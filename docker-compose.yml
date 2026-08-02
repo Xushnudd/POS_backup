@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  next-frontend:
+    build: .
+    container_name: next-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/next
+      - uploads_data:/app/public/uploads
+
+  db:
+    image: postgres:15-alpine
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: pos_user
+      POSTGRES_PASSWORD: pos_password
+      POSTGRES_DB: pos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  uploads_data: {}
+  postgres_data: {}
