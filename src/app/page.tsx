@@ -5,13 +5,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Logo from "@/components/Logo";
 import Button from "@/components/Button";
 import uz from "@/dictionary/uz.json";
-import { faMoneyBill1Wave, faSquarePollVertical, faStore, faWarehouse } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faMoneyBill1Wave, faSquarePollVertical, faStore, faWarehouse } from "@fortawesome/free-solid-svg-icons";
 
 type NavData = typeof uz.nav;
 type BannerData = typeof uz.banner;
 type ButtonStyle = 'success' | 'danger' | 'default';
 type MyStoreData = typeof uz.mystore;
 type ControlInfoData = typeof uz.control_info;
+type PriceData = typeof uz.prices;
+type TradeData = typeof uz.trade;
+type FooterData = typeof uz.footer;
 
 interface NavProps {
   data?: NavData;
@@ -58,6 +61,7 @@ const Banner = ({ data = uz.banner }: BannerProps) => (
 )
 
 
+
 interface MyStoreProps {
   data?: MyStoreData;
 }
@@ -83,13 +87,13 @@ const ControlInfo = ({ data = uz.control_info }: ControlInfoProps) => {
     faSquarePollVertical
   ]
   return (
-    <div className="w-full flex flex-col gap-20">
+    <div className="my-40 w-full flex flex-col gap-20">
       <div className="w-full text-center px-20 flex flex-col gap-5">
         <h2 className="text-4xl">{data.title}</h2>
         <p className="text-sm text-gray-600">{data.caption}</p>
       </div>
       <div className="w-full flex justify-around">
-        {data.cards.map((card, i) => (
+        {data.cards.map((card, i: number) => (
           <div key={i} className="w-2/7 border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
             <FontAwesomeIcon icon={icons[i]} className="w-10 text-green-700" />
             <span className="text-xl">{card.title}</span>
@@ -101,6 +105,46 @@ const ControlInfo = ({ data = uz.control_info }: ControlInfoProps) => {
   )
 }
 
+
+
+interface PriceProps {
+  data?: PriceData;
+}
+
+const Price = ({ data = uz.prices }: PriceProps) => {
+  return (
+    <div className="w-full">
+      <div className="flex flex-col items-center gap-5">
+        <h2 className="text-4xl">{data.title}</h2>
+        <p className="text-gray-600">{data.caption}</p>
+      </div>
+      <div className="my-40 w-full flex justify-around">
+        {data.cards.map((card, i:number) => (
+          <div key={i} className="border-2 border-gray-200 p-5 rounded-2xl flex flex-col gap-5">
+            <div>
+              <h3 className="text-3xl font-bold">{card.title}</h3>
+              <div className="mt-5">
+                <span className="text-5xl">{card.price}</span>
+                <span className="text-gray-600">So'm/oy</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {card.caption.map((el:string, i:number) => (
+                <div key={i} className="flex gap-3">
+                  <FontAwesomeIcon icon={faCheck} className="w-3 text-green-700" />
+                  <span>{el}</span>
+                </div>
+              ))}
+            </div>
+            <Button style={card.button.style as ButtonStyle}>{card.button.title}</Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
 export default function Home() {
   return (
     <div className="relative px-5 m-auto max-w-7xl min-w-3xl">
@@ -108,6 +152,7 @@ export default function Home() {
       <Banner />
       <MyStore />
       <ControlInfo />
+      <Price />
     </div>
   );
 }

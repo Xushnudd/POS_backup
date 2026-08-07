@@ -42,5 +42,76 @@
         "caption": "Daromad, foyda va eng ko'p sotilgan mahsulotlar bo'yicha aniq statistika va grafiklar orqali biznesingizni tahlil qiling."
       }
     ]
+  },
+  "prices": {
+    "title": "Oddiy va shaffof narxlar",
+    "caption": "Yashirin to'lovlarsiz. O'z biznesingiz hajmi va ehtiyojlariga mos tarifni tanlang.",
+    "cards": [
+      {
+        "title": "Bepul",
+        "price": 0,
+        "caption": [
+          "Bitta kassa",
+          "100 ta mahsulotgacha",
+          "Asosiy hisobotlar"
+        ],
+        "button": {
+          "title": "Boshlash",
+          "style": "default"
+        }
+      },
+      {
+        "title": "Pro",
+        "price": 25000,
+        "caption": [
+          "Cheksiz kassalar",
+          "Cheksiz mahsulotlar",
+          "Kengaytirilgan hisobotlar"
+        ],
+        "button": {
+          "title": "Pro ni tanlash",
+          "style": "success"
+        }
+      },
+      {
+        "title": "Business",
+        "price": 50000,
+        "caption": [
+          "Barcha Pro imkoniyatlari",
+          "Bir nechta do'konlar tarmog'i",
+          "Shaxsiy menejer"
+        ],
+        "button": {
+          "title": "Bog'lanish",
+          "style": "default"
+        }
+      }
+    ]
+  },
+  "trade": {
+    "title": "Savdoni keyingi bosqichga olib chiqing",
+    "caption": "Hozir ro'yxatdan o'ting va 14 kunlik bepul sinov muddatiga ega bo'ling. Hech qanday karta ma'lumotlari talab qilinmaydi.",
+    "button": "Bepul hisob yaratish"
+  },
+  "footer": {
+    "copyright": "© 2024 Shuni POS. Barcha huquqlar himoyalangan.",
+    "list": [
+      {
+        "title": "Xususiyatlar",
+        "link": ""
+      },
+      {
+        "title": "Narxlar",
+        "link": ""
+      },
+      {
+        "title": "Biz haqimizda",
+        "link": ""
+      },
+      {
+        "title": "Maxfiylik siyosati",
+        "link": ""
+      }
+    ]
   }
 }
