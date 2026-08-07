@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "list": [
+      "Xususiyatlar",
+      "Narxlar",
+      "Biz haqimizda"
+    ],
+    "button": "Bepul boshlash"
+  },
+  "banner": {
+    "title": "Savdoni oson va <span class='text-green-700'>aqlli</span> boshqaring",
+    "caption": "{logo} - kichik va o'rta biznes uchun eng qulay savdi tizimi. MVP versiyasida barcha zarur xususiyatlar jamlangan, tezkor va ishonchli.",
+    "buttons": [
+      {
+        "name": "Bepul boshlash",
+        "style": "success"
+      },
+      {
+        "name": "Demo video ko'rish",
+        "style": "default"
+      }
+    ]
+  },
+  "mystore": {
+    "title": "100+ do'konlar bizni tanlagan",
+    "caption": "O'zbekiston bo'ylab ishonchli hamkorlar"
+  },
+  "control_info": {
+    "title": "Biznesingiz uchun zarur bo'lgan barcha vositalar",
+    "caption": "Ortiqcha murakkabliklarsiz, faqat eng muhim va foydali funksiyalar bilan jihozlangan.",
+    "cards": [
+      {
+        "title": "Tezkor savdo",
+        "caption": "Mijozlarga xizmat ko'rsatish tezligini oshiring. Bir necha soniya ichida to'lovlarni qabul qiling va chek chiqaring."
+      },
+      {
+        "title": "Ombor nazorati",
+        "caption": "Mahsulotlar qoldig'ini real vaqt rejimida kuzatib boring. Tugab borayotgan tovarlar haqida avtomatik bildirishnomalar."
+      },
+      {
+        "title": "Batafsil hisobotlar",
+        "caption": "Daromad, foyda va eng ko'p sotilgan mahsulotlar bo'yicha aniq statistika va grafiklar orqali biznesingizni tahlil qiling."
+      }
+    ]
+  }
+}
