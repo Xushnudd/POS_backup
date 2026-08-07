@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -67,7 +68,7 @@ interface MyStoreProps {
 }
 
 const MyStore = ({ data = uz.mystore }: MyStoreProps) => (
-  <div className="my-40 w-full bg-green-100 flex flex-col items-center gap-3 p-10 rounded-2xl border border-gray-200">
+  <div className="w-full bg-green-100 flex flex-col items-center gap-3 p-10 rounded-2xl border border-gray-200">
     <FontAwesomeIcon icon={faStore} className="w-10 text-green-700" />
     <span className="text-green-700 text-2xl font-bold">{data.title}</span>
     <p className="text-gray-600 text-sm">{data.caption}</p>
@@ -87,7 +88,7 @@ const ControlInfo = ({ data = uz.control_info }: ControlInfoProps) => {
     faSquarePollVertical
   ]
   return (
-    <div className="my-40 w-full flex flex-col gap-20">
+    <div className="w-full flex flex-col gap-20">
       <div className="w-full text-center px-20 flex flex-col gap-5">
         <h2 className="text-4xl">{data.title}</h2>
         <p className="text-sm text-gray-600">{data.caption}</p>
@@ -118,18 +119,19 @@ const Price = ({ data = uz.prices }: PriceProps) => {
         <h2 className="text-4xl">{data.title}</h2>
         <p className="text-gray-600">{data.caption}</p>
       </div>
-      <div className="my-40 w-full flex justify-around">
-        {data.cards.map((card, i:number) => (
-          <div key={i} className="border-2 border-gray-200 p-5 rounded-2xl flex flex-col gap-5">
+      <div className="my-40 w-full flex justify-around items-center">
+        {data.cards.map((card, i: number) => (
+          <div key={i} className={`relative w-max h-max border-2 rounded-2xl flex flex-col gap-5 ${card.button.style == "success" ? "p-10 border-green-600" : "p-5 border-gray-200"}`}>
+            <div className={`w-max px-1 py-0 bg-red-600 rounded-full text-white uppercase absolute top-[-13] right-10 ${card.button.style == "success" ? "" : "hidden"}`}>Mashhur</div>
             <div>
               <h3 className="text-3xl font-bold">{card.title}</h3>
-              <div className="mt-5">
+              <div className="mt-5 flex items-end gap-0.5">
                 <span className="text-5xl">{card.price}</span>
                 <span className="text-gray-600">So'm/oy</span>
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              {card.caption.map((el:string, i:number) => (
+              {card.caption.map((el: string, i: number) => (
                 <div key={i} className="flex gap-3">
                   <FontAwesomeIcon icon={faCheck} className="w-3 text-green-700" />
                   <span>{el}</span>
@@ -145,14 +147,59 @@ const Price = ({ data = uz.prices }: PriceProps) => {
 }
 
 
+
+interface TradeProps {
+  data?: TradeData;
+}
+
+const Trade = ({ data = uz.trade }: TradeProps) => (
+  <div className="w-full px-30 py-10 bg-green-700 rounded-2xl flex flex-col items-center gap-10 text-center">
+    <h2 className="text-white text-5xl">{data.title}</h2>
+    <p className="text-gray-300">{data.caption}</p>
+    <button className="bg-white px-10 py-5 rounded-2xl text-green-700 font-bold hover:opacity-90 active:opacity-50">{data.button}</button>
+  </div>
+)
+
+
+
+interface FooterProps {
+  data?: FooterData;
+}
+
+const Footer = ({ data = uz.footer }: FooterProps) => {
+  return (
+    <footer className="bg-gray-300 p-5 flex justify-between items-center">
+      <div>
+        <Logo />
+        <span>{data.copyright}</span>
+      </div>
+      <div className="flex gap-5">
+        {data.list.map((el, i: number) => (
+          <Link key={i} href={el.link}>{el.title}</Link>
+        ))}
+      </div>
+    </footer>
+  )
+}
+
+
+
 export default function Home() {
   return (
-    <div className="relative px-5 m-auto max-w-7xl min-w-3xl">
-      <Nav />
-      <Banner />
-      <MyStore />
-      <ControlInfo />
-      <Price />
-    </div>
+    <>
+      <div className="relative px-5 m-auto max-w-7xl min-w-3xl flex flex-col gap-20">
+        <header>
+          <Nav />
+          <Banner />
+          <MyStore />
+        </header>
+        <main className="w-full flex flex-col gap-30">
+          <ControlInfo />
+          <Price />
+          <Trade />
+        </main>
+      </div>
+      <Footer />
+    </>
   );
 }
