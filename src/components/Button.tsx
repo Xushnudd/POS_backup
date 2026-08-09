@@ -1,7 +1,9 @@
+import { ReactNode } from 'react';
+
 type ButtonStyle = 'success' | 'danger' | 'default'
 
 interface ButtonProps {
-  children: any;
+  children: ReactNode;
   style?: ButtonStyle;
 }
 
