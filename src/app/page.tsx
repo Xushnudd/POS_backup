@@ -56,6 +56,7 @@ const Banner = ({ data = uz.banner }: BannerProps) => (
         width={500}
         height={500}
         className="w-full h-80"
+        priority
       />
     </div>
   </div>
