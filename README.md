@@ -1,36 +1,990 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shuni POS — MVP texnik topshiriq
 
-## Getting Started
+Kichik va o‘rta bizneslar uchun brauzerda ishlovchi savdo va ombor boshqaruvi tizimi. MVPning vazifasi: kassada savdoni tez rasmiylashtirish, qoldiqni aniq yuritish va egaga kunlik moliyaviy ko‘rinish berish.
 
-First, run the development server:
+## MVP doirasi
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Modul | MVPda bo‘ladi | Natija |
+| --- | --- | --- |
+| Tashkilot va do‘kon | Kompaniya, do‘kon va kassa yaratish | Bir biznesning bir nechta nuqtasi yuritiladi |
+| Foydalanuvchilar | Egasi, administrator, kassir rollari | Har kim faqat vakolati doirasida ishlaydi |
+| Katalog | Kategoriya, mahsulot, barkod, narx va minimal qoldiq | Savdoga tayyor mahsulotlar ro‘yxati |
+| POS kassa | Skaner/qidiruv, savat, chegirma, to‘lov, chek | Savdo bir necha harakatda yakunlanadi |
+| Ombor | Kirim, qaytarish, tuzatish va transfer | Qoldiq har doim hisoblanadi |
+| Mijoz | Mijoz kartasi va qarzdorlik | Takroriy mijozlar va nasiya nazorati |
+| Smena va kassa | Smenani ochish/yopish, naqd pul qoldig‘i | Kassir hisobdorligi |
+| Hisobot | Savdo, to‘lov, mahsulot, qoldiq, foyda | Egaga operativ tahlil |
+| Sozlamalar | Valyuta, soliq, chek rekvizitlari | Biznesga moslashtirilgan tizim |
+
+MVPga kirmaydi: onlayn-do‘kon, mobil ilova, buxgalteriya integratsiyasi, yetkazib berish, bonus/loyallik ballari, ishlab chiqarish/retseptura hamda avtomatik tashqi fiskal yoki to‘lov provayderi integratsiyalari. Ular uchun keyinchalik kengaytma nuqtalari qoldiriladi.
+
+## Rollar va ruxsatlar
+
+| Amal | Egasi | Administrator | Kassir |
+| --- | :---: | :---: | :---: |
+| Barcha do‘konlar va hisobotlarni ko‘rish | ✓ | Belgilangan do‘konlar | — |
+| Do‘kon, foydalanuvchi va umumiy sozlamalarni boshqarish | ✓ | Qisman | — |
+| Mahsulot, narx va kategoriya boshqaruvi | ✓ | ✓ | Ko‘rish/qidirish |
+| Kirim, transfer va inventar tuzatish | ✓ | ✓ | — |
+| Smena ochish/yopish | ✓ | ✓ | ✓ |
+| Savdo, qaytarish va chek chiqarish | ✓ | ✓ | ✓ |
+| Chegirma qo‘llash | ✓ | Chegarasiz | Sozlamadagi limitgacha |
+| Sotuvni bekor qilish yoki tahrirlash | ✓ | ✓ | Faqat yakunlanmaguncha |
+
+## Asosiy funksional talablar
+
+### Kirish va biznesni sozlash
+
+- Telefon/e-mail va parol bilan ro‘yxatdan o‘tish hamda kirish.
+- Birinchi kirishda tashkilot nomi, STIR (ixtiyoriy), valyuta (`UZS`), vaqt zonasi, do‘kon va boshlang‘ich kassa yaratiladi.
+- Egasi foydalanuvchini taklif qiladi, unga rol va ishlashi mumkin bo‘lgan do‘konlarni belgilaydi.
+- Parol xeshlangan holda saqlanadi; sessiya xavfsiz cookie yoki token orqali yuritiladi.
+
+### Katalog va narxlar
+
+- Kategoriya: nomi, tartib raqami va faol/nofaol holati.
+- Mahsulot: nomi, SKU, barkod, kategoriya, o‘lchov birligi, sotuv narxi, tannarx, minimal qoldiq, rasm (ixtiyoriy), faol holati.
+- SKU va barkod bitta tashkilot ichida takrorlanmaydi; barkod skaner kiritmasi sifatida ishlaydi.
+- Mahsulot arxivi savdo tarixini buzmaydi: u o‘chirilmaydi, `is_active = false` qilinadi.
+- Narx o‘zgarganda joriy mahsulot narxi yangilanadi; savdo qatorida esa o‘sha vaqtdagi narx nusxasi saqlanadi.
+
+### POS kassa
+
+- Kassir faqat bir ochiq smenada savdo qiladi.
+- Mahsulot barkod orqali, nom/SKU orqali qidirib yoki tezkor katalogdan savatga qo‘shiladi.
+- Savatdagi miqdor o‘zgartiriladi yoki qator olib tashlanadi; miqdor kasr bo‘lishi mumkinligi mahsulot birligiga bog‘liq.
+- Har qatorga va/yoki butun chekka chegirma beriladi. Kassir chegirma limiti oshsa administrator tasdig‘i talab qilinadi.
+- Mijoz ixtiyoriy tanlanadi. Nasiya savdoda mijoz majburiy.
+- To‘lov turlari: naqd, karta, o‘tkazma va nasiya. Bir chekka bir nechta to‘lov turi bilan to‘lash mumkin.
+- Yakunlashdan oldin qoldiq tekshiriladi; manfiy qoldiq faqat tashkilot sozlamasi ruxsat etsa mumkin.
+- Yakunlangan savdo uchun noyob chek raqami yaratiladi, ombor harakati yoziladi, to‘lovlar kiritiladi va chop etishga mos chek ko‘rsatiladi.
+- Qoralama savdo saqlanishi mumkin; yakunlangan savdo tahrir qilinmaydi.
+
+### Qaytarish, bekor qilish va nasiya
+
+- Savdo yakunlanmaguncha kassir uni bekor qilishi mumkin.
+- Yakunlangan savdo bo‘yicha to‘liq yoki qisman qaytarish original chek qatorlariga bog‘langan holda bajariladi.
+- Qaytarishda mahsulot qoldig‘i qayta oshadi; pul qaytarilishi `refund` turidagi to‘lov bilan yoziladi.
+- Nasiya qarzi mijoz kesimida sotuv summasi minus nasiya to‘lovlari sifatida hisoblanadi.
+- Qarzni undirish alohida to‘lov sifatida kiritiladi va hech qanday mahsulot qatorini yaratmaydi.
+
+### Ombor va inventar
+
+- Har bir do‘kon uchun mahsulot qoldig‘i alohida yuritiladi.
+- Kirim: yetkazib beruvchi (ixtiyoriy), hujjat raqami, mahsulotlar, miqdor va tannarx.
+- Chiqim/tuzatish: sabab, miqdor va izoh bilan; manfiy yoki musbat farq yoziladi.
+- Do‘konlar orasidagi transfer jo‘natuvchi do‘kondan chiqim, qabul qiluvchi do‘konga kirim sifatida qayd etiladi.
+- Qoldiq `inventory_movements` yozuvlari asosida yoki tezkorlik uchun `inventory_balances` jadvalida agregat ko‘rinishda yuritiladi. Har bir tasdiqlangan harakat ikkalasini bitta tranzaksiyada yangilaydi.
+- Minimal qoldiqdan past mahsulotlar uchun dashboard ogohlantirishi chiqariladi.
+
+### Smena va kassa nazorati
+
+- Kassir smenani boshlang‘ich naqd summa bilan ochadi.
+- Har kassa uchun bir paytda faqat bitta ochiq smena bo‘lishi mumkin.
+- Smena davomida naqd pul kiritish/olish (`cash_in`, `cash_out`) sabab va izoh bilan qayd qilinadi.
+- Yopishda tizim kutayotgan naqd summa va kassir sanagan summa solishtiriladi; farq saqlanadi.
+- Yopilgan smena qayta tahrir qilinmaydi.
+
+### Hisobotlar
+
+| Hisobot | Filtrlar | Asosiy ko‘rsatkichlar |
+| --- | --- | --- |
+| Dashboard | Sana, do‘kon | Bugungi savdo, chek soni, o‘rtacha chek, naqd/karta, ochiq smenalar, kam qoldiq |
+| Savdolar | Davr, do‘kon, kassir, holat, to‘lov turi | Chek raqami, summa, chegirma, to‘lov, qaytarish |
+| Mahsulotlar | Davr, do‘kon, kategoriya | Sotilgan miqdor, tushum, tannarx, yalpi foyda |
+| Ombor qoldig‘i | Do‘kon, kategoriya, kam qoldiq | Joriy qoldiq, qiymat, minimal qoldiq |
+| Kassa/smena | Davr, kassa, kassir | Boshlang‘ich, kutilgan, sanalgan summa, farq |
+| Mijoz qarzlari | Mijoz, do‘kon | Jami qarz, oxirgi savdo, oxirgi to‘lov |
+
+Hisobotlar ekranda ko‘rinadi va CSV formatida yuklab olinadi. Yalpi foyda = sotuv qatorlari summasi − sotuv vaqtida saqlangan tannarx.
+
+## Asosiy ish oqimlari
+
+```text
+Smena ochish → mahsulot tanlash → savat → mijoz/to‘lov tanlash
+→ savdoni yakunlash → to‘lov + chek + ombor chiqimi → hisobotlar
+
+Kirim/tuzatish/transfer → ombor harakati → qoldiq yangilanishi
+Qaytarish → qaytarma chek + refund → ombor qoldig‘i oshishi
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Ma’lumotlar modeli
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Quyidagi sxema PostgreSQL uchun mo‘ljallangan. Pul qiymatlari `numeric(14,2)`, miqdorlar `numeric(14,3)` turida saqlanadi. Barcha jadvalda `id UUID`, `created_at timestamptz`, zarur joyda `updated_at timestamptz` mavjud deb qabul qilinadi.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Tashkilot va kirish
 
-## Learn More
+| Jadval | Ustunlar | Izoh |
+| --- | --- | --- |
+| `organizations` | `id`, `name`, `tin`, `phone`, `currency_code`, `timezone`, `allow_negative_stock`, `receipt_footer`, `created_at` | Tenant/biznes chegarasi |
+| `users` | `id`, `full_name`, `phone`, `email`, `password_hash`, `is_active`, `last_login_at`, `created_at` | Global foydalanuvchi profili; `phone` va `email` noyob |
+| `organization_users` | `id`, `organization_id FK`, `user_id FK`, `role`, `is_active`, `created_at` | Rol: `owner`, `admin`, `cashier`; `(organization_id, user_id)` noyob |
+| `stores` | `id`, `organization_id FK`, `name`, `address`, `phone`, `is_active`, `created_at`, `updated_at` | Savdo nuqtasi |
+| `user_stores` | `organization_user_id FK`, `store_id FK` | Administrator/kassirga ruxsatli do‘konlar; juftlik noyob |
+| `registers` | `id`, `store_id FK`, `name`, `code`, `is_active`, `created_at` | Kassa terminali; `(store_id, code)` noyob |
 
-To learn more about Next.js, take a look at the following resources:
+### Katalog va hamkorlar
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Jadval | Ustunlar | Izoh |
+| --- | --- | --- |
+| `categories` | `id`, `organization_id FK`, `name`, `sort_order`, `is_active`, `created_at`, `updated_at` | Kategoriya; tashkilot ichida nom noyob |
+| `products` | `id`, `organization_id FK`, `category_id FK nullable`, `name`, `sku`, `barcode`, `unit`, `sale_price`, `cost_price`, `min_stock`, `image_url`, `is_active`, `created_at`, `updated_at` | `sku`/`barcode` tashkilot bo‘yicha noyob; `unit`: dona, kg, litr va h.k. |
+| `customers` | `id`, `organization_id FK`, `full_name`, `phone`, `address`, `note`, `credit_limit`, `is_active`, `created_at`, `updated_at` | Mijoz va nasiya limiti; telefon bo‘yicha indeks |
+| `suppliers` | `id`, `organization_id FK`, `name`, `phone`, `tin`, `address`, `note`, `is_active`, `created_at`, `updated_at` | Kirim manbasi |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Ombor
 
-## Deploy on Vercel
+| Jadval | Ustunlar | Izoh |
+| --- | --- | --- |
+| `stock_documents` | `id`, `organization_id FK`, `store_id FK`, `supplier_id FK nullable`, `document_type`, `document_no`, `status`, `note`, `created_by FK`, `confirmed_by FK nullable`, `confirmed_at`, `created_at` | `document_type`: `purchase`, `adjustment`, `transfer_out`, `transfer_in`, `return_in`; faqat `confirmed` hujjat qoldiqni o‘zgartiradi |
+| `stock_document_items` | `id`, `stock_document_id FK`, `product_id FK`, `quantity`, `unit_cost`, `note`, `created_at` | Hujjat qatorlari; miqdor musbat, yo‘nalishni hujjat turi belgilaydi |
+| `inventory_movements` | `id`, `organization_id FK`, `store_id FK`, `product_id FK`, `movement_type`, `quantity_delta`, `unit_cost`, `source_type`, `source_id`, `occurred_at`, `created_by FK`, `note` | O‘zgarmas audit jurnali; `quantity_delta` ±; `source_type`: sale, return, stock_document |
+| `inventory_balances` | `store_id FK`, `product_id FK`, `quantity`, `updated_at` | Tezkor joriy qoldiq; PK `(store_id, product_id)` |
+| `stock_transfers` | `id`, `organization_id FK`, `from_store_id FK`, `to_store_id FK`, `status`, `note`, `created_by FK`, `sent_at`, `received_at`, `created_at` | Transfer sarlavhasi; `from_store_id != to_store_id` |
+| `stock_transfer_items` | `id`, `stock_transfer_id FK`, `product_id FK`, `quantity`, `unit_cost` | Transfer mahsulotlari |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Savdo, to‘lov va kassa
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Jadval | Ustunlar | Izoh |
+| --- | --- | --- |
+| `shifts` | `id`, `register_id FK`, `organization_user_id FK`, `opened_at`, `opening_cash`, `closed_at nullable`, `expected_cash nullable`, `counted_cash nullable`, `cash_difference nullable`, `status`, `note` | `status`: `open`, `closed`; kassa uchun bitta ochiq smena |
+| `cash_movements` | `id`, `shift_id FK`, `movement_type`, `amount`, `reason`, `created_by FK`, `created_at` | `cash_in` yoki `cash_out`; savdo to‘lovlaridan alohida |
+| `sales` | `id`, `organization_id FK`, `store_id FK`, `register_id FK`, `shift_id FK`, `cashier_id FK`, `customer_id FK nullable`, `receipt_no`, `status`, `subtotal`, `discount_amount`, `total_amount`, `note`, `completed_at nullable`, `voided_at nullable`, `voided_by FK nullable`, `created_at` | `status`: `draft`, `completed`, `voided`, `partially_returned`, `returned`; `(register_id, receipt_no)` noyob |
+| `sale_items` | `id`, `sale_id FK`, `product_id FK`, `product_name`, `sku`, `quantity`, `unit_price`, `discount_amount`, `line_total`, `unit_cost`, `created_at` | Tarix buzilmasligi uchun nom, SKU, narx va tannarx nusxalanadi |
+| `payments` | `id`, `organization_id FK`, `store_id FK`, `shift_id FK nullable`, `sale_id FK nullable`, `customer_id FK nullable`, `payment_type`, `direction`, `amount`, `reference_no`, `paid_at`, `received_by FK`, `note`, `created_at` | `payment_type`: `cash`, `card`, `transfer`, `credit`; `direction`: `in`, `out`; nasiya undiruvida `sale_id` bo‘sh bo‘lishi mumkin |
+| `sale_returns` | `id`, `sale_id FK`, `return_receipt_no`, `status`, `refund_amount`, `reason`, `processed_by FK`, `returned_at`, `created_at` | Original savdoga bog‘langan qaytarish |
+| `sale_return_items` | `id`, `sale_return_id FK`, `sale_item_id FK`, `product_id FK`, `quantity`, `unit_price`, `line_total` | Miqdor original sotilgan miqdordan oshmasligi kerak |
+
+### Nazorat va servis
+
+| Jadval | Ustunlar | Izoh |
+| --- | --- | --- |
+| `discount_policies` | `id`, `organization_id FK`, `cashier_max_percent`, `admin_max_percent`, `require_reason_from_percent`, `is_active`, `updated_at` | Chegirma cheklovlari |
+| `audit_logs` | `id`, `organization_id FK`, `actor_id FK nullable`, `entity_type`, `entity_id`, `action`, `before_data jsonb`, `after_data jsonb`, `ip_address`, `created_at` | Muhim o‘zgarishlar: narx, qaytarish, smena, ombor va ruxsatlar |
+
+## Ma’lumotlar yaxlitligi qoidalari
+
+- Barcha biznes ma’lumotlari `organization_id` orqali ajratiladi; so‘rovlarda tenant filtri majburiy.
+- Savdo yakunlash, qaytarish, ombor hujjatini tasdiqlash va smena yopish bitta ma’lumotlar bazasi tranzaksiyasida bajariladi.
+- `completed` savdo qatorlari, to‘lovlari va ombor harakatlari o‘chirilmaydi; tuzatish faqat qaytarish yoki qarshi yozuv bilan qilinadi.
+- `payments` summasi yakunlangan savdo uchun `total_amount`ga teng bo‘lishi kerak; nasiya qismi ham to‘lov sifatida yoziladi.
+- Nasiya savdosida mijozning yangi qarzi `credit_limit`dan oshmasligi kerak (egasi/admin tasdig‘i bo‘lmasa).
+- `sale_return_items.quantity` original qator bo‘yicha avval qaytarilgan miqdorni hisobga olganda sotilgan miqdordan katta bo‘lmaydi.
+- Qoldiq va `inventory_movements` izchil bo‘lishi uchun savdo/ombor yozuvlari ketma-ket bloklash yoki atomik update bilan ishlaydi.
+
+## Tavsiya etilgan ekranlar
+
+| Ekran | Maqsad |
+| --- | --- |
+| Kirish / ro‘yxatdan o‘tish | Hisob yaratish va autentifikatsiya |
+| Birlamchi sozlash | Tashkilot, do‘kon, kassa yaratish |
+| Dashboard | Kunlik ko‘rsatkichlar va ogohlantirishlar |
+| POS | Tez savdo va chek chiqarish |
+| Savdolar | Chek qidirish, tafsilot va qaytarish |
+| Mahsulotlar / kategoriyalar | Katalog va narxlar boshqaruvi |
+| Ombor | Qoldiq, kirim, tuzatish, transfer |
+| Mijozlar | Mijoz profili, savdo tarixi, qarz undirish |
+| Smenalar | Ochish/yopish va kassa harakatlari |
+| Hisobotlar | Filtr, jadval va CSV eksport |
+| Sozlamalar | Do‘konlar, kassalar, foydalanuvchilar, chegirma siyosati |
+
+## Qabul mezonlari
+
+1. Kassir mahsulotni barkod yoki qidiruv orqali topib, ochiq smenada 3 soniyadan kam vaqtda chekni yakunlay oladi (oddiy lokal tarmoq sharoitida).
+2. Yakunlangan savdo qoldiqni kamaytiradi; qisman qaytarish aynan qaytarilgan miqdorga qoldiqni oshiradi.
+3. Har bir savdo, qaytarish, kirim va kassa farqi kim va qachon qilgani bilan auditga tushadi.
+4. Do‘kon A foydalanuvchisi Do‘kon B qoldig‘i yoki savdosini ruxsatsiz ko‘ra/yangilay olmaydi.
+5. Savdo hisobotidagi tushum, to‘lovlar va smena hisoboti bir xil davr/do‘kon uchun o‘zaro mos keladi.
+6. CSV eksporti ekrandagi faol filtrlarni to‘liq aks ettiradi.
+
+## Keyingi bosqich uchun kengaytmalar
+
+- Click/Payme/terminal/fiskal printer integratsiyasi va QR-chek.
+- Yetkazib beruvchiga buyurtma, xarid narxi tarixi va partiya/yaroqlilik muddati.
+- Telegram bildirishnomalari, sodiqlik dasturi va promo-kodlar.
+- Filiallar bo‘yicha analitika, xodim KPI va rejalashtirilgan hisobotlar.
+- Offline-first kassa hamda mobil ilova.
+
+## Backend arxitekturasi
+
+### Texnologiya stack
+
+- **Backend framework**: Node.js + Express.js yoki Fastify
+- **Database**: PostgreSQL 15 (docker-compose orqali ishlaydi)
+- **ORM**: Prisma yoki TypeORM
+- **Authentication**: JWT token + bcrypt
+- **Validation**: Zod yoki Joi
+- **API Documentation**: Swagger/OpenAPI
+- **CORS**: cors middleware
+- **Rate limiting**: express-rate-limit
+- **Logging**: Winston yoki Pino
+- **Environment variables**: dotenv
+
+### API arxitekturasi
+
+**REST API** quyidagi prinsiplar asosida ishlaydi:
+
+- Base URL: `/api/v1`
+- JSON formatida ma'lumot almashinuvi
+- Authentication: Bearer token (JWT)
+- Tenant isolation: `organization_id` header orqali
+- Error handling: uniform error response format
+- Pagination: `page` va `limit` parametrlari
+- Filtering, sorting, searching: query parametrlar
+
+### Authentication & Authorization
+
+**Auth endpoints:**
+- `POST /api/v1/auth/register` - Ro'yxatdan o'tish
+- `POST /api/v1/auth/login` - Tizimga kirish
+- `POST /api/v1/auth/logout` - Tizimdan chiqish
+- `POST /api/v1/auth/refresh` - Token yangilash
+- `GET /api/v1/auth/me` - Joriy foydalanuvchi ma'lumotlari
+
+**Middleware:**
+- `authMiddleware` - JWT token tekshirish
+- `roleMiddleware` - Rolga asoslangan ruxsatlar
+- `tenantMiddleware` - Organization filtr
+
+### API endpoints
+
+#### Organization & Users
+- `GET /api/v1/organizations` - Tashkilotlar ro'yxati (egasi uchun)
+- `POST /api/v1/organizations` - Yangi tashkilot yaratish
+- `GET /api/v1/organizations/:id` - Tashkilot tafsilotlari
+- `PUT /api/v1/organizations/:id` - Tashkilot yangilash
+- `GET /api/v1/organizations/:id/users` - Foydalanuvchilar ro'yxati
+- `POST /api/v1/organizations/:id/users` - Foydalanuvchi qo'shish
+- `PUT /api/v1/organizations/:id/users/:userId` - Foydalanuvchi yangilash
+- `DELETE /api/v1/organizations/:id/users/:userId` - Foydalanuvchi o'chirish
+
+#### Stores & Registers
+- `GET /api/v1/stores` - Do'konlar ro'yxati
+- `POST /api/v1/stores` - Yangi do'kon yaratish
+- `GET /api/v1/stores/:id` - Do'kon tafsilotlari
+- `PUT /api/v1/stores/:id` - Do'kon yangilash
+- `DELETE /api/v1/stores/:id` - Do'kon o'chirish
+- `GET /api/v1/stores/:id/registers` - Kassalar ro'yxati
+- `POST /api/v1/stores/:id/registers` - Yangi kassa yaratish
+- `PUT /api/v1/registers/:id` - Kassa yangilash
+
+#### Categories & Products
+- `GET /api/v1/categories` - Kategoriyalar ro'yxati
+- `POST /api/v1/categories` - Yangi kategoriya yaratish
+- `PUT /api/v1/categories/:id` - Kategoriya yangilash
+- `DELETE /api/v1/categories/:id` - Kategoriya o'chirish (soft delete)
+- `GET /api/v1/products` - Mahsulotlar ro'yxati (filter, search, pagination)
+- `POST /api/v1/products` - Yangi mahsulot yaratish
+- `GET /api/v1/products/:id` - Mahsulot tafsilotlari
+- `PUT /api/v1/products/:id` - Mahsulot yangilash
+- `DELETE /api/v1/products/:id` - Mahsulot o'chirish (soft delete)
+- `GET /api/v1/products/barcode/:barcode` - Barkod bo'yicha qidirish
+
+#### Customers & Suppliers
+- `GET /api/v1/customers` - Mijozlar ro'yxati
+- `POST /api/v1/customers` - Yangi mijoz yaratish
+- `GET /api/v1/customers/:id` - Mijoz tafsilotlari
+- `PUT /api/v1/customers/:id` - Mijoz yangilash
+- `DELETE /api/v1/customers/:id` - Mijoz o'chirish (soft delete)
+- `GET /api/v1/customers/:id/debt` - Mijoz qarzi
+- `GET /api/v1/suppliers` - Yetkazib beruvchilar ro'yxati
+- `POST /api/v1/suppliers` - Yangi yetkazib beruvchi yaratish
+- `PUT /api/v1/suppliers/:id` - Yetkazib beruvchi yangilash
+
+#### POS & Sales
+- `GET /api/v1/shifts` - Smenalar ro'yxati
+- `POST /api/v1/shifts/open` - Smena ochish
+- `POST /api/v1/shifts/:id/close` - Smena yopish
+- `GET /api/v1/shifts/:id` - Smena tafsilotlari
+- `POST /api/v1/shifts/:id/cash-movements` - Naqd pul harakati
+- `GET /api/v1/sales` - Savdolar ro'yxati
+- `POST /api/v1/sales` - Yangi savdo yaratish (draft)
+- `GET /api/v1/sales/:id` - Savdo tafsilotlari
+- `PUT /api/v1/sales/:id` - Savdo yangilash (faqat draft)
+- `POST /api/v1/sales/:id/complete` - Savdoni yakunlash
+- `POST /api/v1/sales/:id/void` - Savdoni bekor qilish
+- `POST /api/v1/sales/:id/return` - Savdodan qaytarish
+- `GET /api/v1/sales/:id/receipt` - Chek ma'lumotlari
+
+#### Inventory
+- `GET /api/v1/stock-documents` - Ombor hujjatlari ro'yxati
+- `POST /api/v1/stock-documents` - Yangi hujjat yaratish
+- `GET /api/v1/stock-documents/:id` - Hujjat tafsilotlari
+- `PUT /api/v1/stock-documents/:id` - Hujjat yangilash
+- `POST /api/v1/stock-documents/:id/confirm` - Hujjatni tasdiqlash
+- `GET /api/v1/inventory/balances` - Qoldiq balansi
+- `GET /api/v1/inventory/movements` - Ombor harakatlari tarixi
+- `GET /api/v1/transfers` - Transferlar ro'yxati
+- `POST /api/v1/transfers` - Yangi transfer yaratish
+- `POST /api/v1/transfers/:id/send` - Transferni yuborish
+- `POST /api/v1/transfers/:id/receive` - Transferni qabul qilish
+
+#### Payments
+- `GET /api/v1/payments` - To'lovlar ro'yxati
+- `POST /api/v1/payments` - Yangi to'lov yaratish
+- `POST /api/v1/payments/credit` - Nasiya undirish
+- `GET /api/v1/payments/:id` - To'lov tafsilotlari
+
+#### Reports
+- `GET /api/v1/reports/dashboard` - Dashboard ma'lumotlari
+- `GET /api/v1/reports/sales` - Savdo hisoboti
+- `GET /api/v1/reports/products` - Mahsulot hisoboti
+- `GET /api/v1/reports/inventory` - Ombor hisoboti
+- `GET /api/v1/reports/shifts` - Smena hisoboti
+- `GET /api/v1/reports/customers-debt` - Mijoz qarzlari hisoboti
+- `GET /api/v1/reports/export` - CSV eksport
+
+#### Settings
+- `GET /api/v1/settings/discount-policies` - Chegirma siyosati
+- `PUT /api/v1/settings/discount-policies` - Chegirma siyosatini yangilash
+- `GET /api/v1/settings/organization` - Tashkilot sozlamalari
+- `PUT /api/v1/settings/organization` - Tashkilot sozlamalarini yangilash
+
+### Ma'lumotlar bazasi ulanishi
+
+**Prisma schema structure:**
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Models based on the database schema defined above
+```
+
+**Environment variables:**
+```env
+DATABASE_URL="postgresql://pos_user:pos_password@localhost:5432/pos_db"
+JWT_SECRET="your-secret-key"
+JWT_EXPIRES_IN="7d"
+NODE_ENV="development"
+PORT=3001
+CORS_ORIGIN="http://localhost:3000"
+```
+
+### API response format
+
+**Success response:**
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Operatsiya muvaffaqiyatli yakunlandi"
+}
+```
+
+**Error response:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Ma'lumotlar noto'g'ri",
+    "details": [ ... ]
+  }
+}
+```
+
+### Security considerations
+
+- Barcha API endpointlar (authdan tashqari) authentication talab qiladi
+- Role-based access control (RBAC) implementatsiya qilinadi
+- Rate limiting har bir endpoint uchun sozlanadi
+- Input validation barcha requestlar uchun majburiy
+- SQL injection prevention (ORM parameterized queries)
+- XSS protection
+- CORS properly configured
+- Security headers (helmet middleware)
+- Sensitive data loggingdan chiqariladi
+
+### Project structure
+
+```
+backend/
+├── src/
+│   ├── controllers/      # Request handlers
+│   ├── middleware/      # Auth, validation, error handling
+│   ├── models/          # Database models (Prisma)
+│   ├── routes/          # API routes
+│   ├── services/        # Business logic
+│   ├── utils/           # Helper functions
+│   ├── validators/      # Request validation schemas
+│   └── app.ts           # Express app setup
+├── prisma/
+│   └── schema.prisma    # Database schema
+├── tests/               # API tests
+└── package.json
+```
+
+### Development workflow
+
+1. Database start: `docker-compose up -d`
+2. Migrations: `npx prisma migrate dev`
+3. Generate Prisma client: `npx prisma generate`
+4. Development server: `npm run dev`
+5. API documentation: `http://localhost:3001/api-docs`
+
+## Frontend arxitekturasi
+
+### Texnologiya stack
+
+- **Framework**: Next.js 16.2.12 (App Router)
+- **UI Library**: React 19.2.4
+- **Language**: TypeScript 5
+- **Styling**: Tailwind CSS 4
+- **Icons**: FontAwesome 7.3.1
+- **State Management**: React Context API + useState/useReducer
+- **Form Handling**: React controlled components
+- **HTTP Client**: Fetch API
+- **Authentication**: JWT token (localStorage/cookie)
+- **Routing**: Next.js App Router (file-based routing)
+- **Type Safety**: TypeScript with strict mode
+- **Build Tool**: Next.js built-in bundler
+- **Development**: ESLint, TypeScript strict mode
+
+### Application Architecture
+
+**Component-based architecture** quyidagi prinsiplar asosida:
+
+- **Atomic Design Pattern**: Atoms, Molecules, Organisms, Templates, Pages
+- **Container/Presenter Pattern**: Logic vs UI separation
+- **Custom Hooks**: Reusable stateful logic
+- **Context Providers**: Global state management
+- **Server Components**: Performance optimization
+- **Client Components**: Interactive UI elements
+
+### Project Structure
+
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── (auth)/                  # Auth route group
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── register/
+│   │       └── page.tsx
+│   ├── (dashboard)/             # Dashboard route group
+│   │   ├── layout.tsx           # Dashboard layout
+│   │   ├── page.tsx             # Dashboard home
+│   │   ├── pos/
+│   │   │   └── page.tsx         # POS interface
+│   │   ├── sales/
+│   │   │   ├── page.tsx         # Sales list
+│   │   │   └── [id]/
+│   │   │       └── page.tsx     # Sale details
+│   │   ├── products/
+│   │   │   ├── page.tsx         # Products list
+│   │   │   └── [id]/
+│   │   │       └── page.tsx     # Product details
+│   │   ├── inventory/
+│   │   │   ├── page.tsx         # Inventory management
+│   │   │   └── transfers/
+│   │   │       └── page.tsx     # Stock transfers
+│   │   ├── customers/
+│   │   │   ├── page.tsx         # Customers list
+│   │   │   └── [id]/
+│   │   │       └── page.tsx     # Customer details
+│   │   ├── shifts/
+│   │   │   └── page.tsx         # Shift management
+│   │   ├── reports/
+│   │   │   ├── page.tsx         # Reports overview
+│   │   │   └── [type]/
+│   │   │       └── page.tsx     # Specific report
+│   │   └── settings/
+│   │       ├── page.tsx         # Settings overview
+│   │       ├── organization/
+│   │       │   └── page.tsx     # Organization settings
+│   │       ├── stores/
+│   │       │   └── page.tsx     # Store management
+│   │       ├── users/
+│   │       │   └── page.tsx     # User management
+│   │       └── discounts/
+│   │           └── page.tsx     # Discount policies
+│   ├── api/                     # API routes (if needed)
+│   ├── layout.tsx               # Root layout
+│   ├── page.tsx                 # Landing page
+│   └── globals.css              # Global styles
+├── components/                  # Reusable components
+│   ├── ui/                      # UI components (atoms)
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Select.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Table.tsx
+│   │   ├── Card.tsx
+│   │   ├── Badge.tsx
+│   │   ├── DatePicker.tsx
+│   │   └── LoadingSpinner.tsx
+│   ├── forms/                   # Form components
+│   │   ├── LoginForm.tsx
+│   │   ├── ProductForm.tsx
+│   │   ├── CustomerForm.tsx
+│   │   └── StockDocumentForm.tsx
+│   ├── layouts/                 # Layout components
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── Footer.tsx
+│   │   └── DashboardLayout.tsx
+│   ├── pos/                     # POS-specific components
+│   │   ├── ProductSearch.tsx
+│   │   ├── Cart.tsx
+│   │   ├── CartItem.tsx
+│   │   ├── PaymentModal.tsx
+│   │   ├── ReceiptPreview.tsx
+│   │   └── CustomerSelector.tsx
+│   ├── tables/                  # Table components
+│   │   ├── SalesTable.tsx
+│   │   ├── ProductsTable.tsx
+│   │   ├── InventoryTable.tsx
+│   │   └── CustomersTable.tsx
+│   └── charts/                  # Chart components
+│       ├── SalesChart.tsx
+│       ├── RevenueChart.tsx
+│       └── InventoryChart.tsx
+├── lib/                         # Utility functions
+│   ├── api.ts                   # API client
+│   ├── auth.ts                  # Auth utilities
+│   ├── format.ts                # Formatting functions
+│   ├── validation.ts            # Validation schemas
+│   └── constants.ts             # App constants
+├── hooks/                       # Custom React hooks
+│   ├── useAuth.ts               # Authentication hook
+│   ├── useCart.ts               # Cart management
+│   ├── useProducts.ts           # Products data
+│   ├── useInventory.ts          # Inventory data
+│   ├── useDebounce.ts           # Debounce utility
+│   └── useLocalStorage.ts       # Local storage hook
+├── context/                     # React Context providers
+│   ├── AuthContext.tsx          # Authentication context
+│   ├── OrganizationContext.tsx  # Organization context
+│   ├── ThemeContext.tsx         # Theme context
+│   └── NotificationContext.tsx  # Notification context
+├── types/                       # TypeScript types
+│   ├── api.types.ts             # API response types
+│   ├── auth.types.ts            # Auth types
+│   ├── product.types.ts         # Product types
+│   ├── sale.types.ts            # Sale types
+│   ├── inventory.types.ts       # Inventory types
+│   └── common.types.ts          # Common types
+├── utils/                       # Helper functions
+│   ├── date.utils.ts            # Date utilities
+│   ├── currency.utils.ts        # Currency formatting
+│   ├── validation.utils.ts      # Validation helpers
+│   └── api.utils.ts             # API helpers
+└── dictionary/                  # Internationalization
+    ├── uz.json                  # Uzbek translations
+    └── ru.json                  # Russian translations
+```
+
+### Design System
+
+#### Color Palette
+
+**Primary Colors:**
+- Primary Blue: `#3B82F6` (blue-500)
+- Primary Dark: `#1E40AF` (blue-800)
+- Primary Light: `#93C5FD` (blue-300)
+
+**Secondary Colors:**
+- Success Green: `#10B981` (emerald-500)
+- Warning Orange: `#F59E0B` (amber-500)
+- Error Red: `#EF4444` (red-500)
+- Info Blue: `#06B6D4` (cyan-500)
+
+**Neutral Colors:**
+- White: `#FFFFFF`
+- Light Gray: `#F3F4F6` (gray-100)
+- Medium Gray: `#9CA3AF` (gray-400)
+- Dark Gray: `#4B5563` (gray-600)
+- Black: `#111827` (gray-900)
+
+#### Typography
+
+**Font Family:**
+- Primary: Inter or system-ui
+- Monospace: JetBrains Mono or monospace
+
+**Font Sizes:**
+- Text-xs: 0.75rem (12px)
+- Text-sm: 0.875rem (14px)
+- Text-base: 1rem (16px)
+- Text-lg: 1.125rem (18px)
+- Text-xl: 1.25rem (20px)
+- Text-2xl: 1.5rem (24px)
+- Text-3xl: 1.875rem (30px)
+- Text-4xl: 2.25rem (36px)
+
+**Font Weights:**
+- Normal: 400
+- Medium: 500
+- Semibold: 600
+- Bold: 700
+
+#### Spacing System
+
+**Scale:** 4px base unit
+- xs: 0.25rem (4px)
+- sm: 0.5rem (8px)
+- md: 1rem (16px)
+- lg: 1.5rem (24px)
+- xl: 2rem (32px)
+- 2xl: 3rem (48px)
+- 3xl: 4rem (64px)
+
+#### Border Radius
+
+- sm: 0.25rem (4px)
+- md: 0.375rem (6px)
+- lg: 0.5rem (8px)
+- xl: 0.75rem (12px)
+- full: 9999px
+
+#### Shadows
+
+- sm: `0 1px 2px 0 rgb(0 0 0 / 0.05)`
+- md: `0 4px 6px -1px rgb(0 0 0 / 0.1)`
+- lg: `0 10px 15px -3px rgb(0 0 0 / 0.1)`
+- xl: `0 20px 25px -5px rgb(0 0 0 / 0.1)`
+
+### Key Components Specifications
+
+#### 1. Authentication Components
+
+**LoginForm Component:**
+- Phone/email input with validation
+- Password input with show/hide toggle
+- Remember me checkbox
+- Submit button with loading state
+- Error message display
+- Link to registration page
+
+**RegisterForm Component:**
+- Full name input
+- Phone input with format validation
+- Email input (optional)
+- Password input with strength indicator
+- Confirm password input
+- Organization setup wizard
+- Terms and conditions checkbox
+
+#### 2. Dashboard Layout
+
+**DashboardLayout Component:**
+- Responsive sidebar with navigation
+- Header with user info and notifications
+- Main content area with max-width
+- Breadcrumb navigation
+- Mobile menu toggle
+- Organization selector
+- Theme toggle (optional)
+
+**Sidebar Component:**
+- Navigation menu with icons
+- Active state highlighting
+- Role-based menu items
+- Collapse/expand functionality
+- Logo and organization name
+- User profile section
+
+#### 3. POS Interface
+
+**POSPage Component:**
+- Product search with barcode scanning
+- Category quick filters
+- Product grid/list view
+- Shopping cart panel
+- Customer selector
+- Discount application
+- Payment methods selection
+- Receipt preview
+- Quick actions (hold, void, return)
+
+**ProductSearch Component:**
+- Search input with debounce
+- Barcode scanner integration
+- Recent products display
+- Category filter dropdown
+- Search results with images
+- Keyboard navigation support
+
+**Cart Component:**
+- Cart items list with quantity controls
+- Line item editing
+- Remove item functionality
+- Subtotal calculation
+- Discount display
+- Tax calculation
+- Total amount display
+- Quick add buttons
+
+**PaymentModal Component:**
+- Payment method selection (cash, card, transfer, credit)
+- Amount input with validation
+- Change calculation for cash payments
+- Multiple payment methods support
+- Payment confirmation
+- Receipt generation options
+
+#### 4. Data Tables
+
+**GenericTable Component:**
+- Sortable columns
+- Filterable rows
+- Pagination
+- Row selection
+- Bulk actions
+- Export functionality
+- Responsive design
+- Loading state
+- Empty state
+
+**SalesTable Component:**
+- Receipt number column
+- Date and time
+- Customer name
+- Total amount
+- Payment methods
+- Status badges
+- Action buttons (view, return, print)
+- Filters by date, status, cashier
+
+#### 5. Forms
+
+**ProductForm Component:**
+- Product name input
+- SKU input with uniqueness check
+- Barcode input with scanner support
+- Category selection
+- Unit selection (dona, kg, litr, etc.)
+- Sale price input
+- Cost price input
+- Minimum stock input
+- Image upload with preview
+- Active status toggle
+- Validation with error messages
+
+**CustomerForm Component:**
+- Full name input
+- Phone input with format validation
+- Address input
+- Credit limit input
+- Notes textarea
+- Active status toggle
+- Purchase history display
+
+#### 6. Dashboard Components
+
+**DashboardCards Component:**
+- Today's sales card
+- Number of receipts card
+- Average check amount card
+- Cash vs card ratio card
+- Open shifts indicator
+- Low stock alerts
+- Revenue trend chart
+- Top products list
+
+**RevenueChart Component:**
+- Line chart for daily/weekly/monthly revenue
+- Bar chart for comparison
+- Date range selector
+- Export as image
+- Interactive tooltips
+- Responsive sizing
+
+### State Management Strategy
+
+**Global State (Context API):**
+- `AuthContext`: User authentication state, permissions
+- `OrganizationContext`: Current organization, store, register
+- `ThemeContext`: Theme preferences, color scheme
+- `NotificationContext`: Toast notifications, alerts
+
+**Local State (useState/useReducer):**
+- Component-specific state
+- Form state
+- UI state (modals, dropdowns)
+- Temporary data
+
+**Server State (Fetch API):**
+- API data caching
+- Automatic refetching
+- Loading and error states
+
+### API Integration
+
+**API Client Structure:**
+```typescript
+// lib/api.ts
+class ApiClient {
+  private baseURL: string;
+  private token: string | null;
+
+  constructor() {
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+    this.token = localStorage.getItem('token');
+  }
+
+  async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    // Implementation with error handling, token refresh, etc.
+  }
+
+  // Specific methods for each endpoint
+  auth: AuthAPI;
+  products: ProductsAPI;
+  sales: SalesAPI;
+  // etc.
+}
+```
+
+**Error Handling:**
+- Global error boundary
+- API error interceptor
+- User-friendly error messages
+- Retry logic for failed requests
+- Network error detection
+
+### Performance Optimization
+
+**Code Splitting:**
+- Dynamic imports for heavy components
+- Route-based code splitting
+- Lazy loading for charts and heavy libraries
+
+**Image Optimization:**
+- Next.js Image component
+- Responsive images
+- WebP format
+- Lazy loading
+
+**Caching Strategy:**
+- API response caching
+- Static page generation where possible
+- Service worker for offline support (future)
+
+**Bundle Optimization:**
+- Tree shaking
+- Minification
+- Compression
+- CDN for static assets
+
+### Accessibility
+
+**WCAG 2.1 AA Compliance:**
+- Semantic HTML
+- ARIA labels and roles
+- Keyboard navigation
+- Focus management
+- Color contrast ratios
+- Screen reader support
+- Alt text for images
+- Error announcements
+
+### Responsive Design
+
+**Breakpoints:**
+- Mobile: < 640px
+- Tablet: 640px - 1024px
+- Desktop: > 1024px
+
+**Mobile-First Approach:**
+- Touch-friendly UI elements
+- Swipe gestures for navigation
+- Optimized forms for mobile
+- Bottom navigation for mobile
+- Hamburger menu for navigation
+
+### Internationalization (i18n)
+
+**Supported Languages:**
+- Uzbek (primary)
+- Russian (secondary)
+
+**Implementation:**
+- Dictionary-based translations
+- Language switcher component
+- Date/time localization
+- Currency formatting
+- Number formatting
+
+### Security Considerations
+
+**Client-Side Security:**
+- XSS prevention
+- CSRF protection
+- Secure token storage
+- Input sanitization
+- Content Security Policy
+- HTTPS enforcement
+
+**Data Protection:**
+- Sensitive data encryption
+- Secure local storage usage
+- Token expiration handling
+- Session management
+
+### Testing Strategy
+
+**Unit Testing:**
+- Component testing with React Testing Library
+- Hook testing
+- Utility function testing
+
+**Integration Testing:**
+- API integration testing
+- Component integration testing
+- User flow testing
+
+**E2E Testing:**
+- Critical user paths
+- Authentication flows
+- POS operations
+- Form submissions
+
+### Development Workflow
+
+1. **Setup:** `npm install`
+2. **Development:** `npm run dev`
+3. **Build:** `npm run build`
+4. **Production:** `npm start`
+5. **Linting:** `npm run lint`
+6. **Type checking:** Automatic with TypeScript
+
+### Environment Variables
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+NEXT_PUBLIC_APP_NAME=Shuni POS
+NEXT_PUBLIC_DEFAULT_LANGUAGE=uz
+NEXT_PUBLIC_CURRENCY_CODE=UZS
+NEXT_PUBLIC_DATE_FORMAT=DD.MM.YYYY
+```
+
+### Deployment Considerations
+
+**Build Optimization:**
+- Static export where possible
+- Server-side rendering for dynamic content
+- Edge deployment support
+- Environment-specific configurations
+
+**Monitoring:**
+- Error tracking (Sentry)
+- Performance monitoring
+- User analytics
+- A/B testing capability
+
+### Future Enhancements
+
+- Progressive Web App (PWA) support
+- Offline functionality
+- Push notifications
+- Voice commands for POS
+- Advanced animations
+- Dark mode implementation
+- Custom themes support
+- Widget system for dashboard

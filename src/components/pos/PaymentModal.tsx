@@ -1,0 +1,257 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Modal from '@/components/ui/Modal';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import { Customer, PaymentType, Sale } from '@/types';
+import { formatMoney } from '@/lib/format';
+import { useNotification } from '@/context/NotificationContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faMoneyBillWave,
+  faCreditCard,
+  faBuildingColumns,
+  faHandshake,
+  faCheck,
+  faExclamationTriangle,
+} from '@fortawesome/free-solid-svg-icons';
+
+interface PaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  totalAmount: number;
+  customer: Customer | null;
+  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[]) => Promise<void>;
+  isLoading: boolean;
+}
+
+export default function PaymentModal({
+  isOpen,
+  onClose,
+  totalAmount,
+  customer,
+  onProcessPayment,
+  isLoading,
+}: PaymentModalProps) {
+  const { notifyError } = useNotification();
+  const [activeMethod, setActiveMethod] = useState<PaymentType>('cash');
+  const [cashTendered, setCashTendered] = useState<string>('');
+  const [referenceNo, setReferenceNo] = useState<string>('');
+
+  // When modal opens, reset tendered amount to totalAmount
+  useEffect(() => {
+    if (isOpen) {
+      setCashTendered(String(totalAmount));
+      setReferenceNo('');
+    }
+  }, [isOpen, totalAmount]);
+
+  const numericCash = parseFloat(cashTendered) || 0;
+  const changeAmount = Math.max(0, numericCash - totalAmount);
+
+  const quickAmounts = [
+    totalAmount,
+    Math.ceil(totalAmount / 10000) * 10000,
+    Math.ceil(totalAmount / 50000) * 50000,
+    100000,
+    200000,
+  ].filter((v, i, a) => v >= totalAmount && a.indexOf(v) === i);
+
+  const handleComplete = async () => {
+    if (activeMethod === 'credit') {
+      if (!customer) {
+        notifyError('Nasiya savdo uchun mijoz tanlanishi shart!');
+        return;
+      }
+    }
+
+    if (activeMethod === 'cash') {
+      if (numericCash < totalAmount) {
+        notifyError('Kiritilgan naqd pul jami summadan kam bo\'lishi mumkin emas!');
+        return;
+      }
+    }
+
+    const payments = [
+      {
+        paymentType: activeMethod,
+        amount: totalAmount,
+        referenceNo: referenceNo.trim() || undefined,
+      },
+    ];
+
+    await onProcessPayment(payments);
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="To'lovni qabul qilish"
+      size="lg"
+      footer={
+        <div className="flex items-center justify-between w-full">
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Bekor qilish
+          </Button>
+          <Button
+            variant="success"
+            size="lg"
+            onClick={handleComplete}
+            isLoading={isLoading}
+            leftIcon={<FontAwesomeIcon icon={faCheck} />}
+            className="font-bold px-8 shadow-md shadow-emerald-500/20"
+          >
+            Savdoni yakunlash ({formatMoney(totalAmount)})
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-6">
+        {/* Total sum display */}
+        <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">
+          <div>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">
+              To&apos;lanadigan summa
+            </span>
+            <span className="text-3xl font-black text-emerald-400">
+              {formatMoney(totalAmount)}
+            </span>
+          </div>
+
+          {customer && (
+            <div className="text-right">
+              <span className="text-xs text-slate-400 block">Mijoz</span>
+              <span className="text-sm font-bold text-white">{customer.fullName}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Payment method selector */}
+        <div>
+          <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2.5">
+            To&apos;lov usulini tanlang
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { id: 'cash', label: 'Naqd pul', icon: faMoneyBillWave, color: 'emerald' },
+              { id: 'card', label: 'Karta', icon: faCreditCard, color: 'blue' },
+              { id: 'transfer', label: 'O\'tkazma', icon: faBuildingColumns, color: 'purple' },
+              { id: 'credit', label: 'Nasiya / Qarz', icon: faHandshake, color: 'amber' },
+            ].map((m) => {
+              const isSelected = activeMethod === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setActiveMethod(m.id as PaymentType)}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                    isSelected
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-sm font-bold'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white font-medium'
+                  }`}
+                >
+                  <FontAwesomeIcon
+                    icon={m.icon}
+                    className={`text-2xl mb-2 ${isSelected ? 'text-emerald-600' : 'text-gray-400'}`}
+                  />
+                  <span className="text-xs">{m.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Method-specific content */}
+        {activeMethod === 'cash' && (
+          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
+            <Input
+              label="Mijoz bergan naqd pul (so'm)"
+              type="number"
+              min={totalAmount}
+              step="1000"
+              value={cashTendered}
+              onChange={(e) => setCashTendered(e.target.value)}
+              className="text-lg font-bold text-emerald-700"
+              autoFocus
+            />
+
+            {/* Quick cash buttons */}
+            <div>
+              <span className="text-xs font-semibold text-gray-500 block mb-2">
+                Tezkor summalar:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {quickAmounts.map((amt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setCashTendered(String(amt))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                      numericCash === amt
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    {formatMoney(amt)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Change display */}
+            <div className="pt-3 border-t border-gray-200 flex items-center justify-between">
+              <span className="text-sm font-bold text-gray-600">Qaytim:</span>
+              <span
+                className={`text-xl font-black ${
+                  changeAmount > 0 ? 'text-blue-600' : 'text-gray-400'
+                }`}
+              >
+                {formatMoney(changeAmount)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {activeMethod === 'credit' && (
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 space-y-3">
+            <div className="flex items-center gap-2 font-bold text-sm text-amber-800">
+              <FontAwesomeIcon icon={faExclamationTriangle} />
+              <span>Nasiya savdo ogohlantirishi</span>
+            </div>
+            {customer ? (
+              <div className="text-xs space-y-1">
+                <p>
+                  Mijoz: <strong>{customer.fullName}</strong> ({customer.phone})
+                </p>
+                <p>
+                  Kredit limiti:{' '}
+                  <strong>{formatMoney(customer.creditLimit || 0)}</strong>
+                </p>
+                <p className="text-gray-600">
+                  Ushbu summa mijozning qarz hisobiga yoziladi.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs font-semibold text-red-600">
+                Diqqat: Savatda mijoz tanlanmagan! Nasiya savdoni amalga oshirish uchun avval mijozni tanlang.
+              </p>
+            )}
+          </div>
+        )}
+
+        {(activeMethod === 'card' || activeMethod === 'transfer') && (
+          <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <Input
+              label="Kvitansiya / Chek / Tranzaksiya raqami (ixtiyoriy)"
+              placeholder="Masalan: 987654"
+              value={referenceNo}
+              onChange={(e) => setReferenceNo(e.target.value)}
+            />
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}

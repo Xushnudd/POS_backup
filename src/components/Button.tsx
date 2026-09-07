@@ -1,20 +1,13 @@
-import { ReactNode } from 'react';
+import Button, { ButtonProps } from './ui/Button';
 
-type ButtonStyle = 'success' | 'danger' | 'default'
-
-interface ButtonProps {
-  children: ReactNode;
-  style?: ButtonStyle;
-}
-
-const styles: Record<ButtonStyle, string> = {
-  success: 'bg-green-700 text-white',
-  danger: 'bg-red-700 text-white',
-  default: 'border border-gray-200 text-gray-700'
-}
-
-export default function Button({ children, style = 'default' }: ButtonProps) {
+export default function LegacyButton({
+  children,
+  style = 'default',
+  ...props
+}: ButtonProps & { style?: 'success' | 'danger' | 'default' }) {
   return (
-    <button className={`${styles[style]} p-3 rounded-xl text-xl cursor-pointer hover:opacity-90 active:opacity-50`}>{children}</button>
+    <Button styleVariant={style} {...props}>
+      {children}
+    </Button>
   );
 }

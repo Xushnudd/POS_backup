@@ -1,0 +1,436 @@
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useOrganization } from '@/context/OrganizationContext';
+import { useNotification } from '@/context/NotificationContext';
+import { api } from '@/lib/api';
+import { Customer } from '@/types';
+import { formatMoney, formatPhone } from '@/lib/format';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
+import Badge from '@/components/ui/Badge';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUsers,
+  faUserPlus,
+  faSearch,
+  faMoneyBillWave,
+  faHandHoldingDollar,
+  faPhone,
+  faEdit,
+} from '@fortawesome/free-solid-svg-icons';
+
+export default function CustomersPage() {
+  const { organization } = useAuth();
+  const { activeStore } = useOrganization();
+  const { notifySuccess, notifyError } = useNotification();
+
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Add / Edit Modal
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    address: '',
+    note: '',
+    creditLimit: '0',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Debt Payment Modal
+  const [selectedDebtCustomer, setSelectedDebtCustomer] = useState<Customer | null>(null);
+  const [debtAmount, setDebtAmount] = useState<string>('');
+  const [debtNote, setDebtNote] = useState<string>('');
+  const [isProcessingDebt, setIsProcessingDebt] = useState(false);
+
+  const loadCustomers = useCallback(async () => {
+    if (!organization?.id) return;
+    setIsLoading(true);
+    try {
+      const res = await api.customers.list({
+        organizationId: organization.id,
+        search: searchQuery || undefined,
+        limit: 100,
+      });
+
+      if (res.data) {
+        // Also load debts for each customer
+        const customersWithDebt = await Promise.all(
+          res.data.map(async (c) => {
+            try {
+              const debtRes = await api.customers.getDebt(c.id);
+              return {
+                ...c,
+                debt: debtRes.data?.debt || 0,
+              };
+            } catch {
+              return c;
+            }
+          })
+        );
+        setCustomers(customersWithDebt);
+      }
+    } catch (err: any) {
+      console.error('Error loading customers:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [organization?.id, searchQuery]);
+
+  useEffect(() => {
+    loadCustomers();
+  }, [loadCustomers]);
+
+  const openCreateModal = () => {
+    setEditingCustomer(null);
+    setFormData({
+      fullName: '',
+      phone: '',
+      address: '',
+      note: '',
+      creditLimit: '1000000',
+    });
+    setIsCustomerModalOpen(true);
+  };
+
+  const openEditModal = (c: Customer) => {
+    setEditingCustomer(c);
+    setFormData({
+      fullName: c.fullName,
+      phone: c.phone,
+      address: c.address || '',
+      note: c.note || '',
+      creditLimit: String(c.creditLimit || 0),
+    });
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleSaveCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization?.id) return;
+
+    if (!formData.fullName || !formData.phone) {
+      notifyError('Ism va telefon raqamini kiriting');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        organizationId: organization.id,
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim() || undefined,
+        note: formData.note.trim() || undefined,
+        creditLimit: parseFloat(formData.creditLimit) || 0,
+      };
+
+      if (editingCustomer) {
+        await api.customers.update(editingCustomer.id, payload);
+        notifySuccess('Mijoz ma\'lumotlari yangilandi');
+      } else {
+        await api.customers.create(payload);
+        notifySuccess('Yangi mijoz muvaffaqiyatli qo\'shildi');
+      }
+
+      setIsCustomerModalOpen(false);
+      loadCustomers();
+    } catch (err: any) {
+      notifyError(err.message || 'Mijozni saqlashda xatolik');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleOpenDebtModal = (c: Customer) => {
+    setSelectedDebtCustomer(c);
+    setDebtAmount(String(c.debt || ''));
+    setDebtNote('Qarz to\'lovi');
+  };
+
+  const handleProcessDebtPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization?.id || !activeStore?.id || !selectedDebtCustomer) return;
+
+    const amount = parseFloat(debtAmount);
+    if (!amount || amount <= 0) {
+      notifyError('To\'lov summasini kiriting');
+      return;
+    }
+
+    setIsProcessingDebt(true);
+    try {
+      await api.payments.credit({
+        organizationId: organization.id,
+        storeId: activeStore.id,
+        customerId: selectedDebtCustomer.id,
+        amount,
+        note: debtNote.trim() || undefined,
+      });
+
+      notifySuccess('Nasiya qarzi muvaffaqiyatli undirildi!');
+      setSelectedDebtCustomer(null);
+      loadCustomers();
+    } catch (err: any) {
+      notifyError(err.message || 'Qarzni undirishda xatolik yuz berdi');
+    } finally {
+      setIsProcessingDebt(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+            Mijozlar va Nasiya
+          </h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Doimiy xaridorlar ro&apos;yxati, kredit limitlari va qarzdorlik nazorati
+          </p>
+        </div>
+
+        <Button
+          variant="primary"
+          onClick={openCreateModal}
+          leftIcon={<FontAwesomeIcon icon={faUserPlus} />}
+          className="font-bold shadow-md shadow-blue-500/20"
+        >
+          Yangi mijoz qo&apos;shish
+        </Button>
+      </div>
+
+      {/* Search bar */}
+      <Card padding={false} className="p-4">
+        <div className="relative w-full">
+          <input
+            type="text"
+            placeholder="Mijoz ismi yoki telefon raqami bo'yicha qidirish..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-hidden focus:border-blue-500"
+          />
+          <FontAwesomeIcon
+            icon={faSearch}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+          />
+        </div>
+      </Card>
+
+      {/* Customers Table */}
+      <Card padding={false}>
+        {isLoading ? (
+          <div className="h-64 flex items-center justify-center">
+            <LoadingSpinner size="lg" text="Mijozlar yuklanmoqda..." />
+          </div>
+        ) : customers.length === 0 ? (
+          <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+            <FontAwesomeIcon icon={faUsers} className="text-4xl text-gray-300 mb-3" />
+            <p className="text-base font-bold text-gray-700">Mijozlar topilmadi</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Yangi mijoz qo&apos;shish uchun yuqoridagi tugmani bosing
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
+                  <th className="py-3.5 px-4">Mijoz</th>
+                  <th className="py-3.5 px-4">Telefon</th>
+                  <th className="py-3.5 px-4">Manzil</th>
+                  <th className="py-3.5 px-4 text-right">Kredit limiti</th>
+                  <th className="py-3.5 px-4 text-right">Joriy qarz</th>
+                  <th className="py-3.5 px-4 text-right">Amallar</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {customers.map((c) => {
+                  const hasDebt = Number(c.debt || 0) > 0;
+                  return (
+                    <tr key={c.id} className="hover:bg-gray-50/70 transition">
+                      <td className="py-3.5 px-4 font-bold text-gray-900">{c.fullName}</td>
+                      <td className="py-3.5 px-4 text-gray-700 font-mono">
+                        {formatPhone(c.phone)}
+                      </td>
+                      <td className="py-3.5 px-4 text-gray-500">{c.address || '-'}</td>
+                      <td className="py-3.5 px-4 text-right font-medium text-gray-600">
+                        {formatMoney(c.creditLimit)}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        {hasDebt ? (
+                          <span className="font-black text-red-600">
+                            {formatMoney(c.debt)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">0 so&apos;m</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right space-x-1">
+                        {hasDebt && (
+                          <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => handleOpenDebtModal(c)}
+                            leftIcon={<FontAwesomeIcon icon={faHandHoldingDollar} />}
+                          >
+                            Qarzni undirish
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditModal(c)}
+                          leftIcon={<FontAwesomeIcon icon={faEdit} />}
+                        >
+                          Tahrirlash
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      {/* Customer Form Modal */}
+      <Modal
+        isOpen={isCustomerModalOpen}
+        onClose={() => setIsCustomerModalOpen(false)}
+        title={editingCustomer ? 'Mijozni tahrirlash' : 'Yangi mijoz qo\'shish'}
+        size="md"
+      >
+        <form onSubmit={handleSaveCustomer} className="space-y-4">
+          <Input
+            label="Mijoz to'liq ismi *"
+            placeholder="Jamshid Ergashev"
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            required
+          />
+
+          <Input
+            label="Telefon raqami *"
+            type="tel"
+            placeholder="901234567"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            leftIcon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
+            required
+          />
+
+          <Input
+            label="Manzil"
+            placeholder="Toshkent sh., Yunusobod tumani"
+            value={formData.address}
+            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+          />
+
+          <Input
+            label="Maksimal nasiya / kredit limiti (so'm)"
+            type="number"
+            min="0"
+            step="100000"
+            placeholder="1000000"
+            value={formData.creditLimit}
+            onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
+            helperText="Mijozga berilishi mumkin bo'lgan maksimal qarz miqdori"
+          />
+
+          <Input
+            label="Izoh (ixtiyoriy)"
+            placeholder="Mijoz haqida qo'shimcha eslatma"
+            value={formData.note}
+            onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+          />
+
+          <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsCustomerModalOpen(false)}
+              disabled={isSaving}
+            >
+              Bekor qilish
+            </Button>
+            <Button type="submit" variant="primary" isLoading={isSaving} className="font-bold">
+              {editingCustomer ? 'Saqlash' : 'Qo\'shish'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Debt Repayment Modal */}
+      <Modal
+        isOpen={!!selectedDebtCustomer}
+        onClose={() => setSelectedDebtCustomer(null)}
+        title="Nasiya qarzini undirish"
+        size="md"
+      >
+        {selectedDebtCustomer && (
+          <form onSubmit={handleProcessDebtPayment} className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
+              <span className="text-xs text-gray-500 block">Mijoz:</span>
+              <p className="text-sm font-bold text-gray-900">{selectedDebtCustomer.fullName}</p>
+              <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
+                <span className="text-gray-500">Joriy qarzdorlik:</span>
+                <span className="font-black text-red-600">
+                  {formatMoney(selectedDebtCustomer.debt)}
+                </span>
+              </div>
+            </div>
+
+            <Input
+              label="Qabul qilinayotgan summa (so'm) *"
+              type="number"
+              min="1"
+              max={selectedDebtCustomer.debt}
+              step="1000"
+              value={debtAmount}
+              onChange={(e) => setDebtAmount(e.target.value)}
+              leftIcon={<FontAwesomeIcon icon={faMoneyBillWave} className="text-xs" />}
+              required
+            />
+
+            <Input
+              label="Izoh"
+              placeholder="Qarz to'lovi"
+              value={debtNote}
+              onChange={(e) => setDebtNote(e.target.value)}
+            />
+
+            <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSelectedDebtCustomer(null)}
+                disabled={isProcessingDebt}
+              >
+                Bekor qilish
+              </Button>
+              <Button
+                type="submit"
+                variant="success"
+                isLoading={isProcessingDebt}
+                className="font-bold"
+              >
+                To&apos;lovni qabul qilish
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+    </div>
+  );
+}
