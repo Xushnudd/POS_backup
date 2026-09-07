@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
           fullName: user.fullName,
           phone: user.phone,
           email: user.email,
+          organizationUserId: orgUser.id,
         },
         organization: {
           id: orgUser.organization.id,

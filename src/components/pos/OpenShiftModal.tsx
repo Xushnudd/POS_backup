@@ -39,18 +39,16 @@ export default function OpenShiftModal({
       notifyError('Iltimos, kassa terminalini tanlang');
       return;
     }
-    if (!user?.id) {
-      notifyError('Foydalanuvchi ma\'lumotlari topilmadi');
+    if (!user?.organizationUserId) {
+      notifyError('Tashkilot foydalanuvchisi ma\'lumotlari topilmadi');
       return;
     }
 
     setIsLoading(true);
     try {
-      // In the backend schema, organizationUserId is the organizationUser ID.
-      // If user.id is passed, shifts/route.ts checks organizationUserId.
       await api.shifts.open({
         registerId: activeRegister.id,
-        organizationUserId: user.id,
+        organizationUserId: user.organizationUserId,
         openingCash: parseFloat(openingCash) || 0,
         note: note.trim() || undefined,
       });

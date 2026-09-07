@@ -42,6 +42,7 @@ export interface AuthUser {
   fullName: string;
   phone: string;
   email?: string | null;
+  organizationUserId?: string;
 }
 
 export interface AuthData {

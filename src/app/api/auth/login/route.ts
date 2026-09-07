@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
           fullName: user.fullName,
           phone: user.phone,
           email: user.email,
+          organizationUserId: firstOrgUser.id,
         },
         organization: {
           id: firstOrgUser.organization.id,
