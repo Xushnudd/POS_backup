@@ -14,9 +14,10 @@ const createUserSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -35,7 +36,7 @@ export async function GET(
 
     const organizationUsers = await prisma.organizationUser.findMany({
       where: {
-        organizationId: params.id,
+        organizationId: id,
         isActive: true,
       },
       include: {
@@ -80,9 +81,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -126,7 +128,7 @@ export async function POST(
     // Create organization user
     const organizationUser = await prisma.organizationUser.create({
       data: {
-        organizationId: params.id,
+        organizationId: id,
         userId: user.id,
         role: validatedData.role,
       },

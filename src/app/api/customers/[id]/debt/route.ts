@@ -4,9 +4,10 @@ import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -24,7 +25,7 @@ export async function GET(
     }
 
     const customer = await prisma.customer.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!customer) {
@@ -37,7 +38,7 @@ export async function GET(
     // Calculate debt: sales on credit - credit payments
     const creditSales = await prisma.payment.aggregate({
       where: {
-        customerId: params.id,
+        customerId: id,
         paymentType: 'credit',
         direction: 'in',
       },
@@ -48,7 +49,7 @@ export async function GET(
 
     const creditPayments = await prisma.payment.aggregate({
       where: {
-        customerId: params.id,
+        customerId: id,
         paymentType: 'credit',
         direction: 'out',
       },
@@ -62,7 +63,7 @@ export async function GET(
     // Get recent transactions
     const recentPayments = await prisma.payment.findMany({
       where: {
-        customerId: params.id,
+        customerId: id,
         paymentType: 'credit',
       },
       orderBy: {

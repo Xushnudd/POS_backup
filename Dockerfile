@@ -1,5 +1,5 @@
 # ─── Stage 1: deps ────────────────────────────────────────────────────────────
-FROM frontend-frontend:latest AS deps
+FROM node:20-slim AS deps
 
 # Install openssl for Prisma
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
@@ -13,7 +13,7 @@ RUN npm ci
 RUN npx prisma generate
 
 # ─── Stage 2: builder ─────────────────────────────────────────────────────────
-FROM frontend-frontend:latest AS builder
+FROM node:20-slim AS builder
 
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
-FROM frontend-frontend:latest AS runner
+FROM node:20-slim AS runner
 
 # Install openssl — required by Prisma query engine at runtime
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*

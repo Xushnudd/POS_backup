@@ -4,9 +4,10 @@ import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -24,7 +25,7 @@ export async function POST(
     }
 
     const document = await prisma.stockDocument.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         items: true,
         store: true,
@@ -49,7 +50,7 @@ export async function POST(
     const confirmedDocument = await prisma.$transaction(async (tx) => {
       // Update document status
       const updatedDocument = await tx.stockDocument.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           status: 'confirmed',
           confirmedBy: payload.userId,
@@ -86,7 +87,7 @@ export async function POST(
             quantityDelta,
             unitCost: item.unitCost,
             sourceType: 'stock_document',
-            sourceId: params.id,
+            sourceId: id,
             createdBy: payload.userId,
           },
         })

@@ -4,9 +4,10 @@ import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -24,7 +25,7 @@ export async function POST(
     }
 
     const transfer = await prisma.stockTransfer.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         items: true,
         toStore: true,
@@ -49,7 +50,7 @@ export async function POST(
     const receivedTransfer = await prisma.$transaction(async (tx) => {
       // Update transfer status
       const updatedTransfer = await tx.stockTransfer.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           status: 'received',
           receivedAt: new Date(),

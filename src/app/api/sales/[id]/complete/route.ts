@@ -13,9 +13,10 @@ const completeSaleSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -36,7 +37,7 @@ export async function POST(
     const validatedData = completeSaleSchema.parse(body)
 
     const sale = await prisma.sale.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         items: true,
         organization: true,
@@ -92,7 +93,7 @@ export async function POST(
     const completedSale = await prisma.$transaction(async (tx) => {
       // Update sale status
       const updatedSale = await tx.sale.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           status: 'completed',
           completedAt: new Date(),
@@ -106,7 +107,7 @@ export async function POST(
             organizationId: sale.organizationId,
             storeId: sale.storeId,
             shiftId: sale.shiftId,
-            saleId: params.id,
+            saleId: id,
             customerId: sale.customerId,
             paymentType: payment.paymentType,
             direction: 'in',
@@ -129,7 +130,7 @@ export async function POST(
             quantityDelta: -item.quantity,
             unitCost: item.unitCost,
             sourceType: 'sale',
-            sourceId: params.id,
+            sourceId: id,
             createdBy: payload.userId,
           },
         })

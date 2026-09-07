@@ -12,9 +12,10 @@ const updateStoreSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -32,7 +33,7 @@ export async function GET(
     }
 
     const store = await prisma.store.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         registers: {
           where: { isActive: true },
@@ -63,9 +64,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -86,7 +88,7 @@ export async function PUT(
     const validatedData = updateStoreSchema.parse(body)
 
     const store = await prisma.store.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     })
 
@@ -114,9 +116,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -135,7 +138,7 @@ export async function DELETE(
 
     // Soft delete
     await prisma.store.update({
-      where: { id: params.id },
+      where: { id },
       data: { isActive: false },
     })
 

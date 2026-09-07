@@ -20,9 +20,10 @@ const updateSaleSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -40,7 +41,7 @@ export async function GET(
     }
 
     const sale = await prisma.sale.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         customer: true,
         items: true,
@@ -73,9 +74,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -96,7 +98,7 @@ export async function PUT(
     const validatedData = updateSaleSchema.parse(body)
 
     const sale = await prisma.sale.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!sale) {
@@ -117,7 +119,7 @@ export async function PUT(
     const updatedSale = await prisma.$transaction(async (tx) => {
       // Delete existing items
       await tx.saleItem.deleteMany({
-        where: { saleId: params.id },
+        where: { saleId: id },
       })
 
       // Recalculate totals if items provided
@@ -134,7 +136,7 @@ export async function PUT(
         // Create new items
         await tx.saleItem.createMany({
           data: validatedData.items.map(item => ({
-            saleId: params.id,
+            saleId: id,
             productId: item.productId,
             productName: item.productName,
             sku: item.sku,
@@ -148,7 +150,7 @@ export async function PUT(
       }
 
       return await tx.sale.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           ...(validatedData.customerId !== undefined && { customerId: validatedData.customerId }),
           ...(validatedData.discountAmount !== undefined && { discountAmount: validatedData.discountAmount }),

@@ -16,9 +16,10 @@ const updateStockDocumentSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -36,7 +37,7 @@ export async function GET(
     }
 
     const document = await prisma.stockDocument.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         store: true,
         supplier: true,
@@ -71,9 +72,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -94,7 +96,7 @@ export async function PUT(
     const validatedData = updateStockDocumentSchema.parse(body)
 
     const document = await prisma.stockDocument.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!document) {
@@ -115,20 +117,20 @@ export async function PUT(
       // Delete existing items if new items provided
       if (validatedData.items) {
         await tx.stockDocumentItem.deleteMany({
-          where: { stockDocumentId: params.id },
+          where: { stockDocumentId: id },
         })
 
         // Create new items
         await tx.stockDocumentItem.createMany({
           data: validatedData.items.map(item => ({
-            stockDocumentId: params.id,
+            stockDocumentId: id,
             ...item,
           })),
         })
       }
 
       return await tx.stockDocument.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           ...(validatedData.supplierId !== undefined && { supplierId: validatedData.supplierId }),
           ...(validatedData.note !== undefined && { note: validatedData.note }),

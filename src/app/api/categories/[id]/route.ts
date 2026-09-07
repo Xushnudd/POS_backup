@@ -11,9 +11,10 @@ const updateCategorySchema = z.object({
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -34,7 +35,7 @@ export async function PUT(
     const validatedData = updateCategorySchema.parse(body)
 
     const category = await prisma.category.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     })
 
@@ -62,9 +63,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -83,7 +85,7 @@ export async function DELETE(
 
     // Soft delete
     await prisma.category.update({
-      where: { id: params.id },
+      where: { id },
       data: { isActive: false },
     })
 

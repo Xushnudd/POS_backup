@@ -10,9 +10,10 @@ const closeShiftSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -30,7 +31,7 @@ export async function GET(
     }
 
     const shift = await prisma.shift.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         register: true,
         organizationUser: {
@@ -80,9 +81,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -103,7 +105,7 @@ export async function POST(
     const validatedData = closeShiftSchema.parse(body)
 
     const shift = await prisma.shift.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!shift) {
@@ -123,7 +125,7 @@ export async function POST(
     // Calculate expected cash
     const payments = await prisma.payment.findMany({
       where: {
-        shiftId: params.id,
+        shiftId: id,
         paymentType: 'cash',
         direction: 'in',
       },
@@ -131,7 +133,7 @@ export async function POST(
 
     const cashMovements = await prisma.cashMovement.findMany({
       where: {
-        shiftId: params.id,
+        shiftId: id,
       },
     })
 
@@ -147,7 +149,7 @@ export async function POST(
     const cashDifference = validatedData.countedCash - expectedCash
 
     const updatedShift = await prisma.shift.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: 'closed',
         closedAt: new Date(),

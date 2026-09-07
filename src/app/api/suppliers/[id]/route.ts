@@ -14,9 +14,10 @@ const updateSupplierSchema = z.object({
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -37,7 +38,7 @@ export async function PUT(
     const validatedData = updateSupplierSchema.parse(body)
 
     const supplier = await prisma.supplier.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     })
 

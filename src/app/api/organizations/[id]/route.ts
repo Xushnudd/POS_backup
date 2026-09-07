@@ -15,9 +15,10 @@ const updateOrganizationSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -35,7 +36,7 @@ export async function GET(
     }
 
     const organization = await prisma.organization.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         stores: {
           where: { isActive: true },
@@ -76,9 +77,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -99,7 +101,7 @@ export async function PUT(
     const validatedData = updateOrganizationSchema.parse(body)
 
     const organization = await prisma.organization.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     })
 

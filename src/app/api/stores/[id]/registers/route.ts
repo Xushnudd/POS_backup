@@ -16,9 +16,10 @@ const updateRegisterSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -37,7 +38,7 @@ export async function GET(
 
     const registers = await prisma.register.findMany({
       where: {
-        storeId: params.id,
+        storeId: id,
         isActive: true,
       },
     })
@@ -58,9 +59,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -82,7 +84,7 @@ export async function POST(
 
     const register = await prisma.register.create({
       data: {
-        storeId: params.id,
+        storeId: id,
         ...validatedData,
       },
     })

@@ -11,9 +11,10 @@ const updateRegisterSchema = z.object({
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -34,7 +35,7 @@ export async function PUT(
     const validatedData = updateRegisterSchema.parse(body)
 
     const register = await prisma.register.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
     })
 

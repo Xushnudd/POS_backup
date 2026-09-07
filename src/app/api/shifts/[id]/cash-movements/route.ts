@@ -11,9 +11,10 @@ const cashMovementSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const token = extractTokenFromHeader(request.headers.get('authorization'))
     if (!token) {
       return NextResponse.json(
@@ -34,7 +35,7 @@ export async function POST(
     const validatedData = cashMovementSchema.parse(body)
 
     const shift = await prisma.shift.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!shift) {
@@ -53,7 +54,7 @@ export async function POST(
 
     const cashMovement = await prisma.cashMovement.create({
       data: {
-        shiftId: params.id,
+        shiftId: id,
         ...validatedData,
         createdBy: payload.userId,
       },
