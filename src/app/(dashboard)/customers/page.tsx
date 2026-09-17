@@ -11,7 +11,6 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
-import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -69,7 +68,7 @@ export default function CustomersPage() {
               const debtRes = await api.customers.getDebt(c.id);
               return {
                 ...c,
-                debt: debtRes.data?.debt || 0,
+                debt: Number(debtRes.data?.totalDebt) || 0,
               };
             } catch {
               return c;
@@ -78,15 +77,15 @@ export default function CustomersPage() {
         );
         setCustomers(customersWithDebt);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading customers:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, searchQuery]);
+  }, [organization, searchQuery]);
 
   useEffect(() => {
-    loadCustomers();
+    void Promise.resolve().then(loadCustomers);
   }, [loadCustomers]);
 
   const openCreateModal = () => {
@@ -143,8 +142,8 @@ export default function CustomersPage() {
 
       setIsCustomerModalOpen(false);
       loadCustomers();
-    } catch (err: any) {
-      notifyError(err.message || 'Mijozni saqlashda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Mijozni saqlashda xatolik');
     } finally {
       setIsSaving(false);
     }
@@ -179,8 +178,8 @@ export default function CustomersPage() {
       notifySuccess('Nasiya qarzi muvaffaqiyatli undirildi!');
       setSelectedDebtCustomer(null);
       loadCustomers();
-    } catch (err: any) {
-      notifyError(err.message || 'Qarzni undirishda xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Qarzni undirishda xatolik yuz berdi');
     } finally {
       setIsProcessingDebt(false);
     }

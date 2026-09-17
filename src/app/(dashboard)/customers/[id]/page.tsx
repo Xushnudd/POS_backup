@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Customer } from '@/types';
 import { formatMoney, formatPhone } from '@/lib/format';
@@ -10,7 +10,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faEdit, faHandHoldingDollar } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faHandHoldingDollar } from '@fortawesome/free-solid-svg-icons';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import { useAuth } from '@/context/AuthContext';
@@ -20,7 +20,6 @@ import { useNotification } from '@/context/NotificationContext';
 export default function CustomerDetailPage() {
   const params = useParams();
   const id = params?.id as string;
-  const router = useRouter();
   const { organization } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
@@ -37,14 +36,22 @@ export default function CustomerDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    setIsLoading(true);
+    let isCancelled = false;
+
     Promise.all([api.customers.get(id), api.customers.getDebt(id)])
       .then(([cRes, dRes]) => {
+        if (isCancelled) return;
         if (cRes.data) setCustomer(cRes.data);
-        if (dRes.data) setDebt(dRes.data.debt || 0);
+        if (dRes.data) setDebt(Number(dRes.data.totalDebt) || 0);
       })
       .catch((err) => console.error(err))
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        if (!isCancelled) setIsLoading(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [id]);
 
   const handleDebtPayment = async (e: React.FormEvent) => {
@@ -72,9 +79,9 @@ export default function CustomerDetailPage() {
       setPaymentAmount('');
       // refresh debt
       const dRes = await api.customers.getDebt(customer.id);
-      if (dRes.data) setDebt(dRes.data.debt || 0);
-    } catch (err: any) {
-      notifyError(err.message || 'Xatolik yuz berdi');
+      if (dRes.data) setDebt(Number(dRes.data.totalDebt) || 0);
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
     } finally {
       setIsProcessing(false);
     }

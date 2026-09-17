@@ -196,7 +196,7 @@ Majburiy: `organizationId`, `name`, `sku`, `barcode`, `salePrice`, `costPrice`. 
 | --- | --- | --- |
 | GET | `/customers` | Mijozlar ro‘yxati |
 | POST | `/customers` | Mijoz yaratish |
-| GET | `/customers/:id` | Mijoz, savdo va to‘lovlari |
+| GET | `/customers/:id` | Mijoz tafsiloti |
 | PUT | `/customers/:id` | Mijozni yangilash |
 | DELETE | `/customers/:id` | Mijozni soft-delete qilish |
 | GET | `/customers/:id/debt` | Mijoz nasiya qarzi va tarixlari |
@@ -225,7 +225,7 @@ Majburiy: `organizationId`, `name`, `sku`, `barcode`, `salePrice`, `costPrice`. 
 
 ### `GET /customers/:id/debt`
 
-Javobda `customer`, `totalCreditSales`, `totalCreditPayments`, `currentDebt`, `creditSales` va `creditPayments` qaytadi.
+Javobda `customerId`, `customerName`, `creditLimit`, `totalDebt`, `remainingCredit` va oxirgi 10 ta `recentPayments` qaytadi.
 
 ### Yetkazib beruvchilar
 

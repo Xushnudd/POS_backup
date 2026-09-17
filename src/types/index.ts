@@ -248,6 +248,15 @@ export interface Payment {
   note?: string | null;
 }
 
+export interface CustomerDebt {
+  customerId: string;
+  customerName: string;
+  creditLimit: number;
+  totalDebt: number;
+  remainingCredit: number;
+  recentPayments: Payment[];
+}
+
 export interface Sale {
   id: string;
   organizationId: string;

@@ -3,6 +3,7 @@ import {
   AuthData,
   Category,
   Customer,
+  CustomerDebt,
   DashboardReportData,
   InventoryBalance,
   Payment,
@@ -356,7 +357,7 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
-    getDebt: (id: string) => this.request<any>(`/customers/${id}/debt`),
+    getDebt: (id: string) => this.request<CustomerDebt>(`/customers/${id}/debt`),
   };
 
   // Suppliers

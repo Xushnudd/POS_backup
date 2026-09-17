@@ -70,8 +70,8 @@ export default function RegisterPage() {
 
       notifySuccess('Muvaffaqiyatli ro\'yxatdan o\'tdingiz! Tizim sozlandi.');
       router.push('/dashboard');
-    } catch (err: any) {
-      const msg = err.message || 'Ro\'yxatdan o\'tishda xatolik yuz berdi';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ro\'yxatdan o\'tishda xatolik yuz berdi';
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
