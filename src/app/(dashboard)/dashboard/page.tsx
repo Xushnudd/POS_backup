@@ -22,7 +22,6 @@ import {
   faCashRegister,
   faBoxesStacked,
   faWarehouse,
-  faPlus,
   faArrowRight,
   faCalendarDay,
 } from '@fortawesome/free-solid-svg-icons';
@@ -52,10 +51,10 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, activeStore?.id, date]);
+  }, [organization, activeStore, date]);
 
   useEffect(() => {
-    loadDashboardData();
+    void Promise.resolve().then(loadDashboardData);
   }, [loadDashboardData]);
 
   return (

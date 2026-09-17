@@ -15,7 +15,6 @@ import ReceiptPreview from '@/components/pos/ReceiptPreview';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faReceipt,
-  faPrint,
   faBan,
   faRotateLeft,
   faEye,
@@ -53,15 +52,15 @@ export default function SalesPage() {
           setTotalPages(res.pagination.totalPages);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading sales:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, activeStore?.id, selectedStatus, page]);
+  }, [organization, activeStore, selectedStatus, page]);
 
   useEffect(() => {
-    loadSales();
+    void Promise.resolve().then(loadSales);
   }, [loadSales]);
 
   const handleVoidSale = async (saleId: string) => {
@@ -71,8 +70,8 @@ export default function SalesPage() {
       await api.sales.void(saleId);
       notifySuccess('Savdo muvaffaqiyatli bekor qilindi');
       loadSales();
-    } catch (err: any) {
-      notifyError(err.message || 'Savdoni bekor qilishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Savdoni bekor qilishda xatolik');
     }
   };
 

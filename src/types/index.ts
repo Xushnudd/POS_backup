@@ -307,6 +307,21 @@ export interface DashboardReportData {
   }[];
 }
 
+export interface SalesReportSummary {
+  totalRevenue: number;
+  totalDiscount: number;
+  totalItems: number;
+  averageSale: number;
+}
+
+export interface ProductReportItem extends Product {
+  quantitySold: number;
+  revenue: number;
+  cost: number;
+  profit: number;
+  profitMargin: number;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -322,4 +337,5 @@ export interface ApiResponse<T = any> {
     total: number;
     totalPages: number;
   };
+  summary?: SalesReportSummary;
 }

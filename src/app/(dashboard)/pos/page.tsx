@@ -70,12 +70,12 @@ export default function PosPage() {
       if (res.data) {
         setProducts(res.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading products:', err);
     } finally {
       setIsLoadingProducts(false);
     }
-  }, [organization?.id, debouncedSearch, selectedCategoryId]);
+  }, [organization, debouncedSearch, selectedCategoryId]);
 
   // Load initial data (categories and customers)
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function PosPage() {
   }, [organization?.id]);
 
   useEffect(() => {
-    loadProducts();
+    void Promise.resolve().then(loadProducts);
   }, [loadProducts]);
 
   // Check if shift is open
@@ -174,8 +174,8 @@ export default function PosPage() {
       setIsPaymentModalOpen(false);
       clearCart();
       setIsReceiptModalOpen(true);
-    } catch (err: any) {
-      notifyError(err.message || 'To\'lovni yakunlashda xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'To\'lovni yakunlashda xatolik yuz berdi');
     } finally {
       setIsProcessingPayment(false);
     }

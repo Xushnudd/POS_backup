@@ -7,7 +7,7 @@ import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { InventoryBalance, Product, StockDocument, Supplier } from '@/types';
-import { formatMoney, formatNumber, formatDate } from '@/lib/format';
+import { formatNumber, formatDate } from '@/lib/format';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -24,7 +24,6 @@ import {
   faCheck,
   faTrash,
   faRightLeft,
-  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function InventoryPage() {
@@ -69,15 +68,15 @@ export default function InventoryPage() {
         });
         if (res.data) setDocuments(res.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load inventory data:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, activeStore?.id, activeTab, lowStockOnly]);
+  }, [organization, activeStore, activeTab, lowStockOnly]);
 
   useEffect(() => {
-    loadData();
+    void Promise.resolve().then(loadData);
   }, [loadData]);
 
   // Load products and suppliers for document creation
@@ -98,8 +97,8 @@ export default function InventoryPage() {
       await api.stockDocuments.confirm(id);
       notifySuccess('Ombor hujjati tasdiqlandi va qoldiqlar yangilandi!');
       loadData();
-    } catch (err: any) {
-      notifyError(err.message || 'Hujjatni tasdiqlashda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Hujjatni tasdiqlashda xatolik');
     }
   };
 
@@ -162,8 +161,8 @@ export default function InventoryPage() {
       setIsDocModalOpen(false);
       setActiveTab('documents');
       loadData();
-    } catch (err: any) {
-      notifyError(err.message || 'Hujjatni yaratishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Hujjatni yaratishda xatolik');
     } finally {
       setIsSavingDoc(false);
     }

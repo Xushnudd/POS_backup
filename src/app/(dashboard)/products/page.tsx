@@ -18,11 +18,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
   faSearch,
-  faFolderPlus,
   faEdit,
   faBoxesStacked,
   faTags,
-  faWandMagicSparkles,
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ProductsPage() {
@@ -71,15 +69,15 @@ export default function ProductsPage() {
 
       if (prodsRes.data) setProducts(prodsRes.data);
       if (catsRes.data) setCategories(catsRes.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load products:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, searchQuery, selectedCategory]);
+  }, [organization, searchQuery, selectedCategory]);
 
   useEffect(() => {
-    loadData();
+    void Promise.resolve().then(loadData);
   }, [loadData]);
 
   const openCreateModal = () => {
@@ -116,8 +114,14 @@ export default function ProductsPage() {
     e.preventDefault();
     if (!organization?.id) return;
 
-    if (!formData.name || !formData.sku || !formData.barcode || !formData.salePrice) {
-      notifyError('Barcha majburiy maydonlarni to\'ldiring');
+    if (
+      !formData.name ||
+      !formData.sku ||
+      !formData.barcode ||
+      Number(formData.costPrice) <= 0 ||
+      Number(formData.salePrice) <= 0
+    ) {
+      notifyError('Barcha majburiy maydonlarni to‘ldiring; tannarx va sotuv narxi 0 dan katta bo‘lsin');
       return;
     }
 
@@ -130,8 +134,8 @@ export default function ProductsPage() {
         barcode: formData.barcode.trim(),
         categoryId: formData.categoryId || undefined,
         unit: formData.unit,
-        costPrice: parseFloat(formData.costPrice) || 0,
-        salePrice: parseFloat(formData.salePrice) || 0,
+        costPrice: Number(formData.costPrice),
+        salePrice: Number(formData.salePrice),
         minStock: parseFloat(formData.minStock) || 0,
       };
 
@@ -145,8 +149,8 @@ export default function ProductsPage() {
 
       setIsProductModalOpen(false);
       loadData();
-    } catch (err: any) {
-      notifyError(err.message || 'Mahsulotni saqlashda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Mahsulotni saqlashda xatolik');
     } finally {
       setIsSaving(false);
     }
@@ -165,8 +169,8 @@ export default function ProductsPage() {
       setCategoryName('');
       const catsRes = await api.categories.list(organization.id);
       if (catsRes.data) setCategories(catsRes.data);
-    } catch (err: any) {
-      notifyError(err.message || 'Kategoriya qo\'shishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Kategoriya qo\'shishda xatolik');
     }
   };
 

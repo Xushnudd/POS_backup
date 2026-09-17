@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
-import { CashMovement, Shift } from '@/types';
+import { Shift } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -22,7 +21,6 @@ import {
   faArrowUp,
   faLock,
   faHistory,
-  faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ShiftsPage() {
@@ -57,15 +55,15 @@ export default function ShiftsPage() {
       if (res.data) {
         setShiftsHistory(res.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load shift history:', err);
     } finally {
       setIsLoadingHistory(false);
     }
-  }, [activeRegister?.id]);
+  }, [activeRegister]);
 
   useEffect(() => {
-    loadHistory();
+    void Promise.resolve().then(loadHistory);
   }, [loadHistory, activeShift]);
 
   // Cash movement handler
@@ -100,8 +98,8 @@ export default function ShiftsPage() {
       setMovementAmount('');
       setMovementReason('');
       await refreshShift();
-    } catch (err: any) {
-      notifyError(err.message || 'Pul harakatida xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Pul harakatida xatolik yuz berdi');
     } finally {
       setIsProcessingMove(false);
     }
@@ -120,7 +118,7 @@ export default function ShiftsPage() {
 
     setIsClosingShift(true);
     try {
-      const res = await api.shifts.close(activeShift.id, {
+      await api.shifts.close(activeShift.id, {
         countedCash: counted,
         note: closeNote.trim() || undefined,
       });
@@ -129,8 +127,8 @@ export default function ShiftsPage() {
       setIsCloseModalOpen(false);
       await refreshShift();
       loadHistory();
-    } catch (err: any) {
-      notifyError(err.message || 'Smenani yopishda xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Smenani yopishda xatolik yuz berdi');
     } finally {
       setIsClosingShift(false);
     }

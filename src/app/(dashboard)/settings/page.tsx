@@ -12,10 +12,8 @@ import Select from '@/components/ui/Select';
 import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { USER_ROLES } from '@/lib/constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faGear,
   faBuilding,
   faStore,
   faCashRegister,
@@ -25,6 +23,14 @@ import {
   faPhone,
   faIdCard,
 } from '@fortawesome/free-solid-svg-icons';
+
+type SettingsUser = {
+  id: string;
+  role: 'owner' | 'admin' | 'cashier';
+  isActive: boolean;
+  user: { fullName: string; phone: string; email?: string | null };
+  stores?: Array<{ id: string; name: string }>;
+};
 
 export default function SettingsPage() {
   const { organization, refreshUser } = useAuth();
@@ -42,7 +48,7 @@ export default function SettingsPage() {
   const [isSavingOrg, setIsSavingOrg] = useState(false);
 
   // Users state
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<SettingsUser[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Modals
@@ -69,11 +75,13 @@ export default function SettingsPage() {
   // Initialize org form
   useEffect(() => {
     if (organization) {
-      setOrgName(organization.name || '');
-      setOrgPhone(organization.phone || '');
-      setOrgTin(organization.tin || '');
-      setReceiptFooter(organization.receiptFooter || '');
-      setAllowNegativeStock(organization.allowNegativeStock || false);
+      void Promise.resolve().then(() => {
+        setOrgName(organization.name || '');
+        setOrgPhone(organization.phone || '');
+        setOrgTin(organization.tin || '');
+        setReceiptFooter(organization.receiptFooter || '');
+        setAllowNegativeStock(organization.allowNegativeStock || false);
+      });
     }
   }, [organization]);
 
@@ -84,16 +92,16 @@ export default function SettingsPage() {
     try {
       const res = await api.organizations.users(organization.id);
       if (res.data) setUsers(res.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load users:', err);
     } finally {
       setIsLoadingUsers(false);
     }
-  }, [organization?.id]);
+  }, [organization]);
 
   useEffect(() => {
     if (activeTab === 'users') {
-      loadUsers();
+      void Promise.resolve().then(loadUsers);
     }
   }, [activeTab, loadUsers]);
 
@@ -114,8 +122,8 @@ export default function SettingsPage() {
 
       notifySuccess('Tashkilot sozlamalari muvaffaqiyatli saqlandi');
       await refreshUser();
-    } catch (err: any) {
-      notifyError(err.message || 'Sozlamalarni saqlashda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Sozlamalarni saqlashda xatolik');
     } finally {
       setIsSavingOrg(false);
     }
@@ -141,8 +149,8 @@ export default function SettingsPage() {
       setStoreAddress('');
       setStorePhone('');
       await refreshStores();
-    } catch (err: any) {
-      notifyError(err.message || 'Do\'kon yaratishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Do\'kon yaratishda xatolik');
     } finally {
       setIsSavingStore(false);
     }
@@ -165,8 +173,8 @@ export default function SettingsPage() {
       setRegisterName('');
       setRegisterCode('');
       await refreshStores();
-    } catch (err: any) {
-      notifyError(err.message || 'Kassa yaratishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Kassa yaratishda xatolik');
     } finally {
       setIsSavingRegister(false);
     }
@@ -194,8 +202,8 @@ export default function SettingsPage() {
       setUserPassword('');
       setUserStoreIds([]);
       loadUsers();
-    } catch (err: any) {
-      notifyError(err.message || 'Foydalanuvchi qo\'shishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Foydalanuvchi qo\'shishda xatolik');
     } finally {
       setIsSavingUser(false);
     }
@@ -220,7 +228,7 @@ export default function SettingsPage() {
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as 'organization' | 'stores' | 'users')}
             className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition cursor-pointer flex items-center gap-2 ${
               activeTab === tab.id
                 ? 'border-blue-600 text-blue-600'
@@ -450,7 +458,7 @@ export default function SettingsPage() {
                       </td>
                       <td className="py-3 px-4 text-gray-600">
                         {u.stores && u.stores.length > 0
-                          ? u.stores.map((s: any) => s.name).join(', ')
+                          ? u.stores.map((s) => s.name).join(', ')
                           : 'Barcha do\'konlar'}
                       </td>
                     </tr>
@@ -582,7 +590,7 @@ export default function SettingsPage() {
           <Select
             label="Roli *"
             value={userRole}
-            onChange={(e) => setUserRole(e.target.value as any)}
+            onChange={(e) => setUserRole(e.target.value as 'admin' | 'cashier')}
             options={[
               { value: 'cashier', label: 'Kassir (faqat POS va smena)' },
               { value: 'admin', label: 'Administrator (to\'liq nazorat)' },

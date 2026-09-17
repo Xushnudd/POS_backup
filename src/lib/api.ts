@@ -8,6 +8,7 @@ import {
   InventoryBalance,
   Payment,
   Product,
+  ProductReportItem,
   Register,
   Sale,
   Shift,
@@ -413,7 +414,7 @@ class ApiClient {
           q.append(k, String(v));
         }
       });
-      return this.request<any>(`/reports/sales?${q.toString()}`);
+      return this.request<Sale[]>(`/reports/sales?${q.toString()}`);
     },
 
     products: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string }) => {
@@ -423,7 +424,7 @@ class ApiClient {
           q.append(k, String(v));
         }
       });
-      return this.request<any>(`/reports/products?${q.toString()}`);
+      return this.request<ProductReportItem[]>(`/reports/products?${q.toString()}`);
     },
   };
 

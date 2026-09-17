@@ -48,15 +48,15 @@ export default function StockTransfersPage() {
     try {
       const res = await api.transfers.list({ organizationId: organization.id });
       if (res.data) setTransfers(res.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading transfers:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id]);
+  }, [organization]);
 
   useEffect(() => {
-    loadTransfers();
+    void Promise.resolve().then(loadTransfers);
   }, [loadTransfers]);
 
   useEffect(() => {
@@ -121,8 +121,8 @@ export default function StockTransfersPage() {
       notifySuccess('Transfer muvaffaqiyatli yaratildi');
       setIsModalOpen(false);
       loadTransfers();
-    } catch (err: any) {
-      notifyError(err.message || 'Transferni yaratishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Transferni yaratishda xatolik');
     } finally {
       setIsSaving(false);
     }
@@ -133,8 +133,8 @@ export default function StockTransfersPage() {
       await api.transfers.send(id);
       notifySuccess('Transfer jo\'natildi');
       loadTransfers();
-    } catch (err: any) {
-      notifyError(err.message || 'Transferni jo\'natishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Transferni jo\'natishda xatolik');
     }
   };
 
@@ -143,8 +143,8 @@ export default function StockTransfersPage() {
       await api.transfers.receive(id);
       notifySuccess('Transfer qabul qilindi va qoldiqlar yangilandi');
       loadTransfers();
-    } catch (err: any) {
-      notifyError(err.message || 'Transferni qabul qilishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Transferni qabul qilishda xatolik');
     }
   };
 

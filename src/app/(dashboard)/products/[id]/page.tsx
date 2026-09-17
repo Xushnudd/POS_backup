@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Category, Product } from '@/types';
-import { formatMoney } from '@/lib/format';
 import { PRODUCT_UNITS } from '@/lib/constants';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -42,12 +41,14 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    setIsLoading(true);
+    let isCancelled = false;
+
     Promise.all([
       api.products.get(id),
       organization?.id ? api.categories.list(organization.id) : Promise.resolve({ data: [] }),
     ])
       .then(([prodRes, catRes]) => {
+        if (isCancelled) return;
         if (prodRes.data) {
           const p = prodRes.data;
           setProduct(p);
@@ -65,12 +66,23 @@ export default function ProductDetailPage() {
         if (catRes.data) setCategories(catRes.data);
       })
       .catch((err) => console.error(err))
-      .finally(() => setIsLoading(false));
-  }, [id, organization?.id]);
+      .finally(() => {
+        if (!isCancelled) setIsLoading(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [id, organization]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
+
+    if (Number(formData.costPrice) <= 0 || Number(formData.salePrice) <= 0) {
+      notifyError('Tannarx va sotuv narxi 0 dan katta bo‘lishi kerak');
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -80,14 +92,14 @@ export default function ProductDetailPage() {
         barcode: formData.barcode.trim(),
         categoryId: formData.categoryId || undefined,
         unit: formData.unit,
-        costPrice: parseFloat(formData.costPrice) || 0,
-        salePrice: parseFloat(formData.salePrice) || 0,
+        costPrice: Number(formData.costPrice),
+        salePrice: Number(formData.salePrice),
         minStock: parseFloat(formData.minStock) || 0,
       });
       notifySuccess('Mahsulot muvaffaqiyatli saqlandi');
       router.push('/products');
-    } catch (err: any) {
-      notifyError(err.message || 'Xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
     } finally {
       setIsSaving(false);
     }
@@ -99,8 +111,8 @@ export default function ProductDetailPage() {
       await api.products.delete(product.id);
       notifySuccess('Mahsulot o\'chirildi');
       router.push('/products');
-    } catch (err: any) {
-      notifyError(err.message || 'O\'chirishda xatolik');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'O\'chirishda xatolik');
     }
   };
 

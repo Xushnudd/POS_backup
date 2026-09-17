@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { api } from '@/lib/api';
+import { ProductReportItem, Sale, SalesReportSummary } from '@/types';
 import { formatMoney, formatNumber, formatDate } from '@/lib/format';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -12,9 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChartLine,
   faFileCsv,
-  faCalendarDay,
   faBoxesStacked,
-  faMoneyBillTrendUp,
   faRotateLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -31,8 +30,9 @@ export default function ReportsPage() {
   const [startDate, setStartDate] = useState(firstDayStr);
   const [endDate, setEndDate] = useState(todayStr);
 
-  const [salesReport, setSalesReport] = useState<any>(null);
-  const [productsReport, setProductsReport] = useState<any[]>([]);
+  const [salesReport, setSalesReport] = useState<Sale[]>([]);
+  const [salesSummary, setSalesSummary] = useState<SalesReportSummary | null>(null);
+  const [productsReport, setProductsReport] = useState<ProductReportItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadReport = useCallback(async () => {
@@ -47,6 +47,7 @@ export default function ReportsPage() {
           endDate,
         });
         if (res.data) setSalesReport(res.data);
+        if (res.summary) setSalesSummary(res.summary);
       } else {
         const res = await api.reports.products({
           organizationId: organization.id,
@@ -56,15 +57,15 @@ export default function ReportsPage() {
         });
         if (res.data) setProductsReport(res.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load report:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, activeStore?.id, activeTab, startDate, endDate]);
+  }, [organization, activeStore, activeTab, startDate, endDate]);
 
   useEffect(() => {
-    loadReport();
+    void Promise.resolve().then(loadReport);
   }, [loadReport]);
 
   // CSV Export utility
@@ -72,7 +73,7 @@ export default function ReportsPage() {
     if (activeTab === 'sales') {
       const rows = [
         ['Chek raqami', 'Sana', 'Mijoz', 'Summa', 'Holat'],
-        ...(salesReport?.sales || []).map((s: any) => [
+        ...salesReport.map((s) => [
           s.receiptNo,
           formatDate(s.completedAt || s.createdAt, true),
           s.customer?.fullName || 'Mijozsiz',
@@ -87,8 +88,8 @@ export default function ReportsPage() {
         ...productsReport.map((p) => [
           p.name,
           p.sku,
-          p.categoryName || '-',
-          p.quantity,
+          p.category?.name || '-',
+          p.quantitySold,
           p.revenue,
           p.cost,
           p.profit,
@@ -98,7 +99,7 @@ export default function ReportsPage() {
     }
   };
 
-  const downloadCSV = (rows: any[][], filename: string) => {
+  const downloadCSV = (rows: Array<Array<string | number>>, filename: string) => {
     const csvContent =
       'data:text/csv;charset=utf-8,\uFEFF' +
       rows.map((e) => e.map((val) => `"${val}"`).join(',')).join('\n');
@@ -209,7 +210,7 @@ export default function ReportsPage() {
                 Umumiy savdo summasi
               </span>
               <span className="text-2xl font-black text-gray-900 mt-2 block">
-                {formatMoney(salesReport?.totalRevenue || 0)}
+                {formatMoney(salesSummary?.totalRevenue || 0)}
               </span>
               <span className="text-xs text-gray-400 mt-1 block">Tanlangan davr uchun</span>
             </Card>
@@ -219,7 +220,7 @@ export default function ReportsPage() {
                 Cheklar soni
               </span>
               <span className="text-2xl font-black text-blue-600 mt-2 block">
-                {formatNumber(salesReport?.totalSales || 0)} ta
+                {formatNumber(salesReport.length)} ta
               </span>
               <span className="text-xs text-gray-400 mt-1 block">Yakunlangan cheklar</span>
             </Card>
@@ -229,7 +230,7 @@ export default function ReportsPage() {
                 O&apos;rtacha chek
               </span>
               <span className="text-2xl font-black text-purple-600 mt-2 block">
-                {formatMoney(salesReport?.averageCheck || 0)}
+                {formatMoney(salesSummary?.averageSale || 0)}
               </span>
               <span className="text-xs text-gray-400 mt-1 block">1 chekka to&apos;g&apos;ri keladi</span>
             </Card>
@@ -245,7 +246,7 @@ export default function ReportsPage() {
               <div className="h-48 flex items-center justify-center">
                 <LoadingSpinner size="lg" text="Hisobot yuklanmoqda..." />
               </div>
-            ) : !salesReport?.sales || salesReport.sales.length === 0 ? (
+            ) : salesReport.length === 0 ? (
               <div className="h-40 flex items-center justify-center text-gray-400 text-xs">
                 Bu davrda savdolar topilmadi
               </div>
@@ -262,7 +263,7 @@ export default function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {salesReport.sales.map((s: any) => (
+                    {salesReport.map((s) => (
                       <tr key={s.id} className="hover:bg-gray-50/70 transition">
                         <td className="py-3 px-4 font-mono font-bold text-gray-900">
                           {s.receiptNo}
@@ -325,7 +326,7 @@ export default function ReportsPage() {
                         <td className="py-3 px-4 font-bold text-gray-900">{p.name}</td>
                         <td className="py-3 px-4 font-mono text-gray-500">{p.sku}</td>
                         <td className="py-3 px-4 text-center font-bold text-blue-600">
-                          {formatNumber(p.quantity)}
+                          {formatNumber(p.quantitySold)}
                         </td>
                         <td className="py-3 px-4 text-right font-semibold text-gray-800">
                           {formatMoney(p.revenue)}

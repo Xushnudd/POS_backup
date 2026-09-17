@@ -27,18 +27,23 @@ export default function SaleDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    setIsLoading(true);
-    api.sales
+    let isCancelled = false;
+
+    void api.sales
       .get(id)
       .then((res) => {
-        if (res.data) setSale(res.data);
+        if (!isCancelled && res.data) setSale(res.data);
       })
       .catch((err) => {
         console.error(err);
       })
       .finally(() => {
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [id]);
 
   const handleVoid = async () => {
@@ -47,8 +52,8 @@ export default function SaleDetailPage() {
       await api.sales.void(sale.id);
       notifySuccess('Savdo bekor qilindi');
       router.push('/sales');
-    } catch (err: any) {
-      notifyError(err.message || 'Xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
     }
   };
 
