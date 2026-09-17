@@ -137,6 +137,10 @@ export default function InventoryPage() {
       notifyError('Kamida bitta mahsulot qo\'shing');
       return;
     }
+    if (docItems.some((item) => !item.productId || item.quantity <= 0 || item.unitCost < 0)) {
+      notifyError('Har bir mahsulot uchun miqdor 0 dan katta, tannarx esa manfiy bo\'lmagan son bo\'lishi kerak');
+      return;
+    }
 
     setIsSavingDoc(true);
     try {

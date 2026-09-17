@@ -8,14 +8,14 @@ const createStockDocumentSchema = z.object({
   storeId: z.string().uuid(),
   supplierId: z.string().uuid().optional(),
   documentType: z.enum(['purchase', 'adjustment', 'transfer_out', 'transfer_in', 'return_in']),
-  documentNo: z.string(),
+  documentNo: z.string().trim().min(1),
   note: z.string().optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
     quantity: z.number().positive(),
-    unitCost: z.number().positive(),
+    unitCost: z.number().nonnegative(),
     note: z.string().optional(),
-  })),
+  })).min(1),
 })
 
 const updateStockDocumentSchema = z.object({
@@ -132,11 +132,15 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = createStockDocumentSchema.parse(body)
+    const { items, ...documentData } = validatedData
 
     const document = await prisma.stockDocument.create({
       data: {
-        ...validatedData,
+        ...documentData,
         createdBy: payload.userId,
+        items: {
+          create: items,
+        },
       },
       include: {
         items: {
@@ -156,7 +160,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }

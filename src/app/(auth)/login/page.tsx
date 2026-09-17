@@ -39,8 +39,8 @@ export default function LoginPage() {
       await login(phone.trim(), password);
       notifySuccess('Tizimga muvaffaqiyatli kirdingiz!');
       router.push('/pos');
-    } catch (err: any) {
-      const msg = err.message || 'Kirishda xatolik yuz berdi';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Kirishda xatolik yuz berdi';
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
