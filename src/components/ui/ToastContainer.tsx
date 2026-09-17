@@ -3,6 +3,7 @@
 import React from 'react';
 import { useNotification, NotificationType } from '@/context/NotificationContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
   faCheckCircle,
   faExclamationCircle,
@@ -13,7 +14,7 @@ import {
 
 const typeConfig: Record<
   NotificationType,
-  { bg: string; border: string; text: string; icon: any }
+  { bg: string; border: string; text: string; icon: IconDefinition }
 > = {
   success: {
     bg: 'bg-emerald-50',

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
   faCashRegister,
   faChartPie,
@@ -16,7 +17,6 @@ import {
   faChartLine,
   faGear,
   faTimes,
-  faStore,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
@@ -27,7 +27,7 @@ interface SidebarProps {
 interface NavItem {
   href: string;
   label: string;
-  icon: any;
+  icon: IconDefinition;
   roles?: ('owner' | 'admin' | 'cashier')[];
   badge?: string;
   highlight?: boolean;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Category, Product } from '@/types';
 import { formatMoney } from '@/lib/format';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

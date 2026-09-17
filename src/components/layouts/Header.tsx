@@ -11,7 +11,6 @@ import {
   faCashRegister,
   faStore,
   faRightFromBracket,
-  faCircle,
   faBolt,
 } from '@fortawesome/free-solid-svg-icons';
 import Badge from '@/components/ui/Badge';

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { Customer, PaymentType, Sale } from '@/types';
+import { Customer, PaymentType } from '@/types';
 import { formatMoney } from '@/lib/format';
 import { useNotification } from '@/context/NotificationContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -42,8 +42,10 @@ export default function PaymentModal({
   // When modal opens, reset tendered amount to totalAmount
   useEffect(() => {
     if (isOpen) {
-      setCashTendered(String(totalAmount));
-      setReferenceNo('');
+      void Promise.resolve().then(() => {
+        setCashTendered(String(totalAmount));
+        setReferenceNo('');
+      });
     }
   }, [isOpen, totalAmount]);
 

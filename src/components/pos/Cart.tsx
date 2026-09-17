@@ -10,7 +10,6 @@ import {
   faCartShopping,
   faTrash,
   faArrowRight,
-  faUser,
   faPercent,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';

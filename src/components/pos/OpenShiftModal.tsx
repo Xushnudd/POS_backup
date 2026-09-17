@@ -57,8 +57,8 @@ export default function OpenShiftModal({
       await refreshShift();
       onClose();
       onSuccess?.();
-    } catch (err: any) {
-      notifyError(err.message || 'Smenani ochishda xatolik yuz berdi');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Smenani ochishda xatolik yuz berdi');
     } finally {
       setIsLoading(false);
     }
