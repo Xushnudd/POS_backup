@@ -1,0 +1,376 @@
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useOrganization } from '@/context/OrganizationContext';
+import { useNotification } from '@/context/NotificationContext';
+import { api } from '@/lib/api';
+import { Product, StockTransfer } from '@/types';
+import { formatDate } from '@/lib/format';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
+import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faRightLeft,
+  faPlus,
+  faArrowLeft,
+  faPaperPlane,
+  faInbox,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
+
+export default function StockTransfersPage() {
+  const { organization } = useAuth();
+  const { stores } = useOrganization();
+  const { notifySuccess, notifyError } = useNotification();
+
+  const [transfers, setTransfers] = useState<StockTransfer[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fromStoreId, setFromStoreId] = useState('');
+  const [toStoreId, setToStoreId] = useState('');
+  const [note, setNote] = useState('');
+  const [items, setItems] = useState<{ productId: string; quantity: number; unitCost: number }[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const loadTransfers = useCallback(async () => {
+    if (!organization?.id) return;
+    setIsLoading(true);
+    try {
+      const res = await api.transfers.list({ organizationId: organization.id });
+      if (res.data) setTransfers(res.data);
+    } catch (err: unknown) {
+      console.error('Error loading transfers:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [organization]);
+
+  useEffect(() => {
+    void Promise.resolve().then(loadTransfers);
+  }, [loadTransfers]);
+
+  useEffect(() => {
+    if (!organization?.id) return;
+    api.products.list({ organizationId: organization.id, limit: 100 }).then((res) => {
+      if (res.data) setProducts(res.data);
+    });
+  }, [organization?.id]);
+
+  const openCreateModal = () => {
+    if (stores.length < 2) {
+      notifyError('Transfer uchun kamida 2 ta do\'kon mavjud bo\'lishi kerak');
+      return;
+    }
+    setFromStoreId(stores[0]?.id || '');
+    setToStoreId(stores[1]?.id || '');
+    setNote('');
+    setItems(
+      products.length > 0
+        ? [{ productId: products[0].id, quantity: 1, unitCost: Number(products[0].costPrice) || 0 }]
+        : []
+    );
+    setIsModalOpen(true);
+  };
+
+  const handleAddItem = () => {
+    if (products.length === 0) return;
+    setItems([
+      ...items,
+      { productId: products[0].id, quantity: 1, unitCost: Number(products[0].costPrice) || 0 },
+    ]);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
+  const handleCreateTransfer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization?.id) return;
+
+    if (fromStoreId === toStoreId) {
+      notifyError('Jo\'natuvchi va qabul qiluvchi do\'kon bir xil bo\'lishi mumkin emas');
+      return;
+    }
+
+    if (items.length === 0) {
+      notifyError('Kamida bitta mahsulot qo\'shing');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await api.transfers.create({
+        organizationId: organization.id,
+        fromStoreId,
+        toStoreId,
+        note: note.trim() || undefined,
+        items,
+      });
+
+      notifySuccess('Transfer muvaffaqiyatli yaratildi');
+      setIsModalOpen(false);
+      loadTransfers();
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Transferni yaratishda xatolik');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSend = async (id: string) => {
+    try {
+      await api.transfers.send(id);
+      notifySuccess('Transfer jo\'natildi');
+      loadTransfers();
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Transferni jo\'natishda xatolik');
+    }
+  };
+
+  const handleReceive = async (id: string) => {
+    try {
+      await api.transfers.receive(id);
+      notifySuccess('Transfer qabul qilindi va qoldiqlar yangilandi');
+      loadTransfers();
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Transferni qabul qilishda xatolik');
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Link href="/inventory">
+            <Button variant="ghost" size="icon">
+              <FontAwesomeIcon icon={faArrowLeft} />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+              Do&apos;konlararo transferlar
+            </h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Filiallar va savdo nuqtalari o&apos;rtasida mahsulot harakati
+            </p>
+          </div>
+        </div>
+
+        <Button
+          variant="primary"
+          onClick={openCreateModal}
+          leftIcon={<FontAwesomeIcon icon={faPlus} />}
+          className="font-bold shadow-md shadow-blue-500/20"
+        >
+          Yangi transfer
+        </Button>
+      </div>
+
+      <Card padding={false}>
+        {isLoading ? (
+          <div className="h-64 flex items-center justify-center">
+            <LoadingSpinner size="lg" text="Transferlar yuklanmoqda..." />
+          </div>
+        ) : transfers.length === 0 ? (
+          <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
+            <FontAwesomeIcon icon={faRightLeft} className="text-4xl text-gray-300 mb-3" />
+            <p className="text-base font-bold text-gray-700">Transferlar topilmadi</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Do&apos;konlar orasida tovar jo&apos;natish uchun &quot;Yangi transfer&quot; tugmasini bosing
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
+                  <th className="py-3.5 px-4">Jo&apos;natuvchi do&apos;kon</th>
+                  <th className="py-3.5 px-4">Qabul qiluvchi do&apos;kon</th>
+                  <th className="py-3.5 px-4 text-center">Tovarlar soni</th>
+                  <th className="py-3.5 px-4">Sana</th>
+                  <th className="py-3.5 px-4 text-center">Holat</th>
+                  <th className="py-3.5 px-4 text-right">Amallar</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {transfers.map((t) => (
+                  <tr key={t.id} className="hover:bg-gray-50/70 transition">
+                    <td className="py-3.5 px-4 font-bold text-gray-900">
+                      {t.fromStore?.name || 'Do\'kon A'}
+                    </td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900">
+                      {t.toStore?.name || 'Do\'kon B'}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-bold text-blue-600">
+                      {t.items?.length || 0} ta
+                    </td>
+                    <td className="py-3.5 px-4 text-gray-500">
+                      {formatDate(t.createdAt, true)}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      {t.status === 'received' ? (
+                        <Badge variant="success" size="sm">
+                          Qabul qilingan
+                        </Badge>
+                      ) : t.status === 'sent' ? (
+                        <Badge variant="info" size="sm">
+                          Yo&apos;lda (Jo&apos;natilgan)
+                        </Badge>
+                      ) : (
+                        <Badge variant="warning" size="sm">
+                          Qoralama
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-right space-x-1">
+                      {t.status === 'draft' && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleSend(t.id)}
+                          leftIcon={<FontAwesomeIcon icon={faPaperPlane} />}
+                        >
+                          Jo&apos;natish
+                        </Button>
+                      )}
+                      {t.status === 'sent' && (
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={() => handleReceive(t.id)}
+                          leftIcon={<FontAwesomeIcon icon={faInbox} />}
+                        >
+                          Qabul qilish
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      {/* Transfer Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Yangi do'konlararo transfer"
+        size="lg"
+      >
+        <form onSubmit={handleCreateTransfer} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="Qaysi do'kondan (Chiqim) *"
+              value={fromStoreId}
+              onChange={(e) => setFromStoreId(e.target.value)}
+              options={stores.map((s) => ({ value: s.id, label: s.name }))}
+            />
+
+            <Select
+              label="Qaysi do'konga (Kirim) *"
+              value={toStoreId}
+              onChange={(e) => setToStoreId(e.target.value)}
+              options={stores.map((s) => ({ value: s.id, label: s.name }))}
+            />
+          </div>
+
+          <Input
+            label="Izoh (ixtiyoriy)"
+            placeholder="Transfer sababi"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-gray-700">Mahsulotlar</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddItem}
+                leftIcon={<FontAwesomeIcon icon={faPlus} />}
+              >
+                Qo&apos;shish
+              </Button>
+            </div>
+
+            <div className="space-y-2 border border-gray-200 rounded-xl p-3 bg-gray-50 max-h-52 overflow-y-auto">
+              {items.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-gray-200">
+                  <div className="flex-1">
+                    <select
+                      value={item.productId}
+                      onChange={(e) => {
+                        const updated = [...items];
+                        updated[idx].productId = e.target.value;
+                        setItems(updated);
+                      }}
+                      className="w-full text-xs font-semibold bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-hidden"
+                    >
+                      {products.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.unit})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="w-24">
+                    <input
+                      type="number"
+                      placeholder="Miqdor"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const updated = [...items];
+                        updated[idx].quantity = parseFloat(e.target.value) || 1;
+                        setItems(updated);
+                      }}
+                      className="w-full text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg p-2 text-center focus:outline-hidden"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem(idx)}
+                    className="p-2 text-gray-400 hover:text-red-500"
+                  >
+                    <FontAwesomeIcon icon={faTrash} className="text-xs" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              disabled={isSaving}
+            >
+              Bekor qilish
+            </Button>
+            <Button type="submit" variant="primary" isLoading={isSaving} className="font-bold">
+              Yaratish
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+}

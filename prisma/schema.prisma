@@ -1,0 +1,468 @@
+// Prisma schema for Shuni POS
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Organization and Auth
+model Organization {
+  id               String   @id @default(uuid())
+  name             String
+  tin              String?  @unique
+  phone            String
+  currencyCode     String   @default("UZS")
+  timezone         String   @default("Asia/Tashkent")
+  allowNegativeStock Boolean @default(false)
+  receiptFooter    String?
+  createdAt        DateTime @default(now())
+  
+  users            OrganizationUser[]
+  stores           Store[]
+  categories       Category[]
+  products         Product[]
+  customers        Customer[]
+  suppliers        Supplier[]
+  stockDocuments   StockDocument[]
+  stockTransfers   StockTransfer[]
+  sales            Sale[]
+  payments         Payment[]
+  discountPolicies DiscountPolicy[]
+  auditLogs        AuditLog[]
+}
+
+model User {
+  id             String   @id @default(uuid())
+  fullName       String
+  phone          String   @unique
+  email          String?  @unique
+  passwordHash   String
+  isActive       Boolean  @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime @default(now())
+  
+  organizationUsers OrganizationUser[]
+  createdStockDocuments    StockDocument[] @relation("CreatedBy")
+  confirmedStockDocuments  StockDocument[] @relation("ConfirmedBy")
+  createdStockTransfers    StockTransfer[] @relation("CreatedBy")
+  cashMovements           CashMovement[]
+  sales                   Sale[] @relation("Cashier")
+  voidedSales             Sale[] @relation("VoidedBy")
+  payments                Payment[] @relation("ReceivedBy")
+  saleReturns             SaleReturn[] @relation("ProcessedBy")
+  auditLogs               AuditLog[]
+  inventoryMovements      InventoryMovement[] @relation("InventoryMovementCreator")
+}
+
+model OrganizationUser {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  role           String   // owner, admin, cashier
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userStores     UserStore[]
+  shifts         Shift[]
+  
+  @@unique([organizationId, userId])
+}
+
+model Store {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  address        String?
+  phone          String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userStores     UserStore[]
+  registers      Register[]
+  stockDocuments StockDocument[]
+  inventoryBalances InventoryBalance[]
+  inventoryMovements InventoryMovement[]
+  fromStockTransfers StockTransfer[] @relation("FromStore")
+  toStockTransfers   StockTransfer[] @relation("ToStore")
+  sales          Sale[]
+  payments       Payment[]
+}
+
+model UserStore {
+  organizationUserId String
+  storeId            String
+  
+  organizationUser   OrganizationUser @relation(fields: [organizationUserId], references: [id], onDelete: Cascade)
+  store              Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  @@unique([organizationUserId, storeId])
+}
+
+model Register {
+  id        String   @id @default(uuid())
+  storeId   String
+  name      String
+  code      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  store     Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  shifts    Shift[]
+  sales     Sale[]
+  
+  @@unique([storeId, code])
+}
+
+// Catalog
+model Category {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  products       Product[]
+  
+  @@unique([organizationId, name])
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  organizationId String
+  categoryId     String?
+  name           String
+  sku            String   @unique
+  barcode        String   @unique
+  unit           String   // dona, kg, litr, etc.
+  salePrice      Decimal  @db.Decimal(14, 2)
+  costPrice      Decimal  @db.Decimal(14, 2)
+  minStock       Decimal  @db.Decimal(14, 3) @default(0)
+  imageUrl       String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category       Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  stockDocumentItems StockDocumentItem[]
+  stockTransferItems   StockTransferItem[]
+  inventoryMovements   InventoryMovement[]
+  inventoryBalances    InventoryBalance[]
+  saleItems             SaleItem[]
+  saleReturnItems       SaleReturnItem[]
+}
+
+model Customer {
+  id             String   @id @default(uuid())
+  organizationId String
+  fullName       String
+  phone          String
+  address        String?
+  note           String?
+  creditLimit    Decimal  @db.Decimal(14, 2) @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sales          Sale[]
+  payments       Payment[]
+  
+  @@index([phone])
+}
+
+model Supplier {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  phone          String?
+  tin            String?
+  address        String?
+  note           String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  stockDocuments StockDocument[]
+}
+
+// Inventory
+model StockDocument {
+  id             String   @id @default(uuid())
+  organizationId String
+  storeId        String
+  supplierId     String?
+  documentType   String   // purchase, adjustment, transfer_out, transfer_in, return_in
+  documentNo     String
+  status         String   @default("draft") // draft, confirmed
+  note           String?
+  createdBy      String
+  confirmedBy    String?
+  confirmedAt    DateTime?
+  createdAt      DateTime @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  store          Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier       Supplier?    @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  creator        User         @relation("CreatedBy", fields: [createdBy], references: [id])
+  confirmer      User?        @relation("ConfirmedBy", fields: [confirmedBy], references: [id])
+  items          StockDocumentItem[]
+}
+
+model StockDocumentItem {
+  id              String   @id @default(uuid())
+  stockDocumentId String
+  productId       String
+  quantity        Decimal  @db.Decimal(14, 3)
+  unitCost        Decimal  @db.Decimal(14, 2)
+  note            String?
+  createdAt       DateTime @default(now())
+  
+  stockDocument   StockDocument @relation(fields: [stockDocumentId], references: [id], onDelete: Cascade)
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model InventoryMovement {
+  id             String   @id @default(uuid())
+  organizationId String
+  storeId        String
+  productId      String
+  movementType   String   // sale, return, stock_document
+  quantityDelta  Decimal  @db.Decimal(14, 3)
+  unitCost       Decimal  @db.Decimal(14, 2)
+  sourceType     String   // sale, return, stock_document
+  sourceId       String
+  occurredAt     DateTime @default(now())
+  createdBy      String
+  note           String?
+  
+  store          Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  creator        User         @relation("InventoryMovementCreator", fields: [createdBy], references: [id])
+}
+
+model InventoryBalance {
+  storeId   String
+  productId String
+  quantity  Decimal @db.Decimal(14, 3) @default(0)
+  updatedAt DateTime @updatedAt
+  
+  store    Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@id([storeId, productId])
+}
+
+model StockTransfer {
+  id             String   @id @default(uuid())
+  organizationId String
+  fromStoreId    String
+  toStoreId      String
+  status         String   @default("draft") // draft, sent, received
+  note           String?
+  createdBy      String
+  sentAt         DateTime?
+  receivedAt     DateTime?
+  createdAt      DateTime @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fromStore      Store        @relation("FromStore", fields: [fromStoreId], references: [id], onDelete: Cascade)
+  toStore        Store        @relation("ToStore", fields: [toStoreId], references: [id], onDelete: Cascade)
+  creator        User         @relation("CreatedBy", fields: [createdBy], references: [id])
+  items          StockTransferItem[]
+}
+
+model StockTransferItem {
+  id              String   @id @default(uuid())
+  stockTransferId String
+  productId       String
+  quantity        Decimal  @db.Decimal(14, 3)
+  unitCost        Decimal  @db.Decimal(14, 2)
+  
+  stockTransfer   StockTransfer @relation(fields: [stockTransferId], references: [id], onDelete: Cascade)
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Sales and POS
+model Shift {
+  id               String   @id @default(uuid())
+  registerId       String
+  organizationUserId String
+  openedAt         DateTime @default(now())
+  openingCash      Decimal  @db.Decimal(14, 2)
+  closedAt         DateTime?
+  expectedCash     Decimal? @db.Decimal(14, 2)
+  countedCash      Decimal? @db.Decimal(14, 2)
+  cashDifference   Decimal? @db.Decimal(14, 2)
+  status           String   @default("open") // open, closed
+  note             String?
+  
+  register         Register         @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  organizationUser OrganizationUser @relation(fields: [organizationUserId], references: [id], onDelete: Cascade)
+  cashMovements    CashMovement[]
+  sales            Sale[]
+  payments         Payment[]
+  
+  @@index([organizationUserId])
+}
+
+model CashMovement {
+  id           String   @id @default(uuid())
+  shiftId      String
+  movementType String   // cash_in, cash_out
+  amount       Decimal  @db.Decimal(14, 2)
+  reason       String
+  createdBy    String
+  createdAt    DateTime @default(now())
+  
+  shift        Shift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  creator      User  @relation(fields: [createdBy], references: [id])
+}
+
+model Sale {
+  id             String   @id @default(uuid())
+  organizationId String
+  storeId        String
+  registerId     String
+  shiftId        String
+  cashierId      String
+  customerId     String?
+  receiptNo      String
+  status         String   @default("draft") // draft, completed, voided, partially_returned, returned
+  subtotal       Decimal  @db.Decimal(14, 2)
+  discountAmount Decimal  @db.Decimal(14, 2) @default(0)
+  totalAmount    Decimal  @db.Decimal(14, 2)
+  note           String?
+  completedAt    DateTime?
+  voidedAt       DateTime?
+  voidedBy       String?
+  createdAt      DateTime @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  store          Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  register       Register     @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  shift          Shift        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  cashier        User         @relation("Cashier", fields: [cashierId], references: [id])
+  customer       Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  voider         User?        @relation("VoidedBy", fields: [voidedBy], references: [id])
+  items          SaleItem[]
+  payments       Payment[]
+  saleReturns    SaleReturn[]
+  
+  @@unique([registerId, receiptNo])
+}
+
+model SaleItem {
+  id             String   @id @default(uuid())
+  saleId         String
+  productId      String
+  productName    String
+  sku            String
+  quantity       Decimal  @db.Decimal(14, 3)
+  unitPrice      Decimal  @db.Decimal(14, 2)
+  discountAmount Decimal  @db.Decimal(14, 2) @default(0)
+  lineTotal      Decimal  @db.Decimal(14, 2)
+  unitCost       Decimal  @db.Decimal(14, 2)
+  createdAt      DateTime @default(now())
+  
+  sale           Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  saleReturnItems SaleReturnItem[]
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  organizationId String
+  storeId        String
+  shiftId        String?
+  saleId         String?
+  customerId     String?
+  paymentType    String   // cash, card, transfer, credit
+  direction      String   // in, out
+  amount         Decimal  @db.Decimal(14, 2)
+  referenceNo    String?
+  paidAt         DateTime @default(now())
+  receivedBy     String
+  note           String?
+  createdAt      DateTime @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  store          Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  shift          Shift?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  sale           Sale?        @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  customer       Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  receiver       User         @relation("ReceivedBy", fields: [receivedBy], references: [id])
+}
+
+model SaleReturn {
+  id              String   @id @default(uuid())
+  saleId          String
+  returnReceiptNo String
+  status          String   @default("completed") // completed
+  refundAmount    Decimal  @db.Decimal(14, 2)
+  reason          String?
+  processedBy     String
+  returnedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  
+  sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  processor       User     @relation("ProcessedBy", fields: [processedBy], references: [id])
+  items           SaleReturnItem[]
+}
+
+model SaleReturnItem {
+  id              String   @id @default(uuid())
+  saleReturnId    String
+  saleItemId      String
+  productId       String
+  quantity        Decimal  @db.Decimal(14, 3)
+  unitPrice       Decimal  @db.Decimal(14, 2)
+  lineTotal       Decimal  @db.Decimal(14, 2)
+  
+  saleReturn      SaleReturn @relation(fields: [saleReturnId], references: [id], onDelete: Cascade)
+  saleItem        SaleItem   @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
+  product         Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Control and Service
+model DiscountPolicy {
+  id                       String   @id @default(uuid())
+  organizationId           String
+  cashierMaxPercent        Decimal  @db.Decimal(5, 2) @default(0)
+  adminMaxPercent          Decimal  @db.Decimal(5, 2) @default(100)
+  requireReasonFromPercent Decimal  @db.Decimal(5, 2) @default(10)
+  isActive                 Boolean  @default(true)
+  updatedAt                DateTime @updatedAt
+  
+  organization             Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  organizationId String
+  actorId     String?
+  entityType  String
+  entityId    String
+  action      String
+  beforeData  Json?
+  afterData   Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
