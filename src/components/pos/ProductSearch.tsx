@@ -11,6 +11,7 @@ import {
   faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import CameraBarcodeScanner from '@/components/pos/CameraBarcodeScanner';
 
 interface ProductSearchProps {
   products: Product[];
@@ -20,6 +21,7 @@ interface ProductSearchProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onSelectProduct: (product: Product) => void;
+  onCameraScan: (barcode: string) => void | Promise<void>;
   isLoading: boolean;
 }
 
@@ -31,6 +33,7 @@ export default function ProductSearch({
   searchQuery,
   onSearchChange,
   onSelectProduct,
+  onCameraScan,
   isLoading,
 }: ProductSearchProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -65,32 +68,39 @@ export default function ProductSearch({
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Top: Search & Barcode input */}
-      <div className="relative">
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 pointer-events-none">
-          <FontAwesomeIcon icon={faSearch} className="text-sm" />
-          <span className="text-gray-200">|</span>
-          <FontAwesomeIcon icon={faBarcode} className="text-sm" />
+      <div className="flex items-center gap-2">
+        <div className="relative min-w-0 flex-1">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 pointer-events-none">
+            <FontAwesomeIcon icon={faSearch} className="text-sm" />
+            <span className="text-gray-200">|</span>
+            <FontAwesomeIcon icon={faBarcode} className="text-sm" />
+          </div>
+
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Mahsulot nomi yoki barkod..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-white text-gray-900 border border-gray-200 rounded-2xl pl-16 pr-4 py-3 text-sm shadow-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+          />
+
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchChange('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-100 px-2 py-1 rounded-lg"
+            >
+              Tozalash
+            </button>
+          )}
         </div>
 
-        <input
-          ref={searchInputRef}
-          type="text"
-          placeholder="Mahsulot nomi, SKU yoki barkodni skaner qiling..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="w-full bg-white text-gray-900 border border-gray-200 rounded-2xl pl-16 pr-4 py-3 text-sm shadow-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+        <CameraBarcodeScanner
+          onDetected={onCameraScan}
+          className="shrink-0 border border-gray-200 bg-white p-3 text-base shadow-xs"
         />
-
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => onSearchChange('')}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-100 px-2 py-1 rounded-lg"
-          >
-            Tozalash
-          </button>
-        )}
       </div>
 
       {/* Category Pills Bar */}

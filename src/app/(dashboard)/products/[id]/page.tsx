@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import CameraBarcodeScanner from '@/components/pos/CameraBarcodeScanner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '@/context/NotificationContext';
@@ -173,12 +174,19 @@ export default function ProductDetailPage() {
               onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
               required
             />
-            <Input
-              label="Barkod *"
-              value={formData.barcode}
-              onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-              required
-            />
+            <div className="relative">
+              <Input
+                label="Barkod *"
+                value={formData.barcode}
+                onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                className="pr-11"
+                required
+              />
+              <CameraBarcodeScanner
+                onDetected={(barcode) => setFormData((current) => ({ ...current, barcode }))}
+                className="absolute right-1 top-7 p-2"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

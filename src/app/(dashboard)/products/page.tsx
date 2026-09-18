@@ -14,6 +14,7 @@ import Select from '@/components/ui/Select';
 import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import CameraBarcodeScanner from '@/components/pos/CameraBarcodeScanner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -210,17 +211,24 @@ export default function ProductsPage() {
       {/* Filter Bar */}
       <Card padding={false} className="p-4">
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="relative flex-1 w-full">
-            <input
-              type="text"
-              placeholder="Nom, SKU yoki barkod bo'yicha qidirish..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-hidden focus:border-blue-500"
-            />
-            <FontAwesomeIcon
-              icon={faSearch}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+          <div className="flex w-full flex-1 items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <input
+                type="text"
+                placeholder="Nom, SKU yoki barkod bo'yicha qidirish..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-hidden focus:border-blue-500"
+              />
+              <FontAwesomeIcon
+                icon={faSearch}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+              />
+            </div>
+
+            <CameraBarcodeScanner
+              onDetected={(barcode) => setSearchQuery(barcode)}
+              className="shrink-0 border border-gray-200 bg-gray-50 p-2.5 text-base"
             />
           </div>
 
@@ -342,13 +350,20 @@ export default function ProductsPage() {
               required
             />
 
-            <Input
-              label="Barkod *"
-              placeholder="478000123456"
-              value={formData.barcode}
-              onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-              required
-            />
+            <div className="relative">
+              <Input
+                label="Barkod *"
+                placeholder="478000123456"
+                value={formData.barcode}
+                onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                className="pr-11"
+                required
+              />
+              <CameraBarcodeScanner
+                onDetected={(barcode) => setFormData((current) => ({ ...current, barcode }))}
+                className="absolute right-1 top-7 p-2"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

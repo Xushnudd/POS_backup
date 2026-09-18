@@ -108,6 +108,24 @@ export default function PosPage() {
     setIsPaymentModalOpen(true);
   };
 
+  const handleCameraBarcode = async (barcode: string) => {
+    if (!organization?.id) return;
+
+    try {
+      const response = await api.products.findByBarcode(organization.id, barcode);
+      if (!response.data) {
+        notifyError('Barkod bo‘yicha mahsulot topilmadi');
+        return;
+      }
+
+      addItem(response.data);
+      setSearchQuery('');
+      notifySuccess(`${response.data.name} savatga qo‘shildi`);
+    } catch (error: unknown) {
+      notifyError(error instanceof Error ? error.message : 'Barkod bo‘yicha mahsulot topilmadi');
+    }
+  };
+
   // Process and complete sale
   const handleProcessPayment = async (
     payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[]
@@ -221,6 +239,7 @@ export default function PosPage() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onSelectProduct={addItem}
+            onCameraScan={handleCameraBarcode}
             isLoading={isLoadingProducts}
           />
         </div>
