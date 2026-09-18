@@ -117,6 +117,11 @@ class ApiClient {
 
     get: (id: string) => this.request<Product>(`/products/${id}`),
 
+    findByBarcode: (organizationId: string, barcode: string) => {
+      const query = new URLSearchParams({ organizationId, barcode });
+      return this.request<Product>(`/products?${query.toString()}`);
+    },
+
     create: (data: Partial<Product>) =>
       this.request<Product>('/products', {
         method: 'POST',
