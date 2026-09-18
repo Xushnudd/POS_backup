@@ -9,6 +9,12 @@
     "lint": "eslint",
     "postinstall": "prisma generate || exit 0"
   },
+  "onlyBuiltDependencies": [
+    "@prisma/client",
+    "@prisma/engines",
+    "prisma",
+    "unrs-resolver"
+  ],
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",
     "@fortawesome/free-regular-svg-icons": "^7.3.1",
