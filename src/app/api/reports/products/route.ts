@@ -1,3 +1,5 @@
+import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
+import { consumeLimit } from '@/server/auth/rate-limit'
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { withApi } from '@/server/api'
@@ -29,6 +31,17 @@ export const GET=withApi(async(request:NextRequest)=>{
   WHERE s."organizationId"=${context.organizationId} ${stores} ${storeFilter} ${categoryFilter} ${returnsRange}
  ), totals AS (SELECT "productId",sum(quantity) AS quantity,sum(revenue) AS revenue,sum(cost) AS cost FROM movements GROUP BY "productId")`
  type Stat={id:string;name:string;sku:string;quantitySold:Prisma.Decimal;revenue:Prisma.Decimal;cost:Prisma.Decimal}
+ if(params.get('format')==='csv'){
+  if(context.role==='cashier')throw new AccessError(403,'FORBIDDEN')
+  await consumeLimit('report.export',context.organizationId+':'+context.userId,10,60000)
+  const data=await prisma.$transaction(async tx=>{
+   const count=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`${cte} SELECT count(*) FROM totals`)
+   if(Number(count[0].count)>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; davrni toraytiring')
+   const rows=await tx.$queryRaw<Stat[]>(Prisma.sql`${cte} SELECT p.id,p.name,p.sku,t.quantity AS "quantitySold",t.revenue,t.cost FROM totals t JOIN "Product" p ON p.id=t."productId" ORDER BY t.revenue DESC,p.id LIMIT ${EXPORT_CAP}`)
+   return {filename:'product-report-'+context.organizationId+'.csv',content:csv([['Vaqt zonasi',org.timezone],['Davr boshi',params.get('startDate')],['Davr oxiri',params.get('endDate')],['ID','Mahsulot','SKU','Sof miqdor','Sof tovar tushumi','Tarixiy tannarx','Yalpi foyda'],...rows.map(row=>[row.id,row.name,row.sku,numeric(row.quantitySold,6),numeric(row.revenue),numeric(row.cost,6),numeric(row.revenue.sub(row.cost))])])}
+  },{isolationLevel:'RepeatableRead'})
+  return NextResponse.json({success:true,data})
+ }
  const [rows,count]=await prisma.$transaction([
   prisma.$queryRaw<Stat[]>(Prisma.sql`${cte} SELECT p.id,p.name,p.sku,t.quantity AS "quantitySold",t.revenue,t.cost FROM totals t JOIN "Product" p ON p.id=t."productId" ORDER BY t.revenue DESC,p.id LIMIT ${limit} OFFSET ${(page-1)*limit}`),
   prisma.$queryRaw<{count:bigint}[]>(Prisma.sql`${cte} SELECT count(*) FROM totals`),

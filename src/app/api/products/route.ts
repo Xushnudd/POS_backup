@@ -1,3 +1,5 @@
+import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
+import { consumeLimit } from '@/server/auth/rate-limit'
 import { amountSchema } from '@/server/sales/service'
 import { nonnegativeQuantitySchema } from '@/server/catalog/service'
 import { Prisma } from '@prisma/client'
@@ -56,6 +58,7 @@ async function handleGET(request: NextRequest) {
       )
     }
 
+    if(searchParams.get('format')==='csv'&&barcode)throw new AccessError(400,'INVALID_FILTER')
     // Search by barcode
     if (barcode) {
       const product = await db.product.findFirst({
@@ -99,6 +102,18 @@ async function handleGET(request: NextRequest) {
 
     if (categoryId) {
       where.categoryId = categoryId
+    }
+
+    if(searchParams.get('format')==='csv'){
+      if(payload.role==='cashier')throw new AccessError(403,'FORBIDDEN')
+      await consumeLimit('catalog.export',payload.organizationId+':'+payload.userId,10,60000)
+      const data=await db.$transaction(async tx=>{
+        const total=await tx.product.count({where})
+        if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
+        const rows=await tx.product.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,costPrice:true,minStock:true,category:{select:{name:true}},barcodes:{select:{value:true},orderBy:{value:'asc'}}}})
+        return {filename:'products-'+payload.organizationId+'.csv',content:csv([['ID','Mahsulot','SKU','Asosiy barkod','Qo‘shimcha barkodlar','Birlik','Kategoriya','Sotuv narxi','Tannarx','Minimal qoldiq'],...rows.map(row=>[row.id,row.name,row.sku,row.barcode,row.barcodes.map(code=>code.value).join(' | '),row.unit,row.category?.name,numeric(row.salePrice),numeric(row.costPrice,6),numeric(row.minStock,6)])])}
+      },{isolationLevel:'RepeatableRead'})
+      return NextResponse.json({success:true,data})
     }
 
     const [products, total] = await Promise.all([

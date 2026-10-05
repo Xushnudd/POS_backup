@@ -1,5 +1,6 @@
 'use client';
 
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -182,6 +183,7 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{})}} label="Katalogni CSV yuklash"/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

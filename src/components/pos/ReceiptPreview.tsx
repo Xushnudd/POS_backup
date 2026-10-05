@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 import { Sale } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
 import { useAuth } from '@/context/AuthContext';
@@ -13,20 +14,31 @@ interface ReceiptPreviewProps {
   isOpen: boolean;
   onClose: () => void;
   sale: Sale | null;
+  copy?:boolean;
 }
 
 export default function ReceiptPreview({
   isOpen,
   onClose,
   sale,
+  copy=false,
 }: ReceiptPreviewProps) {
   const { organization, user } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
+  const [width,setWidth]=useState('80');
+  const [printRequested,setPrintRequested]=useState(false);
 
   if (!sale) return null;
 
   const handlePrint = () => {
-    window.print();
+    // This records only a browser print request, never hardware confirmation.
+    if(!printRef.current)return;
+    setPrintRequested(true);
+    const frame=document.createElement('iframe');frame.title='Chek chop etish';frame.style.cssText='position:fixed;width:0;height:0;border:0;';
+    const paper=Number(width)===58?58:80;
+    frame.srcdoc=`<!doctype html><html lang="uz"><head><meta charset="utf-8"><title>POS chek</title><style>@page{size:${paper}mm 297mm;margin:2mm}body{margin:0;font:11px monospace;color:#111}#printable-receipt{width:${paper-4}mm!important;max-width:none!important;padding:0!important;border:0!important}p{margin:3px 0}h2{font-size:14px}.flex{display:flex}.flex-col{flex-direction:column}.justify-between{justify-content:space-between}.text-center{text-align:center}.font-bold,.font-black{font-weight:bold}.break-words{overflow-wrap:anywhere}.flex-1{flex:1}.border-b{border-bottom:1px dashed #aaa}.py-2\\.5,.py-3{padding:6px 0}.space-y-2>div{margin:5px 0}svg{display:none}</style></head><body>${printRef.current.outerHTML}</body></html>`;
+    frame.onload=()=>{frame.contentWindow?.addEventListener('afterprint',()=>frame.remove(),{once:true});frame.contentWindow?.focus();frame.contentWindow?.print();};
+    document.body.append(frame);setTimeout(()=>frame.remove(),120000);
   };
 
   return (
@@ -56,13 +68,18 @@ export default function ReceiptPreview({
         </div>
       }
     >
+      <Select label="Chek qog‘ozi eni" value={width} options={[{value:'58',label:'58 mm'},{value:'80',label:'80 mm'}]} onChange={event=>setWidth(event.target.value)}/>
+      <p className="text-xs text-slate-500 mb-3">Brauzer orqali chop etish/PDF. Printer sozlamasida mos qog‘ozni tanlang. Bu fiskal chek emas.</p>
+      {printRequested&&<p role="status" className="text-xs">Chop etish oynasi so‘raldi; fizik chop etilganligi tasdiqlanmaydi.</p>}
       {/* Printable Receipt Paper */}
       <div
         ref={printRef}
         id="printable-receipt"
         className="bg-white p-6 border border-dashed border-gray-300 rounded-xl max-w-sm mx-auto font-mono text-xs text-gray-800"
+        style={{width:width+'mm',maxWidth:'100%'}}
       >
         {/* Header */}
+        <p className="text-center font-bold">{copy?'CHEK NUSXASI':'SAVDO CHEKI'} · FISKAL EMAS</p>
         <div className="text-center pb-3 border-b border-dashed border-gray-300">
           <h2 className="text-base font-black uppercase text-gray-900 tracking-wider">
             {organization?.name || 'SHUNI POS'}
@@ -87,7 +104,7 @@ export default function ReceiptPreview({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Kassir:</span>
-            <span>{user?.fullName || 'Kassir'}</span>
+            <span>{sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:'Chekdagi kassir ID: '+sale.cashierId)}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between">
@@ -107,7 +124,7 @@ export default function ReceiptPreview({
             {sale.items.map((item, idx) => (
               <div key={idx} className="flex flex-col text-[11px]">
                 <div className="flex justify-between font-medium text-gray-900">
-                  <span className="truncate max-w-[200px]">{item.productName}</span>
+                  <span className="break-words min-w-0 flex-1">{item.productName}</span>
                   <span className="font-bold">{formatMoney(item.lineTotal)}</span>
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-500">
@@ -156,7 +173,7 @@ export default function ReceiptPreview({
               };
               return (
                 <div key={idx} className="flex justify-between text-gray-700">
-                  <span>{pTypeLabels[p.paymentType] || p.paymentType}:</span>
+                  <span>{pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?'chiqim':'kirim'}):</span>
                   <span className="font-semibold">{formatMoney(p.amount)}</span>
                 </div>
               );

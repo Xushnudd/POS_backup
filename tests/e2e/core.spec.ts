@@ -12,6 +12,7 @@ test.afterAll(async()=>{
  await db.$disconnect()
 })
 test('Production HTTPS: register, open shift, restore local basket and sell cash exactly once',async({page})=>{
+ await page.addInitScript(()=>{window.print=()=>{};})
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message))
  const phone='998'+Date.now(),password='test-only-password';phones.push(phone)
  await page.goto('/register')
@@ -39,6 +40,10 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await expect(page.getByRole('dialog')).toBeVisible()
  await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).click()
  await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.keyboard.press('F9');await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.keyboard.press('F2');await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toBeFocused()
+ await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('no-such-product')
+ await page.keyboard.press('F4');await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toHaveValue('')
  await page.getByRole('heading',{name:'Browser coffee',exact:true}).click()
  await expect(page.getByRole('button',{name:"To'lovga o'tish"})).toBeEnabled()
  // Wait for IndexedDB commit rather than an arbitrary UI delay.
@@ -49,7 +54,10 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  })).toBe(true)
  await page.reload()
  await expect(page.getByRole('button',{name:"To'lovga o'tish"})).toBeEnabled()
- await page.getByRole('button',{name:"To'lovga o'tish"}).click()
+ await page.keyboard.press('F9')
+ await expect(page.getByRole('dialog')).toBeVisible()
+ await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.keyboard.press('F9')
  await page.getByRole('button',{name:'Nasiya / Qarz',exact:true}).click()
  await page.getByLabel('Nasiya to‘lash muddati (ixtiyoriy)',{exact:true}).fill('2030-01-01')
  await page.getByRole('button',{name:'Aralash',exact:true}).click()
@@ -68,6 +76,17 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  expect(sale.totalAmount.toString()).toBe('100.25');expect(sale.payments.length).toBe(1);expect(sale.payments[0].amount.toString()).toBe('100.25')
  expect(sale.items[0].unit).toBe('dona')
  await page.goto(`/sales/${sale.id}`)
+ await page.getByRole('button',{name:'Chekni chop etish',exact:true}).click()
+ await expect(page.locator('#printable-receipt')).toContainText('CHEK NUSXASI')
+ for(const paper of ['58','80']){
+  await page.getByLabel('Chek qog‘ozi eni',{exact:true}).selectOption(paper)
+  await page.getByRole('dialog').getByRole('button',{name:'Chekni chop etish',exact:true}).click()
+  const frame=page.locator('iframe[title="Chek chop etish"]').last()
+  await expect(frame).toBeAttached()
+  const document=await frame.getAttribute('srcdoc');expect(document).toContain(`size:${paper}mm 297mm`);expect(document).toContain('CHEK NUSXASI');expect(document).toContain(sale.receiptNo)
+  const pdfPage=await page.context().newPage();await pdfPage.setContent(document!);const pdf=await pdfPage.pdf({preferCSSPageSize:true});expect(pdf.subarray(0,4).toString()).toBe('%PDF');await pdfPage.close()
+ }
+ await page.getByRole('dialog').getByRole('button',{name:'Yangi savdo',exact:true}).click()
  await page.getByRole('button',{name:'Qaytarish',exact:true}).click()
  const disposition=page.getByLabel(`${sale.items[0].productName}: qaytarilgan tovar holati`,{exact:true})
  await expect(disposition).toHaveValue('sellable')
@@ -263,6 +282,13 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await page.getByRole('button',{name:'Filtrlash',exact:true}).click()
  await expect(page.getByRole('row').filter({hasText:'SaleReturn'})).toHaveCount(1)
  await expect(page.getByRole('row').filter({hasText:'SaleReturn'})).toContainText('Browser Owner')
+ for(const [path,label,contains] of [['/products','Katalogni CSV yuklash','Browser coffee'],['/customers','Mijozlarni CSV yuklash','Browser debtor']] as const){
+  await page.goto(path);const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:label,exact:true}).click();const download=await downloadPromise;const stream=await download.createReadStream();const chunks:Buffer[]=[];for await(const chunk of stream!)chunks.push(Buffer.from(chunk));expect(Buffer.concat(chunks).toString('utf8')).toContain(contains)
+ }
+ await page.goto('/reports')
+ for(const tab of ['Savdolar hisoboti','Mahsulotlar hisoboti']){
+  await page.getByRole('button',{name:tab,exact:true}).click();const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'To‘liq hisobotni CSV yuklash',exact:true}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/report-.*\.csv$/)
+ }
  const secondContext=await page.context().browser()!.newContext({ignoreHTTPSErrors:true})
  try{
   const login=await secondContext.request.post('https://localhost:3100/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}});expect(login.ok()).toBe(true)
@@ -285,5 +311,13 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  expect((await page.request.get('/api/auth/me')).status()).toBe(401)
  expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}})).status()).toBe(401)
  expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:'browser-new-password'}})).ok()).toBe(true)
+ await page.goto('/security')
+ const thirdContext=await page.context().browser()!.newContext({ignoreHTTPSErrors:true})
+ try{
+  expect((await thirdContext.request.post('https://localhost:3100/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:'browser-new-password'}})).ok()).toBe(true)
+  await page.getByRole('button',{name:'Barcha sessiyalardan chiqish',exact:true}).click();await expect(page).toHaveURL(/\/login$/)
+  expect((await thirdContext.request.get('https://localhost:3100/api/auth/me')).status()).toBe(401)
+  expect((await page.request.get('/api/auth/me')).status()).toBe(401)
+ }finally{await thirdContext.close()}
  expect(errors).toEqual([])
 })

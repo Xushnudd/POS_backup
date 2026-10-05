@@ -77,6 +77,8 @@ export default function ProductSearch({
           </div>
 
           <input
+            id="pos-product-search"
+            aria-label="POS mahsulot qidirish"
             ref={searchInputRef}
             type="text"
             placeholder="Mahsulot nomi yoki barkod..."

@@ -1,3 +1,4 @@
+import { newPasswordSchema } from '@/server/auth/password-policy'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
@@ -6,7 +7,7 @@ import { hashPassword, verifyPassword, getRequestToken, verifyToken } from '@/li
 import { AccessError } from '@/server/auth/policy'
 import { consumeLimit } from '@/server/auth/rate-limit'
 import { SESSION_COOKIE } from '@/server/auth/session'
-const schema=z.object({currentPassword:z.string().min(1).max(72),newPassword:z.string().min(8).max(72).refine(value=>Buffer.byteLength(value,'utf8')<=72,'Parol UTF-8 bo‘yicha 72 baytdan oshmasin')}).strict()
+const schema=z.object({currentPassword:z.string().min(1).max(72),newPassword:newPasswordSchema}).strict()
 export const POST=withApi(async(request:NextRequest)=>{
  const context=await verifyToken(getRequestToken(request)??'')
  if (!context) throw new AccessError(401,'UNAUTHORIZED')

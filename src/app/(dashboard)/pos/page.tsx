@@ -293,8 +293,31 @@ export default function PosPage() {
     finally { setIsProcessingPayment(false); }
   };
 
+  useEffect(()=>{
+    const onKey=(event:KeyboardEvent)=>{
+      if(event.repeat||event.isComposing||event.ctrlKey||event.metaKey||event.altKey||!localReady||isProcessingPayment||hasPendingCheckout)return;
+      if(event.key==='Escape'){
+        if(isPaymentModalOpen){event.preventDefault();setIsPaymentModalOpen(false);}
+        else if(isReceiptModalOpen){event.preventDefault();setIsReceiptModalOpen(false);}
+        return;
+      }
+      if(isPaymentModalOpen||isReceiptModalOpen||isOpenShiftModalOpen||document.querySelector('[role="dialog"]'))return;
+      const target=event.target as HTMLElement|null;
+      if(target&&(target.matches('input,textarea,select')||target.isContentEditable)&&target.id!=='pos-product-search')return;
+      if(event.key==='F2'){event.preventDefault();document.getElementById('pos-product-search')?.focus();}
+      if(event.key==='F4'){event.preventDefault();setSearchQuery('');setSelectedCategoryId('');document.getElementById('pos-product-search')?.focus();}
+      if(event.key==='F9'){
+        event.preventDefault();
+        if(!activeShift){setIsOpenShiftModalOpen(true);return;}
+        if(items.length)setIsPaymentModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
+  },[localReady,isProcessingPayment,hasPendingCheckout,isPaymentModalOpen,isReceiptModalOpen,isOpenShiftModalOpen,activeShift,items.length]);
+
   return (
     <div className="h-[calc(100vh-5rem)] flex flex-col gap-4">
+      <p className="text-xs text-slate-500">F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.</p>
       {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3">
         <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
         <div className="flex gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>

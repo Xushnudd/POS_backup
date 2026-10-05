@@ -1,3 +1,4 @@
+import { newPasswordSchema } from '@/server/auth/password-policy'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -10,7 +11,7 @@ const createUserSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(9),
   email: z.string().email().optional(),
-  password: z.string().min(8).max(72),
+  password: newPasswordSchema,
   role: z.enum(['owner', 'admin', 'cashier']),
   storeIds: z.array(z.string()).optional(),
 })

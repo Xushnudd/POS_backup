@@ -1,3 +1,5 @@
+import { consumeLimit } from '@/server/auth/rate-limit'
+import { newPasswordSchema } from '@/server/auth/password-policy'
 import { AccessError } from '@/server/auth/policy'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
@@ -10,7 +12,7 @@ const registerSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(9),
   email: z.string().email().optional(),
-  password: z.string().min(8).max(72),
+  password: newPasswordSchema,
   organizationName: z.string().min(2),
   tin: z.string().optional(),
 })
@@ -19,6 +21,9 @@ async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = registerSchema.parse(body)
+
+    await consumeLimit('register-account',validatedData.phone,5,15*60*1000)
+    if(process.env.TRUST_PROXY_IP==='true')await consumeLimit('register-ip',request.headers.get('x-real-ip')??'unknown',30,15*60*1000)
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({

@@ -254,6 +254,7 @@ export default function SaleDetailPage() {
 
       <ReturnHistory key={sale.id} saleId={sale.id} timezone={organization?.timezone??'Asia/Tashkent'} version={returnVersion}/>
       <ReceiptPreview
+        copy
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}
         sale={sale}

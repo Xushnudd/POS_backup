@@ -41,6 +41,7 @@ async function handleGET(
       where: { id },
       include: {
         customer: true,
+        cashier:{select:{fullName:true}},
         items: true,
         payments: true,
         register: true,

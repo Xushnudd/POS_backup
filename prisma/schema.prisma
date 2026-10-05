@@ -493,6 +493,7 @@ model AuditLog {
   
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([organizationId, createdAt(sort: Desc), id], map: "AuditLog_organization_created_id")
 }
 // Opaque tokens are only sent through an HttpOnly cookie; only SHA-256 is stored.
 model Session {

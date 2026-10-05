@@ -280,6 +280,7 @@ export interface Sale {
   registerId: string;
   shiftId: string;
   cashierId: string;
+  cashier?:{fullName:string};
   customerId?: string | null;
   customer?: Customer | null;
   receiptNo: string;

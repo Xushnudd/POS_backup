@@ -1,3 +1,4 @@
+import { newPasswordSchema } from '@/server/auth/password-policy'
 import type { Prisma } from '@prisma/client'
 import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
@@ -8,7 +9,7 @@ import { sessionHash } from '../auth/session'
 import { audit } from '../operations'
 
 export const invitationSchema=z.object({phone:z.string().min(9).max(64),role:z.enum(['admin','cashier']),storeIds:z.array(z.string().uuid()).min(1).max(100)})
-export const acceptInvitationSchema=z.object({token:z.string().regex(/^[A-Za-z0-9_-]{43}$/),fullName:z.string().min(2).max(200).optional(),password:z.string().min(8).max(72).optional()})
+export const acceptInvitationSchema=z.object({token:z.string().regex(/^[A-Za-z0-9_-]{43}$/),fullName:z.string().min(2).max(200).optional(),password:newPasswordSchema.optional()})
 async function requireOwner(tx: Prisma.TransactionClient,context:TokenPayload) {
  const member=await tx.organizationUser.findFirst({where:{id:context.organizationUserId,userId:context.userId,organizationId:context.organizationId,role:'owner',isActive:true,user:{isActive:true}}})
  const session=await tx.session.findFirst({where:{id:context.sessionId,userId:context.userId,organizationId:context.organizationId,revokedAt:null,expiresAt:{gt:new Date()},idleExpiresAt:{gt:new Date()}}})

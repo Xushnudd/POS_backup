@@ -1,3 +1,4 @@
+import { salesReportCsv } from '@/server/exports/sales-report'
 import { dateRange } from '@/server/reports/dates'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -40,6 +41,8 @@ async function handleGET(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    if(searchParams.get('format')==='csv')return NextResponse.json({success:true,data:await salesReportCsv(payload,searchParams)})
 
     const where: Prisma.SaleWhereInput = {
       organizationId,

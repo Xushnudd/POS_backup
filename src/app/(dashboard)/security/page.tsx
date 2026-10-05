@@ -42,6 +42,15 @@ export default function SecurityPage(){
   finally{setRevoking('');}
  };
  const date=(value:string)=>new Date(value).toLocaleString('uz-UZ',{timeZone:organization?.timezone});
+ const logoutAll=async()=>{
+  if(changing||!user||!organization)return;
+  setChanging(true);setPasswordError('');
+  try{
+   if((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length)throw new Error('Sinxronlanmagan amallar bor; avval ularning natijasini tekshiring');
+   await api.auth.logoutAll();await refreshUser();router.replace('/login');
+  }catch(error){setPasswordError(error instanceof Error?error.message:'Chiqish amalga oshmadi');}
+  finally{setChanging(false);}
+ };
  return <div className="space-y-4"><h1 className="text-2xl font-bold">Faol sessiyalar</h1><Card>
   <p className="text-sm mb-3">Bu ro‘yxat hisobingizning barcha bizneslardagi faol sessiyalarini ko‘rsatadi. Qurilma modeli yoki joylashuv taxmin qilinmaydi. Joriy sessiyadan chiqish uchun menyudagi Chiqish tugmasini ishlating.</p>
   {error&&<div role="alert">{error}<Button onClick={()=>setVersion(value=>value+1)}>Qayta yuklash</Button></div>}
@@ -57,5 +66,5 @@ export default function SecurityPage(){
   <Input label="Yangi parol" type="password" autoComplete="new-password" required minLength={8} maxLength={72} disabled={changing} value={newPassword} onChange={event=>setNewPassword(event.target.value)}/>
   <Input label="Yangi parolni tasdiqlash" type="password" autoComplete="new-password" required minLength={8} maxLength={72} disabled={changing} value={confirmation} onChange={event=>setConfirmation(event.target.value)}/>
   {passwordError&&<p role="alert">{passwordError}</p>}<Button type="submit" disabled={changing}>Parolni yangilash</Button>
- </form></Card></div>;
+ </form></Card><Card title="Barcha sessiyalardan chiqish"><p className="text-sm mb-3">Barcha bizneslardagi kirishlar, shu jumladan joriy sessiya ham yopiladi. Lokal amallar o‘chirilmaydi.</p><Button disabled={changing} onClick={logoutAll}>Barcha sessiyalardan chiqish</Button></Card></div>;
 }

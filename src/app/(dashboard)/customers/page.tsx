@@ -1,5 +1,6 @@
 'use client';
 
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -24,7 +25,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function CustomersPage() {
-  const { organization } = useAuth();
+  const { organization,role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -144,6 +145,7 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{})}} label="Mijozlarni CSV yuklash"/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

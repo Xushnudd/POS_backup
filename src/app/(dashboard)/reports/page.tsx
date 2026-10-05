@@ -1,5 +1,6 @@
 'use client';
 
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -13,7 +14,6 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChartLine,
-  faFileCsv,
   faBoxesStacked,
   faRotateLeft,
 } from '@fortawesome/free-solid-svg-icons';
@@ -69,50 +69,6 @@ export default function ReportsPage() {
     void Promise.resolve().then(loadReport);
   }, [loadReport]);
 
-  // CSV Export utility
-  const exportCSV = () => {
-    if (activeTab === 'sales') {
-      const rows = [
-        ['Chek raqami', 'Sana', 'Mijoz', 'Summa', 'Holat'],
-        ...salesReport.map((s) => [
-          s.receiptNo,
-          formatDate(s.completedAt || s.createdAt, true),
-          s.customer?.fullName || 'Mijozsiz',
-          s.totalAmount,
-          s.status,
-        ]),
-      ];
-      downloadCSV(rows, `savdolar_hisoboti_${startDate}_${endDate}.csv`);
-    } else {
-      const rows = [
-        ['Mahsulot', 'SKU', 'Kategoriya', 'Sotilgan miqdor', 'Tushum', 'Tannarx', 'Yalpi foyda'],
-        ...productsReport.map((p) => [
-          p.name,
-          p.sku,
-          p.category?.name || '-',
-          p.quantitySold,
-          p.revenue,
-          p.cost,
-          p.profit,
-        ]),
-      ];
-      downloadCSV(rows, `mahsulotlar_hisoboti_${startDate}_${endDate}.csv`);
-    }
-  };
-
-  const downloadCSV = (rows: Array<Array<string | number>>, filename: string) => {
-    const csvContent =
-      'data:text/csv;charset=utf-8,\uFEFF' +
-      rows.map((e) => e.map((val) => `"${val}"`).join(',')).join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
@@ -128,14 +84,7 @@ export default function ReportsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={exportCSV}
-            leftIcon={<FontAwesomeIcon icon={faFileCsv} className="text-emerald-600 text-sm" />}
-            className="font-bold"
-          >
-            CSV Eksport
-          </Button>
+          {organization&&<CsvExportButton path={activeTab==='sales'?'/reports/sales':'/reports/products'} params={{organizationId:organization.id,startDate,endDate,...(activeStore?.id?{storeId:activeStore.id}:{})}} label="To‘liq hisobotni CSV yuklash"/>}
 
           <Button
             variant="outline"
