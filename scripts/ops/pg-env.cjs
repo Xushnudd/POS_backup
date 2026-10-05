@@ -3,7 +3,7 @@ try {
 const url = new URL(process.env.POS_DATABASE_CONNECTION)
 if (!['postgres:', 'postgresql:'].includes(url.protocol)) throw new Error('PostgreSQL URL required')
 const values = {
-  PGHOST: url.hostname, PGPORT: url.port || '5432', PGDATABASE: decodeURIComponent(url.pathname.slice(1)),
+  PGHOST: url.hostname.replace(/^\[|\]$/g,''), PGPORT: url.port || '5432', PGDATABASE: decodeURIComponent(url.pathname.slice(1)),
   PGUSER: decodeURIComponent(url.username), PGPASSWORD: decodeURIComponent(url.password), PGCONNECT_TIMEOUT: '10',
 }
 const parameters = { sslmode:'PGSSLMODE', sslrootcert:'PGSSLROOTCERT', sslcert:'PGSSLCERT', sslkey:'PGSSLKEY', connect_timeout:'PGCONNECT_TIMEOUT' }

@@ -9,7 +9,7 @@ import { createSession, setSessionCookie } from '@/server/auth/session'
 
 const loginSchema = z.object({
   phone: z.string().min(9),
-  password: z.string().min(1),
+  password: z.string().min(1).max(72),
 })
 
 async function handlePOST(request: NextRequest) {
@@ -18,7 +18,7 @@ async function handlePOST(request: NextRequest) {
     const validatedData = loginSchema.parse(body)
 
     await consumeLimit('login-account',validatedData.phone)
-    if (process.env.TRUST_PROXY === 'true') await consumeLimit('login-ip',request.headers.get('x-forwarded-for')?.split(',')[0].trim()??'unknown',30)
+    if (process.env.TRUST_PROXY_IP === 'true') await consumeLimit('login-ip',request.headers.get('x-real-ip')??'unknown',30)
     // Find user by phone
     const user = await prisma.user.findUnique({
       where: { phone: validatedData.phone },

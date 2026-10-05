@@ -1,6 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, {useEffect,useState} from 'react';
+import {api} from '@/lib/api';
+import {deviceId,pendingOperations} from '@/lib/offline';
+import type {Organization} from '@/types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNotification } from '@/context/NotificationContext';
@@ -26,6 +29,24 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
   const { notifyError } = useNotification();
   const { user, organization, role, logout } = useAuth();
   const { activeStore, activeRegister, activeShift } = useOrganization();
+  const [businesses,setBusinesses]=useState<Organization[]>([]);
+  const [switching,setSwitching]=useState(false);
+  useEffect(()=>{
+    let cancelled=false;
+    if (organization?.id) void api.organizations.list().then(result=>{if(!cancelled)setBusinesses(result.data??[]);}).catch(()=>undefined);
+    return ()=>{cancelled=true;};
+  },[organization?.id]);
+  const switchBusiness=async(target:string)=>{
+    if (!organization?.id || !user?.id || target===organization.id) return;
+    setSwitching(true);
+    try{
+      if ((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length) throw new Error('Avval kutilayotgan savdo natijalarini tekshiring');
+      await api.organizations.switch(target);
+      localStorage.removeItem('pos_active_store');localStorage.removeItem('pos_active_register');
+      window.location.assign('/pos');
+    }catch(error){notifyError(error instanceof Error?error.message:'Biznes almashtirilmadi');setSwitching(false);}
+  };
+
 
   const roleNames: Record<string, string> = {
     owner: 'Do\'kon egasi',
@@ -79,6 +100,9 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
       {/* Right: Quick POS link, User profile & Logout */}
       <div className="flex items-center gap-3">
+        {businesses.length>1 && <select aria-label="Biznesni almashtirish" value={organization?.id??''} disabled={switching} onChange={e=>{void switchBusiness(e.target.value);}} className="max-w-36 text-xs border rounded-lg p-2">
+          {businesses.map(business=><option key={business.id} value={business.id}>{business.name}</option>)}
+        </select>}
         {!isPosPage && (
           <Link href="/pos">
             <Button

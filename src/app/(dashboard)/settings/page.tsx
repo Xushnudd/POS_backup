@@ -33,7 +33,7 @@ type SettingsUser = {
 };
 
 export default function SettingsPage() {
-  const { organization, refreshUser } = useAuth();
+  const { organization, refreshUser, role } = useAuth();
   const { stores, refreshStores } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -71,6 +71,12 @@ export default function SettingsPage() {
   const [userRole, setUserRole] = useState<'admin' | 'cashier'>('cashier');
   const [userStoreIds, setUserStoreIds] = useState<string[]>([]);
   const [isSavingUser, setIsSavingUser] = useState(false);
+  const [userMode,setUserMode]=useState<'direct'|'invite'>('direct');
+  const [invitationLink,setInvitationLink]=useState('');
+  const [invitationId,setInvitationId]=useState('');
+  const [editingMember,setEditingMember]=useState<SettingsUser|null>(null);
+  const [memberRole,setMemberRole]=useState<'owner'|'admin'|'cashier'>('cashier');
+  const [memberStores,setMemberStores]=useState<string[]>([]);
 
   // Initialize org form
   useEffect(() => {
@@ -187,7 +193,12 @@ export default function SettingsPage() {
 
     setIsSavingUser(true);
     try {
-      await api.organizations.addUser(organization.id, {
+      if (userMode==='invite') {
+        const result=await api.organizations.createInvitation(organization.id,{phone:userPhone.trim(),role:userRole,storeIds:userStoreIds});
+        if (!result.data) throw new Error('Taklif yaratilmadi');
+        setInvitationId(result.data.id);
+        setInvitationLink(`${window.location.origin}/invite#${result.data.invitationToken}`);
+      } else await api.organizations.addUser(organization.id, {
         fullName: userName.trim(),
         phone: userPhone.trim(),
         password: userPassword,
@@ -195,7 +206,7 @@ export default function SettingsPage() {
         storeIds: userStoreIds.length > 0 ? userStoreIds : undefined,
       });
 
-      notifySuccess('Xodim muvaffaqiyatli qo\'shildi');
+      notifySuccess(userMode==='invite'?'Taklif yaratildi; havolani xodimga xavfsiz ulashing':'Xodim muvaffaqiyatli qo‘shildi');
       setIsUserModalOpen(false);
       setUserName('');
       setUserPhone('');
@@ -225,7 +236,7 @@ export default function SettingsPage() {
           { id: 'organization', label: 'Tashkilot rekvizitlari', icon: faBuilding },
           { id: 'stores', label: 'Do\'konlar va Kassalar', icon: faStore },
           { id: 'users', label: 'Xodimlar (Foydalanuvchilar)', icon: faUserTie },
-        ].map((tab) => (
+        ].filter(tab=>tab.id!=='users'||role==='owner').map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as 'organization' | 'stores' | 'users')}
@@ -430,7 +441,7 @@ export default function SettingsPage() {
                     <th className="py-3 px-4">Xodim</th>
                     <th className="py-3 px-4">Telefon</th>
                     <th className="py-3 px-4">Rol</th>
-                    <th className="py-3 px-4">Biriktirilgan do&apos;konlar</th>
+                    <th className="py-3 px-4">Biriktirilgan do&apos;konlar</th><th className="py-3 px-4">Amallar</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -459,8 +470,15 @@ export default function SettingsPage() {
                       <td className="py-3 px-4 text-gray-600">
                         {u.stores && u.stores.length > 0
                           ? u.stores.map((s) => s.name).join(', ')
-                          : 'Barcha do\'konlar'}
+                          : u.role==='owner'?'Barcha do‘konlar':'Filial biriktirilmagan'}
                       </td>
+                      <td className="py-3 px-4"><div className="flex gap-2">
+                        <Button size="sm" onClick={()=>{setEditingMember(u);setMemberRole(u.role);setMemberStores(u.stores?.map(store=>store.id)??[]);}}>Vakolat</Button>
+                        <Button size="sm" onClick={async()=>{
+                          if (!organization?.id) return;
+                          try{await api.organizations.updateMember(organization.id,u.id,{isActive:!u.isActive});await loadUsers();notifySuccess(u.isActive?'Xodim bloklandi':'Xodim faollashtirildi');}catch(error){notifyError(error instanceof Error?error.message:'Amal bajarilmadi');}
+                        }}>{u.isActive?'Bloklash':'Faollashtirish'}</Button>
+                      </div></td>
                     </tr>
                   ))}
                 </tbody>
@@ -556,6 +574,24 @@ export default function SettingsPage() {
         </form>
       </Modal>
 
+      {invitationLink && <Card title="Bir martalik taklif havolasi">
+        <p className="text-sm mb-2">Havola 72 soat amal qiladi. Uni faqat tegishli xodimga ulashing; umumiy chatga qo‘ymang.</p>
+        <Input label="Taklif havolasi" value={invitationLink} readOnly />
+        <div className="flex gap-2 mt-2"><Button onClick={()=>setInvitationLink('')}>Yopish</Button>
+        <Button onClick={async()=>{if (!organization?.id) return;try{await api.organizations.revokeInvitation(organization.id,invitationId);setInvitationLink('');notifySuccess('Taklif bekor qilindi');}catch(error){notifyError(error instanceof Error?error.message:'Taklif bekor qilinmadi');}}}>Taklifni bekor qilish</Button></div>
+      </Card>}
+      <Modal isOpen={Boolean(editingMember)} onClose={()=>setEditingMember(null)} title="Xodim vakolatlari" size="md">
+        <form className="space-y-4" onSubmit={async event=>{
+          event.preventDefault();if (!organization?.id || !editingMember) return;
+          setIsSavingUser(true);
+          try {await api.organizations.updateMember(organization.id,editingMember.id,{role:memberRole,storeIds:memberStores});setEditingMember(null);await loadUsers();notifySuccess('Vakolat yangilandi; xodim qayta kirishi kerak');}
+          catch(error){notifyError(error instanceof Error?error.message:'Vakolat o‘zgarmadi');}finally{setIsSavingUser(false);}
+        }}>
+          <Select label="Rol" value={memberRole} onChange={e=>setMemberRole(e.target.value as typeof memberRole)} options={[{value:'owner',label:'Egasi'},{value:'admin',label:'Administrator'},{value:'cashier',label:'Kassir'}]} />
+          <fieldset><legend className="text-sm font-semibold">Filiallar</legend>{stores.map(store=><label key={store.id} className="flex gap-2 py-1"><input type="checkbox" checked={memberStores.includes(store.id)} onChange={e=>setMemberStores(old=>e.target.checked?[...old,store.id]:old.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset>
+          <Button type="submit" isLoading={isSavingUser}>Saqlash</Button>
+        </form>
+      </Modal>
       {/* User Modal */}
       <Modal
         isOpen={isUserModalOpen}
@@ -564,13 +600,14 @@ export default function SettingsPage() {
         size="md"
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
-          <Input
+          <Select label="Qo‘shish usuli" value={userMode} onChange={e=>setUserMode(e.target.value as 'direct'|'invite')} options={[{value:'direct',label:'Yangi hisob yaratish'},{value:'invite',label:'Bir martalik taklif havolasi'}]} />
+          {userMode==='direct' && <Input
             label="Xodim to'liq ismi *"
             placeholder="Aziz Karimov"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             required
-          />
+          />}
           <Input
             label="Telefon raqam *"
             type="tel"
@@ -579,14 +616,14 @@ export default function SettingsPage() {
             onChange={(e) => setUserPhone(e.target.value)}
             required
           />
-          <Input
-            label="Parol (kamida 6 ta belgi) *"
+          {userMode==='direct' && <Input
+            label="Parol (kamida 8 ta belgi) *"
             type="password"
             placeholder="••••••••"
             value={userPassword}
             onChange={(e) => setUserPassword(e.target.value)}
-            required
-          />
+            minLength={8} maxLength={72} required
+          />}
           <Select
             label="Roli *"
             value={userRole}
@@ -596,6 +633,7 @@ export default function SettingsPage() {
               { value: 'admin', label: 'Administrator (to\'liq nazorat)' },
             ]}
           />
+          <fieldset><legend className="text-sm font-semibold">Filiallar</legend>{stores.map(store=><label key={store.id} className="flex gap-2 py-1"><input type="checkbox" checked={userStoreIds.includes(store.id)} onChange={e=>setUserStoreIds(old=>e.target.checked?[...old,store.id]:old.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset>
           <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
             <Button
               type="button"

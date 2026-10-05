@@ -1,3 +1,5 @@
+import { amountSchema } from '@/server/sales/service'
+import { nonnegativeQuantitySchema } from '@/server/catalog/service'
 import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -9,13 +11,13 @@ import { z } from 'zod'
 const createProductSchema = z.object({
   organizationId: z.string().uuid(),
   categoryId: z.string().uuid().optional(),
-  name: z.string().min(2),
-  sku: z.string().min(2),
-  barcode: z.string().min(2),
+  name: z.string().trim().min(2).max(200),
+  sku: z.string().trim().min(2).max(100),
+  barcode: z.string().trim().min(2).max(200),
   unit: z.string().default('dona'),
-  salePrice: z.number().positive(),
-  costPrice: z.number().positive(),
-  minStock: z.number().default(0),
+  salePrice: amountSchema,
+  costPrice: nonnegativeQuantitySchema,
+  minStock: nonnegativeQuantitySchema.default(0),
   imageUrl: z.string().url().optional(),
 })
 
@@ -59,7 +61,7 @@ async function handleGET(request: NextRequest) {
       const product = await db.product.findFirst({
         where: {
           organizationId,
-          barcode,
+          OR:[{barcode},{barcodes:{some:{value:barcode}}}],
           isActive: true,
         },
         include: {
@@ -76,7 +78,7 @@ async function handleGET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        data: product,
+        data: {...product,unitPrecision:(await db.unit.findFirst({where:{organizationId:payload.organizationId,code:product.unit}}))?.precision??6},
       })
     }
 
@@ -91,6 +93,7 @@ async function handleGET(request: NextRequest) {
         { name: { contains: search, mode: 'insensitive' } },
         { sku: { contains: search, mode: 'insensitive' } },
         { barcode: { contains: search, mode: 'insensitive' } },
+        {barcodes:{some:{value:{contains:search,mode:'insensitive'}}}},
       ]
     }
 
@@ -113,9 +116,10 @@ async function handleGET(request: NextRequest) {
       db.product.count({ where }),
     ])
 
+    const units=await db.unit.findMany({where:{code:{in:products.map(product=>product.unit)}}})
     return NextResponse.json({
       success: true,
-      data: products,
+      data: products.map(product=>({...product,unitPrecision:units.find(unit=>unit.code===product.unit)?.precision??6})),
       pagination: {
         page,
         limit,
@@ -126,6 +130,7 @@ async function handleGET(request: NextRequest) {
 
   } catch (error) {
     if (error instanceof AccessError) throw error
+    if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -155,6 +160,8 @@ async function handlePOST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createProductSchema.parse(body)
 
+    if (!await db.unit.findFirst({where:{organizationId:payload.organizationId,code:validatedData.unit,isActive:true}})) throw new AccessError(400,'INVALID_UNIT','Faol birlikni tanlang')
+
     // Check if SKU or barcode already exists
     const existingProduct = await db.product.findFirst({
       where: {
@@ -162,6 +169,7 @@ async function handlePOST(request: NextRequest) {
         OR: [
           { sku: validatedData.sku },
           { barcode: validatedData.barcode },
+          {barcodes:{some:{value:validatedData.barcode}}},
         ],
       },
     })
@@ -192,6 +200,7 @@ async function handlePOST(request: NextRequest) {
 
   } catch (error) {
     if (error instanceof AccessError) throw error
+    if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },

@@ -25,6 +25,6 @@ if [[ "$restore_tables" != 0 ]]; then
   exit 1
 fi
 (cd "$(dirname "$restore_file")" && sha256sum -c "$(basename "$restore_file").sha256")
-gpg --batch --output "$restore_workdir/database.dump" --decrypt "$restore_file"
+gpg --quiet --batch --output "$restore_workdir/database.dump" --decrypt "$restore_file"
 pg_restore --dbname="$PGDATABASE" --exit-on-error --single-transaction --no-owner --no-acl "$restore_workdir/database.dump"
 printf 'Restored into confirmed empty database: %s\n' "$restore_database"

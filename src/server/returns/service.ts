@@ -1,3 +1,4 @@
+import {validateUnitQuantity} from '../catalog/service'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import type { TokenPayload } from '@/lib/auth'
@@ -30,6 +31,7 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    const amount=qty.eq(remaining)?net.sub(oldAmount):money(net.mul(qty).div(original.quantity))
    return {saleItemId:original.id,productId:original.productId,quantity:qty,unitPrice:original.unitPrice,lineTotal:amount,disposition:requested.disposition,unitCost:original.unitCost}
   })
+  for (const row of rows) { const unit=sale.items.find(item=>item.id===row.saleItemId)?.unit; if(unit) await validateUnitQuantity(tx,context.organizationId,unit,row.quantity) }
   const refund=rows.reduce((sum,x)=>sum.add(x.lineTotal),decimal(0))
   const totalReturned=sale.saleReturns.reduce((sum,x)=>sum.add(x.refundAmount),decimal(0))
   if (refund.add(totalReturned).gt(sale.totalAmount)) throw new AccessError(409,'REFUND_EXCEEDED')
@@ -44,6 +46,13 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    await tx.$queryRaw`SELECT id FROM "Customer" WHERE id=${sale.customerId} FOR UPDATE`
    const debt=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:sale.id},_sum:{amount:true}})
    outstandingCredit=PrismaMinZero(debt._sum.amount)
+   // Cash cannot refund a debt repayment received through a bank/other channel.
+   // Preserve its actual channel until an explicit refund settlement flow is available.
+   const allocations=await tx.debtEntry.findMany({where:{organizationId:context.organizationId,saleId:sale.id,sourceType:'collection'}})
+   const paymentIds=[...new Set(allocations.map(entry=>entry.sourceId.split(':')[0]))]
+   if (paymentIds.length && await tx.payment.count({where:{id:{in:paymentIds},organizationId:context.organizationId,paymentType:{not:'cash'}}})) throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED','Nasiya bank orqali to‘langan; uni avtomatik naqd qaytarish mumkin emas')
+   if (credit.gt(0) && await tx.debtEntry.count({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:null,sourceType:'legacy_payment',amount:{lt:0}}})) throw new AccessError(409,'DEBT_ALLOCATION_REQUIRED','Eski qarz to‘lovlarini original savdolarga taqsimlash kerak')
+
   }
   const remainingLiability=sale.totalAmount.sub(totalReturned)
   if (outstandingCredit.gt(remainingLiability)) throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')

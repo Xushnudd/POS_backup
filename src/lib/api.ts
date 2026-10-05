@@ -1,5 +1,7 @@
 import {
   ApiResponse,
+  CatalogUnit,
+  ProductBarcode,
   Organization,
   OrganizationMember,
   AuthData,
@@ -90,9 +92,21 @@ class ApiClient {
         body: JSON.stringify(body),
       }),
 
+    acceptInvitation: (data:{token:string;fullName?:string;password?:string}) => this.request<{organizationId:string;membershipId:string}>('/auth/invitations/accept',{method:'POST',body:JSON.stringify(data)}),
     logout: () => this.request('/auth/logout', { method: 'POST', body: '{}' }),
     logoutAll: () => this.request('/auth/logout-all', { method: 'POST', body: '{}' }),
     me: () => this.request<AuthData>('/auth/me'),
+  };
+
+  units = {
+    list: () => this.request<CatalogUnit[]>('/units'),
+    create: (data:{code:string;name:string;precision:number}) => this.request<CatalogUnit>('/units',{method:'POST',body:JSON.stringify(data)}),
+    update: (id:string,data:{name?:string;precision?:number;isActive?:boolean}) => this.request<CatalogUnit>(`/units/${id}`,{method:'PUT',body:JSON.stringify(data)}),
+  };
+  barcodes = {
+    list: (id:string) => this.request<ProductBarcode[]>(`/products/${id}/barcodes`),
+    add: (id:string,value:string) => this.request<ProductBarcode>(`/products/${id}/barcodes`,{method:'POST',body:JSON.stringify({value})}),
+    remove: (id:string,barcodeId:string) => this.request(`/products/${id}/barcodes/${barcodeId}`,{method:'DELETE',body:'{}'}),
   };
 
   // Products
@@ -406,6 +420,7 @@ class ApiClient {
 
   // Reports
   reports = {
+    reconciliation: (params:{kind:string;storeId?:string;page:number}) => this.request<Record<string,unknown>[]>(`/reports/reconciliation?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined).map(([k,v])=>[k,String(v)]))}`),
     dashboard: (params: { organizationId: string; storeId?: string; date?: string }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
@@ -460,6 +475,8 @@ class ApiClient {
 
   // Organizations & Users
   organizations = {
+    list: () => this.request<Organization[]>('/organizations'),
+    switch: (targetOrganizationId:string) => this.request('/organizations/switch',{method:'POST',body:JSON.stringify({targetOrganizationId})}),
     get: (id: string) => this.request<Organization>(`/organizations/${id}`),
 
     update: (id: string, data: Record<string, unknown>) =>
@@ -468,6 +485,9 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
+    revokeInvitation: (id:string,invitationId:string) => this.request(`/organizations/${id}/invitations/${invitationId}`,{method:'DELETE',body:'{}'}),
+    createInvitation: (id:string,data:{phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken:string}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify(data)}),
+    updateMember: (id:string,memberId:string,data:{role?:string;isActive?:boolean;storeIds?:string[]}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify(data)}),
     users: (id: string) => this.request<OrganizationMember[]>(`/organizations/${id}/users`),
 
     addUser: (

@@ -20,12 +20,15 @@ export const completeSchema=z.object({operationId:z.string().uuid().optional(),p
 export type DraftInput=z.infer<typeof saleDraftSchema>
 export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {
   const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})
+  const units=await tx.unit.findMany({where:{organizationId:context.organizationId,code:{in:[...new Set(products.map(p=>p.unit))]}}})
   const rows=input.map(item=>{
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
     const quantity=decimal(item.quantity)
-    if (product.unit==='dona' && !quantity.isInteger()) throw new AccessError(400,'INVALID_UNIT_PRECISION','Dona miqdori butun son bo‘lishi kerak')
-    return {productId:product.id,productName:product.name,sku:product.sku,quantity,unitPrice:product.salePrice,unitCost:product.costPrice,
+    const unit=units.find(value=>value.code===product.unit)
+    if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
+    if (quantity.decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
+    return {productId:product.id,productName:product.name,sku:product.sku,unit:product.unit,quantity,unitPrice:product.salePrice,unitCost:product.costPrice,
       discountAmount:money(item.discountAmount),lineTotal:lineTotal(quantity,product.salePrice,item.discountAmount)}
   })
   const totals=draftTotals(rows,receiptDiscount)
@@ -79,6 +82,7 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
     const allocation=allocateMoney(sale.discountAmount,sale.items.map(x=>({id:x.id,weight:x.lineTotal})))
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
       const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
+      if (product && item.unit && product.unit!==item.unit) throw new AccessError(409,'UNIT_CHANGED','Mahsulot birligi o‘zgardi; savatni yangilang')
       if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; savatni yangilang')
       await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id],unitCost:product.costPrice}})
       await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})

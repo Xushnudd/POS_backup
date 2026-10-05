@@ -81,6 +81,7 @@ export interface Product {
   sku: string;
   barcode: string;
   unit: string;
+  unitPrecision?: number;
   salePrice: number;
   costPrice: number;
   minStock: number;
@@ -226,6 +227,7 @@ export interface SaleItem {
   productId: string;
   productName: string;
   sku: string;
+  unit?: string | null;
   quantity: number;
   unitPrice: number;
   discountAmount: number;
@@ -344,3 +346,6 @@ export interface OrganizationMember {
  id: string; role: Role; isActive: boolean;
  user: User; stores?: Store[];
 }
+
+export interface CatalogUnit {id:string;code:string;name:string;precision:number;isActive:boolean}
+export interface ProductBarcode {id:string;value:string;isPrimary:boolean}

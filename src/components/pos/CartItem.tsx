@@ -58,7 +58,7 @@ export default function CartItem({
           <input
             type="number"
             min="0.1"
-            step={item.product.unit === 'dona' ? '1' : '0.1'}
+            step={item.product.unitPrecision===0 || item.product.unit==='dona'?'1':`0.${'0'.repeat(Math.max(0,(item.product.unitPrecision??6)-1))}1`}
             value={item.quantity}
             onChange={(e) => {
               const val = parseFloat(e.target.value);

@@ -1,3 +1,4 @@
+import {validateUnitQuantity} from '../catalog/service'
 import { Prisma } from '@prisma/client'
 import type { TokenPayload } from '@/lib/auth'
 import { AccessError } from '../auth/policy'
@@ -7,6 +8,7 @@ export async function moveStock(tx: Prisma.TransactionClient, context: TokenPayl
   const product=await tx.product.findFirst({where:{id:input.productId,organizationId:context.organizationId}})
   const store=await tx.store.findFirst({where:{id:input.storeId,organizationId:context.organizationId}})
   if (!product || !store || (context.role!=='owner' && !context.storeIds.includes(store.id))) throw new AccessError(404,'NOT_FOUND')
+  await validateUnitQuantity(tx,context.organizationId,product.unit,delta)
   const where={storeId_productId:{storeId:input.storeId,productId:input.productId}}
   await tx.inventoryBalance.upsert({where,create:{storeId:input.storeId,productId:input.productId,quantity:0},update:{}})
   const update=await tx.inventoryBalance.updateMany({

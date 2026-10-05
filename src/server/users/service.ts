@@ -2,12 +2,13 @@ import { z } from 'zod'
 import type { TokenPayload } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '../auth/policy'
-import { audit } from '../operations'
+import { assertLiveContext, audit } from '../operations'
 export const memberSchema=z.object({role:z.enum(['owner','admin','cashier']).optional(),isActive:z.boolean().optional(),storeIds:z.array(z.string().uuid()).max(100).optional()})
 export async function updateMember(context:TokenPayload,id:string,input:z.infer<typeof memberSchema>) {
  if (context.role!=='owner') throw new AccessError(403,'FORBIDDEN')
  return prisma.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
+  await assertLiveContext(tx,context)
   const member=await tx.organizationUser.findFirst({where:{id,organizationId:context.organizationId}})
   if (!member) throw new AccessError(404,'NOT_FOUND')
   if (member.isActive && member.role==='owner' && (input.isActive===false || (input.role && input.role!=='owner'))) {
@@ -30,7 +31,8 @@ export async function transferOwnership(context:TokenPayload,targetId:string) {
  if (context.role!=='owner') throw new AccessError(403,'FORBIDDEN')
  return prisma.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
-  const target=await tx.organizationUser.findFirst({where:{id:targetId,organizationId:context.organizationId,isActive:true}})
+  await assertLiveContext(tx,context)
+  const target=await tx.organizationUser.findFirst({where:{id:targetId,organizationId:context.organizationId,isActive:true,user:{isActive:true}}})
   if (!target || target.userId===context.userId) throw new AccessError(400,'INVALID_TARGET')
   await tx.organizationUser.update({where:{id:target.id},data:{role:'owner'}})
   await tx.organizationUser.update({where:{id:context.organizationUserId},data:{role:'admin'}})

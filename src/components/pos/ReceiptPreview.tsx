@@ -112,7 +112,7 @@ export default function ReceiptPreview({
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-500">
                   <span>
-                    {item.quantity} x {formatMoney(item.unitPrice)}
+                    {item.quantity} {item.unit??''} x {formatMoney(item.unitPrice)}
                   </span>
                   {item.discountAmount > 0 && (
                     <span className="text-red-500">

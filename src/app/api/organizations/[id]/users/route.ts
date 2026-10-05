@@ -41,7 +41,6 @@ async function handleGET(
     const organizationUsers = await db.organizationUser.findMany({
       where: {
         organizationId: id,
-        isActive: true,
       },
       include: {
         user: true,

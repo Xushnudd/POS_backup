@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -21,10 +22,10 @@ export default function ReportsPage() {
   const { organization } = useAuth();
   const { activeStore } = useOrganization();
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  const firstDayStr = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-    .toISOString()
-    .split('T')[0];
+  const dateParts=new Intl.DateTimeFormat('en',{timeZone:organization?.timezone??'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const part=(type:string)=>dateParts.find(value=>value.type===type)?.value;
+  const todayStr=`${part('year')}-${part('month')}-${part('day')}`;
+  const firstDayStr=`${todayStr.slice(0,7)}-01`;
 
   const [activeTab, setActiveTab] = useState<'sales' | 'products'>('sales');
   const [startDate, setStartDate] = useState(firstDayStr);
@@ -120,6 +121,7 @@ export default function ReportsPage() {
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
             Tahlil va Hisobotlar
           </h1>
+          <Link href="/reports/reconciliation" className="text-sm text-blue-700">Qoldiq va pul hisobini solishtirish</Link>
           <p className="text-sm text-gray-500 mt-0.5">
             Savdo ko&apos;rsatkichlari, tovarlar aylanmasi, foyda va CSV eksport
           </p>

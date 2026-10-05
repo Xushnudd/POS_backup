@@ -1,5 +1,5 @@
 # ─── Stage 1: deps ────────────────────────────────────────────────────────────
-FROM node:22-slim AS deps
+FROM node:24-slim AS deps
 
 # Install openssl for Prisma
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
@@ -9,11 +9,11 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 
-RUN npm ci
+RUN npm ci --engine-strict
 RUN npx prisma generate
 
 # ─── Stage 2: builder ─────────────────────────────────────────────────────────
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
 
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
-FROM node:22-slim AS runner
+FROM node:24-slim AS runner
 
 # Install openssl — required by Prisma query engine at runtime
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*

@@ -20,6 +20,9 @@ model Organization {
   receiptFooter    String?
   createdAt        DateTime @default(now())
   
+  units            Unit[]
+  productBarcodes  ProductBarcode[]
+  invitations      Invitation[]
   operations       Operation[]
   debtEntries      DebtEntry[]
   sessions         Session[]
@@ -47,6 +50,7 @@ model User {
   lastLoginAt    DateTime?
   createdAt      DateTime @default(now())
   
+  invitations    Invitation[]
   sessions       Session[]
   organizationUsers OrganizationUser[]
   createdStockDocuments    StockDocument[] @relation("CreatedBy")
@@ -158,6 +162,7 @@ model Product {
   
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   category       Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  barcodes       ProductBarcode[]
   stockDocumentItems StockDocumentItem[]
   stockTransferItems   StockTransferItem[]
   inventoryMovements   InventoryMovement[]
@@ -378,6 +383,7 @@ model SaleItem {
   productId      String
   productName    String
   sku            String
+  unit           String?  // Legacy receipts did not snapshot a unit.
   quantity       Decimal  @db.Decimal(20, 6)
   unitPrice      Decimal  @db.Decimal(14, 2)
   discountAmount Decimal  @db.Decimal(14, 2) @default(0)
@@ -528,4 +534,44 @@ model RateLimit {
  attempts Int @default(0)
  expiresAt DateTime
  @@index([expiresAt])
+}
+
+model Invitation {
+  id             String @id @default(uuid())
+  organizationId String
+  phone          String
+  role           String
+  storeIds       Json
+  tokenHash      String @unique
+  invitedBy      String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  inviter        User @relation(fields:[invitedBy],references:[id])
+  @@index([organizationId,createdAt])
+}
+
+model Unit {
+ id             String @id @default(uuid())
+ organizationId String
+ code           String
+ name           String
+ precision      Int
+ isActive       Boolean @default(true)
+ organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ @@unique([organizationId,code])
+}
+model ProductBarcode {
+ id             String @id @default(uuid())
+ organizationId String
+ productId      String
+ value          String
+ isPrimary      Boolean @default(false)
+ createdAt      DateTime @default(now())
+ organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product        Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ @@unique([organizationId,value])
+ @@index([productId])
 }

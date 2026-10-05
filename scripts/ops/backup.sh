@@ -16,7 +16,7 @@ mapfile -d '' -t backup_connection < "$backup_workdir/connection"
 export "${backup_connection[@]}"
 rm "$backup_workdir/connection"
 pg_dump --format=custom --no-owner --no-acl --file="$backup_workdir/database.dump"
-gpg --batch --yes --encrypt --recipient "$BACKUP_RECIPIENT" --output "$backup_workdir/$backup_name" "$backup_workdir/database.dump"
+gpg --quiet --batch --yes --encrypt --recipient "$BACKUP_RECIPIENT" --output "$backup_workdir/$backup_name" "$backup_workdir/database.dump"
 # No plaintext backup leaves the private temporary directory.
 install -m 600 "$backup_workdir/$backup_name" "$BACKUP_DIRECTORY/$backup_name"
 (cd "$BACKUP_DIRECTORY" && sha256sum "$backup_name" > "$backup_name.sha256")

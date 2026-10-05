@@ -1,3 +1,6 @@
+import { Prisma } from '@prisma/client'
+import { amountSchema } from '@/server/sales/service'
+import { nonnegativeQuantitySchema } from '@/server/catalog/service'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -7,13 +10,13 @@ import { z } from 'zod'
 
 const updateProductSchema = z.object({
   categoryId: z.string().uuid().optional(),
-  name: z.string().min(2).optional(),
-  sku: z.string().min(2).optional(),
-  barcode: z.string().min(2).optional(),
+  name: z.string().trim().min(2).max(200).optional(),
+  sku: z.string().trim().min(2).max(100).optional(),
+  barcode: z.string().trim().min(2).max(200).optional(),
   unit: z.string().optional(),
-  salePrice: z.number().positive().optional(),
-  costPrice: z.number().positive().optional(),
-  minStock: z.number().optional(),
+  salePrice: amountSchema.optional(),
+  costPrice: nonnegativeQuantitySchema.optional(),
+  minStock: nonnegativeQuantitySchema.optional(),
   imageUrl: z.string().url().optional(),
   isActive: z.boolean().optional(),
 })
@@ -62,6 +65,7 @@ async function handleGET(
 
   } catch (error) {
     if (error instanceof AccessError) throw error
+    if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -96,6 +100,17 @@ async function handlePUT(
     const validatedData = updateProductSchema.parse(body)
 
     const product = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${id} FOR UPDATE`
+      const current=await tx.product.findUniqueOrThrow({where:{id}})
+      if (validatedData.unit!==undefined) {
+        if (!await tx.unit.findFirst({where:{organizationId:payload.organizationId,code:validatedData.unit,isActive:true}})) throw new AccessError(400,'INVALID_UNIT')
+        if (validatedData.unit!==current.unit && (await tx.saleItem.count({where:{productId:id}}) || await tx.inventoryMovement.count({where:{productId:id}}) || await tx.inventoryBalance.count({where:{productId:id,quantity:{not:0}}}))) throw new AccessError(409,'UNIT_IN_USE','Harakati bor mahsulotning bazaviy birligini o‘zgartirib bo‘lmaydi')
+      }
+      if (validatedData.barcode!==undefined) {
+        const alias=await tx.productBarcode.findFirst({where:{organizationId:payload.organizationId,value:validatedData.barcode,productId:{not:id}}})
+        if(alias)throw new AccessError(409,'BARCODE_EXISTS')
+      }
+
       const result = await tx.product.update({
       where: { id },
       data: validatedData,
@@ -115,6 +130,7 @@ async function handlePUT(
 
   } catch (error) {
     if (error instanceof AccessError) throw error
+    if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
@@ -169,6 +185,7 @@ async function handleDELETE(
 
   } catch (error) {
     if (error instanceof AccessError) throw error
+    if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }

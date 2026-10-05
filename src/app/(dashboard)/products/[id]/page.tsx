@@ -1,10 +1,11 @@
 'use client';
+import ProductBarcodes from '@/components/catalog/ProductBarcodes';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { Category, Product } from '@/types';
+import { Category, Product, CatalogUnit } from '@/types';
 import { PRODUCT_UNITS } from '@/lib/constants';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -21,10 +22,11 @@ export default function ProductDetailPage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { organization } = useAuth();
+  const { organization, role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [units,setUnits]=useState<CatalogUnit[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,10 +47,12 @@ export default function ProductDetailPage() {
     let isCancelled = false;
 
     Promise.all([
+      role!=='cashier'?api.units.list():Promise.resolve({data:[]}),
       api.products.get(id),
       organization?.id ? api.categories.list(organization.id) : Promise.resolve({ data: [] }),
     ])
-      .then(([prodRes, catRes]) => {
+      .then(([unitRes, prodRes, catRes]) => {
+        setUnits(unitRes.data??[]);
         if (isCancelled) return;
         if (prodRes.data) {
           const p = prodRes.data;
@@ -74,14 +78,14 @@ export default function ProductDetailPage() {
     return () => {
       isCancelled = true;
     };
-  }, [id, organization]);
+  }, [id, organization, role]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
 
-    if (Number(formData.costPrice) <= 0 || Number(formData.salePrice) <= 0) {
-      notifyError('Tannarx va sotuv narxi 0 dan katta bo‘lishi kerak');
+    if (!formData.costPrice || Number(formData.costPrice) < 0 || !formData.salePrice || Number(formData.salePrice) < 0) {
+      notifyError('Tannarx va sotuv narxi manfiy bo‘lmagan bo‘lishi kerak');
       return;
     }
 
@@ -136,6 +140,8 @@ export default function ProductDetailPage() {
     );
   }
 
+  if (role==='cashier') return <div className="space-y-4"><h1 className="text-xl font-bold">{product.name}</h1><p>{product.sku} · {product.unit}</p><ProductBarcodes productId={product.id} readOnly/></div>;
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
@@ -158,6 +164,7 @@ export default function ProductDetailPage() {
         </Button>
       </div>
 
+      <ProductBarcodes key={product.barcode} productId={product.id}/>
       <Card title="Mahsulot ma'lumotlarini tahrirlash">
         <form onSubmit={handleSave} className="space-y-4">
           <Input
@@ -200,21 +207,21 @@ export default function ProductDetailPage() {
               label="O'lchov birligi"
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              options={PRODUCT_UNITS}
+              options={units.length?units.filter(unit=>unit.isActive).map(unit=>({value:unit.code,label:unit.name})):PRODUCT_UNITS}
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input
               label="Tannarx (so'm) *"
-              type="number"
+              type="number" min="0" step="0.000001"
               value={formData.costPrice}
               onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
               required
             />
             <Input
               label="Sotuv narxi (so'm) *"
-              type="number"
+              type="number" min="0" step="0.01"
               value={formData.salePrice}
               onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
               required

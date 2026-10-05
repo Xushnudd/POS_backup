@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -25,9 +26,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ProductsPage() {
-  const { organization } = useAuth();
+  const { organization, role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
+  const [unitOptions,setUnitOptions]=useState(PRODUCT_UNITS);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,7 +60,7 @@ export default function ProductsPage() {
     if (!organization?.id) return;
     setIsLoading(true);
     try {
-      const [prodsRes, catsRes] = await Promise.all([
+      const [prodsRes, catsRes, unitsRes] = await Promise.all([
         api.products.list({
           organizationId: organization.id,
           search: searchQuery || undefined,
@@ -66,16 +68,18 @@ export default function ProductsPage() {
           limit: 100,
         }),
         api.categories.list(organization.id),
+        role!=='cashier'?api.units.list():Promise.resolve({data:[]}),
       ]);
 
       if (prodsRes.data) setProducts(prodsRes.data);
       if (catsRes.data) setCategories(catsRes.data);
+      if (unitsRes.data?.length) setUnitOptions(unitsRes.data.filter(unit=>unit.isActive).map(unit=>({value:unit.code,label:unit.name})));
     } catch (err: unknown) {
       console.error('Failed to load products:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [organization, searchQuery, selectedCategory]);
+  }, [organization, searchQuery, selectedCategory, role]);
 
   useEffect(() => {
     void Promise.resolve().then(loadData);
@@ -119,10 +123,10 @@ export default function ProductsPage() {
       !formData.name ||
       !formData.sku ||
       !formData.barcode ||
-      Number(formData.costPrice) <= 0 ||
-      Number(formData.salePrice) <= 0
+      !formData.costPrice || Number(formData.costPrice) < 0 ||
+      !formData.salePrice || Number(formData.salePrice) < 0
     ) {
-      notifyError('Barcha majburiy maydonlarni to‘ldiring; tannarx va sotuv narxi 0 dan katta bo‘lsin');
+      notifyError('Barcha majburiy maydonlarni to‘ldiring; tannarx va sotuv narxi manfiy bo‘lmagan bo‘lsin');
       return;
     }
 
@@ -170,6 +174,7 @@ export default function ProductsPage() {
       setCategoryName('');
       const catsRes = await api.categories.list(organization.id);
       if (catsRes.data) setCategories(catsRes.data);
+
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Kategoriya qo\'shishda xatolik');
     }
@@ -189,8 +194,10 @@ export default function ProductsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {role!=='cashier' && <Link href="/products/units" className="text-sm text-blue-700">Birliklar</Link>}
           <Button
             variant="outline"
+            disabled={role==='cashier'}
             onClick={() => setIsCategoryModalOpen(true)}
             leftIcon={<FontAwesomeIcon icon={faTags} />}
           >
@@ -199,6 +206,7 @@ export default function ProductsPage() {
 
           <Button
             variant="primary"
+            disabled={role==='cashier'}
             onClick={openCreateModal}
             leftIcon={<FontAwesomeIcon icon={faPlus} />}
             className="font-bold shadow-md shadow-blue-500/20"
@@ -272,7 +280,7 @@ export default function ProductsPage() {
                   <th className="py-3.5 px-4">SKU / Barkod</th>
                   <th className="py-3.5 px-4">Kategoriya</th>
                   <th className="py-3.5 px-4">Birlik</th>
-                  <th className="py-3.5 px-4 text-right">Tannarx</th>
+                  {role!=='cashier' && <th className="py-3.5 px-4 text-right">Tannarx</th>}
                   <th className="py-3.5 px-4 text-right">Sotuv narxi</th>
                   <th className="py-3.5 px-4 text-center">Min. qoldiq</th>
                   <th className="py-3.5 px-4 text-right">Amallar</th>
@@ -296,9 +304,9 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="py-3.5 px-4 font-medium text-gray-600">{p.unit}</td>
-                    <td className="py-3.5 px-4 text-right text-gray-500 font-medium">
+                    {role!=='cashier' && <td className="py-3.5 px-4 text-right text-gray-500 font-medium">
                       {formatMoney(p.costPrice)}
-                    </td>
+                    </td>}
                     <td className="py-3.5 px-4 text-right font-black text-gray-900">
                       {formatMoney(p.salePrice)}
                     </td>
@@ -311,6 +319,7 @@ export default function ProductsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        disabled={role==='cashier'}
                         onClick={() => openEditModal(p)}
                         leftIcon={<FontAwesomeIcon icon={faEdit} />}
                       >
@@ -379,7 +388,7 @@ export default function ProductsPage() {
               label="O'lchov birligi"
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              options={PRODUCT_UNITS}
+              options={unitOptions}
             />
           </div>
 
@@ -388,7 +397,7 @@ export default function ProductsPage() {
               label="Tannarx (so'm) *"
               type="number"
               min="0"
-              step="100"
+              step="0.000001"
               placeholder="8000"
               value={formData.costPrice}
               onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
@@ -399,7 +408,7 @@ export default function ProductsPage() {
               label="Sotuv narxi (so'm) *"
               type="number"
               min="0"
-              step="100"
+              step="0.01"
               placeholder="12000"
               value={formData.salePrice}
               onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
