@@ -370,7 +370,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### FIX-01 — qo‘llanmada qayd etilgan xatolarni yopish
 
-- [ ] **FIX-01.01** — TypeScript, Prisma konfiguratsiyasi, Zod va JWT turlari bo‘yicha xatolarni tuzatish.
+- [x] **FIX-01.01** — TypeScript, Prisma konfiguratsiyasi, Zod va JWT turlari bo‘yicha xatolarni tuzatish.
 
   **Texnologiya:** TypeScript strict, Zod, Prisma, jsonwebtoken.
 
@@ -386,7 +386,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.02** — Savdo hisobotidagi yuklanmagan `items`ga murojaatni tuzatish.
+- [x] **FIX-01.02** — Savdo hisobotidagi yuklanmagan `items`ga murojaatni tuzatish.
 
   **Texnologiya:** Prisma select/include va PostgreSQL aggregate.
 
@@ -402,7 +402,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.03** — Transfer yaratishda bog‘langan mahsulot qatorlarini to‘g‘ri saqlash.
+- [x] **FIX-01.03** — Transfer yaratishda bog‘langan mahsulot qatorlarini to‘g‘ri saqlash.
 
   **Texnologiya:** Prisma nested writes va transaction.
 
@@ -418,7 +418,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.04** — Qoralamada faqat izoh/mijoz o‘zgarsa mahsulot qatorlari saqlanishini ta’minlash.
+- [x] **FIX-01.04** — Qoralamada faqat izoh/mijoz o‘zgarsa mahsulot qatorlari saqlanishini ta’minlash.
 
   **Texnologiya:** TypeScript patch DTO, Prisma transaction.
 
@@ -434,7 +434,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.05** — Chegirma alohida o‘zgarsa summalarni qayta hisoblash; nol qiymatni to‘g‘ri qabul qilish.
+- [x] **FIX-01.05** — Chegirma alohida o‘zgarsa summalarni qayta hisoblash; nol qiymatni to‘g‘ri qabul qilish.
 
   **Texnologiya:** Prisma.Decimal va Zod.
 
@@ -450,7 +450,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.06** — Ro‘yxatdan o‘tish javobini frontend ehtiyoji bilan moslashtirish; birlamchi yaratishni tranzaksiyaga olish.
+- [x] **FIX-01.06** — Ro‘yxatdan o‘tish javobini frontend ehtiyoji bilan moslashtirish; birlamchi yaratishni tranzaksiyaga olish.
 
   **Texnologiya:** Prisma transaction, TypeScript DTO, React Context.
 
@@ -482,7 +482,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.08** — `ignoreBuildErrors`ni olib tashlash; paketlar mosligini va Prisma client yaratishni majburiy tekshirish.
+- [x] **FIX-01.08** — `ignoreBuildErrors`ni olib tashlash; paketlar mosligini va Prisma client yaratishni majburiy tekshirish.
 
   **Texnologiya:** Next.js, TypeScript, ESLint, npm lockfile.
 
@@ -514,7 +514,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.09` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.10** — Maxfiy muhit fayllari image yoki build kontekstiga kirishini to‘xtatish.
+- [x] **FIX-01.10** — Maxfiy muhit fayllari image yoki build kontekstiga kirishini to‘xtatish.
 
   **Texnologiya:** Docker .dockerignore va secret mount.
 
