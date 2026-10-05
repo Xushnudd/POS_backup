@@ -1,18 +1,21 @@
+import { AccessError } from '@/server/auth/policy'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { hashPassword, generateToken } from '@/lib/auth'
+import { hashPassword } from '@/lib/auth'
 import { z } from 'zod'
+import { createSession, setSessionCookie } from '@/server/auth/session'
 
 const registerSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(9),
   email: z.string().email().optional(),
-  password: z.string().min(6),
+  password: z.string().min(8).max(72),
   organizationName: z.string().min(2),
   tin: z.string().optional(),
 })
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = registerSchema.parse(body)
@@ -32,8 +35,9 @@ export async function POST(request: NextRequest) {
     // Hash password
     const passwordHash = await hashPassword(validatedData.password)
 
+    const { organization, user, organizationUser, token } = await prisma.$transaction(async (tx) => {
     // Create organization
-    const organization = await prisma.organization.create({
+    const organization = await tx.organization.create({
       data: {
         name: validatedData.organizationName,
         tin: validatedData.tin,
@@ -44,7 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create user
-    const user = await prisma.user.create({
+    const user = await tx.user.create({
       data: {
         fullName: validatedData.fullName,
         phone: validatedData.phone,
@@ -54,7 +58,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create organization user (owner role)
-    const organizationUser = await prisma.organizationUser.create({
+    const organizationUser = await tx.organizationUser.create({
       data: {
         organizationId: organization.id,
         userId: user.id,
@@ -63,7 +67,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create default store
-    const store = await prisma.store.create({
+    const store = await tx.store.create({
       data: {
         organizationId: organization.id,
         name: 'Asosiy do\'kon',
@@ -73,7 +77,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Give user access to the store
-    await prisma.userStore.create({
+    await tx.userStore.create({
       data: {
         organizationUserId: organizationUser.id,
         storeId: store.id,
@@ -81,7 +85,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create default register
-    await prisma.register.create({
+    await tx.register.create({
       data: {
         storeId: store.id,
         name: 'Kassa 1',
@@ -90,7 +94,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create default discount policy
-    await prisma.discountPolicy.create({
+    await tx.discountPolicy.create({
       data: {
         organizationId: organization.id,
         cashierMaxPercent: 5,
@@ -99,44 +103,42 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Generate token
-    const token = generateToken({
-      userId: user.id,
-      organizationId: organization.id,
-      role: 'owner',
+      const token = await createSession(tx, user.id, organization.id)
+      return { organization, user, organizationUser, token }
     })
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
-        token,
+        token: "cookie-session",
         user: {
           id: user.id,
           fullName: user.fullName,
           phone: user.phone,
           email: user.email,
+          organizationUserId: organizationUser.id,
         },
-        organization: {
-          id: organization.id,
-          name: organization.name,
-          currencyCode: organization.currencyCode,
-        },
+        organization,
+        role: "owner",
       },
       message: 'Muvaffaqiyatli ro\'yxatdan o\'tdingiz'
     })
+    setSessionCookie(response, token)
+    return response
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Registration error:', error)
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const POST = withApi(handlePOST, { public: true })

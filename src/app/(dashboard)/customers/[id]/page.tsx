@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -18,10 +18,11 @@ import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function CustomerDetailPage() {
+  const attempt=useRef<string|null>(null);
   const params = useParams();
   const id = params?.id as string;
   const { organization } = useAuth();
-  const { activeStore } = useOrganization();
+  const { activeStore, activeShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -64,16 +65,21 @@ export default function CustomerDetailPage() {
       return;
     }
 
+    if (!activeShift) { notifyError('Qarzni undirish uchun smenani oching'); return; }
+    attempt.current ??= crypto.randomUUID();
     setIsProcessing(true);
     try {
       await api.payments.credit({
         organizationId: organization.id,
         storeId: activeStore.id,
         customerId: customer.id,
+        shiftId: activeShift.id,
+        operationId: attempt.current,
         amount: amt,
         note: paymentNote.trim() || undefined,
       });
 
+      attempt.current = null;
       notifySuccess('Nasiya qarzi undirildi');
       setIsDebtModalOpen(false);
       setPaymentAmount('');

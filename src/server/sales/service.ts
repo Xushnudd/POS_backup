@@ -1,0 +1,88 @@
+import { randomUUID } from 'node:crypto'
+import { Prisma } from '@prisma/client'
+import { z } from 'zod'
+import type { TokenPayload } from '@/lib/auth'
+import { AccessError, tenantScope } from '../auth/policy'
+import { audit, runOperation } from '../operations'
+import { moveStock } from '../inventory/movements'
+import { allocateMoney, decimal, draftTotals, lineTotal, money } from './calculations'
+
+export const amountSchema=z.union([z.number().finite().refine(v=>decimal(v).decimalPlaces()<=2),z.string().regex(/^\d+(\.\d{1,2})?$/)]).refine(v=>decimal(v).gte(0),'Summa manfiy bo‘lmasligi kerak')
+export const quantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(v=>decimal(v).gt(0) && decimal(v).decimalPlaces()<=6,'Miqdor musbat bo‘lishi kerak')
+export const saleDraftSchema=z.object({
+  organizationId:z.string().uuid(),storeId:z.string().uuid(),registerId:z.string().uuid(),shiftId:z.string().uuid(),
+  cashierId:z.string().uuid().optional(),customerId:z.string().uuid().nullable().optional(),
+  operationId:z.string().uuid().optional(), note:z.string().max(2000).optional(),discountAmount:amountSchema.default(0),
+  items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500),
+})
+export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:amountSchema.refine(v=>decimal(v).gt(0)),referenceNo:z.string().max(200).optional()})
+export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).min(1).max(10)})
+export type DraftInput=z.infer<typeof saleDraftSchema>
+export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {
+  const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})
+  const rows=input.map(item=>{
+    const product=products.find(p=>p.id===item.productId)
+    if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
+    const quantity=decimal(item.quantity)
+    if (product.unit==='dona' && !quantity.isInteger()) throw new AccessError(400,'INVALID_UNIT_PRECISION','Dona miqdori butun son bo‘lishi kerak')
+    return {productId:product.id,productName:product.name,sku:product.sku,quantity,unitPrice:product.salePrice,unitCost:product.costPrice,
+      discountAmount:money(item.discountAmount),lineTotal:lineTotal(quantity,product.salePrice,item.discountAmount)}
+  })
+  const totals=draftTotals(rows,receiptDiscount)
+  const gross=rows.reduce((sum,x)=>sum.add(x.quantity.mul(x.unitPrice)),decimal(0))
+  const off=gross.sub(totals.totalAmount)
+  const policy=await tx.discountPolicy.findFirst({where:{organizationId:context.organizationId,isActive:true}})
+  const max=context.role==='owner'?decimal(100):context.role==='admin'?decimal(policy?.adminMaxPercent??0):decimal(policy?.cashierMaxPercent??0)
+  if (gross.gt(0) && off.mul(100).div(gross).gt(max)) throw new AccessError(403,'DISCOUNT_LIMIT','Chegirma vakolat chegarasidan oshdi')
+  return {rows,totals}
+}
+export async function requireOpenShift(tx:Prisma.TransactionClient,context:TokenPayload,shiftId:string) {
+  await tx.$queryRaw`SELECT id FROM "Shift" WHERE id=${shiftId} FOR UPDATE`
+  const shift=await tx.shift.findFirst({where:{id:shiftId,AND:tenantScope('Shift',context)},include:{register:{include:{store:true}}}})
+  if (!shift || shift.status!=='open' || !shift.register.isActive || !shift.register.store.isActive) throw new AccessError(409,'INVALID_SHIFT','Smena ochiq emas')
+  return shift
+}
+export async function createDraft(context:TokenPayload,input:DraftInput,key:string) {
+  return runOperation(context,'sale.create',key,input,async tx=>{
+    const shift=await requireOpenShift(tx,context,input.shiftId)
+    if (shift.registerId!==input.registerId || shift.register.storeId!==input.storeId || input.organizationId!==context.organizationId) throw new AccessError(409,'INVALID_RELATION')
+    if (input.customerId && !await tx.customer.findFirst({where:{id:input.customerId,organizationId:context.organizationId,isActive:true}})) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
+    const {rows,totals}=await prepareItems(tx,context,input.items,input.discountAmount)
+    const sale=await tx.sale.create({data:{organizationId:context.organizationId,storeId:input.storeId,registerId:input.registerId,shiftId:input.shiftId,cashierId:context.userId,customerId:input.customerId,receiptNo:'RCP-'+randomUUID(),note:input.note,...totals,items:{create:rows}},include:{items:true}})
+    await audit(tx,context,'Sale',sale.id,'draft_created')
+    return sale
+  })
+}
+export async function completeSale(context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string) {
+  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments},async tx=>{
+    await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
+    const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:true,organization:true}})
+    if (!sale) throw new AccessError(404,'NOT_FOUND')
+    if (sale.status!=='draft') throw new AccessError(409,'INVALID_STATUS','Savdo allaqachon yakunlangan')
+    await requireOpenShift(tx,context,sale.shiftId)
+    if (!sale.items.length) throw new AccessError(400,'EMPTY_SALE')
+    const total=input.payments.reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
+    if (!total.eq(sale.totalAmount)) throw new AccessError(400,'INVALID_PAYMENT','To‘lovlar jami savdoga teng bo‘lishi kerak')
+    const credit=input.payments.filter(p=>p.paymentType==='credit').reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
+    if (credit.gt(0)) {
+      if (!sale.customerId) throw new AccessError(400,'CUSTOMER_REQUIRED')
+      await tx.$queryRaw`SELECT id FROM "Customer" WHERE id=${sale.customerId} FOR UPDATE`
+      const customer=await tx.customer.findFirst({where:{id:sale.customerId,organizationId:context.organizationId,isActive:true}})
+      if (!customer) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
+      const debt=await tx.debtEntry.aggregate({where:{customerId:customer.id,organizationId:context.organizationId},_sum:{amount:true}})
+      if (decimal(debt._sum.amount??0).add(credit).gt(customer.creditLimit)) throw new AccessError(409,'CREDIT_LIMIT','Nasiya limiti oshdi')
+      await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit}})
+    }
+    const allocation=allocateMoney(sale.discountAmount,sale.items.map(x=>({id:x.id,weight:x.lineTotal})))
+    for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
+      const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
+      if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; savatni yangilang')
+      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id]}})
+      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:item.unitCost,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
+    }
+    for (const p of input.payments) await tx.payment.create({data:{organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
+    const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date()},include:{items:true,payments:true}})
+    await audit(tx,context,'Sale',sale.id,'completed',{totalAmount:sale.totalAmount,payments:input.payments})
+    return updated
+  })
+}

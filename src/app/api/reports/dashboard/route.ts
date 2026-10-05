@@ -1,10 +1,14 @@
+import { decimal } from '@/server/sales/calculations'
+import { dateRange, localDate } from '@/server/reports/dates'
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -12,18 +16,20 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
     const storeId = searchParams.get('storeId')
-    const date = searchParams.get('date') || new Date().toISOString().split('T')[0]
+    const organization=await db.organization.findUniqueOrThrow({where:{id:payload.organizationId}})
+    const date = searchParams.get('date') || localDate(new Date(),organization.timezone)
 
     if (!organizationId) {
       return NextResponse.json(
@@ -32,24 +38,18 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const startDate = new Date(date)
-    startDate.setHours(0, 0, 0, 0)
-    const endDate = new Date(date)
-    endDate.setHours(23, 59, 59, 999)
+    const range=dateRange(date,date,organization.timezone)
 
     const where: any = {
       organizationId,
-      status: 'completed',
-      completedAt: {
-        gte: startDate,
-        lte: endDate,
-      },
+      status: { in: ['completed','partially_returned','returned'] },
+      completedAt: range,
     }
 
     if (storeId) where.storeId = storeId
 
     // Get today's sales
-    const sales = await prisma.sale.findMany({
+    const sales = await db.sale.findMany({
       where,
       include: {
         payments: true,
@@ -57,22 +57,17 @@ export async function GET(request: NextRequest) {
     })
 
     const totalSales = sales.length
-    const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.totalAmount), 0)
-    const averageCheck = totalSales > 0 ? totalRevenue / totalSales : 0
-
-    // Payment breakdown
-    const cashPayments = sales
-      .flatMap(sale => sale.payments)
-      .filter(p => p.paymentType === 'cash')
-      .reduce((sum, p) => sum + Number(p.amount), 0)
-    
-    const cardPayments = sales
-      .flatMap(sale => sale.payments)
-      .filter(p => p.paymentType === 'card')
-      .reduce((sum, p) => sum + Number(p.amount), 0)
+    const returns=await db.saleReturn.aggregate({where:{returnedAt:range,sale:{organizationId,...(storeId&&{storeId})}},_sum:{refundAmount:true}})
+    const grossRevenue=sales.reduce((sum,sale)=>sum.add(sale.totalAmount),decimal(0))
+    const refundAmount=decimal(returns._sum.refundAmount??0)
+    const totalRevenue=grossRevenue.sub(refundAmount)
+    const averageCheck=totalSales?totalRevenue.div(totalSales).toDecimalPlaces(2):decimal(0)
+    const dayPayments=await db.payment.findMany({where:{paidAt:range,status:'recorded',...(storeId&&{storeId})}})
+    const paymentTotal=(type:string)=>dayPayments.filter(p=>p.paymentType===type).reduce((sum,p)=>sum.add(p.direction==='in'?p.amount:p.amount.negated()),decimal(0))
+    const cashPayments=paymentTotal('cash'),cardPayments=paymentTotal('card')
 
     // Open shifts
-    const openShifts = await prisma.shift.count({
+    const openShifts = await db.shift.count({
       where: {
         status: 'open',
         ...(storeId && { register: { storeId } }),
@@ -80,7 +75,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Low stock items
-    const lowStockItems = await prisma.inventoryBalance.findMany({
+    const lowStockItems = await db.inventoryBalance.findMany({
       where: {
         ...(storeId && { storeId }),
         product: {
@@ -99,7 +94,7 @@ export async function GET(request: NextRequest) {
     ).length
 
     // Top products today
-    const productSales = await prisma.saleItem.groupBy({
+    const productSales = await db.saleItem.groupBy({
       by: ['productId'],
       where: {
         sale: {
@@ -120,7 +115,7 @@ export async function GET(request: NextRequest) {
 
     const topProducts = await Promise.all(
       productSales.map(async (ps) => {
-        const product = await prisma.product.findUnique({
+        const product = await db.product.findUnique({
           where: { id: ps.productId },
           select: {
             id: true,
@@ -142,6 +137,8 @@ export async function GET(request: NextRequest) {
         date,
         totalSales,
         totalRevenue,
+        grossRevenue,
+        refundAmount,
         averageCheck,
         cashPayments,
         cardPayments,
@@ -152,10 +149,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get dashboard error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)

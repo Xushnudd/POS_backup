@@ -1,30 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { AccessError, tenantScope } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
+import { prepareItems, quantitySchema, amountSchema } from '@/server/sales/service'
+import { draftTotals } from '@/server/sales/calculations'
 
 const updateSaleSchema = z.object({
-  customerId: z.string().uuid().optional(),
-  items: z.array(z.object({
-    productId: z.string().uuid(),
-    productName: z.string(),
-    sku: z.string(),
-    quantity: z.number().positive(),
-    unitPrice: z.number().positive(),
-    discountAmount: z.number().default(0),
-    unitCost: z.number().positive(),
-  })).optional(),
-  discountAmount: z.number().optional(),
-  note: z.string().optional(),
+ customerId:z.string().uuid().nullable().optional(),note:z.string().max(2000).optional(),discountAmount:amountSchema.optional(),
+ items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500).optional(),
 })
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -32,15 +27,16 @@ export async function GET(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
-    const sale = await prisma.sale.findUnique({
+    const sale = await db.sale.findUnique({
       where: { id },
       include: {
         customer: true,
@@ -64,7 +60,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('Get sale error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -72,13 +68,13 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function handlePUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -86,18 +82,19 @@ export async function PUT(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = updateSaleSchema.parse(body)
 
-    const sale = await prisma.sale.findUnique({
+    const sale = await db.sale.findUnique({
       where: { id },
     })
 
@@ -115,48 +112,27 @@ export async function PUT(
       )
     }
 
-    // Update sale with new data
     const updatedSale = await prisma.$transaction(async (tx) => {
-      // Delete existing items
-      await tx.saleItem.deleteMany({
-        where: { saleId: id },
-      })
-
-      // Recalculate totals if items provided
-      let subtotal = sale.subtotal
-      let totalAmount = sale.totalAmount
-
-      if (validatedData.items) {
-        subtotal = validatedData.items.reduce(
-          (sum, item) => sum + (item.quantity * item.unitPrice - item.discountAmount),
-          0
-        )
-        totalAmount = subtotal - (validatedData.discountAmount || sale.discountAmount)
-
-        // Create new items
+      // Lock the draft so checkout and edits cannot race.
+      await tx.$queryRaw`SELECT id FROM "Sale" WHERE id = ${id} FOR UPDATE`
+      const current = await tx.sale.findUniqueOrThrow({ where: { id, AND: tenantScope("Sale", payload) }, include: { items: true } })
+      if (current.status !== 'draft') throw new Error('INVALID_STATUS')
+      const prepared = validatedData.items ? await prepareItems(tx, payload, validatedData.items, validatedData.discountAmount ?? current.discountAmount) : null
+      const totals = prepared?.totals ?? draftTotals(current.items, validatedData.discountAmount ?? current.discountAmount)
+      if (validatedData.items !== undefined) {
+        await tx.saleItem.deleteMany({ where: { saleId: id } })
         await tx.saleItem.createMany({
-          data: validatedData.items.map(item => ({
-            saleId: id,
-            productId: item.productId,
-            productName: item.productName,
-            sku: item.sku,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            discountAmount: item.discountAmount,
-            lineTotal: item.quantity * item.unitPrice - item.discountAmount,
-            unitCost: item.unitCost,
-          })),
+          data: prepared!.rows.map(item => ({...item,saleId:id})),
         })
       }
-
-      return await tx.sale.update({
+      return tx.sale.update({
         where: { id },
         data: {
           ...(validatedData.customerId !== undefined && { customerId: validatedData.customerId }),
-          ...(validatedData.discountAmount !== undefined && { discountAmount: validatedData.discountAmount }),
           ...(validatedData.note !== undefined && { note: validatedData.note }),
-          ...(validatedData.items && { subtotal, totalAmount }),
+          ...totals,
         },
+        include: { items: true },
       })
     })
 
@@ -167,17 +143,23 @@ export async function PUT(
     })
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Update sale error:', error)
+    if (error instanceof Error && ['INVALID_DISCOUNT', 'INVALID_AMOUNT', 'INVALID_STATUS'].includes(error.message)) {
+      return NextResponse.json({ success: false, error: { code: error.message, message: 'Savdo miqdori, chegirmasi yoki holati noto‘g‘ri' } }, { status: 409 })
+    }
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)
+
+export const PUT = withApi(handlePUT)

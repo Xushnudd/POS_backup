@@ -20,6 +20,9 @@ model Organization {
   receiptFooter    String?
   createdAt        DateTime @default(now())
   
+  operations       Operation[]
+  debtEntries      DebtEntry[]
+  sessions         Session[]
   users            OrganizationUser[]
   stores           Store[]
   categories       Category[]
@@ -44,6 +47,7 @@ model User {
   lastLoginAt    DateTime?
   createdAt      DateTime @default(now())
   
+  sessions       Session[]
   organizationUsers OrganizationUser[]
   createdStockDocuments    StockDocument[] @relation("CreatedBy")
   confirmedStockDocuments  StockDocument[] @relation("ConfirmedBy")
@@ -141,12 +145,12 @@ model Product {
   organizationId String
   categoryId     String?
   name           String
-  sku            String   @unique
-  barcode        String   @unique
+  sku            String
+  barcode        String
   unit           String   // dona, kg, litr, etc.
   salePrice      Decimal  @db.Decimal(14, 2)
-  costPrice      Decimal  @db.Decimal(14, 2)
-  minStock       Decimal  @db.Decimal(14, 3) @default(0)
+  costPrice      Decimal  @db.Decimal(20, 6)
+  minStock       Decimal  @db.Decimal(20, 6) @default(0)
   imageUrl       String?
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
@@ -160,6 +164,9 @@ model Product {
   inventoryBalances    InventoryBalance[]
   saleItems             SaleItem[]
   saleReturnItems       SaleReturnItem[]
+
+  @@unique([organizationId, sku])
+  @@unique([organizationId, barcode])
 }
 
 model Customer {
@@ -177,6 +184,7 @@ model Customer {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   sales          Sale[]
   payments       Payment[]
+  debtEntries    DebtEntry[]
   
   @@index([phone])
 }
@@ -224,8 +232,8 @@ model StockDocumentItem {
   id              String   @id @default(uuid())
   stockDocumentId String
   productId       String
-  quantity        Decimal  @db.Decimal(14, 3)
-  unitCost        Decimal  @db.Decimal(14, 2)
+  quantity        Decimal  @db.Decimal(20, 6)
+  unitCost        Decimal  @db.Decimal(20, 6)
   note            String?
   createdAt       DateTime @default(now())
   
@@ -239,8 +247,8 @@ model InventoryMovement {
   storeId        String
   productId      String
   movementType   String   // sale, return, stock_document
-  quantityDelta  Decimal  @db.Decimal(14, 3)
-  unitCost       Decimal  @db.Decimal(14, 2)
+  quantityDelta  Decimal  @db.Decimal(20, 6)
+  unitCost       Decimal  @db.Decimal(20, 6)
   sourceType     String   // sale, return, stock_document
   sourceId       String
   occurredAt     DateTime @default(now())
@@ -255,7 +263,7 @@ model InventoryMovement {
 model InventoryBalance {
   storeId   String
   productId String
-  quantity  Decimal @db.Decimal(14, 3) @default(0)
+  quantity  Decimal @db.Decimal(20, 6) @default(0)
   updatedAt DateTime @updatedAt
   
   store    Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -287,8 +295,9 @@ model StockTransferItem {
   id              String   @id @default(uuid())
   stockTransferId String
   productId       String
-  quantity        Decimal  @db.Decimal(14, 3)
-  unitCost        Decimal  @db.Decimal(14, 2)
+  receivedQuantity Decimal @db.Decimal(20, 6) @default(0)
+  quantity        Decimal  @db.Decimal(20, 6)
+  unitCost        Decimal  @db.Decimal(20, 6)
   
   stockTransfer   StockTransfer @relation(fields: [stockTransferId], references: [id], onDelete: Cascade)
   product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -369,11 +378,12 @@ model SaleItem {
   productId      String
   productName    String
   sku            String
-  quantity       Decimal  @db.Decimal(14, 3)
+  quantity       Decimal  @db.Decimal(20, 6)
   unitPrice      Decimal  @db.Decimal(14, 2)
   discountAmount Decimal  @db.Decimal(14, 2) @default(0)
   lineTotal      Decimal  @db.Decimal(14, 2)
-  unitCost       Decimal  @db.Decimal(14, 2)
+  unitCost       Decimal  @db.Decimal(20, 6)
+  receiptDiscount Decimal @db.Decimal(14, 2) @default(0)
   createdAt      DateTime @default(now())
   
   sale           Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
@@ -389,6 +399,7 @@ model Payment {
   saleId         String?
   customerId     String?
   paymentType    String   // cash, card, transfer, credit
+  status         String   @default("recorded") // manual/cash record, never an implied provider confirmation
   direction      String   // in, out
   amount         Decimal  @db.Decimal(14, 2)
   referenceNo    String?
@@ -426,9 +437,10 @@ model SaleReturnItem {
   saleReturnId    String
   saleItemId      String
   productId       String
-  quantity        Decimal  @db.Decimal(14, 3)
+  quantity        Decimal  @db.Decimal(20, 6)
   unitPrice       Decimal  @db.Decimal(14, 2)
   lineTotal       Decimal  @db.Decimal(14, 2)
+  disposition     String @default("sellable") // sellable, damaged, write_off
   
   saleReturn      SaleReturn @relation(fields: [saleReturnId], references: [id], onDelete: Cascade)
   saleItem        SaleItem   @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
@@ -465,4 +477,54 @@ model AuditLog {
   
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+// Opaque tokens are only sent through an HttpOnly cookie; only SHA-256 is stored.
+model Session {
+  id             String @id @default(uuid())
+  tokenHash      String @unique
+  userId         String
+  organizationId String
+  expiresAt      DateTime
+  idleExpiresAt  DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model Operation {
+  id             String @id @default(uuid())
+  organizationId String
+  type           String
+  key            String
+  payloadHash    String
+  result         Json
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@unique([organizationId, type, key])
+  @@index([organizationId, createdAt])
+}
+model DebtEntry {
+  saleId         String?
+  id             String @id @default(uuid())
+  organizationId String
+  customerId     String
+  sourceType     String
+  sourceId       String
+  amount         Decimal @db.Decimal(14, 2)
+  note           String?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  @@unique([organizationId, sourceType, sourceId])
+  @@index([customerId, createdAt])
+}
+
+model RateLimit {
+ key String @id
+ attempts Int @default(0)
+ expiresAt DateTime
+ @@index([expiresAt])
 }

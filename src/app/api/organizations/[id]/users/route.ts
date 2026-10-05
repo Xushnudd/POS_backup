@@ -1,6 +1,8 @@
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader, hashPassword } from '@/lib/auth'
+import { verifyToken, getRequestToken, hashPassword } from '@/lib/auth'
 import { z } from 'zod'
 
 const createUserSchema = z.object({
@@ -12,13 +14,13 @@ const createUserSchema = z.object({
   storeIds: z.array(z.string()).optional(),
 })
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -26,15 +28,16 @@ export async function GET(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
-    const organizationUsers = await prisma.organizationUser.findMany({
+    const organizationUsers = await db.organizationUser.findMany({
       where: {
         organizationId: id,
         isActive: true,
@@ -71,7 +74,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('Get organization users error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -79,13 +82,13 @@ export async function GET(
   }
 }
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -93,19 +96,20 @@ export async function POST(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = createUserSchema.parse(body)
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await db.user.findUnique({
       where: { phone: validatedData.phone }
     })
 
@@ -115,7 +119,7 @@ export async function POST(
     } else {
       // Create new user
       const passwordHash = await hashPassword(validatedData.password)
-      user = await prisma.user.create({
+      user = await db.user.create({
         data: {
           fullName: validatedData.fullName,
           phone: validatedData.phone,
@@ -126,7 +130,7 @@ export async function POST(
     }
 
     // Create organization user
-    const organizationUser = await prisma.organizationUser.create({
+    const organizationUser = await db.organizationUser.create({
       data: {
         organizationId: id,
         userId: user.id,
@@ -136,7 +140,7 @@ export async function POST(
 
     // Assign stores if provided
     if (validatedData.storeIds && validatedData.storeIds.length > 0) {
-      await prisma.userStore.createMany({
+      await db.userStore.createMany({
         data: validatedData.storeIds.map(storeId => ({
           organizationUserId: organizationUser.id,
           storeId,
@@ -154,17 +158,20 @@ export async function POST(
     })
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Create user error:', error)
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

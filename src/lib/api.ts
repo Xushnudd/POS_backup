@@ -24,24 +24,14 @@ class ApiClient {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
   }
 
-  private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('pos_token');
-  }
-
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const token = this.getToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const url = `${this.getBaseUrl()}${endpoint}`;
 
@@ -49,6 +39,7 @@ class ApiClient {
       const response = await fetch(url, {
         ...options,
         headers,
+        credentials: 'same-origin',
       });
 
       const data = await response.json();
@@ -93,6 +84,8 @@ class ApiClient {
         body: JSON.stringify(body),
       }),
 
+    logout: () => this.request('/auth/logout', { method: 'POST', body: '{}' }),
+    logoutAll: () => this.request('/auth/logout-all', { method: 'POST', body: '{}' }),
     me: () => this.request<AuthData>('/auth/me'),
   };
 
@@ -219,7 +212,7 @@ class ApiClient {
 
     get: (id: string) => this.request<Shift>(`/shifts/${id}`),
 
-    open: (data: { registerId: string; organizationUserId: string; openingCash: number; note?: string }) =>
+    open: (data: { registerId: string; organizationUserId: string; openingCash: number; note?: string; operationId: string }) =>
       this.request<Shift>('/shifts', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -231,10 +224,10 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
-    cashMovement: (id: string, data: { movementType: 'cash_in' | 'cash_out'; amount: number; reason: string }) =>
+    cashMovement: (id: string, data: { movementType: 'cash_in' | 'cash_out'; amount: number; reason: string; operationId?: string }) =>
       this.request(`/shifts/${id}/cash-movements`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, operationId: data.operationId ?? crypto.randomUUID() }),
       }),
   };
 
@@ -390,7 +383,9 @@ class ApiClient {
       organizationId: string;
       storeId: string;
       customerId: string;
-      amount: number;
+      amount: number | string;
+      shiftId: string;
+      operationId: string;
       referenceNo?: string;
       note?: string;
     }) =>

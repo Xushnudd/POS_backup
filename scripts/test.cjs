@@ -1,0 +1,10 @@
+const { spawnSync } = require('node:child_process');
+const { readdirSync } = require('node:fs');
+const path = require('node:path');
+const compile = spawnSync(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.test.json'], {stdio:'inherit'});
+if (compile.status !== 0) process.exit(compile.status || 1);
+const selected = process.argv.includes('--integration') ? 'integration' : 'unit';
+const files = readdirSync('.test-build/tests').filter(f => f.endsWith(`.${selected}.test.js`)).map(f => path.join('.test-build/tests', f));
+if (!files.length) throw new Error('No tests found');
+const run = spawnSync(process.execPath, ['--require', './scripts/test-resolver.cjs', '--test', ...files], {stdio:'inherit'});
+process.exit(run.status || 0);

@@ -1,10 +1,12 @@
+import { AccessError } from '@/server/auth/policy'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
 
     if (!token) {
       return NextResponse.json(
@@ -13,7 +15,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
 
     if (!payload) {
       return NextResponse.json(
@@ -88,10 +90,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get user error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)

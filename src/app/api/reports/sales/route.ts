@@ -1,10 +1,14 @@
+import { dateRange } from '@/server/reports/dates'
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
+import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -12,13 +16,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
@@ -38,21 +43,19 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       organizationId,
-      status: 'completed',
+      status: { in: ['completed','partially_returned','returned'] },
     }
 
     if (storeId) where.storeId = storeId
-    if (startDate && endDate) {
-      where.completedAt = {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
-      }
-    }
+    const organization=await db.organization.findUniqueOrThrow({where:{id:payload.organizationId}})
+    const range=dateRange(startDate,endDate,organization.timezone)
+    if (Object.keys(range).length) where.completedAt = range
 
-    const [sales, total] = await Promise.all([
-      prisma.sale.findMany({
+    const [sales, total, sums, itemCount, returns] = await Promise.all([
+      db.sale.findMany({
         where,
         include: {
+          items: true,
           customer: true,
           register: true,
           cashier: {
@@ -69,22 +72,28 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.sale.count({ where }),
+      db.sale.count({ where }),
+      db.sale.aggregate({ where, _sum: { totalAmount: true, discountAmount: true } }),
+      db.saleItem.count({ where: { sale: where } }),
+      db.saleReturn.aggregate({ where: { ...(Object.keys(range).length && { returnedAt: range }), sale: { organizationId, ...(storeId && { storeId }) } }, _sum: { refundAmount: true } }),
     ])
 
-    // Calculate totals
-    const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.totalAmount), 0)
-    const totalDiscount = sales.reduce((sum, sale) => sum + Number(sale.discountAmount), 0)
-    const totalItems = sales.reduce((sum, sale) => sum + sale.items.length, 0)
+    const grossRevenue = new Prisma.Decimal(sums._sum.totalAmount ?? 0)
+    const refundAmount = new Prisma.Decimal(returns._sum.refundAmount ?? 0)
+    const totalRevenue = grossRevenue.sub(refundAmount)
+    const totalDiscount = new Prisma.Decimal(sums._sum.discountAmount ?? 0)
+    const totalItems = itemCount
 
     return NextResponse.json({
       success: true,
       data: sales,
       summary: {
         totalRevenue,
+        grossRevenue,
+        refundAmount,
         totalDiscount,
         totalItems,
-        averageSale: sales.length > 0 ? totalRevenue / sales.length : 0,
+        averageSale: total > 0 ? totalRevenue.div(total).toDecimalPlaces(2).toString() : "0.00",
       },
       pagination: {
         page,
@@ -95,10 +104,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get sales report error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)

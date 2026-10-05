@@ -1,0 +1,41 @@
+import type { TokenPayload } from '@/lib/auth'
+
+export class AccessError extends Error {
+  constructor(public status: number, public code: string, message = 'Bu amal uchun ruxsat yo‘q') { super(message) }
+}
+export function tenantScope(model: string, context: TokenPayload): Record<string, unknown> {
+  const org = context.organizationId
+  const stores = context.role === 'owner' ? { organizationId: org } : { organizationId: org, id: { in: context.storeIds } }
+  const storeRelation = { store: stores }
+  switch (model) {
+    case 'Organization': return { id: org }
+    case 'User': return { organizationUsers: { some: { organizationId: org, isActive: true } } }
+    case 'Store': return stores
+    case 'Register': return storeRelation
+    case 'Shift': return { register: storeRelation, ...(context.role === 'cashier' && { organizationUserId: context.organizationUserId }) }
+    case 'CashMovement': return { shift: tenantScope('Shift', context) }
+    case 'InventoryBalance': return storeRelation
+    case 'Sale': return { organizationId: org, ...storeRelation, ...(context.role === 'cashier' && { cashierId: context.userId }) }
+    case 'SaleItem': return { sale: tenantScope('Sale', context) }
+    case 'SaleReturn': return { sale: tenantScope('Sale', context) }
+    case 'SaleReturnItem': return { saleReturn: tenantScope('SaleReturn', context) }
+    case 'StockDocumentItem': return { stockDocument: tenantScope('StockDocument', context) }
+    case 'StockTransferItem': return { stockTransfer: tenantScope('StockTransfer', context) }
+    case 'StockTransfer': return { organizationId: org, fromStore: stores, toStore: stores }
+    case 'UserStore': return { organizationUser: { organizationId: org }, store: stores }
+    case 'StockDocument': case 'InventoryMovement': case 'Payment': return { organizationId: org, ...storeRelation }
+    default: return { organizationId: org }
+  }
+}
+export function assertRoutePermission(path: string, method: string, role: string) {
+  if (!['owner', 'admin', 'cashier'].includes(role)) throw new AccessError(403, 'FORBIDDEN')
+  const area = path.split('/')[2]
+  const read = method === 'GET' || method === 'HEAD'
+  if (area === 'organizations' && !read && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
+  if (area === 'organizations' && path.includes('/users') && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
+  if (role === 'cashier') {
+    const allowed = ['sales', 'shifts', 'products', 'categories', 'customers', 'stores', 'auth', 'operations', 'sync']
+    if (!allowed.includes(area) || (['products','categories','customers','stores'].includes(area) && !read)) throw new AccessError(403, 'FORBIDDEN')
+    if (path.endsWith('/void')) throw new AccessError(403, 'MANAGER_REQUIRED')
+  }
+}

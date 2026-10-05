@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -25,9 +25,10 @@ import {
 
 export default function CustomersPage() {
   const { organization } = useAuth();
-  const { activeStore } = useOrganization();
+  const { activeStore, activeShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
+  const collectionAttempt = useRef<string | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -150,6 +151,7 @@ export default function CustomersPage() {
   };
 
   const handleOpenDebtModal = (c: Customer) => {
+    collectionAttempt.current = null;
     setSelectedDebtCustomer(c);
     setDebtAmount(String(c.debt || ''));
     setDebtNote('Qarz to\'lovi');
@@ -165,17 +167,22 @@ export default function CustomersPage() {
       return;
     }
 
+    if (!activeShift) { notifyError('Qarzni undirish uchun smenani oching'); return; }
+    collectionAttempt.current ??= crypto.randomUUID();
     setIsProcessingDebt(true);
     try {
       await api.payments.credit({
         organizationId: organization.id,
         storeId: activeStore.id,
         customerId: selectedDebtCustomer.id,
+        shiftId: activeShift.id,
+        operationId: collectionAttempt.current,
         amount,
         note: debtNote.trim() || undefined,
       });
 
       notifySuccess('Nasiya qarzi muvaffaqiyatli undirildi!');
+      collectionAttempt.current = null;
       setSelectedDebtCustomer(null);
       loadCustomers();
     } catch (err: unknown) {

@@ -1,20 +1,23 @@
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
+import { closeShift, closeSchema } from '@/server/finance/shifts'
 
 const closeShiftSchema = z.object({
   countedCash: z.number(),
   note: z.string().optional(),
 })
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -22,15 +25,16 @@ export async function GET(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
-    const shift = await prisma.shift.findUnique({
+    const shift = await db.shift.findUnique({
       where: { id },
       include: {
         register: true,
@@ -71,7 +75,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('Get shift error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -79,13 +83,13 @@ export async function GET(
   }
 }
 
-export async function POST(
+async function handlePOST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -93,72 +97,16 @@ export async function POST(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
-
     const body = await request.json()
-    const validatedData = closeShiftSchema.parse(body)
-
-    const shift = await prisma.shift.findUnique({
-      where: { id },
-    })
-
-    if (!shift) {
-      return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Sena topilmadi' } },
-        { status: 404 }
-      )
-    }
-
-    if (shift.status !== 'open') {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_STATUS', message: 'Sena allaqachon yopilgan' } },
-        { status: 400 }
-      )
-    }
-
-    // Calculate expected cash
-    const payments = await prisma.payment.findMany({
-      where: {
-        shiftId: id,
-        paymentType: 'cash',
-        direction: 'in',
-      },
-    })
-
-    const cashMovements = await prisma.cashMovement.findMany({
-      where: {
-        shiftId: id,
-      },
-    })
-
-    const cashIn = payments.reduce((sum, p) => sum + Number(p.amount), 0)
-    const cashInMovements = cashMovements
-      .filter(cm => cm.movementType === 'cash_in')
-      .reduce((sum, cm) => sum + Number(cm.amount), 0)
-    const cashOutMovements = cashMovements
-      .filter(cm => cm.movementType === 'cash_out')
-      .reduce((sum, cm) => sum + Number(cm.amount), 0)
-
-    const expectedCash = Number(shift.openingCash) + cashIn + cashInMovements - cashOutMovements
-    const cashDifference = validatedData.countedCash - expectedCash
-
-    const updatedShift = await prisma.shift.update({
-      where: { id },
-      data: {
-        status: 'closed',
-        closedAt: new Date(),
-        expectedCash,
-        countedCash: validatedData.countedCash,
-        cashDifference,
-        note: validatedData.note,
-      },
-    })
+    const validatedData = closeSchema.parse(body)
+    const updatedShift = await closeShift(payload,id,validatedData)
 
     return NextResponse.json({
       success: true,
@@ -167,17 +115,20 @@ export async function POST(
     })
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Close shift error:', error)
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

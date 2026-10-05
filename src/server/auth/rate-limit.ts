@@ -1,0 +1,17 @@
+import { createHash } from 'node:crypto'
+import { prisma } from '@/lib/prisma'
+import { AccessError } from './policy'
+export async function consumeLimit(category:string,identity:string,limit=5,windowMs=15*60*1000) {
+ const key=createHash('sha256').update(category+':'+identity).digest('hex')
+ const now=new Date(),expires=new Date(now.getTime()+windowMs)
+ const rows=await prisma.$queryRaw<{attempts:number}[]>`
+  INSERT INTO "RateLimit" (key,attempts,"expiresAt") VALUES (${key},1,${expires})
+  ON CONFLICT (key) DO UPDATE SET attempts=CASE WHEN "RateLimit"."expiresAt"<=${now} THEN 1 ELSE "RateLimit".attempts+1 END,
+  "expiresAt"=CASE WHEN "RateLimit"."expiresAt"<=${now} THEN ${expires} ELSE "RateLimit"."expiresAt" END
+  RETURNING attempts`
+ if (rows[0].attempts>limit) throw new AccessError(429,'RATE_LIMITED','Ko‘p urinish. Keyinroq qayta urinib ko‘ring')
+}
+export async function clearLimit(category:string,identity:string) {
+ const key=createHash('sha256').update(category+':'+identity).digest('hex')
+ await prisma.rateLimit.deleteMany({where:{key}})
+}

@@ -1,10 +1,12 @@
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -12,13 +14,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const storeId = searchParams.get('storeId')
@@ -50,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [balances, total] = await Promise.all([
-      prisma.inventoryBalance.findMany({
+      db.inventoryBalance.findMany({
         where,
         include: {
           product: {
@@ -66,7 +69,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.inventoryBalance.count({ where }),
+      db.inventoryBalance.count({ where }),
     ])
 
     // Filter low stock if requested
@@ -89,10 +92,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get inventory balances error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)

@@ -1,6 +1,8 @@
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 
 const createCustomerSchema = z.object({
@@ -21,9 +23,9 @@ const updateCustomerSchema = z.object({
   isActive: z.boolean().optional(),
 })
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -31,13 +33,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
@@ -66,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [customers, total] = await Promise.all([
-      prisma.customer.findMany({
+      db.customer.findMany({
         where,
         orderBy: {
           fullName: 'asc',
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.customer.count({ where }),
+      db.customer.count({ where }),
     ])
 
     return NextResponse.json({
@@ -89,7 +92,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get customers error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -97,9 +100,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -107,19 +110,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = createCustomerSchema.parse(body)
 
     // Check if phone already exists
-    const existingCustomer = await prisma.customer.findFirst({
+    const existingCustomer = await db.customer.findFirst({
       where: {
         organizationId: validatedData.organizationId,
         phone: validatedData.phone,
@@ -133,7 +137,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const customer = await prisma.customer.create({
+    const customer = await db.customer.create({
       data: validatedData,
     })
 
@@ -144,17 +148,20 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Create customer error:', error)
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

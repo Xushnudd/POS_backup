@@ -21,7 +21,7 @@ interface AuthContextType {
     email?: string;
     tin?: string;
   }) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const setAuthData = useCallback((data: AuthData) => {
-    localStorage.setItem('pos_token', data.token);
+    localStorage.removeItem('pos_token');
     setToken(data.token);
     setUser(data.user);
     setOrganization({
@@ -63,11 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const savedToken = localStorage.getItem('pos_token');
-    if (!savedToken) {
-      setIsLoading(false);
-      return;
-    }
+    localStorage.removeItem('pos_token');
+    const savedToken = 'cookie-session';
 
     try {
       const res = await api.auth.me();
@@ -130,7 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await api.auth.logout();
     clearAuthData();
     router.push('/login');
   };

@@ -1,14 +1,17 @@
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
+import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -16,15 +19,16 @@ export async function GET(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
-    const customer = await prisma.customer.findUnique({
+    const customer = await db.customer.findUnique({
       where: { id },
     })
 
@@ -35,33 +39,13 @@ export async function GET(
       )
     }
 
-    // Calculate debt: sales on credit - credit payments
-    const creditSales = await prisma.payment.aggregate({
-      where: {
-        customerId: id,
-        paymentType: 'credit',
-        direction: 'in',
-      },
-      _sum: {
-        amount: true,
-      },
+    const ledger = await db.debtEntry.aggregate({
+      where: { customerId: id }, _sum: { amount: true },
     })
-
-    const creditPayments = await prisma.payment.aggregate({
-      where: {
-        customerId: id,
-        paymentType: 'credit',
-        direction: 'out',
-      },
-      _sum: {
-        amount: true,
-      },
-    })
-
-    const totalDebt = (creditSales._sum.amount || 0) - (creditPayments._sum.amount || 0)
+    const totalDebt = new Prisma.Decimal(ledger._sum.amount ?? 0)
 
     // Get recent transactions
-    const recentPayments = await prisma.payment.findMany({
+    const recentPayments = await db.payment.findMany({
       where: {
         customerId: id,
         paymentType: 'credit',
@@ -79,16 +63,17 @@ export async function GET(
         customerName: customer.fullName,
         creditLimit: customer.creditLimit,
         totalDebt,
-        remainingCredit: customer.creditLimit - totalDebt,
+        remainingCredit: customer.creditLimit.sub(totalDebt),
         recentPayments,
       },
     })
 
   } catch (error) {
-    console.error('Get customer debt error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)

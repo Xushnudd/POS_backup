@@ -1,29 +1,14 @@
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
+import { openShift, openSchema } from '@/server/finance/shifts'
 
-const openShiftSchema = z.object({
-  registerId: z.string().uuid(),
-  organizationUserId: z.string().uuid(),
-  openingCash: z.number().default(0),
-  note: z.string().optional(),
-})
-
-const closeShiftSchema = z.object({
-  countedCash: z.number(),
-  note: z.string().optional(),
-})
-
-const cashMovementSchema = z.object({
-  movementType: z.enum(['cash_in', 'cash_out']),
-  amount: z.number().positive(),
-  reason: z.string(),
-})
-
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -31,13 +16,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const registerId = searchParams.get('registerId')
@@ -53,7 +39,7 @@ export async function GET(request: NextRequest) {
       where.status = status
     }
 
-    const shifts = await prisma.shift.findMany({
+    const shifts = await db.shift.findMany({
       where,
       include: {
         register: true,
@@ -74,7 +60,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get shifts error:', error)
+    if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -82,9 +68,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -92,43 +78,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
-
     const body = await request.json()
-    const validatedData = openShiftSchema.parse(body)
-
-    // Check if there's already an open shift for this register
-    const existingOpenShift = await prisma.shift.findFirst({
-      where: {
-        registerId: validatedData.registerId,
-        status: 'open',
-      },
-    })
-
-    if (existingOpenShift) {
-      return NextResponse.json(
-        { success: false, error: { code: 'SHIFT_ALREADY_OPEN', message: 'Bu kassa uchun allaqachon ochiq smena mavjud' } },
-        { status: 400 }
-      )
-    }
-
-    const shift = await prisma.shift.create({
-      data: validatedData,
-      include: {
-        register: true,
-        organizationUser: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    })
+    const validatedData = openSchema.parse(body)
+    const shift = await openShift(payload, validatedData)
 
     return NextResponse.json({
       success: true,
@@ -137,17 +96,20 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Open shift error:', error)
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
     )
   }
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

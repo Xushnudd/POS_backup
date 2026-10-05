@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -31,6 +31,7 @@ export default function OpenShiftModal({
   const [note, setNote] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const attempt = useRef<string | null>(null);
   const registers = activeStore?.registers || [];
 
   const handleOpenShift = async (e: React.FormEvent) => {
@@ -46,13 +47,16 @@ export default function OpenShiftModal({
 
     setIsLoading(true);
     try {
+      attempt.current ??= crypto.randomUUID();
       await api.shifts.open({
+        operationId: attempt.current,
         registerId: activeRegister.id,
         organizationUserId: user.organizationUserId,
         openingCash: parseFloat(openingCash) || 0,
         note: note.trim() || undefined,
       });
 
+      attempt.current = null;
       notifySuccess('Smena muvaffaqiyatli ochildi!');
       await refreshShift();
       onClose();

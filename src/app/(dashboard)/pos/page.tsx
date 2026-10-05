@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -126,6 +126,7 @@ export default function PosPage() {
     }
   };
 
+  const checkoutAttempt = useRef<{ operationId: string; payload: string; saleId?: string } | null>(null);
   // Process and complete sale
   const handleProcessPayment = async (
     payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[]
@@ -158,10 +159,14 @@ export default function PosPage() {
         })),
       };
 
-      const saleRes = await api.sales.create(draftPayload);
-      if (!saleRes.data) {
-        throw new Error('Savdo qoralamasi yaratilmadi');
+      const signature = JSON.stringify(draftPayload);
+      if (checkoutAttempt.current && checkoutAttempt.current.payload !== signature) {
+        throw new Error('Oldingi savdo natijasini aniqlang; kutilayotgan savatni o‘zgartirish mumkin emas');
       }
+      checkoutAttempt.current ??= { operationId: crypto.randomUUID(), payload: signature };
+      const saleRes = await api.sales.create({ ...draftPayload, operationId: checkoutAttempt.current.operationId });
+      if (!saleRes.data) throw new Error('Savdo qoralamasi yaratilmadi');
+      checkoutAttempt.current.saleId = saleRes.data.id;
 
       // 2. Complete sale with payments
       const completeRes = await api.sales.complete(saleRes.data.id, {
@@ -175,18 +180,8 @@ export default function PosPage() {
       notifySuccess('Savdo muvaffaqiyatli yakunlandi!');
 
       // 3. Prepare for receipt preview
-      const finishedSale: Sale = {
-        ...completeRes.data,
-        items: draftPayload.items.map((it) => ({
-          ...it,
-          lineTotal: it.quantity * it.unitPrice - it.discountAmount,
-        })),
-        customer,
-        payments: payments.map((p) => ({
-          ...p,
-          direction: 'in',
-        })),
-      };
+      const finishedSale: Sale = { ...completeRes.data, customer };
+      checkoutAttempt.current = null;
 
       setCompletedSale(finishedSale);
       setIsPaymentModalOpen(false);
