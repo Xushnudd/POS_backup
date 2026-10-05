@@ -7,7 +7,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
-import { api } from '@/lib/api';
+import Select from '@/components/ui/Select';
+import { api, ApiError } from '@/lib/api';
+import { deviceId, pendingOperations, enqueue, acknowledge } from '@/lib/offline';
 import { Sale } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
 import Card from '@/components/ui/Card';
@@ -15,18 +17,23 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ReceiptPreview from '@/components/pos/ReceiptPreview';
+import ReturnHistory from '@/components/pos/ReturnHistory';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPrint, faBan } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function SaleDetailPage() {
-  const {role}=useAuth();
+  const {role,user,organization}=useAuth();
   const {activeShift}=useOrganization();
   const [returnOpen,setReturnOpen]=useState(false);
   const [returnQty,setReturnQty]=useState<Record<string,string>>({});
+  const [returnDisposition,setReturnDisposition]=useState<Record<string,'sellable'|'damaged'|'write_off'>>({});
   const [reason,setReason]=useState('');
   const [returning,setReturning]=useState(false);
-  const returnAttempt=useRef<string|null>(null);
+  const returnAttempt=useRef<Parameters<typeof api.sales.returns>[1]|null>(null);
+  const [returnUnknown,setReturnUnknown]=useState(false);
+  const [localReady,setLocalReady]=useState(false);
+  const [localError,setLocalError]=useState('');
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
@@ -35,6 +42,28 @@ export default function SaleDetailPage() {
   const [sale, setSale] = useState<Sale | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [returnVersion,setReturnVersion]=useState(0);
+
+  useEffect(()=>{
+    if(!id||!organization?.id||!user?.id)return;
+    let cancelled=false;
+    void Promise.resolve().then(async()=>{
+      if(cancelled)return;
+      setLocalReady(false);setLocalError('');returnAttempt.current=null;setReturnUnknown(false);
+      try{
+        const saved=(await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).find(operation=>operation.type==='sale.return'&&operation.payload.saleId===id);
+        if(cancelled)return;
+        if(saved){
+          const {saleId,...payload}=saved.payload;
+          if(saleId!==id||payload.operationId!==saved.id)throw new Error('Saqlangan qaytarish mos emas');
+          const input=payload as Parameters<typeof api.sales.returns>[1];
+          returnAttempt.current=input;setReturnQty(Object.fromEntries(input.items.map(item=>[item.saleItemId,String(item.quantity)])));setReturnDisposition(Object.fromEntries(input.items.map(item=>[item.saleItemId,item.disposition])));setReason(input.reason);setReturnUnknown(true);setReturnOpen(true);
+        }
+        setLocalReady(true);
+      }catch(error){if(!cancelled)setLocalError(error instanceof Error?error.message:'Lokal qaytarish yuklanmadi');}
+    });
+    return()=>{cancelled=true;};
+  },[id,organization?.id,user?.id]);
 
   useEffect(() => {
     if (!id) return;
@@ -69,16 +98,27 @@ export default function SaleDetailPage() {
   };
 
   const handleReturn=async()=>{
-    if (!sale || !activeShift) {notifyError('Qaytarish uchun ochiq smena kerak');return;}
-    const selected=sale.items.filter(item=>Number(returnQty[item.id??'']??0)>0).map(item=>({saleItemId:item.id!,quantity:Number(returnQty[item.id!]),disposition:'sellable' as const}));
+    if(!sale||!organization||!user||!localReady||returning)return;
+    const wasRetry=!!returnAttempt.current;
+    if(!wasRetry&&!activeShift){notifyError('Qaytarish uchun ochiq smena kerak');return;}
+    const selected=sale.items.filter(item=>Number(returnQty[item.id??'']??0)>0).map(item=>({saleItemId:item.id!,quantity:Number(returnQty[item.id!]),disposition:returnDisposition[item.id!]??'sellable'}));
     if (!selected.length || reason.trim().length<2) {notifyError('Miqdor va qaytarish sababini kiriting');return;}
-    returnAttempt.current ??= crypto.randomUUID();setReturning(true);
+    returnAttempt.current ??= {operationId:crypto.randomUUID(),shiftId:activeShift!.id,reason,items:selected};setReturning(true);
     try {
-      await api.sales.returns(sale.id,{operationId:returnAttempt.current,shiftId:activeShift.id,reason,items:selected});
-      returnAttempt.current=null;setReturnOpen(false);setReturnQty({});setReason('');
+      await enqueue({id:returnAttempt.current.operationId,scope:{organizationId:organization.id,userId:user.id,deviceId:deviceId()},type:'sale.return',payload:{saleId:sale.id,...returnAttempt.current},state:'pending',createdAt:new Date().toISOString()});
+      const result=await api.sales.returns(sale.id,returnAttempt.current);
+      await acknowledge(returnAttempt.current.operationId,'synced',result.data);
+      returnAttempt.current=null;setReturnUnknown(false);setReturnOpen(false);setReturnQty({});setReturnDisposition({});setReason('');
+      setReturnVersion(value=>value+1);
       const response=await api.sales.get(sale.id);if(response.data)setSale(response.data);
       notifySuccess('Qaytarish qayd etildi');
-    } catch(error) {notifyError(error instanceof Error?error.message:'Qaytarish amalga oshmadi');}
+    } catch(error) {
+      setReturnUnknown(true);
+      if(!wasRetry&&returnAttempt.current&&error instanceof ApiError&&['VALIDATION_ERROR','RETURN_QUANTITY_EXCEEDED','DUPLICATE_ITEM','INVALID_SHIFT','EXTERNAL_REFUND_REQUIRED','DEBT_ALLOCATION_REQUIRED','DEBT_RECONCILIATION_REQUIRED','INVALID_STATUS'].includes(error.code??'')){
+        try{await acknowledge(returnAttempt.current.operationId,'rejected',undefined,error.code);returnAttempt.current=null;setReturnUnknown(false);}catch{notifyError('Lokal natija saqlanmadi; asl amalni qayta tekshiring');}
+      }
+      notifyError(error instanceof Error?error.message:'Qaytarish amalga oshmadi');
+    }
     finally{setReturning(false);}
   };
 
@@ -105,10 +145,16 @@ export default function SaleDetailPage() {
     <div className="space-y-6 max-w-4xl mx-auto">
       <Modal isOpen={returnOpen} onClose={()=>setReturnOpen(false)} title="Tovar qaytarish">
         <div className="space-y-3">
-          {sale.items.map(item=><Input key={item.id} label={item.productName} type="number" min="0" max={Number(item.quantity)} step="0.001" value={returnQty[item.id!]??'0'} onChange={e=>setReturnQty(q=>({...q,[item.id!]:e.target.value}))}/>)}
-          <Input label="Sabab" value={reason} onChange={e=>setReason(e.target.value)}/>
+          {sale.items.map(item=><div key={item.id} className="space-y-2">
+            <Input id={`return-quantity-${item.id}`} label={item.productName} disabled={returning||returnUnknown} type="number" min="0" max={Number(item.quantity)} step="0.001" value={returnQty[item.id!]??'0'} onChange={e=>setReturnQty(q=>({...q,[item.id!]:e.target.value}))}/>
+            <Select id={`return-disposition-${item.id}`} label={`${item.productName}: qaytarilgan tovar holati`} disabled={returning||returnUnknown} value={returnDisposition[item.id!]??'sellable'} options={[{value:'sellable',label:'Sotiladigan qoldiqqa qaytarish'},{value:'damaged',label:'Brak — sotiladigan qoldiqqa qo‘shilmaydi'},{value:'write_off',label:'Hisobdan chiqarish — sotiladigan qoldiqqa qo‘shilmaydi'}]} onChange={e=>setReturnDisposition(values=>({...values,[item.id!]:e.target.value as 'sellable'|'damaged'|'write_off'}))}/>
+          </div>)}
+          <Input label="Sabab" disabled={returning||returnUnknown} value={reason} onChange={e=>setReason(e.target.value)}/>
           <p className="text-xs text-slate-500">Faqat sotilgan va hali qaytarilmagan miqdor qabul qilinadi. Naqd/nasiya hisobini server original chekdan hisoblaydi.</p>
-          <Button onClick={handleReturn} disabled={returning}>Qaytarishni tasdiqlash</Button>
+          <p className="text-xs text-slate-500">Brak va hisobdan chiqarilgan tovar qaytarish hujjatida qayd etiladi; alohida brak omboriga ko‘chirilmaydi.</p>
+          {returnUnknown&&<p role="status">Oldingi qaytarish natijasi tekshirilishi kerak. Asl miqdor, holat va smena saqlangan.</p>}
+          {localError&&<p role="alert">{localError}. Yangi qaytarish bloklandi; sahifani qayta yuklang.</p>}
+          <Button onClick={handleReturn} disabled={returning||!localReady}>{returnUnknown?'Oldingi qaytarishni tekshirish':'Qaytarishni tasdiqlash'}</Button>
         </div>
       </Modal>
       <div className="flex items-center justify-between">
@@ -137,7 +183,7 @@ export default function SaleDetailPage() {
             Chekni chop etish
           </Button>
 
-          {role !== 'cashier' && ['completed','partially_returned'].includes(sale.status) && <Button onClick={()=>setReturnOpen(true)}>Qaytarish</Button>}
+          {role !== 'cashier' && (returnUnknown||['completed','partially_returned'].includes(sale.status)) && <Button onClick={()=>setReturnOpen(true)}>Qaytarish</Button>}
           {role !== 'cashier' && sale.status === 'draft' && (
             <Button
               variant="danger"
@@ -206,6 +252,7 @@ export default function SaleDetailPage() {
         </table>
       </Card>
 
+      <ReturnHistory key={sale.id} saleId={sale.id} timezone={organization?.timezone??'Asia/Tashkent'} version={returnVersion}/>
       <ReceiptPreview
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}

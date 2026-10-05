@@ -7,6 +7,8 @@ import Button from '@/components/ui/Button';
 import { Customer, PaymentType } from '@/types';
 import { fixed, displayed } from '@/lib/money';
 import { formatMoney } from '@/lib/format';
+import { useAuth } from '@/context/AuthContext';
+import { dateBoundary } from '@/server/reports/dates';
 import { useNotification } from '@/context/NotificationContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -23,7 +25,7 @@ interface PaymentModalProps {
   onClose: () => void;
   totalAmount: number;
   customer: Customer | null;
-  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[]) => Promise<void>;
+  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -35,6 +37,8 @@ export default function PaymentModal({
   onProcessPayment,
   isLoading,
 }: PaymentModalProps) {
+  const {organization}=useAuth();
+  const [creditDueDate,setCreditDueDate]=useState('');
   const { notifyError } = useNotification();
   const [activeMethod, setActiveMethod] = useState<PaymentType | 'mixed'>('cash');
   const [mixedCash,setMixedCash]=useState('0');
@@ -48,7 +52,7 @@ export default function PaymentModal({
     if (isOpen) {
       void Promise.resolve().then(() => {
         setCashTendered(String(totalAmount));
-        setReferenceNo('');
+        setReferenceNo('');setCreditDueDate('');
         setMixedCash(String(totalAmount));setMixedCard('0');setMixedCredit('0');
       });
     }
@@ -90,7 +94,12 @@ export default function PaymentModal({
       } catch { notifyError('To‘lov miqdori noto‘g‘ri'); return; }
     } else payments=totalAmount===0?[]:[{paymentType:activeMethod,amount:totalAmount,referenceNo:referenceNo.trim()||undefined}];
 
-    await onProcessPayment(payments);
+    let creditDueAt:string|undefined;
+    if(payments.some(payment=>payment.paymentType==='credit')&&creditDueDate){
+      try{const deadline=new Date(dateBoundary(creditDueDate,organization?.timezone??'Asia/Tashkent',true).getTime()-1);if(deadline.getTime()<Date.now())throw new Error('Nasiya muddati o‘tgan sana bo‘lmasligi kerak');creditDueAt=deadline.toISOString();}
+      catch(error){notifyError(error instanceof Error?error.message:'Muddat noto‘g‘ri');return;}
+    }
+    await onProcessPayment(payments,creditDueAt);
   };
 
   return (
@@ -229,6 +238,7 @@ export default function PaymentModal({
           </div>
         )}
 
+        {(activeMethod==='credit'||activeMethod==='mixed')&&<Input type="date" label="Nasiya to‘lash muddati (ixtiyoriy)" value={creditDueDate} onChange={event=>setCreditDueDate(event.target.value)} disabled={isLoading} helperText="Muddat tashkilot vaqt zonasida kun oxirigacha hisoblanadi; faqat nasiya qismiga qo‘llanadi."/>}
         {activeMethod === 'credit' && (
           <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 space-y-3">
             <div className="flex items-center gap-2 font-bold text-sm text-amber-800">

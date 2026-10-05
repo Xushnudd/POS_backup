@@ -15,6 +15,8 @@ import {
   ProductReportItem,
   Register,
   Sale,
+  SaleReturnHistory,
+  AuditSummary,
   Shift,
   StockDocument,
   StockCount,
@@ -27,6 +29,7 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
 class ApiClient {
+  auditSummary = (params:Record<string,string>) => this.request<AuditSummary[]>(`/audit?${new URLSearchParams({...params,view:'summary',limit:'50'})}`);
   private getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
   }
@@ -185,6 +188,7 @@ class ApiClient {
   sales = {
     list: (params: {
       organizationId: string;
+      customerId?:string;
       storeId?: string;
       shiftId?: string;
       status?: string;
@@ -214,12 +218,13 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
-    complete: (id: string, data: { payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
+    complete: (id: string, data: { creditDueAt?:string; payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
       this.request<Sale>(`/sales/${id}/complete`, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
+    returnHistory: (id:string,page=1) => this.request<SaleReturnHistory[]>(`/sales/${id}/returns?page=${page}&limit=20`),
     returns: (id: string, data: {operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number;disposition:'sellable'|'damaged'|'write_off'}[]}) =>
       this.request(`/sales/${id}/returns`, {method:'POST',body:JSON.stringify(data)}),
 
@@ -400,7 +405,7 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
-    exportStatement:(id:string,params:{from?:string;to?:string}={})=>this.request<{filename:string;content:string}>(`/customers/${id}/ledger?${new URLSearchParams({format:'csv',...Object.fromEntries(Object.entries(params).filter(([,value])=>value))})}`),
+    exportStatement:(id:string,params:{from?:string;to?:string;format?:'csv'|'commercial-csv'|'html'}={})=>this.request<{filename:string;content:string}>(`/customers/${id}/ledger?${new URLSearchParams({format:'csv',...Object.fromEntries(Object.entries(params).filter(([,value])=>value))})}`),
     statement:(id:string,params:{page?:number;from?:string;to?:string}={})=>this.request<CustomerStatement>(`/customers/${id}/ledger?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!=='').map(([k,v])=>[k,String(v)]))}`),
     postDebtDocument:(id:string,data:CustomerDebtDocumentInput)=>this.request<{id:string}>(`/customers/${id}/ledger`,{method:'POST',body:JSON.stringify(data)}),
     getDebt: (id: string, targetsPage?:number) => this.request<CustomerDebt>(`/customers/${id}/debt${targetsPage?`?targetsPage=${targetsPage}`:''}`),

@@ -50,12 +50,12 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
  const refresh=useCallback(async()=>{try{const response=await api.customers.statement(customerId,{page,from:from||undefined,to:to||undefined});setStatement(response.data??null);}catch(error){notifyError(error instanceof Error?error.message:'Ko‘chirma yuklanmadi');}},[customerId,page,from,to,notifyError]);
  useEffect(()=>{void Promise.resolve().then(refresh);},[refresh,version]);
  const [exporting,setExporting]=useState(false);
- const exportCsv=async()=>{
+ const exportCsv=async(format:'csv'|'commercial-csv'|'html'='csv')=>{
   setExporting(true);
   try{
-   const response=await api.customers.exportStatement(customerId,{from:from||undefined,to:to||undefined});
+   const response=await api.customers.exportStatement(customerId,{format,from:from||undefined,to:to||undefined});
    if(!response.data)throw new Error('Eksport natijasi kelmadi');
-   const url=URL.createObjectURL(new Blob([response.data.content],{type:'text/csv;charset=utf-8'}));
+   const url=URL.createObjectURL(new Blob([response.data.content],{type:format==='html'?'text/html;charset=utf-8':'text/csv;charset=utf-8'}));
    const link=document.createElement('a');link.href=url;link.download=response.data.filename;document.body.append(link);link.click();link.remove();
    setTimeout(()=>URL.revokeObjectURL(url),1000);
   }catch(error){notifyError(error instanceof Error?error.message:'Eksport bajarilmadi');}
@@ -90,9 +90,14 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
  };
  return <Card className="space-y-4">
   <h2 className="font-bold">Mijoz qarz ko‘chirmasi</h2>
-  <Button variant="outline" onClick={exportCsv} disabled={exporting}>Qarz ko‘chirmasini CSV yuklash</Button>
+  <Button variant="outline" onClick={()=>exportCsv()} disabled={exporting}>Qarz ko‘chirmasini CSV yuklash</Button>
+  <Button variant="outline" onClick={()=>exportCsv('commercial-csv')} disabled={exporting}>To‘liq mijoz ko‘chirmasini CSV yuklash</Button>
+  <Button variant="outline" onClick={()=>exportCsv('html')} disabled={exporting}>Qarz ko‘chirmasini chop etish fayli</Button>
   <div className="flex gap-3"><Input type="date" label="Davr boshlanishi" value={from} onChange={event=>{setFrom(event.target.value);setPage(1);}}/><Input type="date" label="Davr oxiri" value={to} onChange={event=>{setTo(event.target.value);setPage(1);}}/></div>
   {statement&&<><div className="grid grid-cols-2 gap-2 text-sm"><p>Davr boshidagi qarz: {formatMoney(statement.summary.openingBalance)}</p><p>Davr oxiridagi qarz: {formatMoney(statement.summary.closingBalance)}</p><p>Joriy qarz: {formatMoney(statement.summary.currentBalance)}</p><p>Yozuvlar: {statement.pagination.total}</p></div>
+   <div className="grid grid-cols-2 gap-2 text-sm"><p>Muddati o‘tgan qarz: {formatMoney(statement.aging.overdue)}</p><p>Muddati kelmagan qarz: {formatMoney(statement.aging.upcoming)}</p><p>Muddat belgilanmagan savdo qarzi: {formatMoney(statement.aging.noDueDate)}</p><p>Hujjatlarga taqsimlanmagan qarz: {formatMoney(statement.aging.unallocated)}</p></div>
+   <p className="text-xs text-gray-600">Muddat guruhlari joriy qoldiq uchun, tanlangan davr uchun emas. Boshlang‘ich/umumiy qarzlar hujjatlarga aniq ajratilmaguncha muddati o‘tgan deb hisoblanmaydi.</p>
+   {statement.aging.requiresReconciliation&&<p role="alert" className="text-amber-700">Eski taqsimlanmagan to‘lov yoki manfiy qarz guruhi bor. Muddat bo‘yicha taxminiy qoldiq chiqarilmadi; tarixni yarashtirish kerak.</p>}
    <div className="overflow-auto"><table className="text-xs w-full"><thead><tr><th>Sana</th><th>Hujjat / chek</th><th>Summa</th><th>Qoldiq</th><th>Muddat / sabab / xodim</th></tr></thead><tbody>{statement.entries.map(entry=><tr key={entry.id} className="border-t"><td className="p-2">{new Date(entry.effectiveAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone})}</td><td>{names[entry.sourceType]??entry.sourceType}<div>{entry.receiptNo??entry.sourceId}</div></td><td>{formatMoney(entry.amount)}</td><td>{formatMoney(entry.balance)}</td><td>{entry.dueAt?new Date(entry.dueAt).toLocaleDateString('uz-UZ',{timeZone:organization?.timezone}):'Muddat belgilanmagan'}<div>{entry.note}</div><div>{entry.actorName??'Eski yozuv: xodim belgilanmagan'}</div></td></tr>)}</tbody></table></div>
    <div className="flex gap-2"><Button variant="outline" disabled={page<=1} onClick={()=>setPage(value=>value-1)}>Oldingi</Button><span>{page} / {Math.max(statement.pagination.totalPages,1)}</span><Button variant="outline" disabled={page>=statement.pagination.totalPages} onClick={()=>setPage(value=>value+1)}>Keyingi</Button></div></>}
   {localError&&<div role="alert"><p>Lokal qarz hujjatlarini tekshirishda xato: {localError}. Yangi hujjat bloklangan.</p><Button onClick={()=>setRecovery(value=>value+1)}>Lokal hujjatlarni qayta tekshirish</Button></div>}

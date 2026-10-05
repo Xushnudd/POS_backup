@@ -52,3 +52,9 @@ test('CSV text keeps delimiters and quotes in one cell and neutralizes spreadshe
  assert.equal(csvText(null),'""')
  assert.equal(csvText('Verified customer'),'"Verified customer"')
 })
+
+test('Print HTML escapes untrusted markup and attribute delimiters',async()=>{
+ const {htmlText}=await import('@/server/customers/print')
+ assert.equal(htmlText('<img src=x onerror="alert(1)">&\''),'&lt;img src=x onerror=&quot;alert(1)&quot;&gt;&amp;&#39;')
+ assert.equal(htmlText(null),'')
+})

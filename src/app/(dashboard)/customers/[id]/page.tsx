@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { DebtAllocationPicker } from '@/components/customers/DebtAllocationPicker';
 import Select from '@/components/ui/Select';
+import { CustomerSales } from '@/components/customers/CustomerSales';
 import { CustomerLedger } from '@/components/customers/CustomerLedger';
 import { deviceId, pendingOperations, enqueue, acknowledge } from '@/lib/offline';
 import { fixed } from '@/lib/money';
@@ -243,6 +244,7 @@ export default function CustomerDetailPage() {
         </div>
       </Card>
 
+      <CustomerSales key={'sales:'+id} customerId={id} version={ledgerVersion}/>
       {role==='owner'&&<CustomerLedger key={id} customerId={id} version={ledgerVersion} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));}}/>}
       {/* Debt Payment Modal */}
       <Modal

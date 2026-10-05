@@ -49,6 +49,8 @@ async function handleGET(request: NextRequest) {
     if (storeId) where.storeId = storeId
     if (shiftId) where.shiftId = shiftId
     if (status) where.status = status
+    const customerId=searchParams.get('customerId')
+    if(customerId)where.customerId=customerId
 
     const [sales, total] = await Promise.all([
       db.sale.findMany({
@@ -57,10 +59,9 @@ async function handleGET(request: NextRequest) {
           customer: true,
           items: true,
           payments: true,
+          ...(customerId?{saleReturns:{select:{id:true,refundAmount:true,returnReceiptNo:true,returnedAt:true}}}:{}),
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: [{createdAt:'desc'},{id:'desc'}],
         skip,
         take: limit,
       }),

@@ -156,7 +156,7 @@ export default function PosPage() {
 
   // Process and complete sale
   const handleProcessPayment = async (
-    payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[]
+    payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string
   ) => {
     if (!organization?.id || !activeStore?.id || !activeRegister?.id || !activeShift?.id || !user?.id) {
       notifyError('Kassa yoki smena ma\'lumotlari to\'liq emas');
@@ -188,6 +188,7 @@ export default function PosPage() {
         })),
       };
 
+      const completion={payments,...(creditDueAt?{creditDueAt}: {})};
       const signature = JSON.stringify(draftPayload);
       if (checkoutAttempt.current && checkoutAttempt.current.payload !== signature) {
         throw new Error('Oldingi savdo natijasini aniqlang; kutilayotgan savatni o‘zgartirish mumkin emas');
@@ -203,11 +204,11 @@ export default function PosPage() {
       checkoutAttempt.current.saleId = saleRes.data.id;
       await acknowledge(operationId,'synced',saleRes.data);
       await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current});
-      await enqueue({id:saleRes.data.id,scope,type:'sale.complete',payload:{saleId:saleRes.data.id,payments},state:'pending',createdAt:new Date().toISOString()});
+      await enqueue({id:saleRes.data.id,scope,type:'sale.complete',payload:{saleId:saleRes.data.id,...completion},state:'pending',createdAt:new Date().toISOString()});
 
       // 2. Complete sale with payments
       const completeRes = await api.sales.complete(saleRes.data.id, {
-        payments,
+        ...completion,
       });
 
       if (!completeRes.data) {

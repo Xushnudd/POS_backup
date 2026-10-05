@@ -86,6 +86,7 @@ const navItems: NavItem[] = [
     icon: faGear,
     roles: ['owner'],
   },
+  {href:'/audit',label:'Audit tarixi',icon:faClockRotateLeft,roles:['owner']},
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {

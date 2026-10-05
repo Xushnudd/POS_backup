@@ -1,3 +1,4 @@
+import { consumeLimit } from './auth/rate-limit'
 import { randomUUID } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -109,6 +110,11 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
           if (context && options.validateBodyReferences !== false) await validateRefs(body, context)
         }
       }
+      if(context&&request.method==='GET'&&path.startsWith('/api/reports/')){
+        const identity=context.organizationId+':'+context.userId
+        await consumeLimit('report.read',identity,60,60000)
+        if(path==='/api/reports/reconciliation')await consumeLimit('report.reconciliation',identity,10,60000)
+      }
       const result = await handler(request, routeContext)
       const data = await result.json()
       const response = NextResponse.json(sanitize(data, context?.role), { status: result.status, headers: result.headers })
@@ -124,7 +130,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         status = error.code === 'P2025' ? 404 : 409; code = error.code === 'P2025' ? 'NOT_FOUND' : 'CONFLICT'; message = 'Resurs topilmadi yoki amal takrorlangan'
       }
       console.error(JSON.stringify({event:'api_error',requestId,status,code}))
-      return NextResponse.json({ success:false, error:{code,message}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store'} })
+      return NextResponse.json({ success:false, error:{code,message}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
     }
   }
 }

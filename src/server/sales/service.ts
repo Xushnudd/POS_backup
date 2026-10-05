@@ -70,6 +70,7 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
     const total=input.payments.reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
     if (!total.eq(sale.totalAmount)) throw new AccessError(400,'INVALID_PAYMENT','To‘lovlar jami savdoga teng bo‘lishi kerak')
     const credit=input.payments.filter(p=>p.paymentType==='credit').reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
+    if(input.creditDueAt&&(credit.lte(0)||new Date(input.creditDueAt).getTime()<Date.now()))throw new AccessError(400,'INVALID_CREDIT_DUE_DATE','Muddat musbat nasiya qismi uchun va o‘tmagan sana bo‘lishi kerak')
     if (credit.gt(0)) {
       if (!sale.customerId) throw new AccessError(400,'CUSTOMER_REQUIRED')
       await tx.$queryRaw`SELECT id FROM "Customer" WHERE id=${sale.customerId} FOR UPDATE`

@@ -532,3 +532,55 @@ Manual qarz hujjati (`POST /api/customers/:id/ledger`) ham HTTPdan oldin lokal `
 ### Mijoz qarz ko‘chirmasini CSV eksport qilish
 
 `GET /api/customers/:id/ledger?format=csv&from=2026-01-01&to=2026-01-31` — faqat owner uchun. From/to ixtiyoriy; mavjud organization-timezone davr qoidalari ishlaydi. JSON `data.filename` va `data.content` (UTF-8 BOM CSV string) qaytadi; UI Blob orqali `.csv` yuklaydi. Page/limit e’tiborga olinmaydi, davr to‘liq eksport qilinadi. 10000 yozuvdan oshsa `413 EXPORT_TOO_LARGE`; davrni qisqartiring. Summary va satr qoldiqlari bitta database snapshotdan. CSVda tashkilot timezone va satrlar uchun UTC sana/muddat bor, moliyaviy qiymatlar Decimal 2 xonali. Matnli ustunlar spreadsheet formula injectiondan himoyalangan. Endpoint private/no-store; boshqa tenant va owner bo‘lmagan a’zoga eksport berilmaydi. Bu qarz ledgeri eksporti; naqd-only savdolarni qamrab oladigan to‘liq mijoz commercial statementi hali alohida qolgan.
+
+
+### Mijoz savdolari tarixi
+
+`GET /api/sales?organizationId=<UUID>&customerId=<UUID>&page=1&limit=20` — mavjud savdo listiga ixtiyoriy customerId filtri qo‘shildi. Naqd yoki nasiya turidan qat’i nazar ayni mijozning vakolatdagi savdolari qaytadi; tenant/branch/own-cashier cheklovlari saqlanadi. Customer filterli javobdagi har sale uchun `saleReturns` array (id, refundAmount Decimal string, returnReceiptNo, returnedAt) qo‘shiladi. Payments avvalgidek qaytadi. Qaytarish `refundAmount` tovar qiymati; uning hammasi cash refund degani emas. Customer karta shu pagination API va sales detail havolalarini ishlatadi; mijozga bog‘lanmagan eski savdolar taxminiy ravishda biriktirilmaydi. Bu jadval full commercial statement eksporti emas.
+
+
+### Birlashtirilgan mijoz ko‘chirmasi
+
+`GET /api/customers/:id/ledger?format=commercial-csv&from=2026-01-01&to=2026-01-31` — owner-only. JSON `data.filename` (`customer-statement-<UUID>.csv`) va UTF-8 BOM CSV `data.content` qaytadi. From/to ixtiyoriy, organization timezone ishlaydi; maksimal 10000 hodisa, oshsa 413 EXPORT_TOO_LARGE.
+
+Eksport yakunlangan savdo, qaytarish, mijozga yoki uning savdosiga bog‘langan payment va debt yozuvlarini bitta snapshotda birlashtiradi. Savdo/qaytarish qiymati va pul harakati alohida ustunlar. Credit payment kirimga qo‘shilmaydi; faqat DebtEntry qarzni o‘zgartiradi. `recorded` non-credit payment kirim/chiqimda hisoblanadi; card/transfer uchun bu tashqi provider confirmation degani emas. Draft/voided sale savdo qiymatiga kirmaydi. Row timestamp/due UTC, actor ID va source/detail/reference saqlanadi; summary davr boshidagi/oxiridagi qarzni ko‘rsatadi. Xavfsiz CSV quoting/formula himoyasi va private/no-store mavjud. Oldingi `format=csv` faqat qarz ko‘chirmasi eksporti sifatida saqlangan.
+
+
+### Nasiya savdosi muddati
+
+`POST /api/sales/:id/complete` uchun ixtiyoriy `creditDueAt` offsetli ISO datetime. U faqat musbat credit payment qismi bo‘lsa va muddat hali o‘tmagan bo‘lsa qabul qilinadi; aks holda `400 INVALID_CREDIT_DUE_DATE`, posting rollback. Credit DebtEntry shu dueAtni saqlaydi. POS credit/mixed oynasi tanlangan sanani tashkilot timezone bo‘yicha kun oxiriga aylantiradi. Original completion payloadi muddat bilan IndexedDB’da saqlanadi; ayni operation kaliti bilan boshqa muddatga almashtirish payload conflict. Committed replay muddat keyinchalik o‘tgan bo‘lsa ham mavjud natijani qaytaradi; yangi posting uchun sana qayta tekshiriladi. Optional field yuborilmagan avvalgi so‘rovlar o‘zgarmaydi.
+
+
+### Qarz ko‘chirmasini chop etish
+
+`GET /api/customers/:id/ledger?format=html&from=2026-01-01&to=2026-01-31` — owner-only, JSON `data.filename` (`customer-debt-<UUID>.html`) va `data.content` (standalone HTML) qaytadi. Date/tenant/snapshot va 10000 yozuv cap qarz CSV bilan bir xil. Customer kartadagi tugma faylni yuklaydi; brauzerda ochib Ctrl+P bilan chop etish yoki PDF saqlash mumkin. HTMLda summary, barcha period ledger rows, due dates/actor/reason bor; JavaScript yo‘q, dynamic text escaped va CSP qo‘yilgan. Bu qarz ko‘chirmasi print ko‘rinishi; full commercial CSV format alohida saqlangan. Hech qanday real printer/hardware/vendor integratsiyasi qo‘shilmagan.
+
+
+### Qarz qoldig‘ining joriy muddat guruhlari
+
+`GET /api/customers/:id/ledger` javobiga `data.aging` qo‘shildi: `asOf` ISO, Decimal strings `overdue`, `upcoming`, `noDueDate`, `unallocated`, `debtTotal`, `creditBalance`; boolean `requiresReconciliation`. Bu joriy qoldiqning aging holati, from/to bilan historical aging emas. Sale debt qoldig‘i original dueAt bilan guruhlanadi; general opening/correction document settlement hali individual bo‘lmagani uchun unallocated. Negative group yoki legacy null-sale payment reduction aniqlansa taxminiy sale aging chiqarilmaydi: debtTotal unallocated va requiresReconciliation true. Buckets jami debtTotalga, debtTotal-creditBalance esa currentBalancega teng. Aging owner-only ledger snapshot ichida hisoblanadi; oldingi summary/pagination contract saqlangan. Debt CSVga shu current buckets qo‘shilgan.
+
+
+### Ko‘chirma va eksport request limitlari
+
+Owner ledger GET eksport formatlari (`csv`, `commercial-csv`, `html`) tashkilot+xodim kesimida umumiy 10 request/60s budgetga ega. Customer, davr yoki formatni almashtirish yangi budget ochmaydi. Oddiy ledger GET alohida 60 request/60s. Limit oshsa `429 RATE_LIMITED` va `Retry-After` (qolgan butun sekund) qaytadi; shu muddatdan keyin qayta uriniladi. Budgetlar PostgreSQL atomic counter bilan saqlanadi, process-local emas. Owner va tenant qoidalari saqlangan. Mavjud shared auth/operation rate-limit javoblari ham Retry-After headerini oladi; ularning o‘z window/limitlari o‘zgarmagan.
+
+### Audit tarixi summary
+
+`GET /api/audit?view=summary&page=1&limit=50` — faqat owner uchun. Ixtiyoriy exact-match filtrlar: `entityType`, `action` (100 belgigacha), `entityId`, `actorId` (UUID); `from`/`to` tashkilot timezone bo‘yicha date range, oxirgi kun to‘liq kiradi. Javob `data` va `pagination`; rows createdAt descending/id ascending. Count va rows bir repeatable-read snapshotdan. Summary DTO `id`, `actorId`, `entityType`, `entityId`, `action`, `createdAt`, nullable `actor.fullName` maydonlariga ega. Before/after payload, IP va xodimning boshqa ma’lumotlari berilmaydi. Tashkilot+xodim uchun60/min limit, oshsa429/Retry-After. `view` berilmagan audit API ham owner-only va ayni filtr/snapshot/umumiy60/min budget bilan ishlaydi; ownerga qo‘shimcha organizationId/beforeData/afterData qaytadi. IP manzil chiqarilmaydi, payload existing recursive API sanitizationdan o‘tadi. Admin endi org-wide raw auditga kira olmaydi: audit yozuvlarida ishonchli filial scope yo‘q. Noma’lum view400 INVALID_VIEW; haddan tashqari pagination offset400 INVALID_PAGINATION. View almashtirish budgetni yangilamaydi.
+
+Owner `/audit` sahifasini menyudan ochadi; filtrlar,50 tadan pagination va loading/error/retry mavjud. Bu yozilgan audit hodisalari tarixi; har bir tizim hodisasi qamrab olingan yoki alohida security-event bildirishnomasi yaratilgan degan da’vo yo‘q.
+
+### Hisobot request limitlari
+
+`GET /api/reports/sales`, `/products`, `/dashboard`, `/reconciliation` tashkilot+xodim kesimida umumiy 60 request/60s limitdan foydalanadi. Reconciliation qo‘shimcha 10 request/60s limitga ega; ikkala limit ham amal qiladi. Endpoint, davr, filial yoki reconciliation `kind` parametrini almashtirish yangi budget ochmaydi. Vakolat va tenant/filial reference tekshiruvlari limitdan oldin bajariladi. Limit oshsa `429 RATE_LIMITED`, private/no-store va `Retry-After` qaytadi. Hisobot natijalarining mavjud scope va hisoblash qoidalari saqlangan.
+
+### Qaytarilgan tovar holati
+
+`GET /api/sales/:id/returns?page=1&limit=20` — savdoga tegishli qaytarishlar tarixi. Mavjud Sale tenant/branch/own-cashier scope amal qiladi; kassir faqat vakolatdagi o‘z savdosi tarixini o‘qiydi, qaytarish yaratish uchun manager talabi saqlanadi. Limit 1..200; default20. JSON `data` array va `pagination` (`page`, `limit`, `total`, `totalPages`) qaytadi. Qatorlar returnedAt/id kamayish tartibida, count va qatorlar bir repeatable-read snapshotdan.
+
+Har hujjat `id`, `returnReceiptNo`, `returnedAt`, `status`, `refundAmount` Decimal string, `reason`, minimal `processor.fullName` va `items` qaytaradi. Itemda `id`, `saleItemId`, `quantity`, `lineTotal`, `disposition`, original chekning `saleItem.productName/sku/unit` qiymatlari bor; joriy katalog nomi tarixni o‘zgartirmaydi. Parol, token, tannarx yoki keraksiz xodim profili berilmaydi. Savdo detail ekranida pagination, loading/error/retry mavjud; qaytarish success/replaydan keyin tarix yangilanadi. Qiymat tovar qaytarish summasi, naqd refund summasi deb talqin qilinmaydi.
+
+`POST /api/sales/:id/returns` mavjud `items[].disposition` maydonini qabul qiladi: `sellable` sotiladigan qoldiqqa qaytaradi; `damaged` va `write_off` qaytarish hujjatida saqlanadi, sotiladigan qoldiqni oshirmaydi. Maydon berilmasa mavjud `sellable` default saqlanadi. Savdo detail ekranida har bir qator uchun shu uch tanlov bor. Alohida brak omboriga ko‘chirish hozir amalga oshirilmaydi. Refund va debt hisoblari tovar holatidan qat’i nazar original chek qoidalari bo‘yicha; manager vakolati, ochiq smena va idempotency talablari saqlangan.
+
+Qaytarish UI so‘rovni HTTPdan oldin mavjud IndexedDB operations storega `sale.return` sifatida saqlaydi (`saleId`, original `operationId`, `shiftId`, `reason`, `items`). Scope tashkilot+foydalanuvchi+qurilma. Noma’lum natija/reload holatida ayni savdo oynasi asl payloadni tiklaydi, maydonlarni qulflaydi va “Oldingi qaytarishni tekshirish” tugmasini ko‘rsatadi. Original operation serverda committed bo‘lsa, eski smena yopilgan va savdo returned bo‘lganidan keyin ham bir xil payload bilan replay oldingi natijani qaytaradi; yangi posting uchun mavjud ochiq smena talabi saqlanadi. Local save muvaffaqiyatsiz bo‘lsa HTTP yuborilmaydi; local recovery xatosi yangi amalni bloklaydi. Server successdan keyin local synced acknowledgment yoziladi. Birinchi aniq validation/business rad javoblari rejected sifatida yopiladi; noma’lum natijadan keyingi retry rad javobi asl intentni yo‘qotmaydi. Mavjud sync contract o‘zgarmagan.

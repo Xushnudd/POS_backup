@@ -266,7 +266,14 @@ export interface CustomerDebt {
   allocationTargets?: {page:number;hasMore:boolean;items:DebtAllocationTarget[]};
 }
 
+export interface AuditSummary {id:string;actorId:string|null;entityType:string;entityId:string;action:string;createdAt:string;actor:{fullName:string}|null}
+export interface SaleReturnHistory {
+  id:string;returnReceiptNo:string;returnedAt:string;status:string;refundAmount:string;reason:string|null;
+  processor:{fullName:string};
+  items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
+}
 export interface Sale {
+  saleReturns?:{id:string;refundAmount:string;returnReceiptNo:string;returnedAt:string}[];
   id: string;
   organizationId: string;
   storeId: string;
@@ -378,6 +385,7 @@ export interface CustomerStatementEntry {
  effectiveAt:string;dueAt:string|null;createdAt:string;note:string|null;actorId:string|null;actorName:string|null;
 }
 export interface CustomerStatement {
+ aging:{asOf:string;overdue:string;upcoming:string;noDueDate:string;unallocated:string;debtTotal:string;creditBalance:string;requiresReconciliation:boolean};
  customer:{id:string;fullName:string};entries:CustomerStatementEntry[];
  summary:{openingBalance:string;increases:string;reductions:string;closingBalance:string;currentBalance:string};
  pagination:{page:number;limit:number;total:number;totalPages:number};
