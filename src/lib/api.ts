@@ -347,6 +347,8 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
+    returnTransit: (id:string,data:{operationId:string;reason:string}) => this.request<StockTransfer>(`/transfers/${id}/return`,{method:"POST",body:JSON.stringify(data)}),
+
     cancel: (id:string,reason:string) => this.request<StockTransfer>(`/transfers/${id}/cancel`,{method:"POST",body:JSON.stringify({reason})}),
 
     send: (id: string) =>

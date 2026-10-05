@@ -128,6 +128,18 @@ export default function StockTransfersPage() {
     }
   };
 
+  const returnIntents=useRef<Record<string,{operationId:string;reason:string}>>({});
+  const handleReturn=async(id:string)=>{
+    let intent=returnIntents.current[id];
+    if(!intent){
+      const reason=window.prompt('Hali qabul qilinmagan mahsulotlar manba omborga qaytib kelganini tasdiqlang. Qaytarish sababi:')?.trim();
+      if(!reason)return;
+      if(reason.length<3||reason.length>2000){notifyError('Sabab 3–2000 belgi bo‘lishi kerak');return;}
+      intent={operationId:crypto.randomUUID(),reason};returnIntents.current[id]=intent;
+    }
+    try{await api.transfers.returnTransit(id,intent);notifySuccess('Qabul qilinmagan miqdorlar manba omborga qaytarildi');await loadTransfers();}
+    catch(error){notifyError(error instanceof Error?error.message:'Natija noaniq; shu amal bilan qayta urinishingiz mumkin');await loadTransfers();}
+  };
   const cancelReasons=useRef<Record<string,string>>({});
   const handleCancel=async(id:string)=>{
     const reason=cancelReasons.current[id]??window.prompt('Jo‘natilmagan transferni bekor qilish sababi:')?.trim();
@@ -233,7 +245,7 @@ export default function StockTransfersPage() {
                         <Badge variant="success" size="sm">
                           Qabul qilingan
                         </Badge>
-                      ) : t.status === 'cancelled' ? (<Badge variant="warning" size="sm">Bekor qilingan</Badge>) : t.status === 'sent' ? (
+                      ) : t.status === 'closed' ? (<Badge variant="success" size="sm">Qabul/qaytarish bilan yopilgan</Badge>) : t.status === 'cancelled' ? (<Badge variant="warning" size="sm">Bekor qilingan</Badge>) : t.status === 'sent' ? (
                         <Badge variant="info" size="sm">
                           Yo&apos;lda (Jo&apos;natilgan)
                         </Badge>
@@ -255,6 +267,7 @@ export default function StockTransfersPage() {
                           Jo&apos;natish
                         </Button>
                       )}
+                      {t.status === 'sent' && <Button size="sm" variant="outline" onClick={()=>handleReturn(t.id)}>Yo‘ldagi qismini qaytarish</Button>}
                       {t.status === 'sent' && (
                         <Button
                           variant="success"

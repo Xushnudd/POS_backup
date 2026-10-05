@@ -139,6 +139,8 @@ export interface StockTransferItem {
   stockTransferId?: string;
   productId: string;
   product?: Product;
+  receivedQuantity?: number;
+  returnedQuantity?: number;
   quantity: number;
   unitCost: number;
 }
@@ -150,7 +152,7 @@ export interface StockTransfer {
   fromStore?: Store;
   toStoreId: string;
   toStore?: Store;
-  status: 'draft' | 'sent' | 'received' | 'cancelled';
+  status: 'draft' | 'sent' | 'received' | 'cancelled' | 'closed';
   note?: string | null;
   createdBy: string;
   sentAt?: string | null;

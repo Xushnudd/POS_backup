@@ -40,3 +40,9 @@ Auditda ESLintning development glob zanjiridagi [braces stack exhaustion](https:
 ## ADR-007 — yuborilmagan savdo urinishini bekor qilish
 
 2026-10-05. `Operation.state=cancelled` aynan original sale.create idempotency slotini band qiladi. Kechikkan serializable posting shu unique slot bilan to‘qnashib, yangi transactionda terminal bekor holatini ko‘radi; savdo/stock/payment yaratmaydi. Original actor va payload hash mos bo‘lishi shart. Allaqachon yaratilgan draftni bu xizmat o‘zgartirmaydi: mavjud manager-only void ruxsati saqlanadi. Parallel cancellation/posting PostgreSQL sinovi o‘tdi. Browser E2E haqiqiy commitdan keyin HTTP javobni uzib, reload va operation recovery orqali aynan bitta sale/payment/stock effektini tasdiqladi.
+
+## ADR-008 — ombor reversal va transferni qaytarish
+
+2026-10-05. Tasdiqlangan StockDocument va uning satrlari DB trigger bilan edit/delete/adddan himoyalanadi; tashkilotni to‘liq o‘chirishdagi FK cascade bundan alohida. Reversal originalga unique linkli yangi confirmed hujjat, manfiy original quantitylar va alohida movement/audit bilan yaratiladi. Xarid reversalida moving-average inverse qo‘llanadi; saqlangan checkout tannarxi o‘zgarmaydi. Yetarli qoldiq yoki nonnegative cost qiymati bo‘lmasa butun transaction rad etiladi; negative-stock policy reversal orqali yangi kamomad yaratmaydi.
+
+Transfer: draft cancellation stockni o‘zgartirmaydi. Sentdan keyin faqat unreceived transit qismi manba omborga operator tasdig‘i bilan qaytariladi; receivedQuantity + returnedQuantity ≤ quantity DB constraint. Barcha miqdor qabul/qaytarilganida holat closed; qabul qilingan mahsulotlar uchun yangi teskari transfer ishlatiladi. Return operationning idempotent yozuvi, stock journal va reason/actorli audit qaytarish dalilini saqlaydi. Parallel receive/return aynan bitta iqtisodiy effekt beradi. Vendor/hardware implementatsiyasi kiritilmagan.

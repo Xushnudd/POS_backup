@@ -304,6 +304,7 @@ model StockTransferItem {
   stockTransferId String
   productId       String
   receivedQuantity Decimal @db.Decimal(20, 6) @default(0)
+  returnedQuantity Decimal @db.Decimal(20, 6) @default(0)
   quantity        Decimal  @db.Decimal(20, 6)
   unitCost        Decimal  @db.Decimal(20, 6)
   

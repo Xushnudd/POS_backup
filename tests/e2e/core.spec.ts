@@ -78,5 +78,18 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await expect(page.getByRole('row').filter({hasText:adjustmentNumber})).toContainText('Qaytarilgan:')
  expect(await db.stockDocument.count({where:{reversalOfId:adjustment.id,status:'confirmed'}})).toBe(1)
  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('2')
+ const destinationResponse=await page.request.post('/api/stores',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.data.organization.id,name:'Browser destination'}})
+ expect(destinationResponse.ok()).toBe(true)
+ const destination=(await destinationResponse.json()).data
+ const transferResponse=await page.request.post('/api/transfers',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.data.organization.id,fromStoreId:store.id,toStoreId:destination.id,items:[{productId:product.id,quantity:1,unitCost:40}]}})
+ expect(transferResponse.ok()).toBe(true)
+ const transfer=(await transferResponse.json()).data
+ expect((await page.request.post(`/api/transfers/${transfer.id}/send`,{headers:{Origin:'https://localhost:3100'},data:{}})).ok()).toBe(true)
+ await page.goto('/inventory/transfers')
+ page.once('dialog',dialog=>dialog.accept('Goods physically returned to source'))
+ await page.getByRole('button',{name:'Yo‘ldagi qismini qaytarish',exact:true}).click()
+ await expect(page.getByText('Qabul/qaytarish bilan yopilgan',{exact:true})).toBeVisible()
+ expect((await db.stockTransferItem.findFirstOrThrow({where:{stockTransferId:transfer.id}})).returnedQuantity.toString()).toBe('1')
+ expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('2')
  expect(errors).toEqual([])
 })

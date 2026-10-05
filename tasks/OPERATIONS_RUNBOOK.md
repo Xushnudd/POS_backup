@@ -10,7 +10,7 @@ Bu yo‘riqnoma real hostingni yaratmaydi. Domen, TLS reverse proxy, secret bosh
 4. Versiyalangan `POS_IMAGE` bilan image yarating. Compose DB portini hostga chiqarmaydi. App default faqat localhostga ochiladi; TLS reverse proxy oldida ishlaydi. Proxy haqiqiy HTTPS Host/Originni saqlasin. `TRUST_PROXY_IP=true` faqat proxy foydalanuvchi bergan IP headerlarni almashtirsa qo‘yiladi.
 5. Yangilashdan oldin operator backup oladi, staging nusxada migrate va restore mashqini bajaradi. Concurrent eski app mavjud bo‘lsa backfill vaqtida savdo yozuvlarini to‘xtatish kerak: 002 receipt-discount/debt backfilllari oldingi app bilan parallel yozishga mo‘ljallanmagan.
 6. `docker compose --profile migration run --rm migrate` faqat tekshirilgan release va backupdan keyin. App startup `db push` qilmaydi. Migratsiya muvaffaqiyatsiz bo‘lsa webni yangilamang, xatoni tuzating; migration historyni taxmin bilan resolve qilmang.
-7. `docker compose up -d app`, `/api/health/live` 200, `/api/health/ready` 200, test tashkilotida kirish/smena/savdo/qaytarish smoke sinovi. Readiness bazadagi Operation.actorId va yakunlangan 010 cancelled_operations migration contractini tekshiradi; jadvallar/credentiallar tashqariga chiqarilmaydi.
+7. `docker compose up -d app`, `/api/health/live` 200, `/api/health/ready` 200, test tashkilotida kirish/smena/savdo/qaytarish smoke sinovi. Readiness bazadagi Operation.actorId va yakunlangan 012 transfer_returns migration contractini tekshiradi; jadvallar/credentiallar tashqariga chiqarilmaydi.
 8. Savdo, payment, debt va inventory journal reconciliation tekshirilgach trafikni oching. Lokal pending sync operatsiyalarini o‘chirmang; bir xil kalit bilan server statusini tekshiring.
 
 ## Backup
@@ -34,3 +34,5 @@ App rollback faqat schema bilan mos imagega bajariladi. Monetary schema/ledger m
 ## Izolyatsiyalangan qabul sinovlari
 
 2026-10-05: 6 unit, 14 PostgreSQL integration va 1 Chromium HTTPS checkout/recovery scenario o‘tdi. `scripts/ops/test-migrations.sh` fresh schema hamda oldingi discounted-credit receipt fixturega barcha 11 migrationni qo‘lladi. `scripts/ops/test-backup.sh` GPG/checksum, transaction restore va mavjud jadvalli DBni rad etish holatini tasdiqladi. Ular faqat `pos-plan-test-db`dagi vaqtinchalik bazalarda ishlaydi; real biznes bazasi va providerga tegmaydi. Bu dalillar pilot, load, to‘liq PLAN1 va production infratuzilma qabulining o‘rnini bosmaydi.
+
+Ombor yangilanishi: migration011 tasdiqlangan hujjat/satrlarni DB darajasida o‘zgarmas qiladi. Xato kirim uchun Inventory → Hujjatlar → Qarshi hujjat, sabab va manager tasdig‘i ishlatiladi. Migration012 transferda qabul/qaytarish miqdorini ajratadi; yo‘ldagi qism faqat jismonan manba omborga qaytgach qaytarish komandasi bilan yoziladi. Qabul qilingan tovar uchun yangi teskari transfer yarating. Readiness migration012 tugallanishini talab qiladi. Qaytarish yo‘ldagi qoldiqni yo‘qotmaydi va original hujjatni o‘chirmaydi.

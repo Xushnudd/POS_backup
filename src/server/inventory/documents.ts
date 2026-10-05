@@ -52,17 +52,17 @@ export async function receiveTransfer(context:TokenPayload,id:string,input:z.inf
   const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
   if (doc.status!=='sent') throw new AccessError(409,'INVALID_STATUS')
-  const rows=input.items??doc.items.filter(x=>x.receivedQuantity.lt(x.quantity)).map(x=>({itemId:x.id,quantity:x.quantity.sub(x.receivedQuantity).toString()}))
+  const rows=input.items??doc.items.filter(x=>x.receivedQuantity.add(x.returnedQuantity).lt(x.quantity)).map(x=>({itemId:x.id,quantity:x.quantity.sub(x.receivedQuantity).sub(x.returnedQuantity).toString()}))
   if (new Set(rows.map(x=>x.itemId)).size!==rows.length || !rows.length) throw new AccessError(400,'INVALID_ITEMS')
   for (const row of [...rows].sort((a,b)=>a.itemId.localeCompare(b.itemId))) {
    const original=doc.items.find(x=>x.id===row.itemId)
-   if (!original || decimal(row.quantity).gt(original.quantity.sub(original.receivedQuantity))) throw new AccessError(409,'RECEIVE_QUANTITY_EXCEEDED')
+   if (!original || decimal(row.quantity).gt(original.quantity.sub(original.receivedQuantity).sub(original.returnedQuantity))) throw new AccessError(409,'RECEIVE_QUANTITY_EXCEEDED')
    await moveStock(tx,context,{storeId:doc.toStoreId,productId:original.productId,delta:row.quantity,unitCost:original.unitCost,sourceType:'transfer_in',sourceId:key})
    await tx.stockTransferItem.update({where:{id:original.id},data:{receivedQuantity:{increment:decimal(row.quantity)}}})
   }
   const remaining=await tx.stockTransferItem.findMany({where:{stockTransferId:doc.id}})
-  const done=remaining.every(x=>x.receivedQuantity.eq(x.quantity))
-  const result=await tx.stockTransfer.update({where:{id},data:{status:done?'received':'sent',...(done&&{receivedAt:new Date()})},include:{items:true}})
+  const done=remaining.every(x=>x.receivedQuantity.add(x.returnedQuantity).eq(x.quantity))
+  const result=await tx.stockTransfer.update({where:{id},data:{status:done?(remaining.some(x=>x.returnedQuantity.gt(0))?'closed':'received'):'sent',...(done&&{receivedAt:new Date()})},include:{items:true}})
   await audit(tx,context,'StockTransfer',id,'received',{items:rows,complete:done})
   return result
  })
@@ -111,6 +111,30 @@ export async function cancelTransfer(context:TokenPayload,id:string,input:z.infe
   if (transfer.status!=='draft') throw new AccessError(409,'INVALID_STATUS','Faqat jo‘natilmagan transferni bekor qilish mumkin')
   const result=await tx.stockTransfer.update({where:{id},data:{status:'cancelled'},include:{items:true}})
   await audit(tx,context,'StockTransfer',id,'cancelled',{reason:input.reason})
+  return result
+ })
+}
+
+export const returnTransferSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000),items:z.array(z.object({itemId:z.string().uuid(),quantity:quantitySchema})).min(1).max(500).optional()}).strict()
+export async function returnTransfer(context:TokenPayload,id:string,input:z.infer<typeof returnTransferSchema>) {
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
+ return runOperation(context,'transfer.return',input.operationId,{id,reason:input.reason,items:input.items??'all'},async tx=>{
+  await tx.$queryRaw`SELECT id FROM "StockTransfer" WHERE id=${id} FOR UPDATE`
+  const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
+  if (!doc) throw new AccessError(404,'NOT_FOUND')
+  if (doc.status!=='sent') throw new AccessError(409,'INVALID_STATUS')
+  const rows=input.items??doc.items.filter(x=>x.receivedQuantity.add(x.returnedQuantity).lt(x.quantity)).map(x=>({itemId:x.id,quantity:x.quantity.sub(x.receivedQuantity).sub(x.returnedQuantity).toString()}))
+  if (!rows.length || new Set(rows.map(x=>x.itemId)).size!==rows.length) throw new AccessError(400,'INVALID_ITEMS')
+  for (const row of [...rows].sort((a,b)=>a.itemId.localeCompare(b.itemId))) {
+   const item=doc.items.find(x=>x.id===row.itemId)
+   if(!item || decimal(row.quantity).gt(item.quantity.sub(item.receivedQuantity).sub(item.returnedQuantity))) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED','Faqat hali qabul qilinmagan miqdorni qaytarish mumkin')
+   await moveStock(tx,context,{storeId:doc.fromStoreId,productId:item.productId,delta:row.quantity,unitCost:item.unitCost,sourceType:'transfer_return',sourceId:input.operationId})
+   await tx.stockTransferItem.update({where:{id:item.id},data:{returnedQuantity:{increment:decimal(row.quantity)}}})
+  }
+  const remaining=await tx.stockTransferItem.findMany({where:{stockTransferId:id}})
+  const done=remaining.every(item=>item.receivedQuantity.add(item.returnedQuantity).eq(item.quantity))
+  const result=await tx.stockTransfer.update({where:{id},data:{status:done?'closed':'sent'},include:{items:true}})
+  await audit(tx,context,'StockTransfer',id,'transit_returned',{items:rows,reason:input.reason,complete:done})
   return result
  })
 }

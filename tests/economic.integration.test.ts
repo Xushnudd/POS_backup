@@ -327,3 +327,39 @@ test('Draft transfer cancellation replays once and cannot race a stock shipment'
   assert.equal(await prisma.inventoryMovement.count({where:{sourceId:competing.id}}),saved.status==='sent'?1:0)
  }
 })
+
+test('Transit returns conserve source/destination stock and cannot exceed unreceived quantity',async()=>{
+ const {sendTransfer,receiveTransfer,returnTransfer,cancelTransfer}=await import('@/server/inventory/documents')
+ const f=await fixture(10),destination=await prisma.store.create({data:{organizationId:f.org.id,name:'Destination'}})
+ const transfer=await prisma.stockTransfer.create({data:{organizationId:f.org.id,fromStoreId:f.store.id,toStoreId:destination.id,createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:4,unitCost:50}}},include:{items:true}})
+ await sendTransfer(f.context,transfer.id)
+ await assert.rejects(()=>cancelTransfer(f.context,transfer.id,{reason:'Already sent'}))
+ await receiveTransfer(f.context,transfer.id,{operationId:randomUUID(),items:[{itemId:transfer.items[0].id,quantity:1}]})
+ await assert.rejects(()=>returnTransfer(f.context,transfer.id,{operationId:randomUUID(),reason:'Transit return',items:[{itemId:transfer.items[0].id,quantity:4}]}))
+ const input={operationId:randomUUID(),reason:'Destination refused remaining goods',items:[{itemId:transfer.items[0].id,quantity:2}]}
+ assert.equal((await returnTransfer(f.context,transfer.id,input)).status,'sent')
+ await returnTransfer(f.context,transfer.id,input)
+ assert.equal((await returnTransfer(f.context,transfer.id,{operationId:randomUUID(),reason:'Last goods returned'})).status,'closed')
+ const saved=await prisma.stockTransferItem.findUniqueOrThrow({where:{id:transfer.items[0].id}})
+ assert.equal(saved.receivedQuantity.toString(),'1');assert.equal(saved.returnedQuantity.toString(),'3')
+ const balance=(storeId:string)=>prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId,productId:f.product.id}}})
+ assert.equal((await balance(f.store.id)).quantity.toString(),'9');assert.equal((await balance(destination.id)).quantity.toString(),'1')
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:input.operationId}}),1)
+ await assert.rejects(()=>receiveTransfer(f.context,transfer.id,{}))
+ await assert.rejects(()=>prisma.stockTransferItem.update({where:{id:saved.id},data:{returnedQuantity:4}}))
+})
+
+test('Concurrent receive/return chooses a single effect for the same transit unit',async()=>{
+ const {sendTransfer,receiveTransfer,returnTransfer}=await import('@/server/inventory/documents')
+ const f=await fixture(5),destination=await prisma.store.create({data:{organizationId:f.org.id,name:'Destination'}})
+ for(let index=0;index<3;index++){
+  const transfer=await prisma.stockTransfer.create({data:{organizationId:f.org.id,fromStoreId:f.store.id,toStoreId:destination.id,createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:1,unitCost:50}}}})
+  await sendTransfer(f.context,transfer.id)
+  const outcomes=await Promise.allSettled([receiveTransfer(f.context,transfer.id,{}),returnTransfer(f.context,transfer.id,{operationId:randomUUID(),reason:'Returned from transit'})])
+  assert.equal(outcomes.filter(outcome=>outcome.status==='fulfilled').length,1)
+  const item=await prisma.stockTransferItem.findFirstOrThrow({where:{stockTransferId:transfer.id}})
+  assert.equal(item.receivedQuantity.add(item.returnedQuantity).toString(),'1')
+ }
+ const balances=await prisma.inventoryBalance.aggregate({where:{productId:f.product.id},_sum:{quantity:true}})
+ assert.equal(balances._sum.quantity?.toString(),'5')
+})
