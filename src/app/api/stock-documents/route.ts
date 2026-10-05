@@ -71,6 +71,7 @@ async function handleGET(request: NextRequest) {
         include: {
           store: true,
           supplier: true,
+          reversal: {select:{id:true,documentNo:true}},
           items: {
             include: {
               product: true,

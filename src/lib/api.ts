@@ -22,7 +22,7 @@ import {
   Supplier,
 } from '@/types';
 
-class ApiError extends Error { code?: string; details?: unknown; }
+export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
 class ApiClient {
   private getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
@@ -53,6 +53,7 @@ class ApiClient {
           data?.error?.message || data?.message || `Xatolik: ${response.statusText}`;
         const error = new ApiError(errorMsg);
         error.code = data?.error?.code;
+        error.status = response.status;
         error.details = data?.error?.details;
         throw error;
       }
@@ -313,6 +314,9 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
+    reverse: (id:string,data:{operationId:string;reason:string}) =>
+      this.request<StockDocument>(`/stock-documents/${id}/reverse`,{method:"POST",body:JSON.stringify(data)}),
+
     confirm: (id: string) =>
       this.request<StockDocument>(`/stock-documents/${id}/confirm`, {
         method: 'POST',
@@ -342,6 +346,8 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+
+    cancel: (id:string,reason:string) => this.request<StockTransfer>(`/transfers/${id}/cancel`,{method:"POST",body:JSON.stringify({reason})}),
 
     send: (id: string) =>
       this.request<StockTransfer>(`/transfers/${id}/send`, {

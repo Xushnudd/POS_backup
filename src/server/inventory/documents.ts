@@ -7,6 +7,7 @@ import { moveStock } from './movements'
 import { quantitySchema } from '../sales/service'
 
 export async function confirmStockDocument(context:TokenPayload,id:string) {
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
  return runOperation(context,'stock.confirm',id,{id},async tx=>{
   await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
   const doc=await tx.stockDocument.findFirst({where:{id,AND:tenantScope('StockDocument',context)},include:{items:true,organization:true}})
@@ -63,6 +64,53 @@ export async function receiveTransfer(context:TokenPayload,id:string,input:z.inf
   const done=remaining.every(x=>x.receivedQuantity.eq(x.quantity))
   const result=await tx.stockTransfer.update({where:{id},data:{status:done?'received':'sent',...(done&&{receivedAt:new Date()})},include:{items:true}})
   await audit(tx,context,'StockTransfer',id,'received',{items:rows,complete:done})
+  return result
+ })
+}
+
+export const reverseStockSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000)}).strict()
+export async function reverseStockDocument(context:TokenPayload,id:string,input:z.infer<typeof reverseStockSchema>) {
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
+ return runOperation(context,'stock.reverse',input.operationId,{id,reason:input.reason},async tx=>{
+  await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
+  const original=await tx.stockDocument.findFirst({where:{id,AND:tenantScope('StockDocument',context)},include:{items:true,reversal:true}})
+  if (!original) throw new AccessError(404,'NOT_FOUND')
+  if (!original.items.length || original.status!=='confirmed' || original.reversalOfId || !['purchase','adjustment','return_in'].includes(original.documentType)) throw new AccessError(409,'INVALID_STATUS')
+  if (original.reversal) throw new AccessError(409,'ALREADY_REVERSED')
+  const reversal=await tx.stockDocument.create({data:{organizationId:original.organizationId,storeId:original.storeId,supplierId:original.supplierId,
+   documentType:'reversal',documentNo:'REV-'+input.operationId,reversalOfId:id,createdBy:context.userId,note:input.reason,
+   items:{create:original.items.map(item=>({productId:item.productId,quantity:item.quantity.negated(),unitCost:item.unitCost,note:item.note}))}}})
+  for (const item of [...original.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
+   if (original.documentType==='purchase') {
+    await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${item.productId} FOR UPDATE`
+    const product=await tx.product.findFirstOrThrow({where:{id:item.productId,organizationId:context.organizationId}})
+    const stock=await tx.inventoryBalance.aggregate({where:{productId:product.id},_sum:{quantity:true}})
+    const quantity=decimal(stock._sum.quantity??0),remaining=quantity.sub(item.quantity)
+    const remainingValue=quantity.mul(product.costPrice).sub(item.quantity.mul(item.unitCost))
+    if (remaining.lt(0) || remainingValue.lt('-0.000001')) throw new AccessError(409,'COST_RECONCILIATION_REQUIRED','Xaridni qaytarish uchun qoldiq va tannarxni solishtiring')
+    // Moving-average inverse; sold units keep their checkout cost snapshot.
+    // With no units left, retain the last known cost as the future catalog default.
+    if (remaining.gt(0)) await tx.product.update({where:{id:product.id},data:{costPrice:remainingValue.lt(0)?0:remainingValue.div(remaining).toDecimalPlaces(6)}})
+   }
+   // Reversals never create a new shortage, even when negative-stock policy is on.
+   await moveStock(tx,context,{storeId:original.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:item.unitCost,sourceType:'stock_reversal',sourceId:reversal.id})
+  }
+  const result=await tx.stockDocument.update({where:{id:reversal.id},data:{status:'confirmed',confirmedBy:context.userId,confirmedAt:new Date()},include:{items:true}})
+  await audit(tx,context,'StockDocument',id,'reversed',{reversalId:result.id,reason:input.reason})
+  return result
+ })
+}
+
+export const cancelTransferSchema=z.object({reason:z.string().trim().min(3).max(2000)}).strict()
+export async function cancelTransfer(context:TokenPayload,id:string,input:z.infer<typeof cancelTransferSchema>) {
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
+ return runOperation(context,'transfer.cancel',id,{id,reason:input.reason},async tx=>{
+  await tx.$queryRaw`SELECT id FROM "StockTransfer" WHERE id=${id} FOR UPDATE`
+  const transfer=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
+  if (!transfer) throw new AccessError(404,'NOT_FOUND')
+  if (transfer.status!=='draft') throw new AccessError(409,'INVALID_STATUS','Faqat jo‘natilmagan transferni bekor qilish mumkin')
+  const result=await tx.stockTransfer.update({where:{id},data:{status:'cancelled'},include:{items:true}})
+  await audit(tx,context,'StockTransfer',id,'cancelled',{reason:input.reason})
   return result
  })
 }

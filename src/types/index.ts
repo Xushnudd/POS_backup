@@ -101,7 +101,7 @@ export interface InventoryBalance {
   store?: Store;
 }
 
-export type DocumentType = 'purchase' | 'adjustment' | 'transfer_out' | 'transfer_in' | 'return_in';
+export type DocumentType = 'purchase' | 'adjustment' | 'transfer_out' | 'transfer_in' | 'return_in' | 'reversal';
 export type DocumentStatus = 'draft' | 'confirmed';
 
 export interface StockDocumentItem {
@@ -123,6 +123,8 @@ export interface StockDocument {
   supplier?: Supplier | null;
   documentType: DocumentType;
   documentNo: string;
+  reversalOfId?: string | null;
+  reversal?: {id:string;documentNo:string} | null;
   status: DocumentStatus;
   note?: string | null;
   createdBy: string;
@@ -148,7 +150,7 @@ export interface StockTransfer {
   fromStore?: Store;
   toStoreId: string;
   toStore?: Store;
-  status: 'draft' | 'sent' | 'received';
+  status: 'draft' | 'sent' | 'received' | 'cancelled';
   note?: string | null;
   createdBy: string;
   sentAt?: string | null;

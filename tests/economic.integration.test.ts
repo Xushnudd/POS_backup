@@ -264,3 +264,66 @@ test('Cancellation tombstone blocks delayed draft posting; a committed draft kee
   else {assert.equal(outcomes[0].status,'fulfilled');assert.equal(outcomes[1].status,'fulfilled');if(outcomes[1].status==='fulfilled')assert.equal(outcomes[1].value.state,'created')}
  }
 })
+
+test('Stock reversal preserves immutable history, inverse weighted cost, audit and exactly-one effect',async()=>{
+ const {confirmStockDocument,reverseStockDocument}=await import('@/server/inventory/documents')
+ const f=await fixture(10)
+ const doc=await prisma.stockDocument.create({data:{organizationId:f.org.id,storeId:f.store.id,documentType:'purchase',documentNo:randomUUID(),createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:10,unitCost:70}}},include:{items:true}})
+ await confirmStockDocument(f.context,doc.id)
+ assert.equal((await prisma.product.findUniqueOrThrow({where:{id:f.product.id}})).costPrice.toString(),'60')
+ await assert.rejects(()=>prisma.stockDocument.update({where:{id:doc.id},data:{note:'Rewrite history'}}))
+ await assert.rejects(()=>prisma.stockDocument.delete({where:{id:doc.id}}))
+ await assert.rejects(()=>prisma.stockDocumentItem.update({where:{id:doc.items[0].id},data:{quantity:11}}))
+ await assert.rejects(()=>prisma.stockDocumentItem.delete({where:{id:doc.items[0].id}}))
+ await assert.rejects(()=>prisma.stockDocumentItem.create({data:{stockDocumentId:doc.id,productId:f.product.id,quantity:1,unitCost:1}}))
+ await assert.rejects(()=>reverseStockDocument({...f.context,role:'cashier'},doc.id,{operationId:randomUUID(),reason:'Wrong purchase'}))
+ const input={operationId:randomUUID(),reason:'Wrong supplier delivery'}
+ const outcomes=await Promise.all([reverseStockDocument(f.context,doc.id,input),reverseStockDocument(f.context,doc.id,input)])
+ assert.equal(outcomes[0].id,outcomes[1].id)
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'10')
+ assert.equal((await prisma.product.findUniqueOrThrow({where:{id:f.product.id}})).costPrice.toString(),'50')
+ assert.equal((await prisma.stockDocument.findUniqueOrThrow({where:{id:doc.id}})).status,'confirmed')
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:outcomes[0].id}}),1)
+ assert.equal(await prisma.auditLog.count({where:{entityId:doc.id,action:'reversed'}}),1)
+ await assert.rejects(()=>reverseStockDocument(f.context,doc.id,{...input,operationId:randomUUID()}))
+ await assert.rejects(()=>reverseStockDocument(f.context,outcomes[0].id,{...input,operationId:randomUUID()}))
+ const other=await fixture()
+ await assert.rejects(()=>reverseStockDocument(other.context,doc.id,input))
+})
+
+test('Failed reversal rolls back all lines; negative adjustment reversal restores stock',async()=>{
+ const {confirmStockDocument,reverseStockDocument}=await import('@/server/inventory/documents')
+ const f=await fixture(1)
+ const doc=await prisma.stockDocument.create({data:{organizationId:f.org.id,storeId:f.store.id,documentType:'adjustment',documentNo:randomUUID(),createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:-1,unitCost:50}}}})
+ await confirmStockDocument(f.context,doc.id)
+ await reverseStockDocument(f.context,doc.id,{operationId:randomUUID(),reason:'Incorrect stock adjustment'})
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'1')
+ const incoming=await prisma.stockDocument.create({data:{organizationId:f.org.id,storeId:f.store.id,documentType:'return_in',documentNo:randomUUID(),createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:2,unitCost:50}}}})
+ await confirmStockDocument(f.context,incoming.id)
+ const sale=await createDraft(f.context,{...f.draft,items:[{productId:f.product.id,quantity:3,discountAmount:0}]},randomUUID())
+ await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:300}]},randomUUID())
+ const key=randomUUID()
+ await assert.rejects(()=>reverseStockDocument(f.context,incoming.id,{operationId:key,reason:'Wrong returned quantity'}))
+ assert.equal(await prisma.stockDocument.count({where:{reversalOfId:incoming.id}}),0)
+ assert.equal(await prisma.operation.count({where:{key}}),0)
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'0')
+})
+
+test('Draft transfer cancellation replays once and cannot race a stock shipment',async()=>{
+ const {sendTransfer,cancelTransfer}=await import('@/server/inventory/documents')
+ const f=await fixture(10)
+ const destination=await prisma.store.create({data:{organizationId:f.org.id,name:'Other'}})
+ const make=()=>prisma.stockTransfer.create({data:{organizationId:f.org.id,fromStoreId:f.store.id,toStoreId:destination.id,createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:1,unitCost:50}}}})
+ const transfer=await make(),input={reason:'Incorrect destination'}
+ assert.equal((await cancelTransfer(f.context,transfer.id,input)).status,'cancelled')
+ assert.equal((await cancelTransfer(f.context,transfer.id,input)).status,'cancelled')
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:transfer.id}}),0)
+ await assert.rejects(()=>sendTransfer(f.context,transfer.id))
+ for(let index=0;index<3;index++){
+  const competing=await make()
+  const results=await Promise.allSettled([sendTransfer(f.context,competing.id),cancelTransfer(f.context,competing.id,input)])
+  assert.equal(results.filter(result=>result.status==='fulfilled').length,1)
+  const saved=await prisma.stockTransfer.findUniqueOrThrow({where:{id:competing.id}})
+  assert.equal(await prisma.inventoryMovement.count({where:{sourceId:competing.id}}),saved.status==='sent'?1:0)
+ }
+})

@@ -218,6 +218,9 @@ model StockDocument {
   supplierId     String?
   documentType   String   // purchase, adjustment, transfer_out, transfer_in, return_in
   documentNo     String
+  reversalOfId   String? @unique
+  reversalOf     StockDocument? @relation("DocumentReversal", fields: [reversalOfId], references: [id], onDelete: NoAction)
+  reversal       StockDocument? @relation("DocumentReversal")
   status         String   @default("draft") // draft, confirmed
   note           String?
   createdBy      String

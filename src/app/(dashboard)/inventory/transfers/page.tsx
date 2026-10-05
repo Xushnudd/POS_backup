@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -128,6 +128,16 @@ export default function StockTransfersPage() {
     }
   };
 
+  const cancelReasons=useRef<Record<string,string>>({});
+  const handleCancel=async(id:string)=>{
+    const reason=cancelReasons.current[id]??window.prompt('Jo‘natilmagan transferni bekor qilish sababi:')?.trim();
+    if(!reason)return;
+    if(reason.length<3||reason.length>2000){notifyError('Sabab 3–2000 belgi bo‘lishi kerak');return;}
+    cancelReasons.current[id]=reason;
+    try{await api.transfers.cancel(id,reason);notifySuccess('Transfer bekor qilindi; qoldiq o‘zgarmadi');await loadTransfers();}
+    catch(error){notifyError(error instanceof Error?error.message:'Natija noaniq. Shu transferni yana tekshiring');await loadTransfers();}
+  };
+
   const handleSend = async (id: string) => {
     try {
       await api.transfers.send(id);
@@ -223,7 +233,7 @@ export default function StockTransfersPage() {
                         <Badge variant="success" size="sm">
                           Qabul qilingan
                         </Badge>
-                      ) : t.status === 'sent' ? (
+                      ) : t.status === 'cancelled' ? (<Badge variant="warning" size="sm">Bekor qilingan</Badge>) : t.status === 'sent' ? (
                         <Badge variant="info" size="sm">
                           Yo&apos;lda (Jo&apos;natilgan)
                         </Badge>
@@ -234,6 +244,7 @@ export default function StockTransfersPage() {
                       )}
                     </td>
                     <td className="py-3.5 px-4 text-right space-x-1">
+                      {t.status === 'draft' && <Button size="sm" variant="outline" onClick={()=>handleCancel(t.id)}>Bekor qilish</Button>}
                       {t.status === 'draft' && (
                         <Button
                           variant="primary"

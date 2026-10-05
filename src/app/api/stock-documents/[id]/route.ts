@@ -1,4 +1,7 @@
-import { AccessError } from '@/server/auth/policy'
+import { signedQuantitySchema, nonnegativeQuantitySchema } from '@/server/catalog/service'
+import { assertLiveContext, audit } from '@/server/operations'
+import { prisma } from '@/lib/prisma'
+import { AccessError, tenantScope } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
@@ -7,13 +10,13 @@ import { z } from 'zod'
 
 const updateStockDocumentSchema = z.object({
   supplierId: z.string().uuid().optional(),
-  note: z.string().optional(),
+  note: z.string().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
-    quantity: z.number().positive(),
-    unitCost: z.number().positive(),
-    note: z.string().optional(),
-  })).optional(),
+    quantity: signedQuantitySchema,
+    unitCost: nonnegativeQuantitySchema,
+    note: z.string().max(2000).optional(),
+  })).min(1).max(500).optional(),
 })
 
 async function handleGET(
@@ -117,10 +120,13 @@ async function handlePUT(
       )
     }
 
-    const updatedDocument = await db.$transaction(async (tx) => {
+    const updatedDocument = await prisma.$transaction(async (tx) => {
+      await assertLiveContext(tx,payload)
       await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
-      const locked=await tx.stockDocument.findUniqueOrThrow({where:{id}})
+      const locked=await tx.stockDocument.findFirstOrThrow({where:{id,AND:tenantScope("StockDocument",payload)}})
       if (locked.status!=='draft') throw new AccessError(409,'INVALID_STATUS')
+      if (validatedData.items && locked.documentType!=='adjustment' && validatedData.items.some(item=>Number(item.quantity)<=0)) throw new AccessError(400,'INVALID_QUANTITY')
+      await audit(tx,payload,'StockDocument',id,'draft_updated',validatedData)
       // Delete existing items if new items provided
       if (validatedData.items) {
         await tx.stockDocumentItem.deleteMany({

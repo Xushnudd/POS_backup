@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { InventoryBalance, Product, StockDocument, Supplier } from '@/types';
 import { formatNumber, formatDate } from '@/lib/format';
 import Card from '@/components/ui/Card';
@@ -27,7 +27,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function InventoryPage() {
-  const { organization } = useAuth();
+  const { organization, role } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -49,6 +49,11 @@ export default function InventoryPage() {
     { productId: string; quantity: number; unitCost: number }[]
   >([]);
   const [isSavingDoc, setIsSavingDoc] = useState(false);
+  const [reverseTarget,setReverseTarget]=useState<{id:string;operationId:string}|null>(null);
+  const [reverseReason,setReverseReason]=useState('');
+  const [isReversing,setIsReversing]=useState(false);
+  const [reverseSubmitted,setReverseSubmitted]=useState(false);
+
 
   const loadData = useCallback(async () => {
     if (!organization?.id) return;
@@ -100,6 +105,20 @@ export default function InventoryPage() {
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Hujjatni tasdiqlashda xatolik');
     }
+  };
+
+  const handleReverseDocument=async(event:React.FormEvent)=>{
+    event.preventDefault();
+    if(!reverseTarget)return;
+    setIsReversing(true);setReverseSubmitted(true);
+    try{
+      await api.stockDocuments.reverse(reverseTarget.id,{operationId:reverseTarget.operationId,reason:reverseReason});
+      setReverseTarget(null);notifySuccess('Qarshi hujjat tasdiqlandi; asl hujjat tarixda saqlandi');await loadData();
+    }catch(error){
+      if(error instanceof ApiError && error.status && error.status>=400 && error.status<500){setReverseSubmitted(false);if(error.code==='ALREADY_REVERSED'){setReverseTarget(null);await loadData();}}
+      notifyError(error instanceof Error?error.message:'Qarshi hujjat yaratilmadi. Shu amal bilan qayta urinishingiz mumkin');
+    }
+    finally{setIsReversing(false);}
   };
 
   const openNewDocModal = () => {
@@ -351,7 +370,7 @@ export default function InventoryPage() {
                           ? 'Kirim (Xarid)'
                           : doc.documentType === 'adjustment'
                           ? 'Tuzatish'
-                          : doc.documentType}
+                          : doc.documentType === 'reversal' ? 'Qarshi hujjat' : doc.documentType}
                       </td>
                       <td className="py-3.5 px-4 text-gray-700">
                         {doc.supplier?.name || '-'}
@@ -374,6 +393,10 @@ export default function InventoryPage() {
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
+                        {doc.status === 'confirmed' && !doc.reversalOfId && (role==='owner'||role==='admin') && (
+                          doc.reversal ? <span className="text-xs text-gray-500">Qaytarilgan: {doc.reversal.documentNo}</span> :
+                          <Button variant="outline" size="sm" onClick={()=>{setReverseTarget({id:doc.id,operationId:crypto.randomUUID()});setReverseReason('');setReverseSubmitted(false);}}>Qarshi hujjat</Button>
+                        )}
                         {doc.status === 'draft' && (
                           <Button
                             variant="success"
@@ -394,6 +417,14 @@ export default function InventoryPage() {
         </Card>
       )}
 
+      <Modal isOpen={!!reverseTarget} onClose={()=>{if(!isReversing && !reverseSubmitted)setReverseTarget(null);}} title="Ombor hujjatini qaytarish">
+        <form onSubmit={handleReverseDocument} className="space-y-4">
+          <p className="text-sm text-gray-600">Asl hujjat o‘zgarmaydi. Miqdorlar qarshi hujjat bilan qaytariladi; yetarli qoldiq bo‘lishi shart.</p>
+          <Input label="Qaytarish sababi" value={reverseReason} onChange={event=>setReverseReason(event.target.value)} minLength={3} maxLength={2000} required disabled={reverseSubmitted}/>
+          {reverseSubmitted && <p className="text-sm text-amber-700">Javob noaniq bo‘lsa, shu amal bilan qayta urining. Sabab va kalit saqlanadi.</p>}
+          <Button type="submit" disabled={isReversing}>{isReversing?'Tekshirilmoqda...':reverseSubmitted?'Natijani qayta olish':'Qarshi hujjatni tasdiqlash'}</Button>
+        </form>
+      </Modal>
       {/* New Document Modal */}
       <Modal
         isOpen={isDocModalOpen}
