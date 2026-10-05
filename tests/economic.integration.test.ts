@@ -509,3 +509,34 @@ test('A business duplicate without a committed operation remains a conflict',asy
  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,key}}),0)
  assert.equal(await prisma.debtEntry.count({where:{customerId:customer.id}}),1)
 })
+
+test('Explicit debt allocations select receipts, conserve payment and reject invalid targets atomically',async()=>{
+ const f=await fixture(5)
+ const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Allocation customer',phone:'allocation',creditLimit:1000}})
+ const sales:string[]=[]
+ for(let i=0;i<2;i++) {
+  const draft=await createDraft(f.context,{...f.draft,customerId:customer.id},randomUUID())
+  sales.push((await completeSale(f.context,draft.id,{payments:[{paymentType:'credit',amount:100}]},draft.id)).id)
+ }
+ const base={organizationId:f.org.id,storeId:f.store.id,shiftId:f.shift.id,customerId:customer.id,paymentType:'cash' as const}
+ const input={...base,operationId:randomUUID(),amount:50,allocations:[{saleId:sales[1],amount:40},{saleId:sales[0],amount:10}]}
+ const payments=await Promise.all([collectDebt(f.context,input),collectDebt(f.context,input)])
+ assert.equal(payments[0].id,payments[1].id)
+ for(const [index,expected] of [[0,'90'],[1,'60']] as const) {
+  const balance=await prisma.debtEntry.aggregate({where:{customerId:customer.id,saleId:sales[index]},_sum:{amount:true}})
+  assert.equal(balance._sum.amount?.toString(),expected)
+ }
+ const invalid=[
+  {amount:20,allocations:[{saleId:sales[0],amount:10}]},
+  {amount:20,allocations:[{saleId:sales[0],amount:10},{saleId:sales[0],amount:10}]},
+  {amount:70,allocations:[{saleId:sales[1],amount:70}]},
+  {amount:10,allocations:[{saleId:randomUUID(),amount:10}]},
+  {amount:20,allocations:[{saleId:sales[0],amount:10},{saleId:randomUUID(),amount:10}]},
+ ]
+ for(const selection of invalid) {
+  await assert.rejects(()=>collectDebt(f.context,{...base,...selection,operationId:randomUUID()}))
+ }
+ assert.equal(await prisma.payment.count({where:{customerId:customer.id,note:'debt_collection'}}),1)
+ assert.equal(await prisma.debtEntry.count({where:{customerId:customer.id,sourceType:'collection'}}),2)
+ await assert.rejects(()=>collectDebt(f.context,{...input,allocations:[{saleId:sales[0],amount:50}]}))
+})

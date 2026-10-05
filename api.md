@@ -505,3 +505,16 @@ Javob: `totalSales`, `totalRevenue`, `averageCheck`, `cashPayments`, `cardPaymen
 | `paymentType` | `cash`, `card`, `transfer`, `credit` |
 | `payment.direction` | `in`, `out` |
 | `cashMovement.movementType` | `cash_in`, `cash_out` |
+
+### Qarz undirish: aniq taqsimot
+
+`POST /api/payments/credit` mavjud payloadiga ixtiyoriy `allocations` qo‘shildi.
+`/api/sync` dagi `debt.collect` ham shu contractdan foydalanadi.
+
+```json
+{"allocations":[{"saleId":"<birinchi-savdo-UUID>","amount":"40.00"},{"saleId":"<ikkinchi-savdo-UUID>","amount":"10.00"}]}
+```
+
+Bu misolda asosiy `amount` `50.00` bo‘lishi kerak; qolgan majburiy organization/store/customer/shift/operation maydonlari avvalgidek yuboriladi. Summa Decimal bilan hisoblanadi. Har bir target faqat bir marta, 1–200 ta allocation, musbat summa; jami payment summasiga aynan teng bo‘lishi shart. Targetning ayni tashkilot va mijozga tegishli qarz qoldig‘idan ortiq ajratish rad etiladi. Bitta target xato bo‘lsa, payment va barcha qarz yozuvlari rollback qilinadi. Retry bir xil operationId va o‘zgarmagan to‘liq payload bilan bajariladi.
+
+`allocations` yuborilmasa mavjud FIFO ishlaydi. `saleId: null` umumiy boshlang‘ich/tuzatish qarz guruhini bildiradi; alohida opening hujjatiga taqsimot deb talqin qilinmaydi. Opening hujjatlari bo‘yicha individual allocation va tarixiy noaniq taqsimotni tuzatish hali bajarilmagan. Mavjud mijoz UI avtomatik FIFOdan foydalanadi; explicit tanlash hozir API/sync orqali mavjud.
