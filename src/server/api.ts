@@ -45,6 +45,31 @@ function sanitize(value: unknown, role?: string): unknown {
     !(role === 'cashier' && ['costPrice','unitCost','profit','profitMargin','cost'].includes(key))
   ).map(([key,val]) => [key,sanitize(val,role)]))
 }
+async function boundedBody(request: NextRequest): Promise<string> {
+  const reader = request.clone().body?.getReader()
+  if (!reader) return ''
+  const decoder = new TextDecoder('utf-8', { fatal: true })
+  let size = 0, text = ''
+  try {
+    for (;;) {
+      const { value, done } = await reader.read()
+      if (done) break
+      size += value.byteLength
+      if (size > 1024 * 1024) {
+        // A tee cancellation can wait for the other branch; do not await it.
+        void reader.cancel().catch(() => undefined)
+        throw new AccessError(413, 'PAYLOAD_TOO_LARGE')
+      }
+      text += decoder.decode(value, { stream: true })
+    }
+    return text + decoder.decode()
+  } catch (error) {
+    if (error instanceof AccessError) throw error
+    throw new AccessError(400, 'INVALID_JSON')
+  } finally {
+    reader.releaseLock()
+  }
+}
 export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean } = {}) {
   return async (request: NextRequest, routeContext: C): Promise<Response> => {
     const requestId = randomUUID()
@@ -63,6 +88,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         if ((origin && origin !== expected) || request.headers.get('sec-fetch-site') === 'cross-site') throw new AccessError(403,'CSRF_REJECTED')
         if (!request.headers.get('content-type')?.startsWith('application/json')) throw new AccessError(415,'JSON_REQUIRED','JSON so‘rov talab qilinadi')
         const length = request.headers.get('content-length')
+        if (length && !/^\d+$/.test(length)) throw new AccessError(400,'INVALID_CONTENT_LENGTH')
         if (length && Number(length) > 1024 * 1024) throw new AccessError(413,'PAYLOAD_TOO_LARGE')
       }
       let context: TokenPayload | null = null
@@ -76,8 +102,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         await validateRefs(Object.fromEntries(new URL(request.url).searchParams), context)
       }
       if (mutation) {
-        const text = await request.clone().text()
-        if (Buffer.byteLength(text) > 1024 * 1024) throw new AccessError(413,'PAYLOAD_TOO_LARGE')
+        const text = await boundedBody(request)
         if (text) {
           let body: unknown
           try { body = JSON.parse(text) } catch { throw new AccessError(400,'INVALID_JSON','JSON noto‘g‘ri') }

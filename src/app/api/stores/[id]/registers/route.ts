@@ -10,12 +10,6 @@ const createRegisterSchema = z.object({
   code: z.string().min(2),
 })
 
-const updateRegisterSchema = z.object({
-  name: z.string().min(2).optional(),
-  code: z.string().min(2).optional(),
-  isActive: z.boolean().optional(),
-})
-
 async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

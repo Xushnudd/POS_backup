@@ -6,11 +6,6 @@ import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 import { closeShift, closeSchema } from '@/server/finance/shifts'
 
-const closeShiftSchema = z.object({
-  countedCash: z.number(),
-  note: z.string().optional(),
-})
-
 async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

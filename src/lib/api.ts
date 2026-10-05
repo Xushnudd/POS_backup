@@ -18,7 +18,6 @@ import {
   StockTransfer,
   Store,
   Supplier,
-  User,
 } from '@/types';
 
 class ApiError extends Error { code?: string; details?: unknown; }
@@ -65,6 +64,10 @@ class ApiClient {
       throw err;
     }
   }
+
+  operations = {
+    status: (type: string, operationId: string) => this.request<{state:'not_found'|'completed';result?:Sale}>(`/operations?${new URLSearchParams({type,operationId})}`),
+  };
 
   // Authentication
   auth = {

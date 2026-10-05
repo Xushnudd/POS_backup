@@ -1,0 +1,35 @@
+name: Core POS checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: pos_test
+          POSTGRES_PASSWORD: local-test-only
+          POSTGRES_DB: pos_test
+        ports: ["55439:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pos_test -d pos_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://pos_test:local-test-only@127.0.0.1:55439/pos_test
+      APP_ORIGIN: https://pos.example.invalid
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:integration
+      - run: npm run build

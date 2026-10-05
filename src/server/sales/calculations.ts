@@ -18,6 +18,7 @@ export function lineTotal(quantity: DecimalInput, price: DecimalInput, discount:
 }
 export function draftTotals(items: { quantity: DecimalInput; unitPrice: DecimalInput; discountAmount: DecimalInput }[], discount: DecimalInput) {
   const subtotal = items.reduce((sum, item) => sum.add(lineTotal(item.quantity, item.unitPrice, item.discountAmount)), decimal(0))
+  if (subtotal.gte('1000000000000')) throw new Error('INVALID_AMOUNT')
   const off = money(discount)
   if (off.lt(0) || off.gt(subtotal)) throw new Error('INVALID_DISCOUNT')
   return { subtotal, discountAmount: off, totalAmount: subtotal.sub(off) }

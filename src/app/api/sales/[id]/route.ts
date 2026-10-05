@@ -6,7 +6,7 @@ import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
-import { prepareItems, quantitySchema, amountSchema } from '@/server/sales/service'
+import { enforceDiscountLimit, prepareItems, quantitySchema, amountSchema } from '@/server/sales/service'
 import { draftTotals } from '@/server/sales/calculations'
 
 const updateSaleSchema = z.object({
@@ -120,6 +120,7 @@ async function handlePUT(
       if (current.status !== 'draft') throw new Error('INVALID_STATUS')
       const prepared = validatedData.items ? await prepareItems(tx, payload, validatedData.items, validatedData.discountAmount ?? current.discountAmount) : null
       const totals = prepared?.totals ?? draftTotals(current.items, validatedData.discountAmount ?? current.discountAmount)
+      if (!prepared) await enforceDiscountLimit(tx,payload,current.items,totals.totalAmount)
       if (validatedData.items !== undefined) {
         await tx.saleItem.deleteMany({ where: { saleId: id } })
         await tx.saleItem.createMany({

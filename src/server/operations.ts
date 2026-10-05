@@ -32,7 +32,10 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
         return JSON.parse(JSON.stringify(result)) as T
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,timeout:15000})
     } catch(error) {
-      const retryable=error instanceof Prisma.PrismaClientKnownRequestError && (error.code==='P2034' || (error.code==='P2010' && ['40001','40P01'].includes(String(error.meta?.code))))
+      // Serializable snapshots can predate the advisory lock. A competing Operation
+      // insert then produces this exact unique conflict: retry the rolled-back transaction.
+      const operationRace=error instanceof Prisma.PrismaClientKnownRequestError && error.code==='P2002' && error.meta?.modelName==='Operation' && Array.isArray(error.meta?.target) && ['organizationId','type','key'].every(field=>(error.meta!.target as string[]).includes(field))
+      const retryable=operationRace || (error instanceof Prisma.PrismaClientKnownRequestError && (error.code==='P2034' || (error.code==='P2010' && ['40001','40P01'].includes(String(error.meta?.code)))))
       if (!retryable || attempt===2) throw error
       await new Promise(resolve=>setTimeout(resolve,20*(attempt+1)))
     }

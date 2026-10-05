@@ -12,13 +12,6 @@ const createStoreSchema = z.object({
   phone: z.string().optional(),
 })
 
-const updateStoreSchema = z.object({
-  name: z.string().min(2).optional(),
-  address: z.string().optional(),
-  phone: z.string().optional(),
-  isActive: z.boolean().optional(),
-})
-
 async function handleGET(request: NextRequest) {
   try {
     const token = getRequestToken(request)

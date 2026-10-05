@@ -7,8 +7,8 @@ import { audit, runOperation } from '../operations'
 import { moveStock } from '../inventory/movements'
 import { allocateMoney, decimal, draftTotals, lineTotal, money } from './calculations'
 
-export const amountSchema=z.union([z.number().finite().refine(v=>decimal(v).decimalPlaces()<=2),z.string().regex(/^\d+(\.\d{1,2})?$/)]).refine(v=>decimal(v).gte(0),'Summa manfiy bo‘lmasligi kerak')
-export const quantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(v=>decimal(v).gt(0) && decimal(v).decimalPlaces()<=6,'Miqdor musbat bo‘lishi kerak')
+export const amountSchema=z.union([z.number().finite().refine(v=>decimal(v).decimalPlaces()<=2),z.string().regex(/^\d+(\.\d{1,2})?$/)]).refine(v=>decimal(v).gte(0) && decimal(v).lt('1000000000000'),'Summa manfiy bo‘lmasligi kerak')
+export const quantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(v=>decimal(v).gt(0) && decimal(v).decimalPlaces()<=6 && decimal(v).lt('100000000000000'),'Miqdor musbat bo‘lishi kerak')
 export const saleDraftSchema=z.object({
   organizationId:z.string().uuid(),storeId:z.string().uuid(),registerId:z.string().uuid(),shiftId:z.string().uuid(),
   cashierId:z.string().uuid().optional(),customerId:z.string().uuid().nullable().optional(),
@@ -29,12 +29,15 @@ export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayl
       discountAmount:money(item.discountAmount),lineTotal:lineTotal(quantity,product.salePrice,item.discountAmount)}
   })
   const totals=draftTotals(rows,receiptDiscount)
+  await enforceDiscountLimit(tx,context,rows,totals.totalAmount)
+  return {rows,totals}
+}
+export async function enforceDiscountLimit(tx:Prisma.TransactionClient,context:TokenPayload,rows:{quantity:Prisma.Decimal;unitPrice:Prisma.Decimal}[],totalAmount:Prisma.Decimal) {
   const gross=rows.reduce((sum,x)=>sum.add(x.quantity.mul(x.unitPrice)),decimal(0))
-  const off=gross.sub(totals.totalAmount)
+  const off=gross.sub(totalAmount)
   const policy=await tx.discountPolicy.findFirst({where:{organizationId:context.organizationId,isActive:true}})
   const max=context.role==='owner'?decimal(100):context.role==='admin'?decimal(policy?.adminMaxPercent??0):decimal(policy?.cashierMaxPercent??0)
   if (gross.gt(0) && off.mul(100).div(gross).gt(max)) throw new AccessError(403,'DISCOUNT_LIMIT','Chegirma vakolat chegarasidan oshdi')
-  return {rows,totals}
 }
 export async function requireOpenShift(tx:Prisma.TransactionClient,context:TokenPayload,shiftId:string) {
   await tx.$queryRaw`SELECT id FROM "Shift" WHERE id=${shiftId} FOR UPDATE`
@@ -77,8 +80,8 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
       const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
       if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; savatni yangilang')
-      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id]}})
-      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:item.unitCost,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
+      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id],unitCost:product.costPrice}})
+      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
     }
     for (const p of input.payments) await tx.payment.create({data:{organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date()},include:{items:true,payments:true}})

@@ -19,19 +19,6 @@ const createProductSchema = z.object({
   imageUrl: z.string().url().optional(),
 })
 
-const updateProductSchema = z.object({
-  categoryId: z.string().uuid().optional(),
-  name: z.string().min(2).optional(),
-  sku: z.string().min(2).optional(),
-  barcode: z.string().min(2).optional(),
-  unit: z.string().optional(),
-  salePrice: z.number().positive().optional(),
-  costPrice: z.number().positive().optional(),
-  minStock: z.number().optional(),
-  imageUrl: z.string().url().optional(),
-  isActive: z.boolean().optional(),
-})
-
 async function handleGET(request: NextRequest) {
   try {
     const token = getRequestToken(request)

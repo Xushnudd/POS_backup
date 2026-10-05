@@ -4,20 +4,7 @@ import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
-import { z } from 'zod'
-
-const createPaymentSchema = z.object({
-  organizationId: z.string().uuid(),
-  storeId: z.string().uuid(),
-  shiftId: z.string().uuid().optional(),
-  saleId: z.string().uuid().optional(),
-  customerId: z.string().uuid().optional(),
-  paymentType: z.enum(['cash', 'card', 'transfer', 'credit']),
-  direction: z.enum(['in', 'out']),
-  amount: z.number().positive(),
-  referenceNo: z.string().optional(),
-  note: z.string().optional(),
-})
+import { manualPaymentSchema, recordManualPayment } from '@/server/payments/manual'
 
 async function handleGET(request: NextRequest) {
   try {
@@ -97,58 +84,10 @@ async function handleGET(request: NextRequest) {
 }
 
 async function handlePOST(request: NextRequest) {
-  try {
-    const token = getRequestToken(request)
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
-        { status: 401 }
-      )
-    }
-
-    const payload = await verifyToken(token)
-    if (!payload) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
-        { status: 401 }
-      )
-    }
-    const db = scopedPrisma(payload)
-
-    const body = await request.json()
-    const validatedData = createPaymentSchema.parse(body)
-
-    const payment = await db.payment.create({
-      data: {
-        ...validatedData,
-        receivedBy: payload.userId,
-      },
-      include: {
-        customer: true,
-        sale: true,
-      },
-    })
-
-    return NextResponse.json({
-      success: true,
-      data: payment,
-      message: 'To\'lov muvaffaqiyatli yaratildi',
-    })
-
-  } catch (error) {
-    if (error instanceof AccessError) throw error
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
-  }
+  const context = await verifyToken(getRequestToken(request) ?? '')
+  if (!context) throw new AccessError(401, 'UNAUTHORIZED')
+  const input = manualPaymentSchema.parse(await request.json())
+  return NextResponse.json({ success: true, data: await recordManualPayment(context, input) })
 }
 export const GET = withApi(handleGET)
 

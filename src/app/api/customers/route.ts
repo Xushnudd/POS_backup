@@ -15,15 +15,6 @@ const createCustomerSchema = z.object({
   creditLimit: z.number().default(0),
 })
 
-const updateCustomerSchema = z.object({
-  fullName: z.string().min(2).optional(),
-  phone: z.string().min(9).optional(),
-  address: z.string().optional(),
-  note: z.string().optional(),
-  creditLimit: z.number().optional(),
-  isActive: z.boolean().optional(),
-})
-
 async function handleGET(request: NextRequest) {
   try {
     const token = getRequestToken(request)

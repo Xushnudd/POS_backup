@@ -21,17 +21,6 @@ const createStockDocumentSchema = z.object({
   })).min(1),
 }).refine(doc => doc.documentType === "adjustment" || doc.items.every(item => item.quantity > 0), "Kirim miqdori musbat bo‘lishi kerak")
 
-const updateStockDocumentSchema = z.object({
-  supplierId: z.string().uuid().optional(),
-  note: z.string().optional(),
-  items: z.array(z.object({
-    productId: z.string().uuid(),
-    quantity: z.number().positive(),
-    unitCost: z.number().positive(),
-    note: z.string().optional(),
-  })).optional(),
-})
-
 async function handleGET(request: NextRequest) {
   try {
     const token = getRequestToken(request)

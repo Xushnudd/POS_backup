@@ -129,6 +129,7 @@ export default function PosPage() {
   };
 
   const [localReady,setLocalReady]=useState(false);
+  const [hasPendingCheckout,setHasPendingCheckout]=useState(false);
   const checkoutAttempt = useRef<{ operationId: string; payload: string; saleId?: string } | null>(null);
   useEffect(() => {
     if (!organization?.id || !user?.id) return;
@@ -140,6 +141,7 @@ export default function PosPage() {
         const saved=value as {cart:{items:CartItem[];cartDiscount:number;customer:Customer|null;note:string};attempt:typeof checkoutAttempt.current};
         if (saved.cart?.items) hydrate(saved.cart);
         checkoutAttempt.current=saved.attempt;
+        setHasPendingCheckout(Boolean(saved.attempt));
       }
       setLocalReady(true);
     }).catch(()=>{if (!cancelled) notifyError('Lokal savatni tiklab bo‘lmadi; ma’lumotni tozalashdan oldin tekshiring');});
@@ -192,6 +194,7 @@ export default function PosPage() {
       }
       checkoutAttempt.current ??= { operationId: crypto.randomUUID(), payload: signature };
       const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+      setHasPendingCheckout(true);
       const operationId=checkoutAttempt.current.operationId;
       await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current});
       await enqueue({id:operationId,scope,type:'sale.create',payload:{...draftPayload,operationId},state:'pending',createdAt:new Date().toISOString()});
@@ -218,6 +221,7 @@ export default function PosPage() {
       // 3. Prepare for receipt preview
       const finishedSale: Sale = { ...completeRes.data, customer };
       checkoutAttempt.current = null;
+      setHasPendingCheckout(false);
 
       setCompletedSale(finishedSale);
       setIsPaymentModalOpen(false);
@@ -230,8 +234,46 @@ export default function PosPage() {
     }
   };
 
+  const recoverCheckout = async () => {
+    const attempt=checkoutAttempt.current;
+    if (!attempt || !organization?.id || !user?.id) return;
+    setIsProcessingPayment(true);
+    try {
+      const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+      if (!attempt.saleId) {
+        const draft=await api.operations.status('sale.create',attempt.operationId);
+        if (draft.data?.state!=='completed' || !draft.data.result) {
+          notifyError('Yakunlangan natija hali topilmadi. Oldingi amal kalitini saqlab, ulanish tiklangach qayta tekshiring.');
+          return;
+        }
+        attempt.saleId=draft.data.result.id;
+        await acknowledge(attempt.operationId,'synced',draft.data.result);
+        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt});
+      }
+      const completed=await api.operations.status('sale.complete',attempt.saleId);
+      if (completed.data?.state!=='completed' || !completed.data.result) {
+        notifyError('Qoralama mavjud, lekin yakunlash natijasi hali topilmadi. Shu savat va to‘lov bilan qayta urinishingiz mumkin; yangi savdo boshlamang.');
+        return;
+      }
+      await acknowledge(attempt.saleId,'synced',completed.data.result);
+      await saveDraft(scope,{cart:{items:[],cartDiscount:0,customer:null,note:''},attempt:null});
+      checkoutAttempt.current=null;
+      setHasPendingCheckout(false);
+      setCompletedSale(completed.data.result);
+      clearCart();
+      setIsPaymentModalOpen(false);
+      setIsReceiptModalOpen(true);
+      notifySuccess('Oldingi savdoning yakunlangan natijasi tiklandi');
+    } catch(error) { notifyError(error instanceof Error?error.message:'Savdo holatini tekshirib bo‘lmadi'); }
+    finally { setIsProcessingPayment(false); }
+  };
+
   return (
     <div className="h-[calc(100vh-5rem)] flex flex-col gap-4">
+      {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3">
+        <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
+        <Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button>
+      </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (
         <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl flex items-center justify-between shadow-xs">

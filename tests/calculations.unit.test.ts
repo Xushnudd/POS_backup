@@ -35,3 +35,12 @@ test('Tashkent date range includes whole last day and rejects invalid date',asyn
  assert.equal(range.lt?.toISOString(),'2026-10-05T19:00:00.000Z')
  assert.throws(()=>dateRange('2026-02-30',null,'Asia/Tashkent'))
 })
+
+test('Production config requires a HTTPS origin and PostgreSQL connection without exposing values',async()=>{
+ const {validateProductionEnvironment}=await import('@/server/config')
+ assert.doesNotThrow(()=>validateProductionEnvironment({NODE_ENV:'development'}))
+ assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production'}))
+ assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'http://pos.example.invalid'}))
+ assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid/path'}))
+ assert.doesNotThrow(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid'}))
+})

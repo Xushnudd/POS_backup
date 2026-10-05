@@ -11,12 +11,6 @@ const createCategorySchema = z.object({
   sortOrder: z.number().default(0),
 })
 
-const updateCategorySchema = z.object({
-  name: z.string().min(2).optional(),
-  sortOrder: z.number().optional(),
-  isActive: z.boolean().optional(),
-})
-
 async function handleGET(request: NextRequest) {
   try {
     const token = getRequestToken(request)

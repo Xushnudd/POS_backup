@@ -11,9 +11,7 @@ import {
   faChartLine,
   faCheck,
   faArrowRight,
-  faStore,
   faCashRegister,
-  faShieldHalved,
 } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/components/ui/Button';
 

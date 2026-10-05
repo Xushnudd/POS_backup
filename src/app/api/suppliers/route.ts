@@ -14,15 +14,6 @@ const createSupplierSchema = z.object({
   note: z.string().optional(),
 })
 
-const updateSupplierSchema = z.object({
-  name: z.string().min(2).optional(),
-  phone: z.string().optional(),
-  tin: z.string().optional(),
-  address: z.string().optional(),
-  note: z.string().optional(),
-  isActive: z.boolean().optional(),
-})
-
 async function handleGET(request: NextRequest) {
   try {
     const token = getRequestToken(request)
