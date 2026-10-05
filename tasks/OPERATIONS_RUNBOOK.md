@@ -10,7 +10,7 @@ Bu yo‘riqnoma real hostingni yaratmaydi. Domen, TLS reverse proxy, secret bosh
 4. Versiyalangan `POS_IMAGE` bilan image yarating. Compose DB portini hostga chiqarmaydi. App default faqat localhostga ochiladi; TLS reverse proxy oldida ishlaydi. Proxy haqiqiy HTTPS Host/Originni saqlasin. `TRUST_PROXY_IP=true` faqat proxy foydalanuvchi bergan IP headerlarni almashtirsa qo‘yiladi.
 5. Yangilashdan oldin operator backup oladi, staging nusxada migrate va restore mashqini bajaradi. Concurrent eski app mavjud bo‘lsa backfill vaqtida savdo yozuvlarini to‘xtatish kerak: 002 receipt-discount/debt backfilllari oldingi app bilan parallel yozishga mo‘ljallanmagan.
 6. `docker compose --profile migration run --rm migrate` faqat tekshirilgan release va backupdan keyin. App startup `db push` qilmaydi. Migratsiya muvaffaqiyatsiz bo‘lsa webni yangilamang, xatoni tuzating; migration historyni taxmin bilan resolve qilmang.
-7. `docker compose up -d app`, `/api/health/live` 200, `/api/health/ready` 200, test tashkilotida kirish/smena/savdo/qaytarish smoke sinovi. Readiness bazadagi Operation.actorId va yakunlangan 014 count_history_guards migration contractini tekshiradi; jadvallar/credentiallar tashqariga chiqarilmaydi.
+7. `docker compose up -d app`, `/api/health/live` 200, `/api/health/ready` 200, test tashkilotida kirish/smena/savdo/qaytarish smoke sinovi. Readiness bazadagi Operation.actorId va yakunlangan 015 customer_ledger_documents migration contractini tekshiradi; jadvallar/credentiallar tashqariga chiqarilmaydi.
 8. Savdo, payment, debt va inventory journal reconciliation tekshirilgach trafikni oching. Lokal pending sync operatsiyalarini o‘chirmang; bir xil kalit bilan server statusini tekshiring.
 
 ## Backup
@@ -44,3 +44,11 @@ Inventory → Inventarizatsiya: full (2000 SKUgacha) yoki qisman scope, blind co
 Sanash to‘xtab qolsa boshqa manager aktiv sanashlar ro‘yxatidan ochib, tugatadi yoki sabab bilan bekor qiladi. Raw balance yoki StockFreeze yozuvini qo‘lda o‘chirmang. Avtomatik freeze timeout yo‘q; physical checkpoint buzilmasligi uchun operator nazorati kerak. Readiness migration014ni talab qiladi.
 
 Backup/restore active freeze va readinglarni ham saqlaydi; restore nusxasida aktiv countlar operator bilan solishtirilib, keyin savdo ochiladi. `test-backup.sh` izolyatsiyalangan active-count fixture bilan reading/expected/current balance va freeze aynan tiklanganini tekshiradi.
+
+## Mijoz qarzini tuzatish va ko‘chirma
+
+Owner mijoz kartasida qarz ko‘chirmasi va alohida qarz hujjatini ko‘radi. Opening uchun manba hujjat summasi/sana/muddat/sabab; decrease/write-off mavjud guruh qarzidan oshmaydi. Savdo write-offida tegishli chek tanlanadi. Oddiy naqd undirish ochiq smenada o‘z Payment/collection oqimi orqali bajariladi; manual qarz tuzatishi pul tushumi yoki refund emas.
+
+Original DebtEntry edit/delete qilinmaydi; yangi audited correction hujjati yoziladi. Written-off liability qaytarilganda real cash tushumi deb talqin qilinmaydi. Payment/reference bilan tasdiqlangan collectionlar o‘z kanali bo‘yicha saqlanadi; bank/card settlement chegaralari o‘zgarmaydi. Ledger source operation result noaniq bo‘lsa original key/payloadni saqlab qayta tekshiring.
+
+Ko‘chirma timezone bo‘yicha davr boshidagi/oxiridagi/running/current qarzni, source/receipt/actor/reason va ma’lum due dateni ko‘rsatadi. Eski noma’lum actor/muddat taxmin qilinmagan. Customer due-date aging/export/advance va full purchase activity hali alohida CRM ishlaridir. Migration015 effectiveAtni eski createdAtdan oladi, append-only guard va deferred customer FKni qo‘shadi. `test-backup.sh` original actor/effective/due ledger fixture ham aynan tiklanganini tekshiradi.

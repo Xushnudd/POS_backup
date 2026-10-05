@@ -62,6 +62,8 @@ INSERT INTO "StockCount" (id,"organizationId","storeId",scope,blind,"createdBy")
 INSERT INTO "StockCountLine" (id,"countId","productId","productName",sku,unit,"expectedQuantity","unitCost") VALUES (:'fixture',:'fixture',:'fixture','Fixture SKU','FIX','dona',3,5);
 INSERT INTO "StockCountReading" (id,"lineId",round,quantity,"countedBy") VALUES (:'fixture',:'fixture',1,2,:'fixture');
 INSERT INTO "StockFreeze" ("storeId","productId","countId") VALUES (:'fixture',:'fixture',:'fixture');
+INSERT INTO "Customer" (id,"organizationId","fullName",phone,"creditLimit","updatedAt") VALUES (:'fixture',:'fixture','Ledger fixture',:'fixture',100,NOW());
+INSERT INTO "DebtEntry" (id,"organizationId","customerId","sourceType","sourceId",amount,"actorId","effectiveAt","dueAt") VALUES (:'fixture',:'fixture',:'fixture','opening_debt',:'fixture',3.75,:'fixture','2026-01-01','2026-02-01');
 COMMIT;
 SQL
 scripts/ops/backup.sh
@@ -78,9 +80,15 @@ SELECT c.status || ':' || l."expectedQuantity"::text || ':' || r.quantity::text 
 SQL
 )
 [[ "$restored_count" == 'counting:3.000000:2.000000:3.000000' ]]
+restored_debt=$(docker exec -i pos-plan-test-db psql -U pos_test -d "$restore_db" -At -v fixture="$fixture_id" <<'SQL'
+SELECT amount::text || ':' || "sourceType" || ':' || to_char("effectiveAt",'YYYY-MM-DD') || ':' || to_char("dueAt",'YYYY-MM-DD') FROM "DebtEntry" WHERE id=:'fixture' AND "actorId"=:'fixture';
+SQL
+)
+[[ "$restored_debt" == '3.75:opening_debt:2026-01-01:2026-02-01' ]]
+
 
 if scripts/ops/restore.sh "$backup_file"; then
  printf 'ERROR: overwrite guard failed\n' >&2
  exit 1
 fi
-printf 'PASS: encrypted backup, transactional restore, migration records match source, active count/readings/freeze recovered, existing-table guard\n'
+printf 'PASS: encrypted backup, transactional restore, migration records match source, active count/readings/freeze and customer ledger recovered, existing-table guard\n'

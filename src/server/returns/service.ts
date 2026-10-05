@@ -41,11 +41,14 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
   const other=sale.totalAmount.sub(credit).sub(cash)
   // Vendor refunds are deliberately out of scope. Never pretend card/Click was refunded.
   if (other.gt(0)) throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED','Bu savdoning tashqi to‘lovi qaytarilishi integratsiya tayyor bo‘lgach bajariladi')
-  let outstandingCredit=decimal(0)
+  let outstandingCredit=decimal(0),waivedCredit=decimal(0)
   if (sale.customerId) {
    await tx.$queryRaw`SELECT id FROM "Customer" WHERE id=${sale.customerId} FOR UPDATE`
    const debt=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:sale.id},_sum:{amount:true}})
    outstandingCredit=PrismaMinZero(debt._sum.amount)
+   const waived=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:sale.id,sourceType:{in:['write_off','write_off_reversal']}},_sum:{amount:true}})
+   waivedCredit=decimal(waived._sum.amount??0).negated()
+   if(waivedCredit.lt(0))throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
    // Cash cannot refund a debt repayment received through a bank/other channel.
    // Preserve its actual channel until an explicit refund settlement flow is available.
    const allocations=await tx.debtEntry.findMany({where:{organizationId:context.organizationId,saleId:sale.id,sourceType:'collection'}})
@@ -55,13 +58,14 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
 
   }
   const remainingLiability=sale.totalAmount.sub(totalReturned)
-  if (outstandingCredit.gt(remainingLiability)) throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
-  const split=allocateMoney(refund,[{id:'cash',weight:remainingLiability.sub(outstandingCredit)},{id:'credit',weight:outstandingCredit}])
-  const debtReduction=split.credit
-  const cashRefund=refund.sub(debtReduction)
+  if (outstandingCredit.add(waivedCredit).gt(remainingLiability)) throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
+  const split=allocateMoney(refund,[{id:'cash',weight:remainingLiability.sub(outstandingCredit).sub(waivedCredit)},{id:'credit',weight:outstandingCredit},{id:'waived',weight:waivedCredit}])
+  const debtReduction=split.credit.add(split.waived)
+  const cashRefund=split.cash
   const ret=await tx.saleReturn.create({data:{saleId:sale.id,returnReceiptNo:'RET-'+randomUUID(),refundAmount:refund,reason:input.reason,processedBy:context.userId,
     items:{create:rows.map(({unitCost,...row})=>{void unitCost;return row})}},include:{items:true}})
-  if (debtReduction.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'return',sourceId:ret.id,saleId:sale.id,amount:debtReduction.negated()}})
+  if (debtReduction.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'return',sourceId:ret.id,saleId:sale.id,amount:debtReduction.negated(),actorId:context.userId}})
+  if (split.waived.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'write_off_reversal',sourceId:ret.id,saleId:sale.id,amount:split.waived,actorId:context.userId,note:'Written-off liability returned'}})
   if (cashRefund.gt(0)) await tx.payment.create({data:{organizationId:context.organizationId,storeId:sale.storeId,shiftId:input.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:'cash',direction:'out',amount:cashRefund,receivedBy:context.userId,note:'return:'+ret.id}})
   for (const row of rows) if (row.disposition==='sellable') await moveStock(tx,context,{storeId:sale.storeId,productId:row.productId,delta:row.quantity,unitCost:row.unitCost,sourceType:'return',sourceId:ret.id})
   const allReturned=sale.items.every(x=>{
@@ -70,7 +74,7 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    return previous.add(current).eq(x.quantity)
   })
   await tx.sale.update({where:{id:sale.id},data:{status:allReturned?'returned':'partially_returned'}})
-  await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,reason:input.reason})
+  await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,waiverReversal:split.waived,reason:input.reason})
   return ret
  })
 }

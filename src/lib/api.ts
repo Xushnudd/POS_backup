@@ -18,6 +18,8 @@ import {
   Shift,
   StockDocument,
   StockCount,
+  CustomerStatement,
+  CustomerDebtDocumentInput,
   StockTransfer,
   Store,
   Supplier,
@@ -398,6 +400,8 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
+    statement:(id:string,params:{page?:number;from?:string;to?:string}={})=>this.request<CustomerStatement>(`/customers/${id}/ledger?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!=='').map(([k,v])=>[k,String(v)]))}`),
+    postDebtDocument:(id:string,data:CustomerDebtDocumentInput)=>this.request<{id:string}>(`/customers/${id}/ledger`,{method:'POST',body:JSON.stringify(data)}),
     getDebt: (id: string) => this.request<CustomerDebt>(`/customers/${id}/debt`),
   };
 

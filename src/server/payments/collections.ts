@@ -16,7 +16,7 @@ export async function collectDebt(context:TokenPayload,input:z.infer<typeof coll
   const amount=money(input.amount)
   if (amount.gt(sums._sum.amount??0)) throw new AccessError(409,'DEBT_OVERPAYMENT')
   const payment=await tx.payment.create({data:{organizationId:context.organizationId,storeId:input.storeId,shiftId:input.shiftId,customerId:customer.id,paymentType:input.paymentType,direction:'in',amount,receivedBy:context.userId,referenceNo:input.referenceNo,note:'debt_collection'}})
-  const origins=await tx.debtEntry.findMany({where:{organizationId:context.organizationId,customerId:customer.id,amount:{gt:0}},orderBy:[{createdAt:'asc'},{id:'asc'}]})
+  const origins=await tx.debtEntry.findMany({where:{organizationId:context.organizationId,customerId:customer.id,amount:{gt:0}},orderBy:[{effectiveAt:'asc'},{id:'asc'}]})
   let remaining=amount
   const visited=new Set<string|null>()
   for (const origin of origins) {
@@ -27,7 +27,7 @@ export async function collectDebt(context:TokenPayload,input:z.infer<typeof coll
     const available=decimal(balance._sum.amount??0)
     if (available.lte(0)) continue
     const part=remaining.lt(available)?remaining:available
-    await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'collection',sourceId:payment.id+':'+origin.id,saleId:origin.saleId,amount:part.negated(),note:input.note}})
+    await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'collection',sourceId:payment.id+':'+origin.id,saleId:origin.saleId,amount:part.negated(),note:input.note,actorId:context.userId}})
     remaining=remaining.sub(part)
   }
   if (!remaining.isZero()) throw new AccessError(409,'DEBT_ALLOCATION_MISMATCH')

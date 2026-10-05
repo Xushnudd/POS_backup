@@ -39,7 +39,11 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
       // Serializable snapshots can predate the advisory lock. A competing Operation
       // insert then produces this exact unique conflict: retry the rolled-back transaction.
       const operationRace=error instanceof Prisma.PrismaClientKnownRequestError && error.code==='P2002' && error.meta?.modelName==='Operation' && Array.isArray(error.meta?.target) && ['organizationId','type','key'].every(field=>(error.meta!.target as string[]).includes(field))
-      const retryable=operationRace || (error instanceof Prisma.PrismaClientKnownRequestError && (error.code==='P2034' || (error.code==='P2010' && ['40001','40P01'].includes(String(error.meta?.code)))))
+      // A deterministic business source can collide before the Operation insert.
+      // Retry only when this exact operation has a committed terminal record;
+      // fresh transaction rechecks live authorization, actor and payload hash.
+      const committedBusinessRace=error instanceof Prisma.PrismaClientKnownRequestError && error.code==='P2002' && !!await prisma.operation.findUnique({where:{organizationId_type_key:{organizationId:context.organizationId,type,key}},select:{id:true}})
+      const retryable=operationRace || committedBusinessRace || (error instanceof Prisma.PrismaClientKnownRequestError && (error.code==='P2034' || (error.code==='P2010' && ['40001','40P01'].includes(String(error.meta?.code)))))
       if (!retryable || attempt===2) throw error
       await new Promise(resolve=>setTimeout(resolve,20*(attempt+1)))
     }

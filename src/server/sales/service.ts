@@ -16,7 +16,7 @@ export const saleDraftSchema=z.object({
   items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500),
 })
 export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:amountSchema.refine(v=>decimal(v).gt(0)),referenceNo:z.string().max(200).optional()})
-export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10)})
+export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional()})
 export type DraftInput=z.infer<typeof saleDraftSchema>
 export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {
   const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})
@@ -60,7 +60,7 @@ export async function createDraft(context:TokenPayload,input:DraftInput,key:stri
   })
 }
 export async function completeSale(context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string) {
-  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments},async tx=>{
+  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{})},async tx=>{
     await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
     const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:true,organization:true}})
     if (!sale) throw new AccessError(404,'NOT_FOUND')
@@ -77,7 +77,7 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
       if (!customer) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
       const debt=await tx.debtEntry.aggregate({where:{customerId:customer.id,organizationId:context.organizationId},_sum:{amount:true}})
       if (decimal(debt._sum.amount??0).add(credit).gt(customer.creditLimit)) throw new AccessError(409,'CREDIT_LIMIT','Nasiya limiti oshdi')
-      await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit}})
+      await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit,actorId:context.userId,dueAt:input.creditDueAt?new Date(input.creditDueAt):undefined}})
     }
     const allocation=allocateMoney(sale.discountAmount,sale.items.map(x=>({id:x.id,weight:x.lineTotal})))
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {

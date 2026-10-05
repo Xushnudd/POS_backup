@@ -525,6 +525,9 @@ model Operation {
   @@index([organizationId, createdAt])
 }
 model DebtEntry {
+  actorId        String?
+  effectiveAt    DateTime @default(now())
+  dueAt          DateTime?
   saleId         String?
   id             String @id @default(uuid())
   organizationId String
@@ -535,7 +538,7 @@ model DebtEntry {
   note           String?
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  customer       Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: NoAction)
   @@unique([organizationId, sourceType, sourceId])
   @@index([customerId, createdAt])
 }

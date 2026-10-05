@@ -1874,7 +1874,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-01.06** — Qarzni o‘chirish/tuzatish faqat sabab, vakolat va audit bilan.
+- [x] **CRM-01.06** — Qarzni o‘chirish/tuzatish faqat sabab, vakolat va audit bilan.
 
   **Texnologiya:** Approval, Prisma reversal/audit transaction.
 

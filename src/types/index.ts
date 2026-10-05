@@ -366,3 +366,16 @@ export interface StockCount {
  createdAt:string;approvedBy?:string|null;approvedAt?:string|null;adjustmentId?:string|null;reason?:string|null;
  store?:{name:string};lines?:StockCountLine[];
 }
+
+export interface CustomerDebtDocumentInput {
+ operationId:string;kind:'opening'|'increase'|'decrease'|'write_off';amount:string;reason:string;saleId?:string;effectiveAt?:string;dueAt?:string;
+}
+export interface CustomerStatementEntry {
+ id:string;sourceType:string;sourceId:string;saleId:string|null;receiptNo:string|null;amount:string;balance:string;
+ effectiveAt:string;dueAt:string|null;createdAt:string;note:string|null;actorId:string|null;actorName:string|null;
+}
+export interface CustomerStatement {
+ customer:{id:string;fullName:string};entries:CustomerStatementEntry[];
+ summary:{openingBalance:string;increases:string;reductions:string;closingBalance:string;currentBalance:string};
+ pagination:{page:number;limit:number;total:number;totalPages:number};
+}

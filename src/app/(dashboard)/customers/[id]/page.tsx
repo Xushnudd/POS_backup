@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { api } from '@/lib/api';
+import { CustomerLedger } from '@/components/customers/CustomerLedger';
+import { fixed } from '@/lib/money';
+import { api, ApiError } from '@/lib/api';
 import { Customer } from '@/types';
 import { formatMoney, formatPhone } from '@/lib/format';
 import Card from '@/components/ui/Card';
@@ -18,15 +20,15 @@ import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function CustomerDetailPage() {
-  const attempt=useRef<string|null>(null);
+  const attempt=useRef<Parameters<typeof api.payments.credit>[0]|null>(null);
   const params = useParams();
   const id = params?.id as string;
-  const { organization } = useAuth();
+  const { organization, role } = useAuth();
   const { activeStore, activeShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [debt, setDebt] = useState<number>(0);
+  const [debt, setDebt] = useState<string>('0');
   const [isLoading, setIsLoading] = useState(true);
 
   // Debt payment modal
@@ -34,6 +36,8 @@ export default function CustomerDetailPage() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNote, setPaymentNote] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasPendingPayment,setHasPendingPayment]=useState(false);
+  const [ledgerVersion,setLedgerVersion]=useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -43,7 +47,7 @@ export default function CustomerDetailPage() {
       .then(([cRes, dRes]) => {
         if (isCancelled) return;
         if (cRes.data) setCustomer(cRes.data);
-        if (dRes.data) setDebt(Number(dRes.data.totalDebt) || 0);
+        if (dRes.data) setDebt(String(dRes.data.totalDebt));
       })
       .catch((err) => console.error(err))
       .finally(() => {
@@ -57,36 +61,39 @@ export default function CustomerDetailPage() {
 
   const handleDebtPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id || !activeStore?.id || !customer) return;
+    if (!organization?.id || !customer) return;
 
-    const amt = parseFloat(paymentAmount);
-    if (!amt || amt <= 0) {
+    if(attempt.current&&attempt.current.customerId!==customer.id){notifyError('Oldingi mijoz to‘lovi natijasi noaniq. O‘sha mijoz kartasiga qayting');return;}
+    const amt = paymentAmount.trim();
+    if (!/^\d+(\.\d{1,2})?$/.test(amt) || fixed(amt)<=BigInt(0)) {
       notifyError('To\'lov summasini kiriting');
       return;
     }
 
-    if (!activeShift) { notifyError('Qarzni undirish uchun smenani oching'); return; }
-    attempt.current ??= crypto.randomUUID();
+    if (!attempt.current && (!activeStore || !activeShift)) { notifyError('Qarzni undirish uchun do‘kon tanlab, smenani oching'); return; }
     setIsProcessing(true);
     try {
-      await api.payments.credit({
+      attempt.current ??= {
         organizationId: organization.id,
-        storeId: activeStore.id,
+        storeId: activeStore!.id,
         customerId: customer.id,
-        shiftId: activeShift.id,
-        operationId: attempt.current,
+        shiftId: activeShift!.id,
+        operationId: crypto.randomUUID(),
         amount: amt,
         note: paymentNote.trim() || undefined,
-      });
+      };
+      setHasPendingPayment(true);
+      await api.payments.credit(attempt.current);
 
-      attempt.current = null;
+      attempt.current = null;setHasPendingPayment(false);setLedgerVersion(value=>value+1);
       notifySuccess('Nasiya qarzi undirildi');
       setIsDebtModalOpen(false);
       setPaymentAmount('');
       // refresh debt
       const dRes = await api.customers.getDebt(customer.id);
-      if (dRes.data) setDebt(Number(dRes.data.totalDebt) || 0);
+      if (dRes.data) setDebt(String(dRes.data.totalDebt));
     } catch (err: unknown) {
+      if(err instanceof ApiError && err.status && err.status>=400 && err.status<500){attempt.current=null;setHasPendingPayment(false);}
       notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
     } finally {
       setIsProcessing(false);
@@ -127,11 +134,12 @@ export default function CustomerDetailPage() {
           </div>
         </div>
 
-        {debt > 0 && (
+        {fixed(debt)>BigInt(0) && (
           <Button
             variant="success"
             onClick={() => {
-              setPaymentAmount(String(debt));
+              setPaymentAmount(attempt.current?String(attempt.current.amount):debt);
+              if(attempt.current)setPaymentNote(attempt.current.note??'');
               setIsDebtModalOpen(true);
             }}
             leftIcon={<FontAwesomeIcon icon={faHandHoldingDollar} />}
@@ -146,7 +154,7 @@ export default function CustomerDetailPage() {
           <span className="text-xs text-gray-500">Joriy qarzdorlik</span>
           <p
             className={`text-2xl font-black mt-1 ${
-              debt > 0 ? 'text-red-600' : 'text-gray-900'
+              fixed(debt)>BigInt(0) ? 'text-red-600' : 'text-gray-900'
             }`}
           >
             {formatMoney(debt)}
@@ -178,10 +186,11 @@ export default function CustomerDetailPage() {
         </div>
       </Card>
 
+      {role==='owner'&&<CustomerLedger key={id} customerId={id} version={ledgerVersion} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));}}/>}
       {/* Debt Payment Modal */}
       <Modal
         isOpen={isDebtModalOpen}
-        onClose={() => setIsDebtModalOpen(false)}
+        onClose={() => {if(!attempt.current&&!isProcessing)setIsDebtModalOpen(false);}}
         title="Qarzni undirish"
         size="md"
       >
@@ -189,8 +198,10 @@ export default function CustomerDetailPage() {
           <Input
             label="To'lov summasi (so'm) *"
             type="number"
-            min="1"
+            min="0.01"
+            step="0.01"
             max={debt}
+            disabled={isProcessing || hasPendingPayment}
             value={paymentAmount}
             onChange={(e) => setPaymentAmount(e.target.value)}
             required
@@ -199,6 +210,7 @@ export default function CustomerDetailPage() {
           <Input
             label="Izoh"
             placeholder="Qarz to'lovi"
+            disabled={isProcessing || hasPendingPayment}
             value={paymentNote}
             onChange={(e) => setPaymentNote(e.target.value)}
           />
@@ -208,12 +220,12 @@ export default function CustomerDetailPage() {
               type="button"
               variant="outline"
               onClick={() => setIsDebtModalOpen(false)}
-              disabled={isProcessing}
+              disabled={isProcessing || hasPendingPayment}
             >
               Bekor qilish
             </Button>
             <Button type="submit" variant="success" isLoading={isProcessing} className="font-bold">
-              Tasdiqlash
+              {hasPendingPayment?'Oldingi to‘lovni tekshirish':'Tasdiqlash'}
             </Button>
           </div>
         </form>
