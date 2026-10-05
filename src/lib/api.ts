@@ -29,6 +29,10 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
 class ApiClient {
+  sessions = {
+    list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
+    revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
+  };
   auditSummary = (params:Record<string,string>) => this.request<AuditSummary[]>(`/audit?${new URLSearchParams({...params,view:'summary',limit:'50'})}`);
   private getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
@@ -103,6 +107,7 @@ class ApiClient {
     acceptInvitation: (data:{token:string;fullName?:string;password?:string}) => this.request<{organizationId:string;membershipId:string}>('/auth/invitations/accept',{method:'POST',body:JSON.stringify(data)}),
     logout: () => this.request('/auth/logout', { method: 'POST', body: '{}' }),
     logoutAll: () => this.request('/auth/logout-all', { method: 'POST', body: '{}' }),
+    changePassword:(currentPassword:string,newPassword:string)=>this.request('/auth/change-password',{method:'POST',body:JSON.stringify({currentPassword,newPassword})}),
     me: () => this.request<AuthData>('/auth/me'),
   };
 

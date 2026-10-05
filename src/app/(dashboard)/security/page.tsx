@@ -1,0 +1,61 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import { deviceId, pendingOperations } from '@/lib/offline';
+import { useRouter } from 'next/navigation';
+type SessionRow={id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean};
+export default function SecurityPage(){
+ const {user,organization,refreshUser}=useAuth();
+ const router=useRouter();
+ const [rows,setRows]=useState<SessionRow[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(0),[busy,setBusy]=useState(true),[revoking,setRevoking]=useState(''),[error,setError]=useState(''),[version,setVersion]=useState(0);
+ const [currentPassword,setCurrentPassword]=useState(''),[newPassword,setNewPassword]=useState(''),[confirmation,setConfirmation]=useState(''),[changing,setChanging]=useState(false),[passwordError,setPasswordError]=useState('');
+ const changePassword=async(event:React.FormEvent)=>{
+  event.preventDefault();if(changing||!user||!organization)return;
+  setPasswordError('');
+  if(newPassword!==confirmation){setPasswordError('Yangi parollar bir xil emas');return;}
+  if(new TextEncoder().encode(newPassword).length>72){setPasswordError('Parol UTF-8 bo‘yicha 72 baytdan oshmasin');return;}
+  setChanging(true);
+  try{
+   if((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length)throw new Error('Sinxronlanmagan amallar bor; avval ularning natijasini tekshiring');
+   await api.auth.changePassword(currentPassword,newPassword);
+   setCurrentPassword('');setNewPassword('');setConfirmation('');await refreshUser();router.replace('/login');
+  }catch(error){setPasswordError(error instanceof Error?error.message:'Natija noaniq. Qayta kirishda yangi parolni tekshiring.');}
+  finally{setChanging(false);}
+ };
+ useEffect(()=>{
+  if(!user?.id)return;let cancelled=false;
+  void Promise.resolve().then(async()=>{
+   if(cancelled)return;setBusy(true);setError('');
+   try{const response=await api.sessions.list(page);if(!cancelled){setRows(response.data??[]);setPages(response.pagination?.totalPages??0);}}
+   catch(error){if(!cancelled)setError(error instanceof Error?error.message:'Sessiyalar yuklanmadi');}
+   finally{if(!cancelled)setBusy(false);}
+  });return()=>{cancelled=true;};
+ },[user?.id,page,version]);
+ const revoke=async(id:string)=>{
+  setRevoking(id);setError('');
+  try{await api.sessions.revoke(id);setVersion(value=>value+1);}
+  catch(error){setError(error instanceof Error?error.message:'Sessiya bekor qilinmadi');}
+  finally{setRevoking('');}
+ };
+ const date=(value:string)=>new Date(value).toLocaleString('uz-UZ',{timeZone:organization?.timezone});
+ return <div className="space-y-4"><h1 className="text-2xl font-bold">Faol sessiyalar</h1><Card>
+  <p className="text-sm mb-3">Bu ro‘yxat hisobingizning barcha bizneslardagi faol sessiyalarini ko‘rsatadi. Qurilma modeli yoki joylashuv taxmin qilinmaydi. Joriy sessiyadan chiqish uchun menyudagi Chiqish tugmasini ishlating.</p>
+  {error&&<div role="alert">{error}<Button onClick={()=>setVersion(value=>value+1)}>Qayta yuklash</Button></div>}
+  {busy?<p>Yuklanmoqda...</p>:rows.map(row=><article key={row.id} className="border-t py-3 space-y-1">
+   <p className="font-semibold">{row.current?'Joriy sessiya':'Boshqa sessiya'}</p><p className="text-xs break-all">Sessiya ID: {row.id}</p>
+   <p className="text-xs break-all">Biznes ID: {row.organizationId}</p><p className="text-sm">Yaratilgan: {date(row.createdAt)}</p><p className="text-sm">Amal qilish muddati: {date(row.expiresAt)}</p><p className="text-sm">Faolsizlik muddati: {date(row.idleExpiresAt)}</p>
+   {!row.current&&<Button disabled={!!revoking} onClick={()=>revoke(row.id)}>Sessiyani bekor qilish</Button>}
+  </article>)}
+  <div className="flex items-center gap-3 mt-3"><Button disabled={busy||page<=1} onClick={()=>setPage(value=>value-1)}>Oldingi</Button><span>{page} / {Math.max(1,pages)}</span><Button disabled={busy||page>=pages} onClick={()=>setPage(value=>value+1)}>Keyingi</Button></div>
+ </Card><Card title="Parolni almashtirish"><form onSubmit={changePassword} className="space-y-3">
+  <p className="text-sm">Parol o‘zgargach barcha sessiyalar yopiladi va qayta kirish kerak bo‘ladi. Lokal saqlangan amallar o‘chirilmaydi.</p>
+  <Input label="Joriy parol" type="password" autoComplete="current-password" required maxLength={72} disabled={changing} value={currentPassword} onChange={event=>setCurrentPassword(event.target.value)}/>
+  <Input label="Yangi parol" type="password" autoComplete="new-password" required minLength={8} maxLength={72} disabled={changing} value={newPassword} onChange={event=>setNewPassword(event.target.value)}/>
+  <Input label="Yangi parolni tasdiqlash" type="password" autoComplete="new-password" required minLength={8} maxLength={72} disabled={changing} value={confirmation} onChange={event=>setConfirmation(event.target.value)}/>
+  {passwordError&&<p role="alert">{passwordError}</p>}<Button type="submit" disabled={changing}>Parolni yangilash</Button>
+ </form></Card></div>;
+}

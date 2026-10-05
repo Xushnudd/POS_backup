@@ -181,6 +181,51 @@ test('Owner audit summary filters a timezone snapshot and omits sensitive payloa
   assert.equal((await read(req(query,a.cookie),undefined)).status,403)
  }finally{for(const owner of [a,b])await clearLimit('audit.summary',owner.data.organization.id+':'+owner.data.user.id)}
 })
+test('Session management exposes only own live sessions and revokes another session exactly once',async()=>{
+ const {GET:list,POST:revoke}=await import('@/app/api/auth/sessions/route')
+ const {createSession,verifySession}=await import('@/server/auth/session')
+ const {clearLimit}=await import('@/server/auth/rate-limit')
+ const a=await account(),b=await account()
+ try{
+  const token=await prisma.$transaction(tx=>createSession(tx,a.data.user.id,a.data.organization.id))
+  const other=await verifySession(token);assert.ok(other)
+  const current=await verifySession(a.cookie.split('=')[1].split(';')[0]);assert.ok(current)
+  await prisma.session.create({data:{userId:a.data.user.id,organizationId:a.data.organization.id,tokenHash:randomUUID(),expiresAt:new Date(0),idleExpiresAt:new Date(0)}})
+  const response=await list(req('/auth/sessions?limit=1',a.cookie),undefined);assert.equal(response.status,200)
+  const body=await response.json();assert.equal(body.pagination.total,2);assert.equal(body.data.length,1);assert.ok(!JSON.stringify(body).includes('tokenHash'))
+  const all=(await (await list(req('/auth/sessions',a.cookie),undefined)).json()).data;assert.equal(all.filter((row:{current:boolean})=>row.current).length,1)
+  assert.ok(all.every((row:{organizationId:string})=>row.organizationId===a.data.organization.id))
+  const call=(cookie:string,id:string)=>revoke(req('/auth/sessions',cookie,{sessionId:id},'POST'),undefined)
+  assert.equal((await call(b.cookie,other.sessionId)).status,404)
+  assert.equal((await call(a.cookie,current.sessionId)).status,409)
+  const results=await Promise.all([call(a.cookie,other.sessionId),call(a.cookie,other.sessionId)]);assert.ok(results.every(response=>response.status===200))
+  assert.equal(await verifySession(token),null);assert.ok(await verifySession(a.cookie.split('=')[1].split(';')[0]))
+  assert.equal(await prisma.auditLog.count({where:{organizationId:a.data.organization.id,entityId:other.sessionId,action:'session_revoked'}}),1)
+  await prisma.organizationUser.update({where:{id:a.data.user.organizationUserId},data:{role:'cashier'}})
+  assert.equal((await list(req('/auth/sessions',a.cookie),undefined)).status,200)
+ }finally{for(const account of [a,b])for(const category of ['session.read','session.revoke'])await clearLimit(category,account.data.user.id)}
+})
+test('Password changes reject bad credentials and UTF-8 truncation; competing requests cannot overwrite',async()=>{
+ const {POST:change}=await import('@/app/api/auth/change-password/route')
+ const {verifyPassword}=await import('@/lib/auth')
+ const {verifySession}=await import('@/server/auth/session')
+ const {clearLimit}=await import('@/server/auth/rate-limit')
+ const a=await account()
+ const call=(currentPassword:string,newPassword:string)=>change(req('/auth/change-password',a.cookie,{currentPassword,newPassword},'POST'),undefined)
+ try{
+  assert.equal((await call('wrong','valid-new-password')).status,403)
+  assert.equal((await call('test-only-password','я'.repeat(40))).status,400)
+  const results=await Promise.all([call('test-only-password','new-password-one'),call('test-only-password','new-password-two')])
+  assert.equal(results.filter(result=>result.status===200).length,1)
+  assert.ok(results.filter(result=>result.status!==200).every(result=>[401,403,409].includes(result.status)))
+  const winner=results[0].status===200?'new-password-one':'new-password-two'
+  const user=await prisma.user.findUniqueOrThrow({where:{id:a.data.user.id}})
+  assert.ok(await verifyPassword(winner,user.passwordHash));assert.equal(await verifyPassword('test-only-password',user.passwordHash),false)
+  assert.equal(await verifySession(a.cookie.split('=')[1]),null)
+  assert.equal(await prisma.session.count({where:{userId:user.id,revokedAt:null}}),0)
+  assert.equal(await prisma.auditLog.count({where:{organizationId:a.data.organization.id,action:'password_changed'}}),1)
+ }finally{await clearLimit('password-change',a.data.user.id)}
+})
 test('Customer exports share an atomic format/customer budget and expose a bounded retry delay',async()=>{
  const {GET:ledger}=await import('@/app/api/customers/[id]/ledger/route')
  const {clearLimit}=await import('@/server/auth/rate-limit')

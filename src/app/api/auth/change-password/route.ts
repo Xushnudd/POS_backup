@@ -6,7 +6,7 @@ import { hashPassword, verifyPassword, getRequestToken, verifyToken } from '@/li
 import { AccessError } from '@/server/auth/policy'
 import { consumeLimit } from '@/server/auth/rate-limit'
 import { SESSION_COOKIE } from '@/server/auth/session'
-const schema=z.object({currentPassword:z.string().min(1).max(72),newPassword:z.string().min(8).max(72)})
+const schema=z.object({currentPassword:z.string().min(1).max(72),newPassword:z.string().min(8).max(72).refine(value=>Buffer.byteLength(value,'utf8')<=72,'Parol UTF-8 bo‘yicha 72 baytdan oshmasin')}).strict()
 export const POST=withApi(async(request:NextRequest)=>{
  const context=await verifyToken(getRequestToken(request)??'')
  if (!context) throw new AccessError(401,'UNAUTHORIZED')
@@ -16,6 +16,13 @@ export const POST=withApi(async(request:NextRequest)=>{
  if (!await verifyPassword(input.currentPassword,user.passwordHash)) throw new AccessError(403,'INVALID_PASSWORD')
  const hash=await hashPassword(input.newPassword)
  await prisma.$transaction(async tx=>{
+  await tx.$queryRaw`SELECT id FROM "User" WHERE id=${user.id} FOR UPDATE`
+  await tx.$queryRaw`SELECT id FROM "Session" WHERE id=${context.sessionId} FOR UPDATE`
+  const current=await tx.user.findUniqueOrThrow({where:{id:user.id}})
+  const session=await tx.session.findUnique({where:{id:context.sessionId}})
+  const now=new Date()
+  if(!current.isActive||!session||session.userId!==user.id||session.revokedAt||session.expiresAt<=now||session.idleExpiresAt<=now)throw new AccessError(401,'UNAUTHORIZED')
+  if(current.passwordHash!==user.passwordHash)throw new AccessError(409,'PASSWORD_CHANGED','Parol boshqa so‘rovda o‘zgargan; qayta kiring')
   await tx.user.update({where:{id:user.id},data:{passwordHash:hash}})
   await tx.session.updateMany({where:{userId:user.id,revokedAt:null},data:{revokedAt:new Date()}})
   await tx.auditLog.create({data:{organizationId:context.organizationId,actorId:user.id,entityType:'User',entityId:user.id,action:'password_changed'}})
