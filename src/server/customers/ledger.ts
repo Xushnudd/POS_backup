@@ -33,10 +33,10 @@ export async function postDebtDocument(context:TokenPayload,customerId:string,in
   return result
  })
 }
-export async function customerStatement(context:TokenPayload,customerId:string,options:{page?:number;limit?:number;from?:string|null;to?:string|null}={}){
+export async function customerStatement(context:TokenPayload,customerId:string,options:{page?:number;limit?:number;from?:string|null;to?:string|null;exportAll?:boolean}={}){
  manager(context)
- const page=options.page??1,limit=options.limit??50
- if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(limit)||limit<1||limit>200)throw new AccessError(400,'INVALID_PAGINATION')
+ const page=options.exportAll?1:(options.page??1),limit=options.exportAll?10000:(options.limit??50)
+ if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(limit)||limit<1||limit>(options.exportAll?10000:200))throw new AccessError(400,'INVALID_PAGINATION')
  return prisma.$transaction(async tx=>{
   const customer=await tx.customer.findFirst({where:{id:customerId,organizationId:context.organizationId}})
   if(!customer)throw new AccessError(404,'CUSTOMER_NOT_FOUND')
@@ -47,11 +47,12 @@ export async function customerStatement(context:TokenPayload,customerId:string,o
   const opening=dates.gte?await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId,effectiveAt:{lt:dates.gte}},_sum:{amount:true}}):null
   const openingBalance=decimal(opening?._sum.amount??0)
   const [totals]=await tx.$queryRaw<{total:bigint;increases:Prisma.Decimal;reductions:Prisma.Decimal}[]>`SELECT count(*) AS total,COALESCE(sum(d.amount) FILTER(WHERE d.amount>0),0) AS increases,COALESCE(-sum(d.amount) FILTER(WHERE d.amount<0),0) AS reductions FROM "DebtEntry" d WHERE ${range}`
+  if(options.exportAll&&totals.total>BigInt(10000))throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 yozuvdan oshdi; davrni qisqartiring')
   const entries=await tx.$queryRaw<{id:string;sourceType:string;sourceId:string;saleId:string|null;receiptNo:string|null;amount:Prisma.Decimal;balance:Prisma.Decimal;effectiveAt:Date;dueAt:Date|null;createdAt:Date;note:string|null;actorId:string|null;actorName:string|null}[]>`
    SELECT statement.* FROM (SELECT d.id,d."sourceType",d."sourceId",d."saleId",s."receiptNo",d.amount,d."effectiveAt",d."dueAt",d."createdAt",d.note,d."actorId",u."fullName" AS "actorName",${openingBalance}::numeric+sum(d.amount) OVER(ORDER BY d."effectiveAt",d.id ROWS UNBOUNDED PRECEDING) AS balance
    FROM "DebtEntry" d LEFT JOIN "Sale" s ON s.id=d."saleId" AND s."organizationId"=d."organizationId" LEFT JOIN "User" u ON u.id=d."actorId" WHERE ${range}) statement
    ORDER BY statement."effectiveAt",statement.id LIMIT ${limit} OFFSET ${(page-1)*limit}`
   const all=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId},_sum:{amount:true}})
-  return {customer:{id:customer.id,fullName:customer.fullName},entries,summary:{openingBalance,increases:totals.increases,reductions:totals.reductions,closingBalance:openingBalance.add(totals.increases).sub(totals.reductions),currentBalance:decimal(all._sum.amount??0)},pagination:{page,limit,total:Number(totals.total),totalPages:Math.ceil(Number(totals.total)/limit)}}
+  return {timezone:organization.timezone,customer:{id:customer.id,fullName:customer.fullName},entries,summary:{openingBalance,increases:totals.increases,reductions:totals.reductions,closingBalance:openingBalance.add(totals.increases).sub(totals.reductions),currentBalance:decimal(all._sum.amount??0)},pagination:{page,limit,total:Number(totals.total),totalPages:Math.ceil(Number(totals.total)/limit)}}
  },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead})
 }

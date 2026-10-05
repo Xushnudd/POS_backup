@@ -540,3 +540,14 @@ test('Explicit debt allocations select receipts, conserve payment and reject inv
  assert.equal(await prisma.debtEntry.count({where:{customerId:customer.id,sourceType:'collection'}}),2)
  await assert.rejects(()=>collectDebt(f.context,{...input,allocations:[{saleId:sales[0],amount:50}]}))
 })
+
+test('Debt export rejects oversized periods before loading the entry table',async()=>{
+ const {customerStatement}=await import('@/server/customers/ledger')
+ const f=await fixture(),customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Large history',phone:'large-export'}})
+ await prisma.debtEntry.createMany({data:Array.from({length:10001},()=>({organizationId:f.org.id,customerId:customer.id,sourceType:'opening_debt',sourceId:randomUUID(),amount:1,effectiveAt:new Date('2026-01-01T00:00:00Z')}))})
+ await assert.rejects(()=>customerStatement(f.context,customer.id,{exportAll:true}),(error:unknown)=>error instanceof Error&&'code' in error&&error.code==='EXPORT_TOO_LARGE')
+ const small=await customerStatement(f.context,customer.id,{exportAll:true,from:'2026-02-01',to:'2026-02-01'})
+ assert.equal(small.entries.length,0)
+ assert.equal(small.summary.openingBalance.toString(),'10001')
+ assert.equal(small.summary.closingBalance.toString(),'10001')
+})

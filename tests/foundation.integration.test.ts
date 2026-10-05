@@ -84,6 +84,14 @@ test('Debt allocation targets paginate positive scoped balances and require owne
  await prisma.debtEntry.create({data:{organizationId:a.data.organization.id,customerId:customer.id,saleId:sales[0].id,sourceType:'collection',sourceId:randomUUID(),amount:-10}})
  await prisma.debtEntry.create({data:{organizationId:a.data.organization.id,customerId:customer.id,sourceType:'opening_debt',sourceId:randomUUID(),amount:3.75}})
  const {GET:debt}=await import('@/app/api/customers/[id]/debt/route')
+ const {GET:ledger}=await import('@/app/api/customers/[id]/ledger/route')
+ const exportCall=(cookie:string)=>ledger(req(`/customers/${customer.id}/ledger?format=csv`,cookie),{params:Promise.resolve({id:customer.id})})
+ const exported=await exportCall(a.cookie);assert.equal(exported.status,200)
+ const csv=(await exported.json()).data.content as string
+ assert.ok(csv.startsWith('\uFEFF'));assert.ok(csv.includes('513.75'))
+ for(const sale of sales)assert.ok(csv.includes(sale.receiptNo))
+ assert.equal(exported.headers.get('Cache-Control'),'private, no-store')
+ assert.equal((await exportCall(b.cookie)).status,404)
  const call=(cookie:string,page:string)=>debt(req(`/customers/${customer.id}/debt?targetsPage=${page}`,cookie),{params:Promise.resolve({id:customer.id})})
  const first=await call(a.cookie,'1');assert.equal(first.status,200)
  const one=(await first.json()).data.allocationTargets
@@ -97,4 +105,5 @@ test('Debt allocation targets paginate positive scoped balances and require owne
  assert.equal((await call(b.cookie,'1')).status,404)
  await prisma.organizationUser.update({where:{id:a.data.user.organizationUserId},data:{role:'admin'}})
  assert.equal((await call(a.cookie,'1')).status,403)
+ assert.equal((await exportCall(a.cookie)).status,403)
 })

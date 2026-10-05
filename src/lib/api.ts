@@ -400,6 +400,7 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
+    exportStatement:(id:string,params:{from?:string;to?:string}={})=>this.request<{filename:string;content:string}>(`/customers/${id}/ledger?${new URLSearchParams({format:'csv',...Object.fromEntries(Object.entries(params).filter(([,value])=>value))})}`),
     statement:(id:string,params:{page?:number;from?:string;to?:string}={})=>this.request<CustomerStatement>(`/customers/${id}/ledger?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!=='').map(([k,v])=>[k,String(v)]))}`),
     postDebtDocument:(id:string,data:CustomerDebtDocumentInput)=>this.request<{id:string}>(`/customers/${id}/ledger`,{method:'POST',body:JSON.stringify(data)}),
     getDebt: (id: string, targetsPage?:number) => this.request<CustomerDebt>(`/customers/${id}/debt${targetsPage?`?targetsPage=${targetsPage}`:''}`),

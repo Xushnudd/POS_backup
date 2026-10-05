@@ -521,3 +521,14 @@ Bu misolda asosiy `amount` `50.00` bo‘lishi kerak; qolgan majburiy organizatio
 
 
 `GET /api/customers/:id/debt?targetsPage=1` — faqat owner uchun ochiq qarz targetlari. Ixtiyoriy parametr bo‘lmasa oldingi javob contracti saqlanadi. Parametr musbat butun son, ko‘pi bilan 100000. `data.allocationTargets` ichida `page`, `hasMore`, `items` (har sahifada 50 ta) keladi. Har item: `saleId` (UUID yoki null), `receiptNo` (string yoki null), `balance` (Decimal string). Faqat musbat net qoldiqlar qaytadi; yopilgan qarzlar chiqariladi. Boshqa tashkilot mijoziga 404, owner bo‘lmagan a’zoga target so‘rovida 403. Ko‘rsatilgan qoldiq maslahat uchun; undirish vaqtida transaction ichida qayta tekshiriladi.
+
+
+Mijoz kartasidagi undirish so‘rovi yuborilishidan oldin to‘liq payload IndexedDB `operations` navbatida tashkilot/xodim/qurilma kesimida saqlanadi. Reload shu kalit va original smena bilan natijani tekshirishni tiklaydi; yopilgan smenada ham avval committed bo‘lgan operation idempotency orqali qaytadi, yangi undirish yopilgan smenada bajarilmaydi. Qarz qoldig‘i kamayganligi eski retry summasini o‘zgartirmaydi. Lokal `synced` server muvaffaqiyatini, `rejected` esa birinchi yuborishdagi aniq validation/debt rad javobini bildiradi; ular yangi API endpoint yoki payment statusi emas. Noaniq urinishning keyingi auth/business xatosi original payloadni o‘chirmaydi. Mijozlar ro‘yxatidagi undirish tugmasi ham shu yagona mijoz kartasi oqimini ochadi. `?collect=1` bir martalik UI ko‘rsatma, payment yaratmaydi va o‘qilgach URLdan chiqariladi.
+
+
+Manual qarz hujjati (`POST /api/customers/:id/ledger`) ham HTTPdan oldin lokal `debt.document` intenti sifatida saqlanadi. Mijoz kartasi reload’da original kind/amount/reason/saleId/effectiveAt/dueAt va operationIdni tiklaydi. API payloadi o‘zgarmagan; lokal payloaddagi customerId routing uchun ishlatiladi va strict ledger requestiga qo‘shilmaydi. Hujjatlar avtomatik `/api/sync`ga yuborilmaydi — owner shu kartada ayni hujjatni explicit qayta tekshiradi. Bu yangi vendor yoki payment integratsiyasi emas; hujjat pul to‘lovi yaratmaydi.
+
+
+### Mijoz qarz ko‘chirmasini CSV eksport qilish
+
+`GET /api/customers/:id/ledger?format=csv&from=2026-01-01&to=2026-01-31` — faqat owner uchun. From/to ixtiyoriy; mavjud organization-timezone davr qoidalari ishlaydi. JSON `data.filename` va `data.content` (UTF-8 BOM CSV string) qaytadi; UI Blob orqali `.csv` yuklaydi. Page/limit e’tiborga olinmaydi, davr to‘liq eksport qilinadi. 10000 yozuvdan oshsa `413 EXPORT_TOO_LARGE`; davrni qisqartiring. Summary va satr qoldiqlari bitta database snapshotdan. CSVda tashkilot timezone va satrlar uchun UTC sana/muddat bor, moliyaviy qiymatlar Decimal 2 xonali. Matnli ustunlar spreadsheet formula injectiondan himoyalangan. Endpoint private/no-store; boshqa tenant va owner bo‘lmagan a’zoga eksport berilmaydi. Bu qarz ledgeri eksporti; naqd-only savdolarni qamrab oladigan to‘liq mijoz commercial statementi hali alohida qolgan.

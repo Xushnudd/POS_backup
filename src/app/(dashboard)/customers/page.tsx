@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
+import { fixed } from '@/lib/money';
 import { api } from '@/lib/api';
 import { Customer } from '@/types';
 import { formatMoney, formatPhone } from '@/lib/format';
@@ -18,7 +18,6 @@ import {
   faUsers,
   faUserPlus,
   faSearch,
-  faMoneyBillWave,
   faHandHoldingDollar,
   faPhone,
   faEdit,
@@ -26,10 +25,8 @@ import {
 
 export default function CustomersPage() {
   const { organization } = useAuth();
-  const { activeStore, activeShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
-  const collectionAttempt = useRef<string | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -45,12 +42,6 @@ export default function CustomersPage() {
     creditLimit: '0',
   });
   const [isSaving, setIsSaving] = useState(false);
-
-  // Debt Payment Modal
-  const [selectedDebtCustomer, setSelectedDebtCustomer] = useState<Customer | null>(null);
-  const [debtAmount, setDebtAmount] = useState<string>('');
-  const [debtNote, setDebtNote] = useState<string>('');
-  const [isProcessingDebt, setIsProcessingDebt] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     if (!organization?.id) return;
@@ -70,7 +61,7 @@ export default function CustomersPage() {
               const debtRes = await api.customers.getDebt(c.id);
               return {
                 ...c,
-                debt: Number(debtRes.data?.totalDebt) || 0,
+                debt: String(debtRes.data?.totalDebt ?? '0'),
               };
             } catch {
               return c;
@@ -151,48 +142,6 @@ export default function CustomersPage() {
     }
   };
 
-  const handleOpenDebtModal = (c: Customer) => {
-    collectionAttempt.current = null;
-    setSelectedDebtCustomer(c);
-    setDebtAmount(String(c.debt || ''));
-    setDebtNote('Qarz to\'lovi');
-  };
-
-  const handleProcessDebtPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!organization?.id || !activeStore?.id || !selectedDebtCustomer) return;
-
-    const amount = parseFloat(debtAmount);
-    if (!amount || amount <= 0) {
-      notifyError('To\'lov summasini kiriting');
-      return;
-    }
-
-    if (!activeShift) { notifyError('Qarzni undirish uchun smenani oching'); return; }
-    collectionAttempt.current ??= crypto.randomUUID();
-    setIsProcessingDebt(true);
-    try {
-      await api.payments.credit({
-        organizationId: organization.id,
-        storeId: activeStore.id,
-        customerId: selectedDebtCustomer.id,
-        shiftId: activeShift.id,
-        operationId: collectionAttempt.current,
-        amount,
-        note: debtNote.trim() || undefined,
-      });
-
-      notifySuccess('Nasiya qarzi muvaffaqiyatli undirildi!');
-      collectionAttempt.current = null;
-      setSelectedDebtCustomer(null);
-      loadCustomers();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Qarzni undirishda xatolik yuz berdi');
-    } finally {
-      setIsProcessingDebt(false);
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
@@ -262,7 +211,7 @@ export default function CustomersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {customers.map((c) => {
-                  const hasDebt = Number(c.debt || 0) > 0;
+                  const hasDebt = fixed(c.debt ?? '0') > BigInt(0);
                   return (
                     <tr key={c.id} className="hover:bg-gray-50/70 transition">
                       <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link></td>
@@ -284,14 +233,9 @@ export default function CustomersPage() {
                       </td>
                       <td className="py-3.5 px-4 text-right space-x-1">
                         {hasDebt && (
-                          <Button
-                            variant="success"
-                            size="sm"
-                            onClick={() => handleOpenDebtModal(c)}
-                            leftIcon={<FontAwesomeIcon icon={faHandHoldingDollar} />}
-                          >
-                            Qarzni undirish
-                          </Button>
+                          <Link href={`/customers/${c.id}?collect=1`} className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white font-bold">
+                            <FontAwesomeIcon icon={faHandHoldingDollar} /> Qarzni undirish
+                          </Link>
                         )}
                         <Button
                           variant="ghost"
@@ -378,66 +322,6 @@ export default function CustomersPage() {
         </form>
       </Modal>
 
-      {/* Debt Repayment Modal */}
-      <Modal
-        isOpen={!!selectedDebtCustomer}
-        onClose={() => setSelectedDebtCustomer(null)}
-        title="Nasiya qarzini undirish"
-        size="md"
-      >
-        {selectedDebtCustomer && (
-          <form onSubmit={handleProcessDebtPayment} className="space-y-4">
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
-              <span className="text-xs text-gray-500 block">Mijoz:</span>
-              <p className="text-sm font-bold text-gray-900">{selectedDebtCustomer.fullName}</p>
-              <div className="flex justify-between text-xs pt-2 border-t border-gray-200">
-                <span className="text-gray-500">Joriy qarzdorlik:</span>
-                <span className="font-black text-red-600">
-                  {formatMoney(selectedDebtCustomer.debt)}
-                </span>
-              </div>
-            </div>
-
-            <Input
-              label="Qabul qilinayotgan summa (so'm) *"
-              type="number"
-              min="1"
-              max={selectedDebtCustomer.debt}
-              step="1000"
-              value={debtAmount}
-              onChange={(e) => setDebtAmount(e.target.value)}
-              leftIcon={<FontAwesomeIcon icon={faMoneyBillWave} className="text-xs" />}
-              required
-            />
-
-            <Input
-              label="Izoh"
-              placeholder="Qarz to'lovi"
-              value={debtNote}
-              onChange={(e) => setDebtNote(e.target.value)}
-            />
-
-            <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setSelectedDebtCustomer(null)}
-                disabled={isProcessingDebt}
-              >
-                Bekor qilish
-              </Button>
-              <Button
-                type="submit"
-                variant="success"
-                isLoading={isProcessingDebt}
-                className="font-bold"
-              >
-                To&apos;lovni qabul qilish
-              </Button>
-            </div>
-          </form>
-        )}
-      </Modal>
     </div>
   );
 }

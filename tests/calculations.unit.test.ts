@@ -44,3 +44,11 @@ test('Production config requires a HTTPS origin and PostgreSQL connection withou
  assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid/path'}))
  assert.doesNotThrow(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid'}))
 })
+
+test('CSV text keeps delimiters and quotes in one cell and neutralizes spreadsheet formulas',async()=>{
+ const {csvText}=await import('@/server/customers/export')
+ assert.equal(csvText('a,b\n"quoted"'),'"a,b\n""quoted"""')
+ for(const value of ['=SUM(1,1)',' +cmd','\t@SUM(A1)','\r\n-1+2','\uFEFF=1+1'])assert.equal(csvText(value),'"\''+value+'"')
+ assert.equal(csvText(null),'""')
+ assert.equal(csvText('Verified customer'),'"Verified customer"')
+})

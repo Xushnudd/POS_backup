@@ -169,7 +169,7 @@ export interface Customer {
   address?: string | null;
   note?: string | null;
   creditLimit: number;
-  debt?: number;
+  debt?: number | string;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
