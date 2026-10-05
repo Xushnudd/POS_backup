@@ -1,3 +1,4 @@
+import { clientLine, fixed, displayed } from '@/lib/money';
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Customer, Product } from '@/types';
 
@@ -15,7 +16,7 @@ export function useCart() {
         const updated = [...prev];
         const currentItem = updated[existingIdx];
         const newQty = currentItem.quantity + quantity;
-        const lineTotal = newQty * currentItem.unitPrice - currentItem.discountAmount;
+        const lineTotal = clientLine(newQty, currentItem.unitPrice, currentItem.discountAmount);
 
         updated[existingIdx] = {
           ...currentItem,
@@ -26,7 +27,7 @@ export function useCart() {
       }
 
       const unitPrice = Number(product.salePrice);
-      const lineTotal = quantity * unitPrice;
+      const lineTotal = clientLine(quantity, unitPrice);
 
       return [
         ...prev,
@@ -50,7 +51,7 @@ export function useCart() {
     setItems((prev) =>
       prev.map((item) => {
         if (item.product.id === productId) {
-          const lineTotal = quantity * item.unitPrice - item.discountAmount;
+          const lineTotal = clientLine(quantity, item.unitPrice, item.discountAmount);
           return {
             ...item,
             quantity,
@@ -68,7 +69,7 @@ export function useCart() {
         prev.map((item) => {
           if (item.product.id === productId) {
             const safeDiscount = Math.max(0, Math.min(discountAmount, item.quantity * item.unitPrice));
-            const lineTotal = item.quantity * item.unitPrice - safeDiscount;
+            const lineTotal = clientLine(item.quantity, item.unitPrice, safeDiscount);
             return {
               ...item,
               discountAmount: safeDiscount,
@@ -94,18 +95,24 @@ export function useCart() {
   }, []);
 
   const subtotal = useMemo(() => {
-    return items.reduce((sum, item) => sum + item.lineTotal, 0);
+    return displayed(items.reduce((sum, item) => sum + fixed(item.lineTotal), BigInt(0)));
   }, [items]);
 
   const totalAmount = useMemo(() => {
-    return Math.max(0, subtotal - (Number(cartDiscount) || 0));
+    const net=fixed(subtotal)-fixed(Number(cartDiscount)||0);
+    return displayed(net<BigInt(0)?BigInt(0):net);
   }, [subtotal, cartDiscount]);
 
   const itemCount = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
   }, [items]);
 
+  const hydrate = useCallback((snapshot: { items: CartItem[]; cartDiscount: number; customer: Customer | null; note: string }) => {
+    setItems(snapshot.items); setCartDiscount(snapshot.cartDiscount); setCustomer(snapshot.customer); setNote(snapshot.note);
+  }, []);
+
   return {
+    hydrate,
     items,
     addItem,
     updateQuantity,

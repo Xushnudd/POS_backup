@@ -92,8 +92,12 @@ async function handlePOST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createCategorySchema.parse(body)
 
-    const category = await db.category.create({
+    const category = await db.$transaction(async tx => {
+      const result = await tx.category.create({
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"create"}})
+      return result
     })
 
     return NextResponse.json({

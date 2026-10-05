@@ -98,8 +98,12 @@ async function handlePOST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createSupplierSchema.parse(body)
 
-    const supplier = await db.supplier.create({
+    const supplier = await db.$transaction(async tx => {
+      const result = await tx.supplier.create({
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Supplier",entityId:result.id,action:"create"}})
+      return result
     })
 
     return NextResponse.json({

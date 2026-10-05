@@ -1,5 +1,5 @@
+import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
-import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
@@ -32,10 +32,9 @@ async function handleGET(request: NextRequest) {
         { status: 401 }
       )
     }
-    const db = scopedPrisma(payload)
 
     // Get user's organizations
-    const organizationUsers = await db.organizationUser.findMany({
+    const organizationUsers = await prisma.organizationUser.findMany({
       where: {
         userId: payload.userId,
         isActive: true,
@@ -90,23 +89,14 @@ async function handlePOST(request: NextRequest) {
         { status: 401 }
       )
     }
-    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = createOrganizationSchema.parse(body)
 
-    // Create organization
-    const organization = await db.organization.create({
-      data: validatedData,
-    })
-
-    // Add current user as owner
-    await db.organizationUser.create({
-      data: {
-        organizationId: organization.id,
-        userId: payload.userId,
-        role: 'owner',
-      },
+    const organization = await prisma.$transaction(async tx => {
+      const organization=await tx.organization.create({data:validatedData})
+      await tx.organizationUser.create({data:{organizationId:organization.id,userId:payload.userId,role:'owner'}})
+      return organization
     })
 
     return NextResponse.json({

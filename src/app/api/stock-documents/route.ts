@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -66,7 +67,7 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Prisma.StockDocumentWhereInput = {
       organizationId,
     }
 
@@ -138,7 +139,8 @@ async function handlePOST(request: NextRequest) {
     const validatedData = createStockDocumentSchema.parse(body)
     const { items, ...documentData } = validatedData
 
-    const document = await db.stockDocument.create({
+    const document = await db.$transaction(async tx => {
+      const result = await tx.stockDocument.create({
       data: {
         ...documentData,
         createdBy: payload.userId,
@@ -153,6 +155,9 @@ async function handlePOST(request: NextRequest) {
           },
         },
       },
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"StockDocument",entityId:result.id,action:"create"}})
+      return result
     })
 
     return NextResponse.json({

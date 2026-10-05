@@ -1,3 +1,4 @@
+import { audit } from '@/server/operations'
 import { prisma } from '@/lib/prisma'
 import { AccessError, tenantScope } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -125,7 +126,7 @@ async function handlePUT(
           data: prepared!.rows.map(item => ({...item,saleId:id})),
         })
       }
-      return tx.sale.update({
+      const result=await tx.sale.update({
         where: { id },
         data: {
           ...(validatedData.customerId !== undefined && { customerId: validatedData.customerId }),
@@ -134,6 +135,8 @@ async function handlePUT(
         },
         include: { items: true },
       })
+      await audit(tx,payload,"Sale",id,"draft_updated")
+      return result
     })
 
     return NextResponse.json({

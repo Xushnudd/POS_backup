@@ -91,9 +91,13 @@ async function handlePUT(
     const body = await request.json()
     const validatedData = updateStoreSchema.parse(body)
 
-    const store = await db.store.update({
+    const store = await db.$transaction(async tx => {
+      const result = await tx.store.update({
       where: { id },
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Store",entityId:result.id,action:"update"}})
+      return result
     })
 
     return NextResponse.json({
@@ -142,9 +146,13 @@ async function handleDELETE(
     const db = scopedPrisma(payload)
 
     // Soft delete
-    await db.store.update({
+    await db.$transaction(async tx => {
+      const result = await tx.store.update({
       where: { id },
       data: { isActive: false },
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Store",entityId:result.id,action:"update"}})
+      return result
     })
 
     return NextResponse.json({

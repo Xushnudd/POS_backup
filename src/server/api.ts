@@ -72,7 +72,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         if (!context) throw new AccessError(401,'UNAUTHORIZED','Avtorizatsiya talab qilinadi')
         assertRoutePermission(path, request.method, context.role)
         const segments = path.split('/').filter(Boolean)
-        if (segments[2] && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
+        if (segments[2] && segments[2] !== 'switch' && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
         await validateRefs(Object.fromEntries(new URL(request.url).searchParams), context)
       }
       if (mutation) {

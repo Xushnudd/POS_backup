@@ -7,7 +7,8 @@ import { useNotification } from '@/context/NotificationContext';
 import { useCart } from '@/hooks/useCart';
 import { useDebounce } from '@/hooks/useDebounce';
 import { api } from '@/lib/api';
-import { Category, Customer, PaymentType, Product, Sale } from '@/types';
+import { deviceId, saveDraft, loadDraft, enqueue, acknowledge } from '@/lib/offline';
+import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
 import ProductSearch from '@/components/pos/ProductSearch';
 import Cart from '@/components/pos/Cart';
 import PaymentModal from '@/components/pos/PaymentModal';
@@ -35,6 +36,7 @@ export default function PosPage() {
     updateLineDiscount,
     removeItem,
     clearCart,
+    hydrate,
     setCartDiscount,
     setCustomer,
   } = useCart();
@@ -126,7 +128,30 @@ export default function PosPage() {
     }
   };
 
+  const [localReady,setLocalReady]=useState(false);
   const checkoutAttempt = useRef<{ operationId: string; payload: string; saleId?: string } | null>(null);
+  useEffect(() => {
+    if (!organization?.id || !user?.id) return;
+    let cancelled=false;
+    const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+    void loadDraft(scope).then(value=>{
+      if (cancelled) return;
+      if (value && typeof value==='object') {
+        const saved=value as {cart:{items:CartItem[];cartDiscount:number;customer:Customer|null;note:string};attempt:typeof checkoutAttempt.current};
+        if (saved.cart?.items) hydrate(saved.cart);
+        checkoutAttempt.current=saved.attempt;
+      }
+      setLocalReady(true);
+    }).catch(()=>{if (!cancelled) notifyError('Lokal savatni tiklab bo‘lmadi; ma’lumotni tozalashdan oldin tekshiring');});
+    return ()=>{cancelled=true;};
+  },[organization?.id,user?.id,hydrate,notifyError]);
+  useEffect(()=>{
+    if (!localReady || !organization?.id || !user?.id) return;
+    const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+    const timer=setTimeout(()=>{void saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current}).catch(()=>notifyError('Savat lokal saqlanmadi; ushbu oynani yopmang'));},200);
+    return ()=>clearTimeout(timer);
+  },[localReady,organization?.id,user?.id,items,cartDiscount,customer,note,notifyError]);
+
   // Process and complete sale
   const handleProcessPayment = async (
     payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[]
@@ -136,6 +161,8 @@ export default function PosPage() {
       return;
     }
 
+    if (!localReady) { notifyError('Lokal savat hali tayyor emas'); return; }
+    if (!navigator.onLine) { notifyError('Savdoni yakunlash uchun ulanishni tiklang; savat saqlangan'); return; }
     setIsProcessingPayment(true);
     try {
       // 1. Create draft sale
@@ -164,9 +191,16 @@ export default function PosPage() {
         throw new Error('Oldingi savdo natijasini aniqlang; kutilayotgan savatni o‘zgartirish mumkin emas');
       }
       checkoutAttempt.current ??= { operationId: crypto.randomUUID(), payload: signature };
-      const saleRes = await api.sales.create({ ...draftPayload, operationId: checkoutAttempt.current.operationId });
+      const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+      const operationId=checkoutAttempt.current.operationId;
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current});
+      await enqueue({id:operationId,scope,type:'sale.create',payload:{...draftPayload,operationId},state:'pending',createdAt:new Date().toISOString()});
+      const saleRes = await api.sales.create({ ...draftPayload, operationId });
       if (!saleRes.data) throw new Error('Savdo qoralamasi yaratilmadi');
       checkoutAttempt.current.saleId = saleRes.data.id;
+      await acknowledge(operationId,'synced',saleRes.data);
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current});
+      await enqueue({id:saleRes.data.id,scope,type:'sale.complete',payload:{saleId:saleRes.data.id,payments},state:'pending',createdAt:new Date().toISOString()});
 
       // 2. Complete sale with payments
       const completeRes = await api.sales.complete(saleRes.data.id, {
@@ -177,6 +211,8 @@ export default function PosPage() {
         throw new Error('Savdoni yakunlashda xatolik');
       }
 
+      await acknowledge(saleRes.data.id,'synced',completeRes.data);
+      await saveDraft(scope,{cart:{items:[],cartDiscount:0,customer:null,note:''},attempt:null});
       notifySuccess('Savdo muvaffaqiyatli yakunlandi!');
 
       // 3. Prepare for receipt preview

@@ -118,6 +118,9 @@ async function handlePUT(
     }
 
     const updatedDocument = await db.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
+      const locked=await tx.stockDocument.findUniqueOrThrow({where:{id}})
+      if (locked.status!=='draft') throw new AccessError(409,'INVALID_STATUS')
       // Delete existing items if new items provided
       if (validatedData.items) {
         await tx.stockDocumentItem.deleteMany({

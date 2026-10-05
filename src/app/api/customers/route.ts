@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -56,7 +57,7 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Prisma.CustomerWhereInput = {
       organizationId,
       isActive: true,
     }
@@ -137,8 +138,12 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
-    const customer = await db.customer.create({
+    const customer = await db.$transaction(async tx => {
+      const result = await tx.customer.create({
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Customer",entityId:result.id,action:"create"}})
+      return result
     })
 
     return NextResponse.json({

@@ -322,14 +322,14 @@ export interface ProductReportItem extends Product {
   profitMargin: number;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
   pagination?: {
     page: number;
@@ -338,4 +338,9 @@ export interface ApiResponse<T = any> {
     totalPages: number;
   };
   summary?: SalesReportSummary;
+}
+
+export interface OrganizationMember {
+ id: string; role: Role; isActive: boolean;
+ user: User; stores?: Store[];
 }

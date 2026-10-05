@@ -1,5 +1,7 @@
 import {
   ApiResponse,
+  Organization,
+  OrganizationMember,
   AuthData,
   Category,
   Customer,
@@ -19,6 +21,7 @@ import {
   User,
 } from '@/types';
 
+class ApiError extends Error { code?: string; details?: unknown; }
 class ApiClient {
   private getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
@@ -47,16 +50,16 @@ class ApiClient {
       if (!response.ok || data.success === false) {
         const errorMsg =
           data?.error?.message || data?.message || `Xatolik: ${response.statusText}`;
-        const error: any = new Error(errorMsg);
+        const error = new ApiError(errorMsg);
         error.code = data?.error?.code;
         error.details = data?.error?.details;
         throw error;
       }
 
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       // If error is network or JSON parsing error
-      if (!err.code) {
+      if (!(err instanceof ApiError) || !err.code) {
         console.error(`API Request failed on [${endpoint}]:`, err);
       }
       throw err;
@@ -177,13 +180,13 @@ class ApiClient {
 
     get: (id: string) => this.request<Sale>(`/sales/${id}`),
 
-    create: (data: any) =>
+    create: (data: Record<string, unknown>) =>
       this.request<Sale>('/sales', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    update: (id: string, data: any) =>
+    update: (id: string, data: Record<string, unknown>) =>
       this.request<Sale>(`/sales/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -194,6 +197,9 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+
+    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number;disposition:'sellable'|'damaged'|'write_off'}[]}) =>
+      this.request(`/sales/${id}/returns`, {method:'POST',body:JSON.stringify(data)}),
 
     void: (id: string) =>
       this.request<Sale>(`/sales/${id}/void`, {
@@ -250,7 +256,7 @@ class ApiClient {
           q.append(k, String(v));
         }
       });
-      return this.request<any[]>(`/inventory/movements?${q.toString()}`);
+      return this.request<Record<string, unknown>[]>(`/inventory/movements?${q.toString()}`);
     },
   };
 
@@ -451,15 +457,15 @@ class ApiClient {
 
   // Organizations & Users
   organizations = {
-    get: (id: string) => this.request<any>(`/organizations/${id}`),
+    get: (id: string) => this.request<Organization>(`/organizations/${id}`),
 
-    update: (id: string, data: any) =>
-      this.request<any>(`/organizations/${id}`, {
+    update: (id: string, data: Record<string, unknown>) =>
+      this.request<Organization>(`/organizations/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
 
-    users: (id: string) => this.request<any[]>(`/organizations/${id}/users`),
+    users: (id: string) => this.request<OrganizationMember[]>(`/organizations/${id}/users`),
 
     addUser: (
       id: string,

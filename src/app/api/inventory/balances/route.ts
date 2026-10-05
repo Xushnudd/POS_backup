@@ -1,102 +1,27 @@
-import { AccessError } from '@/server/auth/policy'
-import { scopedPrisma } from '@/server/auth/scoped-prisma'
-import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
+import { withApi } from '@/server/api'
+import { prisma } from '@/lib/prisma'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { verifyToken, getRequestToken } from '@/lib/auth'
-
-async function handleGET(request: NextRequest) {
-  try {
-    const token = getRequestToken(request)
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
-        { status: 401 }
-      )
-    }
-
-    const payload = await verifyToken(token)
-    if (!payload) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
-        { status: 401 }
-      )
-    }
-    const db = scopedPrisma(payload)
-
-    const { searchParams } = new URL(request.url)
-    const storeId = searchParams.get('storeId')
-    const categoryId = searchParams.get('categoryId')
-    const lowStock = searchParams.get('lowStock') === 'true'
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const skip = (page - 1) * limit
-
-    const where: any = {}
-
-    if (storeId) {
-      where.storeId = storeId
-    }
-
-    if (categoryId) {
-      where.product = {
-        categoryId,
-      }
-    }
-
-    if (lowStock) {
-      where.product = {
-        ...where.product,
-        minStock: {
-          gt: 0,
-        },
-      }
-    }
-
-    const [balances, total] = await Promise.all([
-      db.inventoryBalance.findMany({
-        where,
-        include: {
-          product: {
-            include: {
-              category: true,
-            },
-          },
-          store: true,
-        },
-        orderBy: {
-          updatedAt: 'desc',
-        },
-        skip,
-        take: limit,
-      }),
-      db.inventoryBalance.count({ where }),
-    ])
-
-    // Filter low stock if requested
-    let filteredBalances = balances
-    if (lowStock) {
-      filteredBalances = balances.filter(
-        balance => Number(balance.quantity) < Number(balance.product.minStock)
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: filteredBalances,
-      pagination: {
-        page,
-        limit,
-        total: lowStock ? filteredBalances.length : total,
-        totalPages: Math.ceil((lowStock ? filteredBalances.length : total) / limit),
-      },
-    })
-
-  } catch (error) {
-    if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
-  }
-}
-export const GET = withApi(handleGET)
+import { AccessError } from '@/server/auth/policy'
+export const GET=withApi(async(request:NextRequest)=>{
+ const context=await verifyToken(getRequestToken(request)??'')
+ if (!context) throw new AccessError(401,'UNAUTHORIZED')
+ const q=new URL(request.url).searchParams,page=Number(q.get('page')??1),limit=Number(q.get('limit')??50)
+ const store=q.get('storeId'),category=q.get('categoryId'),low=q.get('lowStock')==='true'
+ const scope=context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND b."storeId" IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`
+ const filter=Prisma.sql`FROM "InventoryBalance" b JOIN "Store" s ON s.id=b."storeId" JOIN "Product" p ON p.id=b."productId"
+ WHERE s."organizationId"=${context.organizationId} AND p."organizationId"=${context.organizationId} ${scope}
+ ${store?Prisma.sql`AND b."storeId"=${store}`:Prisma.empty} ${category?Prisma.sql`AND p."categoryId"=${category}`:Prisma.empty}
+ ${low?Prisma.sql`AND p."minStock">0 AND b.quantity<p."minStock"`:Prisma.empty}`
+ const [keys,count]=await prisma.$transaction([
+  prisma.$queryRaw<{storeId:string;productId:string}[]>(Prisma.sql`SELECT b."storeId",b."productId" ${filter} ORDER BY b."updatedAt" DESC,b."storeId",b."productId" LIMIT ${limit} OFFSET ${(page-1)*limit}`),
+  prisma.$queryRaw<{count:bigint}[]>(Prisma.sql`SELECT count(*) ${filter}`),
+ ],{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead})
+ const db=scopedPrisma(context)
+ const rows=keys.length?await db.inventoryBalance.findMany({where:{OR:keys},include:{product:{include:{category:true}},store:true}}):[]
+ const balances=keys.map(key=>rows.find(row=>row.storeId===key.storeId&&row.productId===key.productId))
+ const total=Number(count[0].count)
+ return NextResponse.json({success:true,data:balances,pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}})
+})

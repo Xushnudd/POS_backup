@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -50,7 +51,7 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Prisma.StockTransferWhereInput = {
       organizationId,
     }
 
@@ -126,7 +127,8 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
-    const transfer = await db.stockTransfer.create({
+    const transfer = await db.$transaction(async tx => {
+      const result = await tx.stockTransfer.create({
       data: {
         organizationId: validatedData.organizationId,
         fromStoreId: validatedData.fromStoreId,
@@ -142,6 +144,9 @@ async function handlePOST(request: NextRequest) {
           },
         },
       },
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"StockTransfer",entityId:result.id,action:"create"}})
+      return result
     })
 
     return NextResponse.json({

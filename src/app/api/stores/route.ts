@@ -134,17 +134,22 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
-    const store = await db.store.create({
+    const store = await db.$transaction(async tx => {
+      const result = await tx.store.create({
       data: validatedData,
     })
-
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Store",entityId:result.id,action:"create"}})
     // Give creator access to the store
-    await db.userStore.create({
+    await tx.userStore.create({
       data: {
         organizationUserId: orgUser.id,
-        storeId: store.id,
+        storeId: result.id,
       },
     })
+
+      return result
+    })
+
 
     return NextResponse.json({
       success: true,

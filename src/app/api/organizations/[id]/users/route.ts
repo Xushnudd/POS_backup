@@ -1,3 +1,4 @@
+import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -9,7 +10,7 @@ const createUserSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(9),
   email: z.string().email().optional(),
-  password: z.string().min(6),
+  password: z.string().min(8).max(72),
   role: z.enum(['owner', 'admin', 'cashier']),
   storeIds: z.array(z.string()).optional(),
 })
@@ -103,56 +104,23 @@ async function handlePOST(
         { status: 401 }
       )
     }
-    const db = scopedPrisma(payload)
-
     const body = await request.json()
     const validatedData = createUserSchema.parse(body)
 
-    // Check if user already exists
-    const existingUser = await db.user.findUnique({
-      where: { phone: validatedData.phone }
+    if (await prisma.user.findUnique({where:{phone:validatedData.phone}})) throw new AccessError(409,'INVITATION_REQUIRED','Mavjud hisobga taklif yuborish kerak')
+    const passwordHash = await hashPassword(validatedData.password)
+    const organizationUser = await prisma.$transaction(async tx => {
+      const user = await tx.user.create({data:{fullName:validatedData.fullName,phone:validatedData.phone,email:validatedData.email,passwordHash}})
+      const member = await tx.organizationUser.create({data:{organizationId:id,userId:user.id,role:validatedData.role}})
+      if (validatedData.storeIds?.length) await tx.userStore.createMany({data:[...new Set(validatedData.storeIds)].map(storeId=>({organizationUserId:member.id,storeId}))})
+      await tx.auditLog.create({data:{organizationId:id,actorId:payload.userId,entityType:'OrganizationUser',entityId:member.id,action:'staff_created'}})
+      return {...member,user:{id:user.id,fullName:user.fullName,phone:user.phone,email:user.email}}
     })
-
-    let user
-    if (existingUser) {
-      user = existingUser
-    } else {
-      // Create new user
-      const passwordHash = await hashPassword(validatedData.password)
-      user = await db.user.create({
-        data: {
-          fullName: validatedData.fullName,
-          phone: validatedData.phone,
-          email: validatedData.email,
-          passwordHash,
-        },
-      })
-    }
-
-    // Create organization user
-    const organizationUser = await db.organizationUser.create({
-      data: {
-        organizationId: id,
-        userId: user.id,
-        role: validatedData.role,
-      },
-    })
-
-    // Assign stores if provided
-    if (validatedData.storeIds && validatedData.storeIds.length > 0) {
-      await db.userStore.createMany({
-        data: validatedData.storeIds.map(storeId => ({
-          organizationUserId: organizationUser.id,
-          storeId,
-        })),
-      })
-    }
 
     return NextResponse.json({
       success: true,
       data: {
         ...organizationUser,
-        user,
       },
       message: 'Foydalanuvchi muvaffaqiyatli qo\'shildi',
     })

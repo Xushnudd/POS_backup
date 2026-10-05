@@ -104,9 +104,13 @@ async function handlePUT(
     const body = await request.json()
     const validatedData = updateOrganizationSchema.parse(body)
 
-    const organization = await db.organization.update({
+    const organization = await db.$transaction(async tx => {
+      const result = await tx.organization.update({
       where: { id },
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Organization",entityId:result.id,action:"update"}})
+      return result
     })
 
     return NextResponse.json({

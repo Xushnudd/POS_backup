@@ -16,7 +16,7 @@ export const saleDraftSchema=z.object({
   items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500),
 })
 export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:amountSchema.refine(v=>decimal(v).gt(0)),referenceNo:z.string().max(200).optional()})
-export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).min(1).max(10)})
+export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10)})
 export type DraftInput=z.infer<typeof saleDraftSchema>
 export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {
   const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})

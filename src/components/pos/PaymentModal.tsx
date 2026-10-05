@@ -5,6 +5,7 @@ import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Customer, PaymentType } from '@/types';
+import { fixed, displayed } from '@/lib/money';
 import { formatMoney } from '@/lib/format';
 import { useNotification } from '@/context/NotificationContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,7 +36,10 @@ export default function PaymentModal({
   isLoading,
 }: PaymentModalProps) {
   const { notifyError } = useNotification();
-  const [activeMethod, setActiveMethod] = useState<PaymentType>('cash');
+  const [activeMethod, setActiveMethod] = useState<PaymentType | 'mixed'>('cash');
+  const [mixedCash,setMixedCash]=useState('0');
+  const [mixedCard,setMixedCard]=useState('0');
+  const [mixedCredit,setMixedCredit]=useState('0');
   const [cashTendered, setCashTendered] = useState<string>('');
   const [referenceNo, setReferenceNo] = useState<string>('');
 
@@ -45,12 +49,13 @@ export default function PaymentModal({
       void Promise.resolve().then(() => {
         setCashTendered(String(totalAmount));
         setReferenceNo('');
+        setMixedCash(String(totalAmount));setMixedCard('0');setMixedCredit('0');
       });
     }
   }, [isOpen, totalAmount]);
 
   const numericCash = parseFloat(cashTendered) || 0;
-  const changeAmount = Math.max(0, numericCash - totalAmount);
+  const changeAmount = displayed(fixed(numericCash)>fixed(totalAmount)?fixed(numericCash)-fixed(totalAmount):BigInt(0));
 
   const quickAmounts = [
     totalAmount,
@@ -75,13 +80,15 @@ export default function PaymentModal({
       }
     }
 
-    const payments = [
-      {
-        paymentType: activeMethod,
-        amount: totalAmount,
-        referenceNo: referenceNo.trim() || undefined,
-      },
-    ];
+    let payments: {paymentType:PaymentType;amount:number;referenceNo?:string}[];
+    if (activeMethod === 'mixed') {
+      try {
+        const parts=[{paymentType:'cash' as const,value:mixedCash},{paymentType:'card' as const,value:mixedCard},{paymentType:'credit' as const,value:mixedCredit}];
+        if (parts.some(p=>fixed(p.value)<BigInt(0)) || parts.reduce((sum,p)=>sum+fixed(p.value),BigInt(0))!==fixed(totalAmount)) { notifyError('Aralash to‘lov jami chek summasiga teng bo‘lishi kerak'); return; }
+        if (fixed(mixedCredit)>BigInt(0) && !customer) { notifyError('Nasiya uchun mijoz tanlang'); return; }
+        payments=parts.filter(p=>fixed(p.value)>BigInt(0)).map(p=>({paymentType:p.paymentType,amount:displayed(fixed(p.value)),referenceNo:referenceNo||undefined}));
+      } catch { notifyError('To‘lov miqdori noto‘g‘ri'); return; }
+    } else payments=totalAmount===0?[]:[{paymentType:activeMethod,amount:totalAmount,referenceNo:referenceNo.trim()||undefined}];
 
     await onProcessPayment(payments);
   };
@@ -137,8 +144,9 @@ export default function PaymentModal({
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
+              { id: 'mixed', label: 'Aralash', icon: faMoneyBillWave, color: 'emerald' },
               { id: 'cash', label: 'Naqd pul', icon: faMoneyBillWave, color: 'emerald' },
-              { id: 'card', label: 'Karta', icon: faCreditCard, color: 'blue' },
+              { id: 'card', label: 'Karta (qo‘lda)', icon: faCreditCard, color: 'blue' },
               { id: 'transfer', label: 'O\'tkazma', icon: faBuildingColumns, color: 'purple' },
               { id: 'credit', label: 'Nasiya / Qarz', icon: faHandshake, color: 'amber' },
             ].map((m) => {
@@ -147,7 +155,7 @@ export default function PaymentModal({
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setActiveMethod(m.id as PaymentType)}
+                  onClick={() => setActiveMethod(m.id as PaymentType | 'mixed')}
                   className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
                     isSelected
                       ? 'border-emerald-500 bg-emerald-50 text-emerald-900 shadow-sm font-bold'
@@ -165,6 +173,11 @@ export default function PaymentModal({
           </div>
         </div>
 
+        {activeMethod === 'mixed' && <div className="grid gap-3 sm:grid-cols-3">
+          <Input label="Naqd" type="number" min="0" step="0.01" value={mixedCash} onChange={e=>setMixedCash(e.target.value)}/>
+          <Input label="Karta (qo‘lda qayd)" type="number" min="0" step="0.01" value={mixedCard} onChange={e=>setMixedCard(e.target.value)}/>
+          <Input label="Nasiya" type="number" min="0" step="0.01" value={mixedCredit} onChange={e=>setMixedCredit(e.target.value)}/>
+        </div>}
         {/* Method-specific content */}
         {activeMethod === 'cash' && (
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">

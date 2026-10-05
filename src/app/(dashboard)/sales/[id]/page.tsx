@@ -1,8 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { useOrganization } from '@/context/OrganizationContext';
+import Modal from '@/components/ui/Modal';
+import Input from '@/components/ui/Input';
 import { api } from '@/lib/api';
 import { Sale } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
@@ -16,6 +20,13 @@ import { faArrowLeft, faPrint, faBan } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function SaleDetailPage() {
+  const {role}=useAuth();
+  const {activeShift}=useOrganization();
+  const [returnOpen,setReturnOpen]=useState(false);
+  const [returnQty,setReturnQty]=useState<Record<string,string>>({});
+  const [reason,setReason]=useState('');
+  const [returning,setReturning]=useState(false);
+  const returnAttempt=useRef<string|null>(null);
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
@@ -57,6 +68,20 @@ export default function SaleDetailPage() {
     }
   };
 
+  const handleReturn=async()=>{
+    if (!sale || !activeShift) {notifyError('Qaytarish uchun ochiq smena kerak');return;}
+    const selected=sale.items.filter(item=>Number(returnQty[item.id??'']??0)>0).map(item=>({saleItemId:item.id!,quantity:Number(returnQty[item.id!]),disposition:'sellable' as const}));
+    if (!selected.length || reason.trim().length<2) {notifyError('Miqdor va qaytarish sababini kiriting');return;}
+    returnAttempt.current ??= crypto.randomUUID();setReturning(true);
+    try {
+      await api.sales.returns(sale.id,{operationId:returnAttempt.current,shiftId:activeShift.id,reason,items:selected});
+      returnAttempt.current=null;setReturnOpen(false);setReturnQty({});setReason('');
+      const response=await api.sales.get(sale.id);if(response.data)setSale(response.data);
+      notifySuccess('Qaytarish qayd etildi');
+    } catch(error) {notifyError(error instanceof Error?error.message:'Qaytarish amalga oshmadi');}
+    finally{setReturning(false);}
+  };
+
   if (isLoading) {
     return (
       <div className="h-64 flex items-center justify-center">
@@ -78,6 +103,14 @@ export default function SaleDetailPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      <Modal isOpen={returnOpen} onClose={()=>setReturnOpen(false)} title="Tovar qaytarish">
+        <div className="space-y-3">
+          {sale.items.map(item=><Input key={item.id} label={item.productName} type="number" min="0" max={Number(item.quantity)} step="0.001" value={returnQty[item.id!]??'0'} onChange={e=>setReturnQty(q=>({...q,[item.id!]:e.target.value}))}/>)}
+          <Input label="Sabab" value={reason} onChange={e=>setReason(e.target.value)}/>
+          <p className="text-xs text-slate-500">Faqat sotilgan va hali qaytarilmagan miqdor qabul qilinadi. Naqd/nasiya hisobini server original chekdan hisoblaydi.</p>
+          <Button onClick={handleReturn} disabled={returning}>Qaytarishni tasdiqlash</Button>
+        </div>
+      </Modal>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/sales">
@@ -104,7 +137,8 @@ export default function SaleDetailPage() {
             Chekni chop etish
           </Button>
 
-          {sale.status === 'draft' && (
+          {role !== 'cashier' && ['completed','partially_returned'].includes(sale.status) && <Button onClick={()=>setReturnOpen(true)}>Qaytarish</Button>}
+          {role !== 'cashier' && sale.status === 'draft' && (
             <Button
               variant="danger"
               onClick={handleVoid}

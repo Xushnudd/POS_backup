@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -39,7 +40,7 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Prisma.InventoryMovementWhereInput = {
       organizationId,
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
@@ -24,6 +24,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ShiftsPage() {
+  const cashAttempt=useRef<string|null>(null);
   const { activeRegister, activeShift, refreshShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -81,9 +82,11 @@ export default function ShiftsPage() {
       return;
     }
 
+    cashAttempt.current ??= crypto.randomUUID();
     setIsProcessingMove(true);
     try {
       await api.shifts.cashMovement(activeShift.id, {
+        operationId:cashAttempt.current,
         movementType,
         amount,
         reason: movementReason.trim(),
@@ -94,6 +97,7 @@ export default function ShiftsPage() {
           ? 'Naqd pul kassaga kiritildi'
           : 'Naqd pul kassadan chiqarildi'
       );
+      cashAttempt.current=null;
       setIsCashMoveModalOpen(false);
       setMovementAmount('');
       setMovementReason('');

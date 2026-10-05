@@ -27,6 +27,11 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const setActiveRegister = useCallback((register: Register) => {
+    setActiveRegisterState(register);
+    localStorage.setItem('pos_active_register', JSON.stringify(register));
+  }, []);
+
   const setActiveStore = useCallback((store: Store) => {
     setActiveStoreState(store);
     localStorage.setItem('pos_active_store', JSON.stringify(store));
@@ -36,12 +41,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       setActiveRegisterState(null);
       localStorage.removeItem('pos_active_register');
     }
-  }, []);
-
-  const setActiveRegister = useCallback((register: Register) => {
-    setActiveRegisterState(register);
-    localStorage.setItem('pos_active_register', JSON.stringify(register));
-  }, []);
+  }, [setActiveRegister]);
 
   const refreshStores = useCallback(async () => {
     if (!organization?.id || !isAuthenticated) return;
@@ -97,7 +97,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     } finally {
       setIsLoading(false);
     }
-  }, [organization?.id, isAuthenticated]);
+  }, [organization, isAuthenticated]);
 
   const refreshShift = useCallback(async () => {
     if (!activeRegister?.id || !isAuthenticated) {
@@ -116,17 +116,17 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       console.error('Error fetching active shift:', err);
       setActiveShift(null);
     }
-  }, [activeRegister?.id, isAuthenticated]);
+  }, [activeRegister, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated && organization?.id) {
-      refreshStores();
+      void Promise.resolve().then(refreshStores);
     }
   }, [isAuthenticated, organization?.id, refreshStores]);
 
   useEffect(() => {
     if (activeRegister?.id) {
-      refreshShift();
+      void Promise.resolve().then(refreshShift);
     }
   }, [activeRegister?.id, refreshShift]);
 

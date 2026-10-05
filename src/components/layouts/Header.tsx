@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,6 +23,7 @@ interface HeaderProps {
 
 export default function Header({ onToggleSidebar }: HeaderProps) {
   const pathname = usePathname();
+  const { notifyError } = useNotification();
   const { user, organization, role, logout } = useAuth();
   const { activeStore, activeRegister, activeShift } = useOrganization();
 
@@ -101,7 +103,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           </div>
 
           <button
-            onClick={logout}
+            onClick={() => { void logout().catch(error => notifyError(error instanceof Error ? error.message : 'Chiqish amalga oshmadi')); }}
             title="Tizimdan chiqish"
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
           >

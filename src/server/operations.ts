@@ -15,16 +15,20 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
   for (let attempt=0;attempt<3;attempt++) {
     try {
       return await prisma.$transaction(async tx=>{
+        const active=await tx.session.findFirst({where:{id:context.sessionId,userId:context.userId,organizationId:context.organizationId,revokedAt:null,expiresAt:{gt:new Date()},idleExpiresAt:{gt:new Date()},user:{isActive:true}}})
+        const member=await tx.organizationUser.findFirst({where:{id:context.organizationUserId,userId:context.userId,organizationId:context.organizationId,isActive:true},include:{userStores:true}})
+        if (!active || !member || member.role!==context.role || (context.role!=='owner' && context.storeIds.some(id=>!member.userStores.some(x=>x.storeId===id)))) throw new AccessError(401,'SESSION_CHANGED','Sessiya yoki vakolat o‘zgardi; qayta kiring')
         const lock=`${context.organizationId}:${type}:${key}`
         await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lock},0))::text`
         const old=await tx.operation.findUnique({where:{organizationId_type_key:{organizationId:context.organizationId,type,key}}})
         if (old) {
+          if (old.actorId!==context.userId) throw new AccessError(403,"OPERATION_ACTOR_MISMATCH")
           if (old.payloadHash!==hash) throw new AccessError(409,'OPERATION_PAYLOAD_CONFLICT','Bu amal kaliti boshqa ma’lumot bilan ishlatilgan')
           return old.result as T
         }
         const result=await work(tx)
         const json=JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue
-        await tx.operation.create({data:{organizationId:context.organizationId,type,key,payloadHash:hash,result:json}})
+        await tx.operation.create({data:{organizationId:context.organizationId,actorId:context.userId,type,key,payloadHash:hash,result:json}})
         return JSON.parse(JSON.stringify(result)) as T
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,timeout:15000})
     } catch(error) {

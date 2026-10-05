@@ -24,7 +24,8 @@ async function fixture(quantity=10) {
  const shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}})
  const product=await prisma.product.create({data:{organizationId:org.id,name:'P',sku:'P',barcode:'P',unit:'dona',salePrice:100,costPrice:50}})
  await prisma.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity}})
- const context:TokenPayload={userId:user.id,organizationId:org.id,organizationUserId:member.id,role:'owner',storeIds:[store.id],sessionId:'test'}
+ const session=await prisma.session.create({data:{userId:user.id,organizationId:org.id,tokenHash:randomUUID(),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}})
+ const context:TokenPayload={userId:user.id,organizationId:org.id,organizationUserId:member.id,role:'owner',storeIds:[store.id],sessionId:session.id}
  const draft={organizationId:org.id,storeId:store.id,registerId:register.id,shiftId:shift.id,discountAmount:0,items:[{productId:product.id,quantity:1,discountAmount:0}]}
  return {org,user,store,shift,product,context,draft}
 }

@@ -12,7 +12,6 @@ export const GET=withApi(async(request:NextRequest)=>{
  const operation=await prisma.operation.findUnique({where:{organizationId_type_key:{organizationId:context.organizationId,type,key}}})
  if (!operation) return NextResponse.json({success:true,data:{state:'not_found'}})
  // Cashiers may only retrieve results for their own economic operations.
- const result=operation.result as Record<string,unknown>
- if (context.role==='cashier' && result.cashierId!==context.userId) throw new AccessError(403,'FORBIDDEN')
+ if (context.role==='cashier' && operation.actorId!==context.userId) throw new AccessError(403,'FORBIDDEN')
  return NextResponse.json({success:true,data:{state:'completed',result:operation.result}})
 })

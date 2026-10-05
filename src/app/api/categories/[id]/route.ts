@@ -37,9 +37,13 @@ async function handlePUT(
     const body = await request.json()
     const validatedData = updateCategorySchema.parse(body)
 
-    const category = await db.category.update({
+    const category = await db.$transaction(async tx => {
+      const result = await tx.category.update({
       where: { id },
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"update"}})
+      return result
     })
 
     return NextResponse.json({
@@ -88,9 +92,13 @@ async function handleDELETE(
     const db = scopedPrisma(payload)
 
     // Soft delete
-    await db.category.update({
+    await db.$transaction(async tx => {
+      const result = await tx.category.update({
       where: { id },
       data: { isActive: false },
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"update"}})
+      return result
     })
 
     return NextResponse.json({

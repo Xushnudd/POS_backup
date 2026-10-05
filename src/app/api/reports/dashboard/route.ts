@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { decimal } from '@/server/sales/calculations'
 import { dateRange, localDate } from '@/server/reports/dates'
 import { AccessError } from '@/server/auth/policy'
@@ -40,7 +41,7 @@ async function handleGET(request: NextRequest) {
 
     const range=dateRange(date,date,organization.timezone)
 
-    const where: any = {
+    const where: Prisma.SaleWhereInput = {
       organizationId,
       status: { in: ['completed','partially_returned','returned'] },
       completedAt: range,

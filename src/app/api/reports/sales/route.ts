@@ -41,7 +41,7 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Prisma.SaleWhereInput = {
       organizationId,
       status: { in: ['completed','partially_returned','returned'] },
     }
