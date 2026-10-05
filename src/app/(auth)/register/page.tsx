@@ -47,8 +47,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!password || password.length < 6) {
-      setErrorMessage('Parol kamida 6 ta belgidan iborat bo\'lishi kerak');
+    if (!password || password.length < 8 || password.length > 72) {
+      setErrorMessage('Parol 8–72 ta belgidan iborat bo\'lishi kerak');
       return;
     }
 
@@ -157,11 +157,12 @@ export default function RegisterPage() {
             />
 
             <Input
-              label="Parol (kamida 6 ta belgi)"
+              label="Parol (8–72 ta belgi)"
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              minLength={8} maxLength={72}
               leftIcon={<FontAwesomeIcon icon={faLock} className="text-xs" />}
               required
             />

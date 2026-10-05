@@ -1,3 +1,4 @@
+import { signedQuantitySchema, nonnegativeQuantitySchema } from '@/server/catalog/service'
 import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -12,14 +13,14 @@ const createStockDocumentSchema = z.object({
   supplierId: z.string().uuid().optional(),
   documentType: z.enum(['purchase', 'adjustment', 'transfer_out', 'transfer_in', 'return_in']),
   documentNo: z.string().trim().min(1),
-  note: z.string().optional(),
+  note: z.string().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
-    quantity: z.number().finite().refine(v => v !== 0),
-    unitCost: z.number().nonnegative(),
-    note: z.string().optional(),
-  })).min(1),
-}).refine(doc => doc.documentType === "adjustment" || doc.items.every(item => item.quantity > 0), "Kirim miqdori musbat bo‘lishi kerak")
+    quantity: signedQuantitySchema,
+    unitCost: nonnegativeQuantitySchema,
+    note: z.string().max(2000).optional(),
+  })).min(1).max(500),
+}).refine(doc => doc.documentType === "adjustment" || doc.items.every(item => Number(item.quantity) > 0), "Kirim miqdori musbat bo‘lishi kerak")
 
 async function handleGET(request: NextRequest) {
   try {

@@ -1,0 +1,68 @@
+import { test, expect } from '@playwright/test'
+import { PrismaClient } from '@prisma/client'
+import { randomUUID } from 'node:crypto'
+const connection=new URL(process.env.DATABASE_URL??'')
+if(connection.hostname!=='127.0.0.1'||connection.pathname!=='/pos_test')throw new Error('Isolated test DB required')
+const db=new PrismaClient(),orgs:string[]=[],users:string[]=[],phones:string[]=[]
+test.afterAll(async()=>{
+ const accounts=await db.user.findMany({where:{phone:{in:phones}},include:{organizationUsers:true}})
+ users.push(...accounts.map(user=>user.id));orgs.push(...accounts.flatMap(user=>user.organizationUsers.map(member=>member.organizationId)))
+ await db.debtEntry.deleteMany({where:{organizationId:{in:orgs}}})
+ await db.organization.deleteMany({where:{id:{in:orgs}}})
+ await db.user.deleteMany({where:{id:{in:users}}})
+ await db.$disconnect()
+})
+test('Production HTTPS: register, open shift, restore local basket and sell cash exactly once',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message))
+ const phone='998'+Date.now(),password='test-only-password';phones.push(phone)
+ await page.goto('/register')
+ await page.getByLabel('Ism va Familiya').fill('Browser Owner')
+ await page.getByLabel('Telefon raqam',{exact:true}).fill(phone)
+ await page.getByLabel("Do'kon yoki Biznes nomi").fill('Browser POS test')
+ await page.getByLabel(/Parol \(/).fill(password)
+ await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click()
+ await expect(page).toHaveURL(/\/dashboard$/)
+ const me=await (await page.request.get('/api/auth/me')).json()
+ orgs.push(me.data.organization.id);users.push(me.data.user.id)
+ const cookie=(await page.context().cookies()).find(cookie=>cookie.name==='pos_session')
+ expect(cookie?.httpOnly).toBe(true);expect(cookie?.secure).toBe(true);expect(cookie?.sameSite).toBe('Lax')
+ expect(await page.evaluate(()=>localStorage.getItem('pos_token'))).toBeNull()
+ const store=(await (await page.request.get(`/api/stores?organizationId=${me.data.organization.id}`)).json()).data[0]
+ const productResponse=await page.request.post('/api/products',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.data.organization.id,name:'Browser coffee',sku:'BROWSER',barcode:'BROWSER',unit:'dona',salePrice:100.25,costPrice:40,minStock:0}})
+ expect(productResponse.ok()).toBe(true)
+ const product=(await productResponse.json()).data
+ const documentResponse=await page.request.post('/api/stock-documents',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.data.organization.id,storeId:store.id,documentType:'purchase',documentNo:randomUUID(),items:[{productId:product.id,quantity:3,unitCost:40}]}})
+ expect(documentResponse.ok()).toBe(true)
+ const document=(await documentResponse.json()).data
+ expect((await page.request.post(`/api/stock-documents/${document.id}/confirm`,{headers:{Origin:'https://localhost:3100'},data:{}})).ok()).toBe(true)
+ await page.goto('/pos')
+ await page.getByRole('button',{name:'Smenani ochish',exact:true}).click()
+ await expect(page.getByRole('dialog')).toBeVisible()
+ await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).click()
+ await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.getByRole('heading',{name:'Browser coffee',exact:true}).click()
+ await expect(page.getByRole('button',{name:"To'lovga o'tish"})).toBeEnabled()
+ // Wait for IndexedDB commit rather than an arbitrary UI delay.
+ await expect.poll(()=>page.evaluate(async()=>{
+  const request=indexedDB.open('shuni-pos-local-v1');const database=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})
+  const values=await new Promise<{value:{cart:{items:unknown[]}}}[]>(resolve=>{const query=database.transaction('drafts').objectStore('drafts').getAll();query.onsuccess=()=>resolve(query.result)})
+  database.close();return values.some(value=>value.value.cart.items.length===1)
+ })).toBe(true)
+ await page.reload()
+ await expect(page.getByRole('button',{name:"To'lovga o'tish"})).toBeEnabled()
+ await page.getByRole('button',{name:"To'lovga o'tish"}).click()
+ await page.getByLabel("Mijoz bergan naqd pul (so'm)").fill('150.25')
+ // Simulate a transport failure AFTER the real server committed checkout.
+ await page.route('**/api/sales/*/complete',async route=>{await route.fetch();await route.abort()})
+ await page.getByRole('button',{name:/Savdoni yakunlash/}).click()
+ await expect.poll(async()=>db.sale.count({where:{organizationId:me.data.organization.id,status:'completed'}})).toBe(1)
+ await page.reload()
+ await page.getByRole('button',{name:'Natijani tekshirish',exact:true}).click()
+ await expect(page.getByRole('button',{name:'Natijani tekshirish',exact:true})).not.toBeVisible()
+ const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.data.organization.id},include:{payments:true,items:true}})
+ expect(sale.totalAmount.toString()).toBe('100.25');expect(sale.payments.length).toBe(1);expect(sale.payments[0].amount.toString()).toBe('100.25')
+ expect(sale.items[0].unit).toBe('dona')
+ expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1)
+ expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('2')
+ expect(errors).toEqual([])
+})

@@ -498,7 +498,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.09** — Docker build, standalone chiqishi va bazaga ulanish tartibini tuzatish.
+- [x] **FIX-01.09** — Docker build, standalone chiqishi va bazaga ulanish tartibini tuzatish.
 
   **Texnologiya:** Docker multi-stage, Next.js standalone, Node.js qo‘llab-quvvatlanadigan LTS.
 

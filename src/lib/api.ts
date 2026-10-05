@@ -68,7 +68,8 @@ class ApiClient {
   }
 
   operations = {
-    status: (type: string, operationId: string) => this.request<{state:'not_found'|'completed';result?:Sale}>(`/operations?${new URLSearchParams({type,operationId})}`),
+    cancelDraftIntent: (operationId:string,payload:Record<string,unknown>) => this.request<{state:'cancelled'|'created';saleId?:string}>('/operations/cancel',{method:'POST',body:JSON.stringify({operationId,payload})}),
+    status: (type: string, operationId: string) => this.request<{state:'not_found'|'completed'|'cancelled';result?:Sale}>(`/operations?${new URLSearchParams({type,operationId})}`),
   };
 
   // Authentication

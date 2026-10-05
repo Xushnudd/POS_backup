@@ -1,5 +1,5 @@
 export type OfflineScope={organizationId:string;userId:string;deviceId:string}
-export type PendingOperation={id:string;scope:OfflineScope;type:'sale.create'|'sale.complete'|'sale.return'|'debt.collect';payload:Record<string,unknown>;state:'pending'|'synced'|'conflict';createdAt:string;result?:unknown;code?:string}
+export type PendingOperation={id:string;scope:OfflineScope;type:'sale.create'|'sale.complete'|'sale.return'|'debt.collect';payload:Record<string,unknown>;state:'pending'|'synced'|'conflict'|'cancelled';createdAt:string;result?:unknown;code?:string}
 const database='shuni-pos-local-v1'
 function open():Promise<IDBDatabase> {
  return new Promise((resolve,reject)=>{
@@ -38,7 +38,7 @@ export async function enqueue(operation:PendingOperation) {
 }
 export async function pendingOperations(scope:OfflineScope) {
  const all=await transact<PendingOperation[]>('operations','readonly',store=>store.getAll())
- return all.filter(x=>scopeKey(x.scope)===scopeKey(scope)&&x.state!=='synced').sort((a,b)=>a.createdAt.localeCompare(b.createdAt))
+ return all.filter(x=>scopeKey(x.scope)===scopeKey(scope)&&['pending','conflict'].includes(x.state)).sort((a,b)=>a.createdAt.localeCompare(b.createdAt))
 }
 export async function acknowledge(id:string,state:PendingOperation['state'],result?:unknown,code?:string) {
  const old=await transact<PendingOperation|undefined>('operations','readonly',store=>store.get(id))
@@ -61,4 +61,11 @@ export async function clearScope(scope:OfflineScope) {
  await deleteDraft(scope)
  const all=await transact<PendingOperation[]>('operations','readonly',store=>store.getAll())
  for (const operation of all) if (scopeKey(operation.scope)===scopeKey(scope)) await transact('operations','readwrite',store=>store.delete(operation.id))
+}
+
+export async function markCancelled(id:string,scope:OfflineScope,result:unknown) {
+ const old=await transact<PendingOperation|undefined>('operations','readonly',store=>store.get(id))
+ if (!old) return
+ if (scopeKey(old.scope)!==scopeKey(scope)) throw new Error('Operation scope mismatch')
+ await transact('operations','readwrite',store=>store.put({...old,state:'cancelled',code:'CANCELLED_WITH_SERVER_PROOF',result}))
 }

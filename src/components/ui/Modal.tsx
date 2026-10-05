@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, ReactNode } from 'react';
+import React, { useEffect, useId, useRef, ReactNode } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -30,6 +30,24 @@ export default function Modal({
   footer,
   size = 'md',
 }: ModalProps) {
+  const dialogRef=useRef<HTMLDivElement>(null);
+  const titleId=useId();
+  useEffect(()=>{
+    if(!isOpen)return;
+    const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const selectable=()=>Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')??[]).filter(element=>element.getClientRects().length>0);
+    const frame=requestAnimationFrame(()=>{(selectable()[0]??dialogRef.current)?.focus();});
+    const trap=(event:KeyboardEvent)=>{
+      if(event.key!=='Tab')return;
+      const elements=selectable(),first=elements[0],last=elements.at(-1);
+      if(!first){event.preventDefault();dialogRef.current?.focus();return;}
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    };
+    const dialog=dialogRef.current;dialog?.addEventListener('keydown',trap);
+    return ()=>{cancelAnimationFrame(frame);dialog?.removeEventListener('keydown',trap);if(previous?.isConnected)previous.focus();};
+  },[isOpen]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -61,12 +79,12 @@ export default function Modal({
         aria-hidden="true"
       />
 
-      <div
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={title?titleId:undefined} tabIndex={-1}
         className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden z-10 animate-in zoom-in-95 duration-150`}
       >
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+            <h3 id={titleId} className="text-lg font-bold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
               className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition"

@@ -1,3 +1,5 @@
+import { quantitySchema } from '@/server/sales/service'
+import { nonnegativeQuantitySchema } from '@/server/catalog/service'
 import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -10,12 +12,12 @@ const createTransferSchema = z.object({
   organizationId: z.string().uuid(),
   fromStoreId: z.string().uuid(),
   toStoreId: z.string().uuid(),
-  note: z.string().optional(),
+  note: z.string().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
-    quantity: z.number().positive(),
-    unitCost: z.number().positive(),
-  })).min(1),
+    quantity: quantitySchema,
+    unitCost: nonnegativeQuantitySchema,
+  })).min(1).max(500),
 })
 
 async function handleGET(request: NextRequest) {

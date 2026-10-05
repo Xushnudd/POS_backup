@@ -70,7 +70,7 @@ async function boundedBody(request: NextRequest): Promise<string> {
     reader.releaseLock()
   }
 }
-export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean } = {}) {
+export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean } = {}) {
   return async (request: NextRequest, routeContext: C): Promise<Response> => {
     const requestId = randomUUID()
     try {
@@ -106,7 +106,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         if (text) {
           let body: unknown
           try { body = JSON.parse(text) } catch { throw new AccessError(400,'INVALID_JSON','JSON noto‘g‘ri') }
-          if (context) await validateRefs(body, context)
+          if (context && options.validateBodyReferences !== false) await validateRefs(body, context)
         }
       }
       const result = await handler(request, routeContext)

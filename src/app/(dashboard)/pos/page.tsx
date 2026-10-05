@@ -7,7 +7,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { useCart } from '@/hooks/useCart';
 import { useDebounce } from '@/hooks/useDebounce';
 import { api } from '@/lib/api';
-import { deviceId, saveDraft, loadDraft, enqueue, acknowledge } from '@/lib/offline';
+import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, markCancelled } from '@/lib/offline';
 import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
 import ProductSearch from '@/components/pos/ProductSearch';
 import Cart from '@/components/pos/Cart';
@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 export default function PosPage() {
-  const { user, organization } = useAuth();
+  const { user, organization, role } = useAuth();
   const { activeStore, activeRegister, activeShift, refreshShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -234,6 +234,30 @@ export default function PosPage() {
     }
   };
 
+  const cancelPendingCheckout=async()=>{
+    const attempt=checkoutAttempt.current;
+    if(!attempt || !organization?.id || !user?.id)return;
+    setIsProcessingPayment(true);
+    try{
+      const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+      const outcome=await api.operations.cancelDraftIntent(attempt.operationId,{...JSON.parse(attempt.payload),operationId:attempt.operationId});
+      if(outcome.data?.state==='created' && outcome.data.saleId){
+        attempt.saleId=outcome.data.saleId;
+        const current=await api.sales.get(attempt.saleId);
+        if(current.data?.status!=='voided'){
+          if(role==='cashier')throw new Error('Qoralama yaratilgan. Uni rahbar Savdolar sahifasida bekor qilishi kerak; keyin yana tekshiring.');
+          await api.sales.void(attempt.saleId);
+        }
+        await markCancelled(attempt.saleId,scope,{saleId:attempt.saleId,state:'voided'});
+      }else if(outcome.data?.state!=='cancelled')throw new Error('Server bekor qilishni tasdiqlamadi');
+      await markCancelled(attempt.operationId,scope,outcome.data);
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:null});
+      checkoutAttempt.current=null;setHasPendingCheckout(false);setIsPaymentModalOpen(false);
+      notifySuccess('Urinish serverda bekor qilindi. Savat saqlangan.');
+    }catch(error){notifyError(error instanceof Error?error.message:'Bekor qilish tasdiqlanmadi; urinish saqlangan');}
+    finally{setIsProcessingPayment(false);}
+  };
+
   const recoverCheckout = async () => {
     const attempt=checkoutAttempt.current;
     if (!attempt || !organization?.id || !user?.id) return;
@@ -272,7 +296,7 @@ export default function PosPage() {
     <div className="h-[calc(100vh-5rem)] flex flex-col gap-4">
       {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3">
         <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
-        <Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button>
+        <div className="flex gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
       </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (

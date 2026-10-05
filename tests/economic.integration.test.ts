@@ -242,3 +242,25 @@ test('Bank debt collection never turns into an automatic cash refund',async()=>{
  assert.equal(await prisma.payment.count({where:{saleId:sale.id,direction:'out',paymentType:'cash'}}),0)
  assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'0')
 })
+
+test('Cancellation tombstone blocks delayed draft posting; a committed draft keeps manager-only cancellation',async()=>{
+ const {cancelDraftIntent}=await import('@/server/sales/cancel-intent')
+ const f=await fixture(),key=randomUUID()
+ const cancelled=await cancelDraftIntent(f.context,{operationId:key,payload:f.draft})
+ assert.equal(cancelled.state,'cancelled')
+ await assert.rejects(()=>createDraft(f.context,f.draft,key),/bekor/)
+ assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),0)
+ assert.equal((await cancelDraftIntent(f.context,{operationId:key,payload:f.draft})).state,'cancelled')
+ const otherKey=randomUUID(),sale=await createDraft(f.context,f.draft,otherKey)
+ const existing=await cancelDraftIntent(f.context,{operationId:otherKey,payload:f.draft})
+ assert.equal(existing.state,'created')
+ assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:sale.id}})).status,'draft')
+ // Competing requests either reserve cancellation first, or preserve the posted draft.
+ for(let i=0;i<5;i++){
+  const raceKey=randomUUID()
+  const outcomes=await Promise.allSettled([createDraft(f.context,f.draft,raceKey),cancelDraftIntent(f.context,{operationId:raceKey,payload:f.draft})])
+  const operation=await prisma.operation.findUniqueOrThrow({where:{organizationId_type_key:{organizationId:f.org.id,type:'sale.create',key:raceKey}}})
+  if(operation.state==='cancelled')assert.equal(outcomes[0].status,'rejected')
+  else {assert.equal(outcomes[0].status,'fulfilled');assert.equal(outcomes[1].status,'fulfilled');if(outcomes[1].status==='fulfilled')assert.equal(outcomes[1].value.state,'created')}
+ }
+})

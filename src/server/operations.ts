@@ -27,6 +27,7 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
         if (old) {
           if (old.actorId!==context.userId) throw new AccessError(403,"OPERATION_ACTOR_MISMATCH")
           if (old.payloadHash!==hash) throw new AccessError(409,'OPERATION_PAYLOAD_CONFLICT','Bu amal kaliti boshqa ma’lumot bilan ishlatilgan')
+          if (old.state==='cancelled') throw new AccessError(409,'OPERATION_CANCELLED','Bu urinish bekor qilingan; yangi amal kaliti kerak')
           return old.result as T
         }
         const result=await work(tx)

@@ -9,4 +9,4 @@ async function logout(request: NextRequest) {
   response.cookies.set(SESSION_COOKIE,'',{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',path:'/',maxAge:0})
   return response
 }
-export const POST = withApi(logout)
+export const POST = withApi(logout, { public: true })

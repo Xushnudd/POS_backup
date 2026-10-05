@@ -43,7 +43,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
       if ((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length) throw new Error('Avval kutilayotgan savdo natijalarini tekshiring');
       await api.organizations.switch(target);
       localStorage.removeItem('pos_active_store');localStorage.removeItem('pos_active_register');
-      window.location.assign('/pos');
+      window.location.assign(new URL('/pos', window.location.origin).toString());
     }catch(error){notifyError(error instanceof Error?error.message:'Biznes almashtirilmadi');setSwitching(false);}
   };
 

@@ -13,5 +13,5 @@ export const GET=withApi(async(request:NextRequest)=>{
  if (!operation) return NextResponse.json({success:true,data:{state:'not_found'}})
  // Cashiers may only retrieve results for their own economic operations.
  if (context.role==='cashier' && operation.actorId!==context.userId) throw new AccessError(403,'FORBIDDEN')
- return NextResponse.json({success:true,data:{state:'completed',result:operation.result}})
+ return NextResponse.json({success:true,data:{state:operation.state,result:operation.result}})
 })

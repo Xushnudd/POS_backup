@@ -8,6 +8,7 @@ import { GET as products } from '@/app/api/products/route'
 import { POST as transfer } from '@/app/api/transfers/route'
 import { PUT as editSale } from '@/app/api/sales/[id]/route'
 import { GET as report } from '@/app/api/reports/sales/route'
+import { POST as cancelIntent } from '@/app/api/operations/cancel/route'
 import { POST as logout } from '@/app/api/auth/logout/route'
 
 const url=process.env.DATABASE_URL ?? ''
@@ -59,8 +60,16 @@ test('Tenant API, draft edits, nested transfer, global totals, revoke and constr
  assert.equal(result.data.length,1);assert.equal(result.summary.totalRevenue,'300');assert.equal(result.summary.averageSale,'150')
  const csrf=await products(new NextRequest('http://localhost:3000/api/products',{method:'GET',headers:{cookie:a.cookie}}),undefined)
  assert.equal(csrf.status,400) // Existing contract still requires organizationId.
+ const cancelKey=randomUUID()
+ const intent={organizationId:a.data.organization.id,storeId:a.store.id,registerId:a.register.id,shiftId:shift.id,cashierId:a.data.user.id,items:[{productId:randomUUID(),quantity:1,unitPrice:100}]}
+ const cancelled=await cancelIntent(req('/operations/cancel',a.cookie,{operationId:cancelKey,payload:intent},'POST'),undefined)
+ assert.equal(cancelled.status,200);assert.equal((await cancelled.json()).data.state,'cancelled')
+ const foreignCancel=await cancelIntent(req('/operations/cancel',a.cookie,{operationId:randomUUID(),payload:{...intent,organizationId:b.data.organization.id}},'POST'),undefined)
+ assert.equal(foreignCancel.status,403)
  const badLogout=await logout(new NextRequest('http://localhost:3000/api/auth/logout',{method:'POST',headers:{cookie:a.cookie,origin:'https://attacker.invalid','content-type':'application/json'},body:'{}'}),undefined)
  assert.equal(badLogout.status,403)
  assert.equal((await logout(req('/auth/logout',a.cookie,{},'POST'),undefined)).status,200)
  assert.equal((await products(req(`/products?organizationId=${a.data.organization.id}`,a.cookie),undefined)).status,401)
+ const repeatedLogout=await logout(req('/auth/logout',a.cookie,{},'POST'),undefined)
+ assert.equal(repeatedLogout.status,200);assert.match(repeatedLogout.headers.get('set-cookie')??'',/Max-Age=0/i)
 })

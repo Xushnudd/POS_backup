@@ -26,3 +26,17 @@ Compose DB portini tashqariga chiqarmaydi; private secret env, non-root app, alo
 ## ADR-004 — Node 24 runtime
 
 2026-10-05. Dockerning haqiqiy install bosqichi mavjud lockfiledagi `@zxing/library@0.23.0` Node >=24 talab qilishini ko‘rsatdi. Browser skanerni sababsiz almashtirmasdan mavjud stackni saqlash uchun Docker/CI/local engines Node24ga birlashtirildi; `.npmrc` engine-strict install vaqtida mos kelmaslikni rad etadi. ADR-001 dagi dastlabki Node22 tanlovi shu dalil bilan yangilandi.
+
+## ADR-005 — browser E2E
+
+2026-10-05. Moliyaviy va PostgreSQL testlari mavjud Node test/assert bilan saqlanadi. Haqiqiy browser cookie, IndexedDB basket recovery va UI oqimlarini Node assert tekshira olmaydi; PLAN1 T04dagi Playwright faqat dev dependency sifatida qo‘shiladi. Nextning lokal Playwright qo‘llanmasi va [rasmiy konfiguratsiya](https://playwright.dev/docs/test-configuration)/[webServer](https://playwright.dev/docs/test-webserver) hujjatlari o‘qildi. Faqat localhost `pos_test` bazasi ishlatiladi; real hisob/credential/browser profili testga kiritilmaydi.
+
+## ADR-006 — dependency patch va audit chegarasi
+
+2026-10-05. Next16.3.4 →16.3.8 va eslint-config-next16.3.8; semver-compatible transitiv patchlar `npm audit fix` orqali, `--force` ishlatilmagan. [Rasmiy advisory](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j) Next16.3.6 patchini ko‘rsatadi; loyiha Node ImageResponse ishlatmaydi, lekin package patchlanadi.
+
+Auditda ESLintning development glob zanjiridagi [braces stack exhaustion](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) qolishi mumkin: registrydagi braces3.0.3 uchun hozir patch yo‘q. Next16 ESLintni14 versiyaga majburan tushirish API/regressiya xavfi sabab qilinmaydi. Bu topilma yashirilmaydi; runtime `--omit=dev` audit alohida tekshiriladi, CI timeout bilan cheklanadi. ESLint production standalone runnerda ishlatilmaydi. Upstream patch chiqqanda dev zanjiri qayta yangilanadi.
+
+## ADR-007 — yuborilmagan savdo urinishini bekor qilish
+
+2026-10-05. `Operation.state=cancelled` aynan original sale.create idempotency slotini band qiladi. Kechikkan serializable posting shu unique slot bilan to‘qnashib, yangi transactionda terminal bekor holatini ko‘radi; savdo/stock/payment yaratmaydi. Original actor va payload hash mos bo‘lishi shart. Allaqachon yaratilgan draftni bu xizmat o‘zgartirmaydi: mavjud manager-only void ruxsati saqlanadi. Parallel cancellation/posting PostgreSQL sinovi o‘tdi. Browser E2E haqiqiy commitdan keyin HTTP javobni uzib, reload va operation recovery orqali aynan bitta sale/payment/stock effektini tasdiqladi.
