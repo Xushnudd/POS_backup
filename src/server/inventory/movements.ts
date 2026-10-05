@@ -9,6 +9,9 @@ export async function moveStock(tx: Prisma.TransactionClient, context: TokenPayl
   const store=await tx.store.findFirst({where:{id:input.storeId,organizationId:context.organizationId}})
   if (!product || !store || (context.role!=='owner' && !context.storeIds.includes(store.id))) throw new AccessError(404,'NOT_FOUND')
   await validateUnitQuantity(tx,context.organizationId,product.unit,delta)
+  const lock=`stock:${input.storeId}:${input.productId}`
+  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lock},0))::text`
+  if(await tx.stockFreeze.findUnique({where:{storeId_productId:{storeId:input.storeId,productId:input.productId}}})) throw new AccessError(409,'STOCK_COUNT_IN_PROGRESS',`${product.name} sanalmoqda; avval sanashni yakunlang`)
   const where={storeId_productId:{storeId:input.storeId,productId:input.productId}}
   await tx.inventoryBalance.upsert({where,create:{storeId:input.storeId,productId:input.productId,quantity:0},update:{}})
   const update=await tx.inventoryBalance.updateMany({

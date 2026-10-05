@@ -2,7 +2,12 @@
 set -euo pipefail
 backup_smoke_dir=$(mktemp -d /tmp/pos-backup-smoke.XXXXXX)
 restore_db="pos_restore_test_$(date +%s)"
+fixture_id="backup_count_$(date +%s)_$RANDOM"
 cleanup() {
+ docker exec -i pos-plan-test-db psql -U pos_test -d pos_test -v fixture="$fixture_id" >/dev/null <<'SQL'
+DELETE FROM "Organization" WHERE id=:'fixture';
+DELETE FROM "User" WHERE id=:'fixture';
+SQL
  docker exec pos-plan-test-db dropdb -U pos_test --if-exists "$restore_db" >/dev/null
  rm -rf "$backup_smoke_dir"
 }
@@ -44,6 +49,21 @@ SHIM
 export PATH="$backup_smoke_dir/bin:$PATH"
 export DATABASE_URL=postgresql://pos_test:local-test-only@127.0.0.1:55439/pos_test
 export BACKUP_DIRECTORY="$backup_smoke_dir/backups"
+# Exercise recovery of an active count, immutable reading and persistent stock freeze.
+docker exec -i pos-plan-test-db psql -U pos_test -d pos_test -v ON_ERROR_STOP=1 -v fixture="$fixture_id" >/dev/null <<'SQL'
+BEGIN;
+INSERT INTO "Organization" (id,name,phone) VALUES (:'fixture','Backup count fixture',:'fixture');
+INSERT INTO "User" (id,"fullName",phone,"passwordHash") VALUES (:'fixture','Fixture operator',:'fixture','not-a-login');
+INSERT INTO "OrganizationUser" (id,"organizationId","userId",role) VALUES (:'fixture',:'fixture',:'fixture','owner');
+INSERT INTO "Store" (id,"organizationId",name,"updatedAt") VALUES (:'fixture',:'fixture','Fixture store',NOW());
+INSERT INTO "Product" (id,"organizationId",name,sku,barcode,unit,"salePrice","costPrice","updatedAt") VALUES (:'fixture',:'fixture','Fixture SKU','FIX','FIX','dona',10,5,NOW());
+INSERT INTO "InventoryBalance" ("storeId","productId",quantity,"updatedAt") VALUES (:'fixture',:'fixture',3,NOW());
+INSERT INTO "StockCount" (id,"organizationId","storeId",scope,blind,"createdBy") VALUES (:'fixture',:'fixture',:'fixture','partial',TRUE,:'fixture');
+INSERT INTO "StockCountLine" (id,"countId","productId","productName",sku,unit,"expectedQuantity","unitCost") VALUES (:'fixture',:'fixture',:'fixture','Fixture SKU','FIX','dona',3,5);
+INSERT INTO "StockCountReading" (id,"lineId",round,quantity,"countedBy") VALUES (:'fixture',:'fixture',1,2,:'fixture');
+INSERT INTO "StockFreeze" ("storeId","productId","countId") VALUES (:'fixture',:'fixture',:'fixture');
+COMMIT;
+SQL
 scripts/ops/backup.sh
 backup_file=$(find "$BACKUP_DIRECTORY" -name '*.gpg' -print -quit)
 docker exec pos-plan-test-db createdb -U pos_test "$restore_db"
@@ -53,8 +73,14 @@ scripts/ops/restore.sh "$backup_file"
 restored_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d "$restore_db" -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 source_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d pos_test -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 [[ "$restored_migrations" == "$source_migrations" ]]
+restored_count=$(docker exec -i pos-plan-test-db psql -U pos_test -d "$restore_db" -At -v fixture="$fixture_id" <<'SQL'
+SELECT c.status || ':' || l."expectedQuantity"::text || ':' || r.quantity::text || ':' || b.quantity::text FROM "StockCount" c JOIN "StockCountLine" l ON l."countId"=c.id JOIN "StockCountReading" r ON r."lineId"=l.id JOIN "StockFreeze" f ON f."countId"=c.id JOIN "InventoryBalance" b ON b."storeId"=f."storeId" AND b."productId"=f."productId" WHERE c.id=:'fixture';
+SQL
+)
+[[ "$restored_count" == 'counting:3.000000:2.000000:3.000000' ]]
+
 if scripts/ops/restore.sh "$backup_file"; then
  printf 'ERROR: overwrite guard failed\n' >&2
  exit 1
 fi
-printf 'PASS: encrypted backup, transactional restore, migration records match source, existing-table guard\n'
+printf 'PASS: encrypted backup, transactional restore, migration records match source, active count/readings/freeze recovered, existing-table guard\n'

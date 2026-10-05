@@ -353,3 +353,16 @@ export interface OrganizationMember {
 
 export interface CatalogUnit {id:string;code:string;name:string;precision:number;isActive:boolean}
 export interface ProductBarcode {id:string;value:string;isPrimary:boolean}
+
+export interface StockCountReading {
+ id:string;round:number;quantity:string|number;countedBy:string;countedAt:string;
+}
+export interface StockCountLine {
+ id:string;productId:string;productName:string;sku:string;unit:string;unitChanged?:boolean;
+ expectedQuantity?:string|number;unitCost?:string|number;readings:StockCountReading[];
+}
+export interface StockCount {
+ id:string;storeId:string;scope:'full'|'partial';blind:boolean;status:'counting'|'review'|'approved'|'cancelled';
+ createdAt:string;approvedBy?:string|null;approvedAt?:string|null;adjustmentId?:string|null;reason?:string|null;
+ store?:{name:string};lines?:StockCountLine[];
+}

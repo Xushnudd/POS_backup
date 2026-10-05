@@ -201,6 +201,7 @@ export default function InventoryPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link href="/inventory/counts"><Button variant="outline">Inventarizatsiya</Button></Link>
           <Link href="/inventory/transfers">
             <Button variant="outline" leftIcon={<FontAwesomeIcon icon={faRightLeft} />}>
               Transferlar

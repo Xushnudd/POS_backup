@@ -1578,7 +1578,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### INV-02 — inventarizatsiya va ombor boshqaruvi [P1]
 
-- [ ] **INV-02.01** — To‘liq/qisman sanash; kutilgan qoldiqni yashirib sanash imkoniyati.
+- [x] **INV-02.01** — To‘liq/qisman sanash; kutilgan qoldiqni yashirib sanash imkoniyati.
 
   **Texnologiya:** React counting screen, Prisma CountSession/CountLine.
 
@@ -1594,7 +1594,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-02.02** — Sanash davridagi savdolarni hisobga olish yoki vaqtinchalik bloklash siyosati.
+- [x] **INV-02.02** — Sanash davridagi savdolarni hisobga olish yoki vaqtinchalik bloklash siyosati.
 
   **Texnologiya:** PostgreSQL snapshot/version, Prisma movements.
 
@@ -1610,7 +1610,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-02.03** — Farq hujjati, qayta sanash va tasdiqlovchi.
+- [x] **INV-02.03** — Farq hujjati, qayta sanash va tasdiqlovchi.
 
   **Texnologiya:** Prisma adjustment + Approval/AuditLog.
 

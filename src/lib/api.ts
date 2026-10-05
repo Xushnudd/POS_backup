@@ -17,6 +17,7 @@ import {
   Sale,
   Shift,
   StockDocument,
+  StockCount,
   StockTransfer,
   Store,
   Supplier,
@@ -280,6 +281,15 @@ class ApiClient {
   };
 
   // Stock Documents (Kirim / Tuzatish)
+  stockCounts={
+    list:(page=1,filter:'active'|'all'='active')=>this.request<StockCount[]>(`/stock-counts?page=${page}&limit=50&filter=${filter}`),
+    get:(id:string)=>this.request<StockCount>(`/stock-counts/${id}`),
+    start:(data:{operationId:string;organizationId:string;storeId:string;scope:'full'|'partial';blind:boolean;productIds?:string[]})=>this.request<StockCount>('/stock-counts',{method:'POST',body:JSON.stringify(data)}),
+    record:(id:string,data:{operationId:string;items:{lineId:string;quantity:string}[]})=>this.request<StockCount>(`/stock-counts/${id}`,{method:'POST',body:JSON.stringify(data)}),
+    submit:(id:string)=>this.request<StockCount>(`/stock-counts/${id}/submit`,{method:'POST',body:'{}'}),
+    decide:(id:string,action:'approve'|'cancel',data:{operationId:string;reason:string})=>this.request<StockCount>(`/stock-counts/${id}/${action}`,{method:'POST',body:JSON.stringify(data)}),
+  };
+
   stockDocuments = {
     list: (params: {
       organizationId: string;

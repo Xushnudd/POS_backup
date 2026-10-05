@@ -14,7 +14,7 @@ const refs: Record<string, string> = {
 }
 const pathModels: Record<string, string> = {
   organizations:'Organization', stores:'Store', registers:'Register', products:'Product', categories:'Category',
-  customers:'Customer', suppliers:'Supplier', sales:'Sale', shifts:'Shift', transfers:'StockTransfer', 'stock-documents':'StockDocument',
+  customers:'Customer', suppliers:'Supplier', sales:'Sale', shifts:'Shift', transfers:'StockTransfer', 'stock-documents':'StockDocument', 'stock-counts':'StockCount',
 }
 async function assertReference(model: string, id: unknown, context: TokenPayload) {
   if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)) throw new AccessError(400,'INVALID_ID','Identifikator noto‘g‘ri')
