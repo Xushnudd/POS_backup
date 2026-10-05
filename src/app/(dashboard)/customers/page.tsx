@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -264,7 +265,7 @@ export default function CustomersPage() {
                   const hasDebt = Number(c.debt || 0) > 0;
                   return (
                     <tr key={c.id} className="hover:bg-gray-50/70 transition">
-                      <td className="py-3.5 px-4 font-bold text-gray-900">{c.fullName}</td>
+                      <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link></td>
                       <td className="py-3.5 px-4 text-gray-700 font-mono">
                         {formatPhone(c.phone)}
                       </td>

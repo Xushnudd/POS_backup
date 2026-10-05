@@ -254,6 +254,8 @@ export interface Payment {
   note?: string | null;
 }
 
+export interface DebtAllocationTarget {saleId:string|null;receiptNo:string|null;balance:string}
+
 export interface CustomerDebt {
   customerId: string;
   customerName: string;
@@ -261,6 +263,7 @@ export interface CustomerDebt {
   totalDebt: number;
   remainingCredit: number;
   recentPayments: Payment[];
+  allocationTargets?: {page:number;hasMore:boolean;items:DebtAllocationTarget[]};
 }
 
 export interface Sale {

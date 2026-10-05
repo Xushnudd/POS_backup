@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { DebtAllocationPicker } from '@/components/customers/DebtAllocationPicker';
+import Select from '@/components/ui/Select';
 import { CustomerLedger } from '@/components/customers/CustomerLedger';
 import { fixed } from '@/lib/money';
 import { api, ApiError } from '@/lib/api';
@@ -38,6 +40,8 @@ export default function CustomerDetailPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasPendingPayment,setHasPendingPayment]=useState(false);
   const [ledgerVersion,setLedgerVersion]=useState(0);
+  const [allocationMode,setAllocationMode]=useState('fifo');
+  const [allocations,setAllocations]=useState<{saleId:string|null;amount:string}[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -71,6 +75,11 @@ export default function CustomerDetailPage() {
     }
 
     if (!attempt.current && (!activeStore || !activeShift)) { notifyError('Qarzni undirish uchun do‘kon tanlab, smenani oching'); return; }
+    if(!attempt.current && allocationMode==='explicit') {
+      if(!allocations.length||allocations.length>200||allocations.some(item=>!/^\d+(\.\d{1,2})?$/.test(item.amount)||fixed(item.amount)<=BigInt(0))||allocations.reduce((sum,item)=>sum+fixed(item.amount),BigInt(0))!==fixed(amt)) {
+        notifyError('Ajratilgan musbat summalar jami to‘lov summasiga teng bo‘lishi kerak (1–200 qarz)');return;
+      }
+    }
     setIsProcessing(true);
     try {
       attempt.current ??= {
@@ -81,6 +90,7 @@ export default function CustomerDetailPage() {
         operationId: crypto.randomUUID(),
         amount: amt,
         note: paymentNote.trim() || undefined,
+        ...(allocationMode==='explicit'?{allocations:allocations.map(item=>({...item}))}:{}),
       };
       setHasPendingPayment(true);
       await api.payments.credit(attempt.current);
@@ -138,6 +148,7 @@ export default function CustomerDetailPage() {
           <Button
             variant="success"
             onClick={() => {
+              if(!attempt.current){setAllocationMode('fifo');setAllocations([]);}
               setPaymentAmount(attempt.current?String(attempt.current.amount):debt);
               if(attempt.current)setPaymentNote(attempt.current.note??'');
               setIsDebtModalOpen(true);
@@ -195,6 +206,9 @@ export default function CustomerDetailPage() {
         size="md"
       >
         <form onSubmit={handleDebtPayment} className="space-y-4">
+          {role==='owner'&&<Select label="Qarzni taqsimlash usuli" value={allocationMode} disabled={isProcessing||hasPendingPayment} onChange={event=>setAllocationMode(event.target.value)} options={[{value:'fifo',label:'Avtomatik FIFO'},{value:'explicit',label:'Aniq qarzlarni tanlash'}]}/>}
+          {isDebtModalOpen&&allocationMode==='explicit'&&<DebtAllocationPicker key={customer.id} customerId={customer.id} disabled={isProcessing||hasPendingPayment} value={allocations} onChange={setAllocations}/>}
+
           <Input
             label="To'lov summasi (so'm) *"
             type="number"
