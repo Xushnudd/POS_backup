@@ -14,10 +14,15 @@ export async function confirmStockDocument(context:TokenPayload,id:string) {
   const doc=await tx.stockDocument.findFirst({where:{id,AND:tenantScope('StockDocument',context)},include:{items:true,organization:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
   if (doc.status!=='draft') throw new AccessError(409,'INVALID_STATUS')
-  if (!doc.items.length || !['purchase','adjustment','return_in'].includes(doc.documentType)) throw new AccessError(400,'INVALID_DOCUMENT','Transfer uchun transfer oqimidan foydalaning')
+  if (!doc.items.length || !['purchase','opening','adjustment','return_in'].includes(doc.documentType)) throw new AccessError(400,'INVALID_DOCUMENT','Transfer uchun transfer oqimidan foydalaning')
   for (const item of [...doc.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
    if (item.quantity.isZero() || (doc.documentType!=='adjustment' && item.quantity.lt(0))) throw new AccessError(400,'INVALID_QUANTITY')
-   if (doc.documentType==='purchase') {
+   if(doc.documentType==='opening'){
+    if(!doc.note||doc.note.trim().length<3)throw new AccessError(400,'REASON_REQUIRED')
+    const balance=await tx.inventoryBalance.findUnique({where:{storeId_productId:{storeId:doc.storeId,productId:item.productId}}})
+    if((balance&&!balance.quantity.isZero())||await tx.inventoryMovement.count({where:{storeId:doc.storeId,productId:item.productId}}))throw new AccessError(409,'OPENING_ALREADY_EXISTS','Boshlang‘ich qoldiq faqat harakatsiz mahsulotga kiritiladi; keyin tuzatish hujjatidan foydalaning')
+   }
+   if (['purchase','opening'].includes(doc.documentType)) {
     await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${item.productId} FOR UPDATE`
     const product=await tx.product.findFirstOrThrow({where:{id:item.productId,organizationId:context.organizationId}})
     const stock=await tx.inventoryBalance.aggregate({where:{productId:product.id},_sum:{quantity:true}})
@@ -76,13 +81,13 @@ export async function reverseStockDocument(context:TokenPayload,id:string,input:
   await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
   const original=await tx.stockDocument.findFirst({where:{id,AND:tenantScope('StockDocument',context)},include:{items:true,reversal:true}})
   if (!original) throw new AccessError(404,'NOT_FOUND')
-  if (!original.items.length || original.status!=='confirmed' || original.reversalOfId || !['purchase','adjustment','return_in'].includes(original.documentType)) throw new AccessError(409,'INVALID_STATUS')
+  if (!original.items.length || original.status!=='confirmed' || original.reversalOfId || !['purchase','opening','adjustment','return_in'].includes(original.documentType)) throw new AccessError(409,'INVALID_STATUS')
   if (original.reversal) throw new AccessError(409,'ALREADY_REVERSED')
   const reversal=await tx.stockDocument.create({data:{organizationId:original.organizationId,storeId:original.storeId,supplierId:original.supplierId,
    documentType:'reversal',documentNo:'REV-'+input.operationId,reversalOfId:id,createdBy:context.userId,note:input.reason,
    items:{create:original.items.map(item=>({productId:item.productId,quantity:item.quantity.negated(),unitCost:item.unitCost,note:item.note}))}}})
   for (const item of [...original.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
-   if (original.documentType==='purchase') {
+   if (['purchase','opening'].includes(original.documentType)) {
     await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${item.productId} FOR UPDATE`
     const product=await tx.product.findFirstOrThrow({where:{id:item.productId,organizationId:context.organizationId}})
     const stock=await tx.inventoryBalance.aggregate({where:{productId:product.id},_sum:{quantity:true}})

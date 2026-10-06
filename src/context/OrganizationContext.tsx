@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import { Register, Shift, Store } from '@/types';
 import { useAuth } from './AuthContext';
@@ -21,6 +21,7 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
   const { organization, isAuthenticated } = useAuth();
+  const storeRequest=useRef(0),shiftRequest=useRef(0),loadedOrganization=useRef<string|undefined>(undefined);
   const [stores, setStores] = useState<Store[]>([]);
   const [activeStore, setActiveStoreState] = useState<Store | null>(null);
   const [activeRegister, setActiveRegisterState] = useState<Register | null>(null);
@@ -28,11 +29,15 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setActiveRegister = useCallback((register: Register) => {
+    shiftRequest.current++;
+    setActiveShift(null);
     setActiveRegisterState(register);
     localStorage.setItem('pos_active_register', JSON.stringify(register));
   }, []);
 
   const setActiveStore = useCallback((store: Store) => {
+    shiftRequest.current++;
+    setActiveShift(null);
     setActiveStoreState(store);
     localStorage.setItem('pos_active_store', JSON.stringify(store));
     if (store.registers && store.registers.length > 0) {
@@ -44,10 +49,18 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   }, [setActiveRegister]);
 
   const refreshStores = useCallback(async () => {
-    if (!organization?.id || !isAuthenticated) return;
+    const request=++storeRequest.current;
+    if(loadedOrganization.current!==organization?.id){
+      loadedOrganization.current=organization?.id;shiftRequest.current++;
+      setStores([]);setActiveStoreState(null);setActiveRegisterState(null);setActiveShift(null);
+    }
+    if (!organization?.id || !isAuthenticated) {
+      shiftRequest.current++;setStores([]);setActiveStoreState(null);setActiveRegisterState(null);setActiveShift(null);setIsLoading(false);return;
+    }
     setIsLoading(true);
     try {
       const res = await api.stores.list(organization.id);
+      if(request!==storeRequest.current)return;
       if (res.data) {
         setStores(res.data);
 
@@ -87,19 +100,23 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
             currentRegister = currentStore.registers[0];
           }
 
-          if (currentRegister) {
-            setActiveRegisterState(currentRegister);
-          }
+          shiftRequest.current++;setActiveShift(null);
+          setActiveRegisterState(currentRegister??null);
+          if(!currentRegister)localStorage.removeItem('pos_active_register');
+        }else{
+          shiftRequest.current++;setActiveStoreState(null);setActiveRegisterState(null);setActiveShift(null);
+          localStorage.removeItem('pos_active_store');localStorage.removeItem('pos_active_register');
         }
       }
     } catch (err) {
       console.error('Error fetching stores:', err);
     } finally {
-      setIsLoading(false);
+      if(request===storeRequest.current)setIsLoading(false);
     }
   }, [organization, isAuthenticated]);
 
   const refreshShift = useCallback(async () => {
+    const request=++shiftRequest.current;
     if (!activeRegister?.id || !isAuthenticated) {
       setActiveShift(null);
       return;
@@ -107,6 +124,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
     try {
       const res = await api.shifts.list({ registerId: activeRegister.id, status: 'open' });
+      if(request!==shiftRequest.current)return;
       if (res.data && res.data.length > 0) {
         setActiveShift(res.data[0]);
       } else {
@@ -114,21 +132,21 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       }
     } catch (err) {
       console.error('Error fetching active shift:', err);
-      setActiveShift(null);
+      if(request===shiftRequest.current)setActiveShift(null);
     }
   }, [activeRegister, isAuthenticated]);
 
+  const invalidateStores=useCallback(()=>{storeRequest.current++;shiftRequest.current++;},[]);
+  const invalidateShift=useCallback(()=>{shiftRequest.current++;},[]);
   useEffect(() => {
-    if (isAuthenticated && organization?.id) {
-      void Promise.resolve().then(refreshStores);
-    }
-  }, [isAuthenticated, organization?.id, refreshStores]);
+    void Promise.resolve().then(refreshStores);
+    return invalidateStores;
+  }, [isAuthenticated, organization?.id, refreshStores, invalidateStores]);
 
   useEffect(() => {
-    if (activeRegister?.id) {
-      void Promise.resolve().then(refreshShift);
-    }
-  }, [activeRegister?.id, refreshShift]);
+    void Promise.resolve().then(refreshShift);
+    return invalidateShift;
+  }, [activeRegister?.id, refreshShift, invalidateShift]);
 
   return (
     <OrganizationContext.Provider

@@ -101,7 +101,7 @@ export interface InventoryBalance {
   store?: Store;
 }
 
-export type DocumentType = 'purchase' | 'adjustment' | 'transfer_out' | 'transfer_in' | 'return_in' | 'reversal';
+export type DocumentType = 'purchase' | 'opening' | 'adjustment' | 'transfer_out' | 'transfer_in' | 'return_in' | 'reversal';
 export type DocumentStatus = 'draft' | 'confirmed';
 
 export interface StockDocumentItem {

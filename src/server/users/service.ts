@@ -28,16 +28,46 @@ export async function updateMember(context:TokenPayload,id:string,input:z.infer<
  })
 }
 export async function transferOwnership(context:TokenPayload,targetId:string) {
- if (context.role!=='owner') throw new AccessError(403,'FORBIDDEN')
+ if(context.role!=='owner')throw new AccessError(403,'FORBIDDEN')
  return prisma.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
   await assertLiveContext(tx,context)
   const target=await tx.organizationUser.findFirst({where:{id:targetId,organizationId:context.organizationId,isActive:true,user:{isActive:true}}})
-  if (!target || target.userId===context.userId) throw new AccessError(400,'INVALID_TARGET')
-  await tx.organizationUser.update({where:{id:target.id},data:{role:'owner'}})
-  await tx.organizationUser.update({where:{id:context.organizationUserId},data:{role:'admin'}})
-  await tx.session.updateMany({where:{organizationId:context.organizationId,userId:{in:[context.userId,target.userId]},revokedAt:null},data:{revokedAt:new Date()}})
-  await audit(tx,context,'Organization',context.organizationId,'ownership_transferred',{targetMembershipId:target.id})
-  return {organizationId:context.organizationId,newOwnerMembershipId:target.id}
+  if(!target||target.userId===context.userId)throw new AccessError(400,'INVALID_TARGET')
+  await tx.ownershipTransfer.updateMany({where:{organizationId:context.organizationId,state:'pending',expiresAt:{lte:new Date()}},data:{state:'expired'}})
+  const pending=await tx.ownershipTransfer.findFirst({where:{organizationId:context.organizationId,state:'pending'}})
+  if(pending){
+   if(pending.fromMembershipId===context.organizationUserId&&pending.toMembershipId===targetId)return pending
+   throw new AccessError(409,'TRANSFER_PENDING','Avval mavjud egalik so‘rovini bekor qiling')
+  }
+  const request=await tx.ownershipTransfer.create({data:{organizationId:context.organizationId,fromMembershipId:context.organizationUserId,toMembershipId:targetId,expiresAt:new Date(Date.now()+24*3600000)}})
+  await audit(tx,context,'OwnershipTransfer',request.id,'ownership_requested',{targetMembershipId:targetId})
+  return request
+ })
+}
+export async function respondOwnership(context:TokenPayload,id:string,action:'accept'|'cancel'){
+ return prisma.$transaction(async tx=>{
+  await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
+  await assertLiveContext(tx,context)
+  const request=await tx.ownershipTransfer.findFirst({where:{id,organizationId:context.organizationId}})
+  if(!request||![request.fromMembershipId,request.toMembershipId].includes(context.organizationUserId))throw new AccessError(404,'NOT_FOUND')
+  if(action==='accept'&&request.toMembershipId!==context.organizationUserId)throw new AccessError(403,'RECIPIENT_REQUIRED')
+  if(request.state===(action==='accept'?'accepted':'cancelled'))return {request,token:null}
+  if(request.state!=='pending'||request.expiresAt<=new Date())throw new AccessError(409,'TRANSFER_EXPIRED')
+  if(action==='cancel'){
+   const cancelled=await tx.ownershipTransfer.update({where:{id},data:{state:'cancelled'}})
+   await audit(tx,context,'OwnershipTransfer',id,'ownership_cancelled',{})
+   return {request:cancelled,token:null}
+  }
+  const from=await tx.organizationUser.findFirst({where:{id:request.fromMembershipId,organizationId:context.organizationId,isActive:true,role:'owner',user:{isActive:true}}})
+  if(!from)throw new AccessError(409,'OWNER_CHANGED')
+  await tx.organizationUser.update({where:{id:request.toMembershipId},data:{role:'owner'}})
+  await tx.organizationUser.update({where:{id:from.id},data:{role:'admin'}})
+  await tx.session.updateMany({where:{organizationId:context.organizationId,userId:{in:[context.userId,from.userId]},revokedAt:null},data:{revokedAt:new Date()}})
+  const accepted=await tx.ownershipTransfer.update({where:{id},data:{state:'accepted',acceptedAt:new Date()}})
+  const {createSession}=await import('../auth/session')
+  const token=await createSession(tx,context.userId,context.organizationId)
+  await audit(tx,context,'OwnershipTransfer',id,'ownership_transferred',{fromMembershipId:from.id,targetMembershipId:request.toMembershipId})
+  return {request:accepted,token}
  })
 }

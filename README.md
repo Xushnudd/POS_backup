@@ -1030,3 +1030,15 @@ Natijasi noma’lum savdoda “Natijani tekshirish” asl server yozuvini topadi
 Deploymentdagi yangi additive migratsiyalar: `202610060022_cash_tender`, `202610060023_sale_metadata`; jami24. Existing `npm run db:migrate`ni staging/backup protokoli bilan alohida qo‘llang; build migratsiyani almashtirmaydi. Yangi ilova readiness oxirgi schema contract tayyor bo‘lmaguncha503. Lokal testlarda real biznes DBga tegilmadi.
 
 Keyingi10 band qabul qilindi, jami done40→50. Final real PostgreSQL83/83, unit15/15, HTTPS Chromium5/5; typecheck/lint/build, fresh/legacy24 migration va encrypted backup/restore o‘tdi. Individual qabul/versiya dalili tasks/EXECUTION_STATUS.md oxirgi bo‘limida.
+
+### Boshlang‘ich qoldiq, etiketka va egalikni topshirish
+
+Ombor hujjatlari oynasida **Boshlang‘ich qoldiq** turi mavjud: yangi filial/mahsulotning avvalgi harakatsiz qoldig‘ini sabab bilan kiriting, keyin manager tasdiqlaydi. Keyingi sanash farqi uchun **Tuzatish** tanlang: manfiy miqdor kamomad, musbat miqdor qo‘shimcha qoldiq. Sabab majburiy, nol/takror mahsulot qatori rad. Tasdiqlangan harakatni almashtirib o‘chirish o‘rniga qarshi hujjat ishlatiladi. Eski movement jurnalini bazaning o‘zi ham o‘zgartirishdan himoyalaydi.
+
+Mahsulot tafsilotidagi barkodlar oynasida **Ichki barkod yaratish** va **Etiketka** bor. Nusxa soni 1–100; yuklangan HTML faylni brauzerda ochib print/PDF qilish mumkin. Andoza 80×35 mm, Code128 encoder bwip-js; decoder testlari yetakchi nollar va ASCII belgilar saqlanishini tekshiradi. Printer, uning transporti va fizik bosma sifati hali tasdiqlangan hardware integratsiyasi sifatida va’da qilinmaydi.
+
+Sozlamalar → Xodimlarda **Egalikni topshirish** qabul qiluvchiga 24 soatlik so‘rov yuboradi. So‘rov yuborilganda rollar o‘zgarmaydi. Qabul qiluvchi headerdagi so‘rovni qabul qilgandan keyin yangi owner, avvalgi owner admin bo‘ladi. Ikki accountning eski biznes sessiyalari bekor qilinadi; yangi owner davom etish uchun yangilangan cookie oladi. So‘rovni ikki ishtirokchi ham bekor qilishi mumkin. Oxirgi ownerni bloklash/demote qilish himoyasi saqlangan.
+
+Biznes almashtirish savat/filial/terminal/smena holatlarini joriy biznesga moslaydi. A biznesning lokal savati B biznesga o‘tmaydi; A ga qaytganda tiklanadi. Narx, stock va vakolat serverda jonli qayta tekshiriladi, API javoblari `private, no-store`.
+
+Yangi additive/versioned migratsiyalar 024 va 025, jami26. Builddan alohida `npm run db:migrate` staging/backup protokoli bilan bajariladi; readiness025siz503. O‘zgarishlar faqat izolyatsiyalangan local test bazasida tekshirildi, productionga deploy qilinmadi. +50 vazifa so‘rovi hali yakunlangan deb ko‘rsatilmaydi; individual qabul holati tasks/EXECUTION_STATUS.mdda.

@@ -166,23 +166,24 @@ export default function InventoryPage() {
       notifyError('Kamida bitta mahsulot qo\'shing');
       return;
     }
-    if (docItems.some((item) => !item.productId || item.quantity <= 0 || item.unitCost < 0)) {
-      notifyError('Har bir mahsulot uchun miqdor 0 dan katta, tannarx esa manfiy bo\'lmagan son bo\'lishi kerak');
+    if (docItems.some((item) => !item.productId || (item.quantity===0||(docType!=='adjustment'&&item.quantity<0)) || item.unitCost < 0)) {
+      notifyError('Miqdor nol bo‘lmasin; faqat tuzatishda manfiy miqdor mumkin. Tannarx manfiy bo‘lmasin');
       return;
     }
 
+    if(['opening','adjustment'].includes(docType)&&docNote.trim().length<3){notifyError('Boshlang‘ich qoldiq/tuzatish uchun sabab kiriting');return;}
     setIsSavingDoc(true);
     try {
       await api.stockDocuments.create({
         organizationId: organization.id,
         storeId: activeStore.id,
         documentType: docType,
-        documentNo: `DOC-${Date.now().toString().slice(-6)}`,
+        documentNo: `DOC-${crypto.randomUUID()}`,
         supplierId: docSupplierId || undefined,
         note: docNote || undefined,
         items: docItems.map((item) => ({
           productId: item.productId,
-          quantity: Number(item.quantity) || 1,
+          quantity: Number(item.quantity),
           unitCost: Number(item.unitCost) || 0,
         })),
       });
@@ -273,7 +274,7 @@ export default function InventoryPage() {
 
       <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();setFilters(Object.fromEntries(Object.entries(draftFilters).filter(([,value])=>value.trim()).map(([key,value])=>[key,value.trim()])));}}>
         <Input label={activeTab==='balances'?'Mahsulot, SKU yoki barkod':'Hujjat raqamini qidirish'} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
-        {activeTab==='documents'&&<><Input label="Hujjat davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Hujjat davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label="Hujjat turi filtri" value={draftFilters.documentType} options={[{value:'',label:'Barchasi'},{value:'purchase',label:'Xarid'},{value:'adjustment',label:'Tuzatish'},{value:'reversal',label:'Qarshi hujjat'},{value:'transfer_out',label:'Transfer chiqimi'},{value:'transfer_in',label:'Transfer kirimi'},{value:'return_in',label:'Qaytarish kirimi'}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label="Hujjat holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'confirmed',label:'Tasdiqlangan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label="Supplier ID filtri" value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
+        {activeTab==='documents'&&<><Input label="Hujjat davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Hujjat davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label="Hujjat turi filtri" value={draftFilters.documentType} options={[{value:'',label:'Barchasi'},{value:'purchase',label:'Xarid'},{value:'opening',label:'Boshlang‘ich qoldiq'},{value:'adjustment',label:'Tuzatish'},{value:'reversal',label:'Qarshi hujjat'},{value:'transfer_out',label:'Transfer chiqimi'},{value:'transfer_in',label:'Transfer kirimi'},{value:'return_in',label:'Qaytarish kirimi'}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label="Hujjat holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'confirmed',label:'Tasdiqlangan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label="Supplier ID filtri" value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
         <Button type="submit" disabled={isLoading}>Filtrlash</Button>
       </form>
       {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{})}:filters)}}/>}
@@ -461,6 +462,7 @@ export default function InventoryPage() {
               onChange={(e) => setDocType(e.target.value)}
               options={[
                 { value: 'purchase', label: 'Kirim (Xarid)' },
+                { value: 'opening', label: 'Boshlang‘ich qoldiq' },
                 { value: 'adjustment', label: 'Tuzatish (Inventarizatsiya)' },
               ]}
             />
@@ -527,7 +529,7 @@ export default function InventoryPage() {
                     <input
                       type="number"
                       placeholder="Miqdor"
-                      min="0.1"
+                      min={docType==='adjustment'?undefined:'0.000001'}
                       step="0.1"
                       value={item.quantity}
                       onChange={(e) => {

@@ -117,7 +117,14 @@ class ApiClient {
     create: (data:{code:string;name:string;precision:number}) => this.request<CatalogUnit>('/units',{method:'POST',body:JSON.stringify(data)}),
     update: (id:string,data:{name?:string;precision?:number;isActive?:boolean}) => this.request<CatalogUnit>(`/units/${id}`,{method:'PUT',body:JSON.stringify(data)}),
   };
+  ownership = {
+    list: () => this.request<Array<{id:string;incoming:boolean;expiresAt:string}>>('/ownership-transfers'),
+    request: (organizationId:string,targetMembershipId:string) => this.request(`/organizations/${organizationId}/transfer-ownership`,{method:'POST',body:JSON.stringify({targetMembershipId})}),
+    respond: (id:string,action:'accept'|'cancel') => this.request(`/ownership-transfers/${id}`,{method:'POST',body:JSON.stringify({action})}),
+  };
   barcodes = {
+    generate: (id:string,operationId:string) => this.request<ProductBarcode>(`/products/${id}/barcodes/generate`,{method:'POST',body:JSON.stringify({operationId})}),
+    labels: (id:string,barcodeId:string,copies:number) => this.request<{filename:string;content:string}>(`/products/${id}/barcodes/labels?${new URLSearchParams({barcodeId,copies:String(copies)})}`),
     list: (id:string,params:Record<string,string>={}) => this.request<ProductBarcode[]>(`/products/${id}/barcodes?${new URLSearchParams(params)}`),
     add: (id:string,value:string) => this.request<ProductBarcode>(`/products/${id}/barcodes`,{method:'POST',body:JSON.stringify({value})}),
     remove: (id:string,barcodeId:string) => this.request(`/products/${id}/barcodes/${barcodeId}`,{method:'DELETE',body:'{}'}),

@@ -473,6 +473,7 @@ export default function SettingsPage() {
                           : u.role==='owner'?'Barcha do‘konlar':'Filial biriktirilmagan'}
                       </td>
                       <td className="py-3 px-4"><div className="flex gap-2">
+                        {u.isActive&&<Button size="sm" onClick={async()=>{if(!organization?.id||!window.confirm(`${u.user?.fullName} ga egalik so‘rovini yuborasizmi? Qabul qilganda siz administrator bo‘lasiz.`))return;try{await api.ownership.request(organization.id,u.id);notifySuccess('Qabul qiluvchi tasdig‘i kutilmoqda');}catch(error){notifyError(error instanceof Error?error.message:'So‘rov yuborilmadi');}}}>Egalikni topshirish</Button>}
                         <Button size="sm" onClick={()=>{setEditingMember(u);setMemberRole(u.role);setMemberStores(u.stores?.map(store=>store.id)??[]);}}>Vakolat</Button>
                         <Button size="sm" onClick={async()=>{
                           if (!organization?.id) return;

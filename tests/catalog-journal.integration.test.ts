@@ -114,7 +114,7 @@ test('Print requests are idempotent under concurrency, reject altered intent and
 })
 test('Supplier, journal, shift and audit exports reject more than 10000 rows rather than truncating',async()=>{
  const a=await fixture();await prisma.supplier.createMany({data:Array.from({length:10001},()=>({organizationId:a.org,name:'Cap supplier'}))})
- await prisma.inventoryMovement.createMany({data:Array.from({length:10001},()=>({organizationId:a.org,storeId:a.store.id,productId:a.product.id,movementType:'adjustment',quantityDelta:0,unitCost:0,sourceType:'cap',sourceId:randomUUID(),createdBy:a.data.user.id}))})
+ await prisma.inventoryMovement.createMany({data:Array.from({length:10001},()=>({organizationId:a.org,storeId:a.store.id,productId:a.product.id,movementType:'adjustment',quantityDelta:1,unitCost:0,sourceType:'cap',sourceId:randomUUID(),createdBy:a.data.user.id}))})
  await prisma.shift.createMany({data:Array.from({length:10001},()=>({registerId:a.terminal.id,organizationUserId:a.data.user.organizationUserId,openingCash:0,status:'closed',closedAt:new Date(),expectedCash:0,countedCash:0,cashDifference:0}))})
  await prisma.auditLog.createMany({data:Array.from({length:10001},()=>({organizationId:a.org,entityType:'Cap',entityId:randomUUID(),action:'cap'}))})
  for(const [handler,path] of [[suppliers,`/suppliers?organizationId=${a.org}&format=csv`],[movements,`/inventory/movements?organizationId=${a.org}&format=csv`],[shifts,'/shifts?format=csv'],[audit,'/audit?format=csv&entityType=Cap']] as const)assert.equal((await handler(req(path,a.cookie),undefined)).status,413)

@@ -33,6 +33,7 @@ export function assertRoutePermission(path: string, method: string, role: string
   const read = method === 'GET' || method === 'HEAD'
   if (area === 'organizations' && !path.endsWith('/switch') && !read && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
   if (area === 'organizations' && path.includes('/users') && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
+  if(area==='ownership-transfers' && (read || (method==='POST' && /^\/api\/ownership-transfers\/[0-9a-f-]{36}$/i.test(path))))return
   if (role === 'cashier') {
     const allowed = ['sales', 'shifts', 'products', 'categories', 'customers', 'stores', 'auth', 'operations', 'sync']
     if (area === 'organizations' && (read || path.endsWith('/switch'))) return

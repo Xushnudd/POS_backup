@@ -536,7 +536,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### SEC-01 — tashkilot va do‘kon chegaralari [P0]
 
-- [ ] **SEC-01.01** — Tashkilotni faqat so‘rov tanasidan emas, haqiqiy sessiya va faol a’zolikdan aniqlash.
+- [x] **SEC-01.01** — Tashkilotni faqat so‘rov tanasidan emas, haqiqiy sessiya va faol a’zolikdan aniqlash.
 
   **Texnologiya:** Next.js server DAL, PostgreSQL Session/OrganizationUser, Prisma.
 
@@ -549,6 +549,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Body/query tenantini almashtirish boshqa tenantga kirish bermaydi; sessiyasiz so‘rov rad etiladi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `SEC-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -822,7 +824,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `USR-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **USR-01.02** — Oxirgi egani o‘chirish/bloklashga yo‘l qo‘ymaslik; egalikni topshirish jarayoni.
+- [x] **USR-01.02** — Oxirgi egani o‘chirish/bloklashga yo‘l qo‘ymaslik; egalikni topshirish jarayoni.
 
   **Texnologiya:** PostgreSQL transaction va row lock, Prisma.
 
@@ -836,9 +838,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Oxirgi owner bloklash/o‘chirish parallel so‘rovda ham rad; ownership transfer atomik.
 
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
+
   **Dalil:** `USR-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **USR-01.03** — Bir foydalanuvchining bir nechta biznesi orasida vakolat bilan almashish.
+- [x] **USR-01.03** — Bir foydalanuvchining bir nechta biznesi orasida vakolat bilan almashish.
 
   **Texnologiya:** React Context, Next.js session DAL, Prisma membership.
 
@@ -851,6 +855,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Biznes almashtirish faqat faol membership bilan; oldingi tenant state va cache ko‘rinmaydi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `USR-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1362,7 +1368,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.02** — Bir mahsulot uchun bir nechta barkod; barkod yaratish va etiketka chiqarish.
+- [x] **CAT-01.02** — Bir mahsulot uchun bir nechta barkod; barkod yaratish va etiketka chiqarish.
 
   **Texnologiya:** Prisma ProductBarcode, ZXing decode, T02 bwip-js encode.
 
@@ -1375,6 +1381,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Bitta variantning ko‘p kodi qidiriladi; tenant duplicate rad; bosma kod skanerda originalga teng.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `CAT-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1496,7 +1504,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### INV-01 — qoldiq va harakatlarning yaxlitligi [P0]
 
-- [ ] **INV-01.01** — Har bir o‘zgarish uchun hujjat va ombor harakati; bevosita qoldiqni almashtirishni taqiqlash.
+- [x] **INV-01.01** — Har bir o‘zgarish uchun hujjat va ombor harakati; bevosita qoldiqni almashtirishni taqiqlash.
 
   **Texnologiya:** Prisma stock service, PostgreSQL ledger.
 
@@ -1510,9 +1518,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Har stock o‘zgarishi source movementga ega; to‘g‘ridan quantity edit API orqali rad.
 
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
+
   **Dalil:** `INV-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-01.02** — Boshlang‘ich qoldiqni hujjat bilan kiritish; musbat/manfiy tuzatish, sabab va tasdiq.
+- [x] **INV-01.02** — Boshlang‘ich qoldiqni hujjat bilan kiritish; musbat/manfiy tuzatish, sabab va tasdiq.
 
   **Texnologiya:** React stock forms, Zod signed adjustment, Prisma transaction.
 
@@ -1525,6 +1535,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Opening/positive/negative adjustment source/sabab/approval bilan; journal va balance mos.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `INV-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3455,7 +3467,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-01.02** — Builddan `db push`ni chiqarish; versiyalangan migratsiyani alohida chiqarish bosqichida bajarish.
+- [x] **OPS-01.02** — Builddan `db push`ni chiqarish; versiyalangan migratsiyani alohida chiqarish bosqichida bajarish.
 
   **Texnologiya:** Prisma Migrate, Next.js build, Docker deploy job.
 
@@ -3468,6 +3480,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Build DBga schema mutatsiyasi qilmaydi; deploy faqat versioned migrationni alohida qadamda bajaradi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `OPS-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3831,7 +3845,7 @@ Boshlang‘ich muhandislik maqsadlari: oylik mavjudlik **99,9%**, backupdagi rux
 
   **Dalil:** `OPS-04.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-04.05** — Hisob/ruxsat ma’lumotini eskirgan keshdan olish xavfini boshqarish.
+- [x] **OPS-04.05** — Hisob/ruxsat ma’lumotini eskirgan keshdan olish xavfini boshqarish.
 
   **Texnologiya:** Next.js scoped cache, Prisma version fields.
 
@@ -3844,6 +3858,8 @@ Boshlang‘ich muhandislik maqsadlari: oylik mavjudlik **99,9%**, backupdagi rux
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Price/stock/permission changes cache invalidation yoki bypassdan keyin darhol amalda tekshiriladi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `OPS-04.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3935,7 +3951,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Dalil:** `QA-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **QA-01.05** — Parallel so‘rov va takror amal testlari.
+- [x] **QA-01.05** — Parallel so‘rov va takror amal testlari.
 
   **Texnologiya:** Node Promise.all concurrent requests, PostgreSQL real constraints.
 
@@ -3948,6 +3964,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Parallel last-stock/last-owner/shift/replay testlari deterministic invariant assertions bilan o‘tadi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija, test va versiya dalili [EXECUTION_STATUS.md — +50 checkpoint](EXECUTION_STATUS.md#50-sorovi--1-checkpoint-2026-10-06) bo‘limida.
 
   **Dalil:** `QA-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

@@ -165,7 +165,7 @@ test('DB rejects return items linked to a different sale and debt linked to a di
 
 test('Invitation is single-use, revocable, expires and cannot take over an existing account',async()=>{
  const {createInvitation,acceptInvitation,revokeInvitation}=await import('@/server/users/invitations')
- const {updateMember,transferOwnership}=await import('@/server/users/service')
+ const {updateMember,transferOwnership,respondOwnership}=await import('@/server/users/service')
  const f=await fixture(),another=await fixture()
  await assert.rejects(()=>updateMember(f.context,f.context.organizationUserId,{isActive:false}),/Oxirgi/)
  await assert.rejects(()=>createInvitation(f.context,{phone:another.user.phone,role:'cashier',storeIds:[another.store.id]}))
@@ -188,7 +188,10 @@ test('Invitation is single-use, revocable, expires and cannot take over an exist
  const staff=await prisma.organizationUser.findUniqueOrThrow({where:{id:newMember.membershipId}});users.push(staff.userId)
  const {verifyPassword}=await import('@/lib/auth')
  assert.equal(await verifyPassword('test-only-password',(await prisma.user.findUniqueOrThrow({where:{id:staff.userId}})).passwordHash),true)
- await transferOwnership(f.context,result.membershipId)
+ const transfer=await transferOwnership(f.context,result.membershipId)
+ assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:result.membershipId}})).role,'cashier')
+ const targetSession=await prisma.session.create({data:{tokenHash:randomUUID(),organizationId:f.org.id,userId:another.user.id,expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}})
+ await respondOwnership({...another.context,organizationId:f.org.id,organizationUserId:result.membershipId,role:'cashier',storeIds:[f.store.id],sessionId:targetSession.id},transfer.id,'accept')
  assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:result.membershipId}})).role,'owner')
  assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:f.context.organizationUserId}})).role,'admin')
  assert.notEqual((await prisma.session.findUniqueOrThrow({where:{id:f.context.sessionId}})).revokedAt,null)

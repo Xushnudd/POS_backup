@@ -17,6 +17,7 @@ import {
   faRightFromBracket,
   faBolt,
 } from '@fortawesome/free-solid-svg-icons';
+import OwnershipRequests from '@/components/users/OwnershipRequests';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 
@@ -58,6 +59,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200/80 px-4 lg:px-6 h-16 flex items-center justify-between shadow-2xs">
+      <OwnershipRequests organizationId={organization?.id}/>
       {/* Left: Mobile hamburger & Store / Register info */}
       <div className="flex items-center gap-3">
         <button

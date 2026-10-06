@@ -14,16 +14,16 @@ const createStockDocumentSchema = z.object({
   organizationId: z.string().uuid(),
   storeId: z.string().uuid(),
   supplierId: z.string().uuid().optional(),
-  documentType: z.enum(['purchase', 'adjustment', 'transfer_out', 'transfer_in', 'return_in']),
+  documentType: z.enum(['purchase', 'opening', 'adjustment', 'transfer_out', 'transfer_in', 'return_in']),
   documentNo: z.string().trim().min(1),
-  note: z.string().max(2000).optional(),
+  note: z.string().trim().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
     quantity: signedQuantitySchema,
     unitCost: nonnegativeQuantitySchema,
-    note: z.string().max(2000).optional(),
+    note: z.string().trim().max(2000).optional(),
   })).min(1).max(500),
-}).refine(doc => doc.documentType === "adjustment" || doc.items.every(item => Number(item.quantity) > 0), "Kirim miqdori musbat bo‘lishi kerak")
+}).refine(doc => doc.documentType === "adjustment" || doc.items.every(item => Number(item.quantity) > 0), "Kirim miqdori musbat bo‘lishi kerak").refine(doc=>!['opening','adjustment'].includes(doc.documentType)||(doc.note?.length??0)>=3,'Boshlang‘ich qoldiq/tuzatish sababi kamida3 belgi bo‘lishi kerak').refine(doc=>new Set(doc.items.map(item=>item.productId)).size===doc.items.length,'Takror mahsulot qatorlari mumkin emas')
 
 async function handleGET(request: NextRequest) {
   try {

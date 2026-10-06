@@ -5,7 +5,7 @@ import { searchTerm } from '../catalog/queries'
 export function documentFilters(q:URLSearchParams,timezone:string):Prisma.StockDocumentWhereInput{
  const where:Prisma.StockDocumentWhereInput={}
  const type=q.get('documentType'),status=q.get('status'),search=searchTerm(q)
- if(type&&!['purchase','adjustment','transfer_out','transfer_in','return_in','reversal'].includes(type))throw new AccessError(400,'INVALID_DOCUMENT_TYPE')
+ if(type&&!['purchase','opening','adjustment','transfer_out','transfer_in','return_in','reversal'].includes(type))throw new AccessError(400,'INVALID_DOCUMENT_TYPE')
  if(status&&!['draft','confirmed'].includes(status))throw new AccessError(400,'INVALID_STATUS')
  if(type)where.documentType=type
  if(status)where.status=status

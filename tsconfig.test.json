@@ -7,7 +7,15 @@
     "incremental": false,
     "outDir": ".test-build",
     "rootDir": ".",
-    "plugins": []
+    "plugins": [],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "bwip-js/node": [
+        "./node_modules/bwip-js/dist/bwip-js-node.d.ts"
+      ]
+    }
   },
   "include": [
     "tests/**/*.ts",
