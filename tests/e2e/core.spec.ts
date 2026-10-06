@@ -289,6 +289,9 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await expect(page.getByText('Damaged refund recovery',{exact:false})).toBeVisible()
  await expect(page.getByText('Brak — sotiladigan qoldiqqa qo‘shilmagan',{exact:false})).toBeVisible()
  await expect(page.getByText('Qiymat qaytarilgan tovar summasi; uning hammasi naqd refund degani emas.',{exact:true})).toBeVisible()
+ const returnDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Qaytarma chek HTML yuklash',exact:true}).click();const returnHtml=await returnDownload;
+ const returnMarkup=await (await import('node:fs/promises')).readFile((await returnHtml.path())!,'utf8');expect(returnMarkup).toContain('QAYTARMA CHEK — NUSXA');expect(returnMarkup).toContain(sale.id);expect(returnMarkup).toContain('Damaged refund recovery');expect(returnMarkup).toContain('tasdiq: owner');
+
  await page.getByRole('link',{name:'Audit tarixi',exact:true}).click()
  await expect(page.getByRole('heading',{name:'Audit tarixi',exact:true})).toBeVisible()
  await page.getByLabel('Resurs turi (masalan SaleReturn)',{exact:true}).fill('SaleReturn')
@@ -410,4 +413,39 @@ test('Production HTTPS: catalog management, supplier purchase history and comple
  const membership=await db.organizationUser.findFirstOrThrow({where:{organizationId:org,userId}});await db.userStore.create({data:{organizationUserId:membership.id,storeId:destination.id}})
  await db.stockTransfer.createMany({data:Array.from({length:25},()=>({organizationId:org,fromStoreId:store.id,toStoreId:destination.id,createdBy:userId,status:'draft'}))})
  await page.goto('/inventory/transfers');await page.getByLabel('Jo‘natuvchi filtri',{exact:true}).selectOption(store.id);await page.getByLabel('Qabul qiluvchi filtri',{exact:true}).selectOption(destination.id);await page.getByLabel('Transfer holati filtri',{exact:true}).selectOption('draft');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByText('1 / 2',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Keyingi',exact:true}).click();await expect(page.getByText('2 / 2',{exact:true})).toBeVisible();const transferCsv=await downloadText('Transferlarni CSV yuklash');expect((transferCsv.match(/^"[0-9a-f-]{36}",/gm)??[]).length).toBe(25)
+})
+
+test('Production HTTPS: durable shift correction and frozen report pagination/export',async({page})=>{
+ const phone='998'+Date.now(),password='test-only-password';phones.push(phone)
+ await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Finance Browser');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Finance browser');await page.getByLabel(/Parol \(/).fill(password);await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),headers={Origin:'https://localhost:3100'}
+ const open=async()=>{const response=await page.request.post('/api/shifts',{headers,data:{registerId:register.id,organizationUserId:me.user.organizationUserId,openingCash:0,operationId:randomUUID()}});expect(response.ok()).toBe(true);return (await response.json()).data}
+ const original=await open();expect((await page.request.post(`/api/shifts/${original.id}`,{headers,data:{countedCash:0}})).ok()).toBe(true)
+ const posting=await open();await page.goto('/shifts')
+ await page.getByLabel('Original yopilgan smena',{exact:true}).selectOption(original.id);await page.getByLabel('Tuzatish summasi',{exact:true}).fill('3.50');await page.getByLabel('Tuzatish sababi',{exact:true}).fill('Browser count correction')
+ let originalInput='',retryInput=''
+ await page.route('**/api/shifts/*/corrections',async route=>{if(route.request().method()==='POST'){originalInput=route.request().postData()??'';await route.fetch();await route.abort()}else await route.continue()})
+ await page.getByRole('button',{name:'Tuzatishni yozish',exact:true}).click();await expect.poll(()=>db.shiftCorrection.count({where:{originalShiftId:original.id}})).toBe(1)
+ await page.reload();await expect(page.getByRole('button',{name:'Tuzatish natijasini tekshirish',exact:true})).toBeVisible();await expect(page.getByLabel('Tuzatish summasi',{exact:true})).toBeDisabled()
+ await page.unroute('**/api/shifts/*/corrections');await page.route('**/api/shifts/*/corrections',async route=>{if(route.request().method()==='POST')retryInput=route.request().postData()??'';await route.continue()})
+ await page.getByRole('button',{name:'Tuzatish natijasini tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Tuzatishni yozish',exact:true})).toBeVisible();expect(JSON.parse(retryInput)).toEqual(JSON.parse(originalInput))
+ expect(await db.shiftCorrection.count({where:{originalShiftId:original.id}})).toBe(1);expect((await db.shift.findUniqueOrThrow({where:{id:original.id}})).expectedCash?.toString()).toBe('0')
+ expect((await page.request.post(`/api/shifts/${posting.id}`,{headers,data:{countedCash:'3.50'}})).ok()).toBe(true);expect((await db.shift.findUniqueOrThrow({where:{id:posting.id}})).expectedCash?.toString()).toBe('3.5')
+ await page.unroute('**/api/shifts/*/corrections');const current=await open()
+ const product=await db.product.create({data:{organizationId:me.organization.id,name:'Report product',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}})
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:100}})
+ const ids=Array.from({length:61},()=>randomUUID()),now=new Date()
+ await db.sale.createMany({data:ids.map(id=>({id,organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:current.id,cashierId:me.user.id,receiptNo:id,subtotal:10,totalAmount:10,completedAt:now}))})
+ await db.saleItem.createMany({data:ids.map(saleId=>({saleId,productId:product.id,productName:'Frozen report',sku:'FROZEN',unit:'dona',quantity:1,unitPrice:10,lineTotal:10,unitCost:4}))})
+ await db.payment.createMany({data:ids.map(saleId=>({organizationId:me.organization.id,storeId:store.id,shiftId:current.id,saleId,paymentType:'cash',direction:'in',amount:10,receivedBy:me.user.id,paidAt:now}))})
+ await db.sale.updateMany({where:{id:{in:ids}},data:{status:'completed'}})
+ const initial=page.waitForResponse(response=>response.url().includes('/api/reports/sales?')&&response.request().method()==='GET');await page.goto('/reports');const report=(await (await initial).json());expect(report.pagination.total).toBe(61)
+ await expect(page.getByText('61 ta',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Keyingi sahifa',exact:true}).click();await expect(page.getByText('2 / 2; jami 61',{exact:true})).toBeVisible();await expect(page.getByText('61 ta',{exact:true})).toBeVisible()
+ const draftResponse=await page.request.post('/api/sales',{headers,data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:current.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}});expect(draftResponse.ok()).toBe(true);const sale=(await draftResponse.json()).data;expect((await page.request.post(`/api/sales/${sale.id}/complete`,{headers,data:{payments:[{paymentType:'cash',amount:10}]}})).ok()).toBe(true)
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'To‘liq hisobotni CSV yuklash',exact:true}).click();const file=await download,content=await (await import('node:fs/promises')).readFile((await file.path())!,'utf8');expect((content.match(/^"sale",/gm)??[]).length).toBe(61);expect(content).toContain('"Savdolar soni","61"');expect(content).toContain('"Yalpi savdo","610.00"')
+ const params=new URLSearchParams({organizationId:me.organization.id,storeId:store.id,startDate:report.meta.startDate,endDate:report.meta.endDate,asOf:report.meta.asOf})
+ const dash=await (await page.request.get('/api/reports/dashboard?'+params)).json();expect(dash.data.totalSales).toBe(61);expect(dash.data.totalRevenue).toBe(report.summary.totalRevenue)
+ await page.getByRole('button',{name:'Yangilash',exact:true}).click();await expect(page.getByText('62 ta',{exact:true})).toBeVisible()
+ await page.goto('/dashboard');await page.getByRole('link',{name:'Shu holatdagi jadval',exact:true}).click();await expect(page).toHaveURL(/\/reports\?startDate=/);await expect(page.getByText('62 ta',{exact:true})).toBeVisible()
 })

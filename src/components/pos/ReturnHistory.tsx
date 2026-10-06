@@ -24,9 +24,17 @@ export default function ReturnHistory({saleId,timezone,version}:{saleId:string;t
   {busy?<p>Yuklanmoqda...</p>:error?<div role="alert">{error} <Button onClick={()=>setRetry(value=>value+1)}>Qayta yuklash</Button></div>:rows.length===0?<p>Qaytarish qayd etilmagan.</p>:rows.map(row=><article key={row.id} className="border-t py-3 space-y-2">
    <p className="font-semibold">{row.returnReceiptNo} — {formatMoney(row.refundAmount)}</p>
    <p className="text-xs">{new Date(row.returnedAt).toLocaleString('uz-UZ',{timeZone:timezone})} · {row.processor.fullName} · {row.status}</p>
+   <p className="text-xs">{row.approvedAt?`Tasdiq: ${row.processor.fullName} (${row.approvedRole}), ${new Date(row.approvedAt).toLocaleString('uz-UZ',{timeZone:timezone})}`:'Eski hujjat: tasdiq ma’lumoti qayd etilmagan'}</p>
+   <Button variant="outline" onClick={()=>downloadReturnReceipt(row,saleId,timezone)}>Qaytarma chek HTML yuklash</Button>
    <p className="text-sm whitespace-pre-wrap">Sabab: {row.reason??'—'}</p>
    <ul className="text-sm space-y-1">{row.items.map(item=><li key={item.id}>{item.saleItem.productName} ({item.saleItem.sku}) — {item.quantity} {item.saleItem.unit??''}; {formatMoney(item.lineTotal)}; {labels[item.disposition]??item.disposition}</li>)}</ul>
   </article>)}
   {pages>1&&<div className="flex gap-3 items-center mt-3"><Button disabled={busy||page<=1} onClick={()=>setPage(value=>value-1)}>Oldingi</Button><span>{page} / {pages}</span><Button disabled={busy||page>=pages} onClick={()=>setPage(value=>value+1)}>Keyingi</Button></div>}
  </Card>;
+}
+
+function downloadReturnReceipt(row:SaleReturnHistory,saleId:string,timezone:string){
+ const text=(value:unknown)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]!));
+ const content=`<!doctype html><html lang="uz"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>Qaytarma chek</title><style>@page{size:80mm 297mm;margin:4mm}body{font:12px system-ui;width:72mm;margin:auto;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td{border-bottom:1px dashed #999;padding:5px}h1{font-size:16px}</style></head><body><h1>QAYTARMA CHEK — NUSXA</h1><p>FISKAL EMAS. Brauzerda Ctrl+P orqali chop etish/PDF saqlash.</p><p>${text(row.returnReceiptNo)}</p><p>Original savdo: ${text(saleId)}</p><p>${text(new Date(row.returnedAt).toLocaleString('uz-UZ',{timeZone:timezone}))} (${text(timezone)})</p><p>Xodim: ${text(row.processor.fullName)}; tasdiq: ${text(row.approvedRole??'eski hujjatda noma’lum')}</p><p>Sabab: ${text(row.reason)}</p><table>${row.items.map(item=>`<tr><td>${text(item.saleItem.productName)}<br>${text(item.quantity)} ${text(item.saleItem.unit)}<br>${text(labels[item.disposition])}</td><td>${text(formatMoney(item.lineTotal))}</td></tr>`).join('')}</table><p>Qaytarilgan tovar qiymati: ${text(formatMoney(row.refundAmount))}</p><p>Bu qiymatning hammasi naqd refund degani emas; nasiya qismi qarzni kamaytirishi mumkin.</p></body></html>`;
+ const url=URL.createObjectURL(new Blob([content],{type:'text/html;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download='return-'+row.id+'.html';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }

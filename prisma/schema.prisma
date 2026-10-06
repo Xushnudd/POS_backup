@@ -39,6 +39,7 @@ model Organization {
   payments         Payment[]
   discountPolicies DiscountPolicy[]
   auditLogs        AuditLog[]
+  shiftCorrections ShiftCorrection[]
 }
 
 model User {
@@ -64,6 +65,7 @@ model User {
   saleReturns             SaleReturn[] @relation("ProcessedBy")
   auditLogs               AuditLog[]
   inventoryMovements      InventoryMovement[] @relation("InventoryMovementCreator")
+  shiftCorrections        ShiftCorrection[]
 }
 
 model OrganizationUser {
@@ -337,6 +339,8 @@ model Shift {
   cashMovements    CashMovement[]
   sales            Sale[]
   payments         Payment[]
+  corrections      ShiftCorrection[] @relation("OriginalShift")
+  postedCorrections ShiftCorrection[] @relation("PostingShift")
   
   @@index([organizationUserId])
 }
@@ -352,6 +356,25 @@ model CashMovement {
   
   shift        Shift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   creator      User  @relation(fields: [createdBy], references: [id])
+  correction   ShiftCorrection?
+}
+
+model ShiftCorrection {
+  id               String @id @default(uuid())
+  organizationId   String
+  originalShiftId  String
+  postingShiftId   String
+  cashMovementId   String @unique
+  amount           Decimal @db.Decimal(14, 2)
+  reason           String
+  createdBy        String
+  createdAt        DateTime @default(now())
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  originalShift    Shift @relation("OriginalShift", fields: [originalShiftId], references: [id], onDelete: Cascade)
+  postingShift     Shift @relation("PostingShift", fields: [postingShiftId], references: [id], onDelete: Cascade)
+  cashMovement     CashMovement @relation(fields: [cashMovementId], references: [id], onDelete: Cascade)
+  creator          User @relation(fields: [createdBy], references: [id])
+  @@index([organizationId, originalShiftId, createdAt])
 }
 
 model Sale {
@@ -442,6 +465,9 @@ model SaleReturn {
   processedBy     String
   returnedAt      DateTime @default(now())
   createdAt       DateTime @default(now())
+  approvedBy      String?
+  approvedRole    String?
+  approvedAt      DateTime?
   
   sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   processor       User     @relation("ProcessedBy", fields: [processedBy], references: [id])

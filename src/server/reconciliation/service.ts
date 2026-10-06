@@ -37,7 +37,7 @@ export function discrepancyQuery(context:TokenPayload,kind:ReconciliationKind,st
  return Prisma.sql`
  WITH selected AS (SELECT sh.id,sh."openingCash",sh."expectedCash",r."storeId" FROM "Shift" sh JOIN "Register" r ON r.id=sh."registerId" JOIN "Store" st ON st.id=r."storeId" WHERE st."organizationId"=${context.organizationId} AND sh.status='closed' ${stores(context,'r',storeId)}),
  payments AS (SELECT p."shiftId",SUM(CASE WHEN p.direction='in' THEN p.amount ELSE -p.amount END) AS amount FROM "Payment" p JOIN selected s ON s.id=p."shiftId" WHERE p."paymentType"='cash' AND p.status='recorded' GROUP BY p."shiftId"),
- movements AS (SELECT m."shiftId",SUM(CASE WHEN m."movementType"='cash_in' THEN m.amount ELSE -m.amount END) AS amount FROM "CashMovement" m JOIN selected s ON s.id=m."shiftId" GROUP BY m."shiftId")
+ movements AS (SELECT m."shiftId",SUM(CASE WHEN m."movementType" IN ('cash_in','correction_in') THEN m.amount ELSE -m.amount END) AS amount FROM "CashMovement" m JOIN selected s ON s.id=m."shiftId" GROUP BY m."shiftId")
  SELECT s.id AS "shiftId",s."storeId",s."openingCash"+COALESCE(p.amount,0)+COALESCE(m.amount,0) AS expected,s."expectedCash" AS actual
  FROM selected s LEFT JOIN payments p ON p."shiftId"=s.id LEFT JOIN movements m ON m."shiftId"=s.id
  WHERE s."expectedCash" IS DISTINCT FROM s."openingCash"+COALESCE(p.amount,0)+COALESCE(m.amount,0)`

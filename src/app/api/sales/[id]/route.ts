@@ -119,6 +119,7 @@ async function handlePUT(
       await tx.$queryRaw`SELECT id FROM "Sale" WHERE id = ${id} FOR UPDATE`
       const current = await tx.sale.findUniqueOrThrow({ where: { id, AND: tenantScope("Sale", payload) }, include: { items: true } })
       if (current.status !== 'draft') throw new Error('INVALID_STATUS')
+      if (validatedData.customerId && !await tx.customer.findFirst({where:{id:validatedData.customerId,organizationId:payload.organizationId,isActive:true}})) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
       const prepared = validatedData.items ? await prepareItems(tx, payload, validatedData.items, validatedData.discountAmount ?? current.discountAmount) : null
       const totals = prepared?.totals ?? draftTotals(current.items, validatedData.discountAmount ?? current.discountAmount)
       if (!prepared) await enforceDiscountLimit(tx,payload,current.items,totals.totalAmount)

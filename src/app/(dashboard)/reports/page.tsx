@@ -2,7 +2,8 @@
 
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
-import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
+import React, { Suspense, useRef, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { api } from '@/lib/api';
@@ -18,7 +19,9 @@ import {
   faRotateLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function ReportsPage() {
+export default function ReportsPage(){return <Suspense fallback={<LoadingSpinner/>}><ReportsContent/></Suspense>}
+function ReportsContent() {
+  const searchParams=useSearchParams();
   const { organization } = useAuth();
   const { activeStore } = useOrganization();
 
@@ -28,25 +31,34 @@ export default function ReportsPage() {
   const firstDayStr=`${todayStr.slice(0,7)}-01`;
 
   const [activeTab, setActiveTab] = useState<'sales' | 'products'>('sales');
-  const [startDate, setStartDate] = useState(firstDayStr);
-  const [endDate, setEndDate] = useState(todayStr);
+  const [startDate, setStartDate] = useState(searchParams.get('startDate')??firstDayStr);
+  const [endDate, setEndDate] = useState(searchParams.get('endDate')??todayStr);
 
   const [salesReport, setSalesReport] = useState<Sale[]>([]);
   const [salesSummary, setSalesSummary] = useState<SalesReportSummary | null>(null);
   const [productsReport, setProductsReport] = useState<ProductReportItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error,setError]=useState(''),[page,setPage]=useState(1),[pages,setPages]=useState(0),[totalCount,setTotalCount]=useState(0),[asOf,setAsOf]=useState('');
+  const snapshot=useRef<{key:string;asOf?:string}>({key:'',asOf:searchParams.get('asOf')??undefined});
+  const requestVersion=useRef(0);
 
   const loadReport = useCallback(async () => {
     if (!organization?.id) return;
-    setIsLoading(true);
+    const version=++requestVersion.current;
+    const key=JSON.stringify([organization.id,activeStore?.id,activeTab,startDate,endDate]);
+    if(snapshot.current.key&&snapshot.current.key!==key)snapshot.current={key};
+    snapshot.current.key=key;
+    setIsLoading(true);setError('');
     try {
       if (activeTab === 'sales') {
         const res = await api.reports.sales({
           organizationId: organization.id,
           storeId: activeStore?.id,
           startDate,
-          endDate,
+          endDate,page,limit:50,asOf:snapshot.current.asOf,
         });
+        if(version!==requestVersion.current)return;
+        snapshot.current.asOf=res.meta?.asOf;setAsOf(res.meta?.asOf??'');setTotalCount(res.pagination?.total??0);setPages(res.pagination?.totalPages??0);
         if (res.data) setSalesReport(res.data);
         if (res.summary) setSalesSummary(res.summary);
       } else {
@@ -54,16 +66,18 @@ export default function ReportsPage() {
           organizationId: organization.id,
           storeId: activeStore?.id,
           startDate,
-          endDate,
+          endDate,page,limit:50,asOf:snapshot.current.asOf,
         });
+        if(version!==requestVersion.current)return;
+        snapshot.current.asOf=res.meta?.asOf;setAsOf(res.meta?.asOf??'');setTotalCount(res.pagination?.total??0);setPages(res.pagination?.totalPages??0);
         if (res.data) setProductsReport(res.data);
       }
     } catch (err: unknown) {
-      console.error('Failed to load report:', err);
+      if(version===requestVersion.current){setError(err instanceof Error?err.message:'Hisobot yuklanmadi');setSalesReport([]);setProductsReport([]);setSalesSummary(null);setTotalCount(0);setPages(0);setAsOf('');}
     } finally {
-      setIsLoading(false);
+      if(version===requestVersion.current)setIsLoading(false);
     }
-  }, [organization, activeStore, activeTab, startDate, endDate]);
+  }, [organization, activeStore, activeTab, startDate, endDate,page]);
 
   useEffect(() => {
     void Promise.resolve().then(loadReport);
@@ -84,11 +98,11 @@ export default function ReportsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {organization&&<CsvExportButton path={activeTab==='sales'?'/reports/sales':'/reports/products'} params={{organizationId:organization.id,startDate,endDate,...(activeStore?.id?{storeId:activeStore.id}:{})}} label="To‘liq hisobotni CSV yuklash"/>}
+          {organization&&!isLoading&&!error&&asOf&&<CsvExportButton path={activeTab==='sales'?'/reports/sales':'/reports/products'} params={{organizationId:organization.id,startDate,endDate,asOf,...(activeStore?.id?{storeId:activeStore.id}:{})}} label="To‘liq hisobotni CSV yuklash"/>}
 
           <Button
             variant="outline"
-            onClick={loadReport}
+            onClick={()=>{snapshot.current.asOf=undefined;void loadReport();}}
             leftIcon={<FontAwesomeIcon icon={faRotateLeft} />}
           >
             Yangilash
@@ -102,7 +116,7 @@ export default function ReportsPage() {
           {/* Tabs */}
           <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl w-full sm:w-auto">
             <button
-              onClick={() => setActiveTab('sales')}
+              onClick={() => {setPage(1);setActiveTab('sales');}}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
                 activeTab === 'sales'
                   ? 'bg-white text-gray-900 shadow-xs'
@@ -114,7 +128,7 @@ export default function ReportsPage() {
             </button>
 
             <button
-              onClick={() => setActiveTab('products')}
+              onClick={() => {setPage(1);setActiveTab('products');}}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
                 activeTab === 'products'
                   ? 'bg-white text-gray-900 shadow-xs'
@@ -133,7 +147,7 @@ export default function ReportsPage() {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {setPage(1);setStartDate(e.target.value);}}
                 className="bg-transparent focus:outline-hidden cursor-pointer"
               />
             </div>
@@ -143,7 +157,7 @@ export default function ReportsPage() {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {setPage(1);setEndDate(e.target.value);}}
                 className="bg-transparent focus:outline-hidden cursor-pointer"
               />
             </div>
@@ -151,6 +165,9 @@ export default function ReportsPage() {
         </div>
       </Card>
 
+      {error&&<p role="alert" className="text-red-700">{error}</p>}
+      {asOf&&!isLoading&&!error&&<p className="text-xs text-slate-500">Hisob holati: {asOf}. Eksport ham shu holatdan olinadi; yangi amallarni olish uchun Yangilash ni bosing.</p>}
+      {activeTab==='sales'&&salesSummary&&!isLoading&&!error&&<Card title="Tovar va pul hisoblari"><dl className="grid grid-cols-2 gap-3">{[['Yalpi savdo',salesSummary.grossRevenue],['Qaytarilgan tovar qiymati',salesSummary.refundAmount],['Naqd savdo',salesSummary.cashSales],['Naqd qarz undirish',salesSummary.cashDebtCollections],['Naqd refund',salesSummary.cashRefunds],['Nasiya savdo — pul tushumi emas',salesSummary.creditSales]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{formatMoney(value??'0')}</dd></div>)}</dl></Card>}
       {/* Tab 1: Sales Report */}
       {activeTab === 'sales' && (
         <div className="space-y-6">
@@ -171,7 +188,7 @@ export default function ReportsPage() {
                 Cheklar soni
               </span>
               <span className="text-2xl font-black text-blue-600 mt-2 block">
-                {formatNumber(salesReport.length)} ta
+                {formatNumber(totalCount)} ta
               </span>
               <span className="text-xs text-gray-400 mt-1 block">Yakunlangan cheklar</span>
             </Card>
@@ -303,6 +320,7 @@ export default function ReportsPage() {
           )}
         </Card>
       )}
+      {pages>1&&!error&&<div className="flex gap-3 items-center"><Button disabled={isLoading||page<=1} onClick={()=>setPage(value=>value-1)}>Oldingi sahifa</Button><span>{page} / {pages}; jami {totalCount}</span><Button disabled={isLoading||page>=pages} onClick={()=>setPage(value=>value+1)}>Keyingi sahifa</Button></div>}
     </div>
   );
 }

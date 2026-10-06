@@ -15,7 +15,7 @@ export const GET=withApi(async(request:NextRequest,{params}:{params:Promise<{id:
   const where={saleId:sale.id}
   const total=await tx.saleReturn.count({where})
   const data=await tx.saleReturn.findMany({where,orderBy:[{returnedAt:'desc'},{id:'desc'}],skip:(page-1)*limit,take:limit,
-   select:{id:true,returnReceiptNo:true,returnedAt:true,status:true,refundAmount:true,reason:true,processor:{select:{fullName:true}},items:{orderBy:{id:'asc'},select:{id:true,saleItemId:true,quantity:true,lineTotal:true,disposition:true,saleItem:{select:{productName:true,sku:true,unit:true}}}}}})
+   select:{id:true,returnReceiptNo:true,returnedAt:true,status:true,refundAmount:true,reason:true,approvedBy:true,approvedRole:true,approvedAt:true,processor:{select:{fullName:true}},items:{orderBy:{id:'asc'},select:{id:true,saleItemId:true,quantity:true,lineTotal:true,disposition:true,saleItem:{select:{productName:true,sku:true,unit:true}}}}}})
   return {success:true,data,pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}
  },{isolationLevel:'RepeatableRead'})
  return NextResponse.json(result)

@@ -5,13 +5,14 @@ import type { TokenPayload } from '@/lib/auth'
 import { AccessError, tenantScope } from '../auth/policy'
 import { audit, runOperation } from '../operations'
 import { moveStock } from '../inventory/movements'
+import { weightedAverage } from '../inventory/valuation'
 import { allocateMoney, decimal, money } from '../sales/calculations'
 import { quantitySchema, requireOpenShift } from '../sales/service'
 
-export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().min(2).max(2000),
+export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(2).max(2000),
  items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,disposition:z.enum(['sellable','damaged','write_off']).default('sellable')})).min(1).max(500)})
 export async function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>) {
- if (context.role==='cashier') throw new AccessError(403,'MANAGER_REQUIRED')
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
  return runOperation(context,'sale.return',input.operationId,{saleId,...input},async tx=>{
   await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
   const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:{include:{saleReturnItems:true}},payments:true,saleReturns:true}})
@@ -63,18 +64,26 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
   const debtReduction=split.credit.add(split.waived)
   const cashRefund=split.cash
   const ret=await tx.saleReturn.create({data:{saleId:sale.id,returnReceiptNo:'RET-'+randomUUID(),refundAmount:refund,reason:input.reason,processedBy:context.userId,
+    approvedBy:context.userId,approvedRole:context.role,approvedAt:new Date(),
     items:{create:rows.map(({unitCost,...row})=>{void unitCost;return row})}},include:{items:true}})
   if (debtReduction.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'return',sourceId:ret.id,saleId:sale.id,amount:debtReduction.negated(),actorId:context.userId}})
   if (split.waived.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'write_off_reversal',sourceId:ret.id,saleId:sale.id,amount:split.waived,actorId:context.userId,note:'Written-off liability returned'}})
   if (cashRefund.gt(0)) await tx.payment.create({data:{organizationId:context.organizationId,storeId:sale.storeId,shiftId:input.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:'cash',direction:'out',amount:cashRefund,receivedBy:context.userId,note:'return:'+ret.id}})
-  for (const row of rows) if (row.disposition==='sellable') await moveStock(tx,context,{storeId:sale.storeId,productId:row.productId,delta:row.quantity,unitCost:row.unitCost,sourceType:'return',sourceId:ret.id})
+  for (const row of [...rows].sort((a,b)=>a.productId.localeCompare(b.productId))) if (row.disposition==='sellable') {
+   await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${row.productId} FOR UPDATE`
+   const product=await tx.product.findFirstOrThrow({where:{id:row.productId,organizationId:context.organizationId}})
+   const stock=await tx.inventoryBalance.aggregate({where:{productId:row.productId},_sum:{quantity:true}})
+   const cost=weightedAverage(stock._sum.quantity??0,product.costPrice,row.quantity,row.unitCost)
+   await tx.product.update({where:{id:row.productId},data:{costPrice:cost}})
+   await moveStock(tx,context,{storeId:sale.storeId,productId:row.productId,delta:row.quantity,unitCost:row.unitCost,sourceType:'return',sourceId:ret.id})
+  }
   const allReturned=sale.items.every(x=>{
    const previous=x.saleReturnItems.reduce((sum,r)=>sum.add(r.quantity),decimal(0))
    const current=rows.find(r=>r.saleItemId===x.id)?.quantity??decimal(0)
    return previous.add(current).eq(x.quantity)
   })
   await tx.sale.update({where:{id:sale.id},data:{status:allReturned?'returned':'partially_returned'}})
-  await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,waiverReversal:split.waived,reason:input.reason})
+  await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,waiverReversal:split.waived,reason:input.reason,approvedBy:ret.approvedBy,approvedRole:ret.approvedRole,approvedAt:ret.approvedAt})
   return ret
  })
 }

@@ -5,6 +5,7 @@ import { runOperation, audit } from '../operations'
 import { decimal } from '../sales/calculations'
 import { moveStock } from './movements'
 import { quantitySchema } from '../sales/service'
+import { weightedAverage } from './valuation'
 
 export async function confirmStockDocument(context:TokenPayload,id:string) {
  if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
@@ -22,7 +23,7 @@ export async function confirmStockDocument(context:TokenPayload,id:string) {
     const stock=await tx.inventoryBalance.aggregate({where:{productId:product.id},_sum:{quantity:true}})
     const oldQty=decimal(stock._sum.quantity??0)
     if (oldQty.lt(0)) throw new AccessError(409,'COST_RECONCILIATION_REQUIRED')
-    const average=oldQty.mul(product.costPrice).add(item.quantity.mul(item.unitCost)).div(oldQty.add(item.quantity)).toDecimalPlaces(6)
+    const average=weightedAverage(oldQty,product.costPrice,item.quantity,item.unitCost)
     await tx.product.update({where:{id:product.id},data:{costPrice:average}})
    }
    await moveStock(tx,context,{storeId:doc.storeId,productId:item.productId,delta:item.quantity,unitCost:item.unitCost,sourceType:'stock_document',sourceId:doc.id,allowNegative:doc.organization.allowNegativeStock})

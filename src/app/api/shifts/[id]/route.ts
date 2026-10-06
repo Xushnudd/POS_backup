@@ -4,7 +4,7 @@ import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
-import { closeShift, closeSchema } from '@/server/finance/shifts'
+import { closeShift, closeSchema, shiftCashSummary } from '@/server/finance/shifts'
 
 async function handleGET(
   request: NextRequest,
@@ -29,7 +29,7 @@ async function handleGET(
     }
     const db = scopedPrisma(payload)
 
-    const shift = await db.shift.findUnique({
+    const shift = await db.$transaction(tx=>tx.shift.findUnique({
       where: { id },
       include: {
         register: true,
@@ -55,7 +55,7 @@ async function handleGET(
           },
         },
       },
-    })
+    }),{isolationLevel:'RepeatableRead'})
 
     if (!shift) {
       return NextResponse.json(
@@ -66,7 +66,7 @@ async function handleGET(
 
     return NextResponse.json({
       success: true,
-      data: shift,
+      data: {...shift,cashSummary:shiftCashSummary(shift.openingCash,shift.payments,shift.cashMovements)},
     })
 
   } catch (error) {

@@ -13,6 +13,7 @@ function validNumeric(value:number|string,precision:number,maximum:string,positi
   try {const parsed=decimal(value);return (positive?parsed.gt(0):parsed.gte(0)) && parsed.decimalPlaces()<=precision && parsed.lt(maximum)} catch {return false}
 }
 export const amountSchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,2})?$/)]).refine(v=>validNumeric(v,2,'1000000000000'),'Summa manfiy bo‘lmasligi kerak')
+export const positiveAmountSchema=amountSchema.refine(v=>validNumeric(v,2,'1000000000000',true))
 export const quantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(v=>validNumeric(v,6,'100000000000000',true),'Miqdor musbat bo‘lishi kerak')
 export const saleDraftSchema=z.object({
   organizationId:z.string().uuid(),storeId:z.string().uuid(),registerId:z.string().uuid(),shiftId:z.string().uuid(),
@@ -20,7 +21,7 @@ export const saleDraftSchema=z.object({
   operationId:z.string().uuid().optional(), note:z.string().max(2000).optional(),discountAmount:amountSchema.default(0),
   items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500),
 })
-export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:amountSchema.refine(v=>validNumeric(v,2,'1000000000000',true)),referenceNo:z.string().max(200).optional()})
+export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:positiveAmountSchema,referenceNo:z.string().max(200).optional()})
 export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional()})
 export type DraftInput=z.infer<typeof saleDraftSchema>
 export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {

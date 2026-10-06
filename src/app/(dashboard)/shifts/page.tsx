@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
+import { acknowledge, deviceId, enqueue, pendingOperations } from '@/lib/offline';
 import { Shift } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
 import { useAuth } from '@/context/AuthContext';
@@ -15,6 +16,8 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import OpenShiftModal from '@/components/pos/OpenShiftModal';
+import ShiftCorrections from '@/components/finance/ShiftCorrections';
+import ShiftCashSummary from '@/components/finance/ShiftCashSummary';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClock,
@@ -26,8 +29,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ShiftsPage() {
-  const {role}=useAuth();
-  const cashAttempt=useRef<string|null>(null);
+  const {role,organization,user}=useAuth();
+  const cashAttempt=useRef<{shiftId:string;input:Parameters<typeof api.shifts.cashMovement>[1]&{operationId:string}}|null>(null);
+  const [cashReady,setCashReady]=useState(false);
+  const [cashUnknown,setCashUnknown]=useState(false);
   const { activeRegister, activeShift, refreshShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -39,7 +44,7 @@ export default function ShiftsPage() {
 
   // Cash movement modal
   const [isCashMoveModalOpen, setIsCashMoveModalOpen] = useState(false);
-  const [movementType, setMovementType] = useState<'cash_in' | 'cash_out'>('cash_in');
+  const [movementType, setMovementType] = useState<'cash_in' | 'cash_out'|'bank_deposit'|'collection'>('cash_in');
   const [movementAmount, setMovementAmount] = useState('');
   const [movementReason, setMovementReason] = useState('');
   const [isProcessingMove, setIsProcessingMove] = useState(false);
@@ -70,46 +75,38 @@ export default function ShiftsPage() {
     void Promise.resolve().then(loadHistory);
   }, [loadHistory, activeShift]);
 
-  // Cash movement handler
+  useEffect(()=>{
+    let cancelled=false;
+    void Promise.resolve().then(async()=>{
+      if(!organization||!user)return;setCashReady(false);cashAttempt.current=null;setCashUnknown(false);
+      try{const saved=(await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).find(op=>op.type==='shift.cash');if(cancelled)return;
+        if(saved){const {shiftId,...input}=saved.payload;cashAttempt.current={shiftId:String(shiftId),input:input as NonNullable<typeof cashAttempt.current>['input']};setMovementType(input.movementType as typeof movementType);setMovementAmount(String(input.amount));setMovementReason(String(input.reason));setCashUnknown(true);setIsCashMoveModalOpen(true);}
+        setCashReady(true);
+      }catch(err){if(!cancelled)notifyError(err instanceof Error?err.message:'Lokal pul amali o‘qilmadi');}
+    });return()=>{cancelled=true;};
+  },[organization,user,notifyError]);
+
+  // The durable original intent is replayed even after its shift has closed.
   const handleCashMovement = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeShift?.id) return;
-
-    const amount = parseFloat(movementAmount);
-    if (!amount || amount <= 0) {
-      notifyError('Summani to\'g\'ri kiriting');
-      return;
+    e.preventDefault();if(!organization||!user||!cashReady||isProcessingMove)return;
+    const wasRetry=!!cashAttempt.current;
+    if(!cashAttempt.current){
+      if(!activeShift?.id)return;
+      if(!/^\d+(\.\d{1,2})?$/.test(movementAmount)||!movementReason.trim()){notifyError('Musbat summa (2 kasr) va sabab kiriting');return;}
+      cashAttempt.current={shiftId:activeShift.id,input:{operationId:crypto.randomUUID(),movementType,amount:movementAmount,reason:movementReason.trim()}};
     }
-    if (!movementReason.trim()) {
-      notifyError('Sababini kiriting');
-      return;
-    }
-
-    cashAttempt.current ??= crypto.randomUUID();
-    setIsProcessingMove(true);
-    try {
-      await api.shifts.cashMovement(activeShift.id, {
-        operationId:cashAttempt.current,
-        movementType,
-        amount,
-        reason: movementReason.trim(),
-      });
-
-      notifySuccess(
-        movementType === 'cash_in'
-          ? 'Naqd pul kassaga kiritildi'
-          : 'Naqd pul kassadan chiqarildi'
-      );
-      cashAttempt.current=null;
-      setIsCashMoveModalOpen(false);
-      setMovementAmount('');
-      setMovementReason('');
-      await refreshShift();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Pul harakatida xatolik yuz berdi');
-    } finally {
-      setIsProcessingMove(false);
-    }
+    const saved=cashAttempt.current;setCashUnknown(true);setIsProcessingMove(true);
+    try{
+      await enqueue({id:saved.input.operationId,scope:{organizationId:organization.id,userId:user.id,deviceId:deviceId()},type:'shift.cash',payload:{shiftId:saved.shiftId,...saved.input},state:'pending',createdAt:new Date().toISOString()});
+      const result=await api.shifts.cashMovement(saved.shiftId,saved.input);
+      await acknowledge(saved.input.operationId,'synced',result.data);
+      cashAttempt.current=null;setCashUnknown(false);setIsCashMoveModalOpen(false);setMovementAmount('');setMovementReason('');notifySuccess('Naqd harakat qayd etildi');await refreshShift();await loadHistory();
+    }catch(err){
+      notifyError(err instanceof Error?err.message:'Natija noma’lum; asl pul amalini tekshiring');
+      if(!wasRetry&&err instanceof ApiError&&['VALIDATION_ERROR','INVALID_SHIFT','MANAGER_REQUIRED'].includes(err.code??'')){
+        try{await acknowledge(saved.input.operationId,'rejected',undefined,err.code);cashAttempt.current=null;setCashUnknown(false);}catch{notifyError('Rad natijasi lokal saqlanmadi; asl amalni tekshiring');}
+      }
+    }finally{setIsProcessingMove(false);}
   };
 
   // Close shift handler
@@ -373,6 +370,8 @@ export default function ShiftsPage() {
         onSuccess={loadHistory}
       />
 
+      {role&&role!=='cashier'&&<ShiftCorrections shifts={shiftsHistory} activeShiftId={activeShift?.id} onChanged={async()=>{await refreshShift();await loadHistory();}}/>}
+      <ShiftCashSummary shifts={shiftsHistory} activeShift={activeShift??undefined}/>
       {/* Cash Movement Modal */}
       <Modal
         isOpen={isCashMoveModalOpen}
@@ -380,14 +379,17 @@ export default function ShiftsPage() {
         title={movementType === 'cash_in' ? 'Naqd pul kiritish' : 'Naqd pul olish'}
         size="md"
       >
+        {cashUnknown&&<p role="status">Natija noma’lum: asl summa va amal kaliti bilan qayta tekshiriladi.</p>}
         <form onSubmit={handleCashMovement} className="space-y-4">
+          <label className="block text-sm">Naqd harakat turi<select aria-label="Naqd harakat turi" value={movementType} disabled={isProcessingMove||cashUnknown||!cashReady} onChange={e=>setMovementType(e.target.value as typeof movementType)} className="block border p-2 w-full"><option value="cash_in">Naqd kirim</option><option value="cash_out">Naqd chiqim</option>{role!=='cashier'&&<><option value="bank_deposit">Bankka topshirish</option><option value="collection">Inkassatsiya</option></>}</select></label>
           <Input
             label="Summa (so'm) *"
             type="number"
-            min="1000"
-            step="1000"
+            min="0.01"
+            step="0.01"
             placeholder="50000"
             value={movementAmount}
+            disabled={isProcessingMove||cashUnknown||!cashReady}
             onChange={(e) => setMovementAmount(e.target.value)}
             leftIcon={<FontAwesomeIcon icon={faMoneyBillWave} className="text-xs" />}
             required
@@ -401,6 +403,7 @@ export default function ShiftsPage() {
                 : 'Inkassatsiya / Xarajat'
             }
             value={movementReason}
+            disabled={isProcessingMove||cashUnknown||!cashReady}
             onChange={(e) => setMovementReason(e.target.value)}
             required
           />
@@ -418,6 +421,7 @@ export default function ShiftsPage() {
               type="submit"
               variant="primary"
               isLoading={isProcessingMove}
+              disabled={!cashReady}
               className="font-bold"
             >
               Tasdiqlash

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { api } from '@/lib/api';
@@ -30,13 +31,14 @@ export default function DashboardPage() {
   const { organization } = useAuth();
   const { activeStore } = useOrganization();
 
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState<string>(new Intl.DateTimeFormat('en-CA',{timeZone:organization?.timezone??'Asia/Tashkent'}).format(new Date()));
+  const [asOf,setAsOf]=useState(''),[error,setError]=useState('');
   const [data, setData] = useState<DashboardReportData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const loadDashboardData = useCallback(async () => {
     if (!organization?.id) return;
-    setIsLoading(true);
+    setIsLoading(true);setError('');setAsOf('');
     try {
       const res = await api.reports.dashboard({
         organizationId: organization.id,
@@ -44,10 +46,10 @@ export default function DashboardPage() {
         date,
       });
       if (res.data) {
-        setData(res.data);
+        setData(res.data);setAsOf(res.meta?.asOf??'');
       }
     } catch (err) {
-      console.error('Error loading dashboard report:', err);
+      setData(null);setError(err instanceof Error?err.message:'Dashboard yuklanmadi');
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +96,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {error&&<p role="alert" className="text-red-700">{error}</p>}
+      {organization&&asOf&&!isLoading&&!error&&<div className="flex flex-wrap gap-3 items-center"><p className="text-xs">Hisob holati: {asOf}</p><CsvExportButton path="/reports/sales" params={{organizationId:organization.id,startDate:date,endDate:date,asOf,...(activeStore?.id?{storeId:activeStore.id}:{})}} label="Shu holatdagi savdolar CSV"/><Link href={`/reports?startDate=${date}&endDate=${date}&asOf=${encodeURIComponent(asOf)}`}>Shu holatdagi jadval</Link><Button variant="outline" onClick={loadDashboardData}>Yangilash</Button></div>}
       {/* Metric Cards Grid */}
       {isLoading ? (
         <div className="h-64 flex items-center justify-center">
@@ -106,7 +110,7 @@ export default function DashboardPage() {
             <Card padding={false} className="p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Bugungi tushum
+                  Sof tovar tushumi
                 </span>
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
                   <FontAwesomeIcon icon={faMoneyBillTrendUp} />

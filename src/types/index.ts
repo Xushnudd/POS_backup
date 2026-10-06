@@ -193,7 +193,7 @@ export type ShiftStatus = 'open' | 'closed';
 export interface CashMovement {
   id: string;
   shiftId: string;
-  movementType: 'cash_in' | 'cash_out';
+  movementType: 'cash_in' | 'cash_out' | 'bank_deposit' | 'collection' | 'correction_in' | 'correction_out';
   amount: number;
   reason: string;
   createdBy: string;
@@ -201,6 +201,7 @@ export interface CashMovement {
 }
 
 export interface Shift {
+  cashSummary?:Record<string,string>;
   id: string;
   registerId: string;
   register?: Register;
@@ -269,6 +270,7 @@ export interface CustomerDebt {
 export interface AuditSummary {id:string;actorId:string|null;entityType:string;entityId:string;action:string;createdAt:string;actor:{fullName:string}|null}
 export interface SaleReturnHistory {
   id:string;returnReceiptNo:string;returnedAt:string;status:string;refundAmount:string;reason:string|null;
+  approvedBy:string|null;approvedRole:string|null;approvedAt:string|null;
   processor:{fullName:string};
   items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
 }
@@ -325,6 +327,7 @@ export interface DashboardReportData {
 }
 
 export interface SalesReportSummary {
+  grossRevenue?:string;refundAmount?:string;cashSales?:string;cashDebtCollections?:string;cashRefunds?:string;creditSales?:string;cashPayments?:string;
   totalRevenue: number;
   totalDiscount: number;
   totalItems: number;
@@ -355,6 +358,7 @@ export interface ApiResponse<T = unknown> {
     totalPages: number;
   };
   summary?: SalesReportSummary;
+  meta?: {asOf:string;timezone:string;startDate:string|null;endDate:string|null;storeId:string|null};
 }
 
 export interface OrganizationMember {

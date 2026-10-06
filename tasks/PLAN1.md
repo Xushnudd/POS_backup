@@ -568,7 +568,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-01.03** — Do‘kon, kassa, smena, mahsulot, mijoz va to‘lov bir tashkilotga tegishli ekanini tekshirish.
+- [x] **SEC-01.03** — Do‘kon, kassa, smena, mahsulot, mijoz va to‘lov bir tashkilotga tegishli ekanini tekshirish.
 
   **Texnologiya:** Prisma relational filters, PostgreSQL composite FK.
 
@@ -581,6 +581,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Boshqa tenantning bog‘langan IDsi create/updatega berilganda butun amal rad, yozuv yaratilmaydi.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `SEC-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -600,7 +602,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-01.05** — Kassir boshqa kassir smenasida ruxsatsiz savdo qilmasligi; tannarx va foydani vakolatsiz ko‘rmasligi.
+- [x] **SEC-01.05** — Kassir boshqa kassir smenasida ruxsatsiz savdo qilmasligi; tannarx va foydani vakolatsiz ko‘rmasligi.
 
   **Texnologiya:** Prisma select DTO va Shift ownership.
 
@@ -614,9 +616,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Begona smenada sotish va vakolatsiz cost/profit o‘qish rad; UI yashirishdan tashqari API ham tekshiradi.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `SEC-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-01.06** — Ruxsatlar bekor bo‘lganda eski sessiya ham bu amallarni bajara olmasligi.
+- [x] **SEC-01.06** — Ruxsatlar bekor bo‘lganda eski sessiya ham bu amallarni bajara olmasligi.
 
   **Texnologiya:** PostgreSQL sessiya bekor qilish va membership tekshiruvi.
 
@@ -629,6 +633,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Vakolat bekor qilingach, oldingi sessiyaning keyingi mutatsiyasi rad etiladi.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `SEC-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1194,7 +1200,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### RET-01 — qaytarish va pul qaytarish [P0]
 
-- [ ] **RET-01.01** — Original chek bo‘yicha to‘liq va qisman qaytarish.
+- [x] **RET-01.01** — Original chek bo‘yicha to‘liq va qisman qaytarish.
 
   **Texnologiya:** React return screen, Next.js return service, Prisma.
 
@@ -1208,9 +1214,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Original chekdan full/partial return bajariladi; begona tenant cheki rad.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `RET-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RET-01.02** — Oldingi qaytarishlarni hisobga olish; sotilganidan ko‘p qaytarishni taqiqlash.
+- [x] **RET-01.02** — Oldingi qaytarishlarni hisobga olish; sotilganidan ko‘p qaytarishni taqiqlash.
 
   **Texnologiya:** PostgreSQL row locks/conditional updates, Prisma Decimal.
 
@@ -1223,6 +1231,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Parallel returns jami original miqdordan oshmaydi; oldingi returns ayiriladi.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `RET-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1290,7 +1300,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `RET-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RET-01.07** — Sabab, vakolat, tasdiqlovchi, qaytarma chek va audit.
+- [x] **RET-01.07** — Sabab, vakolat, tasdiqlovchi, qaytarma chek va audit.
 
   **Texnologiya:** Zod, Approval, AuditLog, HTML receipt.
 
@@ -1303,6 +1313,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Sabab/actor/approval/original link/audit saqlangan; vakolatsiz refund rad.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `RET-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2042,7 +2054,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-01.03** — Savdo, qarz undirish, refund, naqd kirim/chiqim va inkassatsiyani alohida hisoblash.
+- [x] **FIN-01.03** — Savdo, qarz undirish, refund, naqd kirim/chiqim va inkassatsiyani alohida hisoblash.
 
   **Texnologiya:** PostgreSQL typed cash journal, Prisma.
 
@@ -2055,6 +2067,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Sale/collection/refund/deposit/withdrawal/inkassatsiya alohida; opening+net=cash expected.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `FIN-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2106,7 +2120,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-01.07** — Yopilgan smenani yashirin tahrirlamaslik; tuzatish hujjati.
+- [x] **FIN-01.07** — Yopilgan smenani yashirin tahrirlamaslik; tuzatish hujjati.
 
   **Texnologiya:** Prisma immutable shift, correction journal.
 
@@ -2120,11 +2134,13 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Closed shift edit/delete rad; correction yangi hujjatda original bilan bog‘langan.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `FIN-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
 #### FIN-02 — foyda va xarajatlar [P1]
 
-- [ ] **FIN-02.01** — Tannarx usulini belgilash: dastlab vaznli o‘rtacha; FIFO/partiya ehtiyoji bo‘lsa kengaytirish.
+- [x] **FIN-02.01** — Tannarx usulini belgilash: dastlab vaznli o‘rtacha; FIFO/partiya ehtiyoji bo‘lsa kengaytirish.
 
   **Texnologiya:** Prisma.Decimal, PostgreSQL stock valuation.
 
@@ -2137,6 +2153,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Weighted average opening+receipt misoli qo‘lda hisobga teng; zero/return holatlari testlangan.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `FIN-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2240,7 +2258,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
 #### REP-01 — ishonchli hisobotlar [P0/P1]
 
-- [ ] **REP-01.01** — P0: tashkilot va do‘kon filtri hamma ko‘rsatkichga tatbiq etilishi.
+- [x] **REP-01.01** — P0: tashkilot va do‘kon filtri hamma ko‘rsatkichga tatbiq etilishi.
 
   **Texnologiya:** Next.js DAL, Prisma relational filters, PostgreSQL SQL.
 
@@ -2254,9 +2272,11 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Barcha reportlar A/B tenant va store allow/deny testidan o‘tadi.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `REP-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.02** — P0: vaqt zonasi, davr boshi/oxiri; oxirgi kun to‘liq kirishi.
+- [x] **REP-01.02** — P0: vaqt zonasi, davr boshi/oxiri; oxirgi kun to‘liq kirishi.
 
   **Texnologiya:** PostgreSQL timestamptz/AT TIME ZONE, Intl display.
 
@@ -2270,9 +2290,11 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Asia/Tashkent yarim ochiq davr va UTC conversion testlari oxirgi kunni to‘liq qamraydi.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `REP-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.03** — P0: yig‘indilar joriy sahifadan emas, barcha mos yozuvlardan olinishi.
+- [x] **REP-01.03** — P0: yig‘indilar joriy sahifadan emas, barcha mos yozuvlardan olinishi.
 
   **Texnologiya:** Prisma aggregate/groupBy yoki parameterized SQL.
 
@@ -2286,9 +2308,11 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Paginationdan qat’i nazar totals barcha matching rowsga teng; 1000 yozuvda tekshirilgan.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `REP-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.04** — P0: sotuv, refund, nasiya va haqiqiy pul tushumi bir-biridan ajratilishi.
+- [x] **REP-01.04** — P0: sotuv, refund, nasiya va haqiqiy pul tushumi bir-biridan ajratilishi.
 
   **Texnologiya:** PostgreSQL sale/return/debt/cash views.
 
@@ -2302,9 +2326,11 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Sale/refund/debt/cash collection ko‘rsatkichlari alohida va ledger datasetiga teng.
 
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
+
   **Dalil:** `REP-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.05** — P0: tannarx har qator `miqdor × tarixiy tannarx`dan hisoblanishi.
+- [x] **REP-01.05** — P0: tannarx har qator `miqdor × tarixiy tannarx`dan hisoblanishi.
 
   **Texnologiya:** PostgreSQL SUM(quantity*historicalCost), Decimal.
 
@@ -2317,6 +2343,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** COGS har satr qty×historical costdan; quantity 1dan katta misolda mos.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `REP-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2384,7 +2412,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.09` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.10** — P1: jadvaldagi umumiy son, eksport va dashboard bir davr uchun mos kelishi.
+- [x] **REP-01.10** — P1: jadvaldagi umumiy son, eksport va dashboard bir davr uchun mos kelishi.
 
   **Texnologiya:** TypeScript shared report filter/DTO, PostgreSQL repeatable snapshot.
 
@@ -2397,6 +2425,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Dashboard/table/export ayni timezone/filter/cut-offda count va jami bo‘yicha teng.
+
+  **Qabul:** `done`, 2026-10-06. [Yana 15 ta bandning test va versiya dalili](EXECUTION_STATUS.md#yana-15-ta-plan1-bandi--yakuniy-qabul-2026-10-06).
 
   **Dalil:** `REP-01.10` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

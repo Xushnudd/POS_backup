@@ -76,7 +76,7 @@ test('Full catalog/customer/report CSV exports ignore UI pagination, protect for
  assert.equal((catalog.match(/^"[0-9a-f-]{36}",/gm)??[]).length,55);assert.ok(catalog.includes("\"'=EXPORT,"));assert.ok(catalog.includes('""quoted""'));assert.ok(!catalog.includes('archived'));assert.ok(catalog.includes('"0.500000"'))
  const customerCsv=await call(customers,`/customers?organizationId=${org}&format=csv&search=EXPORT&limit=1`)
  assert.equal((customerCsv.match(/^"[0-9a-f-]{36}",/gm)??[]).length,55);assert.ok(customerCsv.includes("'=EXPORT CUSTOMER"));assert.ok(customerCsv.includes('"12.25"'))
- const query=`?organizationId=${org}&format=csv&startDate=2026-01-02&endDate=2026-01-02&limit=1`
+ const query=`?organizationId=${org}&format=csv&startDate=2026-01-02&endDate=2026-01-02&limit=1&asOf=${encodeURIComponent(new Date().toISOString())}`
  const saleCsv=await call(salesReport,'/reports/sales'+query)
  assert.equal((saleCsv.match(/^"sale",/gm)??[]).length,55);assert.equal((saleCsv.match(/^"return",/gm)??[]).length,1);assert.ok(saleCsv.includes('"Sof tovar tushumi","54.00"'));assert.ok(saleCsv.includes("'=EXPORT RECEIPT"))
  const productCsv=await call(productReport,'/reports/products'+query)

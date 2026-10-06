@@ -58,3 +58,21 @@ test('Print HTML escapes untrusted markup and attribute delimiters',async()=>{
  assert.equal(htmlText('<img src=x onerror="alert(1)">&\''),'&lt;img src=x onerror=&quot;alert(1)&quot;&gt;&amp;&#39;')
  assert.equal(htmlText(null),'')
 })
+
+test('Weighted average uses local exact precision and validates negative/zero input',async()=>{
+ const {weightedAverage}=await import('@/server/inventory/valuation')
+ assert.equal(weightedAverage(10,50,10,100).toString(),'75')
+ assert.equal(weightedAverage(0,999,1,'12.345678').toString(),'12.345678')
+ assert.equal(weightedAverage('99999999999999.999999','99999999999999.999999','0.000001','0.000001').toString(),'99999999999999.999998')
+ assert.throws(()=>weightedAverage(-1,50,1,10));assert.throws(()=>weightedAverage(0,0,0,0))
+})
+test('Local calendar boundaries follow DST rather than fixed 24-hour arithmetic',async()=>{
+ const {dateRange}=await import('@/server/reports/dates')
+ const spring=dateRange('2026-03-08','2026-03-08','America/New_York'),fall=dateRange('2026-11-01','2026-11-01','America/New_York')
+ assert.equal(spring.lt!.getTime()-spring.gte!.getTime(),23*3600000);assert.equal(fall.lt!.getTime()-fall.gte!.getTime(),25*3600000)
+})
+
+test('Report arithmetic keeps cents in aggregates beyond default Decimal precision',async()=>{
+ const {reportDecimal}=await import('@/server/reports/numeric')
+ assert.equal(reportDecimal('1000000000000000000000000.01').sub('1000000000000000000000000').toString(),'0.01')
+})
