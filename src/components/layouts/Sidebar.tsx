@@ -86,6 +86,9 @@ const navItems: NavItem[] = [
     icon: faGear,
     roles: ['owner'],
   },
+  {href:'/archive',label:'Arxiv',icon:faBoxesStacked,roles:['owner','admin']},
+  {href:'/suppliers',label:'Yetkazib beruvchilar',icon:faUsers,roles:['owner','admin']},
+  {href:'/inventory/movements',label:'Ombor jurnali',icon:faWarehouse,roles:['owner','admin']},
   {href:'/audit',label:'Audit tarixi',icon:faClockRotateLeft,roles:['owner']},
   {href:'/security',label:'Faol sessiyalar',icon:faClockRotateLeft},
 ];
@@ -145,7 +148,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             const isActive =
               item.href === '/dashboard'
                 ? pathname === '/dashboard' || pathname === '/'
-                : pathname.startsWith(item.href);
+                : item.href==='/inventory'?pathname==='/inventory':pathname.startsWith(item.href);
 
             if (item.highlight) {
               return (

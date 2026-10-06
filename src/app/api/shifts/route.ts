@@ -1,3 +1,6 @@
+import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
+import { consumeLimit } from '@/server/auth/rate-limit'
+import { dateRange } from '@/server/reports/dates'
 import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -40,6 +43,24 @@ async function handleGET(request: NextRequest) {
       where.status = status
     }
 
+    if(status&&!['open','closed'].includes(status))throw new AccessError(400,'INVALID_STATUS')
+    const storeId=searchParams.get('storeId')
+    if(storeId)where.register={storeId}
+    const organization=await db.organization.findUniqueOrThrow({where:{id:payload.organizationId},select:{timezone:true}})
+    const range=dateRange(searchParams.get('from'),searchParams.get('to'),organization.timezone)
+    if(Object.keys(range).length)where.openedAt=range
+    if(searchParams.get('format')==='csv'){
+      if(payload.role==='cashier')throw new AccessError(403,'FORBIDDEN')
+      await consumeLimit('shift.export',payload.organizationId+':'+payload.userId,10,60000)
+      const data=await db.$transaction(async tx=>{
+        const total=await tx.shift.count({where})
+        if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
+        const rows=await tx.shift.findMany({where,include:{register:{include:{store:true}},organizationUser:{select:{user:{select:{fullName:true}}}}},orderBy:[{openedAt:'desc'},{id:'asc'}]})
+        const cash=(value:Prisma.Decimal|null)=>value===null?'':numeric(value)
+        return {filename:'shifts-'+payload.organizationId+'.csv',content:csv([['ID','Filial','Kassa','Xodim','Holat','Ochilgan (UTC)','Yopilgan (UTC)','Boshlang‘ich naqd','Yopilish kutilgan naqd','Sanab chiqilgan','Farq'],...rows.map(row=>[row.id,row.register.store.name,row.register.name,row.organizationUser.user.fullName,row.status,row.openedAt.toISOString(),row.closedAt?.toISOString(),cash(row.openingCash),cash(row.expectedCash),cash(row.countedCash),cash(row.cashDifference)])])}
+      },{isolationLevel:'RepeatableRead'})
+      return NextResponse.json({success:true,data})
+    }
     const shifts = await db.shift.findMany({
       where,
       include: {

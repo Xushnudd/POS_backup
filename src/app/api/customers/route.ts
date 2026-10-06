@@ -1,3 +1,4 @@
+import { activeStatus } from '@/server/catalog/status'
 import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
 import { consumeLimit } from '@/server/auth/rate-limit'
 import { Prisma } from '@prisma/client'
@@ -52,7 +53,7 @@ async function handleGET(request: NextRequest) {
 
     const where: Prisma.CustomerWhereInput = {
       organizationId,
-      isActive: true,
+      ...activeStatus(searchParams, payload),
     }
 
     if (search) {
@@ -76,17 +77,10 @@ async function handleGET(request: NextRequest) {
       return NextResponse.json({success:true,data})
     }
 
-    const [customers, total] = await Promise.all([
-      db.customer.findMany({
-        where,
-        orderBy: {
-          fullName: 'asc',
-        },
-        skip,
-        take: limit,
-      }),
-      db.customer.count({ where }),
-    ])
+    const [customers, total] = await db.$transaction(async tx=>{
+      const rows=await tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],skip,take:limit})
+      return [rows,await tx.customer.count({where})] as const
+    },{isolationLevel:'RepeatableRead'})
 
     return NextResponse.json({
       success: true,

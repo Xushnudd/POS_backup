@@ -1,3 +1,4 @@
+import { activeStatus } from '@/server/catalog/status'
 import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
 import { consumeLimit } from '@/server/auth/rate-limit'
 import { amountSchema } from '@/server/sales/service'
@@ -88,7 +89,7 @@ async function handleGET(request: NextRequest) {
     // Build where clause
     const where: Prisma.ProductWhereInput = {
       organizationId,
-      isActive: true,
+      ...activeStatus(searchParams, payload),
     }
 
     if (search) {
@@ -116,20 +117,10 @@ async function handleGET(request: NextRequest) {
       return NextResponse.json({success:true,data})
     }
 
-    const [products, total] = await Promise.all([
-      db.product.findMany({
-        where,
-        include: {
-          category: true,
-        },
-        orderBy: {
-          name: 'asc',
-        },
-        skip,
-        take: limit,
-      }),
-      db.product.count({ where }),
-    ])
+    const [products, total] = await db.$transaction(async tx=>{
+      const rows=await tx.product.findMany({where,include:{category:true},orderBy:[{name:'asc'},{id:'asc'}],skip,take:limit})
+      return [rows,await tx.product.count({where})] as const
+    },{isolationLevel:'RepeatableRead'})
 
     const units=await db.unit.findMany({where:{code:{in:products.map(product=>product.unit)}}})
     return NextResponse.json({

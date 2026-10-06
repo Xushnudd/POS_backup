@@ -6,11 +6,11 @@ import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateSupplierSchema = z.object({
-  name: z.string().min(2).optional(),
-  phone: z.string().optional(),
-  tin: z.string().optional(),
-  address: z.string().optional(),
-  note: z.string().optional(),
+  name: z.string().trim().min(2).max(200).optional(),
+  phone: z.string().max(64).optional(),
+  tin: z.string().max(64).optional(),
+  address: z.string().max(500).optional(),
+  note: z.string().max(2000).optional(),
   isActive: z.boolean().optional(),
 })
 

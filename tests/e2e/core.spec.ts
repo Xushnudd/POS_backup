@@ -80,7 +80,21 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await expect(page.locator('#printable-receipt')).toContainText('CHEK NUSXASI')
  for(const paper of ['58','80']){
   await page.getByLabel('Chek qog‘ozi eni',{exact:true}).selectOption(paper)
-  await page.getByRole('dialog').getByRole('button',{name:'Chekni chop etish',exact:true}).click()
+  if(paper==='58'){
+   let originalPrint='',replayedPrint=''
+   await page.route('**/api/sales/*/print-requests',async route=>{originalPrint=route.request().postData()??'';await route.fetch();await route.abort()})
+   await page.getByRole('dialog').getByRole('button',{name:'Chekni chop etish',exact:true}).click()
+   await expect(page.getByRole('dialog').locator('p[role=alert]')).toBeVisible()
+   await expect(page.getByLabel('Chek qog‘ozi eni',{exact:true})).toBeDisabled()
+   expect(await db.auditLog.count({where:{organizationId:me.data.organization.id,entityId:sale.id,action:'receipt_print_requested'}})).toBe(1)
+   await page.unroute('**/api/sales/*/print-requests')
+   await page.route('**/api/sales/*/print-requests',async route=>{replayedPrint=route.request().postData()??'';await route.continue()})
+   await page.getByRole('dialog').getByRole('button',{name:'Chekni chop etish',exact:true}).click()
+   await expect(page.locator('iframe[title="Chek chop etish"]')).toHaveCount(1)
+   expect(JSON.parse(replayedPrint)).toEqual(JSON.parse(originalPrint))
+   await page.unroute('**/api/sales/*/print-requests')
+  }else await page.getByRole('dialog').getByRole('button',{name:'Chekni chop etish',exact:true}).click()
+  await expect(page.locator('iframe[title="Chek chop etish"]')).toHaveCount(paper==='58'?1:2)
   const frame=page.locator('iframe[title="Chek chop etish"]').last()
   await expect(frame).toBeAttached()
   const document=await frame.getAttribute('srcdoc');expect(document).toContain(`size:${paper}mm 297mm`);expect(document).toContain('CHEK NUSXASI');expect(document).toContain(sale.receiptNo)
@@ -289,6 +303,35 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  for(const tab of ['Savdolar hisoboti','Mahsulotlar hisoboti']){
   await page.getByRole('button',{name:tab,exact:true}).click();const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'To‘liq hisobotni CSV yuklash',exact:true}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/report-.*\.csv$/)
  }
+ // Archive/recovery is exercised through real manager screens, preserving sale history.
+ const archiveCustomer=await (await page.request.post('/api/customers',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.data.organization.id,fullName:'Archive zero customer',phone:'123456789',creditLimit:0}})).json()
+ const archiveCategory=await (await page.request.post('/api/categories',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.data.organization.id,name:'Archive category'}})).json()
+ expect(archiveCustomer.success).toBe(true);expect(archiveCategory.success).toBe(true)
+ await page.goto('/archive')
+ for(const [kind,name] of [['products','Browser coffee'],['customers','Archive zero customer'],['categories','Archive category']] as const){
+  await page.getByLabel('Arxiv turi',{exact:true}).selectOption(kind)
+  await page.getByLabel('Holat',{exact:true}).selectOption('active')
+  const row=page.getByRole('row').filter({hasText:name});await expect(row).toBeVisible()
+  await row.getByRole('button',{name:'Arxivlash',exact:true}).click();await expect(row).not.toBeVisible()
+  await page.getByLabel('Holat',{exact:true}).selectOption('archived');await expect(row).toBeVisible()
+  await row.getByRole('button',{name:'Tiklash',exact:true}).click();await expect(row).not.toBeVisible()
+ }
+ expect(await db.sale.count({where:{id:sale.id}})).toBe(1)
+ await page.getByLabel('Arxiv turi',{exact:true}).selectOption('customers');await page.getByLabel('Holat',{exact:true}).selectOption('active')
+ await page.getByRole('row').filter({hasText:'Browser debtor'}).getByRole('button',{name:'Arxivlash',exact:true}).click()
+ await expect(page.getByText('Mijozning qarz/avans qoldig‘i bor; avval uni hal qiling',{exact:true})).toBeVisible()
+ await page.goto('/suppliers');await page.getByRole('button',{name:'Yangi yetkazib beruvchi',exact:true}).click()
+ await page.getByRole('dialog').getByLabel('Nomi',{exact:true}).fill('Browser supplier')
+ await page.getByRole('dialog').getByLabel('Telefon',{exact:true}).fill('123456789')
+ await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible()
+ const supplierRow=page.getByRole('row').filter({hasText:'Browser supplier'});await expect(supplierRow).toBeVisible()
+ await supplierRow.getByRole('button',{name:'Tahrirlash',exact:true}).click();await page.getByRole('dialog').getByLabel('STIR',{exact:true}).fill('987654321');await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(supplierRow).toContainText('987654321')
+ await supplierRow.getByRole('button',{name:'Arxivlash',exact:true}).click();await expect(supplierRow).not.toBeVisible();await page.getByLabel('Holat',{exact:true}).selectOption('archived');await expect(supplierRow).toBeVisible();await supplierRow.getByRole('button',{name:'Tiklash',exact:true}).click();await expect(supplierRow).not.toBeVisible();await page.getByLabel('Holat',{exact:true}).selectOption('active')
+ for(const [path,contains] of [['/suppliers','Browser supplier'],['/inventory/movements','Browser coffee'],['/shifts','Browser Owner'],['/audit','receipt_print_requested']] as const){
+  await page.goto(path);const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'CSV eksport',exact:true}).click();const download=await downloadPromise;const stream=await download.createReadStream();const chunks:Buffer[]=[];for await(const chunk of stream!)chunks.push(Buffer.from(chunk));expect(Buffer.concat(chunks).toString('utf8')).toContain(contains)
+ }
+ await page.goto('/inventory/movements');await page.getByLabel('Manba ID',{exact:true}).fill(document.id);await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByRole('row').filter({hasText:document.id})).toHaveCount(1)
+ expect(await db.auditLog.count({where:{organizationId:me.data.organization.id,entityId:sale.id,action:'receipt_print_requested'}})).toBe(2)
  const secondContext=await page.context().browser()!.newContext({ignoreHTTPSErrors:true})
  try{
   const login=await secondContext.request.post('https://localhost:3100/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}});expect(login.ok()).toBe(true)

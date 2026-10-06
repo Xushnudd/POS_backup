@@ -6,6 +6,8 @@ import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { Shift } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
+import { useAuth } from '@/context/AuthContext';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -24,6 +26,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ShiftsPage() {
+  const {role}=useAuth();
   const cashAttempt=useRef<string|null>(null);
   const { activeRegister, activeShift, refreshShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
@@ -140,6 +143,7 @@ export default function ShiftsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {role&&role!=='cashier'&&<CsvExportButton path="/shifts" params={activeRegister?{registerId:activeRegister.id}:{}}/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

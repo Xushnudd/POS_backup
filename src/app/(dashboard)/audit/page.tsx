@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import type { AuditSummary } from '@/types';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -22,6 +23,7 @@ export default function AuditPage(){
  },[role,organization?.id,page,filters,retry]);
  if(role!=='owner')return <p>Audit tarixini ko‘rish uchun biznes egasi vakolati kerak.</p>;
  return <div className="space-y-4"><h1 className="text-2xl font-bold">Audit tarixi</h1>
+  <CsvExportButton path="/audit" params={{...filters,view:'summary'}}/>
   <Card><form className="grid sm:grid-cols-2 gap-3" onSubmit={event=>{event.preventDefault();setPage(1);setFilters(Object.fromEntries(Object.entries(draft).filter(([,value])=>value.trim()).map(([key,value])=>[key,value.trim()])));}}>
    <Input label="Davr boshi" type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/><Input label="Davr oxiri" type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/>
    <Input label="Resurs turi (masalan SaleReturn)" maxLength={100} value={draft.entityType} onChange={event=>setDraft({...draft,entityType:event.target.value})}/><Input label="Amal (masalan returned)" maxLength={100} value={draft.action} onChange={event=>setDraft({...draft,action:event.target.value})}/>

@@ -1,3 +1,4 @@
+import { assertCustomerCanArchive } from '@/server/customers/archive'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -89,6 +90,7 @@ async function handlePUT(
     const validatedData = updateCustomerSchema.parse(body)
 
     const customer = await db.$transaction(async tx => {
+      if(validatedData.isActive===false)await assertCustomerCanArchive(tx,payload.organizationId,id)
       const result = await tx.customer.update({
       where: { id },
       data: validatedData,
@@ -144,6 +146,7 @@ async function handleDELETE(
 
     // Soft delete
     await db.$transaction(async tx => {
+      await assertCustomerCanArchive(tx,payload.organizationId,id)
       const result = await tx.customer.update({
       where: { id },
       data: { isActive: false },

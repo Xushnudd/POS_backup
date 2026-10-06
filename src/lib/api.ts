@@ -29,7 +29,7 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
 class ApiClient {
-  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
     list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
@@ -167,6 +167,11 @@ class ApiClient {
       }),
   };
 
+  archive = {
+    list:(kind:'products'|'customers'|'categories',params:Record<string,string>)=>this.request<{id:string;name?:string;fullName?:string;isActive:boolean}[]>(`/${kind}?${new URLSearchParams(params)}`),
+    setActive:(kind:'products'|'customers'|'categories',id:string,isActive:boolean)=>this.request(`/${kind}/${id}`,{method:'PUT',body:JSON.stringify({isActive})}),
+  };
+
   // Categories
   categories = {
     list: (organizationId: string) =>
@@ -192,6 +197,7 @@ class ApiClient {
 
   // Sales
   sales = {
+    printRequest:(id:string,data:{operationId:string;width:58|80;copy:boolean})=>this.request(`/sales/${id}/print-requests`,{method:'POST',body:JSON.stringify(data)}),
     list: (params: {
       organizationId: string;
       customerId?:string;
@@ -282,7 +288,7 @@ class ApiClient {
       return this.request<InventoryBalance[]>(`/inventory/balances?${q.toString()}`);
     },
 
-    movements: (params: { organizationId: string; storeId?: string; productId?: string }) => {
+    movements: (params: { organizationId: string; storeId?: string; productId?: string; movementType?:string;sourceType?:string;sourceId?:string;from?:string;to?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
@@ -419,8 +425,8 @@ class ApiClient {
 
   // Suppliers
   suppliers = {
-    list: (organizationId: string) =>
-      this.request<Supplier[]>(`/suppliers?organizationId=${organizationId}`),
+    list: (organizationId: string,params:Record<string,string>={}) =>
+      this.request<Supplier[]>(`/suppliers?${new URLSearchParams({organizationId,...params})}`),
 
     create: (data: Partial<Supplier>) =>
       this.request<Supplier>('/suppliers', {
