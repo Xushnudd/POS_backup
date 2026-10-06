@@ -1,3 +1,6 @@
+import { documentFilters } from '@/server/inventory/list-filters'
+import { csv, numeric, productValue } from '@/server/exports/csv'
+import { paging, exporting, exportCap, pagination } from '@/server/catalog/queries'
 import { signedQuantitySchema, nonnegativeQuantitySchema } from '@/server/catalog/service'
 import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
@@ -43,13 +46,6 @@ async function handleGET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
-    const storeId = searchParams.get('storeId')
-    const documentType = searchParams.get('documentType')
-    const status = searchParams.get('status')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const skip = (page - 1) * limit
-
     if (!organizationId) {
       return NextResponse.json(
         { success: false, error: { code: 'MISSING_PARAM', message: 'Organization ID talab qilinadi' } },
@@ -57,46 +53,21 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where: Prisma.StockDocumentWhereInput = {
-      organizationId,
-    }
-
-    if (storeId) where.storeId = storeId
-    if (documentType) where.documentType = documentType
-    if (status) where.status = status
-
-    const [documents, total] = await Promise.all([
-      db.stockDocument.findMany({
-        where,
-        include: {
-          store: true,
-          supplier: true,
-          reversal: {select:{id:true,documentNo:true}},
-          items: {
-            include: {
-              product: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        skip,
-        take: limit,
-      }),
-      db.stockDocument.count({ where }),
-    ])
-
-    return NextResponse.json({
-      success: true,
-      data: documents,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
+    const organization=await db.organization.findUniqueOrThrow({where:{id:payload.organizationId},select:{timezone:true}})
+    const where:Prisma.StockDocumentWhereInput={organizationId,...documentFilters(searchParams,organization.timezone)}
+    const {page,limit,skip}=paging(searchParams)
+    const isExport=await exporting(searchParams,payload,'stock-document.export')
+    const result=await db.$transaction(async tx=>{
+      const total=await tx.stockDocument.count({where})
+      if(isExport){exportCap(total);const lines=await tx.stockDocumentItem.count({where:{stockDocument:where}}),empty=await tx.stockDocument.count({where:{...where,items:{none:{}}}});exportCap(lines+empty)}
+      const rows=await tx.stockDocument.findMany({where,include:{store:true,supplier:true,reversal:{select:{id:true,documentNo:true}},items:{include:{product:true},orderBy:{id:'asc'}}},orderBy:[{createdAt:'desc'},{id:'asc'}],...(!isExport?{skip,take:limit}:{})})
+      if(isExport)return {success:true,data:{filename:'stock-documents-'+payload.organizationId+'.csv',content:csv([['Hujjat ID','Raqam','Sana (UTC)','Tasdiqlangan (UTC)','Filial','Supplier','Turi','Holat','Asl hujjat ID','Qarshi hujjat ID','Mahsulot (joriy)','Birlik (joriy)','Miqdor','Birlik tannarxi','Qator qiymati','Izoh'],...rows.flatMap(row=>{
+        const prefix=[row.id,row.documentNo,row.createdAt.toISOString(),row.confirmedAt?.toISOString(),row.store.name,row.supplier?.name,row.documentType,row.status,row.reversalOfId,row.reversal?.id]
+        return row.items.length?row.items.map(item=>[...prefix,item.product.name,item.product.unit,numeric(item.quantity,6),numeric(item.unitCost,6),numeric(productValue(item.quantity,item.unitCost)),item.note??row.note]):[[...prefix,'','','','','',row.note]]
+      })])}}
+      return {success:true,data:rows,pagination:pagination(page,limit,total)}
+    },{isolationLevel:'RepeatableRead'})
+    return NextResponse.json(result)
 
   } catch (error) {
     if (error instanceof AccessError) throw error

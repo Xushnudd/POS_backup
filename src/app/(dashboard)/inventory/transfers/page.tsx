@@ -8,6 +8,8 @@ import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { Product, StockTransfer } from '@/types';
 import { formatDate } from '@/lib/format';
+import Pagination from '@/components/ui/Pagination';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -34,6 +36,10 @@ export default function StockTransfersPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [listError,setListError]=useState(''),[pages,setPages]=useState(0),[draftFilters,setDraftFilters]=useState({fromStoreId:'',toStoreId:'',from:'',to:'',status:''}),[filters,setFilters]=useState<Record<string,string>>({});
+  const scope=JSON.stringify([organization?.id,filters]),[listPage,setListPage]=useState({scope:'',page:1}),page=listPage.scope===scope?listPage.page:1;
+  const requestSequence=useRef({value:0});
+
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fromStoreId, setFromStoreId] = useState('');
@@ -44,19 +50,19 @@ export default function StockTransfersPage() {
 
   const loadTransfers = useCallback(async () => {
     if (!organization?.id) return;
-    setIsLoading(true);
+    const sequence=++requestSequence.current.value;setIsLoading(true);setListError('');
     try {
-      const res = await api.transfers.list({ organizationId: organization.id });
-      if (res.data) setTransfers(res.data);
+      const res = await api.transfers.list({ organizationId: organization.id,...filters,page,limit:20 });
+      if(sequence===requestSequence.current.value){setTransfers(res.data??[]);setPages(res.pagination?.totalPages??0);}
     } catch (err: unknown) {
-      console.error('Error loading transfers:', err);
+      if(sequence===requestSequence.current.value){setListError(err instanceof Error?err.message:'Transferlar yuklanmadi');setTransfers([]);setPages(0);}
     } finally {
-      setIsLoading(false);
+      if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization]);
+  }, [organization,filters,page]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadTransfers);
+    const requests=requestSequence.current;let cancelled=false;void Promise.resolve().then(()=>{if(!cancelled)return loadTransfers();});return()=>{cancelled=true;requests.value++;};
   }, [loadTransfers]);
 
   useEffect(() => {
@@ -199,6 +205,15 @@ export default function StockTransfersPage() {
         </Button>
       </div>
 
+      <form className="grid sm:grid-cols-3 gap-3" onSubmit={e=>{e.preventDefault();setFilters(Object.fromEntries(Object.entries(draftFilters).filter(([,value])=>value)));}}>
+        <Select label="Jo‘natuvchi filtri" value={draftFilters.fromStoreId} options={[{value:'',label:'Barcha filiallar'},...stores.map(store=>({value:store.id,label:store.name}))]} onChange={e=>setDraftFilters({...draftFilters,fromStoreId:e.target.value})}/>
+        <Select label="Qabul qiluvchi filtri" value={draftFilters.toStoreId} options={[{value:'',label:'Barcha filiallar'},...stores.map(store=>({value:store.id,label:store.name}))]} onChange={e=>setDraftFilters({...draftFilters,toStoreId:e.target.value})}/>
+        <Select label="Transfer holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'sent',label:'Yo‘lda'},{value:'received',label:'Qabul qilingan'},{value:'closed',label:'Yopilgan'},{value:'cancelled',label:'Bekor qilingan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/>
+        <Input label="Transfer davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Transfer davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Button type="submit" disabled={isLoading}>Filtrlash</Button>
+      </form>
+      {organization&&<CsvExportButton path="/transfers" params={{organizationId:organization.id,...filters}} label="Transferlarni CSV yuklash"/>}
+      {listError&&<p role="alert">{listError}</p>}
+      <Pagination page={page} pages={pages} busy={isLoading} onPage={value=>setListPage({scope,page:value})} retry={()=>{void loadTransfers();}}/>
       <Card padding={false}>
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">

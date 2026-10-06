@@ -71,3 +71,12 @@ async function handlePUT(
   }
 }
 export const PUT = withApi(handlePUT)
+
+export const GET=withApi(async(request:NextRequest,{params}:{params:Promise<{id:string}>})=>{
+ const context=await verifyToken(getRequestToken(request)??'')
+ if(!context)throw new AccessError(401,'UNAUTHORIZED')
+ const {id}=await params
+ const row=await scopedPrisma(context).supplier.findUnique({where:{id}})
+ if(!row)throw new AccessError(404,'NOT_FOUND')
+ return NextResponse.json({success:true,data:row})
+})

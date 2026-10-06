@@ -1,3 +1,5 @@
+import { csv } from '@/server/exports/csv'
+import { paging, searchTerm, exporting, exportCap, pagination } from '@/server/catalog/queries'
 import { NextRequest, NextResponse } from 'next/server'
 import { withApi } from '@/server/api'
 import { verifyToken, getRequestToken } from '@/lib/auth'
@@ -8,7 +10,16 @@ export const GET=withApi(async(request:NextRequest,{params}:{params:Promise<{id:
  const context=await verifyToken(getRequestToken(request)??'')
  if (!context)throw new AccessError(401,'UNAUTHORIZED')
  const {id}=await params
- return NextResponse.json({success:true,data:await prisma.productBarcode.findMany({where:{productId:id,organizationId:context.organizationId},orderBy:[{isPrimary:'desc'},{createdAt:'asc'}],take:200})})
+ const q=new URL(request.url).searchParams,search=searchTerm(q),{page,limit,skip}=paging(q,200)
+ const where={productId:id,organizationId:context.organizationId,...(search?{value:{contains:search,mode:'insensitive' as const}}:{})}
+ const isExport=await exporting(q,context,'barcode.export')
+ const result=await prisma.$transaction(async tx=>{
+  const total=await tx.productBarcode.count({where});if(isExport)exportCap(total)
+  const rows=await tx.productBarcode.findMany({where,orderBy:[{isPrimary:'desc'},{createdAt:'asc'},{id:'asc'}],...(!isExport?{skip,take:limit}:{})})
+  if(isExport)return {success:true,data:{filename:'barcodes-'+id+'.csv',content:csv([['ID','Mahsulot ID','Barkod','Asosiy'],...rows.map(row=>[row.id,row.productId,row.value,row.isPrimary?'ha':'yo‘q'])])}}
+  return {success:true,data:rows,pagination:pagination(page,limit,total)}
+ },{isolationLevel:'RepeatableRead'})
+ return NextResponse.json(result)
 })
 export const POST=withApi(async(request:NextRequest,{params}:{params:Promise<{id:string}>})=>{
  const context=await verifyToken(getRequestToken(request)??'')

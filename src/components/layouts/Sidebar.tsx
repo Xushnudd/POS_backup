@@ -86,6 +86,7 @@ const navItems: NavItem[] = [
     icon: faGear,
     roles: ['owner'],
   },
+  {href:'/products/categories',label:'Kategoriyalar',icon:faBoxesStacked,roles:['owner','admin']},
   {href:'/archive',label:'Arxiv',icon:faBoxesStacked,roles:['owner','admin']},
   {href:'/suppliers',label:'Yetkazib beruvchilar',icon:faUsers,roles:['owner','admin']},
   {href:'/inventory/movements',label:'Ombor jurnali',icon:faWarehouse,roles:['owner','admin']},

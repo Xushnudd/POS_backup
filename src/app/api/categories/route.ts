@@ -1,3 +1,5 @@
+import { csv, numeric } from '@/server/exports/csv'
+import { paging, searchTerm, exporting, exportCap, pagination } from '@/server/catalog/queries'
 import { activeStatus } from '@/server/catalog/status'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -8,8 +10,8 @@ import { z } from 'zod'
 
 const createCategorySchema = z.object({
   organizationId: z.string().uuid(),
-  name: z.string().min(2),
-  sortOrder: z.number().default(0),
+  name: z.string().trim().min(2).max(200),
+  sortOrder: z.number().int().min(-2147483648).max(2147483647).default(0),
 })
 
 async function handleGET(request: NextRequest) {
@@ -41,14 +43,17 @@ async function handleGET(request: NextRequest) {
       )
     }
 
-    const where = {organizationId, ...activeStatus(searchParams,payload)}
-    const paginated=['status','page','limit'].some(key=>searchParams.has(key))
-    const page=Number(searchParams.get('page')??1),limit=Number(searchParams.get('limit')??20)
-    if((page-1)*limit>2147483647)throw new AccessError(400,'INVALID_PAGINATION')
+    const search=searchTerm(searchParams)
+    const where = {organizationId, ...activeStatus(searchParams,payload),...(search?{name:{contains:search,mode:'insensitive' as const}}:{})}
+    const paginated=['status','search','page','limit'].some(key=>searchParams.has(key))
+    const {page,limit,skip}=paging(searchParams)
+    const isExport=await exporting(searchParams,payload,'category.export')
     const result=await db.$transaction(async tx=>{
       const total=await tx.category.count({where})
-      const data=await tx.category.findMany({where,orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated?{skip:(page-1)*limit,take:limit}:{})})
-      return {success:true,data,...(paginated?{pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}:{})}
+      if(isExport)exportCap(total)
+      const rows=await tx.category.findMany({where,orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated&&!isExport?{skip,take:limit}:{})})
+      if(isExport)return {success:true,data:{filename:'categories-'+organizationId+'.csv',content:csv([['ID','Nomi','Tartib','Faol'],...rows.map(row=>[row.id,row.name,numeric(row.sortOrder,0),row.isActive?'ha':'yo‘q'])])}}
+      return {success:true,data:rows,...(paginated?{pagination:pagination(page,limit,total)}:{})}
     },{isolationLevel:'RepeatableRead'})
     return NextResponse.json(result)
 

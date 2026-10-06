@@ -29,7 +29,7 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
 class ApiClient {
-  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
     list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
@@ -113,12 +113,12 @@ class ApiClient {
   };
 
   units = {
-    list: () => this.request<CatalogUnit[]>('/units'),
+    list: (params:Record<string,string>={}) => this.request<CatalogUnit[]>(`/units?${new URLSearchParams(params)}`),
     create: (data:{code:string;name:string;precision:number}) => this.request<CatalogUnit>('/units',{method:'POST',body:JSON.stringify(data)}),
     update: (id:string,data:{name?:string;precision?:number;isActive?:boolean}) => this.request<CatalogUnit>(`/units/${id}`,{method:'PUT',body:JSON.stringify(data)}),
   };
   barcodes = {
-    list: (id:string) => this.request<ProductBarcode[]>(`/products/${id}/barcodes`),
+    list: (id:string,params:Record<string,string>={}) => this.request<ProductBarcode[]>(`/products/${id}/barcodes?${new URLSearchParams(params)}`),
     add: (id:string,value:string) => this.request<ProductBarcode>(`/products/${id}/barcodes`,{method:'POST',body:JSON.stringify({value})}),
     remove: (id:string,barcodeId:string) => this.request(`/products/${id}/barcodes/${barcodeId}`,{method:'DELETE',body:'{}'}),
   };
@@ -174,8 +174,8 @@ class ApiClient {
 
   // Categories
   categories = {
-    list: (organizationId: string) =>
-      this.request<Category[]>(`/categories?organizationId=${organizationId}`),
+    list: (organizationId: string,params:Record<string,string>={}) =>
+      this.request<Category[]>(`/categories?${new URLSearchParams({organizationId,...params})}`),
 
     create: (data: { organizationId: string; name: string; sortOrder?: number }) =>
       this.request<Category>('/categories', {
@@ -278,7 +278,7 @@ class ApiClient {
 
   // Inventory
   inventory = {
-    balances: (params: { organizationId: string; storeId?: string; lowStock?: boolean }) => {
+    balances: (params: { organizationId: string; storeId?: string; lowStock?: boolean;search?:string;categoryId?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
@@ -314,6 +314,7 @@ class ApiClient {
       organizationId: string;
       storeId?: string;
       documentType?: string;
+      supplierId?:string;from?:string;to?:string;search?:string;
       status?: string;
       page?: number;
       limit?: number;
@@ -354,7 +355,7 @@ class ApiClient {
 
   // Transfers
   transfers = {
-    list: (params: { organizationId: string; status?: string; page?: number; limit?: number }) => {
+    list: (params: { organizationId: string; status?: string; page?: number; limit?: number;fromStoreId?:string;toStoreId?:string;from?:string;to?:string }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -425,6 +426,9 @@ class ApiClient {
 
   // Suppliers
   suppliers = {
+    get:(id:string)=>this.request<Supplier>(`/suppliers/${id}`),
+    purchases:(id:string,params:Record<string,string>={})=>this.request<StockDocument[]>(`/suppliers/${id}/purchases?${new URLSearchParams(params)}`),
+    totals:(id:string,params:Record<string,string>={})=>this.request<{purchases:number;reversals:number;purchaseValue:string;reversalValue:string;netPurchaseValue:string;basis:string;currency:string}>(`/suppliers/${id}/purchase-totals?${new URLSearchParams(params)}`),
     list: (organizationId: string,params:Record<string,string>={}) =>
       this.request<Supplier[]>(`/suppliers?${new URLSearchParams({organizationId,...params})}`),
 

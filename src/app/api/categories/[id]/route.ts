@@ -6,8 +6,8 @@ import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateCategorySchema = z.object({
-  name: z.string().min(2).optional(),
-  sortOrder: z.number().optional(),
+  name: z.string().trim().min(2).max(200).optional(),
+  sortOrder: z.number().int().min(-2147483648).max(2147483647).optional(),
   isActive: z.boolean().optional(),
 })
 

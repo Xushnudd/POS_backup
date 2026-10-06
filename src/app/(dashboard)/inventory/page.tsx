@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -8,6 +8,8 @@ import { useNotification } from '@/context/NotificationContext';
 import { api, ApiError } from '@/lib/api';
 import { InventoryBalance, Product, StockDocument, Supplier } from '@/types';
 import { formatNumber, formatDate } from '@/lib/format';
+import Pagination from '@/components/ui/Pagination';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -40,6 +42,13 @@ export default function InventoryPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lowStockOnly, setLowStockOnly] = useState<boolean>(false);
 
+  const [listError,setListError]=useState(''),[pages,setPages]=useState(0);
+  const [draftFilters,setDraftFilters]=useState({search:'',from:'',to:'',documentType:'',status:'',supplierId:''}),[filters,setFilters]=useState<Record<string,string>>({});
+  const listScope=JSON.stringify([organization?.id,activeStore?.id,activeTab,lowStockOnly,filters]);
+  const [listPage,setListPage]=useState({scope:'',page:1});
+  const page=listPage.scope===listScope?listPage.page:1;
+  const requestSequence=useRef({value:0});
+
   // New stock document modal
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [docType, setDocType] = useState<string>('purchase');
@@ -57,31 +66,33 @@ export default function InventoryPage() {
 
   const loadData = useCallback(async () => {
     if (!organization?.id) return;
-    setIsLoading(true);
+    const sequence=++requestSequence.current.value;
+    setIsLoading(true);setListError('');
     try {
       if (activeTab === 'balances') {
         const res = await api.inventory.balances({
           organizationId: organization.id,
           storeId: activeStore?.id,
-          lowStock: lowStockOnly || undefined,
+          lowStock: lowStockOnly || undefined,search:filters.search,page,limit:20,
         });
-        if (res.data) setBalances(res.data);
+        if(sequence===requestSequence.current.value){setBalances(res.data??[]);setPages(res.pagination?.totalPages??0);}
       } else {
         const res = await api.stockDocuments.list({
           organizationId: organization.id,
-          storeId: activeStore?.id,
+          storeId: activeStore?.id,...filters,page,limit:20,
         });
-        if (res.data) setDocuments(res.data);
+        if(sequence===requestSequence.current.value){setDocuments(res.data??[]);setPages(res.pagination?.totalPages??0);}
       }
     } catch (err: unknown) {
-      console.error('Failed to load inventory data:', err);
+      if(sequence===requestSequence.current.value){setListError(err instanceof Error?err.message:'Ombor ro‘yxati yuklanmadi');setBalances([]);setDocuments([]);setPages(0);}
     } finally {
-      setIsLoading(false);
+      if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization, activeStore, activeTab, lowStockOnly]);
+  }, [organization, activeStore, activeTab, lowStockOnly, filters, page]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadData);
+    const requests=requestSequence.current;let cancelled=false;void Promise.resolve().then(()=>{if(!cancelled)return loadData();});
+    return()=>{cancelled=true;requests.value++;};
   }, [loadData]);
 
   // Load products and suppliers for document creation
@@ -260,6 +271,15 @@ export default function InventoryPage() {
         )}
       </div>
 
+      <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();setFilters(Object.fromEntries(Object.entries(draftFilters).filter(([,value])=>value.trim()).map(([key,value])=>[key,value.trim()])));}}>
+        <Input label={activeTab==='balances'?'Mahsulot, SKU yoki barkod':'Hujjat raqamini qidirish'} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
+        {activeTab==='documents'&&<><Input label="Hujjat davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Hujjat davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label="Hujjat turi filtri" value={draftFilters.documentType} options={[{value:'',label:'Barchasi'},{value:'purchase',label:'Xarid'},{value:'adjustment',label:'Tuzatish'},{value:'reversal',label:'Qarshi hujjat'},{value:'transfer_out',label:'Transfer chiqimi'},{value:'transfer_in',label:'Transfer kirimi'},{value:'return_in',label:'Qaytarish kirimi'}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label="Hujjat holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'confirmed',label:'Tasdiqlangan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label="Supplier ID filtri" value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
+        <Button type="submit" disabled={isLoading}>Filtrlash</Button>
+      </form>
+      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{})}:filters)}}/>}
+      {listError&&<p role="alert" className="text-red-700">{listError}</p>}
+      <Pagination page={page} pages={pages} busy={isLoading} onPage={value=>setListPage({scope:listScope,page:value})} retry={()=>{void loadData();}}/>
+
       {/* Tab Content: Balances */}
       {activeTab === 'balances' && (
         <Card padding={false}>
@@ -292,7 +312,7 @@ export default function InventoryPage() {
                   {balances.map((b, idx) => {
                     const isLow =
                       Number(b.product?.minStock || 0) > 0 &&
-                      Number(b.quantity) <= Number(b.product?.minStock || 0);
+                      Number(b.quantity) < Number(b.product?.minStock || 0);
                     return (
                       <tr key={idx} className="hover:bg-gray-50/70 transition">
                         <td className="py-3.5 px-4 font-bold text-gray-900">
