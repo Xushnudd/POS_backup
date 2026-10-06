@@ -86,7 +86,7 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
   const document=await frame.getAttribute('srcdoc');expect(document).toContain(`size:${paper}mm 297mm`);expect(document).toContain('CHEK NUSXASI');expect(document).toContain(sale.receiptNo)
   const pdfPage=await page.context().newPage();await pdfPage.setContent(document!);const pdf=await pdfPage.pdf({preferCSSPageSize:true});expect(pdf.subarray(0,4).toString()).toBe('%PDF');await pdfPage.close()
  }
- await page.getByRole('dialog').getByRole('button',{name:'Yangi savdo',exact:true}).click()
+ await page.getByRole('dialog').getByRole('button',{name:'Yopish',exact:true}).click()
  await page.getByRole('button',{name:'Qaytarish',exact:true}).click()
  const disposition=page.getByLabel(`${sale.items[0].productName}: qaytarilgan tovar holati`,{exact:true})
  await expect(disposition).toHaveValue('sellable')
@@ -312,6 +312,19 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}})).status()).toBe(401)
  expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:'browser-new-password'}})).ok()).toBe(true)
  await page.goto('/security')
+ const localGuardId=randomUUID()
+ await page.evaluate(async({id,organizationId,userId})=>{
+  const request=indexedDB.open('shuni-pos-local-v1');const database=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})
+  await new Promise<void>((resolve,reject)=>{const tx=database.transaction('operations','readwrite');tx.objectStore('operations').add({id,scope:{organizationId,userId,deviceId:localStorage.getItem('pos_device_id')},type:'debt.document',payload:{customerId:id},state:'pending',createdAt:new Date().toISOString()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)});database.close()
+ },{id:localGuardId,organizationId:me.data.organization.id,userId:me.data.user.id})
+ await page.getByRole('button',{name:'Barcha sessiyalardan chiqish',exact:true}).click()
+ await expect(page.getByText('Sinxronlanmagan amallar bor; avval ularning natijasini tekshiring',{exact:true})).toBeVisible()
+ expect((await page.request.get('/api/auth/me')).ok()).toBe(true)
+ // Only remove the synthetic test fixture; no real economic intent is discarded.
+ await page.evaluate(async id=>{
+  const request=indexedDB.open('shuni-pos-local-v1');const database=await new Promise<IDBDatabase>(resolve=>{request.onsuccess=()=>resolve(request.result)})
+  await new Promise<void>(resolve=>{const tx=database.transaction('operations','readwrite');tx.objectStore('operations').delete(id);tx.oncomplete=()=>resolve()});database.close()
+ },localGuardId)
  const thirdContext=await page.context().browser()!.newContext({ignoreHTTPSErrors:true})
  try{
   expect((await thirdContext.request.post('https://localhost:3100/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:'browser-new-password'}})).ok()).toBe(true)

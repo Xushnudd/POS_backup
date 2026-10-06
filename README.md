@@ -988,3 +988,11 @@ NEXT_PUBLIC_DATE_FORMAT=DD.MM.YYYY
 - Dark mode implementation
 - Custom themes support
 - Widget system for dashboard
+
+### Core POS holati — 2026-10-06
+
+Amaldagi implementation va qolgan ishlar [EXECUTION_STATUS.md](tasks/EXECUTION_STATUS.md), API contractlar [api.md](api.md)da yuritiladi. Coreda shaxsiy sessiyalar/parol boshqaruvi, audit tarixi, to‘liq filtrlangan bounded CSV eksportlari, POS tezkor tugmalari va58/80mm browser receipt/PDF mavjud. Real Click, fiskal va hardware integratsiyalari hali ulanmagan.
+
+Production yangilashda yangi image ishga tushishidan oldin `npm run db:migrate` (`prisma migrate deploy`) bajariladi. Readiness `202610060016_audit_history_guards` migration tugaganini tekshiradi.016 AuditLog UPDATE/DELETEni taqiqlaydi; developmentdagi `migrate dev` yoki `db push` production deploy o‘rnida ishlatilmaydi. Haqiqiy biznes bazasiga bu ish davomida migration qo‘llanmagan.
+
+Oxirgi tekshiruvlar:44 integratsion,9 unit va kengaytirilgan production HTTPS browser testi; typecheck/lint/build, fresh/legacy17 migration va encrypted backup/restore sinovlari o‘tgan. Bu pilot, production hosting yoki butun PLAN1 qabul shartlari yakunlangani degani emas.

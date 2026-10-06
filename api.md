@@ -565,6 +565,36 @@ Eksport yakunlangan savdo, qaytarish, mijozga yoki uning savdosiga bog‘langan 
 
 Owner ledger GET eksport formatlari (`csv`, `commercial-csv`, `html`) tashkilot+xodim kesimida umumiy 10 request/60s budgetga ega. Customer, davr yoki formatni almashtirish yangi budget ochmaydi. Oddiy ledger GET alohida 60 request/60s. Limit oshsa `429 RATE_LIMITED` va `Retry-After` (qolgan butun sekund) qaytadi; shu muddatdan keyin qayta uriniladi. Budgetlar PostgreSQL atomic counter bilan saqlanadi, process-local emas. Owner va tenant qoidalari saqlangan. Mavjud shared auth/operation rate-limit javoblari ham Retry-After headerini oladi; ularning o‘z window/limitlari o‘zgarmagan.
 
+### Yangi hisoblar uchun yagona parol siyosati
+
+Register, owner orqali staff yaratish, invitation orqali yangi hisob ochish va change-password bir xil `newPasswordSchema`dan foydalanadi:8..72 belgi, UTF-8 bo‘yicha maksimum72 bayt. `hashPassword` yordamchisi ham shu tekshiruvni bajaradi; uzun Unicode parol bcrypt tomonidan yashirin qisqartirilmaydi. Mavjud hashlar qayta yozilmaydi; loginning eski hisoblar bilan mosligi saqlangan.
+
+Registerda validated phone bo‘yicha5 urinish/15min; faqat `TRUST_PROXY_IP=true` bo‘lsa trusted reverse proxy yuborgan `x-real-ip` bo‘yicha qo‘shimcha30/15min. Header yo‘q bo‘lsa shu rejimdagi `unknown` umumiy budgetga tushadi. Limit bcrypt va hisob/tashkilot yaratilishidan oldin tekshiriladi;429 RATE_LIMITED/Retry-After. Bu application budget; hosting/DDoS himoyasi alohida.
+
+### Katalog va mijozlar CSV eksporti
+
+`GET /api/products?organizationId=<UUID>&format=csv&search=...&categoryId=<UUID>` — owner/admin; cashier403. Mavjud active-product qidiruv va category filtri, tenant nazorati saqlangan. Asosiy/qo‘shimcha barkodlar, birlik, kategoriya, narx,6-decimal tannarx/minStock eksport qilinadi. `barcode` bilan CSV birga yuborilmaydi (400 INVALID_FILTER).
+
+`GET /api/customers?organizationId=<UUID>&format=csv&search=...` — owner-only. Active mijoz qidiruviga mos ID/ism/telefon/manzil/credit limit va DebtEntrydan joriy net qoldiq; bu due aging yoki davriy ko‘chirma emas. Negative qoldiq ham aniq saqlanadi.
+
+Ikkalasida page/limit satrlarni qisqartirmaydi: to‘liq filtrlangan count bir repeatable-read snapshotda tekshiriladi;10000dan oshsa413 EXPORT_TOO_LARGE va fayl berilmaydi. JSON data.filename/content, UTF-8 BOM/CRLF, quote/newline/formula injection himoyasi, numeric Decimal ustunlar. Catalog va customers export alohida organization+user10/min budget. UI tugmalari mavjud filtrlarni yuboradi va Blob download/error holatini ko‘rsatadi. XLSX/import/archived export bu bosqichga kirmaydi.
+
+### To‘liq savdo va mahsulot hisobotlari CSV
+
+`GET /api/reports/sales?...&format=csv` va `/api/reports/products?...&format=csv` — mavjud organization/store/startDate/endDate qoidalari; productsda categoryId ham qo‘llanadi. Tenant/assigned branch/role saqlangan. JSON data.filename/content; UI hisobot CSV tugmasi ayni date/store filtrlarini yuboradi. Har biri to‘liq natija, UI paginationdan mustaqil,10000 cap/repeatable-read/Decimal/formula protection. Ikkalasi organization+user bo‘yicha bitta report.export10/min budgetni va umumiy report.read60/min limitni sarflaydi.
+
+Sales CSV davr ichida yakunlangan savdolar va davr ichida qaytarilgan tovar hodisalarini alohida satr/ustunlarda beradi. Davrdan oldingi original savdoning davr ichidagi returni ham kiradi. Yalpi savdo, returned goods value va gross-minus-return sof tovar tushumi metadata bor; bular actual cash flow emas. Products CSV mavjud signed sales/returns SQLdan sof quantity/revenue/historical cost/gross profit chiqaradi. Eski client faqat joriy50 satrni CSV qilishi olib tashlandi. XLSX, scheduled/background export va PDF reports hali alohida ishlar.
+
+### POS tezkor tugmalari va chek nusxasi
+
+POS: F2 qidiruv fokus; F4 qidiruv/category filtrlarini tozalash; F9 bo‘sh bo‘lmagan savat uchun payment oynasi (smena yo‘q bo‘lsa open-shift oynasi); Esc payment/receipt oynasini yopish. Tugmalar automatic financial posting qilmaydi. Local recovery tayyor bo‘lmasa, processing/unknown checkout, boshqa dialog yoki boshqa editable fieldda shortcut cheklangan; key repeat/composition/modifier holatlari tashlanadi.
+
+ReceiptPreviewda58/80mm tanlov. Brauzer printi faqat chek DOMidan isolated iframe yaratadi; qog‘oz eni va297mm sahifa CSSi beriladi, actual driver sozlamasi print dialogda tanlanadi. Detaildan ochilgan chek CHEK NUSXASI/FISKAL EMAS; draft QORALAMA. Original cashier name/ID va organization-timezone sana, payments kirim/chiqim belgisi. Print so‘ralgani fizik printer muvaffaqiyati deb ko‘rsatilmaydi va yangi Sale/Payment yaratmaydi. Real printer/fiscal/SDK integratsiyasi yo‘q.
+
+### Audit tarixi append-only migration
+
+`202610060016_audit_history_guards` bazada AuditLog UPDATE/DELETEni taqiqlaydi, organization/time/id indeksini qo‘shadi. Organization cascade delete va haqiqiy User delete uchun existing actorId→null anonimlashtirish istisnolari saqlangan; oddiy actorId o‘zgartirish rad. Deploymentda migration avval qo‘llanadi: readiness endi016 finished holatini talab qiladi. Bu runtime DB guard, superuser yoki table owner vakolatini almashtirmaydi; retention/security event model alohida.
+
 ### Parolni xavfsiz almashtirish
 
 Mavjud `POST /api/auth/change-password` body `{currentPassword,newPassword}` strict: yangi parol8..72 belgi va UTF-8 bo‘yicha72 baytdan oshmaydi (bcrypt truncation oldini olish). Current password tekshiruvi, existing5/15min user budget va CSRF saqlangan. Hash hisoblanganidan keyin transactionda User/Session row lock, live session/user va original hash qayta tekshiriladi; parallel request oldingi parol bilan yangi natijani bosib ketolmaydi. Muvaffaqiyatli password update, barcha user session revokelari va password_changed audit bir transactionda. Cookie tozalanadi. Auditga parol yoki hash yozilmaydi.

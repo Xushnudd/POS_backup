@@ -5,7 +5,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import { Sale } from '@/types';
-import { formatMoney, formatDate } from '@/lib/format';
+import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -48,14 +48,14 @@ export default function ReceiptPreview({
       title={
         <div className="flex items-center gap-2 text-emerald-600">
           <FontAwesomeIcon icon={faCheckCircle} />
-          <span>Savdo muvaffaqiyatli yakunlandi</span>
+          <span>{copy?'Chek nusxasi':sale.status==='draft'?'Savdo qoralamasi':'Savdo muvaffaqiyatli yakunlandi'}</span>
         </div>
       }
       size="md"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button variant="outline" onClick={onClose}>
-            Yangi savdo
+            {copy?'Yopish':'Yangi savdo'}
           </Button>
           <Button
             variant="primary"
@@ -79,7 +79,7 @@ export default function ReceiptPreview({
         style={{width:width+'mm',maxWidth:'100%'}}
       >
         {/* Header */}
-        <p className="text-center font-bold">{copy?'CHEK NUSXASI':'SAVDO CHEKI'} · FISKAL EMAS</p>
+        <p className="text-center font-bold">{sale.status==='draft'?'QORALAMA · ':''}{copy?'CHEK NUSXASI':'SAVDO CHEKI'} · FISKAL EMAS</p>
         <div className="text-center pb-3 border-b border-dashed border-gray-300">
           <h2 className="text-base font-black uppercase text-gray-900 tracking-wider">
             {organization?.name || 'SHUNI POS'}
@@ -100,7 +100,7 @@ export default function ReceiptPreview({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Sana:</span>
-            <span>{formatDate(sale.completedAt || sale.createdAt, true)}</span>
+            <span>{new Date(sale.completedAt||sale.createdAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone??'Asia/Tashkent'})}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Kassir:</span>

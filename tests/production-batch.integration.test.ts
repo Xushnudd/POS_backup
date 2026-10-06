@@ -37,6 +37,15 @@ test('Registration budgets reject before creating a business and new passwords c
   assert.equal(await prisma.user.count({where:{phone:ipPhone}}),0)
  }finally{if(originalProxy===undefined)delete process.env.TRUST_PROXY_IP;else process.env.TRUST_PROXY_IP=originalProxy;await clearLimit('register-ip','unknown')}
 })
+test('Staff and invitation account entrypoints enforce the shared Unicode password boundary',async()=>{
+ const {POST:staff}=await import('@/app/api/organizations/[id]/users/route')
+ const {POST:accept}=await import('@/app/api/auth/invitations/accept/route')
+ const a=await account(),phone='staff-unicode-'+randomUUID()
+ const staffResponse=await staff(req(`/organizations/${a.data.organization.id}/users`,a.cookie,{fullName:'Unicode staff',phone,password:'я'.repeat(40),role:'cashier',storeIds:[a.store.id]}),{params:Promise.resolve({id:a.data.organization.id})})
+ assert.equal(staffResponse.status,400);assert.equal(await prisma.user.count({where:{phone}}),0)
+ const inviteResponse=await accept(req('/auth/invitations/accept','',{token:'a'.repeat(43),password:'я'.repeat(40),fullName:'Unicode staff'}),undefined)
+ assert.equal(inviteResponse.status,400)
+})
 test('Audit DB guard rejects updates/deletes, supports actor anonymization and tenant cascade',async()=>{
  const a=await account(),actor=await prisma.user.create({data:{phone:randomUUID(),fullName:'Deleted actor',passwordHash:'not-login'}});users.push(actor.id)
  const row=await prisma.auditLog.create({data:{organizationId:a.data.organization.id,actorId:actor.id,entityType:'Test',entityId:randomUUID(),action:'recorded'}})
