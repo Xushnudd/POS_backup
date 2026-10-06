@@ -5,9 +5,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { useCart } from '@/hooks/useCart';
+import { usePosConnection } from '@/hooks/usePosConnection';
 import { useDebounce } from '@/hooks/useDebounce';
 import { api } from '@/lib/api';
-import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, markCancelled } from '@/lib/offline';
+import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, markCancelled, synchronize } from '@/lib/offline';
 import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
 import ProductSearch from '@/components/pos/ProductSearch';
 import Cart from '@/components/pos/Cart';
@@ -39,6 +40,7 @@ export default function PosPage() {
     hydrate,
     setCartDiscount,
     setCustomer,
+    setNote,
   } = useCart();
 
   // Products & Categories
@@ -56,6 +58,7 @@ export default function PosPage() {
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState<boolean>(false);
 
+  const connection=usePosConnection();
   const debouncedSearch = useDebounce(searchQuery, 300);
 
   // Load products
@@ -129,34 +132,37 @@ export default function PosPage() {
   };
 
   const [localReady,setLocalReady]=useState(false);
+  const [serviceType,setServiceType]=useState('');
   const [hasPendingCheckout,setHasPendingCheckout]=useState(false);
   const checkoutAttempt = useRef<{ operationId: string; payload: string; saleId?: string } | null>(null);
   useEffect(() => {
     if (!organization?.id || !user?.id) return;
     let cancelled=false;
+    void Promise.resolve().then(()=>{if(!cancelled){setLocalReady(false);setHasPendingCheckout(false);checkoutAttempt.current=null;clearCart();setServiceType('');}});
     const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
     void loadDraft(scope).then(value=>{
       if (cancelled) return;
       if (value && typeof value==='object') {
-        const saved=value as {cart:{items:CartItem[];cartDiscount:number;customer:Customer|null;note:string};attempt:typeof checkoutAttempt.current};
+        const saved=value as {cart:{items:CartItem[];cartDiscount:number;customer:Customer|null;note:string};serviceType?:string;attempt:typeof checkoutAttempt.current};
         if (saved.cart?.items) hydrate(saved.cart);
+        setServiceType(saved.serviceType??'');
         checkoutAttempt.current=saved.attempt;
         setHasPendingCheckout(Boolean(saved.attempt));
       }
       setLocalReady(true);
     }).catch(()=>{if (!cancelled) notifyError('Lokal savatni tiklab bo‘lmadi; ma’lumotni tozalashdan oldin tekshiring');});
     return ()=>{cancelled=true;};
-  },[organization?.id,user?.id,hydrate,notifyError]);
+  },[organization?.id,user?.id,hydrate,clearCart,notifyError]);
   useEffect(()=>{
     if (!localReady || !organization?.id || !user?.id) return;
     const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
-    const timer=setTimeout(()=>{void saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current}).catch(()=>notifyError('Savat lokal saqlanmadi; ushbu oynani yopmang'));},200);
+    const timer=setTimeout(()=>{void saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current}).catch(()=>notifyError('Savat lokal saqlanmadi; ushbu oynani yopmang'));},200);
     return ()=>clearTimeout(timer);
-  },[localReady,organization?.id,user?.id,items,cartDiscount,customer,note,notifyError]);
+  },[localReady,organization?.id,user?.id,items,cartDiscount,customer,note,serviceType,notifyError]);
 
   // Process and complete sale
   const handleProcessPayment = async (
-    payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string
+    payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string
   ) => {
     if (!organization?.id || !activeStore?.id || !activeRegister?.id || !activeShift?.id || !user?.id) {
       notifyError('Kassa yoki smena ma\'lumotlari to\'liq emas');
@@ -164,7 +170,7 @@ export default function PosPage() {
     }
 
     if (!localReady) { notifyError('Lokal savat hali tayyor emas'); return; }
-    if (!navigator.onLine) { notifyError('Savdoni yakunlash uchun ulanishni tiklang; savat saqlangan'); return; }
+    if (connection.state!=='online') { notifyError('Savdoni yakunlash uchun ulanishni tiklang; savat saqlangan'); return; }
     setIsProcessingPayment(true);
     try {
       // 1. Create draft sale
@@ -177,6 +183,7 @@ export default function PosPage() {
         customerId: customer?.id || undefined,
         discountAmount: cartDiscount,
         note: note || undefined,
+        sellerId:user.id,serviceType:serviceType.trim()||undefined,
         items: items.map((i) => ({
           productId: i.product.id,
           productName: i.product.name,
@@ -184,11 +191,10 @@ export default function PosPage() {
           quantity: i.quantity,
           unitPrice: i.unitPrice,
           discountAmount: i.discountAmount,
-          unitCost: Number(i.product.costPrice) || 0,
         })),
       };
 
-      const completion={payments,...(creditDueAt?{creditDueAt}: {})};
+      const completion={payments,...(creditDueAt?{creditDueAt}: {}),...(cashTendered!==undefined?{cashTendered}: {})};
       const signature = JSON.stringify(draftPayload);
       if (checkoutAttempt.current && checkoutAttempt.current.payload !== signature) {
         throw new Error('Oldingi savdo natijasini aniqlang; kutilayotgan savatni o‘zgartirish mumkin emas');
@@ -197,13 +203,13 @@ export default function PosPage() {
       const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
       setHasPendingCheckout(true);
       const operationId=checkoutAttempt.current.operationId;
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current});
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
       await enqueue({id:operationId,scope,type:'sale.create',payload:{...draftPayload,operationId},state:'pending',createdAt:new Date().toISOString()});
       const saleRes = await api.sales.create({ ...draftPayload, operationId });
       if (!saleRes.data) throw new Error('Savdo qoralamasi yaratilmadi');
       checkoutAttempt.current.saleId = saleRes.data.id;
       await acknowledge(operationId,'synced',saleRes.data);
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:checkoutAttempt.current});
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
       await enqueue({id:saleRes.data.id,scope,type:'sale.complete',payload:{saleId:saleRes.data.id,...completion},state:'pending',createdAt:new Date().toISOString()});
 
       // 2. Complete sale with payments
@@ -226,7 +232,7 @@ export default function PosPage() {
 
       setCompletedSale(finishedSale);
       setIsPaymentModalOpen(false);
-      clearCart();
+      clearCart();setServiceType('');
       setIsReceiptModalOpen(true);
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'To\'lovni yakunlashda xatolik yuz berdi');
@@ -252,7 +258,7 @@ export default function PosPage() {
         await markCancelled(attempt.saleId,scope,{saleId:attempt.saleId,state:'voided'});
       }else if(outcome.data?.state!=='cancelled')throw new Error('Server bekor qilishni tasdiqlamadi');
       await markCancelled(attempt.operationId,scope,outcome.data);
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt:null});
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:null});
       checkoutAttempt.current=null;setHasPendingCheckout(false);setIsPaymentModalOpen(false);
       notifySuccess('Urinish serverda bekor qilindi. Savat saqlangan.');
     }catch(error){notifyError(error instanceof Error?error.message:'Bekor qilish tasdiqlanmadi; urinish saqlangan');}
@@ -273,7 +279,7 @@ export default function PosPage() {
         }
         attempt.saleId=draft.data.result.id;
         await acknowledge(attempt.operationId,'synced',draft.data.result);
-        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},attempt});
+        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt});
       }
       const completed=await api.operations.status('sale.complete',attempt.saleId);
       if (completed.data?.state!=='completed' || !completed.data.result) {
@@ -285,7 +291,7 @@ export default function PosPage() {
       checkoutAttempt.current=null;
       setHasPendingCheckout(false);
       setCompletedSale(completed.data.result);
-      clearCart();
+      clearCart();setServiceType('');
       setIsPaymentModalOpen(false);
       setIsReceiptModalOpen(true);
       notifySuccess('Oldingi savdoning yakunlangan natijasi tiklandi');
@@ -317,10 +323,14 @@ export default function PosPage() {
 
   return (
     <div className="h-[calc(100vh-5rem)] flex flex-col gap-4">
+      <div role="status" className={connection.state==='online'?'text-green-700':'bg-amber-50 text-amber-900 p-3'}>
+        <span>{connection.state==='online'?'Server bilan aloqa bor':connection.state==='checking'?'Server aloqasi tekshirilmoqda':'Server bilan aloqa yo‘q. Savat lokal saqlanadi; savdo yakunlanmaydi.'}</span>
+        <Button variant="outline" onClick={connection.recheck}>Aloqani tekshirish</Button>
+      </div>
       <p className="text-xs text-slate-500">F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.</p>
       {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3">
         <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
-        <div className="flex gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
+        <div className="flex gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>Navbatni sinxronlash</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
       </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (
@@ -348,6 +358,8 @@ export default function PosPage() {
         </div>
       )}
 
+      <label>Chek izohi<textarea aria-label="Chek izohi" maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
+      <label>Xizmat turi (ixtiyoriy)<input aria-label="Xizmat turi (ixtiyoriy)" maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       {/* Main 2-column layout: Left Catalog, Right Cart */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
         {/* Left: Product Catalog & Search (2 cols) */}
@@ -381,7 +393,7 @@ export default function PosPage() {
             onSetCartDiscount={setCartDiscount}
             onSetCustomer={setCustomer}
             onCheckout={handleProceedToPayment}
-            disabled={!activeShift}
+            disabled={!activeShift||!localReady||connection.state!=='online'}
           />
         </div>
       </div>

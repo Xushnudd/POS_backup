@@ -1018,3 +1018,15 @@ Return historydan HTML qaytarma chek nusxasi yuklanadi. Manager sababi, actor/ap
 Deployment uchun yangi uchta versioned migratsiya: `202610060019_finance_history`, `202610060020_correction_cash_link`, `202610060021_return_approval_check`. Backup va staging tekshiruvidan keyin existing `npm run db:migrate` yo‘lini qo‘llang; build schema migratsiyasini bajarmaydi. Real biznes bazasiga bu ish jarayonida tegilmagan. Batafsil API contracti api.mdda; task qabul protokoli tasks/EXECUTION_STATUS.mdda. Real Click/fiscal/E-POS/hardware adapterlar keyingi alohida integratsiya doirasida qoladi.
 
 Yakuniy qabul:15 ta PLAN1 ID done, jami25→40. PostgreSQL integration78/78, unit14/14, production HTTPS Chromium3/3; typecheck/lint/build va fresh/legacy22 migration hamda encrypted backup/restore o‘tdi. QA-01.03 (to‘liq ko‘p brauzerli acceptance) bu15 orasida emas. Bu lokal qabul dalili butun tizim production release/pilot tayyorligini anglatmaydi.
+
+## Savat, uzilish va haqiqiy naqd hisob (2026-10-06)
+
+POS server readiness asosida aloqa holatini ko‘rsatadi. Uzilishda savat saqlanadi, savdoni yakunlash bloklanadi; aloqa GET probe orqali chegaralangan backoff bilan tekshiriladi. Mijoz, chek izohi va optional xizmat turi oynani yopib qayta ochganda ham o‘z user/business/device savatidan tiklanadi. Yangi savatlarda keraksiz customer kontaktlari/nested data va katalog tannarxi lokal saqlanmaydi.
+
+Naqd modalda mijoz bergan haqiqiy pulni kiriting. Aralash to‘lovda cash/card(ichki qo‘lda qayd)/credit qismlari va berilgan naqd pul alohida. Server qaytimni hisoblab chekda saqlaydi; tender tushumga qo‘shilmaydi. Masalan100000chek/120000tender →20000qaytim va100000cash receipt. Legacy tender unknown NULL; tarix taxmin qilinmaydi. Click/terminal API settlement ulanmagan.
+
+Natijasi noma’lum savdoda “Natijani tekshirish” asl server yozuvini topadi. “Navbatni sinxronlash” persisted original commandlarni operator ko‘rsatmasi bilan yuboradi; yangi receipt/payment yaratib dublikatlamaydi. Pending/conflict navbat bilan logout/clear bloklanadi. Boshqa tabdagi kechikkan javob terminal amalni qayta ochmaydi; sync/clear atomic IndexedDB transactionlarida. Bu rezervli offline sale emas: signed lease/stock quota hali alohida vazifa.
+
+Deploymentdagi yangi additive migratsiyalar: `202610060022_cash_tender`, `202610060023_sale_metadata`; jami24. Existing `npm run db:migrate`ni staging/backup protokoli bilan alohida qo‘llang; build migratsiyani almashtirmaydi. Yangi ilova readiness oxirgi schema contract tayyor bo‘lmaguncha503. Lokal testlarda real biznes DBga tegilmadi.
+
+Keyingi10 band qabul qilindi, jami done40→50. Final real PostgreSQL83/83, unit15/15, HTTPS Chromium5/5; typecheck/lint/build, fresh/legacy24 migration va encrypted backup/restore o‘tdi. Individual qabul/versiya dalili tasks/EXECUTION_STATUS.md oxirgi bo‘limida.

@@ -230,7 +230,7 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
-    complete: (id: string, data: { creditDueAt?:string; payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
+    complete: (id: string, data: { cashTendered?:string; creditDueAt?:string; payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
       this.request<Sale>(`/sales/${id}/complete`, {
         method: 'POST',
         body: JSON.stringify(data),

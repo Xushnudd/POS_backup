@@ -126,6 +126,9 @@ export default function ReceiptPreview({
           )}
         </div>
 
+        {sale.serviceType&&<p>Xizmat: {sale.serviceType}</p>}
+        {sale.note&&<p className="break-words">Izoh: {sale.note}</p>}
+        {sale.cashTendered!=null&&sale.cashChange!=null&&<div><p>Berilgan naqd: {formatMoney(sale.cashTendered)}</p><p>Qaytim: {formatMoney(sale.cashChange)}</p></div>}
         {/* Items List */}
         <div className="py-2.5 border-b border-dashed border-gray-300">
           <div className="flex justify-between font-bold pb-1 text-[11px] text-gray-500 uppercase">

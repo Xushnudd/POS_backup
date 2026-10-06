@@ -275,6 +275,10 @@ export interface SaleReturnHistory {
   items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
 }
 export interface Sale {
+  sellerId?: string | null;
+  serviceType?: string | null;
+  cashTendered?: string | null;
+  cashChange?: string | null;
   saleReturns?:{id:string;refundAmount:string;returnReceiptNo:string;returnedAt:string}[];
   id: string;
   organizationId: string;

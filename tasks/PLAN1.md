@@ -1068,7 +1068,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.02** — Savatni brauzer yopilishi/yangilanishidan tiklash; qurilma va foydalanuvchi chegarasi.
+- [x] **POS-02.02** — Savatni brauzer yopilishi/yangilanishidan tiklash; qurilma va foydalanuvchi chegarasi.
 
   **Texnologiya:** Browser IndexedDB va React.
 
@@ -1082,9 +1082,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Refresh/browser reopen o‘z savatini tiklaydi; boshqa user/device savati sizib chiqmaydi.
 
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
+
   **Dalil:** `POS-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.03** — Aralash to‘lov: masalan, 60 000 naqd + 40 000 karta; qisman nasiya.
+- [x] **POS-02.03** — Aralash to‘lov: masalan, 60 000 naqd + 40 000 karta; qisman nasiya.
 
   **Texnologiya:** React payment rows, Zod, Prisma.Decimal.
 
@@ -1098,9 +1100,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** 100000 chek uchun 60000 cash+40000 card va cash+debt variantlarida summa/pul/qarz mos.
 
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
+
   **Dalil:** `POS-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.04** — Qaytimni haqiqiy naqd berilgan summa bilan ko‘rsatish, tushumga faqat tegishli summani yozish.
+- [x] **POS-02.04** — Qaytimni haqiqiy naqd berilgan summa bilan ko‘rsatish, tushumga faqat tegishli summani yozish.
 
   **Texnologiya:** React UI, Decimal server calculator, Payment DTO.
 
@@ -1113,6 +1117,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** 100000 chekka 120000 berilganda qaytim 20000, cash tushum 100000 bo‘ladi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `POS-02.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1164,7 +1170,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-02.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.08** — Mijoz tanlash, chek izohi, sotuvchi/xizmat turi kerak bo‘lsa belgilash.
+- [x] **POS-02.08** — Mijoz tanlash, chek izohi, sotuvchi/xizmat turi kerak bo‘lsa belgilash.
 
   **Texnologiya:** React Select/Input, Prisma sale metadata.
 
@@ -1177,6 +1183,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Mijoz/izoh/sotuvchi/xizmat qiymatlari saqlanadi; optional maydonsiz savdo ham o‘tadi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `POS-02.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2088,7 +2096,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-01.05** — Naqd savdoda berilgan pul/qaytimni tushum bilan chalkashtirmaslik.
+- [x] **FIN-01.05** — Naqd savdoda berilgan pul/qaytimni tushum bilan chalkashtirmaslik.
 
   **Texnologiya:** Decimal money service, PostgreSQL tender/change fields.
 
@@ -2101,6 +2109,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** 120000 tender/20000 change misolida cash revenue 100000; tender tushum deb hisoblanmaydi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `FIN-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2786,7 +2796,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
 #### OFF-01 — uzilishdan tiklanish [P0]
 
-- [ ] **OFF-01.01** — Tarmoq holatini ko‘rsatish, savatni xavfsiz saqlash va muvaffaqiyatsiz so‘rovni nazoratli takrorlash.
+- [x] **OFF-01.01** — Tarmoq holatini ko‘rsatish, savatni xavfsiz saqlash va muvaffaqiyatsiz so‘rovni nazoratli takrorlash.
 
   **Texnologiya:** React network UI, Browser IndexedDB, fetch/AbortController.
 
@@ -2800,9 +2810,11 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Bandning qabul mezoni:** Disconnect banner va saved basket bor; reconnect bounded retry bilan, duplicate sale yo‘q.
 
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
+
   **Dalil:** `OFF-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-01.02** — Savdo yozilgan, ammo javob kelmagan holatda serverdagi natijani topish.
+- [x] **OFF-01.02** — Savdo yozilgan, ammo javob kelmagan holatda serverdagi natijani topish.
 
   **Texnologiya:** Next.js operation-status API va PostgreSQL operation record.
 
@@ -2815,6 +2827,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Server commitdan keyingi response-lossda original operation topiladi; yangi sale yaratilmaydi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `OFF-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2884,7 +2898,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `OFF-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-02.02** — Lokal savdo navbati, qurilma identifikatori va server bilan bir martalik sinxronlash.
+- [x] **OFF-02.02** — Lokal savdo navbati, qurilma identifikatori va server bilan bir martalik sinxronlash.
 
   **Texnologiya:** IndexedDB transactions, crypto.randomUUID, PostgreSQL idempotency.
 
@@ -2897,6 +2911,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Browser restartdan keyin queue saqlanadi; repeated sync bitta operation posting yaratadi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `OFF-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2932,7 +2948,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `OFF-02.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-02.05** — Lokal ma’lumot xavfsizligi, chiqishda tozalash va sinxronlanmagan savdoni yo‘qotishdan himoya.
+- [x] **OFF-02.05** — Lokal ma’lumot xavfsizligi, chiqishda tozalash va sinxronlanmagan savdoni yo‘qotishdan himoya.
 
   **Texnologiya:** IndexedDB, Web Crypto, browser storage persistence.
 
@@ -2945,6 +2961,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Unsynced queue borida logout/clear blok yoki xavfsiz eksport bilan; boshqa user queuega kira olmaydi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `OFF-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3285,7 +3303,7 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
 
   **Dalil:** `DATA-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **DATA-01.03** — Qoldiq/savdo/smena holatini atomik o‘zgartirish; deadlock/konfliktni nazoratli qayta urinish.
+- [x] **DATA-01.03** — Qoldiq/savdo/smena holatini atomik o‘zgartirish; deadlock/konfliktni nazoratli qayta urinish.
 
   **Texnologiya:** Prisma interactive transactions, PostgreSQL locks.
 
@@ -3298,6 +3316,8 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Concurrent checkout/stock/shift va deadlock bounded retry testlari yakuniy invariantlarni saqlaydi.
+
+  **Qabul:** `done`, 2026-10-06. [Keyingi 10 ta bandning test va versiya dalili](EXECUTION_STATUS.md#keyingi-10-ta-plan1-bandi--savat-va-tolov-qabul-protokoli-2026-10-06).
 
   **Dalil:** `DATA-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

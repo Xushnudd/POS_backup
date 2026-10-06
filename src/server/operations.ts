@@ -44,7 +44,8 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
       // fresh transaction rechecks live authorization, actor and payload hash.
       const committedBusinessRace=error instanceof Prisma.PrismaClientKnownRequestError && error.code==='P2002' && !!await prisma.operation.findUnique({where:{organizationId_type_key:{organizationId:context.organizationId,type,key}},select:{id:true}})
       const retryable=operationRace || committedBusinessRace || (error instanceof Prisma.PrismaClientKnownRequestError && (error.code==='P2034' || (error.code==='P2010' && ['40001','40P01'].includes(String(error.meta?.code)))))
-      if (!retryable || attempt===2) throw error
+      if (!retryable) throw error
+      if (attempt===2) throw new AccessError(409,'CONCURRENT_CONFLICT','Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring')
       await new Promise(resolve=>setTimeout(resolve,20*(attempt+1)))
     }
   }

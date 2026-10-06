@@ -1,3 +1,5 @@
+import {readFileSync} from 'node:fs'
+import ts from 'typescript'
 import { test, expect } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
 import { randomUUID } from 'node:crypto'
@@ -73,6 +75,7 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await page.getByRole('button',{name:'Natijani tekshirish',exact:true}).click()
  await expect(page.getByRole('button',{name:'Natijani tekshirish',exact:true})).not.toBeVisible()
  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.data.organization.id},include:{payments:true,items:true}})
+ expect(sale.cashTendered?.toString()).toBe('150.25');expect(sale.cashChange?.toString()).toBe('50')
  expect(sale.totalAmount.toString()).toBe('100.25');expect(sale.payments.length).toBe(1);expect(sale.payments[0].amount.toString()).toBe('100.25')
  expect(sale.items[0].unit).toBe('dona')
  await page.goto(`/sales/${sale.id}`)
@@ -448,4 +451,54 @@ test('Production HTTPS: durable shift correction and frozen report pagination/ex
  const dash=await (await page.request.get('/api/reports/dashboard?'+params)).json();expect(dash.data.totalSales).toBe(61);expect(dash.data.totalRevenue).toBe(report.summary.totalRevenue)
  await page.getByRole('button',{name:'Yangilash',exact:true}).click();await expect(page.getByText('62 ta',{exact:true})).toBeVisible()
  await page.goto('/dashboard');await page.getByRole('link',{name:'Shu holatdagi jadval',exact:true}).click();await expect(page).toHaveURL(/\/reports\?startDate=/);await expect(page.getByText('62 ta',{exact:true})).toBeVisible()
+})
+
+
+test('Production HTTPS: offline server banner, browser reopen, customer/note and original mixed-payment sync',async({page,context})=>{
+ const phone='998'+Date.now();phones.push(phone)
+ await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Queue Browser');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Queue browser');await page.getByLabel(/Parol \(/).fill('test-only-password');await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
+ const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),headers={Origin:'https://localhost:3100'}
+ const product=await db.product.create({data:{organizationId:me.organization.id,name:'Queue coffee',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100000,costPrice:10}})
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:5}})
+ const customer=await db.customer.create({data:{organizationId:me.organization.id,fullName:'Queue customer',phone:randomUUID(),creditLimit:100000}})
+ expect((await page.request.post('/api/shifts',{headers,data:{registerId:register.id,organizationUserId:me.user.organizationUserId,openingCash:0,operationId:randomUUID()}})).ok()).toBe(true)
+ await page.goto('/pos');await expect(page.getByText('Server bilan aloqa bor',{exact:true})).toBeVisible()
+ await page.getByRole('heading',{name:'Queue coffee',exact:true}).click();await page.locator('select').filter({has:page.locator('option',{hasText:'Queue customer'})}).selectOption(customer.id)
+ await page.getByLabel('Chek izohi',{exact:true}).fill('Browser delivery note');await page.getByLabel('Xizmat turi (ixtiyoriy)',{exact:true}).fill('Yetkazish')
+ await expect.poll(()=>page.evaluate(async()=>{const r=indexedDB.open('shuni-pos-local-v1');const d=await new Promise<IDBDatabase>(resolve=>{r.onsuccess=()=>resolve(r.result)});const values=await new Promise<{value:{cart:{note:string}}}[]>(resolve=>{const q=d.transaction('drafts').objectStore('drafts').getAll();q.onsuccess=()=>resolve(q.result)});d.close();return values.some(v=>v.value.cart.note==='Browser delivery note')})).toBe(true)
+ await page.close();const reopened=await context.newPage();await reopened.goto('/pos')
+ await expect(reopened.getByLabel('Chek izohi',{exact:true})).toHaveValue('Browser delivery note');await expect(reopened.getByRole('button',{name:"To'lovga o'tish",exact:true})).toBeEnabled()
+ await reopened.route('**/api/health/ready',route=>route.fulfill({status:503,json:{status:'unavailable'}}));await reopened.getByRole('button',{name:'Aloqani tekshirish',exact:true}).click();await expect(reopened.getByText(/Server bilan aloqa yo‘q/)).toBeVisible();await expect(reopened.getByRole('button',{name:"To'lovga o'tish",exact:true})).toBeDisabled();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0)
+ await reopened.unroute('**/api/health/ready');await expect(reopened.getByText('Server bilan aloqa bor',{exact:true})).toBeVisible()
+ await reopened.getByRole('button',{name:"To'lovga o'tish",exact:true}).click();await reopened.getByRole('button',{name:'Aralash',exact:true}).click();await reopened.getByLabel('Naqd',{exact:true}).fill('1e3');await reopened.getByRole('button',{name:/Savdoni yakunlash/}).click();await expect(reopened.getByText('Aralash to‘lov jami chek summasiga teng bo‘lishi kerak',{exact:true})).toBeVisible();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);await reopened.getByLabel('Naqd',{exact:true}).fill('60000');await reopened.getByLabel('Karta (qo‘lda qayd)',{exact:true}).fill('0');await reopened.getByLabel('Nasiya',{exact:true}).fill('40000');await reopened.getByLabel('Aralash to‘lovda berilgan naqd pul',{exact:true}).fill('80000')
+ await reopened.route('**/api/sales/*/complete',async route=>{await route.fetch();await route.abort()});await reopened.getByRole('button',{name:/Savdoni yakunlash/}).click();await expect.poll(()=>db.sale.count({where:{organizationId:me.organization.id,status:'completed'}})).toBe(1)
+ await reopened.reload();await expect(reopened.getByRole('button',{name:'Navbatni sinxronlash',exact:true})).toBeEnabled();await reopened.getByTitle('Tizimdan chiqish',{exact:true}).click();await expect(reopened.getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring',{exact:true})).toBeVisible();await expect(reopened).toHaveURL(/\/pos$/);await reopened.getByRole('button',{name:'Navbatni sinxronlash',exact:true}).click();await expect(reopened.getByRole('button',{name:'Natijani tekshirish',exact:true})).not.toBeVisible()
+ const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id},include:{payments:true}});expect(sale.sellerId).toBe(me.user.id);expect(sale.serviceType).toBe('Yetkazish');expect(sale.customerId).toBe(customer.id);expect(sale.note).toBe('Browser delivery note');expect(sale.cashTendered?.toString()).toBe('80000');expect(sale.cashChange?.toString()).toBe('20000');expect(sale.payments.length).toBe(2)
+ expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString()).toBe('40000');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1)
+ await expect(reopened.locator('#printable-receipt')).toContainText('Browser delivery note');await expect(reopened.locator('#printable-receipt')).toContainText('Qaytim:')
+})
+
+test('IndexedDB transactions isolate users/devices, preserve restart queues and forbid unsafe clear/ack races',async({page})=>{
+ await page.goto('/login')
+ const source=ts.transpileModule(readFileSync('src/lib/offline.ts','utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText
+ const result=await page.evaluate(async source=>{
+  const lib=await import('data:text/javascript;base64,'+btoa(unescape(encodeURIComponent(source))))
+  const scope={organizationId:crypto.randomUUID(),userId:crypto.randomUUID(),deviceId:lib.deviceId()},foreign={...scope,userId:crypto.randomUUID()},otherDevice={...scope,deviceId:crypto.randomUUID()}
+  await lib.saveDraft(scope,{marker:'own'});await lib.saveDraft(foreign,{marker:'foreign'})
+  const minimalScope={...scope,deviceId:crypto.randomUUID()};await lib.saveDraft(minimalScope,{cart:{customer:{id:'customer',fullName:'Name',phone:'phone',email:'private',passwordHash:'never-persist'},items:[{product:{id:'sku',name:'Item',costPrice:'private',supplier:{secret:'never-persist'}}}]}});const minimal=JSON.stringify(await lib.loadDraft(minimalScope));const minimized=!minimal.includes('private')&&!minimal.includes('never-persist');
+  const id=crypto.randomUUID(),op={id,scope,type:'sale.create',payload:{organizationId:scope.organizationId},state:'pending',createdAt:new Date().toISOString()}
+  const race=await Promise.allSettled([lib.enqueue(op),lib.enqueue({...op,payload:{organizationId:'different'}})])
+  const own=await lib.pendingOperations(scope),stranger=await lib.pendingOperations(foreign),device=await lib.pendingOperations(otherDevice)
+  let blocked=false;try{await lib.clearScope(scope)}catch{blocked=true}
+  const before=await lib.loadDraft(scope),foreignBefore=await lib.loadDraft(foreign)
+  const fetchOriginal=globalThis.fetch;let invalidAckBlocked=false
+  try{globalThis.fetch=async()=>new Response(JSON.stringify({data:[{operationId:crypto.randomUUID(),state:'synced',result:{id:'wrong'}}]}),{status:200,headers:{'content-type':'application/json'}});try{await lib.synchronize(scope)}catch{invalidAckBlocked=true}}finally{globalThis.fetch=fetchOriginal}
+  const preservedAfterInvalidAck=(await lib.pendingOperations(scope)).length
+  await Promise.all([lib.acknowledge(id,'synced',{id:'original'}),lib.acknowledge(id,'conflict',undefined,'STALE')])
+  await lib.acknowledge(id,'synced',{id:'original'});const pending=await lib.pendingOperations(scope)
+  await lib.clearScope(scope);const after=await lib.loadDraft(scope),foreignAfter=await lib.loadDraft(foreign)
+  return {minimized,oneWinner:race.filter(r=>r.status==='fulfilled').length,own:own.length,stranger:stranger.length,device:device.length,blocked,invalidAckBlocked,preservedAfterInvalidAck,before,foreignBefore,pending:pending.length,after:after??null,foreignAfter,stableDevice:scope.deviceId===lib.deviceId()}
+ },source)
+ expect(result).toEqual({minimized:true,oneWinner:1,own:1,stranger:0,device:0,blocked:true,invalidAckBlocked:true,preservedAfterInvalidAck:1,before:{marker:'own'},foreignBefore:{marker:'foreign'},pending:0,after:null,foreignAfter:{marker:'foreign'},stableDevice:true})
 })

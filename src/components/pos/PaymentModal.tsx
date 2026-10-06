@@ -25,7 +25,7 @@ interface PaymentModalProps {
   onClose: () => void;
   totalAmount: number;
   customer: Customer | null;
-  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string) => Promise<void>;
+  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -58,7 +58,9 @@ export default function PaymentModal({
     }
   }, [isOpen, totalAmount]);
 
-  const numericCash = parseFloat(cashTendered) || 0;
+  const validCash=(value:string)=>/^\d+(\.\d{1,2})?$/.test(value)&&fixed(value)<BigInt('100000000000000');
+  const numericCash = validCash(cashTendered)?displayed(fixed(cashTendered)):0;
+  const appliedMixedCash=validCash(mixedCash)?fixed(mixedCash):BigInt(0);
   const changeAmount = displayed(fixed(numericCash)>fixed(totalAmount)?fixed(numericCash)-fixed(totalAmount):BigInt(0));
 
   const quickAmounts = [
@@ -88,7 +90,7 @@ export default function PaymentModal({
     if (activeMethod === 'mixed') {
       try {
         const parts=[{paymentType:'cash' as const,value:mixedCash},{paymentType:'card' as const,value:mixedCard},{paymentType:'credit' as const,value:mixedCredit}];
-        if (parts.some(p=>fixed(p.value)<BigInt(0)) || parts.reduce((sum,p)=>sum+fixed(p.value),BigInt(0))!==fixed(totalAmount)) { notifyError('Aralash to‘lov jami chek summasiga teng bo‘lishi kerak'); return; }
+        if (parts.some(p=>!validCash(p.value)||fixed(p.value)<BigInt(0)) || parts.reduce((sum,p)=>sum+fixed(p.value),BigInt(0))!==fixed(totalAmount)) { notifyError('Aralash to‘lov jami chek summasiga teng bo‘lishi kerak'); return; }
         if (fixed(mixedCredit)>BigInt(0) && !customer) { notifyError('Nasiya uchun mijoz tanlang'); return; }
         payments=parts.filter(p=>fixed(p.value)>BigInt(0)).map(p=>({paymentType:p.paymentType,amount:displayed(fixed(p.value)),referenceNo:referenceNo||undefined}));
       } catch { notifyError('To‘lov miqdori noto‘g‘ri'); return; }
@@ -99,7 +101,13 @@ export default function PaymentModal({
       try{const deadline=new Date(dateBoundary(creditDueDate,organization?.timezone??'Asia/Tashkent',true).getTime()-1);if(deadline.getTime()<Date.now())throw new Error('Nasiya muddati o‘tgan sana bo‘lmasligi kerak');creditDueAt=deadline.toISOString();}
       catch(error){notifyError(error instanceof Error?error.message:'Muddat noto‘g‘ri');return;}
     }
-    await onProcessPayment(payments,creditDueAt);
+    const applied=payments.filter(p=>p.paymentType==='cash').reduce((sum,p)=>sum+fixed(p.amount),BigInt(0));
+    let tender:string|undefined;
+    if(activeMethod==='cash'||(activeMethod==='mixed'&&applied>BigInt(0))){
+      if(!validCash(cashTendered)||fixed(cashTendered)<applied){notifyError('Berilgan naqd pul naqd qismidan kam yoki format noto‘g‘ri');return;}
+      tender=cashTendered;
+    }
+    await onProcessPayment(payments,creditDueAt,tender);
   };
 
   return (
@@ -187,6 +195,7 @@ export default function PaymentModal({
           <Input label="Karta (qo‘lda qayd)" type="number" min="0" step="0.01" value={mixedCard} onChange={e=>setMixedCard(e.target.value)}/>
           <Input label="Nasiya" type="number" min="0" step="0.01" value={mixedCredit} onChange={e=>setMixedCredit(e.target.value)}/>
         </div>}
+        {activeMethod==='mixed'&&<div><Input label="Aralash to‘lovda berilgan naqd pul" type="number" min="0" step="0.01" value={cashTendered} onChange={e=>setCashTendered(e.target.value)}/><p>Naqd qaytim: {formatMoney(displayed(fixed(numericCash)>appliedMixedCash?fixed(numericCash)-appliedMixedCash:BigInt(0)))}</p></div>}
         {/* Method-specific content */}
         {activeMethod === 'cash' && (
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">

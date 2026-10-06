@@ -18,5 +18,7 @@ const compile = spawnSync(process.execPath, ['node_modules/typescript/bin/tsc', 
 if (compile.status !== 0) process.exit(compile.status || 1);
 const files = readdirSync('.test-build/tests').filter(f => f.endsWith(`.${selected}.test.js`)).map(f => path.join('.test-build/tests', f));
 if (!files.length) throw new Error('No tests found');
-const run = spawnSync(process.execPath, ['--require', './scripts/test-resolver.cjs', '--test', ...files], {stdio:'inherit'});
+// Files share a disposable DB, including migration/DDL fault-injection tests.
+// Explicit Promise.all concurrency scenarios inside each test remain parallel.
+const run = spawnSync(process.execPath, ['--require', './scripts/test-resolver.cjs', '--test', ...(selected==='integration'?['--test-concurrency=1']:[]), ...files], {stdio:'inherit'});
 process.exit(run.status || 0);

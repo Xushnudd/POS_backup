@@ -216,3 +216,65 @@ test('Every checkout reference rejects foreign tenants atomically, including dra
  for(const data of [{...payment,storeId:other.store.id},{...payment,shiftId:other.shift.id},{...payment,customerId:foreignCustomer.id}])await assert.rejects(()=>prisma.payment.create({data}))
  assert.equal(await prisma.payment.count({where:{organizationId:f.org.id}}),0)
 })
+
+test('Tender and change snapshot conserves cash revenue and replay, while invalid tender rolls back',async()=>{
+ const f=await fixture(4);await prisma.product.update({where:{id:f.product.id},data:{salePrice:100000}})
+ const d=await createDraft(f.context,f.draft,randomUUID())
+ await assert.rejects(()=>completeSale(f.context,d.id,{payments:[{paymentType:'cash',amount:100000}],cashTendered:'99999.99'},d.id),/naqd/)
+ assert.equal(await prisma.payment.count({where:{saleId:d.id}}),0);assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:d.id}})).status,'draft')
+ const input={payments:[{paymentType:'cash' as const,amount:100000}],cashTendered:'120000'}
+ const [a,b]=await Promise.all([completeSale(f.context,d.id,input,d.id),completeSale(f.context,d.id,input,d.id)])
+ assert.equal(a.id,b.id);assert.equal(a.cashTendered?.toString(),'120000');assert.equal(a.cashChange?.toString(),'20000');assert.equal(a.payments[0].amount.toString(),'100000')
+ await assert.rejects(()=>completeSale(f.context,d.id,{...input,cashTendered:'130000'},d.id))
+ await assert.rejects(()=>prisma.sale.update({where:{id:d.id},data:{cashTendered:130000}}))
+ const summary=shiftCashSummary(0,await prisma.payment.findMany({where:{shiftId:f.shift.id}}),[]);assert.equal(summary.expectedCash.toString(),'100000')
+ const legacy=await createDraft(f.context,f.draft,randomUUID());const result=await completeSale(f.context,legacy.id,{payments:[{paymentType:'cash',amount:100000}]},legacy.id);assert.equal(result.cashTendered,null);assert.equal(result.cashChange,null)
+})
+
+test('Mixed cash/card and cash/debt keep applied cash, tender, customer and receipt note separate',async()=>{
+ const f=await fixture(4);await prisma.product.update({where:{id:f.product.id},data:{salePrice:100000}})
+ const card=await createDraft(f.context,{...f.draft,note:'Terminal receipt manually verified'},randomUUID())
+ const a=await completeSale(f.context,card.id,{payments:[{paymentType:'cash',amount:60000},{paymentType:'card',amount:40000}],cashTendered:'80000'},card.id)
+ assert.equal(a.cashChange?.toString(),'20000');assert.equal(a.payments.length,2);assert.equal(a.note,'Terminal receipt manually verified')
+ const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Partial debtor',phone:randomUUID(),creditLimit:50000}})
+ const debt=await createDraft(f.context,{...f.draft,customerId:customer.id,sellerId:f.user.id,serviceType:'Delivery',note:'Delivery after 18:00'},randomUUID())
+ const b=await completeSale(f.context,debt.id,{payments:[{paymentType:'cash',amount:60000},{paymentType:'credit',amount:40000}],cashTendered:'60000'},debt.id)
+ assert.equal(b.sellerId,f.user.id);assert.equal(b.serviceType,'Delivery');assert.equal(b.customerId,customer.id);assert.equal(b.note,'Delivery after 18:00');assert.equal(b.cashChange?.toString(),'0')
+ assert.equal((await prisma.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString(),'40000')
+ assert.equal(shiftCashSummary(0,await prisma.payment.findMany({where:{shiftId:f.shift.id}}),[]).expectedCash.toString(),'120000')
+ const d=await createDraft(f.context,f.draft,randomUUID());await assert.rejects(()=>completeSale(f.context,d.id,{payments:[{paymentType:'card',amount:100000}],cashTendered:1},d.id))
+})
+
+test('Sync response loss and repeated/concurrent foreground sync produce one original posting and isolate actors',async()=>{
+ const {POST:sync}=await import('@/app/api/sync/route')
+ const f=await fixture(2),key=randomUUID(),draftInput={commands:[{operationId:key,type:'sale.create',payload:f.draft}]}
+ const first=await sync(req('/sync',f.cookie,draftInput),undefined);assert.equal(first.status,200)
+ const draft=(await first.json()).data[0].result
+ const body={commands:[{operationId:draft.id,type:'sale.complete',payload:{saleId:draft.id,payments:[{paymentType:'cash',amount:100}],cashTendered:120}}]}
+ const responses=await Promise.all([sync(req('/sync',f.cookie,body),undefined),sync(req('/sync',f.cookie,body),undefined)])
+ for(const response of responses){const result=(await response.json()).data[0];assert.equal(result.state,'synced');assert.equal(result.result.id,draft.id);assert.equal(result.result.cashChange,'20')}
+ assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),1);assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),1);assert.equal(await prisma.inventoryMovement.count({where:{sourceId:draft.id}}),1)
+ const other=await fixture();const denied=(await (await sync(req('/sync',other.cookie,body),undefined)).json()).data[0];assert.equal(denied.state,'conflict');assert.equal(await prisma.payment.count({where:{organizationId:other.org.id}}),0)
+ const expired=await actor(f.org.id,f.store.id,'cashier');await prisma.session.update({where:{id:expired.context.sessionId},data:{idleExpiresAt:new Date(0)}})
+ assert.equal((await sync(req('/sync',expired.cookie,draftInput),undefined)).status,401)
+})
+
+test('Cookie session expiry, revoke and cross-origin CSRF reject mutation before any economic effect',async()=>{
+ const {POST:sync}=await import('@/app/api/sync/route')
+ const f=await fixture(),body={commands:[{operationId:randomUUID(),type:'sale.create',payload:f.draft}]}
+ const cross=new NextRequest('http://localhost:3000/api/sync',{method:'POST',headers:{cookie:f.cookie,origin:'https://evil.invalid','content-type':'application/json'},body:JSON.stringify(body)})
+ assert.equal((await sync(cross,undefined)).status,403);assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),0)
+ const idle=await actor(f.org.id,f.store.id);await prisma.session.update({where:{id:idle.context.sessionId},data:{idleExpiresAt:new Date(0)}});assert.equal(await verifySession(idle.token),null)
+ const absolute=await actor(f.org.id,f.store.id);await prisma.session.update({where:{id:absolute.context.sessionId},data:{expiresAt:new Date(0)}});assert.equal(await verifySession(absolute.token),null)
+ assert.ok(await verifySession(f.token));await prisma.session.update({where:{id:f.context.sessionId},data:{revokedAt:new Date()}});assert.equal((await sync(req('/sync',f.cookie,body),undefined)).status,401)
+})
+
+
+test('Optional sale metadata rejects foreign seller and blank service without creating a draft',async()=>{
+ const f=await fixture(),other=await fixture()
+ await assert.rejects(()=>createDraft(f.context,{...f.draft,sellerId:other.user.id},randomUUID()))
+ assert.equal((await import('@/server/sales/service')).saleDraftSchema.safeParse({...f.draft,serviceType:'   '}).success,false)
+ assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),0)
+ const cashier=await actor(f.org.id,f.store.id,'cashier');const shift=await prisma.shift.create({data:{registerId:(await prisma.register.create({data:{storeId:f.store.id,name:'Other till',code:randomUUID()}})).id,organizationUserId:cashier.member.id,openingCash:0}})
+ await assert.rejects(()=>createDraft(cashier.context,{...f.draft,registerId:shift.registerId,shiftId:shift.id,sellerId:f.user.id},randomUUID()))
+})
