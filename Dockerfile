@@ -23,6 +23,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run worker:build
 RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
 
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
@@ -41,6 +42,8 @@ ENV PORT=3000
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/.worker-build ./.worker-build
+COPY --from=builder /app/scripts/worker-resolver.cjs ./scripts/worker-resolver.cjs
 
 # Copy Prisma CLI for explicit migration job
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma

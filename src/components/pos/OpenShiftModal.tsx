@@ -76,7 +76,7 @@ export default function OpenShiftModal({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2 text-emerald-600">
+        <div className="flex items-center gap-2 text-emerald-700">
           <FontAwesomeIcon icon={faClock} />
           <span>Yangi smena ochish</span>
         </div>

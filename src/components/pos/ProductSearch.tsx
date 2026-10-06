@@ -70,7 +70,7 @@ export default function ProductSearch({
       {/* Top: Search & Barcode input */}
       <div className="flex items-center gap-2">
         <div className="relative min-w-0 flex-1">
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 pointer-events-none">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-600 pointer-events-none">
             <FontAwesomeIcon icon={faSearch} className="text-sm" />
             <span className="text-gray-200">|</span>
             <FontAwesomeIcon icon={faBarcode} className="text-sm" />
@@ -92,7 +92,7 @@ export default function ProductSearch({
             <button
               type="button"
               onClick={() => onSearchChange('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-100 px-2 py-1 rounded-lg"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-600 hover:text-gray-600 bg-gray-100 px-2 py-1 rounded-lg"
             >
               Tozalash
             </button>
@@ -142,10 +142,10 @@ export default function ProductSearch({
             <LoadingSpinner size="lg" text="Mahsulotlar yuklanmoqda..." />
           </div>
         ) : products.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center text-center text-gray-400">
+          <div className="h-64 flex flex-col items-center justify-center text-center text-gray-600">
             <FontAwesomeIcon icon={faBoxesStacked} className="text-3xl text-gray-300 mb-2" />
             <p className="text-sm font-semibold text-gray-600">Mahsulot topilmadi</p>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-600 mt-0.5">
               Qidiruv so&apos;zini tekshiring yoki yangi mahsulot qo&apos;shing
             </p>
           </div>
@@ -161,15 +161,15 @@ export default function ProductSearch({
               >
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider truncate">
+                    <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider truncate">
                       {p.category?.name || 'Katalog'}
                     </span>
-                    <span className="text-[10px] font-mono text-gray-400">
+                    <span className="text-[10px] font-mono text-gray-600">
                       {p.unit || 'dona'}
                     </span>
                   </div>
 
-                  <h4 className="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-emerald-600 transition">
+                  <h4 className="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-emerald-700 transition">
                     {p.name}
                   </h4>
                 </div>
@@ -178,7 +178,7 @@ export default function ProductSearch({
                   <span className="text-sm font-black text-gray-950">
                     {formatMoney(p.salePrice)}
                   </span>
-                  <div className="w-6 h-6 rounded-lg bg-gray-100 group-hover:bg-emerald-600 text-gray-500 group-hover:text-white flex items-center justify-center transition text-xs">
+                  <div className="w-6 h-6 rounded-lg bg-gray-100 group-hover:bg-emerald-600 text-gray-600 group-hover:text-white flex items-center justify-center transition text-xs">
                     <FontAwesomeIcon icon={faPlus} />
                   </div>
                 </div>

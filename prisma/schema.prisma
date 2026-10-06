@@ -41,9 +41,15 @@ model Organization {
   auditLogs        AuditLog[]
   ownershipTransfers OwnershipTransfer[]
   shiftCorrections ShiftCorrection[]
+  incidents Incident[]
+  syncReviews SyncReview[]
+  stockThresholds StockThreshold[]
 }
 
 model User {
+  resolvedIncidents Incident[]
+  syncSources SyncReview[] @relation("SyncActor")
+  resolvedSyncReviews SyncReview[] @relation("SyncResolver")
   assignedSales Sale[] @relation("SaleSeller")
   id             String   @id @default(uuid())
   fullName       String
@@ -88,6 +94,8 @@ model OrganizationUser {
 }
 
 model Store {
+  incidents Incident[]
+  stockThresholds StockThreshold[]
   id             String   @id @default(uuid())
   organizationId String
   name           String
@@ -154,6 +162,7 @@ model Category {
 }
 
 model Product {
+  stockThresholds StockThreshold[]
   id             String   @id @default(uuid())
   organizationId String
   categoryId     String?
@@ -527,6 +536,7 @@ model AuditLog {
   beforeData  Json?
   afterData   Json?
   ipAddress   String?
+  requestId   String?
   createdAt   DateTime @default(now())
   
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -701,4 +711,59 @@ model OwnershipTransfer {
  createdAt DateTime @default(now())
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
  @@index([organizationId,state])
+}
+
+model Incident {
+ store Store? @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ resolver User? @relation(fields:[resolvedBy],references:[id],onDelete:SetNull)
+ id String @id @default(uuid())
+ organizationId String
+ storeId String?
+ kind String
+ entityKey String
+ severity String @default("warning")
+ state String @default("open")
+ evidence Json
+ detectedAt DateTime @default(now())
+ lastSeenAt DateTime @default(now())
+ resolvedAt DateTime?
+ resolvedBy String?
+ resolutionReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ @@unique([organizationId,kind,entityKey])
+ @@index([organizationId,state,storeId])
+}
+model SyncReview {
+ actor User @relation("SyncActor",fields:[actorId],references:[id])
+ resolver User? @relation("SyncResolver",fields:[resolvedBy],references:[id],onDelete:SetNull)
+ id String @id @default(uuid())
+ organizationId String
+ actorId String
+ operationId String
+ commandType String
+ payload Json
+ payloadHash String
+ code String
+ state String @default("conflict")
+ result Json?
+ createdAt DateTime @default(now())
+ resolvedAt DateTime?
+ resolvedBy String?
+ reason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ @@unique([organizationId,commandType,operationId])
+ @@index([organizationId,state])
+}
+model StockThreshold {
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ minimum Decimal @db.Decimal(20,6)
+ maximum Decimal @db.Decimal(20,6)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ @@unique([storeId,productId])
+ @@index([organizationId,storeId])
 }

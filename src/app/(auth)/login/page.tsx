@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {api} from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import Input from '@/components/ui/Input';
@@ -38,7 +39,7 @@ export default function LoginPage() {
     try {
       await login(phone.trim(), password);
       notifySuccess('Tizimga muvaffaqiyatli kirdingiz!');
-      router.push('/pos');
+      const current=await api.auth.me();router.push(current.data?.role==='cashier'?'/pos':'/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Kirishda xatolik yuz berdi';
       setErrorMessage(msg);

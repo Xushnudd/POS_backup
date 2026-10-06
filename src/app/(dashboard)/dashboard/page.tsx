@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -28,7 +29,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function DashboardPage() {
-  const { organization } = useAuth();
+  const { organization,role } = useAuth();
+  const router=useRouter();
   const { activeStore } = useOrganization();
 
   const [date, setDate] = useState<string>(new Intl.DateTimeFormat('en-CA',{timeZone:organization?.timezone??'Asia/Tashkent'}).format(new Date()));
@@ -37,7 +39,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const loadDashboardData = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organization?.id||role==='cashier') return;
     setIsLoading(true);setError('');setAsOf('');
     try {
       const res = await api.reports.dashboard({
@@ -53,12 +55,14 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [organization, activeStore, date]);
+  }, [organization, activeStore, date,role]);
 
   useEffect(() => {
     void Promise.resolve().then(loadDashboardData);
   }, [loadDashboardData]);
 
+  useEffect(()=>{if(role==='cashier')router.replace('/pos');},[role,router]);
+  if(role==='cashier')return <p role="status">Kassaga o‘tilmoqda...</p>;
   return (
     <div data-testid="owner-dashboard" className="space-y-6 max-w-7xl min-w-0 mx-auto">
       {/* Top Banner: Welcome & Date Filter */}
@@ -67,14 +71,14 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
             Xush kelibsiz, {organization?.name || 'Do\'kon egasi'}!
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-600 mt-1">
             Bugungi kundalik savdo ko&apos;rsatkichlari va asosiy analitika
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-            <FontAwesomeIcon icon={faCalendarDay} className="text-gray-400 text-sm" />
+            <FontAwesomeIcon icon={faCalendarDay} className="text-gray-600 text-sm" />
             <input
               type="date"
               value={date}
@@ -109,10 +113,10 @@ export default function DashboardPage() {
             {/* Total Revenue */}
             <Card padding={false} className="p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Sof tovar tushumi
                 </span>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-lg">
                   <FontAwesomeIcon icon={faMoneyBillTrendUp} />
                 </div>
               </div>
@@ -120,14 +124,14 @@ export default function DashboardPage() {
                 <span className="text-2xl font-black text-gray-900">
                   {formatMoney(data?.totalRevenue || 0)}
                 </span>
-                <p className="text-xs text-gray-400 mt-1">Tanlangan sana bo&apos;yicha</p>
+                <p className="text-xs text-gray-600 mt-1">Tanlangan sana bo&apos;yicha</p>
               </div>
             </Card>
 
             {/* Check Count */}
             <Card padding={false} className="p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Cheklar soni
                 </span>
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
@@ -138,14 +142,14 @@ export default function DashboardPage() {
                 <span className="text-2xl font-black text-gray-900">
                   {formatNumber(data?.totalSales || 0)} ta
                 </span>
-                <p className="text-xs text-gray-400 mt-1">Muvaffaqiyatli savdolar</p>
+                <p className="text-xs text-gray-600 mt-1">Muvaffaqiyatli savdolar</p>
               </div>
             </Card>
 
             {/* Average Check */}
             <Card padding={false} className="p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
                   O&apos;rtacha chek
                 </span>
                 <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
@@ -156,14 +160,14 @@ export default function DashboardPage() {
                 <span className="text-2xl font-black text-gray-900">
                   {formatMoney(data?.averageCheck || 0)}
                 </span>
-                <p className="text-xs text-gray-400 mt-1">Har bir savdo bo&apos;yicha</p>
+                <p className="text-xs text-gray-600 mt-1">Har bir savdo bo&apos;yicha</p>
               </div>
             </Card>
 
             {/* Low stock alert */}
             <Card padding={false} className="p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Kam qolgan tovarlar
                 </span>
                 <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-lg">
@@ -208,7 +212,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <span className="text-xs font-bold text-gray-800 block">Naqd pulda</span>
-                      <span className="text-[11px] text-gray-500">Kassaga tushgan naqd</span>
+                      <span className="text-[11px] text-gray-600">Kassaga tushgan naqd</span>
                     </div>
                   </div>
                   <span className="text-sm font-black text-emerald-700">
@@ -223,7 +227,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <span className="text-xs font-bold text-gray-800 block">Plastik karta</span>
-                      <span className="text-[11px] text-gray-500">Terminal orqali</span>
+                      <span className="text-[11px] text-gray-600">Terminal orqali</span>
                     </div>
                   </div>
                   <span className="text-sm font-black text-blue-700">
@@ -231,7 +235,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                <div className="pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500 font-semibold">
+                <div className="pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-600 font-semibold">
                   <span>Jami to&apos;lovlar:</span>
                   <span className="text-gray-900 font-bold">
                     {formatMoney((data?.cashPayments || 0) + (data?.cardPayments || 0))}
@@ -257,7 +261,7 @@ export default function DashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-gray-100 text-gray-400 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-gray-100 text-gray-600 font-bold uppercase tracking-wider">
                         <th className="pb-3">Mahsulot</th>
                         <th className="pb-3">SKU</th>
                         <th className="pb-3 text-center">Sotilgan miqdor</th>
@@ -268,7 +272,7 @@ export default function DashboardPage() {
                       {data.topProducts.map((p, idx) => (
                         <tr key={idx} className="hover:bg-gray-50/60 transition">
                           <td className="py-3 font-bold text-gray-900">{p.name}</td>
-                          <td className="py-3 font-mono text-gray-500">{p.sku}</td>
+                          <td className="py-3 font-mono text-gray-600">{p.sku}</td>
                           <td className="py-3 text-center font-bold text-blue-600">
                             {formatNumber(p.quantity)}
                           </td>
@@ -281,7 +285,7 @@ export default function DashboardPage() {
                   </table>
                 </div>
               ) : (
-                <div className="h-40 flex items-center justify-center text-gray-400 text-xs font-medium">
+                <div className="h-40 flex items-center justify-center text-gray-600 text-xs font-medium">
                   Ushbu sanada savdo bo&apos;yicha ma&apos;lumot mavjud emas
                 </div>
               )}
@@ -294,12 +298,12 @@ export default function DashboardPage() {
               href="/pos"
               className="p-4 bg-white rounded-2xl border border-gray-200 hover:border-emerald-500 hover:shadow-md transition flex items-center gap-3 text-gray-800 group"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg group-hover:bg-emerald-600 group-hover:text-white transition">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg group-hover:bg-emerald-600 group-hover:text-white transition">
                 <FontAwesomeIcon icon={faCashRegister} />
               </div>
               <div>
                 <span className="text-xs font-bold block">POS Kassa</span>
-                <span className="text-[11px] text-gray-400">Yangi savdo ochish</span>
+                <span className="text-[11px] text-gray-600">Yangi savdo ochish</span>
               </div>
             </Link>
 
@@ -312,7 +316,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <span className="text-xs font-bold block">Mahsulotlar</span>
-                <span className="text-[11px] text-gray-400">Katalog va narxlar</span>
+                <span className="text-[11px] text-gray-600">Katalog va narxlar</span>
               </div>
             </Link>
 
@@ -325,7 +329,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <span className="text-xs font-bold block">Ombor & Kirim</span>
-                <span className="text-[11px] text-gray-400">Qoldiq va xaridlar</span>
+                <span className="text-[11px] text-gray-600">Qoldiq va xaridlar</span>
               </div>
             </Link>
 
@@ -338,7 +342,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <span className="text-xs font-bold block">Smenalar</span>
-                <span className="text-[11px] text-gray-400">Kassa nazorati</span>
+                <span className="text-[11px] text-gray-600">Kassa nazorati</span>
               </div>
             </Link>
           </div>

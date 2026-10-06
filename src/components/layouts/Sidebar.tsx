@@ -17,6 +17,7 @@ import {
   faChartLine,
   faGear,
   faTimes,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
@@ -91,6 +92,12 @@ const navItems: NavItem[] = [
   {href:'/suppliers',label:'Yetkazib beruvchilar',icon:faUsers,roles:['owner','admin']},
   {href:'/inventory/movements',label:'Ombor jurnali',icon:faWarehouse,roles:['owner','admin']},
   {href:'/audit',label:'Audit tarixi',icon:faClockRotateLeft,roles:['owner']},
+  {href:'/drafts',label:'Server qoralamalari',icon:faReceipt},
+  {href:'/sync-review',label:'Navbat va konfliktlar',icon:faClockRotateLeft},
+  {href:'/incidents',label:'Hisob tafovutlari',icon:faTriangleExclamation,roles:['owner','admin']},
+  {href:'/replenishment',label:'Qayta buyurtma',icon:faWarehouse,roles:['owner','admin']},
+  {href:'/help',label:'Yordam',icon:faUsers},
+  {href:'/training',label:'Kassir mashqi',icon:faCashRegister},
   {href:'/security',label:'Faol sessiyalar',icon:faClockRotateLeft},
 ];
 
@@ -136,6 +143,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </Link>
 
           <button
+            aria-label="Menyuni yopish"
             onClick={onClose}
             className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
           >

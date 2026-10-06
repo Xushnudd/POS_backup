@@ -11,7 +11,7 @@ import { api, ApiError } from '@/lib/api';
 import { posFailure, type PosFailure } from '@/lib/pos-failure';
 import { clientLine } from '@/lib/money';
 import Modal from '@/components/ui/Modal';
-import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, markCancelled, synchronize } from '@/lib/offline';
+import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, acknowledgeRecovered, markCancelled, synchronize } from '@/lib/offline';
 import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
 import ProductSearch from '@/components/pos/ProductSearch';
 import Cart from '@/components/pos/Cart';
@@ -21,6 +21,9 @@ import OpenShiftModal from '@/components/pos/OpenShiftModal';
 import Button from '@/components/ui/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+
+type CheckoutAttempt={operationId:string;payload:string;saleId?:string};
+function writeAttempt(ref:{current:CheckoutAttempt|null},value:CheckoutAttempt|null){ref.current=value;}
 
 export default function PosPage() {
   const { user, organization, role } = useAuth();
@@ -110,6 +113,7 @@ export default function PosPage() {
       notifyError('Savdo qilish uchun avval smenani ochishingiz zarur!');
       return;
     }
+    if(hasPendingCheckout&&!checkoutAttempt.current?.saleId){notifyError('Avval asl qoralama natijasini tekshiring');return;}
     if (items.length === 0) {
       notifyError('Savatda hech qanday mahsulot yo\'q');
       return;
@@ -142,7 +146,7 @@ export default function PosPage() {
   useEffect(() => {
     if (!organization?.id || !user?.id) return;
     let cancelled=false;
-    void Promise.resolve().then(()=>{if(!cancelled){setLocalReady(false);setHasPendingCheckout(false);checkoutAttempt.current=null;clearCart();setServiceType('');}});
+    void Promise.resolve().then(()=>{if(!cancelled){setLocalReady(false);setHasPendingCheckout(false);writeAttempt(checkoutAttempt,null);clearCart();setServiceType('');}});
     const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
     void loadDraft(scope).then(value=>{
       if (cancelled) return;
@@ -150,7 +154,7 @@ export default function PosPage() {
         const saved=value as {cart:{items:CartItem[];cartDiscount:number;customer:Customer|null;note:string};serviceType?:string;attempt:typeof checkoutAttempt.current};
         if (saved.cart?.items) hydrate(saved.cart);
         setServiceType(saved.serviceType??'');
-        checkoutAttempt.current=saved.attempt;
+        writeAttempt(checkoutAttempt,saved.attempt);
         setHasPendingCheckout(Boolean(saved.attempt));
       }
       setLocalReady(true);
@@ -163,6 +167,29 @@ export default function PosPage() {
     const timer=setTimeout(()=>{void saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current}).catch(()=>notifyError('Savat lokal saqlanmadi; ushbu oynani yopmang'));},200);
     return ()=>clearTimeout(timer);
   },[localReady,organization?.id,user?.id,items,cartDiscount,customer,note,serviceType,notifyError]);
+
+  const buildDraftPayload=()=>{
+    return {
+        organizationId: organization?.id,
+        storeId: activeStore?.id,
+        registerId: activeRegister?.id,
+        shiftId: activeShift?.id,
+        cashierId: user?.id,
+        customerId: customer?.id || undefined,
+        discountAmount: cartDiscount,
+        note: note || undefined,
+        sellerId:user?.id,serviceType:serviceType.trim()||undefined,
+        items: items.map((i) => ({
+          productId: i.product.id,
+          productName: i.product.name,
+          sku: i.product.sku,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          expectedUnitPrice: i.unitPrice,
+          discountAmount: i.discountAmount,
+        })),
+      };
+  };
 
   // Process and complete sale
   const handleProcessPayment = async (
@@ -178,42 +205,24 @@ export default function PosPage() {
     setIsProcessingPayment(true);
     try {
       // 1. Create draft sale
-      const draftPayload = {
-        organizationId: organization.id,
-        storeId: activeStore.id,
-        registerId: activeRegister.id,
-        shiftId: activeShift.id,
-        cashierId: user.id,
-        customerId: customer?.id || undefined,
-        discountAmount: cartDiscount,
-        note: note || undefined,
-        sellerId:user.id,serviceType:serviceType.trim()||undefined,
-        items: items.map((i) => ({
-          productId: i.product.id,
-          productName: i.product.name,
-          sku: i.product.sku,
-          quantity: i.quantity,
-          unitPrice: i.unitPrice,
-          expectedUnitPrice: i.unitPrice,
-          discountAmount: i.discountAmount,
-        })),
-      };
+      const draftPayload = buildDraftPayload();
 
       const completion={payments,...(creditDueAt?{creditDueAt}: {}),...(cashTendered!==undefined?{cashTendered}: {})};
       const signature = JSON.stringify(draftPayload);
-      if (checkoutAttempt.current && checkoutAttempt.current.payload !== signature) {
+      if (checkoutAttempt.current && checkoutAttempt.current.payload !== signature && checkoutAttempt.current.payload!=='resumed') {
         throw new Error('Oldingi savdo natijasini aniqlang; kutilayotgan savatni o‘zgartirish mumkin emas');
       }
-      checkoutAttempt.current ??= { operationId: crypto.randomUUID(), payload: signature };
+      if(!checkoutAttempt.current)writeAttempt(checkoutAttempt,{ operationId: crypto.randomUUID(), payload: signature });
       const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
       setHasPendingCheckout(true);
-      const operationId=checkoutAttempt.current.operationId;
+      const currentAttempt=checkoutAttempt.current;if(!currentAttempt)throw new Error('Asl urinishni tekshiring');
+      const operationId=currentAttempt.operationId;
       await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
-      await enqueue({id:operationId,scope,type:'sale.create',payload:{...draftPayload,operationId},state:'pending',createdAt:new Date().toISOString()});
-      const saleRes = await api.sales.create({ ...draftPayload, operationId });
+      if(!currentAttempt.saleId)await enqueue({id:operationId,scope,type:'sale.create',payload:{...draftPayload,operationId},state:'pending',createdAt:new Date().toISOString()});
+      const saleRes = currentAttempt.saleId?await api.sales.get(currentAttempt.saleId):await api.sales.create({ ...draftPayload, operationId });
       if (!saleRes.data) throw new Error('Savdo qoralamasi yaratilmadi');
-      checkoutAttempt.current.saleId = saleRes.data.id;
-      await acknowledge(operationId,'synced',saleRes.data);
+      writeAttempt(checkoutAttempt,{...currentAttempt,saleId:saleRes.data.id});
+      if(currentAttempt.payload!=='resumed')await acknowledge(operationId,'synced',saleRes.data);
       await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
       await enqueue({id:saleRes.data.id,scope,type:'sale.complete',payload:{saleId:saleRes.data.id,...completion},state:'pending',createdAt:new Date().toISOString()});
 
@@ -232,7 +241,7 @@ export default function PosPage() {
 
       // 3. Prepare for receipt preview
       const finishedSale: Sale = { ...completeRes.data, customer };
-      checkoutAttempt.current = null;
+      writeAttempt(checkoutAttempt,null);
       setHasPendingCheckout(false);
 
       setCompletedSale(finishedSale);
@@ -248,25 +257,74 @@ export default function PosPage() {
     }
   };
 
+  const parkAttempt=useRef<{key:string;signature:string}|null>(null);
+  const [parkedMessage,setParkedMessage]=useState('');
+  const parkDraft=async()=>{
+    if(!organization||!user||!activeShift||!activeStore||!activeRegister||!items.length||hasPendingCheckout||!localReady)return;
+    setIsProcessingPayment(true);
+    try{
+      const payload=buildDraftPayload(),signature=JSON.stringify(payload);
+      if(parkAttempt.current&&parkAttempt.current.signature!==signature)throw new Error('Oldingi saqlash natijasini tekshiring; savatni o‘zgartirmang');
+      parkAttempt.current??={key:crypto.randomUUID(),signature};
+      const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()},operationId=parkAttempt.current.key;
+      writeAttempt(checkoutAttempt,{operationId,payload:signature});setHasPendingCheckout(true);
+      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
+      await enqueue({id:operationId,scope,type:'sale.create',payload:{...payload,operationId},state:'pending',createdAt:new Date().toISOString()});
+      const result=await api.sales.create({...payload,operationId});if(!result.data)throw new Error('Qoralama natijasini tekshiring');
+      await acknowledge(operationId,'synced',result.data);
+      await saveDraft(scope,{cart:{items:[],cartDiscount:0,customer:null,note:''},attempt:null});
+      parkAttempt.current=null;writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);clearCart();setServiceType('');setParkedMessage('Qoralama serverda saqlandi: '+result.data.receiptNo);
+    }catch(error){notifyError(error instanceof Error?error.message:'Qoralama saqlanmadi; asl natijani tekshiring');}finally{setIsProcessingPayment(false);}
+  };
+  const [draftToResume,setDraftToResume]=useState('');
+  useEffect(()=>{void Promise.resolve().then(()=>setDraftToResume(new URLSearchParams(window.location.search).get('draft')??''));},[]);
+  const openServerDraft=async()=>{
+    if(!draftToResume||!localReady||!organization||!user||!activeShift)return;
+    setIsProcessingPayment(true);
+    try{
+      if(items.length||hasPendingCheckout)throw new Error('Avval lokal savat yoki kutilayotgan urinishni hal qiling');
+      const response=await api.sales.get(draftToResume),sale=response.data;if(!sale)throw new Error('Qoralama topilmadi');
+      if(sale.status!=='draft'||sale.cashierId!==user.id||sale.shiftId!==activeShift.id||sale.registerId!==activeRegister?.id)throw new Error('Faqat o‘zingizning faol kassa/smena qoralamangizni oching; boshqa savdoni tarixdan tekshiring');
+      const restored:CartItem[]=[];
+      for(const item of sale.items??[]){const response=await api.products.get(item.productId);if(!response.data)throw new Error('Mahsulot topilmadi');restored.push({product:response.data,quantity:Number(item.quantity),unitPrice:Number(item.unitPrice),discountAmount:Number(item.discountAmount),lineTotal:Number(item.lineTotal)});}
+      const attempt={operationId:crypto.randomUUID(),payload:'resumed',saleId:sale.id};
+      await saveDraft({organizationId:organization.id,userId:user.id,deviceId:deviceId()},{cart:{items:restored,cartDiscount:Number(sale.discountAmount),customer:sale.customer??null,note:sale.note??''},serviceType:sale.serviceType,attempt});
+      hydrate({items:restored,cartDiscount:Number(sale.discountAmount),customer:sale.customer??null,note:sale.note??''});setServiceType(sale.serviceType??'');
+      writeAttempt(checkoutAttempt,{...attempt});setHasPendingCheckout(true);setDraftToResume('');
+      setParkedMessage('Server qoralamasi ochildi; narx va qoldiq yakunlashda qayta tekshiriladi.');
+    }catch(error){notifyError(error instanceof Error?error.message:'Qoralama ochilmadi');}finally{setIsProcessingPayment(false);}
+  };
+
   const cancelPendingCheckout=async()=>{
     const attempt=checkoutAttempt.current;
     if(!attempt || !organization?.id || !user?.id)return;
     setIsProcessingPayment(true);
     try{
       const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
+      if(attempt.payload==='resumed'&&attempt.saleId){
+        const current=await api.sales.get(attempt.saleId);
+        if(current.data?.status==='draft'){
+          if(role==='cashier')throw new Error('Server qoralamasini rahbar bekor qilishi kerak');
+          await api.sales.void(attempt.saleId);
+        }else if(current.data?.status!=='voided')throw new Error('Savdo yakunlangan yoki noma’lum; asl natijani tekshiring');
+        await markCancelled(attempt.saleId,scope,{saleId:attempt.saleId,state:'voided'});
+        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:null});
+        writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);notifySuccess('Server qoralamasi bekor qilinganini tekshirdik');return true;
+      }
       const outcome=await api.operations.cancelDraftIntent(attempt.operationId,{...JSON.parse(attempt.payload),operationId:attempt.operationId});
       if(outcome.data?.state==='created' && outcome.data.saleId){
-        attempt.saleId=outcome.data.saleId;
-        const current=await api.sales.get(attempt.saleId);
+        writeAttempt(checkoutAttempt,{...attempt,saleId:outcome.data.saleId});
+        const createdSaleId=outcome.data.saleId;
+        const current=await api.sales.get(createdSaleId);
         if(current.data?.status!=='voided'){
           if(role==='cashier')throw new Error('Qoralama yaratilgan. Uni rahbar Savdolar sahifasida bekor qilishi kerak; keyin yana tekshiring.');
-          await api.sales.void(attempt.saleId);
+          await api.sales.void(createdSaleId);
         }
-        await markCancelled(attempt.saleId,scope,{saleId:attempt.saleId,state:'voided'});
+        await markCancelled(createdSaleId,scope,{saleId:createdSaleId,state:'voided'});
       }else if(outcome.data?.state!=='cancelled')throw new Error('Server bekor qilishni tasdiqlamadi');
       await markCancelled(attempt.operationId,scope,outcome.data);
       await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:null});
-      checkoutAttempt.current=null;setHasPendingCheckout(false);setIsPaymentModalOpen(false);
+      writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);setIsPaymentModalOpen(false);
       notifySuccess('Urinish serverda bekor qilindi. Savat saqlangan.');
       return true;
     }catch(error){notifyError(error instanceof Error?error.message:'Bekor qilish tasdiqlanmadi; urinish saqlangan');return false;}
@@ -295,18 +353,20 @@ export default function PosPage() {
           notifyError('Yakunlangan natija hali topilmadi. Oldingi amal kalitini saqlab, ulanish tiklangach qayta tekshiring.');
           return;
         }
-        attempt.saleId=draft.data.result.id;
+        writeAttempt(checkoutAttempt,{...attempt,saleId:draft.data.result.id});
         await acknowledge(attempt.operationId,'synced',draft.data.result);
-        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt});
+        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
       }
-      const completed=await api.operations.status('sale.complete',attempt.saleId);
+      const recoveredSaleId=checkoutAttempt.current?.saleId;
+      if(!recoveredSaleId)throw new Error('Savdo natijasi topilmadi');
+      const completed=await api.operations.status('sale.complete',recoveredSaleId);
       if (completed.data?.state!=='completed' || !completed.data.result) {
         notifyError('Qoralama mavjud, lekin yakunlash natijasi hali topilmadi. Shu savat va to‘lov bilan qayta urinishingiz mumkin; yangi savdo boshlamang.');
         return;
       }
-      await acknowledge(attempt.saleId,'synced',completed.data.result);
+      await acknowledgeRecovered(recoveredSaleId,scope,completed.data.result);
       await saveDraft(scope,{cart:{items:[],cartDiscount:0,customer:null,note:''},attempt:null});
-      checkoutAttempt.current=null;
+      writeAttempt(checkoutAttempt,null);
       setHasPendingCheckout(false);
       setCompletedSale(completed.data.result);
       clearCart();setServiceType('');
@@ -348,7 +408,7 @@ export default function PosPage() {
       <p className="text-xs text-slate-500">F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.</p>
       {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
-        <div className="flex flex-wrap gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>Navbatni sinxronlash</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
+        <div className="flex flex-wrap gap-2"><Button onClick={handleProceedToPayment} disabled={isProcessingPayment||connection.state!=='online'}>Qoralama to‘lovini davom ettirish</Button><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>Navbatni sinxronlash</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
       </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (
@@ -376,10 +436,13 @@ export default function PosPage() {
         </div>
       )}
 
+      <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={parkDraft} disabled={!localReady||hasPendingCheckout||isProcessingPayment||!activeShift||!items.length||connection.state!=='online'}>Qoralamani serverda saqlash</Button><a href="/drafts" className="text-blue-800 underline p-2">Server qoralamalari</a><a href="/sync-review" className="text-blue-800 underline p-2">Navbat va konfliktlar</a><a href="/help" className="text-blue-800 underline p-2">Yordam</a></div>
+      {draftToResume&&<Button disabled={!localReady||!activeShift||isProcessingPayment} onClick={openServerDraft}>Tanlangan server qoralamasini ochish</Button>}
+      {parkedMessage&&<p role="status">{parkedMessage}</p>}
       <label>Chek izohi<textarea aria-label="Chek izohi" maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       <label>Xizmat turi (ixtiyoriy)<input aria-label="Xizmat turi (ixtiyoriy)" maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       {/* Main 2-column layout: Left Catalog, Right Cart */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
+      <fieldset disabled={hasPendingCheckout||isProcessingPayment} className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
         {/* Left: Product Catalog & Search (2 cols) */}
         <div className="lg:col-span-2 flex flex-col min-h-[320px] lg:min-h-0">
           <ProductSearch
@@ -414,7 +477,7 @@ export default function PosPage() {
             disabled={!activeShift||!localReady||connection.state!=='online'}
           />
         </div>
-      </div>
+      </fieldset>
 
       <Modal isOpen={Boolean(failure)} onClose={()=>setFailure(null)} title={failure?.stage==='integration'?'Tashqi xizmat holati':'Savdo yakunlanmadi'}>
         {failure&&<div role="alert" data-stage={failure.stage} className="space-y-3"><p>{failure.code}: {failure.message}</p><p>{failure.nextAction}</p>

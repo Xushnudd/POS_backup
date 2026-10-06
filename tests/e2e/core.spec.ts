@@ -641,3 +641,71 @@ test('Owner mobile dashboard and cashier touch controls remain reachable at 360,
   await checkout.click();await expect(page.getByRole('dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).not.toBeVisible()
  }
 })
+
+test('Held server draft resumes on another authorized device and closes the original receipt once',async({page,browser})=>{
+ const phone='998'+Date.now();phones.push(phone)
+ await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Draft Owner');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Held POS');await page.getByLabel(/Parol \(/).fill('test-only-password');await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Held item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'12.34',costPrice:'4.50'}})
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:3}})
+ await page.goto('/pos');await page.getByRole('button',{name:'Smenani ochish',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.getByRole('button',{name:'Held item — savatga qo‘shish',exact:true}).click();await page.getByLabel('Chek izohi',{exact:true}).fill('Held note');await page.getByRole('button',{name:'Qoralamani serverda saqlash',exact:true}).click();await expect(page.getByText(/Qoralama serverda saqlandi:/)).toBeVisible()
+ const draft=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'draft'}});expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.inventoryMovement.count({where:{sourceId:draft.id}})).toBe(0)
+ const other=await browser.newContext({ignoreHTTPSErrors:true})
+ try{
+  expect((await other.request.post('https://localhost:3100/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:'test-only-password'}})).ok()).toBe(true)
+  const next=await other.newPage();await next.goto('https://localhost:3100/drafts');await next.getByRole('link',{name:'Qoralamani ochish',exact:true}).click();await next.getByRole('button',{name:'Tanlangan server qoralamasini ochish',exact:true}).click();await expect(next.getByText(/Server qoralamasi ochildi/)).toBeVisible();await expect(next.getByLabel('Chek izohi',{exact:true})).toHaveValue('Held note')
+  await expect(next.getByRole('button',{name:'Held item — savatga qo‘shish',exact:true})).toBeDisabled()
+  await next.getByRole('button',{name:'Qoralama to‘lovini davom ettirish',exact:true}).click();await next.getByRole('button',{name:/Savdoni yakunlash/}).click();await expect(next.getByRole('dialog')).toContainText('Savdo muvaffaqiyatli yakunlandi')
+  expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(1);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(1);expect(await db.inventoryMovement.count({where:{sourceId:draft.id}})).toBe(1)
+  expect((await db.sale.findUniqueOrThrow({where:{id:draft.id}})).receiptNo).toBe(draft.receiptNo)
+ }finally{await other.close()}
+})
+
+test('Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs',async({page})=>{
+ const phone='998'+Date.now();phones.push(phone)
+ await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Alert Owner');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Alert POS');await page.getByLabel(/Parol \(/).fill('test-only-password');await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Alert item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}})
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
+ await page.goto('/incidents');await page.getByRole('button',{name:'Hisoblarni solishtirish',exact:true}).click();await expect(page.getByRole('article')).toContainText('Ombor qoldig‘i');await expect(page.getByRole('article')).toContainText('Jiddiy')
+ await page.getByLabel('Yopish sababi',{exact:true}).fill('Checked in browser');await page.getByRole('button',{name:'Tuzatilganini tekshirib yopish',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Farq hali bor')
+ expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('2')
+ await page.goto('/replenishment');await page.getByLabel('Qoldiq filiali',{exact:true}).selectOption(store.id);await page.getByLabel('Mahsulot qidirish',{exact:true}).fill('Alert item');await page.getByLabel('Mahsulot',{exact:true}).selectOption(product.id);await page.getByLabel('Minimal qoldiq',{exact:true}).fill('3');await page.getByLabel('Maksimal qoldiq',{exact:true}).fill('10');await page.getByRole('button',{name:'Chegaralarni saqlash',exact:true}).click();await expect(page.getByRole('article')).toContainText('tavsiya 8 dona')
+ await page.goto('/help');await expect(page.getByRole('heading',{name:'Internet yoki server javobi kelmadi'})).toBeVisible();await expect(page.getByRole('heading',{name:'Chek chop etilmadi'})).toBeVisible();await expect(page.getByRole('heading',{name:'Katalog va import xatolari'})).toBeVisible();await page.getByRole('link',{name:'Navbatni tekshirish',exact:true}).click();await expect(page.getByRole('heading',{name:'Navbat va konfliktlar',exact:true})).toBeVisible()
+})
+
+test('Training is isolated from real money and keyboard-only payment modal traps and restores focus',async({page})=>{
+ const phone='998'+Date.now();phones.push(phone)
+ await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Keyboard Owner');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Keyboard POS');await page.getByLabel(/Parol \(/).fill('test-only-password');await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ await page.goto('/training');await page.getByRole('button',{name:'Mashq mahsulotini qo‘shish',exact:true}).click();await page.getByRole('button',{name:'Mashq to‘loviga o‘tish',exact:true}).click();await page.getByLabel('Mashqda berilgan naqd',{exact:true}).fill('15000');await expect(page.getByText('Qaytim: 5000 so‘m',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Faqat mashqni yakunlash',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Mashq yakunlandi'})).toBeVisible();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.payment.count({where:{organizationId:me.organization.id}})).toBe(0)
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Keyboard item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
+ await page.goto('/pos');const open=page.getByRole('button',{name:'Smenani ochish',exact:true});await open.focus();await page.keyboard.press('Enter');await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).focus();await page.keyboard.press('Enter');await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.keyboard.press('F2');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('Keyboard item');const tile=page.getByRole('button',{name:'Keyboard item — savatga qo‘shish',exact:true});await tile.focus();await page.keyboard.press('Enter');await page.keyboard.press('F9');const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await expect.poll(()=>page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true)
+ for(let i=0;i<12;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true)}
+ await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(tile).toBeFocused()
+ expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0)
+})
+
+test('Sync conflict requires manager terminal proof and keeps the original local and server payloads',async({page})=>{
+ const phone='998'+Date.now();phones.push(phone)
+ await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Sync Owner');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Sync review POS');await page.getByLabel(/Parol \(/).fill('test-only-password');await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),register=await db.register.findFirstOrThrow({where:{storeId:store.id}})
+ const member=await db.organizationUser.findFirstOrThrow({where:{organizationId:me.organization.id,userId:me.user.id}}),shift=await db.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Sync item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}})
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
+ const draftResponse=await page.request.post('/api/sales',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}});expect(draftResponse.ok()).toBe(true);const draft=(await draftResponse.json()).data,id=randomUUID()
+ await page.goto('/pos');await expect(page.getByRole('button',{name:'Sync item — savatga qo‘shish'})).toBeVisible()
+ const payload={saleId:draft.id,payments:[{paymentType:'cash',amount:'99'}]}
+ await page.evaluate(async({id,payload,organizationId,userId})=>{
+  const request=indexedDB.open('shuni-pos-local-v1');const database=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})
+  await new Promise<void>((resolve,reject)=>{const tx=database.transaction('operations','readwrite');tx.objectStore('operations').add({id,scope:{organizationId,userId,deviceId:localStorage.getItem('pos_device_id')},type:'sale.complete',payload,state:'pending',createdAt:new Date().toISOString()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)});database.close()
+ },{id,payload,organizationId:me.organization.id,userId:me.user.id})
+ await page.goto('/sync-review');await page.getByRole('button',{name:'Asl kalitlar bilan sinxronlash',exact:true}).click();await expect(page.getByRole('article').filter({hasText:id}).first()).toContainText('conflict')
+ const review=await db.syncReview.findFirstOrThrow({where:{organizationId:me.organization.id,operationId:id}});expect(review.payload).toEqual(payload)
+ await page.getByLabel('Konflikt ko‘rib chiqish sababi',{exact:true}).fill('Original draft reviewed');await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Avval asl amal natijasini tekshiring')
+ expect((await page.request.post(`/api/sales/${draft.id}/void`,{headers:{Origin:'https://localhost:3100'},data:{}})).ok()).toBe(true)
+ await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish',exact:true}).click();await page.getByRole('button',{name:'Rahbar dalilini lokal navbatga saqlash',exact:true}).click();await expect(page.getByRole('article').filter({hasText:id}).first()).toContainText('rejected')
+ expect((await db.syncReview.findUniqueOrThrow({where:{id:review.id}})).payload).toEqual(payload);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.inventoryMovement.count({where:{sourceId:draft.id}})).toBe(0);expect(await db.auditLog.count({where:{entityId:review.id,action:'sync_review_resolved'}})).toBe(1)
+})

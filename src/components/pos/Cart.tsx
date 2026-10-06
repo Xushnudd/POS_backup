@@ -55,7 +55,7 @@ export default function Cart({
       <div className="p-3.5 border-b border-gray-100 bg-gray-50/50">
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">
+            <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block mb-1">
               Mijoz (Nasiya uchun majburiy)
             </label>
             <div className="relative">
@@ -80,7 +80,7 @@ export default function Cart({
           {customer && (
             <button
               onClick={() => onSetCustomer(null)}
-              className="mt-4 p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 transition"
+              className="mt-4 p-1.5 text-gray-600 hover:text-red-500 rounded-lg hover:bg-gray-100 transition"
               title="Mijozni olib tashlash"
             >
               <FontAwesomeIcon icon={faTimes} className="text-xs" />
@@ -92,12 +92,12 @@ export default function Cart({
       {/* Cart Items List */}
       <div className="flex-1 p-3 overflow-y-auto space-y-2">
         {items.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400">
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-600">
             <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl mb-3 text-gray-300">
               <FontAwesomeIcon icon={faCartShopping} />
             </div>
             <p className="text-sm font-bold text-gray-600">Savat bo&apos;sh</p>
-            <p className="text-xs text-gray-400 mt-1 max-w-[200px]">
+            <p className="text-xs text-gray-600 mt-1 max-w-[200px]">
               Katalogdan mahsulot tanlang yoki barkodni skaner qiling
             </p>
           </div>
@@ -119,7 +119,7 @@ export default function Cart({
         <div className="p-4 border-t border-gray-200 bg-gray-50/70 space-y-3">
           {/* Discount and Subtotal rows */}
           <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between text-gray-500 font-medium">
+            <div className="flex justify-between text-gray-600 font-medium">
               <span>Oraliq summa:</span>
               <span className="font-semibold text-gray-800">{formatMoney(subtotal)}</span>
             </div>
@@ -156,7 +156,7 @@ export default function Cart({
           {/* Big Total */}
           <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">
                 Jami to&apos;lov
               </span>
               <span className="text-2xl font-black text-gray-900 leading-tight">
@@ -167,7 +167,7 @@ export default function Cart({
             <button
               type="button"
               onClick={onClearCart}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
+              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
               title="Savatni tozalash"
             >
               <FontAwesomeIcon icon={faTrash} className="text-sm" />

@@ -1,3 +1,4 @@
+import {errorGuidance} from './error-guidance';
 import {
   ApiResponse,
   CatalogUnit,
@@ -27,7 +28,7 @@ import {
   Supplier,
 } from '@/types';
 
-export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
+export class ApiError extends Error { code?: string; details?: unknown; status?: number; requestId?:string; nextAction?:string; }
 class ApiClient {
   csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
@@ -39,7 +40,7 @@ class ApiClient {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
   }
 
-  private async request<T>(
+  async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
@@ -66,6 +67,9 @@ class ApiClient {
         error.code = data?.error?.code;
         error.status = response.status;
         error.details = data?.error?.details;
+        error.requestId=data.requestId??response.headers.get('x-request-id')??undefined;
+        error.nextAction=data?.error?.nextAction??errorGuidance(error.code??'INTERNAL_ERROR').nextAction;
+        error.message=errorMsg+' '+error.nextAction+(error.requestId?' So‘rov: '+error.requestId:'');
         throw error;
       }
 
@@ -73,7 +77,7 @@ class ApiClient {
     } catch (err: unknown) {
       // If error is network or JSON parsing error
       if (!(err instanceof ApiError) || !err.code) {
-        console.error(`API Request failed on [${endpoint}]:`, err);
+        const guide=errorGuidance('NETWORK_ERROR');const error=new ApiError(guide.message+' '+guide.nextAction);error.code='NETWORK_ERROR';error.nextAction=guide.nextAction;throw error;
       }
       throw err;
     }

@@ -1,3 +1,5 @@
+import {requestTrace,logEvent} from './observability/context'
+import {errorGuidance} from '@/lib/error-guidance'
 import { consumeLimit } from './auth/rate-limit'
 import { IntegrationUnavailable } from './integrations/contracts'
 import { randomUUID } from 'node:crypto'
@@ -75,6 +77,8 @@ async function boundedBody(request: NextRequest): Promise<string> {
 export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean } = {}) {
   return async (request: NextRequest, routeContext: C): Promise<Response> => {
     const requestId = randomUUID()
+    return requestTrace.run({requestId},async()=>{
+    const started=Date.now()
     try {
       const path = new URL(request.url).pathname
       const queryParams=new URL(request.url).searchParams
@@ -98,6 +102,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         const token = getRequestToken(request)
         context = token ? await verifySession(token) : null
         if (!context) throw new AccessError(401,'UNAUTHORIZED','Avtorizatsiya talab qilinadi')
+        requestTrace.getStore()!.organizationId=context.organizationId
         assertRoutePermission(path, request.method, context.role)
         const segments = path.split('/').filter(Boolean)
         if (segments[2] && segments[2] !== 'switch' && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
@@ -118,6 +123,8 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       }
       const result = await handler(request, routeContext)
       const data = await result.json()
+      if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}
+      logEvent('api_response',{status:result.status,durationMs:Date.now()-started,...(data.error?.code?{code:data.error.code}:{})})
       const response = NextResponse.json(sanitize(data, context?.role), { status: result.status, headers: result.headers })
       response.headers.set('X-Request-Id', requestId)
       response.headers.set('Cache-Control','private, no-store')
@@ -131,8 +138,10 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       else if (error instanceof Prisma.PrismaClientKnownRequestError && ['P2002','P2025'].includes(error.code)) {
         status = error.code === 'P2025' ? 404 : 409; code = error.code === 'P2025' ? 'NOT_FOUND' : 'CONFLICT'; message = 'Resurs topilmadi yoki amal takrorlangan'
       }
-      console.error(JSON.stringify({event:'api_error',requestId,status,code}))
-      return NextResponse.json({ success:false, error:{code,message,...(error instanceof AccessError&&error.details!==undefined?{details:sanitize(JSON.parse(JSON.stringify(error.details)),'cashier')}:{})}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
+      const guide=errorGuidance(code,message);message=guide.message
+      logEvent('api_error',{status,code,durationMs:Date.now()-started})
+      return NextResponse.json({ success:false, error:{code,message,nextAction:guide.nextAction,...(error instanceof z.ZodError?{details:error.issues.map(issue=>({path:issue.path,code:issue.code,message:issue.message}))}:{}),...(error instanceof AccessError&&error.details!==undefined?{details:sanitize(JSON.parse(JSON.stringify(error.details)),'cashier')}:{})}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
     }
+    })
   }
 }

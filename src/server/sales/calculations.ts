@@ -1,8 +1,9 @@
 import { Prisma } from '@prisma/client'
 
+const Exact=Prisma.Decimal.clone({precision:50,rounding:Prisma.Decimal.ROUND_HALF_UP})
 export type DecimalInput = Prisma.Decimal | number | string
 export function decimal(value: DecimalInput): Prisma.Decimal {
-  const result = new Prisma.Decimal(value)
+  const result = new Exact(value)
   if (!result.isFinite()) throw new Error('INVALID_DECIMAL')
   return result
 }
@@ -38,4 +39,20 @@ export function allocateMoney(total: DecimalInput, lines: { id: string; weight: 
   const ranked=[...rows].sort((a,b)=>b.remainder.comparedTo(a.remainder)||a.id.localeCompare(b.id))
   for (const row of ranked) if (remaining-->0) row.cents=row.cents.add(1)
   return Object.fromEntries(rows.map(row=>[row.id,row.cents.div(100)])) as Record<string,Prisma.Decimal>
+}
+
+// Pure tax arithmetic; a business must configure its tax policy separately.
+export function taxAmounts(amount:DecimalInput,rate:DecimalInput,included:boolean){
+ const value=money(amount),percent=decimal(rate);
+ if(value.lt(0)||percent.lt(0)||percent.gt(100))throw new Error('INVALID_TAX');
+ const base=included?money(value.div(decimal(1).add(percent.div(100)))):value;
+ const tax=included?value.sub(base):money(base.mul(percent).div(100));
+ return {base,tax,total:included?value:base.add(tax)};
+}
+export function partialReturnAmount(net:DecimalInput,sold:DecimalInput,returned:DecimalInput,alreadyRefunded:DecimalInput,requested:DecimalInput){
+ const amount=money(net),quantity=decimal(sold),previous=decimal(returned),refunded=money(alreadyRefunded),request=decimal(requested),remaining=quantity.sub(previous);
+ if(quantity.lte(0)||previous.lt(0)||previous.gt(quantity)||request.lte(0)||request.gt(remaining)||refunded.lt(0)||refunded.gt(amount)||amount.lt(0))throw new Error('INVALID_RETURN');
+ const refund=request.eq(remaining)?amount.sub(refunded):money(amount.mul(request).div(quantity));
+ if(refund.add(refunded).gt(amount))throw new Error('INVALID_RETURN');
+ return refund;
 }

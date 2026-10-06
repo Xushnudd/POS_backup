@@ -12,7 +12,9 @@
     "db:migrate": "prisma migrate deploy",
     "test": "node scripts/test.cjs",
     "test:integration": "node scripts/test.cjs --integration",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "worker:build": "tsc -p tsconfig.worker.json",
+    "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",

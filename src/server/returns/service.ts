@@ -6,7 +6,7 @@ import { AccessError, tenantScope } from '../auth/policy'
 import { audit, runOperation } from '../operations'
 import { moveStock } from '../inventory/movements'
 import { weightedAverage } from '../inventory/valuation'
-import { allocateMoney, decimal, money } from '../sales/calculations'
+import { allocateMoney, decimal, partialReturnAmount } from '../sales/calculations'
 import { quantitySchema, requireOpenShift } from '../sales/service'
 
 export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(2).max(2000),
@@ -29,7 +29,7 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    const qty=decimal(requested.quantity),remaining=original.quantity.sub(returned)
    if (qty.gt(remaining)) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED')
    const net=original.lineTotal.sub(original.receiptDiscount)
-   const amount=qty.eq(remaining)?net.sub(oldAmount):money(net.mul(qty).div(original.quantity))
+   const amount=partialReturnAmount(net,original.quantity,returned,oldAmount,qty)
    return {saleItemId:original.id,productId:original.productId,quantity:qty,unitPrice:original.unitPrice,lineTotal:amount,disposition:requested.disposition,unitCost:original.unitCost}
   })
   for (const row of rows) { const unit=sale.items.find(item=>item.id===row.saleItemId)?.unit; if(unit) await validateUnitQuantity(tx,context.organizationId,unit,row.quantity) }

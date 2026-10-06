@@ -122,7 +122,7 @@ export default function CameraBarcodeScanner({
               {errorMessage}
             </p>
           ) : (
-            <p className="text-center text-xs text-gray-500">
+            <p className="text-center text-xs text-gray-600">
               Barkodni ramka ichiga joylashtiring. Kod topilishi bilan skaner avtomatik yopiladi.
             </p>
           )}

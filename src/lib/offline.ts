@@ -106,3 +106,14 @@ export async function synchronize(scope:OfflineScope){
  // Server idempotency remains the final duplicate protection without Web Locks.
  return synchronizeBatch(scope)
 }
+
+export async function operationHistory(scope:OfflineScope){
+ const all=await transact<PendingOperation[]>('operations','readonly',store=>store.getAll())
+ return all.filter(op=>scopeKey(op.scope)===scopeKey(scope)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))
+}
+export async function acknowledgeRecovered(id:string,scope:OfflineScope,result:unknown){
+ return mutateOperation(id,old=>{
+  if(old&&scopeKey(old.scope)!==scopeKey(scope))throw new Error('Operation scope mismatch')
+  return {record:old?{...old,state:'synced',result}:{id,scope,type:'sale.complete',payload:{saleId:id},state:'synced',createdAt:new Date().toISOString(),result},result:undefined}
+ })
+}

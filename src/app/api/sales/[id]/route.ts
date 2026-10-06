@@ -1,4 +1,4 @@
-import { audit } from '@/server/operations'
+import { audit,assertLiveContext } from '@/server/operations'
 import { prisma } from '@/lib/prisma'
 import { AccessError, tenantScope } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -115,6 +115,7 @@ async function handlePUT(
     }
 
     const updatedSale = await prisma.$transaction(async (tx) => {
+      await assertLiveContext(tx,payload)
       // Lock the draft so checkout and edits cannot race.
       await tx.$queryRaw`SELECT id FROM "Sale" WHERE id = ${id} FOR UPDATE`
       const current = await tx.sale.findUniqueOrThrow({ where: { id, AND: tenantScope("Sale", payload) }, include: { items: true } })

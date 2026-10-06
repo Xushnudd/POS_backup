@@ -29,14 +29,14 @@ export default function CartItem({
           <h4 className="text-xs font-bold text-gray-900 truncate leading-snug">
             {item.product.name}
           </h4>
-          <span className="text-[11px] text-gray-500 font-medium">
+          <span className="text-[11px] text-gray-600 font-medium">
             {formatMoney(item.unitPrice)} / {item.product.unit || 'dona'}
           </span>
         </div>
 
         <button
           onClick={() => onRemove(item.product.id)}
-          className="text-gray-400 hover:text-red-500 p-1 transition"
+          className="text-gray-600 hover:text-red-500 p-1 transition"
           title="O'chirish"
         >
           <FontAwesomeIcon icon={faTrash} className="text-xs" />
@@ -109,7 +109,7 @@ export default function CartItem({
           />
           <button
             onClick={() => setShowDiscount(false)}
-            className="text-[10px] text-gray-500 font-semibold hover:text-gray-700"
+            className="text-[10px] text-gray-600 font-semibold hover:text-gray-700"
           >
             Yopish
           </button>

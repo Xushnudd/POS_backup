@@ -138,7 +138,7 @@ export default function PaymentModal({
         {/* Total sum display */}
         <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">
+            <span className="text-xs text-slate-600 font-semibold uppercase tracking-wider block">
               To&apos;lanadigan summa
             </span>
             <span className="text-3xl font-black text-emerald-400">
@@ -148,7 +148,7 @@ export default function PaymentModal({
 
           {customer && (
             <div className="text-right">
-              <span className="text-xs text-slate-400 block">Mijoz</span>
+              <span className="text-xs text-slate-600 block">Mijoz</span>
               <span className="text-sm font-bold text-white">{customer.fullName}</span>
             </div>
           )}
@@ -181,7 +181,7 @@ export default function PaymentModal({
                 >
                   <FontAwesomeIcon
                     icon={m.icon}
-                    className={`text-2xl mb-2 ${isSelected ? 'text-emerald-600' : 'text-gray-400'}`}
+                    className={`text-2xl mb-2 ${isSelected ? 'text-emerald-700' : 'text-gray-600'}`}
                   />
                   <span className="text-xs">{m.label}</span>
                 </button>
@@ -212,7 +212,7 @@ export default function PaymentModal({
 
             {/* Quick cash buttons */}
             <div>
-              <span className="text-xs font-semibold text-gray-500 block mb-2">
+              <span className="text-xs font-semibold text-gray-600 block mb-2">
                 Tezkor summalar:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -238,7 +238,7 @@ export default function PaymentModal({
               <span className="text-sm font-bold text-gray-600">Qaytim:</span>
               <span
                 className={`text-xl font-black ${
-                  changeAmount > 0 ? 'text-blue-600' : 'text-gray-400'
+                  changeAmount > 0 ? 'text-blue-600' : 'text-gray-600'
                 }`}
               >
                 {formatMoney(changeAmount)}

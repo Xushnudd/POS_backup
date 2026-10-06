@@ -1,3 +1,4 @@
+import {recordConflict} from '@/server/sync/reviews'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApi } from '@/server/api'
@@ -36,7 +37,9 @@ export const POST=withApi(async(request:NextRequest)=>{
   } catch (error) {
    const code=error instanceof AccessError?error.code:error instanceof z.ZodError?'VALIDATION_ERROR':'INTERNAL_ERROR'
    const retryable=code==='INTERNAL_ERROR'||code==='CONCURRENT_CONFLICT'
-   results.push({operationId:command.operationId,state:retryable?'pending':'conflict',code})
+   let reviewId:string|undefined
+   if(!retryable){const review=await recordConflict(context,command,code);reviewId=review.id}
+   results.push({operationId:command.operationId,state:retryable?'pending':'conflict',code,reviewId})
   }
  }
  return NextResponse.json({success:true,data:results})

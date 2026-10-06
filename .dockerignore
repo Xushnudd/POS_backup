@@ -18,3 +18,5 @@ coverage
 .test-build
 tests
 tasks
+
+.worker-build

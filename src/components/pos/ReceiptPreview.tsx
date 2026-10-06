@@ -57,7 +57,7 @@ export default function ReceiptPreview({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2 text-emerald-600">
+        <div className="flex items-center gap-2 text-emerald-700">
           <FontAwesomeIcon icon={faCheckCircle} />
           <span>{copy?'Chek nusxasi':sale.status==='draft'?'Savdo qoralamasi':'Savdo muvaffaqiyatli yakunlandi'}</span>
         </div>
@@ -108,20 +108,20 @@ export default function ReceiptPreview({
         {/* Info */}
         <div className="py-2.5 border-b border-dashed border-gray-300 space-y-1 text-[11px]">
           <div className="flex justify-between">
-            <span className="text-gray-500">Chek raqami:</span>
+            <span className="text-gray-600">Chek raqami:</span>
             <span className="font-bold">{sale.receiptNo}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Sana:</span>
+            <span className="text-gray-600">Sana:</span>
             <span>{new Date(sale.completedAt||sale.createdAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone??'Asia/Tashkent'})}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Kassir:</span>
+            <span className="text-gray-600">Kassir:</span>
             <span>{sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:'Chekdagi kassir ID: '+sale.cashierId)}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Mijoz:</span>
+              <span className="text-gray-600">Mijoz:</span>
               <span className="font-semibold">{sale.customer.fullName}</span>
             </div>
           )}
@@ -132,7 +132,7 @@ export default function ReceiptPreview({
         {sale.cashTendered!=null&&sale.cashChange!=null&&<div><p>Berilgan naqd: {formatMoney(sale.cashTendered)}</p><p>Qaytim: {formatMoney(sale.cashChange)}</p></div>}
         {/* Items List */}
         <div className="py-2.5 border-b border-dashed border-gray-300">
-          <div className="flex justify-between font-bold pb-1 text-[11px] text-gray-500 uppercase">
+          <div className="flex justify-between font-bold pb-1 text-[11px] text-gray-600 uppercase">
             <span>Mahsulot</span>
             <span>Summa</span>
           </div>
@@ -143,7 +143,7 @@ export default function ReceiptPreview({
                   <span className="break-words min-w-0 flex-1">{item.productName}</span>
                   <span className="font-bold">{formatMoney(item.lineTotal)}</span>
                 </div>
-                <div className="flex justify-between text-[10px] text-gray-500">
+                <div className="flex justify-between text-[10px] text-gray-600">
                   <span>
                     {item.quantity} {item.unit??''} x {formatMoney(item.unitPrice)}
                   </span>
@@ -179,7 +179,7 @@ export default function ReceiptPreview({
         {/* Payments breakdown */}
         {sale.payments && sale.payments.length > 0 && (
           <div className="py-2.5 border-b border-dashed border-gray-300 space-y-1 text-[11px]">
-            <span className="text-gray-500 font-bold block mb-1">To&apos;lov turi:</span>
+            <span className="text-gray-600 font-bold block mb-1">To&apos;lov turi:</span>
             {sale.payments.map((p, idx) => {
               const pTypeLabels: Record<string, string> = {
                 cash: 'Naqd pul',
@@ -198,9 +198,9 @@ export default function ReceiptPreview({
         )}
 
         {/* Footer message */}
-        <div className="text-center pt-4 text-[11px] text-gray-500">
+        <div className="text-center pt-4 text-[11px] text-gray-600">
           <p>{organization?.receiptFooter || 'Xaridingiz uchun rahmat!'}</p>
-          <p className="text-[9px] text-gray-400 mt-2">Dastur: Shuni POS</p>
+          <p className="text-[9px] text-gray-600 mt-2">Dastur: Shuni POS</p>
         </div>
       </div>
     </Modal>

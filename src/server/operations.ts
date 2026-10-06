@@ -1,3 +1,4 @@
+import {requestTrace, safeAudit, logEvent} from './observability/context'
 import { createHash } from 'node:crypto'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
@@ -16,6 +17,7 @@ export async function assertLiveContext(tx:Prisma.TransactionClient,context:Toke
 }
 export async function runOperation<T>(context: TokenPayload, type: string, key: string, payload: unknown, work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
   if (!key || key.length > 200) throw new AccessError(400,'OPERATION_ID_REQUIRED','Yagona amal identifikatori talab qilinadi')
+  const trace=requestTrace.getStore();if(trace)trace.operationId=key
   const hash=payloadHash(payload)
   for (let attempt=0;attempt<3;attempt++) {
     try {
@@ -46,12 +48,13 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
       const retryable=operationRace || committedBusinessRace || (error instanceof Prisma.PrismaClientKnownRequestError && (error.code==='P2034' || (error.code==='P2010' && ['40001','40P01'].includes(String(error.meta?.code)))))
       if (!retryable) throw error
       if (attempt===2) throw new AccessError(409,'CONCURRENT_CONFLICT','Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring')
+      logEvent('operation_retry',{code:'CONCURRENT_CONFLICT'})
       await new Promise(resolve=>setTimeout(resolve,20*(attempt+1)))
     }
   }
   throw new AccessError(409,'CONCURRENT_CONFLICT')
 }
 export async function audit(tx: Prisma.TransactionClient, context: TokenPayload, entityType: string, entityId: string, action: string, after?: unknown) {
-  await tx.auditLog.create({data:{organizationId:context.organizationId,actorId:context.userId,entityType,entityId,action,
-    ...(after!==undefined && {afterData:JSON.parse(JSON.stringify(after)) as Prisma.InputJsonValue})}})
+  await tx.auditLog.create({data:{organizationId:context.organizationId,actorId:context.userId,entityType,entityId,action,requestId:requestTrace.getStore()?.requestId,
+    ...(after!==undefined && {afterData:JSON.parse(JSON.stringify(safeAudit(after))) as Prisma.InputJsonValue})}})
 }
