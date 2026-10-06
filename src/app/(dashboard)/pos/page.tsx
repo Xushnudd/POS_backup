@@ -7,7 +7,10 @@ import { useNotification } from '@/context/NotificationContext';
 import { useCart } from '@/hooks/useCart';
 import { usePosConnection } from '@/hooks/usePosConnection';
 import { useDebounce } from '@/hooks/useDebounce';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
+import { posFailure, type PosFailure } from '@/lib/pos-failure';
+import { clientLine } from '@/lib/money';
+import Modal from '@/components/ui/Modal';
 import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, markCancelled, synchronize } from '@/lib/offline';
 import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
 import ProductSearch from '@/components/pos/ProductSearch';
@@ -57,6 +60,7 @@ export default function PosPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState<boolean>(false);
+  const [failure,setFailure]=useState<(PosFailure&{details?:{productName?:string;previousPrice?:string;currentPrice?:string|null;requestedQuantity?:string;availableQuantity?:string}})|null>(null);
 
   const connection=usePosConnection();
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -190,6 +194,7 @@ export default function PosPage() {
           sku: i.product.sku,
           quantity: i.quantity,
           unitPrice: i.unitPrice,
+          expectedUnitPrice: i.unitPrice,
           discountAmount: i.discountAmount,
         })),
       };
@@ -235,6 +240,8 @@ export default function PosPage() {
       clearCart();setServiceType('');
       setIsReceiptModalOpen(true);
     } catch (err: unknown) {
+      setFailure({...posFailure(err),details:err instanceof ApiError?err.details as NonNullable<typeof failure>['details']:undefined});
+      setIsPaymentModalOpen(false);
       notifyError(err instanceof Error ? err.message : 'To\'lovni yakunlashda xatolik yuz berdi');
     } finally {
       setIsProcessingPayment(false);
@@ -261,8 +268,19 @@ export default function PosPage() {
       await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:null});
       checkoutAttempt.current=null;setHasPendingCheckout(false);setIsPaymentModalOpen(false);
       notifySuccess('Urinish serverda bekor qilindi. Savat saqlangan.');
-    }catch(error){notifyError(error instanceof Error?error.message:'Bekor qilish tasdiqlanmadi; urinish saqlangan');}
+      return true;
+    }catch(error){notifyError(error instanceof Error?error.message:'Bekor qilish tasdiqlanmadi; urinish saqlangan');return false;}
     finally{setIsProcessingPayment(false);}
+  };
+
+  const refreshConflictCart=async()=>{
+    if(!checkoutAttempt.current)return;
+    try{
+      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,unitPrice:Number(result.data.salePrice),discountAmount:0,lineTotal:clientLine(item.quantity,Number(result.data.salePrice))};}));
+      if(!await cancelPendingCheckout())return;
+      hydrate({items:current,cartDiscount:0,customer,note});setFailure(null);await loadProducts();
+      notifySuccess('Narxlar yangilandi, chegirmalar tozalandi. Miqdorlarni tekshirib, to‘lovni qayta tasdiqlang.');
+    }catch(error){notifyError(error instanceof Error?error.message:'Savat yangilanmadi; asl urinish saqlangan');}
   };
 
   const recoverCheckout = async () => {
@@ -322,15 +340,15 @@ export default function PosPage() {
   },[localReady,isProcessingPayment,hasPendingCheckout,isPaymentModalOpen,isReceiptModalOpen,isOpenShiftModalOpen,activeShift,items.length]);
 
   return (
-    <div className="h-[calc(100vh-5rem)] flex flex-col gap-4">
+    <div data-testid="pos-touch" className="min-h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-5rem)] flex flex-col gap-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11">
       <div role="status" className={connection.state==='online'?'text-green-700':'bg-amber-50 text-amber-900 p-3'}>
         <span>{connection.state==='online'?'Server bilan aloqa bor':connection.state==='checking'?'Server aloqasi tekshirilmoqda':'Server bilan aloqa yo‘q. Savat lokal saqlanadi; savdo yakunlanmaydi.'}</span>
         <Button variant="outline" onClick={connection.recheck}>Aloqani tekshirish</Button>
       </div>
       <p className="text-xs text-slate-500">F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.</p>
-      {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between gap-3">
+      {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
-        <div className="flex gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>Navbatni sinxronlash</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
+        <div className="flex flex-wrap gap-2"><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>Navbatni sinxronlash</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
       </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (
@@ -363,7 +381,7 @@ export default function PosPage() {
       {/* Main 2-column layout: Left Catalog, Right Cart */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
         {/* Left: Product Catalog & Search (2 cols) */}
-        <div className="lg:col-span-2 flex flex-col min-h-0">
+        <div className="lg:col-span-2 flex flex-col min-h-[320px] lg:min-h-0">
           <ProductSearch
             products={products}
             categories={categories}
@@ -378,7 +396,7 @@ export default function PosPage() {
         </div>
 
         {/* Right: Shopping Cart (1 col) */}
-        <div className="lg:col-span-1 flex flex-col min-h-0">
+        <div className="lg:col-span-1 flex flex-col min-h-[360px] lg:min-h-0">
           <Cart
             items={items}
             subtotal={subtotal}
@@ -398,6 +416,13 @@ export default function PosPage() {
         </div>
       </div>
 
+      <Modal isOpen={Boolean(failure)} onClose={()=>setFailure(null)} title={failure?.stage==='integration'?'Tashqi xizmat holati':'Savdo yakunlanmadi'}>
+        {failure&&<div role="alert" data-stage={failure.stage} className="space-y-3"><p>{failure.code}: {failure.message}</p><p>{failure.nextAction}</p>
+          {failure.details&&<div><p>Mahsulot: {failure.details.productName}</p>{failure.details.previousPrice!==undefined&&<p>Oldingi narx: {failure.details.previousPrice} · Joriy narx: {failure.details.currentPrice??'Mahsulot mavjud emas'}</p>}{failure.details.requestedQuantity!==undefined&&<p>Savat miqdori: {failure.details.requestedQuantity} · Mavjud qoldiq: {failure.details.availableQuantity}</p>}</div>}
+          {['PRICE_CHANGED','INSUFFICIENT_STOCK'].includes(failure.code)&&<><p>Avval eski urinish serverda bekor qilinadi. Kassir qoralamasini bekor qilish uchun rahbar yordami kerak. Chegirmalar tozalanadi, to‘lov qayta tasdiqlanadi.</p><Button disabled={isProcessingPayment} onClick={refreshConflictCart}>Eski urinishni bekor qilib savatni yangilash</Button></>}
+          <Button variant="outline" onClick={()=>{setFailure(null);void recoverCheckout();}}>Asl savdo natijasini tekshirish</Button>
+        </div>}
+      </Modal>
       {/* Modals */}
       <OpenShiftModal
         isOpen={isOpenShiftModalOpen}

@@ -76,6 +76,7 @@ model OrganizationUser {
   userId         String
   role           String   // owner, admin, cashier
   isActive       Boolean  @default(true)
+  archivedAt     DateTime?
   createdAt      DateTime @default(now())
   
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -121,6 +122,7 @@ model UserStore {
 }
 
 model Register {
+  receiptSequence Decimal @default(0) @db.Decimal(20, 0)
   id        String   @id @default(uuid())
   storeId   String
   name      String
@@ -324,6 +326,11 @@ model StockTransferItem {
 
 // Sales and POS
 model Shift {
+  pendingClose Json?
+  countedBy String?
+  approvedBy String?
+  closeReason String?
+  handoverFromId String? @unique
   id               String   @id @default(uuid())
   registerId       String
   organizationUserId String
@@ -380,6 +387,7 @@ model ShiftCorrection {
 }
 
 model Sale {
+  fiscalReceiptNo String?
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
@@ -559,6 +567,8 @@ model Operation {
   @@index([organizationId, createdAt])
 }
 model DebtEntry {
+  debtOriginId String?
+  @@index([debtOriginId])
   actorId        String?
   effectiveAt    DateTime @default(now())
   dueAt          DateTime?

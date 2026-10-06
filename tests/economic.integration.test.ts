@@ -627,7 +627,7 @@ test('Debt aging reconciles partial settlement/write-off and isolates uncertain 
  await postDebtDocument(f.context,customer.id,{operationId:randomUUID(),kind:'opening',amount:25,reason:'Historical opening'})
  const aging=await prisma.$transaction(tx=>debtAging(tx,f.org.id,customer.id,new Date(Date.now()+2*86400000)))
  assert.equal(aging.overdue.toString(),'80');assert.equal(aging.upcoming.toString(),'90')
- assert.equal(aging.noDueDate.toString(),'100');assert.equal(aging.unallocated.toString(),'25')
+ assert.equal(aging.noDueDate.toString(),'125');assert.equal(aging.unallocated.toString(),'0')
  assert.equal(aging.debtTotal.toString(),'295');assert.equal(aging.requiresReconciliation,false)
  const current=await customerStatement(f.context,customer.id)
  assert.equal(current.aging.upcoming.toString(),'170')

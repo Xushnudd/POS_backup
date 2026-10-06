@@ -29,7 +29,7 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; }
 class ApiClient {
-  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
     list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
@@ -136,6 +136,7 @@ class ApiClient {
       organizationId: string;
       search?: string;
       categoryId?: string;
+      status?: 'active'|'archived'|'all';
       barcode?: string;
       page?: number;
       limit?: number;
@@ -264,13 +265,16 @@ class ApiClient {
 
     get: (id: string) => this.request<Shift>(`/shifts/${id}`),
 
-    open: (data: { registerId: string; organizationUserId: string; openingCash: number; note?: string; operationId: string }) =>
+    open: (data: { registerId: string; organizationUserId: string; openingCash: string|number;
+      handoverFromId?:string; note?: string; operationId: string }) =>
       this.request<Shift>('/shifts', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    close: (id: string, data: { countedCash: number; note?: string }) =>
+    handover: (registerId:string)=>this.request<{id:string;countedCash:string;closedAt:string} | null>(`/operations/handover?${new URLSearchParams({registerId})}`),
+    rejectClose: (id:string,data:{requestId:string;operationId:string;reason:string})=>this.request<Shift>(`/shifts/${id}/close-rejection`,{method:'POST',body:JSON.stringify(data)}),
+    close: (id: string, data: { countedCash: string|number; note?: string;approvalRequestId?:string;operationId?:string }) =>
       this.request<Shift>(`/shifts/${id}`, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -465,7 +469,7 @@ class ApiClient {
       operationId: string;
       referenceNo?: string;
       note?: string;
-      allocations?:{saleId:string|null;amount:string}[];
+      allocations?:{saleId:string|null;debtOriginId?:string;amount:string}[];
     }) =>
       this.request<Payment>('/payments/credit', {
         method: 'POST',
@@ -475,6 +479,7 @@ class ApiClient {
 
   // Reports
   reports = {
+    purchases: (params:Record<string,string>) => this.request<{rows:Record<string,unknown>[];summary:{purchaseValue:string;reversalValue:string;netPurchaseValue:string};meta:{asOf:string;timezone:string;currency:string}}>(`/reports/purchases?${new URLSearchParams(params)}`),
     reconciliation: (params:{kind:string;storeId?:string;page:number}) => this.request<Record<string,unknown>[]>(`/reports/reconciliation?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined).map(([k,v])=>[k,String(v)]))}`),
     dashboard: (params: { organizationId: string; storeId?: string; date?: string;startDate?:string;endDate?:string;asOf?:string }) => {
       const q = new URLSearchParams();
@@ -542,7 +547,7 @@ class ApiClient {
 
     revokeInvitation: (id:string,invitationId:string) => this.request(`/organizations/${id}/invitations/${invitationId}`,{method:'DELETE',body:'{}'}),
     createInvitation: (id:string,data:{phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken:string}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify(data)}),
-    updateMember: (id:string,memberId:string,data:{role?:string;isActive?:boolean;storeIds?:string[]}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify(data)}),
+    updateMember: (id:string,memberId:string,data:{role?:string;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify(data)}),
     users: (id: string) => this.request<OrganizationMember[]>(`/organizations/${id}/users`),
 
     addUser: (

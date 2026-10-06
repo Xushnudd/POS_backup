@@ -60,7 +60,7 @@ export default function DashboardPage() {
   }, [loadDashboardData]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div data-testid="owner-dashboard" className="space-y-6 max-w-7xl min-w-0 mx-auto">
       {/* Top Banner: Welcome & Date Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs">
         <div>

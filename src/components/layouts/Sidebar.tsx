@@ -121,7 +121,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Brand header */}
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
-          <Link href="/dashboard" className="flex items-center gap-3">
+          <Link href="/dashboard" prefetch={false} className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-emerald-500 to-blue-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-emerald-500/20">
               S
             </div>
@@ -156,6 +156,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div key={item.href} className="pb-2 pt-1">
                   <Link
                     href={item.href}
+                    prefetch={false}
                     onClick={onClose}
                     className={`flex items-center gap-3 px-3.5 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${
                       isActive
@@ -174,6 +175,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive

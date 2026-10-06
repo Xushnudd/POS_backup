@@ -1,7 +1,7 @@
 import type { TokenPayload } from '@/lib/auth'
 
 export class AccessError extends Error {
-  constructor(public status: number, public code: string, message = 'Bu amal uchun ruxsat yo‘q', public retryAfterSeconds?:number) { super(message) }
+  constructor(public status: number, public code: string, message = 'Bu amal uchun ruxsat yo‘q', public retryAfterSeconds?:number, public details?:unknown) { super(message) }
 }
 export function tenantScope(model: string, context: TokenPayload): Record<string, unknown> {
   const org = context.organizationId

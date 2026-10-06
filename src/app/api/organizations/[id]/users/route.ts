@@ -66,6 +66,7 @@ async function handleGET(
         },
         role: ou.role,
         isActive: ou.isActive,
+        archivedAt: ou.archivedAt,
         stores: ou.userStores.map(us => ({
           id: us.store.id,
           name: us.store.name,

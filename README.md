@@ -1042,3 +1042,19 @@ Sozlamalar → Xodimlarda **Egalikni topshirish** qabul qiluvchiga 24 soatlik so
 Biznes almashtirish savat/filial/terminal/smena holatlarini joriy biznesga moslaydi. A biznesning lokal savati B biznesga o‘tmaydi; A ga qaytganda tiklanadi. Narx, stock va vakolat serverda jonli qayta tekshiriladi, API javoblari `private, no-store`.
 
 Yangi additive/versioned migratsiyalar 024 va 025, jami26. Builddan alohida `npm run db:migrate` staging/backup protokoli bilan bajariladi; readiness025siz503. O‘zgarishlar faqat izolyatsiyalangan local test bazasida tekshirildi, productionga deploy qilinmadi. +50 vazifa so‘rovi hali yakunlangan deb ko‘rsatilmaydi; individual qabul holati tasks/EXECUTION_STATUS.mdda.
+
+### Xarid narxlarini mahsulot va supplier bo‘yicha taqqoslash
+
+Hisobotlar → **Xarid narxlari tahlili** orqali narx tarixi yoki mahsulot/supplier taqqoslashni oching. Yetkazib beruvchi va mahsulotni nom orqali qidirib tanlang, filial/davrni belgilang va **Xaridni filtrlash**ni bosing. Jami barcha mos hujjatlardan, jadval esa sahifalangan qatorlardan hisoblanadi. CSV barcha mos qatorlarni oladi; juda katta natijada filtrni toraytirish kerak.
+
+Narxlar tasdiqlangan xarid hujjatidan olinadi, katalogning keyinchalik o‘zgargan tannarxidan emas. Bekor qiluvchi qarshi hujjat xarid qiymatini kamaytiradi; qoralama xarid hisobga kirmaydi. O‘rtacha narx miqdor bilan vaznlangan, birinchi/oxirgi va minimal/maksimal narxlar purchase qatorlariga tegishli. Eski tasdiq sanasi yo‘q hujjatlar alohida belgi bilan ko‘rsatiladi. Bu supplierga to‘langan pul yoki qarz hisobi emas.
+
+Nasiya bo‘yicha qabul testi: 100000 savdo → debt100000, revenue100000, cash0. Mijozsiz/faol bo‘lmagan mijoz/limitdan yuqori nasiya postingdan oldin rad etiladi. Parallel limit himoyasi saqlangan. Yangi schema, migration, provider yoki hardware integratsiyasi qo‘shilmadi.
+
+Xodimlar boshqaruvi: Sozlamalar → Xodimlar bo‘limida rol/filialni tahrirlash, vaqtincha bloklash, arxivlash va arxivdan tiklash mavjud. Arxivlash savdo tarixini saqlaydi va sessiyalarni bekor qiladi. Tiklash xodimni bloklangan holatda qaytaradi; vakolatlarni tekshirib alohida faollashtirish kerak. Migration `202610060026_member_archive`ni deploydan oldin qo‘llang.
+
+POS konfliktni mahsulot va eski/yangi qiymatlar bilan ko‘rsatadi. Eski urinish bekor qilingach narxlarni yangilash va qayta to‘lov tasdig‘i bor. Real printer adapterisiz browser print/PDF ishlaydi; chop etish xatosi savdoni qayta yaratmaydi.
+
+Smenadagi har qanday naqd farq uchun sabab va manager tasdig‘i talab qilinadi (limit0). Kassir so‘rovi pending paytda savdo/pul yozuvi bloklanadi. Rahbar Shifts ekranida tasdiqlaydi yoki qayta sanashga qaytaradi. Keyingi kassir smena ochishda oldingi sanalgan pulni topshirish sifatida qabul qilishi mumkin. Boshlang‘ich qarz hujjatlari endi individual FIFO/explicit to‘lovga bog‘lanadi; muddati ham alohida hisoblanadi. Eski noma’lum taqsimotlar taxmin qilinmaydi. Deploydan oldin additive migration027ni qo‘llang.
+
+Browser tekshiruvi: odatiy `npm run test:e2e` Chromium; `POS_E2E_ALL_BROWSERS=1 npm run test:e2e` Chromium/Firefox/WebKit. CI uchala browserni `playwright install --with-deps chromium firefox webkit` bilan tayyorlaydi va failure screenshot/trace saqlaydi. 360/768/1280px touch/mobile acceptance bor. Test bazasi faqat isolated pos_test bo‘lishi kerak.

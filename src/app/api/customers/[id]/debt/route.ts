@@ -1,3 +1,6 @@
+import { prisma } from '@/lib/prisma'
+import { assertLiveContext } from '@/server/operations'
+import { debtTargets } from '@/server/customers/targets'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -50,13 +53,12 @@ async function handleGET(
       const raw=request.nextUrl.searchParams.get('targetsPage')??''
       if (!/^[1-9]\d*$/.test(raw)||!Number.isSafeInteger(Number(raw))||Number(raw)>100000) throw new AccessError(400,'INVALID_PAGE')
       const page=Number(raw),limit=50
-      const groups=await db.debtEntry.groupBy({
-        by:['saleId'],where:{customerId:id},_sum:{amount:true},_min:{effectiveAt:true},
-        having:{amount:{_sum:{gt:0}}},orderBy:[{_min:{effectiveAt:'asc'}},{saleId:'asc'}],skip:(page-1)*limit,take:limit+1,
-      })
-      const selected=groups.slice(0,limit)
-      const sales=await db.sale.findMany({where:{id:{in:selected.flatMap(group=>group.saleId?[group.saleId]:[])}},select:{id:true,receiptNo:true}})
-      allocationTargets={page,hasMore:groups.length>limit,items:selected.map(group=>({saleId:group.saleId,receiptNo:sales.find(sale=>sale.id===group.saleId)?.receiptNo??null,balance:String(group._sum.amount??0)}))}
+      allocationTargets=await prisma.$transaction(async tx=>{
+        await assertLiveContext(tx,payload)
+        const groups=(await debtTargets(tx,payload.organizationId,id)).filter(group=>group.balance.gt(0))
+        const selected=groups.slice((page-1)*limit,page*limit)
+        return {page,hasMore:groups.length>page*limit,items:selected.map(group=>({saleId:group.saleId,debtOriginId:group.debtOriginId,sourceType:group.sourceType,receiptNo:group.receiptNo,balance:String(group.balance),dueAt:group.dueAt,legacyUnallocated:group.legacyUnallocated}))}
+      },{isolationLevel:'RepeatableRead'})
     }
 
     // Get recent transactions

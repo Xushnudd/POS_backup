@@ -91,6 +91,7 @@ function ReportsContent() {
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
             Tahlil va Hisobotlar
           </h1>
+          <Link href="/reports/purchases" className="text-sm text-blue-700 mr-4">Xarid narxlari tahlili</Link>
           <Link href="/reports/reconciliation" className="text-sm text-blue-700">Qoldiq va pul hisobini solishtirish</Link>
           <p className="text-sm text-gray-500 mt-0.5">
             Savdo ko&apos;rsatkichlari, tovarlar aylanmasi, foyda va CSV eksport

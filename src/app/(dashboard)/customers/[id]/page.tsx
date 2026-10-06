@@ -44,7 +44,7 @@ export default function CustomerDetailPage() {
   const [hasPendingPayment,setHasPendingPayment]=useState(false);
   const [ledgerVersion,setLedgerVersion]=useState(0);
   const [allocationMode,setAllocationMode]=useState('fifo');
-  const [allocations,setAllocations]=useState<{saleId:string|null;amount:string}[]>([]);
+  const [allocations,setAllocations]=useState<{saleId:string|null;debtOriginId?:string;amount:string}[]>([]);
   const [localReady,setLocalReady]=useState(false);
   const [localError,setLocalError]=useState('');
   const [recoveryVersion,setRecoveryVersion]=useState(0);

@@ -28,6 +28,7 @@ type SettingsUser = {
   id: string;
   role: 'owner' | 'admin' | 'cashier';
   isActive: boolean;
+  archivedAt: string | null;
   user: { fullName: string; phone: string; email?: string | null };
   stores?: Array<{ id: string; name: string }>;
 };
@@ -474,11 +475,16 @@ export default function SettingsPage() {
                       </td>
                       <td className="py-3 px-4"><div className="flex gap-2">
                         {u.isActive&&<Button size="sm" onClick={async()=>{if(!organization?.id||!window.confirm(`${u.user?.fullName} ga egalik so‘rovini yuborasizmi? Qabul qilganda siz administrator bo‘lasiz.`))return;try{await api.ownership.request(organization.id,u.id);notifySuccess('Qabul qiluvchi tasdig‘i kutilmoqda');}catch(error){notifyError(error instanceof Error?error.message:'So‘rov yuborilmadi');}}}>Egalikni topshirish</Button>}
-                        <Button size="sm" onClick={()=>{setEditingMember(u);setMemberRole(u.role);setMemberStores(u.stores?.map(store=>store.id)??[]);}}>Vakolat</Button>
-                        <Button size="sm" onClick={async()=>{
+                        <Badge size="sm">{u.archivedAt?'Arxivlangan':u.isActive?'Faol':'Bloklangan'}</Badge>
+                        {!u.archivedAt&&<Button size="sm" onClick={()=>{setEditingMember(u);setMemberRole(u.role);setMemberStores(u.stores?.map(store=>store.id)??[]);}}>Vakolat</Button>}
+                        {!u.archivedAt&&<Button size="sm" onClick={async()=>{
                           if (!organization?.id) return;
                           try{await api.organizations.updateMember(organization.id,u.id,{isActive:!u.isActive});await loadUsers();notifySuccess(u.isActive?'Xodim bloklandi':'Xodim faollashtirildi');}catch(error){notifyError(error instanceof Error?error.message:'Amal bajarilmadi');}
-                        }}>{u.isActive?'Bloklash':'Faollashtirish'}</Button>
+                        }}>{u.isActive?'Bloklash':'Faollashtirish'}</Button>}
+                        <Button size="sm" onClick={async()=>{
+                          if(!organization?.id||!window.confirm(u.archivedAt?'Xodim arxivdan bloklangan holatda tiklanadi. Vakolatlarini tekshirib, alohida faollashtiring.':'Xodim arxivlanadi va sessiyalari bekor qilinadi. Savdo tarixi saqlanadi. Davom etasizmi?'))return;
+                          try{await api.organizations.updateMember(organization.id,u.id,{action:u.archivedAt?'restore':'archive'});await loadUsers();notifySuccess(u.archivedAt?'Arxivdan tiklandi; hali bloklangan':'Xodim arxivlandi');}catch(error){notifyError(error instanceof Error?error.message:'Amal bajarilmadi');}
+                        }}>{u.archivedAt?'Arxivdan tiklash':'Arxivlash'}</Button>
                       </div></td>
                     </tr>
                   ))}

@@ -61,7 +61,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200/80 px-4 lg:px-6 h-16 flex items-center justify-between shadow-2xs">
       <OwnershipRequests organizationId={organization?.id}/>
       {/* Left: Mobile hamburger & Store / Register info */}
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <button
           onClick={onToggleSidebar}
           className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition"
@@ -91,7 +91,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
               Smena ochiq
             </Badge>
           ) : (
-            <Link href="/shifts">
+            <Link href="/shifts" prefetch={false}>
               <Badge variant="warning" size="sm" dot className="hover:opacity-80 transition cursor-pointer">
                 Smena ochilmagan
               </Badge>
@@ -101,12 +101,12 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
       </div>
 
       {/* Right: Quick POS link, User profile & Logout */}
-      <div className="flex items-center gap-3">
-        {businesses.length>1 && <select aria-label="Biznesni almashtirish" value={organization?.id??''} disabled={switching} onChange={e=>{void switchBusiness(e.target.value);}} className="max-w-36 text-xs border rounded-lg p-2">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        {businesses.length>1 && <select aria-label="Biznesni almashtirish" value={organization?.id??''} disabled={switching} onChange={e=>{void switchBusiness(e.target.value);}} className="max-w-24 sm:max-w-36 min-w-0 text-xs border rounded-lg p-2">
           {businesses.map(business=><option key={business.id} value={business.id}>{business.name}</option>)}
         </select>}
         {!isPosPage && (
-          <Link href="/pos">
+          <Link href="/pos" prefetch={false}>
             <Button
               variant="success"
               size="sm"

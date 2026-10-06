@@ -51,6 +51,7 @@ export default function ShiftsPage() {
 
   // Close shift modal
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const closeAttempt=useRef<string|null>(null);
   const [countedCash, setCountedCash] = useState('');
   const [closeNote, setCloseNote] = useState('');
   const [isClosingShift, setIsClosingShift] = useState(false);
@@ -114,20 +115,22 @@ export default function ShiftsPage() {
     e.preventDefault();
     if (!activeShift?.id) return;
 
-    const counted = parseFloat(countedCash);
-    if (isNaN(counted)) {
+    if (!/^\d+(\.\d{1,2})?$/.test(countedCash)) {
       notifyError('Kassadagi sanalgan naqd pulni kiriting');
       return;
     }
 
     setIsClosingShift(true);
     try {
-      await api.shifts.close(activeShift.id, {
-        countedCash: counted,
+      closeAttempt.current??=crypto.randomUUID();
+      const result=await api.shifts.close(activeShift.id, {
+        operationId:closeAttempt.current,
+        countedCash,
         note: closeNote.trim() || undefined,
       });
 
-      notifySuccess('Smena muvaffaqiyatli yopildi');
+      notifySuccess(result.data?.pendingClose?'Yopish so‘rovi rahbar tasdig‘ini kutmoqda':'Smena muvaffaqiyatli yopildi');
+      closeAttempt.current=null;
       setIsCloseModalOpen(false);
       await refreshShift();
       loadHistory();
@@ -363,6 +366,13 @@ export default function ShiftsPage() {
         )}
       </Card>
 
+      {shiftsHistory.filter(shift=>shift.pendingClose).map(shift=><Card key={shift.id} title="Smena yopilishi tasdiq kutmoqda">
+        <p>Kutilgan: {formatMoney(shift.pendingClose!.expectedCash)} · Sanalgan: {formatMoney(shift.pendingClose!.countedCash)} · Farq: {formatMoney(shift.pendingClose!.difference)}</p>
+        <p>Sabab: {shift.pendingClose!.reason}</p><p>Sanagan xodim ID: {shift.pendingClose!.countedBy}</p>
+        <p>Yangi savdo va pul harakatlari tasdiq yoki rad javobigacha bloklangan.</p>
+        {role!=='cashier'&&<div className="flex flex-wrap gap-2"><Button onClick={async()=>{try{await api.shifts.close(shift.id,{countedCash:shift.pendingClose!.countedCash,approvalRequestId:shift.pendingClose!.id});await refreshShift();await loadHistory();notifySuccess('Smena farqi tasdiqlandi va yopildi');}catch(error){notifyError(error instanceof Error?error.message:'Tasdiq bajarilmadi');}}}>Farqni tasdiqlash va yopish</Button>
+        <Button variant="outline" onClick={async()=>{const reason=window.prompt('Rad etish sababi (kamida 3 belgi)');if(!reason)return;try{await api.shifts.rejectClose(shift.id,{requestId:shift.pendingClose!.id,operationId:crypto.randomUUID(),reason});await refreshShift();await loadHistory();notifySuccess('So‘rov rad etildi; qayta sanash mumkin');}catch(error){notifyError(error instanceof Error?error.message:'Rad etilmadi');}}}>Qayta sanashga qaytarish</Button></div>}
+      </Card>)}
       {/* Open Shift Modal */}
       <OpenShiftModal
         isOpen={isOpenShiftModalOpen}
@@ -446,7 +456,7 @@ export default function ShiftsPage() {
             label="Kassadagi sanalgan naqd pul (so'm) *"
             type="number"
             min="0"
-            step="1000"
+            step="0.01"
             placeholder="1500000"
             value={countedCash}
             onChange={(e) => setCountedCash(e.target.value)}

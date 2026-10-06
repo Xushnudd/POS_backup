@@ -152,10 +152,12 @@ export default function ProductSearch({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {products.map((p) => (
-              <div
+              <button
+                type="button"
+                aria-label={p.name+' — savatga qo‘shish'}
                 key={p.id}
                 onClick={() => onSelectProduct(p)}
-                className="group bg-white rounded-2xl p-3.5 border border-gray-200 hover:border-emerald-500 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between active:scale-98"
+                className="group text-left min-h-28 focus-visible:ring-2 focus-visible:ring-blue-600 bg-white rounded-2xl p-3.5 border border-gray-200 hover:border-emerald-500 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between active:scale-98"
               >
                 <div>
                   <div className="flex items-center justify-between mb-1">
@@ -180,7 +182,7 @@ export default function ProductSearch({
                     <FontAwesomeIcon icon={faPlus} />
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

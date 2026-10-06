@@ -808,7 +808,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### USR-01 — xodimlar hayot sikli [P1]
 
-- [ ] **USR-01.01** — Taklif qilish, rol/do‘kon berish, tahrirlash, vaqtincha bloklash va arxivlash.
+- [x] **USR-01.01** — Taklif qilish, rol/do‘kon berish, tahrirlash, vaqtincha bloklash va arxivlash.
 
   **Texnologiya:** React forms, Zod, Next.js services, Prisma.
 
@@ -823,6 +823,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Invite/role/store/edit/block/archive oqimlari ishlaydi; expiry va begona tenant holatlari rad.
 
   **Dalil:** `USR-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul: 2026-10-06.** Taklif single-use/expiry/revoke va yangi/mavjud hisob himoyasi; rol/filial edit, block/reactivate, explicit archive/restore API va UI. Migration026 archive→inactive, organization lock/last-owner, session revoke va audit. Savdo/payment/stock tarixi o‘zgarmaydi; restore blocked, old cookie yaroqsiz. `tasks/EXECUTION_STATUS.md` “+1: xodimlar hayot sikli” protokoli va version SHA.
 
 - [x] **USR-01.02** — Oxirgi egani o‘chirish/bloklashga yo‘l qo‘ymaslik; egalikni topshirish jarayoni.
 
@@ -1002,7 +1004,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.06** — Chek raqamini yozuvlar soniga bog‘lamasdan noyob ajratish; fiskal raqamni alohida saqlash.
+- [x] **POS-01.06** — Chek raqamini yozuvlar soniga bog‘lamasdan noyob ajratish; fiskal raqamni alohida saqlash.
 
   **Texnologiya:** PostgreSQL counter/sequence va unique index.
 
@@ -1160,7 +1162,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.07** — Qoldiq va narx o‘zgarganini savat yakunida tushunarli ko‘rsatish.
+- [x] **POS-02.07** — Qoldiq va narx o‘zgarganini savat yakunida tushunarli ko‘rsatish.
 
   **Texnologiya:** Next.js validation response, React conflict modal.
 
@@ -1818,7 +1820,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `PUR-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **PUR-01.06** — Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil.
+- [x] **PUR-01.06** — Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil.
 
   **Texnologiya:** PostgreSQL indexed history/aggregate, React report.
 
@@ -1834,13 +1836,15 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Price history original receipt snapshotdan; supplier/product/date filtrli jami nazorat ma’lumotiga teng.
 
+  **Qabul holati (2026-10-06):** `done`. Individual natija/test/versiya [EXECUTION_STATUS.md — +50 checkpoint 2](EXECUTION_STATUS.md#50-sorovi--2-checkpoint-xarid-narxlari-va-nasiya-2026-10-06) bo‘limida.
+
   **Dalil:** `PUR-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
 ### 7. Mijozlar, nasiya, sodiqlik va marketing
 
 #### CRM-01 — to‘g‘ri qarz hisobi [P0]
 
-- [ ] **CRM-01.01** — Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish.
+- [x] **CRM-01.01** — Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish.
 
   **Texnologiya:** Prisma customer/permission, SQL lock, Decimal.
 
@@ -1854,9 +1858,11 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Bandning qabul mezoni:** Mijozsiz/vakolatsiz/limitdan yuqori debt serverda rad; parallel checkout limitni buzmaydi.
 
+  **Qabul holati (2026-10-06):** `done`. Individual natija/test/versiya [EXECUTION_STATUS.md — +50 checkpoint 2](EXECUTION_STATUS.md#50-sorovi--2-checkpoint-xarid-narxlari-va-nasiya-2026-10-06) bo‘limida.
+
   **Dalil:** `CRM-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-01.02** — Qarz yozuvini haqiqiy pul to‘lovidan ajratish: nasiya naqd tushum deb olinmasligi.
+- [x] **CRM-01.02** — Qarz yozuvini haqiqiy pul to‘lovidan ajratish: nasiya naqd tushum deb olinmasligi.
 
   **Texnologiya:** PostgreSQL DebtEntry va CashEntry, TypeScript ledger service.
 
@@ -1869,6 +1875,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** 100000 debt sale cashni oshirmaydi; debt ledger +100000, revenue siyosatga mos.
+
+  **Qabul holati (2026-10-06):** `done`. Individual natija/test/versiya [EXECUTION_STATUS.md — +50 checkpoint 2](EXECUTION_STATUS.md#50-sorovi--2-checkpoint-xarid-narxlari-va-nasiya-2026-10-06) bo‘limida.
 
   **Dalil:** `CRM-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1904,7 +1912,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-01.05** — To‘lovni qaysi qarz/savdoga ajratishni yuritish; boshlang‘ich qarzni alohida hujjat bilan kiritish.
+- [x] **CRM-01.05** — To‘lovni qaysi qarz/savdoga ajratishni yuritish; boshlang‘ich qarzni alohida hujjat bilan kiritish.
 
   **Texnologiya:** PostgreSQL settlement relations, Prisma opening document.
 
@@ -1936,7 +1944,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-01.07** — Mijoz ko‘chirmasi: savdo, qaytarish, to‘lov, qarz qoldig‘i va muddat.
+- [x] **CRM-01.07** — Mijoz ko‘chirmasi: savdo, qaytarish, to‘lov, qarz qoldig‘i va muddat.
 
   **Texnologiya:** PostgreSQL tenant aggregate, React statement, HTML/PDF.
 
@@ -2058,7 +2066,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-01.02** — Smenani ochish, yopish va topshirish; ochiq savdolar/integratsiya kutishlari uchun siyosat.
+- [x] **FIN-01.02** — Smenani ochish, yopish va topshirish; ochiq savdolar/integratsiya kutishlari uchun siyosat.
 
   **Texnologiya:** Prisma shift transaction, TypeScript state machine.
 
@@ -2092,7 +2100,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-01.04** — Sanalgan pul, kutilgan pul, farq, sabab va rahbar tasdig‘i.
+- [x] **FIN-01.04** — Sanalgan pul, kutilgan pul, farq, sabab va rahbar tasdig‘i.
 
   **Texnologiya:** Prisma.Decimal aggregate, React close form, Approval.
 
@@ -2844,7 +2852,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `OFF-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-01.03** — Printer ishlamasa savdoni ikkinchi marta yaratmasdan chekni qayta chiqarish.
+- [x] **OFF-01.03** — Printer ishlamasa savdoni ikkinchi marta yaratmasdan chekni qayta chiqarish.
 
   **Texnologiya:** HTML/CSS print, Prisma original receipt, print attempt history.
 
@@ -2876,7 +2884,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `OFF-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-01.05** — Integratsiya xatosi, savdo xatosi va faqat chek chop etish xatosini alohida ko‘rsatish.
+- [x] **OFF-01.05** — Integratsiya xatosi, savdo xatosi va faqat chek chop etish xatosini alohida ko‘rsatish.
 
   **Texnologiya:** TypeScript tagged errors, React status panels.
 
@@ -3078,7 +3086,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `HW-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **HW-01.05** — Kassir ekrani uchun katta tugmalar; egaga telefon orqali dashboard.
+- [x] **HW-01.05** — Kassir ekrani uchun katta tugmalar; egaga telefon orqali dashboard.
 
   **Texnologiya:** React/Tailwind responsive layout, Server Components.
 
@@ -3919,7 +3927,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Dalil:** `QA-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **QA-01.03** — Kassirning boshidan oxirigacha jarayonlari uchun brauzer testlari.
+- [x] **QA-01.03** — Kassirning boshidan oxirigacha jarayonlari uchun brauzer testlari.
 
   **Texnologiya:** Playwright T04, Next.js test server.
 
@@ -4823,3 +4831,7 @@ Quyidagi rasmiy/loyiha egasining manbalari texnologik imkoniyatlarni tekshirish 
 - [ExcelJS loyiha manbasi](https://github.com/exceljs/exceljs) — XLSX/CSV vazifasiga maxsus kutubxona.
 
 Prisma transaction/Decimal imkoniyatlari mahalliy `@prisma/client` typesida ham tekshirildi. Qo‘shimcha kutubxona/providerga oid aniq patch, API, litsenziya va xavfsizlik holati implementatsiya oldidan qayta tekshiriladi. Hech bir T-ID texnologiya allaqachon o‘rnatilganini, hisob ochilganini yoki tashqi xizmat sotib olinganini bildirmaydi; implementatsiya statusi alohida dalil bilan yuritiladi.
+
+## +10 qabul dalili — 2026-10-06
+
+POS-01.06, POS-02.07, OFF-01.03, OFF-01.05, FIN-01.02, FIN-01.04, CRM-01.05, CRM-01.07, HW-01.05 va QA-01.03 qabul qilindi:63→73 done. Har bir bandning kirishi, kutilgan/haqiqiy natijasi, versioned test/migration, test buyrug‘i va source versiyasi [EXECUTION_STATUS.md](EXECUTION_STATUS.md) ichidagi “+10: checkout, smena, qarz va brauzer qabul” checkpointida. Real vendor/hardware va pilot qabul qilinmagan; legacy debt provenance yetishmasa reconciliation zarur.

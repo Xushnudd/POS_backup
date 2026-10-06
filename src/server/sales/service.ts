@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import type { TokenPayload } from '@/lib/auth'
@@ -20,7 +19,7 @@ export const saleDraftSchema=z.object({
   cashierId:z.string().uuid().optional(),customerId:z.string().uuid().nullable().optional(),
   sellerId:z.string().uuid().nullable().optional(),serviceType:z.string().trim().min(1).max(100).optional(),
   operationId:z.string().uuid().optional(), note:z.string().max(2000).optional(),discountAmount:amountSchema.default(0),
-  items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500),
+  items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0),expectedUnitPrice:amountSchema.optional()})).min(1).max(500),
 })
 export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:positiveAmountSchema,referenceNo:z.string().max(200).optional()})
 export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional(),cashTendered:amountSchema.optional()})
@@ -33,6 +32,7 @@ export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayl
   for (const item of input) {
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
+    if(item.expectedUnitPrice!==undefined&&!product.salePrice.eq(item.expectedUnitPrice))throw new AccessError(409,'PRICE_CHANGED','Savatdagi narx eskirgan; qayta tasdiqlang',undefined,{stage:'sale',productId:product.id,productName:product.name,previousPrice:money(item.expectedUnitPrice),currentPrice:product.salePrice})
     const unit=units.find(value=>value.code===product.unit)
     if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
     if (decimal(item.quantity).decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
@@ -61,10 +61,11 @@ export async function enforceDiscountLimit(tx:Prisma.TransactionClient,context:T
   const max=context.role==='owner'?decimal(100):context.role==='admin'?decimal(policy?.adminMaxPercent??0):decimal(policy?.cashierMaxPercent??0)
   if (gross.gt(0) && off.mul(100).div(gross).gt(max)) throw new AccessError(403,'DISCOUNT_LIMIT','Chegirma vakolat chegarasidan oshdi')
 }
-export async function requireOpenShift(tx:Prisma.TransactionClient,context:TokenPayload,shiftId:string) {
+export async function requireOpenShift(tx:Prisma.TransactionClient,context:TokenPayload,shiftId:string,closing=false) {
   await tx.$queryRaw`SELECT id FROM "Shift" WHERE id=${shiftId} FOR UPDATE`
   const shift=await tx.shift.findFirst({where:{id:shiftId,AND:tenantScope('Shift',context)},include:{register:{include:{store:true}}}})
   if (!shift || shift.status!=='open' || !shift.register.isActive || !shift.register.store.isActive) throw new AccessError(409,'INVALID_SHIFT','Smena ochiq emas')
+  if(shift.pendingClose&&!closing)throw new AccessError(409,'SHIFT_CLOSE_PENDING','Smena yopilishi rahbar tasdig‘ini kutmoqda')
   return shift
 }
 export async function createDraft(context:TokenPayload,input:DraftInput,key:string) {
@@ -77,7 +78,8 @@ export async function createDraft(context:TokenPayload,input:DraftInput,key:stri
       if(!await tx.organizationUser.findFirst({where:{organizationId:context.organizationId,userId:input.sellerId,isActive:true,user:{isActive:true},...(context.role!=='owner'?{userStores:{some:{storeId:input.storeId}}}:{})}}))throw new AccessError(404,'SELLER_NOT_FOUND')
     }
     const {rows,totals}=await prepareItems(tx,context,input.items,input.discountAmount)
-    const sale=await tx.sale.create({data:{organizationId:context.organizationId,storeId:input.storeId,registerId:input.registerId,shiftId:input.shiftId,cashierId:context.userId,customerId:input.customerId,receiptNo:'RCP-'+randomUUID(),note:input.note,sellerId:input.sellerId,serviceType:input.serviceType,...totals,items:{create:rows}},include:{items:true}})
+    const [counter]=await tx.$queryRaw<{value:Prisma.Decimal}[]>`UPDATE "Register" SET "receiptSequence"="receiptSequence"+1 WHERE id=${input.registerId} RETURNING "receiptSequence" AS value`
+    const sale=await tx.sale.create({data:{organizationId:context.organizationId,storeId:input.storeId,registerId:input.registerId,shiftId:input.shiftId,cashierId:context.userId,customerId:input.customerId,receiptNo:'POS-'+counter.value.toFixed(0),note:input.note,sellerId:input.sellerId,serviceType:input.serviceType,...totals,items:{create:rows}},include:{items:true}})
     await audit(tx,context,'Sale',sale.id,'draft_created')
     return sale
   })
@@ -112,7 +114,9 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
       const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
       if (product && item.unit && product.unit!==item.unit) throw new AccessError(409,'UNIT_CHANGED','Mahsulot birligi o‘zgardi; savatni yangilang')
-      if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; savatni yangilang')
+      if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; qayta tasdiqlang',undefined,{stage:'sale',productId:item.productId,productName:item.productName,previousPrice:item.unitPrice,currentPrice:product?.salePrice??null})
+      const balance=await tx.inventoryBalance.findUnique({where:{storeId_productId:{storeId:sale.storeId,productId:item.productId}}})
+      if(!sale.organization.allowNegativeStock && item.quantity.gt(balance?.quantity??0))throw new AccessError(409,'INSUFFICIENT_STOCK','Yetarli qoldiq yo‘q; miqdorni tekshiring',undefined,{stage:'sale',productId:item.productId,productName:item.productName,requestedQuantity:item.quantity,availableQuantity:balance?.quantity??decimal(0)})
       await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id],unitCost:product.costPrice}})
       await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
     }

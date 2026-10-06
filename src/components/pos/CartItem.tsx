@@ -49,6 +49,7 @@ export default function CartItem({
         <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
           <button
             type="button"
+            aria-label={item.product.name+' miqdorini kamaytirish'}
             onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
@@ -56,6 +57,7 @@ export default function CartItem({
           </button>
 
           <input
+            aria-label={item.product.name+' miqdori'}
             type="number"
             min="0.1"
             step={item.product.unitPrecision===0 || item.product.unit==='dona'?'1':`0.${'0'.repeat(Math.max(0,(item.product.unitPrecision??6)-1))}1`}
@@ -69,6 +71,7 @@ export default function CartItem({
 
           <button
             type="button"
+            aria-label={item.product.name+' miqdorini oshirish'}
             onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >

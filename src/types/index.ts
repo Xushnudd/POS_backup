@@ -201,6 +201,8 @@ export interface CashMovement {
 }
 
 export interface Shift {
+  pendingClose?:{id:string;countedCash:string;expectedCash:string;difference:string;countedBy:string;reason:string;createdAt:string}|null;
+  countedBy?:string|null;approvedBy?:string|null;closeReason?:string|null;handoverFromId?:string|null;
   cashSummary?:Record<string,string>;
   id: string;
   registerId: string;
@@ -255,7 +257,7 @@ export interface Payment {
   note?: string | null;
 }
 
-export interface DebtAllocationTarget {saleId:string|null;receiptNo:string|null;balance:string}
+export interface DebtAllocationTarget {saleId:string|null;debtOriginId?:string|null;sourceType?:string;dueAt?:string|null;legacyUnallocated?:boolean;receiptNo:string|null;balance:string}
 
 export interface CustomerDebt {
   customerId: string;
@@ -367,6 +369,7 @@ export interface ApiResponse<T = unknown> {
 
 export interface OrganizationMember {
  id: string; role: Role; isActive: boolean;
+ archivedAt: string | null;
  user: User; stores?: Store[];
 }
 
@@ -387,10 +390,10 @@ export interface StockCount {
 }
 
 export interface CustomerDebtDocumentInput {
- operationId:string;kind:'opening'|'increase'|'decrease'|'write_off';amount:string;reason:string;saleId?:string;effectiveAt?:string;dueAt?:string;
+ operationId:string;kind:'opening'|'increase'|'decrease'|'write_off';amount:string;reason:string;saleId?:string;debtOriginId?:string;effectiveAt?:string;dueAt?:string;
 }
 export interface CustomerStatementEntry {
- id:string;sourceType:string;sourceId:string;saleId:string|null;receiptNo:string|null;amount:string;balance:string;
+ id:string;sourceType:string;sourceId:string;saleId:string|null;debtOriginId?:string|null;receiptNo:string|null;amount:string;balance:string;
  effectiveAt:string;dueAt:string|null;createdAt:string;note:string|null;actorId:string|null;actorName:string|null;
 }
 export interface CustomerStatement {

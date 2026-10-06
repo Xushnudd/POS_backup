@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -28,6 +28,8 @@ export default function OpenShiftModal({
   const { notifySuccess, notifyError } = useNotification();
 
   const [openingCash, setOpeningCash] = useState<string>('0');
+  const [handover,setHandover]=useState<{id:string;countedCash:string}|null>(null),[acceptHandover,setAcceptHandover]=useState(false);
+  useEffect(()=>{let cancelled=false;void Promise.resolve().then(async()=>{setHandover(null);setAcceptHandover(false);if(!isOpen||!activeRegister)return;try{const response=await api.shifts.handover(activeRegister.id);if(!cancelled)setHandover(response.data??null);}catch(error){if(!cancelled)notifyError(error instanceof Error?error.message:'Oldingi smena tekshirilmadi');}});return()=>{cancelled=true;};},[isOpen,activeRegister,notifyError]);
   const [note, setNote] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -52,7 +54,8 @@ export default function OpenShiftModal({
         operationId: attempt.current,
         registerId: activeRegister.id,
         organizationUserId: user.organizationUserId,
-        openingCash: parseFloat(openingCash) || 0,
+        openingCash: acceptHandover&&handover?handover.countedCash:openingCash,
+        ...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),
         note: note.trim() || undefined,
       });
 
@@ -97,11 +100,13 @@ export default function OpenShiftModal({
           />
         )}
 
+        {handover&&<label className="block text-sm"><input type="checkbox" checked={acceptHandover} onChange={e=>{setAcceptHandover(e.target.checked);if(e.target.checked)setOpeningCash(handover.countedCash);}}/> Oldingi smenani qabul qilish — {handover.countedCash} so‘m</label>}
         <Input
           label="Boshlang'ich naqd pul (so'm)"
           type="number"
           min="0"
-          step="1000"
+          step="0.01"
+          disabled={acceptHandover||isLoading}
           value={openingCash}
           onChange={(e) => setOpeningCash(e.target.value)}
           leftIcon={<FontAwesomeIcon icon={faMoneyBillWave} className="text-xs" />}

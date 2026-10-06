@@ -5,6 +5,6 @@ export default defineConfig({
  testDir:'./tests/e2e',fullyParallel:false,workers:1,forbidOnly:Boolean(process.env.CI),retries:0,
  timeout:60000,expect:{timeout:10000},reporter:'list',
  use:{baseURL:'https://localhost:3100',ignoreHTTPSErrors:true,trace:'retain-on-failure',screenshot:'only-on-failure'},
- projects:[{name:'chromium',use:{...devices['Desktop Chrome']}}],
+ projects:[{name:'chromium',use:{...devices['Desktop Chrome']}},...(process.env.POS_E2E_ALL_BROWSERS==='1'?[{name:'firefox',use:{...devices['Desktop Firefox']}},{name:'webkit',use:{...devices['Desktop Safari']}}]:[])],
  webServer:{command:'node scripts/e2e-server.cjs',url:'https://localhost:3100/api/health/ready',ignoreHTTPSErrors:true,reuseExistingServer:false,timeout:120000},
 })

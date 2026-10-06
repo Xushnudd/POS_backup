@@ -17,6 +17,7 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
  const {organization,user}=useAuth(),{notifyError,notifySuccess}=useNotification();
  const [statement,setStatement]=useState<CustomerStatement|null>(null),[page,setPage]=useState(1),[from,setFrom]=useState(''),[to,setTo]=useState('');
  const [kind,setKind]=useState<CustomerDebtDocumentInput['kind']>('opening'),[amount,setAmount]=useState(''),[reason,setReason]=useState(''),[saleId,setSaleId]=useState('');
+ const [debtOriginId,setDebtOriginId]=useState('');
  const [effective,setEffective]=useState(''),[due,setDue]=useState(''),[busy,setBusy]=useState(false),[unknown,setUnknown]=useState(false);
  const attempt=useRef<CustomerDebtDocumentInput|null>(null);
  const [localReady,setLocalReady]=useState(false),[localError,setLocalError]=useState(''),[recovery,setRecovery]=useState(0);
@@ -39,7 +40,7 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
       const part=(name:string)=>parts.find(value=>value.type===name)?.value;
       return `${part('year')}-${part('month')}-${part('day')}`;
      };
-     attempt.current=payload;setKind(payload.kind);setAmount(String(payload.amount));setReason(payload.reason);setSaleId(payload.saleId??'');setEffective(date(payload.effectiveAt));setDue(date(payload.dueAt));setUnknown(true);
+     attempt.current=payload;setKind(payload.kind);setAmount(String(payload.amount));setReason(payload.reason);setSaleId(payload.saleId??'');setDebtOriginId(payload.debtOriginId??'');setEffective(date(payload.effectiveAt));setDue(date(payload.dueAt));setUnknown(true);
     }
     if(!cancelled)setLocalReady(true);
    }catch(error){if(!cancelled)setLocalError(error instanceof Error?error.message:'Lokal hujjatlar yuklanmadi');}
@@ -68,7 +69,7 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
    if(!/^\d+(\.\d{1,2})?$/.test(amount.trim())||fixed(amount.trim())<=BigInt(0)||reason.trim().length<3){notifyError('Summa va kamida 3 belgili sabab kiriting');return;}
    try{
     const zone=organization?.timezone??'Asia/Tashkent';
-    attempt.current={operationId:crypto.randomUUID(),kind,amount:amount.trim(),reason:reason.trim(),...(kind==='write_off'&&saleId.trim()?{saleId:saleId.trim()}:{}),...(kind==='opening'&&effective?{effectiveAt:dateBoundary(effective,zone).toISOString()}:{}),...(kind==='opening'&&due?{dueAt:new Date(dateBoundary(due,zone,true).getTime()-1).toISOString()}: {})};
+    attempt.current={operationId:crypto.randomUUID(),kind,amount:amount.trim(),reason:reason.trim(),...(kind==='write_off'&&saleId.trim()?{saleId:saleId.trim()}:{}),...(['decrease','write_off'].includes(kind)&&!saleId&&debtOriginId?{debtOriginId}:{}),...(kind==='opening'&&effective?{effectiveAt:dateBoundary(effective,zone).toISOString()}:{}),...(kind==='opening'&&due?{dueAt:new Date(dateBoundary(due,zone,true).getTime()-1).toISOString()}: {})};
    }catch(error){notifyError(error instanceof Error?error.message:'Sana noto‘g‘ri');return;}
   }
   setBusy(true);
@@ -81,7 +82,7 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
   }
   catch(error){
    setUnknown(true);
-   if(!wasRetry&&attempt.current&&error instanceof ApiError&&['VALIDATION_ERROR','INVALID_DOCUMENT_DATE','DEBT_REDUCTION_EXCEEDED','CUSTOMER_NOT_FOUND','SALE_NOT_FOUND'].includes(error.code??'')){
+   if(!wasRetry&&attempt.current&&error instanceof ApiError&&['VALIDATION_ERROR','INVALID_DOCUMENT_DATE','DEBT_REDUCTION_EXCEEDED','CUSTOMER_NOT_FOUND','SALE_NOT_FOUND','DEBT_TARGET_REQUIRED'].includes(error.code??'')){
     try{await acknowledge(attempt.current.operationId,'rejected',undefined,error.code);attempt.current=null;setUnknown(false);}catch{notifyError('Lokal hujjat holati saqlanmadi; asl kalitni qayta tekshiring');}
    }
    notifyError(error instanceof Error?error.message:'Natija noaniq; shu amalni qayta tekshiring');
@@ -95,15 +96,16 @@ export function CustomerLedger({customerId,onChanged,version=0}:{customerId:stri
   <Button variant="outline" onClick={()=>exportCsv('html')} disabled={exporting}>Qarz ko‘chirmasini chop etish fayli</Button>
   <div className="flex gap-3"><Input type="date" label="Davr boshlanishi" value={from} onChange={event=>{setFrom(event.target.value);setPage(1);}}/><Input type="date" label="Davr oxiri" value={to} onChange={event=>{setTo(event.target.value);setPage(1);}}/></div>
   {statement&&<><div className="grid grid-cols-2 gap-2 text-sm"><p>Davr boshidagi qarz: {formatMoney(statement.summary.openingBalance)}</p><p>Davr oxiridagi qarz: {formatMoney(statement.summary.closingBalance)}</p><p>Joriy qarz: {formatMoney(statement.summary.currentBalance)}</p><p>Yozuvlar: {statement.pagination.total}</p></div>
-   <div className="grid grid-cols-2 gap-2 text-sm"><p>Muddati o‘tgan qarz: {formatMoney(statement.aging.overdue)}</p><p>Muddati kelmagan qarz: {formatMoney(statement.aging.upcoming)}</p><p>Muddat belgilanmagan savdo qarzi: {formatMoney(statement.aging.noDueDate)}</p><p>Hujjatlarga taqsimlanmagan qarz: {formatMoney(statement.aging.unallocated)}</p></div>
-   <p className="text-xs text-gray-600">Muddat guruhlari joriy qoldiq uchun, tanlangan davr uchun emas. Boshlang‘ich/umumiy qarzlar hujjatlarga aniq ajratilmaguncha muddati o‘tgan deb hisoblanmaydi.</p>
+   <div className="grid grid-cols-2 gap-2 text-sm"><p>Muddati o‘tgan qarz: {formatMoney(statement.aging.overdue)}</p><p>Muddati kelmagan qarz: {formatMoney(statement.aging.upcoming)}</p><p>Muddat belgilanmagan qarz: {formatMoney(statement.aging.noDueDate)}</p><p>Hujjatlarga taqsimlanmagan qarz: {formatMoney(statement.aging.unallocated)}</p></div>
+   <p className="text-xs text-gray-600">Muddat guruhlari joriy qoldiq uchun, tanlangan davr uchun emas. Boshlang‘ich hujjatlarning muddati ham hisoblanadi. Eski bog‘lanmagan to‘lovli umumiy qarz hujjatlarga taxminan taqsimlanmaydi.</p>
    {statement.aging.requiresReconciliation&&<p role="alert" className="text-amber-700">Eski taqsimlanmagan to‘lov yoki manfiy qarz guruhi bor. Muddat bo‘yicha taxminiy qoldiq chiqarilmadi; tarixni yarashtirish kerak.</p>}
-   <div className="overflow-auto"><table className="text-xs w-full"><thead><tr><th>Sana</th><th>Hujjat / chek</th><th>Summa</th><th>Qoldiq</th><th>Muddat / sabab / xodim</th></tr></thead><tbody>{statement.entries.map(entry=><tr key={entry.id} className="border-t"><td className="p-2">{new Date(entry.effectiveAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone})}</td><td>{names[entry.sourceType]??entry.sourceType}<div>{entry.receiptNo??entry.sourceId}</div></td><td>{formatMoney(entry.amount)}</td><td>{formatMoney(entry.balance)}</td><td>{entry.dueAt?new Date(entry.dueAt).toLocaleDateString('uz-UZ',{timeZone:organization?.timezone}):'Muddat belgilanmagan'}<div>{entry.note}</div><div>{entry.actorName??'Eski yozuv: xodim belgilanmagan'}</div></td></tr>)}</tbody></table></div>
+   <div className="overflow-auto"><table className="text-xs w-full"><thead><tr><th>Sana</th><th>Hujjat / chek</th><th>Summa</th><th>Qoldiq</th><th>Muddat / sabab / xodim</th></tr></thead><tbody>{statement.entries.map(entry=><tr key={entry.id} className="border-t"><td className="p-2">{new Date(entry.effectiveAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone})}</td><td>{names[entry.sourceType]??entry.sourceType}<div>{entry.receiptNo??entry.sourceId}</div>{entry.debtOriginId&&<div>Boshlang‘ich hujjat: {entry.debtOriginId}</div>}</td><td>{formatMoney(entry.amount)}</td><td>{formatMoney(entry.balance)}</td><td>{entry.dueAt?new Date(entry.dueAt).toLocaleDateString('uz-UZ',{timeZone:organization?.timezone}):'Muddat belgilanmagan'}<div>{entry.note}</div><div>{entry.actorName??'Eski yozuv: xodim belgilanmagan'}</div></td></tr>)}</tbody></table></div>
    <div className="flex gap-2"><Button variant="outline" disabled={page<=1} onClick={()=>setPage(value=>value-1)}>Oldingi</Button><span>{page} / {Math.max(statement.pagination.totalPages,1)}</span><Button variant="outline" disabled={page>=statement.pagination.totalPages} onClick={()=>setPage(value=>value+1)}>Keyingi</Button></div></>}
   {localError&&<div role="alert"><p>Lokal qarz hujjatlarini tekshirishda xato: {localError}. Yangi hujjat bloklangan.</p><Button onClick={()=>setRecovery(value=>value+1)}>Lokal hujjatlarni qayta tekshirish</Button></div>}
   <h3 className="font-bold">Qarz hujjati</h3><p className="text-sm text-gray-600">Bu amallar naqd yoki bank to‘lovi emas. Eski qarz o‘zgartirilmaydi; yangi tuzatish yozuvi saqlanadi. Savdo qarzini hisobdan chiqarishda ko‘chirmadagi chekni tanlang; boshqa tuzatishlar boshlang‘ich/umumiy qarzga qo‘llanadi.</p>
-  <Select label="Qarz hujjati turi" value={kind} onChange={event=>setKind(event.target.value as CustomerDebtDocumentInput['kind'])} disabled={busy||unknown||!localReady} options={[{value:'opening',label:'Boshlang‘ich qarz'},{value:'increase',label:'Umumiy qarzni oshirish'},{value:'decrease',label:'Umumiy qarzni kamaytirish'},{value:'write_off',label:'Qarzni hisobdan chiqarish'}]}/>
+  <Select label="Qarz hujjati turi" value={kind} onChange={event=>{setKind(event.target.value as CustomerDebtDocumentInput['kind']);setSaleId('');setDebtOriginId('');}} disabled={busy||unknown||!localReady} options={[{value:'opening',label:'Boshlang‘ich qarz'},{value:'increase',label:'Umumiy qarzni oshirish'},{value:'decrease',label:'Umumiy qarzni kamaytirish'},{value:'write_off',label:'Qarzni hisobdan chiqarish'}]}/>
   {kind==='write_off'&&<Select label="Hisobdan chiqariladigan qarz" value={saleId} onChange={event=>setSaleId(event.target.value)} disabled={busy||unknown||!localReady} options={[{value:"",label:"Umumiy / boshlang‘ich qarz"},...Array.from(new Map((statement?.entries??[]).filter(entry=>entry.saleId).map(entry=>[entry.saleId!,{value:entry.saleId!,label:"Chek: "+(entry.receiptNo??entry.saleId!)}])).values())]}/>}
+  {['decrease','write_off'].includes(kind)&&!saleId&&<Select label="Kamaytiriladigan boshlang‘ich hujjat" value={debtOriginId} onChange={event=>setDebtOriginId(event.target.value)} disabled={busy||unknown||!localReady} options={[{value:'',label:'Bitta ochiq hujjat bo‘lsa avtomatik; aks holda tanlang'},...(statement?.entries??[]).filter(entry=>!entry.saleId&&['opening_debt','debt_adjustment'].includes(entry.sourceType)&&Number(entry.amount)>0).map(entry=>({value:entry.id,label:(names[entry.sourceType]??entry.sourceType)+' · '+entry.sourceId+' · '+formatMoney(entry.amount)}))]}/>}
   {kind==='opening'&&<div className="flex gap-3"><Input type="date" label="Boshlang‘ich qarz sanasi" value={effective} onChange={event=>setEffective(event.target.value)} disabled={busy||unknown||!localReady}/><Input type="date" label="Qarz to‘lash muddati" value={due} onChange={event=>setDue(event.target.value)} disabled={busy||unknown||!localReady}/></div>}
   <Input label="Qarz hujjati summasi" inputMode="decimal" value={amount} onChange={event=>setAmount(event.target.value)} disabled={busy||unknown||!localReady}/>
   <Input label="Qarz hujjati sababi" value={reason} maxLength={2000} onChange={event=>setReason(event.target.value)} disabled={busy||unknown||!localReady}/>

@@ -1,4 +1,5 @@
 import { consumeLimit } from './auth/rate-limit'
+import { IntegrationUnavailable } from './integrations/contracts'
 import { randomUUID } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -125,12 +126,13 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
     } catch (error) {
       let status = 500, code = 'INTERNAL_ERROR', message = 'Server xatosi'
       if (error instanceof AccessError) ({status,code,message} = error)
+      else if(error instanceof IntegrationUnavailable){status=503;code='INTEGRATION_UNAVAILABLE';message='Tashqi xizmat sozlanmagan; rahbarga murojaat qiling'}
       else if (error instanceof z.ZodError) { status=400;code='VALIDATION_ERROR';message='Ma’lumotlar noto‘g‘ri' }
       else if (error instanceof Prisma.PrismaClientKnownRequestError && ['P2002','P2025'].includes(error.code)) {
         status = error.code === 'P2025' ? 404 : 409; code = error.code === 'P2025' ? 'NOT_FOUND' : 'CONFLICT'; message = 'Resurs topilmadi yoki amal takrorlangan'
       }
       console.error(JSON.stringify({event:'api_error',requestId,status,code}))
-      return NextResponse.json({ success:false, error:{code,message}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
+      return NextResponse.json({ success:false, error:{code,message,...(error instanceof AccessError&&error.details!==undefined?{details:sanitize(JSON.parse(JSON.stringify(error.details)),'cashier')}:{})}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
     }
   }
 }
