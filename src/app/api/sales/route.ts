@@ -124,6 +124,10 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
+    if (error instanceof Error && ['INVALID_DISCOUNT', 'INVALID_AMOUNT'].includes(error.message)) {
+      return NextResponse.json({success:false,error:{code:error.message,message:'Savdo miqdori yoki chegirmasi noto‘g‘ri'}},{status:409})
+    }
+
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }

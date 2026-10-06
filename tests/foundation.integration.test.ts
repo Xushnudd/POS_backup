@@ -11,8 +11,8 @@ import { GET as report } from '@/app/api/reports/sales/route'
 import { POST as cancelIntent } from '@/app/api/operations/cancel/route'
 import { POST as logout } from '@/app/api/auth/logout/route'
 
-const url=process.env.DATABASE_URL ?? ''
-if (!url.includes('/pos_test') || !['127.0.0.1','localhost'].includes(new URL(url).hostname)) throw new Error('Integration tests require an isolated localhost pos_test database')
+const connection=new URL(process.env.DATABASE_URL??'')
+if (connection.pathname!=='/pos_test' || connection.hostname!=='127.0.0.1' || connection.port!=='55439' || connection.username!=='pos_test') throw new Error('Integration tests require an isolated localhost pos_test database')
 const orgs:string[]=[];const users:string[]=[]
 after(async()=>{
   await prisma.organization.deleteMany({where:{id:{in:orgs}}})
@@ -131,8 +131,9 @@ test('Return history is paginated, uses frozen item names and enforces sale scop
  const register=await prisma.register.create({data:{storeId:a.store.id,name:'Till',code:randomUUID()}})
  const shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:a.data.user.organizationUserId,openingCash:0}})
  const product=await prisma.product.create({data:{organizationId:a.data.organization.id,name:'Changed catalog name',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:1,costPrice:0}})
- const sale=await prisma.sale.create({data:{organizationId:a.data.organization.id,storeId:a.store.id,registerId:register.id,shiftId:shift.id,cashierId:a.data.user.id,receiptNo:randomUUID(),status:'returned',subtotal:21,totalAmount:21,items:{create:{productId:product.id,productName:'Frozen original name',sku:'ORIGINAL',unit:'dona',quantity:21,unitPrice:1,lineTotal:21,unitCost:0}}},include:{items:true}})
+ const sale=await prisma.sale.create({data:{organizationId:a.data.organization.id,storeId:a.store.id,registerId:register.id,shiftId:shift.id,cashierId:a.data.user.id,receiptNo:randomUUID(),status:'draft',subtotal:21,totalAmount:21,items:{create:{productId:product.id,productName:'Frozen original name',sku:'ORIGINAL',unit:'dona',quantity:21,unitPrice:1,lineTotal:21,unitCost:0}}},include:{items:true}})
  for(let index=0;index<21;index++)await prisma.saleReturn.create({data:{saleId:sale.id,returnReceiptNo:'HISTORY-'+index,refundAmount:1,reason:'<script>Literal reason</script>',processedBy:a.data.user.id,returnedAt:new Date(2026,0,1,0,index),items:{create:{saleItemId:sale.items[0].id,productId:product.id,quantity:1,unitPrice:1,lineTotal:1,disposition:index%2?'damaged':'write_off'}}}})
+ await prisma.sale.update({where:{id:sale.id},data:{status:'returned'}})
  const call=(cookie:string,query='')=>history(req(`/sales/${sale.id}/returns${query}`,cookie),{params:Promise.resolve({id:sale.id})})
  const first=await call(a.cookie,'?page=1&limit=20');assert.equal(first.status,200)
  const body=await first.json();assert.equal(body.pagination.total,21);assert.equal(body.data.length,20);assert.equal(body.data[0].returnReceiptNo,'HISTORY-20')
@@ -144,8 +145,9 @@ test('Return history is paginated, uses frozen item names and enforces sale scop
  assert.equal((await call(a.cookie)).status,200)
  const other=await prisma.user.create({data:{fullName:'Other cashier',phone:randomUUID(),passwordHash:'not-a-login'}});users.push(other.id)
  await prisma.organizationUser.create({data:{organizationId:a.data.organization.id,userId:other.id,role:'cashier'}})
- await prisma.sale.update({where:{id:sale.id},data:{cashierId:other.id}})
- assert.equal((await call(a.cookie)).status,404)
+ await assert.rejects(()=>prisma.sale.update({where:{id:sale.id},data:{cashierId:other.id}}))
+ const foreign=await prisma.sale.create({data:{organizationId:a.data.organization.id,storeId:a.store.id,registerId:register.id,shiftId:shift.id,cashierId:other.id,receiptNo:randomUUID(),status:'completed',subtotal:0,totalAmount:0}})
+ assert.equal((await history(req(`/sales/${foreign.id}/returns`,a.cookie),{params:Promise.resolve({id:foreign.id})})).status,404)
 })
 test('Owner audit summary filters a timezone snapshot and omits sensitive payloads',async()=>{
  const {GET:read}=await import('@/app/api/audit/route')
@@ -282,4 +284,34 @@ test('Report endpoints share actor/tenant throttling and reconciliation has a ti
  }finally{
   for(const account of [a,b])for(const category of ['report.read','report.reconciliation'])await clearLimit(category,account.data.organization.id+':'+account.data.user.id)
  }
+})
+
+test('Sale HTTP contract rejects bad input, recovers original operation and rejects changed retry',async()=>{
+ const {POST:create}=await import('@/app/api/sales/route')
+ const {POST:complete}=await import('@/app/api/sales/[id]/complete/route')
+ const {GET:operation}=await import('@/app/api/operations/route')
+ const a=await account(),b=await account()
+ const shift=await prisma.shift.create({data:{registerId:a.register.id,organizationUserId:a.data.user.organizationUserId,openingCash:0}})
+ const product=await prisma.product.create({data:{organizationId:a.data.organization.id,name:'HTTP',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:50}})
+ await prisma.inventoryBalance.create({data:{storeId:a.store.id,productId:product.id,quantity:1}})
+ const base={organizationId:a.data.organization.id,storeId:a.store.id,registerId:a.register.id,shiftId:shift.id,items:[{productId:product.id,quantity:1}]}
+ for(const [body,status] of [[{...base,items:[]},400],...[0,-1,'NaN','Infinity'].map(quantity=>[{...base,items:[{productId:product.id,quantity}]},400] as const),[{...base,discountAmount:101},409],[{...base,storeId:'bad-id'},400],[{...base,organizationId:b.data.organization.id},403]] as const){
+  const response=await create(req('/sales',a.cookie,{...body,operationId:randomUUID()},'POST'),undefined)
+  assert.equal(response.status,status);assert.ok(response.headers.get('x-request-id'))
+ }
+ assert.equal(await prisma.sale.count({where:{organizationId:a.data.organization.id}}),0)
+ const key=randomUUID(),response=await create(req('/sales',a.cookie,{...base,operationId:key,cashierId:a.data.user.id,totalAmount:1,items:[{productId:product.id,quantity:1,unitPrice:1,unitCost:0,unit:'kg'}]},'POST'),undefined)
+ assert.equal(response.status,200);const sale=(await response.json()).data
+ assert.equal(sale.totalAmount,'100');assert.equal(sale.items[0].unitPrice,'100');assert.equal(sale.items[0].unitCost,'50');assert.equal(sale.items[0].unit,'dona');assert.equal(sale.cashierId,a.data.user.id)
+ const call=(payments:unknown)=>complete(req(`/sales/${sale.id}/complete`,a.cookie,{operationId:sale.id,payments},'POST'),{params:Promise.resolve({id:sale.id})})
+ assert.equal((await call([{paymentType:'cash',amount:'NaN'}])).status,400)
+ assert.equal((await call([{paymentType:'cash',amount:99}])).status,400)
+ assert.equal((await call([{paymentType:'cash',amount:100}])).status,200)
+ const recovered=await operation(req(`/operations?organizationId=${a.data.organization.id}&operationId=${sale.id}&type=sale.complete`,a.cookie),undefined)
+ assert.equal(recovered.status,200);assert.equal((await recovered.json()).data.result.id,sale.id)
+ assert.equal((await call([{paymentType:'cash',amount:100}])).status,200)
+ const conflict=await call([{paymentType:'cash',amount:99}]);assert.equal(conflict.status,409);assert.equal((await conflict.json()).error.code,'OPERATION_PAYLOAD_CONFLICT')
+ assert.equal((await editSale(req(`/sales/${sale.id}`,a.cookie,{note:'Hidden edit'},'PUT'),{params:Promise.resolve({id:sale.id})})).status,400)
+ assert.equal(await prisma.payment.count({where:{saleId:sale.id}}),1)
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:sale.id}}),1)
 })

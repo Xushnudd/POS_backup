@@ -900,7 +900,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### POS-01 — ishonchli savdo yakunlash [P0]
 
-- [ ] **POS-01.01** — Narx, tannarx, birlik, kassir va vakolatlarni serverda ishonchli manbadan olish.
+- [x] **POS-01.01** — Narx, tannarx, birlik, kassir va vakolatlarni serverda ishonchli manbadan olish.
 
   **Texnologiya:** Next.js sale service, Prisma va Decimal.
 
@@ -914,9 +914,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Client soxta price/cost/cashier yuborsa server ishonchli qiymatlarni ishlatadi yoki konfliktni rad etadi.
 
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
+
   **Dalil:** `POS-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.02** — Bo‘sh savat, manfiy/yaroqsiz son, ortiqcha chegirma va noto‘g‘ri IDlarni rad etish.
+- [x] **POS-01.02** — Bo‘sh savat, manfiy/yaroqsiz son, ortiqcha chegirma va noto‘g‘ri IDlarni rad etish.
 
   **Texnologiya:** Zod schemas va TypeScript business rules.
 
@@ -930,9 +932,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Bo‘sh savat, nol/manfiy/NaN miqdor, ortiqcha chegirma va begona ID rad; DB o‘zgarmaydi.
 
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
+
   **Dalil:** `POS-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.03** — Savdo, to‘lov, ombor va auditni bitta nazorat qilinadigan amalda yakunlash.
+- [x] **POS-01.03** — Savdo, to‘lov, ombor va auditni bitta nazorat qilinadigan amalda yakunlash.
 
   **Texnologiya:** Prisma interactive transaction, PostgreSQL.
 
@@ -946,9 +950,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Muvaffaqiyatda sale/payment/stock/audit mos; sun’iy o‘rta xatoda hammasi rollback.
 
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
+
   **Dalil:** `POS-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.04** — Takror so‘rov bir savdoni ikki marta yozmasligi uchun yagona amal kaliti qo‘shish — idempotency.
+- [x] **POS-01.04** — Takror so‘rov bir savdoni ikki marta yozmasligi uchun yagona amal kaliti qo‘shish — idempotency.
 
   **Texnologiya:** PostgreSQL unique operation key, Prisma.
 
@@ -962,9 +968,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Bir operationIdning parallel/retry so‘rovi bitta sale/ledger yaratadi; boshqa payload 409 beradi.
 
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
+
   **Dalil:** `POS-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.05** — Ochiq smena, qoldiq, limit va holatni tranzaksiya ichida tekshirish; parallel amallardan himoya.
+- [x] **POS-01.05** — Ochiq smena, qoldiq, limit va holatni tranzaksiya ichida tekshirish; parallel amallardan himoya.
 
   **Texnologiya:** PostgreSQL conditional update/row locks, Prisma Serializable.
 
@@ -977,6 +985,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Oxirgi dona uchun ikki parallel savdoda faqat ruxsatli bittasi o‘tadi; yopiq smena va limit rad.
+
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
 
   **Dalil:** `POS-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -996,7 +1006,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.07** — Timeoutdan keyin “sotildimi?” holatini tekshirib, xavfsiz davom ettirish.
+- [x] **POS-01.07** — Timeoutdan keyin “sotildimi?” holatini tekshirib, xavfsiz davom ettirish.
 
   **Texnologiya:** React retry UI, Next.js operation status API, Prisma.
 
@@ -1010,9 +1020,11 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Bandning qabul mezoni:** Commitdan keyin javob uzilganda operation status original sale IDni qaytaradi; retry dublikat yaratmaydi.
 
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
+
   **Dalil:** `POS-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-01.08** — Yakunlangan savdoni yashirin tahrirlash/o‘chirishni taqiqlash; tuzatishni qarshi hujjat bilan yuritish.
+- [x] **POS-01.08** — Yakunlangan savdoni yashirin tahrirlash/o‘chirishni taqiqlash; tuzatishni qarshi hujjat bilan yuritish.
 
   **Texnologiya:** TypeScript status transitions, Prisma permissions, SQL constraints.
 
@@ -1025,6 +1037,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Yakunlangan savdo edit/delete orqali o‘zgarmaydi; reversal original bilan bog‘lanib auditlanadi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
 
   **Dalil:** `POS-01.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1994,7 +2008,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
 #### FIN-01 — kassa va pul hisobi [P0]
 
-- [ ] **FIN-01.01** — Har kassada bir ochiq smena qoidasi bazada ham himoyalangan bo‘lishi.
+- [x] **FIN-01.01** — Har kassada bir ochiq smena qoidasi bazada ham himoyalangan bo‘lishi.
 
   **Texnologiya:** PostgreSQL partial unique index, Prisma migration.
 
@@ -2007,6 +2021,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Ikki parallel open shift so‘rovida bazada faqat bitta active shift qoladi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
 
   **Dalil:** `FIN-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2140,7 +2156,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-02.03** — Chek chegirmasini qatorlarga taqsimlash; qaytarishni shu qiymatlardan hisoblash.
+- [x] **FIN-02.03** — Chek chegirmasini qatorlarga taqsimlash; qaytarishni shu qiymatlardan hisoblash.
 
   **Texnologiya:** TypeScript Decimal allocation.
 
@@ -2153,6 +2169,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Receipt discount allocation yig‘indisi aynan discountga teng; partial returns original taqsimotni ishlatadi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
 
   **Dalil:** `FIN-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3817,7 +3835,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Dalil:** `QA-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **QA-01.02** — Haqiqiy PostgreSQL bilan savdo, qoldiq, qaytarish va migratsiya integratsion testlari.
+- [x] **QA-01.02** — Haqiqiy PostgreSQL bilan savdo, qoldiq, qaytarish va migratsiya integratsion testlari.
 
   **Texnologiya:** Node test runner, Docker PostgreSQL, Prisma Migrate.
 
@@ -3830,6 +3848,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Real PG isolated integration suite sale/stock/return/migrationni tekshiradi; mock DB dalil o‘rnini bosmaydi.
+
+  **Qabul holati (2026-10-06):** `done`. Individual kirish/natija/test/versiya dalili [EXECUTION_STATUS.md — Yana 10 ta PLAN1 bandi](EXECUTION_STATUS.md#yana-10-ta-plan1-bandi--yakuniy-qabul-2026-10-06) bo‘limida.
 
   **Dalil:** `QA-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

@@ -7,20 +7,37 @@ import { audit, runOperation } from '../operations'
 import { moveStock } from '../inventory/movements'
 import { allocateMoney, decimal, draftTotals, lineTotal, money } from './calculations'
 
-export const amountSchema=z.union([z.number().finite().refine(v=>decimal(v).decimalPlaces()<=2),z.string().regex(/^\d+(\.\d{1,2})?$/)]).refine(v=>decimal(v).gte(0) && decimal(v).lt('1000000000000'),'Summa manfiy bo‘lmasligi kerak')
-export const quantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(v=>decimal(v).gt(0) && decimal(v).decimalPlaces()<=6 && decimal(v).lt('100000000000000'),'Miqdor musbat bo‘lishi kerak')
+function validNumeric(value:number|string,precision:number,maximum:string,positive=false) {
+  // Zod may run refinements after a dirty union branch. Invalid numbers must
+  // become validation issues, never exceptions from Decimal (and HTTP 500).
+  try {const parsed=decimal(value);return (positive?parsed.gt(0):parsed.gte(0)) && parsed.decimalPlaces()<=precision && parsed.lt(maximum)} catch {return false}
+}
+export const amountSchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,2})?$/)]).refine(v=>validNumeric(v,2,'1000000000000'),'Summa manfiy bo‘lmasligi kerak')
+export const quantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(v=>validNumeric(v,6,'100000000000000',true),'Miqdor musbat bo‘lishi kerak')
 export const saleDraftSchema=z.object({
   organizationId:z.string().uuid(),storeId:z.string().uuid(),registerId:z.string().uuid(),shiftId:z.string().uuid(),
   cashierId:z.string().uuid().optional(),customerId:z.string().uuid().nullable().optional(),
   operationId:z.string().uuid().optional(), note:z.string().max(2000).optional(),discountAmount:amountSchema.default(0),
   items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500),
 })
-export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:amountSchema.refine(v=>decimal(v).gt(0)),referenceNo:z.string().max(200).optional()})
+export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:amountSchema.refine(v=>validNumeric(v,2,'1000000000000',true)),referenceNo:z.string().max(200).optional()})
 export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional()})
 export type DraftInput=z.infer<typeof saleDraftSchema>
 export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {
   const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})
   const units=await tx.unit.findMany({where:{organizationId:context.organizationId,code:{in:[...new Set(products.map(p=>p.unit))]}}})
+  // One snapshot/stock posting per SKU, even when scanners submit repeated lines.
+  const combined=new Map<string,{productId:string;quantity:Prisma.Decimal;discountAmount:Prisma.Decimal}>()
+  for (const item of input) {
+    const product=products.find(p=>p.id===item.productId)
+    if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
+    const unit=units.find(value=>value.code===product.unit)
+    if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
+    if (decimal(item.quantity).decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
+    const previous=combined.get(item.productId)
+    combined.set(item.productId,{productId:item.productId,quantity:decimal(item.quantity).add(previous?.quantity??0),discountAmount:money(item.discountAmount).add(previous?.discountAmount??0)})
+  }
+  input=[...combined.values()].sort((a,b)=>a.productId.localeCompare(b.productId)).map(item=>({...item,quantity:quantitySchema.parse(item.quantity.toFixed()),discountAmount:amountSchema.parse(item.discountAmount.toFixed())}))
   const rows=input.map(item=>{
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
@@ -67,6 +84,7 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
     if (sale.status!=='draft') throw new AccessError(409,'INVALID_STATUS','Savdo allaqachon yakunlangan')
     await requireOpenShift(tx,context,sale.shiftId)
     if (!sale.items.length) throw new AccessError(400,'EMPTY_SALE')
+    await enforceDiscountLimit(tx,context,sale.items,sale.totalAmount)
     const total=input.payments.reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
     if (!total.eq(sale.totalAmount)) throw new AccessError(400,'INVALID_PAYMENT','To‘lovlar jami savdoga teng bo‘lishi kerak')
     const credit=input.payments.filter(p=>p.paymentType==='credit').reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))

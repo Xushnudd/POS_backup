@@ -995,4 +995,14 @@ Amaldagi implementation va qolgan ishlar [EXECUTION_STATUS.md](tasks/EXECUTION_S
 
 Production yangilashda yangi image ishga tushishidan oldin `npm run db:migrate` (`prisma migrate deploy`) bajariladi. Readiness `202610060016_audit_history_guards` migration tugaganini tekshiradi.016 AuditLog UPDATE/DELETEni taqiqlaydi; developmentdagi `migrate dev` yoki `db push` production deploy o‘rnida ishlatilmaydi. Haqiqiy biznes bazasiga bu ish davomida migration qo‘llanmagan.
 
-Oxirgi tekshiruvlar:57 integratsion,11 unit va2 production HTTPS browser scenario; typecheck/lint/build o‘tgan. Fresh/legacy17 migration va encrypted backup/restore avvalgi bosqichda tekshirilgan; ushbu 20 ta ish schema/migrationni o‘zgartirmaydi. Bu pilot, production hosting yoki butun PLAN1 qabul shartlari yakunlangani degani emas.
+Oldingi 20 ta ish bosqichi tekshiruvlari:57 integratsion,11 unit va2 production HTTPS browser scenario; typecheck/lint/build o‘tgan. Fresh/legacy17 migration va encrypted backup/restore avvalgi bosqichda tekshirilgan; ushbu 20 ta ish schema/migrationni o‘zgartirmaydi. Bu pilot, production hosting yoki butun PLAN1 qabul shartlari yakunlangani degani emas.
+
+### Savdo tarixi va xavfsiz regressiya testlari
+
+Completed chekni yashirin tahrirlash yoki o‘chirish DB darajasida bloklanadi. Tuzatish uchun original savdodan qaytarish oqimini oching; sabab va original qatorlar saqlanadi. Katalogdagi keyingi narx/tannarx o‘zgarishi original chek va qaytarish qiymatini almashtirmaydi. Mahsulot, mijoz va katalog tarixini saqlash uchun arxivlashdan foydalaning. Checkout oldingi qoralama chegirmasini joriy vakolat bilan qayta tekshiradi; siyosat o‘zgargan bo‘lsa savatni qayta ko‘rib chiqing. Takror mahsulot qatorlari bitta qatorga birlashtiriladi, birlik aniqligi har kirish qatorida tekshiriladi.
+
+Deploymentdan oldin mavjud `npm run db:migrate` yo‘li yangi `202610060017_sale_history` va `202610060018_sale_item_lock` migratsiyalarini qo‘llashi kerak. Build migratsiya o‘rnini bosmaydi. Mahsulot/store/shift/register hard-delete cascade bilan posted tarixni yo‘qotishga urinish ham rad etiladi; public delete oqimi qo‘shilmagan.
+
+`npm run test:integration` faqat `127.0.0.1:55439`, `pos_test` bazasi va `pos_test` foydalanuvchisini qabul qiladi. Guard compilation va connectiondan oldin ishlaydi, noto‘g‘ri URL qiymatini logga chiqarmaydi. Test fayllaridagi alohida guardlar ham shu bazani tekshiradi. Migration smoke test fresh va legacy fixture uchun vaqtinchalik bazalar yaratib o‘chiradi. Real biznes bazasi yoki uning credentiallarini test buyrug‘iga bermang.
+
+2026-10-06 yakuniy qabul: aynan10 ta PLAN1 bandi done — POS-01.01/.02/.03/.04/.05/.07/.08, FIN-01.01, FIN-02.03, QA-01.02. 68/68 real PostgreSQL,11/11 unit,2/2 production HTTPS scenario; typecheck/lint/build o‘tdi. Fresh/legacy19 migration va encrypted backup/restore ham shu bosqichda qayta tekshirildi. Har bir bandning qabul dalili tasks/EXECUTION_STATUS.md oxirgi bo‘limida.

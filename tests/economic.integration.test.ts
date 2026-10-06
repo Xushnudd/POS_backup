@@ -8,7 +8,7 @@ import { collectDebt } from '@/server/payments/collections'
 import type { TokenPayload } from '@/lib/auth'
 
 const connection=new URL(process.env.DATABASE_URL??'')
-if (connection.pathname!=='/pos_test' || connection.hostname!=='127.0.0.1') throw new Error('Isolated test DB required')
+if (connection.pathname!=='/pos_test' || connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.username!=='pos_test') throw new Error('Isolated test DB required')
 const orgs:string[]=[],users:string[]=[]
 after(async()=>{
  await prisma.organization.deleteMany({where:{id:{in:orgs}}})
@@ -635,4 +635,160 @@ test('Debt aging reconciles partial settlement/write-off and isolates uncertain 
  assert.equal(uncertain.aging.unallocated.toString(),'290')
  assert.equal(uncertain.aging.overdue.toString(),'0');assert.equal(uncertain.aging.upcoming.toString(),'0')
  assert.ok(uncertain.aging.debtTotal.eq(uncertain.summary.currentBalance))
+})
+
+test('Checkout trusts catalog snapshots and session actor, combines repeated SKU lines',async()=>{
+ const {saleDraftSchema}=await import('@/server/sales/service')
+ const f=await fixture(5)
+ const input=saleDraftSchema.parse({...f.draft,cashierId:randomUUID(),subtotal:1,totalAmount:1,items:[{productId:f.product.id,quantity:1,unitPrice:1,unitCost:0,unit:'kg',discountAmount:2},{productId:f.product.id,quantity:2,unitPrice:1,discountAmount:3}]})
+ const draft=await createDraft(f.context,input,randomUUID())
+ assert.equal(draft.cashierId,f.user.id);assert.equal(draft.items.length,1)
+ assert.equal(draft.items[0].quantity.toString(),'3');assert.equal(draft.items[0].unitPrice.toString(),'100')
+ assert.equal(draft.items[0].unitCost.toString(),'50');assert.equal(draft.items[0].unit,'dona')
+ assert.equal(draft.items[0].discountAmount.toString(),'5');assert.equal(draft.totalAmount.toString(),'295')
+ const sale=await completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:295}]},draft.id)
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:sale.id}}),1)
+})
+
+test('Invalid baskets, precision, excess discounts and foreign IDs leave no draft or operation',async()=>{
+ const {saleDraftSchema,completeSchema}=await import('@/server/sales/service')
+ const f=await fixture(),foreign=await fixture()
+ for(const amount of [NaN,Infinity,-1,0,'NaN','1.001'])assert.equal(completeSchema.safeParse({payments:[{paymentType:'cash',amount}]}).success,false)
+ const candidates=[{...f.draft,items:[]},...[0,-1,NaN,Infinity,'NaN','0.0000001'].map(quantity=>({...f.draft,items:[{...f.draft.items[0],quantity}]})),{...f.draft,storeId:'bad-id'}]
+ for(const input of candidates)assert.equal(saleDraftSchema.safeParse(input).success,false)
+ for(const input of [{...f.draft,discountAmount:101},{...f.draft,items:[{...f.draft.items[0],discountAmount:101}]},{...f.draft,items:[{...f.draft.items[0],productId:foreign.product.id}]},{...f.draft,items:[{...f.draft.items[0],quantity:0.5},{...f.draft.items[0],quantity:0.5}]}])await assert.rejects(()=>createDraft(f.context,input,randomUUID()))
+ assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),0)
+ assert.equal(await prisma.operation.count({where:{organizationId:f.org.id}}),0)
+ assert.equal(await prisma.auditLog.count({where:{organizationId:f.org.id}}),0)
+})
+
+test('A failure after the first stock posting rolls back stock, snapshots, debt, payment, operation and audit',async()=>{
+ const f=await fixture(1)
+ const second=await prisma.product.create({data:{organizationId:f.org.id,name:'Second',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:50}})
+ const sorted=[f.product,second].sort((a,b)=>a.id.localeCompare(b.id))
+ await prisma.inventoryBalance.upsert({where:{storeId_productId:{storeId:f.store.id,productId:second.id}},create:{storeId:f.store.id,productId:second.id,quantity:1},update:{quantity:1}})
+ await prisma.inventoryBalance.update({where:{storeId_productId:{storeId:f.store.id,productId:sorted[1].id}},data:{quantity:0}})
+ const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Rollback',phone:randomUUID(),creditLimit:500}})
+ const draft=await createDraft(f.context,{...f.draft,customerId:customer.id,items:sorted.map(p=>({productId:p.id,quantity:1,discountAmount:0})),discountAmount:1},randomUUID())
+ await assert.rejects(()=>completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:99},{paymentType:'credit',amount:100}]},draft.id),/qoldiq/)
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:sorted[0].id}}})).quantity.toString(),'1')
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:draft.id}}),0)
+ assert.equal(await prisma.debtEntry.count({where:{saleId:draft.id}}),0)
+ assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),0)
+ assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,type:'sale.complete'}}),0)
+ assert.equal(await prisma.auditLog.count({where:{entityId:draft.id,action:'completed'}}),0)
+ const unchanged=await prisma.sale.findUniqueOrThrow({where:{id:draft.id},include:{items:true}})
+ assert.equal(unchanged.status,'draft');assert.ok(unchanged.items.every(x=>x.receiptDiscount.isZero()))
+})
+
+test('Checkout rechecks current discount limits and closed shift before any posting',async()=>{
+ const f=await fixture()
+ const draft=await createDraft(f.context,{...f.draft,discountAmount:10},randomUUID())
+ await prisma.organizationUser.update({where:{id:f.context.organizationUserId},data:{role:'admin'}})
+ await prisma.userStore.create({data:{organizationUserId:f.context.organizationUserId,storeId:f.store.id}})
+ const admin={...f.context,role:'admin'}
+ await assert.rejects(()=>completeSale(admin,draft.id,{payments:[{paymentType:'cash',amount:90}]},draft.id),/Chegirma/)
+ await prisma.organizationUser.update({where:{id:f.context.organizationUserId},data:{role:'owner'}})
+ await prisma.shift.update({where:{id:f.shift.id},data:{status:'closed',closedAt:new Date()}})
+ await assert.rejects(()=>completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:90}]},draft.id),/Smena/)
+ assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),0)
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:draft.id}}),0)
+})
+
+test('Parallel credit checkouts cannot exceed the shared customer limit',async()=>{
+ const f=await fixture(2)
+ const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Limit',phone:randomUUID(),creditLimit:100}})
+ const drafts=await Promise.all([createDraft(f.context,{...f.draft,customerId:customer.id},randomUUID()),createDraft(f.context,{...f.draft,customerId:customer.id},randomUUID())])
+ const result=await Promise.allSettled(drafts.map(s=>completeSale(f.context,s.id,{payments:[{paymentType:'credit',amount:100}]},s.id)))
+ assert.equal(result.filter(x=>x.status==='fulfilled').length,1)
+ assert.equal((await prisma.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString(),'100')
+ assert.equal(await prisma.payment.count({where:{customerId:customer.id}}),1)
+})
+
+test('Parallel shift opens and direct DB inserts leave only one open till',async()=>{
+ const {openShift}=await import('@/server/finance/shifts')
+ const f=await fixture()
+ await prisma.shift.update({where:{id:f.shift.id},data:{status:'closed',closedAt:new Date()}})
+ const inputs=[randomUUID(),randomUUID()].map(operationId=>({registerId:f.draft.registerId,organizationUserId:f.context.organizationUserId,openingCash:0,operationId}))
+ const result=await Promise.allSettled(inputs.map(input=>openShift(f.context,input)))
+ assert.equal(result.filter(x=>x.status==='fulfilled').length,1)
+ assert.equal(await prisma.shift.count({where:{registerId:f.draft.registerId,status:'open'}}),1)
+ await assert.rejects(()=>prisma.shift.create({data:{registerId:f.draft.registerId,organizationUserId:f.context.organizationUserId,openingCash:0}}))
+})
+
+test('Posted receipt DB snapshots resist edit/delete/insert and parent cascades; linked returns remain valid',async()=>{
+ const f=await fixture(3),draft=await createDraft(f.context,f.draft,randomUUID())
+ const sale=await completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:100}]},draft.id)
+ const item=sale.items[0]
+ await assert.rejects(()=>prisma.sale.update({where:{id:sale.id},data:{note:'Hidden correction'}}))
+ await assert.rejects(()=>prisma.sale.update({where:{id:sale.id},data:{status:'draft'}}))
+ await assert.rejects(()=>prisma.sale.update({where:{id:sale.id},data:{status:'returned'}}))
+ await assert.rejects(()=>prisma.sale.delete({where:{id:sale.id}}))
+ await assert.rejects(()=>prisma.saleItem.update({where:{id:item.id},data:{unitCost:1}}))
+ await assert.rejects(()=>prisma.saleItem.delete({where:{id:item.id}}))
+ const {id:discard,createdAt:timestamp,...copy}=item;void discard;void timestamp
+ await assert.rejects(()=>prisma.saleItem.create({data:copy}))
+ await assert.rejects(()=>prisma.product.delete({where:{id:f.product.id}}))
+ await assert.rejects(()=>prisma.store.delete({where:{id:f.store.id}}))
+ const ret=await returnSale(f.context,sale.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Explicit correction',items:[{saleItemId:item.id,quantity:1,disposition:'sellable'}]})
+ assert.equal(ret.saleId,sale.id);assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:sale.id}})).status,'returned')
+ assert.equal(await prisma.auditLog.count({where:{entityId:ret.id,action:'returned'}}),1)
+ assert.equal((await prisma.saleItem.findUniqueOrThrow({where:{id:item.id}})).unitCost.toString(),'50')
+})
+
+test('Multi-line cent allocation and successive partial returns conserve the frozen receipt after catalog edits',async()=>{
+ const f=await fixture(3)
+ const second=await prisma.product.create({data:{organizationId:f.org.id,name:'Other',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}})
+ await prisma.inventoryBalance.create({data:{storeId:f.store.id,productId:second.id,quantity:1}})
+ const draft=await createDraft(f.context,{...f.draft,items:[{productId:f.product.id,quantity:3,discountAmount:0},{productId:second.id,quantity:1,discountAmount:0}],discountAmount:'0.01'},randomUUID())
+ const sale=await completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:'399.99'}]},draft.id)
+ const {decimal}=await import('@/server/sales/calculations')
+ assert.equal(sale.items.reduce((sum,x)=>sum.add(x.receiptDiscount),decimal(0)).toString(),'0.01')
+ await prisma.product.updateMany({where:{id:{in:[f.product.id,second.id]}},data:{salePrice:999,costPrice:888}})
+ let refunded=decimal(0)
+ for(const item of sale.items)for(let n=0;n<decimal(item.quantity).toNumber();n++){
+  const ret=await returnSale(f.context,sale.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Partial rounding',items:[{saleItemId:item.id,quantity:1,disposition:'damaged'}]})
+  refunded=refunded.add(ret.refundAmount)
+ }
+ assert.equal(refunded.toString(),'399.99')
+ assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:sale.id}})).status,'returned')
+ assert.equal((await prisma.payment.aggregate({where:{saleId:sale.id,direction:'out'},_sum:{amount:true}}))._sum.amount?.toString(),'399.99')
+})
+
+test('A late audit failure rolls back already-written payments and stock',async()=>{
+ const f=await fixture(1),draft=await createDraft(f.context,f.draft,randomUUID())
+ // DDL identifiers and predicate come exclusively from locally generated UUIDs.
+ // This trigger exists only in the guarded, disposable PostgreSQL test DB.
+ const name='pos_test_fault_'+randomUUID().replaceAll('-','')
+ await prisma.$executeRawUnsafe(`CREATE FUNCTION ${name}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Injected audit failure'; END $$`)
+ try {
+  await prisma.$executeRawUnsafe(`CREATE TRIGGER ${name} BEFORE INSERT ON "AuditLog" FOR EACH ROW WHEN (NEW."entityId"='${draft.id}' AND NEW.action='completed') EXECUTE FUNCTION ${name}()`)
+  await assert.rejects(()=>completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:100}]},draft.id),/Injected audit failure/)
+  assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),0)
+  assert.equal(await prisma.inventoryMovement.count({where:{sourceId:draft.id}}),0)
+  assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'1')
+  assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:draft.id}})).status,'draft')
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,type:'sale.complete'}}),0)
+ } finally {
+  await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS ${name} ON "AuditLog"`)
+  await prisma.$executeRawUnsafe(`DROP FUNCTION ${name}()`)
+ }
+ const recovered=await completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:100}]},draft.id)
+ assert.equal(recovered.id,draft.id);assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),1)
+})
+
+test('A child edit waiting for checkout cannot change the newly posted receipt',async()=>{
+ const f=await fixture(1),draft=await createDraft(f.context,f.draft,randomUUID())
+ let locked!:()=>void,release!:()=>void
+ const parentLocked=new Promise<void>(resolve=>{locked=resolve}),continueCommit=new Promise<void>(resolve=>{release=resolve})
+ const posting=prisma.$transaction(async tx=>{
+  await tx.sale.update({where:{id:draft.id},data:{status:'completed',completedAt:new Date()}})
+  locked();await continueCommit
+ })
+ await parentLocked
+ let settled=false
+ const edit=prisma.saleItem.update({where:{id:draft.items[0].id},data:{productName:'Hidden race'}}).then(()=>({rejected:false}),()=>({rejected:true})).finally(()=>{settled=true})
+ try {await new Promise(resolve=>setTimeout(resolve,50));assert.equal(settled,false)} finally {release()}
+ await posting;assert.equal((await edit).rejected,true)
+ assert.equal((await prisma.saleItem.findUniqueOrThrow({where:{id:draft.items[0].id}})).productName,'P')
 })

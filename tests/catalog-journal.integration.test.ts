@@ -16,7 +16,7 @@ import { GET as audit } from '@/app/api/audit/route'
 import { POST as print } from '@/app/api/sales/[id]/print-requests/route'
 import { clearLimit,consumeLimit } from '@/server/auth/rate-limit'
 const connection=new URL(process.env.DATABASE_URL??'')
-if(connection.hostname!=='127.0.0.1'||connection.pathname!=='/pos_test')throw new Error('Isolated test DB required')
+if(connection.hostname!=='127.0.0.1'||connection.pathname!=='/pos_test'||connection.port!=='55439'||connection.username!=='pos_test')throw new Error('Isolated test DB required')
 const orgs:string[]=[],users:string[]=[],phones:string[]=[]
 function req(path:string,cookie='',body?:unknown,method=body?'POST':'GET'){return new NextRequest('http://localhost:3000/api'+path,{method,headers:{cookie,origin:'http://localhost:3000','content-type':'application/json'},...(body?{body:JSON.stringify(body)}:{})})}
 const params=(id:string)=>({params:Promise.resolve({id})})
