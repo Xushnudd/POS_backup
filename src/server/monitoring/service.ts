@@ -4,7 +4,7 @@ import {prisma} from '@/lib/prisma'
 import type {TokenPayload} from '@/lib/auth'
 import {AccessError,tenantScope} from '../auth/policy'
 import {assertLiveContext,audit,runOperation} from '../operations'
-import {discrepancyQuery,type ReconciliationKind} from '../reconciliation/service'
+import {discrepancyQuery,type ReconciliationKind,type ReconciliationScope} from '../reconciliation/service'
 const kinds:ReconciliationKind[]=['inventory','sales','returns','shifts']
 export function incidentScope(context:TokenPayload){
  if(context.role==='cashier')throw new AccessError(403,'FORBIDDEN')
@@ -12,7 +12,7 @@ export function incidentScope(context:TokenPayload){
 }
 // Internal worker uses explicit organization+store scope; no Session or economic posting is fabricated.
 export async function scanOrganization(tx:Prisma.TransactionClient,organizationId:string,storeIds?:string[]){
- const scope={organizationId,userId:'system',organizationUserId:'system',sessionId:'system',role:storeIds?'admin':'owner',storeIds:storeIds??[]} as TokenPayload
+ const scope:ReconciliationScope={organizationId,role:storeIds?'admin':'owner',storeIds:storeIds??[]}
  const counts:Record<string,number>={}
  for(const kind of kinds){
   const query=discrepancyQuery(scope,kind)

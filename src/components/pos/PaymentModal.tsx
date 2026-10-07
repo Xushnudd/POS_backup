@@ -138,7 +138,7 @@ export default function PaymentModal({
         {/* Total sum display */}
         <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs text-slate-600 font-semibold uppercase tracking-wider block">
+            <span className="text-xs text-slate-300 font-semibold uppercase tracking-wider block">
               To&apos;lanadigan summa
             </span>
             <span className="text-3xl font-black text-emerald-400">
@@ -148,7 +148,7 @@ export default function PaymentModal({
 
           {customer && (
             <div className="text-right">
-              <span className="text-xs text-slate-600 block">Mijoz</span>
+              <span className="text-xs text-slate-300 block">Mijoz</span>
               <span className="text-sm font-bold text-white">{customer.fullName}</span>
             </div>
           )}
@@ -207,7 +207,6 @@ export default function PaymentModal({
               value={cashTendered}
               onChange={(e) => setCashTendered(e.target.value)}
               className="text-lg font-bold text-emerald-700"
-              autoFocus
             />
 
             {/* Quick cash buttons */}
@@ -221,9 +220,9 @@ export default function PaymentModal({
                     key={i}
                     type="button"
                     onClick={() => setCashTendered(String(amt))}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-shadow ${
                       numericCash === amt
-                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        ? 'bg-emerald-700 text-white border-emerald-700'
                         : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                     }`}
                   >

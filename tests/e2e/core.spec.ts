@@ -1,11 +1,21 @@
 import {readFileSync} from 'node:fs'
 import ts from 'typescript'
-import { test, expect } from '@playwright/test'
+import { test, expect, type Locator } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
 import { randomUUID } from 'node:crypto'
 const connection=new URL(process.env.DATABASE_URL??'')
 if(connection.hostname!=='127.0.0.1'||connection.pathname!=='/pos_test')throw new Error('Isolated test DB required')
 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[],phones:string[]=[]
+async function expectReadableText(locator:Locator){
+ const ratios=await locator.evaluateAll(elements=>elements.filter(el=>el.getBoundingClientRect().width>0&&!el.matches(':disabled')).map(el=>{
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=1;const ctx=canvas.getContext('2d')!;
+  const rgb=(color:string)=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=color;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data]};
+  let parent:Element|null=el,background=[255,255,255,255];while(parent){const candidate=rgb(getComputedStyle(parent).backgroundColor);if(candidate[3]===255){background=candidate;break;}parent=parent.parentElement;}
+  const luminance=(values:number[])=>values.slice(0,3).map(v=>{const s=v/255;return s<=0.04045?s/12.92:((s+0.055)/1.055)**2.4}).reduce((sum,v,i)=>sum+v*[0.2126,0.7152,0.0722][i],0);
+  const fg=luminance(rgb(getComputedStyle(el).color)),bg=luminance(background);return {text:el.textContent?.trim(),ratio:(Math.max(fg,bg)+0.05)/(Math.min(fg,bg)+0.05)};
+ }));
+ expect(ratios.length).toBeGreaterThan(0);for(const row of ratios)expect(row.ratio,`${row.text}: contrast`).toBeGreaterThanOrEqual(4.5);
+}
 test.afterAll(async()=>{
  const accounts=await db.user.findMany({where:{phone:{in:phones}},include:{organizationUsers:true}})
  users.push(...accounts.map(user=>user.id));orgs.push(...accounts.flatMap(user=>user.organizationUsers.map(member=>member.organizationId)))
@@ -324,7 +334,7 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  expect(await db.sale.count({where:{id:sale.id}})).toBe(1)
  await page.getByLabel('Arxiv turi',{exact:true}).selectOption('customers');await page.getByLabel('Holat',{exact:true}).selectOption('active')
  await page.getByRole('row').filter({hasText:'Browser debtor'}).getByRole('button',{name:'Arxivlash',exact:true}).click()
- await expect(page.getByText('Mijozning qarz/avans qoldig‘i bor; avval uni hal qiling',{exact:true})).toBeVisible()
+ await expect(page.getByText(/Mijozning qarz\/avans qoldig‘i bor; avval uni hal qiling/)).toBeVisible()
  await page.goto('/suppliers');await page.getByRole('button',{name:'Yangi yetkazib beruvchi',exact:true}).click()
  await page.getByRole('dialog').getByLabel('Nomi',{exact:true}).fill('Browser supplier')
  await page.getByRole('dialog').getByLabel('Telefon',{exact:true}).fill('123456789')
@@ -605,7 +615,7 @@ test('Cashier shortage requires owner approval; next cashier accepts counted han
  const context=await browser.newContext({ignoreHTTPSErrors:true})
  try{
   expect((await context.request.post('https://localhost:3100/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone:staff.phone,password:'test-only-password'}})).ok()).toBe(true)
-  const cashier=await context.newPage();await cashier.goto('https://localhost:3100/pos');await cashier.getByRole('button',{name:'Smenani ochish',exact:true}).click();await cashier.getByLabel("Boshlang'ich naqd pul (so'm)").fill('50');await cashier.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).click();await expect(cashier.getByRole('dialog')).not.toBeVisible()
+  const cashier=await context.newPage();await cashier.goto('https://localhost:3100/training');await cashier.getByRole('button',{name:'Mashq mahsulotini qo‘shish',exact:true}).click();await cashier.getByRole('button',{name:'Mashq to‘loviga o‘tish',exact:true}).click();await cashier.getByLabel('Mashqda berilgan naqd',{exact:true}).fill('15000');await cashier.getByRole('button',{name:'Faqat mashqni yakunlash',exact:true}).click();await expect(cashier.getByRole('status').filter({hasText:'Mashq yakunlandi'})).toBeVisible();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);await cashier.goto('https://localhost:3100/pos');await cashier.getByRole('button',{name:'Smenani ochish',exact:true}).click();await cashier.getByLabel("Boshlang'ich naqd pul (so'm)").fill('50');await cashier.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).click();await expect(cashier.getByRole('dialog')).not.toBeVisible()
   const product=await db.product.create({data:{organizationId:me.organization.id,name:'Cashier mixed item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}})
   await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
   const customer=await db.customer.create({data:{organizationId:me.organization.id,fullName:'Cashier customer',phone:randomUUID(),creditLimit:10}})
@@ -669,7 +679,7 @@ test('Owner sees durable inventory alert, exact branch replenishment and guided 
  const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Alert item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}})
  await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
  await page.goto('/incidents');await page.getByRole('button',{name:'Hisoblarni solishtirish',exact:true}).click();await expect(page.getByRole('article')).toContainText('Ombor qoldig‘i');await expect(page.getByRole('article')).toContainText('Jiddiy')
- await page.getByLabel('Yopish sababi',{exact:true}).fill('Checked in browser');await page.getByRole('button',{name:'Tuzatilganini tekshirib yopish',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Farq hali bor')
+ await page.getByLabel('Yopish sababi',{exact:true}).fill('Checked in browser');await page.getByRole('button',{name:'Tuzatilganini tekshirib yopish',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Farq hali bor'})).toContainText('Farq hali bor')
  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('2')
  await page.goto('/replenishment');await page.getByLabel('Qoldiq filiali',{exact:true}).selectOption(store.id);await page.getByLabel('Mahsulot qidirish',{exact:true}).fill('Alert item');await page.getByLabel('Mahsulot',{exact:true}).selectOption(product.id);await page.getByLabel('Minimal qoldiq',{exact:true}).fill('3');await page.getByLabel('Maksimal qoldiq',{exact:true}).fill('10');await page.getByRole('button',{name:'Chegaralarni saqlash',exact:true}).click();await expect(page.getByRole('article')).toContainText('tavsiya 8 dona')
  await page.goto('/help');await expect(page.getByRole('heading',{name:'Internet yoki server javobi kelmadi'})).toBeVisible();await expect(page.getByRole('heading',{name:'Chek chop etilmadi'})).toBeVisible();await expect(page.getByRole('heading',{name:'Katalog va import xatolari'})).toBeVisible();await page.getByRole('link',{name:'Navbatni tekshirish',exact:true}).click();await expect(page.getByRole('heading',{name:'Navbat va konfliktlar',exact:true})).toBeVisible()
@@ -681,8 +691,8 @@ test('Training is isolated from real money and keyboard-only payment modal traps
  const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
  await page.goto('/training');await page.getByRole('button',{name:'Mashq mahsulotini qo‘shish',exact:true}).click();await page.getByRole('button',{name:'Mashq to‘loviga o‘tish',exact:true}).click();await page.getByLabel('Mashqda berilgan naqd',{exact:true}).fill('15000');await expect(page.getByText('Qaytim: 5000 so‘m',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Faqat mashqni yakunlash',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Mashq yakunlandi'})).toBeVisible();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.payment.count({where:{organizationId:me.organization.id}})).toBe(0)
  const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Keyboard item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
- await page.goto('/pos');const open=page.getByRole('button',{name:'Smenani ochish',exact:true});await open.focus();await page.keyboard.press('Enter');await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).focus();await page.keyboard.press('Enter');await expect(page.getByRole('dialog')).not.toBeVisible()
- await page.keyboard.press('F2');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('Keyboard item');const tile=page.getByRole('button',{name:'Keyboard item — savatga qo‘shish',exact:true});await tile.focus();await page.keyboard.press('Enter');await page.keyboard.press('F9');const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await expect.poll(()=>page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true)
+ await page.goto('/pos');const open=page.getByRole('button',{name:'Smenani ochish',exact:true});await expect(page.getByRole('button',{name:'Keyboard item — savatga qo‘shish',exact:true})).toBeVisible();await open.press('Enter');await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).press('Enter');await expect(page.getByRole('dialog')).not.toBeVisible()
+ await page.keyboard.press('F2');const catalogRefresh=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/products'&&new URL(response.url()).searchParams.get('search')==='Keyboard item');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('Keyboard item');const tile=page.getByRole('button',{name:'Keyboard item — savatga qo‘shish',exact:true});await tile.focus();await page.keyboard.press('Enter');await tile.focus();await expect(tile).toBeFocused();await expectReadableText(tile.locator('span,h4'));await page.keyboard.press('F9');const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await expect.poll(()=>page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true);await expectReadableText(dialog.locator('label,button,span'));await catalogRefresh;await expect(page.locator('[data-focus-key]').filter({hasText:'Keyboard item'})).toBeAttached()
  for(let i=0;i<12;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true)}
  await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(tile).toBeFocused()
  expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0)
@@ -704,7 +714,7 @@ test('Sync conflict requires manager terminal proof and keeps the original local
  },{id,payload,organizationId:me.organization.id,userId:me.user.id})
  await page.goto('/sync-review');await page.getByRole('button',{name:'Asl kalitlar bilan sinxronlash',exact:true}).click();await expect(page.getByRole('article').filter({hasText:id}).first()).toContainText('conflict')
  const review=await db.syncReview.findFirstOrThrow({where:{organizationId:me.organization.id,operationId:id}});expect(review.payload).toEqual(payload)
- await page.getByLabel('Konflikt ko‘rib chiqish sababi',{exact:true}).fill('Original draft reviewed');await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Avval asl amal natijasini tekshiring')
+ await page.getByLabel('Konflikt ko‘rib chiqish sababi',{exact:true}).fill('Original draft reviewed');await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Avval asl amal natijasini tekshiring'})).toContainText('Avval asl amal natijasini tekshiring')
  expect((await page.request.post(`/api/sales/${draft.id}/void`,{headers:{Origin:'https://localhost:3100'},data:{}})).ok()).toBe(true)
  await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish',exact:true}).click();await page.getByRole('button',{name:'Rahbar dalilini lokal navbatga saqlash',exact:true}).click();await expect(page.getByRole('article').filter({hasText:id}).first()).toContainText('rejected')
  expect((await db.syncReview.findUniqueOrThrow({where:{id:review.id}})).payload).toEqual(payload);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.inventoryMovement.count({where:{sourceId:draft.id}})).toBe(0);expect(await db.auditLog.count({where:{entityId:review.id,action:'sync_review_resolved'}})).toBe(1)

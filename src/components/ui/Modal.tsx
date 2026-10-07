@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useId, useRef, ReactNode } from 'react';
+import React, { useEffect, useLayoutEffect, useId, useRef, ReactNode } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
@@ -31,12 +31,15 @@ export default function Modal({
   size = 'md',
 }: ModalProps) {
   const dialogRef=useRef<HTMLDivElement>(null);
+  const restoreFrame=useRef<number|null>(null);
   const titleId=useId();
-  useEffect(()=>{
+  useLayoutEffect(()=>{
     if(!isOpen)return;
+    if(restoreFrame.current!==null){cancelAnimationFrame(restoreFrame.current);restoreFrame.current=null;}
     const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const previousId=previous?.id,focusKey=previous?.dataset.focusKey;
     const selectable=()=>Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')??[]).filter(element=>element.getClientRects().length>0);
-    const frame=requestAnimationFrame(()=>{(selectable()[0]??dialogRef.current)?.focus();});
+    (selectable()[0]??dialogRef.current)?.focus();
     const trap=(event:KeyboardEvent)=>{
       if(event.key!=='Tab')return;
       const elements=selectable(),first=elements[0],last=elements.at(-1);
@@ -45,7 +48,17 @@ export default function Modal({
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
     };
     const dialog=dialogRef.current;dialog?.addEventListener('keydown',trap);
-    return ()=>{cancelAnimationFrame(frame);dialog?.removeEventListener('keydown',trap);if(previous?.isConnected)previous.focus();};
+    return ()=>{
+      dialog?.removeEventListener('keydown',trap);
+      // A catalog refresh may replace the original element while the dialog is open.
+      // Find its stable replacement after the closing commit; respect another modal.
+      restoreFrame.current=requestAnimationFrame(()=>{
+        restoreFrame.current=null;
+        const activeDialog=document.querySelector('[role="dialog"][aria-modal="true"]');
+        const target=previous?.isConnected?previous:focusKey?document.querySelector<HTMLElement>(`[data-focus-key="${CSS.escape(focusKey)}"]`):previousId?document.getElementById(previousId):null;
+        if(target&&(!activeDialog||activeDialog.contains(target)))target.focus();
+      });
+    };
   },[isOpen]);
 
   useEffect(() => {

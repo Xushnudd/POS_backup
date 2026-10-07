@@ -10,6 +10,11 @@ export function decimal(value: DecimalInput): Prisma.Decimal {
 export function money(value: DecimalInput): Prisma.Decimal {
   return decimal(value).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP)
 }
+export function debtClosingBalance(opening:DecimalInput,increases:DecimalInput,settlements:DecimalInput){
+ const debits=money(increases),credits=money(settlements);
+ if(debits.lt(0)||credits.lt(0))throw new Error('INVALID_DEBT_AMOUNT');
+ return money(opening).add(debits).sub(credits);
+}
 export function lineTotal(quantity: DecimalInput, price: DecimalInput, discount: DecimalInput = 0) {
   const qty = decimal(quantity), unitPrice = decimal(price), off = money(discount)
   if (qty.lte(0) || unitPrice.lt(0) || off.lt(0)) throw new Error('INVALID_AMOUNT')

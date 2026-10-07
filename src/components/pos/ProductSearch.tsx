@@ -155,6 +155,7 @@ export default function ProductSearch({
               <button
                 type="button"
                 aria-label={p.name+' — savatga qo‘shish'}
+                data-focus-key={'pos-product:'+p.id}
                 key={p.id}
                 onClick={() => onSelectProduct(p)}
                 className="group text-left min-h-28 focus-visible:ring-2 focus-visible:ring-blue-600 bg-white rounded-2xl p-3.5 border border-gray-200 hover:border-emerald-500 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col justify-between active:scale-98"

@@ -5,7 +5,7 @@ release_root=$(pwd)
 release_checkout=$(mktemp -d /tmp/pos-previous-app.XXXXXX)
 trap 'rm -rf "$release_checkout"' EXIT
 # Previous tracked application source, not live checkout modifications or secret files.
-release_base=$(git rev-parse HEAD)
+release_base=$(git rev-parse "${RELEASE_BASE:-HEAD^}")
 git archive "$release_base" src tsconfig.json tsconfig.test.json scripts/test-resolver.cjs | tar -x -C "$release_checkout"
 ln -s "$release_root/node_modules" "$release_checkout/node_modules"
 mkdir -p "$release_checkout/tests"

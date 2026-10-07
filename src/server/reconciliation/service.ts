@@ -4,12 +4,13 @@ import { prisma } from '@/lib/prisma'
 import { AccessError } from '../auth/policy'
 import { assertLiveContext } from '../operations'
 export type ReconciliationKind='inventory'|'sales'|'returns'|'shifts'
-function stores(context:TokenPayload,alias:string,storeId?:string) {
+export type ReconciliationScope=Pick<TokenPayload,'organizationId'|'role'|'storeIds'>
+function stores(context:ReconciliationScope,alias:string,storeId?:string) {
  const column=Prisma.raw(`${alias}."storeId"`)
  if (storeId && context.role!=='owner' && !context.storeIds.includes(storeId)) throw new AccessError(403,'FORBIDDEN')
  return Prisma.sql`${storeId?Prisma.sql`AND ${column}=${storeId}`:Prisma.empty} ${context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND ${column} IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`}`
 }
-export function discrepancyQuery(context:TokenPayload,kind:ReconciliationKind,storeId?:string) {
+export function discrepancyQuery(context:ReconciliationScope,kind:ReconciliationKind,storeId?:string) {
  if (context.role==='cashier') throw new AccessError(403,'FORBIDDEN')
  if (kind==='inventory') return Prisma.sql`
  WITH journal AS (

@@ -1,6 +1,6 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-import {allocateMoney,draftTotals,lineTotal,partialReturnAmount,taxAmounts} from '@/server/sales/calculations'
+import {allocateMoney,debtClosingBalance,draftTotals,lineTotal,partialReturnAmount,taxAmounts} from '@/server/sales/calculations'
 import {errorGuidance} from '@/lib/error-guidance'
 import {logRecord,requestTrace,safeAudit} from '@/server/observability/context'
 test('Exact decimal strings: zero, fractional quantities, discounts and half-up ties',()=>{
@@ -42,3 +42,12 @@ test('Structured log allowlist drops secrets, PII, paths, nested errors and main
  for(const [i,row] of rows.entries()){assert.equal(row.organizationId,i?'tenant-b':'tenant-a');assert.equal(row.requestId,row.organizationId+'-request');assert.doesNotMatch(JSON.stringify(row),new RegExp(secret));assert.deepEqual(Object.keys(row).sort(),['code','event','organizationId','requestId'])}
  assert.deepEqual(safeAudit({amount:'1.01',passwordHash:secret,customer:{phone:secret,email:secret,id:'c'},items:[{secret,quantity:'2'}]}),{amount:'1.01',customer:{id:'c'},items:[{quantity:'2'}]})
 })
+
+test('Credit ledger arithmetic preserves opening debt, collections, advances, zero and boundary cents',()=>{
+ assert.equal(debtClosingBalance('100','200','200').toString(),'100');
+ assert.equal(debtClosingBalance('0','0','0').toString(),'0');
+ assert.equal(debtClosingBalance('0','100','120').toString(),'-20');
+ assert.equal(debtClosingBalance('-20','30','0').toString(),'10');
+ assert.equal(debtClosingBalance('999999999999.99','0.01','999999999999.99').toString(),'0.01');
+ assert.throws(()=>debtClosingBalance('0','-1','0'));assert.throws(()=>debtClosingBalance('0','0','-1'));
+});
