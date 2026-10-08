@@ -1082,3 +1082,10 @@ Bank qaytarmasi: original qo‘lda qayd etilgan payment uchun manager avval serv
 Menyudagi **Narxlar tarixi** sahifasida mahsulotlarni toping, yangi narx va sabab kiriting, **Oldindan ko‘rish** orqali tekshiring va tasdiqlang. Har tasdiq 100 mahsulotgacha atomic; o‘zgargan eski narx batchni bekor qiladi. Tannarxni qo‘lda tahrirlash, uning tarixini ko‘rish va katalog/history eksporti biznes egasiga tegishli. Adminning mahsulot tahririda tannarx readonly; narxlar Decimal satr sifatida yuboriladi. Eski cheklar o‘zgarmaydi. Javob yo‘qolganda sahifani qayta ochib **Original amalni qayta tekshirish**ni bosing — yangi amal bilan almashtirmang.
 
 **Brak va hisobdan chiqarish** sahifasi qaytarilgan sotilmaydigan tovarlarni alohida ko‘rsatadi. Brak filialning alohida joylashuvi/qoldig‘ida, hisobdan chiqarilgan mahsulot esa disposal jurnalida qoladi. Ular sotiladigan ombor qoldig‘iga qo‘shilmaydi. Jadval va CSV original chek nomi/SKU/tannarxini saqlaydi; admin faqat biriktirilgan filiallarni ko‘radi. Brakni ta’mirlash/release va umumiy rezerv boshqaruvi alohida ochiq reja bandlari.
+
+
+### Ichki xarajat va hisoblar
+
+Owner/admin `/finance` orqali ichki hisob balanslari, sababli biznes xarajatlari, hisoblararo teng debit/credit o‘tkazmalar va original hujjatga qarshi qaytarish hujjatini yuritadi. Hisob/toifa yaratish owner-only. Naqd balans mavjud smena kitobidan olinadi; bank/provider kitobi qo‘lda qayd etilgan ichki hisobdir. Ichki o‘tkazma savdo tushumiga kirmaydi.
+
+Yalpi foyda va operatsion foyda alohida ko‘rsatiladi; hisobot ichki boshqaruv uchun. Har amal oldindan ko‘riladi va tasdiqlanadi; noma’lum javobda original kalit/payload lokal saqlanib, sahifa yangilanganda qayta tekshiriladi. Vendor-specific bank/Click/fiskal/hardware integratsiyasi qo‘shilmagan. Contract va cheklovlar `api.md` ichidagi “Ichki moliyaviy hisoblar” bo‘limida.

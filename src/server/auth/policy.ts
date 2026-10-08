@@ -23,7 +23,8 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
     case 'StockTransferItem': return { stockTransfer: tenantScope('StockTransfer', context) }
     case 'StockTransfer': return { organizationId: org, fromStore: stores, toStore: stores }
     case 'UserStore': return { organizationUser: { organizationId: org }, store: stores }
-    case 'ReturnDispositionEntry': case 'DamageLocation': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
+    case 'FinancialDocument': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds},entries:{every:{account:{organizationId:org,storeId:{in:context.storeIds}}}}})}
+    case 'FinancialAccount': case 'ReturnDispositionEntry': case 'DamageLocation': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
     case 'StockCount': case 'StockDocument': case 'InventoryMovement': case 'Payment': return { organizationId: org, ...storeRelation }
     default: return { organizationId: org }
   }

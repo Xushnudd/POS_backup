@@ -1,6 +1,6 @@
 # API vakolat va chegara reyestri
 
-2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir92 template va129 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
+2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir99 template va138 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
 
 Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/store bilan; tashkilotni tahrirlash va xodimlarni boshqarish owner-only. Cashier faqat sales/shifts/products/categories/customers/stores/auth/operations/sync; katalog/mijoz/do‘kon mutatsiyalari yopiq. `/void` manager-only. Ownership recipient GET/accept o‘z persistent requestiga ega. **Gateway allow yakuniy ruxsat emas:** return, corrections, bank deposit, settlement, export/cost, pending-close, foreign actor va branch cheklovlari xizmat ichida ham tekshiriladi. UI yashirish himoya o‘rnini bosmaydi.
 
@@ -110,3 +110,18 @@ Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/st
 | /api/inventory/dispositions | GET | Owner barcha o‘z filiallari; admin assigned branches; cashier403; paginated journal and page-product balances; full CSV max10000 | route-boundaries dynamic negatives; reports-finance damaged/refund rollback; three-browser journal |
 
 `/api/products/[id]` PUT manual cost change owner-only; unchanged cost admin formni buzmaydi. `/api/products` CSV cost ustuni owner-only. Narxlar yo‘li literal collection endpoint; generic product-ID reference checkdan chiqarilgan, har bir request item/query product ref validatsiyasi saqlangan.
+
+
+2026-10-08 ichki finance qo‘shimchasi:
+
+| Route | HTTP | Serverdagi vakolat |
+| --- | --- | --- |
+| /api/finance/accounts | GET, POST | Read owner/admin assigned stores; create owner-only; cashier403 |
+| /api/finance/categories | GET, POST | Read owner/admin; create owner-only; tenant scoped |
+| /api/finance/expenses | POST | Owner/admin, account/category/shift scoped, sufficient balance, live session |
+| /api/finance/transfers | POST | Owner/admin; ikkala hisob ham assigned scope; atomic equal signed postings |
+| /api/finance/documents | GET | Owner/admin; admin document va barcha entry account filiallariga ruxsatli; scoped CSV |
+| /api/finance/documents/[id]/reverse | POST | Owner/admin; original barcha hisoblar scoped; original reversal once |
+| /api/reports/profit | GET | Owner/admin assigned stores; frozen sale costs; report budget |
+
+`reports-finance.integration.test.ts`: cash/bank balancing, duplicate replay, two concurrent debits, audit rollback, immutable cash mirror, cashier/admin deny va cross-branch transfer detail/export/reversal deny. `Finance UI…` browser ssenariyi exact cents va lost-response original reversalni reload orqali tiklaydi. Yangi handlerlar dynamic boundary testiga avtomatik kiradi. Bu qo‘shimcha SEC-01.02/04 ni o‘zi yakunlamaydi: qolgan core guruhlar qabul qilinishda ham reyestr va testlar yangilanadi.

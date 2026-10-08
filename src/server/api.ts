@@ -14,6 +14,7 @@ import { sanitizeResponse } from './auth/response'
 
 const refs: Record<string, string> = {
   storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
+  expenseCategoryId:'ExpenseCategory',accountId:'FinancialAccount',fromAccountId:'FinancialAccount',toAccountId:'FinancialAccount',
   productId:'Product', categoryId:'Category', customerId:'Customer', supplierId:'Supplier',
   organizationUserId:'OrganizationUser', cashierId:'User',
 }
@@ -114,6 +115,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         await consumeLimit('report.read',identity,60,60000)
         if(path==='/api/reports/reconciliation')await consumeLimit('report.reconciliation',identity,10,60000)
       }
+      if(context&&path.startsWith('/api/finance/'))await consumeLimit(mutation?'finance.write':'finance.read',context.organizationId+':'+context.userId,60,60000)
       const result = await handler(request, routeContext)
       const data = await result.json()
       if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}

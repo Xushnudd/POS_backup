@@ -891,3 +891,56 @@ test('Late audit failure rolls back a reviewed price batch and the entire damage
   assert.equal(await prisma.damageLocation.count({where:{organizationId:f.org.id}}),0);assert.equal(await prisma.returnDispositionEntry.count({where:{organizationId:f.org.id}}),0);assert.equal(await prisma.saleReturn.count({where:{saleId:sale.id}}),0);assert.equal(await prisma.payment.count({where:{saleId:sale.id,direction:'out'}}),0);assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,key:{in:[input.operationId,ret.operationId]}}}),0);
  }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${trigger}()`);}
 });
+
+test('Financial accounts transfer atomically without revenue, expense categories/reversals and gross/operating profit reconcile',async()=>{
+ const f=await fixture(2,1000),other=await fixture(),admin=await actor(f.org.id,f.store.id,'admin'),cashier=await actor(f.org.id,f.store.id,'cashier');
+ const finance=await import('@/server/finance/accounts'),{GET:accounts,POST:create}=await import('@/app/api/finance/accounts/route');
+ const cash=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:f.store.id,registerId:f.register.id,name:'Till book',kind:'cash',reason:'Use existing shift cash'}));
+ const bank=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:f.store.id,name:'Manual bank book',kind:'bank',openingBalance:'100',reason:'Verified statement opening'}));
+ const category=await finance.createExpenseCategory(f.context,finance.categorySchema.parse({operationId:randomUUID(),name:'Rent',treatment:'operating'})),capital=await finance.createExpenseCategory(f.context,finance.categorySchema.parse({operationId:randomUUID(),name:'Inventory cost paid',treatment:'capitalised'}));
+ const transfer=finance.transferSchema.parse({operationId:randomUUID(),fromAccountId:cash.id,toAccountId:bank.id,fromShiftId:f.shift.id,amount:'200',reason:'Actual cash deposited manually'});
+ const paymentBefore=await prisma.payment.count({where:{organizationId:f.org.id}});await Promise.all([finance.transferAccounts(f.context,transfer),finance.transferAccounts(f.context,transfer)]);
+ const book=await finance.listAccounts(f.context);assert.equal(book.find(a=>a.id===cash.id)?.balance.toString(),'800');assert.equal(book.find(a=>a.id===bank.id)?.balance.toString(),'300');assert.equal(await prisma.payment.count({where:{organizationId:f.org.id}}),paymentBefore);const mirror=await prisma.accountEntry.findFirstOrThrow({where:{organizationId:f.org.id,cashMovementId:{not:null}}});await assert.rejects(()=>prisma.cashMovement.update({where:{id:mirror.cashMovementId!},data:{amount:999}}));await assert.rejects(()=>prisma.cashMovement.delete({where:{id:mirror.cashMovementId!}}));
+ assert.equal((await prisma.accountEntry.aggregate({where:{document:{organizationId:f.org.id,kind:'transfer'}},_sum:{amount:true}}))._sum.amount?.toString(),'0');
+ const sale=await createDraft(f.context,f.draft,randomUUID());await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:100}]},randomUUID());
+ const expenseInput=finance.expenseSchema.parse({operationId:randomUUID(),accountId:cash.id,expenseCategoryId:category.id,shiftId:f.shift.id,amount:'10',reason:'Office rent paid'});const expense=await finance.postExpense(f.context,expenseInput);await finance.postExpense(f.context,expenseInput);
+ await finance.postExpense(f.context,finance.expenseSchema.parse({...expenseInput,operationId:randomUUID(),accountId:bank.id,expenseCategoryId:capital.id,shiftId:undefined,amount:'20',reason:'Capitalised cost payment'}));
+ const {GET:profit}=await import('@/app/api/reports/profit/route');let response=await profit(req('/reports/profit',f.cookie),undefined);assert.equal(response.status,200);let summary=(await response.json()).data.summary;assert.equal(summary.netSales,'100');assert.equal(summary.cogs,'50');assert.equal(summary.grossProfit,'50');assert.equal(summary.operatingProfit,'40');assert.equal(summary.capitalisedPayments,'20');
+ const reversal=finance.reversalSchema.parse({operationId:randomUUID(),reason:'Rent payment corrected',shifts:{[cash.id]:f.shift.id}});await Promise.all([finance.reverseFinancialDocument(f.context,expense.id,reversal),finance.reverseFinancialDocument(f.context,expense.id,reversal)]);
+ response=await profit(req('/reports/profit',f.cookie),undefined);summary=(await response.json()).data.summary;assert.equal(summary.operatingProfit,'50');assert.equal((await finance.listAccounts(f.context)).find(a=>a.id===cash.id)?.balance.toString(),'900');
+ await assert.rejects(()=>finance.reverseFinancialDocument(f.context,expense.id,{...reversal,operationId:randomUUID()}));
+ const race=finance.expenseSchema.parse({...expenseInput,accountId:bank.id,shiftId:undefined,amount:'200',reason:'Bank amount race'});const raceResults=await Promise.allSettled([finance.postExpense(f.context,{...race,operationId:randomUUID()}),finance.postExpense(f.context,{...race,operationId:randomUUID()})]);assert.equal(raceResults.filter(r=>r.status==='fulfilled').length,1);assert.equal((await finance.listAccounts(f.context)).find(a=>a.id===bank.id)?.balance.toString(),'80');
+ assert.equal((await accounts(req('/finance/accounts',cashier.cookie),undefined)).status,403);
+ assert.equal((await create(req('/finance/accounts',admin.cookie,{operationId:randomUUID(),storeId:f.store.id,kind:'bank',name:'Unauthorized',reason:'No owner approval'}),undefined)).status,403);
+ const foreignAccount=await finance.createAccount(other.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:other.store.id,name:'Foreign bank',kind:'bank',reason:'Foreign opening'}));await assert.rejects(()=>finance.transferAccounts(admin.context,{...transfer,operationId:randomUUID(),toAccountId:foreignAccount.id}));
+ await assert.rejects(()=>prisma.financialDocument.update({where:{id:expense.id},data:{amount:999}}));await assert.rejects(()=>prisma.accountEntry.deleteMany({where:{documentId:expense.id}}));await assert.rejects(()=>prisma.expenseCategory.update({where:{id:category.id},data:{treatment:'capitalised'}}));
+});
+
+test('Financial transfer late audit failure rolls back both accounts, cash and operation key',async()=>{
+ const f=await fixture(1,1000),finance=await import('@/server/finance/accounts');
+ const cash=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:f.store.id,registerId:f.register.id,name:'Rollback till',kind:'cash',reason:'Existing shift opening'}));
+ const bank=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:f.store.id,name:'Rollback bank',kind:'bank',reason:'Empty manual bank book'}));
+ const input=finance.transferSchema.parse({operationId:randomUUID(),fromAccountId:cash.id,toAccountId:bank.id,fromShiftId:f.shift.id,amount:'100',reason:'Rollback transfer test'});
+ const trigger='finance_audit_'+randomUUID().replaceAll('-','');
+ await prisma.$executeRawUnsafe(`CREATE FUNCTION ${trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."organizationId"='${f.org.id}' THEN RAISE EXCEPTION 'test-only late audit failure'; END IF; RETURN NEW; END $$`);
+ await prisma.$executeRawUnsafe(`CREATE TRIGGER ${trigger} BEFORE INSERT ON "AuditLog" FOR EACH ROW EXECUTE FUNCTION ${trigger}()`);
+ try{
+  await assert.rejects(()=>finance.transferAccounts(f.context,input));
+  assert.equal(await prisma.financialDocument.count({where:{organizationId:f.org.id}}),0);
+  assert.equal(await prisma.accountEntry.count({where:{organizationId:f.org.id}}),0);
+  assert.equal(await prisma.cashMovement.count({where:{shiftId:f.shift.id}}),0);
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,key:input.operationId}}),0);
+  const accounts=await finance.listAccounts(f.context);assert.equal(accounts.find(a=>a.id===cash.id)?.balance.toString(),'1000');assert.equal(accounts.find(a=>a.id===bank.id)?.balance.toString(),'0');
+ }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${trigger}()`);}
+ await finance.transferAccounts(f.context,input);assert.equal(await prisma.financialDocument.count({where:{organizationId:f.org.id,kind:'transfer'}}),1);
+});
+
+test('Cross-branch transfer details require access to both accounts',async()=>{
+ const f=await fixture(),finance=await import('@/server/finance/accounts'),branch=await prisma.store.create({data:{organizationId:f.org.id,name:'Private branch'}}),admin=await actor(f.org.id,f.store.id,'admin');
+ const from=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:f.store.id,name:'Allowed book',kind:'bank',openingBalance:'100',reason:'Verified starting statement'})),to=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:branch.id,name:'Private branch bank',kind:'bank',reason:'Empty verified bank book'}));
+ const transfer=await finance.transferAccounts(f.context,finance.transferSchema.parse({operationId:randomUUID(),fromAccountId:from.id,toAccountId:to.id,amount:'20',reason:'Actual cross branch transfer'}));
+ const {GET}=await import('@/app/api/finance/documents/route');let response=await GET(req('/finance/documents',admin.cookie),undefined);assert.equal(response.status,200);let body=await response.json();assert.ok(!body.data.some((d:{id:string})=>d.id===transfer.id));assert.doesNotMatch(JSON.stringify(body),/Private branch bank/);
+ response=await GET(req('/finance/documents?format=csv',admin.cookie),undefined);assert.equal(response.status,200);assert.doesNotMatch((await response.json()).data.content,/Actual cross branch transfer/);
+ await assert.rejects(()=>finance.reverseFinancialDocument(admin.context,transfer.id,finance.reversalSchema.parse({operationId:randomUUID(),reason:'Not authorized for destination'})));
+ response=await GET(req('/finance/documents',f.cookie),undefined);body=await response.json();assert.ok(body.data.some((d:{id:string})=>d.id===transfer.id));
+});

@@ -2238,7 +2238,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-02.04** — Biznes xarajatlari, toifalari va to‘lov hisoblari.
+- [x] **FIN-02.04** — Biznes xarajatlari, toifalari va to‘lov hisoblari.
 
   **Texnologiya:** React expense screens, Prisma Expense/Category/Account.
 
@@ -2254,7 +2254,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-02.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-02.05** — Yalpi foyda va operatsion foydani aniq ajratish; to‘liq buxgalteriya hisobi bilan teng deb ko‘rsatmaslik.
+- [x] **FIN-02.05** — Yalpi foyda va operatsion foydani aniq ajratish; to‘liq buxgalteriya hisobi bilan teng deb ko‘rsatmaslik.
 
   **Texnologiya:** PostgreSQL views/aggregate, React labeled reports.
 
@@ -2270,7 +2270,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-02.06** — Naqd, bank va provayder hisoblari orasidagi pul o‘tkazmalarini ikki marta tushum deb hisoblamaslik.
+- [x] **FIN-02.06** — Naqd, bank va provayder hisoblari orasidagi pul o‘tkazmalarini ikki marta tushum deb hisoblamaslik.
 
   **Texnologiya:** Prisma account transfers, PostgreSQL balanced postings.
 

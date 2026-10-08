@@ -10,6 +10,10 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+  financialAccounts FinancialAccount[]
+  expenseCategories ExpenseCategory[]
+  financialDocuments FinancialDocument[]
+  accountEntries AccountEntry[]
   id               String   @id @default(uuid())
   name             String
   tin              String?  @unique
@@ -50,6 +54,7 @@ model Organization {
 }
 
 model User {
+  financialDocuments FinancialDocument[]
   resolvedIncidents Incident[]
   syncSources SyncReview[] @relation("SyncActor")
   resolvedSyncReviews SyncReview[] @relation("SyncResolver")
@@ -98,6 +103,8 @@ model OrganizationUser {
 }
 
 model Store {
+  financialAccounts FinancialAccount[]
+  financialDocuments FinancialDocument[]
   damageLocations DamageLocation[]
   incidents Incident[]
   stockThresholds StockThreshold[]
@@ -136,6 +143,7 @@ model UserStore {
 }
 
 model Register {
+  financialAccount FinancialAccount?
   receiptSequence Decimal @default(0) @db.Decimal(20, 0)
   id        String   @id @default(uuid())
   storeId   String
@@ -375,6 +383,7 @@ model Shift {
 }
 
 model CashMovement {
+  accountEntry AccountEntry?
   id           String   @id @default(uuid())
   shiftId      String
   movementType String   // cash_in, cash_out
@@ -829,4 +838,65 @@ model ReturnDispositionEntry {
  returnItem SaleReturnItem @relation(fields:[returnItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  actor User @relation("DispositionActor",fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  @@index([organizationId,storeId,disposition,createdAt,id])
+}
+
+model FinancialAccount {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ registerId String? @unique
+ name String
+ kind String
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ register Register? @relation(fields:[registerId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ entries AccountEntry[]
+ @@index([organizationId,storeId,kind])
+}
+model ExpenseCategory {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ treatment String @default("operating")
+ isActive Boolean @default(true)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ documents FinancialDocument[]
+ @@unique([organizationId,name])
+}
+model FinancialDocument {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ kind String
+ amount Decimal @db.Decimal(14,2)
+ reason String
+ actorId String
+ categoryId String?
+ reversalOfId String? @unique
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ category ExpenseCategory? @relation(fields:[categoryId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ original FinancialDocument? @relation("FinancialReversal",fields:[reversalOfId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ reversal FinancialDocument? @relation("FinancialReversal")
+ entries AccountEntry[]
+ @@index([organizationId,storeId,createdAt,id])
+}
+model AccountEntry {
+ id String @id @default(uuid())
+ organizationId String
+ accountId String
+ documentId String
+ amount Decimal @db.Decimal(14,2)
+ cashMovementId String? @unique
+ cashMovement CashMovement? @relation(fields:[cashMovementId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ account FinancialAccount @relation(fields:[accountId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@unique([documentId,accountId])
+ @@index([organizationId,accountId,createdAt,id])
 }

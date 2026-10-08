@@ -1,5 +1,5 @@
 export type OfflineScope={organizationId:string;userId:string;deviceId:string}
-export type PendingOperation={id:string;scope:OfflineScope;type:'sale.create'|'sale.complete'|'sale.return'|'debt.collect'|'debt.document'|'shift.correct'|'shift.cash'|'catalog.prices';payload:Record<string,unknown>;state:'pending'|'synced'|'conflict'|'cancelled'|'rejected';createdAt:string;result?:unknown;code?:string}
+export type PendingOperation={id:string;scope:OfflineScope;type:'sale.create'|'sale.complete'|'sale.return'|'debt.collect'|'debt.document'|'shift.correct'|'shift.cash'|'catalog.prices'|'finance.action';payload:Record<string,unknown>;state:'pending'|'synced'|'conflict'|'cancelled'|'rejected';createdAt:string;result?:unknown;code?:string}
 const database='shuni-pos-local-v1'
 function open():Promise<IDBDatabase> {
  return new Promise((resolve,reject)=>{
@@ -66,7 +66,7 @@ export async function acknowledge(id:string,state:PendingOperation['state'],resu
 // Owner debt corrections require explicit review/retry on the customer card.
 // They are durable local intents, not automatic background sync commands.
 async function synchronizeBatch(scope:OfflineScope) {
- const pending=(await pendingOperations(scope)).filter(x=>x.state==='pending'&&!['debt.document','shift.correct','shift.cash','catalog.prices'].includes(x.type)).slice(0,25)
+ const pending=(await pendingOperations(scope)).filter(x=>x.state==='pending'&&!['debt.document','shift.correct','shift.cash','catalog.prices','finance.action'].includes(x.type)).slice(0,25)
  if (!pending.length) return []
  const response=await fetch('/api/sync',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({commands:pending.map(x=>({operationId:x.id,type:x.type,payload:x.payload}))})})
  const body=await response.json()

@@ -127,9 +127,9 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | FIN-02.01 | CORE-1 | done | Tannarx usulini belgilash: dastlab vaznli o‘rtacha; FIFO/partiya ehtiyoji bo‘lsa kengaytirish. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | FIN-02.02 | CORE-1 | in_progress | Har savdo qatorining tarixiy tannarxi, chegirmasi, solig‘i va yaxlitlanishini saqlash. | Open-shift unique index, cash ledger, immutable close, checkout cost snapshot; economic tests | Handover/approval/cash tender snapshot, tax snapshots, browser acceptance |
 | FIN-02.03 | CORE-1 | done | Chek chegirmasini qatorlarga taqsimlash; qaytarishni shu qiymatlardan hisoblash. | 2026-10-06: qabul mezoni va regressiya o‘tdi; quyidagi “Yana 10 ta PLAN1 bandi” dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
-| FIN-02.04 | CORE-1 | todo | Biznes xarajatlari, toifalari va to‘lov hisoblari. | — | — |
-| FIN-02.05 | CORE-1 | todo | Yalpi foyda va operatsion foydani aniq ajratish; to‘liq buxgalteriya hisobi bilan teng deb ko‘rsatmaslik. | — | — |
-| FIN-02.06 | CORE-1 | todo | Naqd, bank va provayder hisoblari orasidagi pul o‘tkazmalarini ikki marta tushum deb hisoblamaslik. | — | — |
+| FIN-02.04 | CORE-1 | done | Biznes xarajatlari, toifalari va to‘lov hisoblari. | plus-20 finance qabul: 124 PG,27 unit,3 HTTPS browser; migration038–041; quyidagi individual protokol | Regressiyani saqlash; boshqa plus-20 bandlari ochiq |
+| FIN-02.05 | CORE-1 | done | Yalpi foyda va operatsion foydani aniq ajratish; to‘liq buxgalteriya hisobi bilan teng deb ko‘rsatmaslik. | plus-20 finance qabul: 124 PG,27 unit,3 HTTPS browser; migration038–041; quyidagi individual protokol | Regressiyani saqlash; boshqa plus-20 bandlari ochiq |
+| FIN-02.06 | CORE-1 | done | Naqd, bank va provayder hisoblari orasidagi pul o‘tkazmalarini ikki marta tushum deb hisoblamaslik. | plus-20 finance qabul: 124 PG,27 unit,3 HTTPS browser; migration038–041; quyidagi individual protokol | Regressiyani saqlash; boshqa plus-20 bandlari ochiq |
 | FIN-02.07 | CORE-1 | todo | Soliq stavkasi, imtiyoz, narx ichida/tashqarisida soliq siyosatini sozlash; stavka tarixini saqlash. | — | — |
 | REP-01.01 | CORE-1 | done | P0: tashkilot va do‘kon filtri hamma ko‘rsatkichga tatbiq etilishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.02 | CORE-1 | done | P0: vaqt zonasi, davr boshi/oxiri; oxirgi kun to‘liq kirishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -981,3 +981,39 @@ Ushbu +2 so‘rov baseline **99 done**, maqsad **101 done**. **RET-01.04 va CAT-
 - `git diff --check`:exit0. Vaqtinchalik loglar doimiy artefakt emas; qayta ijro manbasi versioned source/tests/migrations/scripts.
 
 Source **297 fayl**, SHA256 `b4a57610f6eafe20587cb4581047a90d731659d2490f52ee85dc5eace702e925`: src/tests/prisma/scripts .ts/.tsx/.sql/.prisma/.cjs/.mjs/.sh; sorted relative path+NUL+bytes+NUL, docs alohida.
+
+## plus-20 — faol bajarish (2026-10-08)
+
+Baseline **101 done**, maqsad **121 done**. Tanlangan yangi IDlar: FIN-02.04/05/06/07/02, PUR-01.01/02/03/04/05, RET-01.03/08, POS-02.06, REP-01.06/08, CRM-01.04, CAT-01.01, DATA-01.09, SEC-01.02/04. Hozir bu checkpoint bo‘yicha **0 yangi done**. Har birining PLAN1 qabul mezoni saqlanadi; test yoki subtask alohida vazifa hisoblanmaydi. Tashqi fiskal/Click/hardware implementatsiyasi kiritilmaydi.
+
+
+### plus-20 moliyaviy guruh — qabul qilingan +3 (2026-10-08)
+
+**Amaldagi hisob: 101 → 104 done. So‘ralgan +20 ichidan3 qabul qilindi,17 hali ochiq. Maqsad121 o‘zgarmadi.** Test, migration yoki UI kichik qadamlar alohida PLAN1 vazifasi sifatida sanalmadi. Quyidagi uchta IDdan boshqa yangi checkbox yopilmagan.
+
+Versiya: HEAD `e6639e8bcb86b2e46b40e663c6c47ec45d06d127` ustidagi ishchi daraxt; avtomatik commit/deploy yo‘q. `src/server/finance/accounts.ts` SHA256 `0ee2a989614ca595fb4451371826c6bf57e71032ac722d2168450f90f255c0a7`; `src/server/reports/profit.ts` SHA256 `057452081f9588d432b38a38b66c002e1d09d6f11282f4566aa7f3062fb75f71`. Test/schema versiyalari quyida.
+
+| ID | Tekshirilgan kirish | Kutilgan va haqiqiy natija | Dalil |
+| --- | --- | --- | --- |
+| FIN-02.04 | cash opening1000, expense10, operating/capitalised category, original reversal; admin create, cashier read va foreign account negative; late AuditLog failure | Expense+cash posting+audit+Operation atomic; original retry bir marta; reversal originalni o‘zgartirmaydi; cashier403/admin account create403; late audit barcha pul/hujjatlarni rollback; CashMovement mirror update/delete SQLda taqiqlanadi | `tests/reports-finance.integration.test.ts`: “Financial accounts…”, “Financial transfer late…”, “Cross-branch transfer details…”; `src/app/(dashboard)/finance/page.tsx`; migrations038–041; uch browser “Finance UI…” |
+| FIN-02.05 | sale100 originalcost50, operatingexpense10, capitalised20, originalexpense reversal | netSales100,COGS50,gross50,operating40,capitalised20; reversal operating50; bank transfer foydani o‘zgartirmaydi; label internal management/not statutory accounting | Profit API SQL RepeatableRead va exact Decimal; same finance test; browser expense10.25 → operating−10.25 → reversal0 |
+| FIN-02.06 | cash→bank200; same-key parallel replay; bank ikki parallel debit200; UI bank20.05 transfer; cross-branch owner transfer/admin only one branch | Same document ostida ±200, sum0; cash800 bank300, savdo Payment soni o‘zgarmaydi; parallel debit faqatbittasi o‘tadi, bank80; UI secondary20.05 va finalprimary79.95; transfer revenue emas; admin unassigned account tafsiloti/export/reversal rad | Same finance PG tests, SQL deferred balancing, immutable journals, HTTPS browser exact cents/lost acknowledgement |
+
+Yakuniy tekshiruvlar:
+
+- `npm run typecheck`: exit0, `/tmp/pos-plus20-typecheck.log`.
+- `npm run lint`: exit0, `/tmp/pos-plus20-lint.log`.
+- `npm test`: 27/27, `/tmp/pos-plus20-unit.log`.
+- `DATABASE_URL=<isolated pos_test> npm run test:integration`: 124/124, `/tmp/pos-plus20-finance-tests.log`. Faqat127.0.0.1:55439/pos_test; haqiqiy biznes bazasi ishlatilmadi.
+- `DATABASE_URL=<build-only invalid connection> APP_ORIGIN=https://build.example.invalid npm run build`: exit0, `/tmp/pos-plus20-build.log`.
+- `DATABASE_URL=<isolated> PLAYWRIGHT_BROWSERS_PATH=/tmp/pos-playwright-browsers POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Finance UI'`: Chromium/Firefox/WebKit3/3, `/tmp/pos-plus20-finance-e2e.log`. HTTPS standalone production build; explicit preview, exact balance/profit, aborted successful reversal response, reload, original pending key, bitta reversal.
+- `bash scripts/ops/test-migrations.sh`: exit0, `/tmp/pos-plus20-migrations.log`; alohida vaqtinchalik fresh/legacy bazalar41 migration va tarixiy backfills bilan. Cleanup yakunlangan.
+- `git diff --check`: exit0.
+
+Test versiyalari: `tests/reports-finance.integration.test.ts` SHA256 `7e31f18ae00df50f9f6ed859fb4406e9423d93691eaf9437d044c05bdd04982d`; `tests/e2e/core.spec.ts` SHA256 `c1b5b908d370c47aa23ea05d70813223ab20044b10eda3cb4ff19c8fa5f6f79b`; schema SHA256 `5bf6ee9a5ba12d1e185c06f8836489167fe2b6ecdb79ad8c3a26c0c162e4e10e`.
+
+Oraliq xatolar yashirilmadi: SQL deferred trigger record shakli va OLD alias PostgreSQL trigger recordiga to‘qnashdi; qo‘llangan038 checksumiga tegilmay039/040 forward fixes bilan tuzatildi. 041 immutable cash mirror himoyasini qo‘shdi. Browser category create test server javobidan oldin DB lookup qilgan; real option ko‘rinishini kutish bilan tuzatildi, assertion yumshatilmadi. Final barcha tekshiruvlar o‘tdi.
+
+Core cheklovlar: hisob/category ro‘yxati10000 dan oshsa explicit413, qisman natija emas. Cash mirror alohida yana cash balansga qo‘shilmaydi. Bank/provider kitobi qo‘lda qayd etilgan ichki jurnal; real vendor integration/confirmation emas. Tax snapshot va purchase landed-cost bu uch band bilan tugallangan deb da’vo qilinmaydi. `SEC-01.02/04` ham shu guruh bilan avtomatik done emas.
+
+Qolgan17 ID: FIN-02.07/02, PUR-01.01/02/03/04/05, RET-01.03/08, POS-02.06, REP-01.06/08, CRM-01.04, CAT-01.01, DATA-01.09, SEC-01.02/04. Keyingi bajarish purchase/order/supplier payable/advance/return/landed-cost guruhidan davom etadi. Tashqi fiskal/E-POS/Click/hardware implementatsiyalari foydalanuvchi belgilaganidek chetlab o‘tiladi.
