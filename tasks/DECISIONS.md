@@ -203,3 +203,15 @@ Migration033 `Payment.sourceType`ni `manual/provider` bilan chegaralaydi. Hozirg
 ### ADR-028 — Manual collection kanalini saqlash va hujjatni qayta ishlatmaslik
 
 Debt collection naqd/karta/o‘tkazma journalini explicit tanlaydi. Card uchun operatorning haqiqatda bajarilgan to‘lov tasdig‘i va original hujjat talab qilinadi; bank API taxmin qilinmaydi. Existing transfer API callers buzilmaydi, lekin UI bank/karta tasdiq/hujjat bilan ishlaydi. Organization/channel/document lock va migration034 unique index disjoint customer parallel so‘rovlarini ham himoyalaydi. Card/transfer cash drawer totaliga qo‘shilmaydi. Original payment/debt allocation/smena/receiver va Operation payload saqlanadi. Full FinancialAccount/transfer/expense funksiyalari FIN-02 bandlarida ochiq; bu implementatsiya alohida bank statement reconciliation yoki provider callback o‘rnini bosmaydi.
+
+### ADR-029 — Avtomatik narx tarixi va bounded reviewed batch
+
+2026-10-08. Prisma ProductPriceHistory + PG trigger qo‘lda va tizim hisoblagan barcha haqiqiy narx o‘zgarishlarini qamraydi. Baseline sanasi migration vaqti; tarix taxmin qilinmaydi. Manual catalog cost edit/history/export owner-only, admin sotuv narxini o‘zgartiradi; mavjud admin financial read vakolati saqlanadi. Transaction-local actor/source individual va bulk editni ajratadi; tizim cost hisobiga uydirma actor qo‘yilmaydi.
+
+Bulk 100 unique rowgacha atomic batch: sorted product locks, expected price, preview hash, sabab, explicit confirmation, serializable Operation replay va bitta audit. Mavjud PostgreSQL va IndexedDB yetarli: worker/queue yoki yangi texnologiya qo‘shilmadi. Katta ro‘yxat alohida ko‘rib tasdiqlangan batchlarga bo‘linadi, global all-or-nothing deb ko‘rsatilmaydi. Lokal reviewed intent avtomatik syncdan chiqarilgan; unknown response original key/payload bilan tekshiriladi. Cashier history endpointini o‘qiy olmaydi; history qiymatlari umumiy credential sanitizerga tayanib himoyalanmaydi.
+
+### ADR-030 — Brak fizik joylashuvi va disposal journal
+
+2026-10-08. Har filialga bitta DamageLocation; nonsellable qaytarma original return item bilan unique immutable ReturnDispositionEntryga bog‘lanadi. Damaged entrylar yig‘indisi alohida brak qoldig‘i; write_off location yo‘q, sotiladigan stock emas. Parent refund transaction ichida location/journal/refund/audit/Operation birga bajariladi. SQL original return/product/store/quantity/cost/actorni tekshiradi; location tenant/store identity o‘zgarmaydi. Backfill frozen original nom/SKU/unit/cost/date bilan, hozirgi katalogdan emas.
+
+Read API assigned branch bilan chegaralangan. Yig‘ma response faqat sahifadagi product/store juftliklariga tegishli va shu scope explicit; shu juftliklarning barcha entrylari hisoblanadi. Butun catalog groupBy responsega yuklanmaydi. Repair/release/reservation INV-02 doirasida alohida, bu task boshqa ochiq bandni avtomatik yopmaydi.

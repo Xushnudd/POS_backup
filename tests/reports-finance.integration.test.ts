@@ -808,3 +808,86 @@ test('Session expiry, revoke and cookie transport enforce the browser boundary w
  const bearer=new NextRequest('http://localhost:3000/api/sales?organizationId='+f.org.id,{headers:{authorization:'Bearer '+f.token}});assert.equal((await GET(bearer,undefined)).status,401)
  const live=await fixture();await prisma.session.update({where:{id:live.context.sessionId},data:{revokedAt:new Date()}});assert.equal(await verifySession(live.token),null)
 })
+
+test('Price batches preview atomically, preserve receipts, replay once and protect cost history/export',async()=>{
+ const f=await fixture(),foreign=await fixture(),admin=await actor(f.org.id,f.store.id,'admin'),cashier=await actor(f.org.id,f.store.id,'cashier');
+ const {changePrices,priceBatchSchema}=await import('@/server/catalog/prices');
+ const {GET,POST}=await import('@/app/api/products/prices/route');
+ const sale=await createDraft(f.context,f.draft,randomUUID());await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:100}]},randomUUID());
+ const second=await prisma.product.create({data:{organizationId:f.org.id,name:'Second',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:200,costPrice:20}});
+ const input=priceBatchSchema.parse({operationId:randomUUID(),field:'salePrice',reason:'Reviewed market prices',preview:true,items:[{productId:f.product.id,expected:'100',value:'125.50'},{productId:second.id,expected:'200',value:'210'}]});
+ const before=await prisma.productPriceHistory.count({where:{organizationId:f.org.id}});
+ const previewResponse=await POST(req('/products/prices',f.cookie,input),undefined);assert.equal(previewResponse.status,200);const preview=(await previewResponse.json()).data;
+ assert.equal(await prisma.productPriceHistory.count({where:{organizationId:f.org.id}}),before);
+ await assert.rejects(()=>changePrices(f.context,{...input,preview:false}),e=>e instanceof Error&&'code'in e&&e.code==='PRICE_PREVIEW_REQUIRED');
+ await prisma.product.update({where:{id:second.id},data:{salePrice:201}});
+ await assert.rejects(()=>changePrices(f.context,{...input,preview:false,confirmationHash:preview.confirmationHash}));
+ assert.equal((await prisma.product.findUniqueOrThrow({where:{id:f.product.id}})).salePrice.toString(),'100');
+ const next={...input,operationId:randomUUID(),items:[input.items[0],{...input.items[1],expected:'201'}]};const reviewed=await changePrices(f.context,next);
+ const posted={...next,preview:false,confirmationHash:reviewed.confirmationHash};await Promise.all([changePrices(f.context,posted),changePrices(f.context,posted)]);
+ assert.equal((await prisma.product.findUniqueOrThrow({where:{id:f.product.id}})).salePrice.toString(),'125.5');
+ assert.equal((await prisma.saleItem.findUniqueOrThrow({where:{id:sale.items[0].id}})).unitPrice.toString(),'100');
+ const history=await prisma.productPriceHistory.findMany({where:{organizationId:f.org.id,source:'catalog.bulk'}});assert.equal(history.length,2);assert.ok(history.every(h=>h.actorId===f.user.id));
+ assert.equal(await prisma.auditLog.count({where:{organizationId:f.org.id,entityId:posted.operationId,action:'prices_changed'}}),1);
+ await assert.rejects(()=>changePrices(f.context,{...posted,reason:'Changed payload'}));
+ const cost=priceBatchSchema.parse({operationId:randomUUID(),field:'costPrice',reason:'Cost review',preview:true,items:[{productId:f.product.id,expected:'50',value:'60.123456'}]});
+ assert.equal((await POST(req('/products/prices',admin.cookie,cost),undefined)).status,403);
+ assert.equal((await GET(req('/products/prices?field=costPrice&format=csv',admin.cookie),undefined)).status,403);
+ assert.equal((await GET(req('/products/prices',cashier.cookie),undefined)).status,403);
+ assert.equal((await GET(req('/products/prices?productId='+foreign.product.id,f.cookie),undefined)).status,404);
+ assert.equal((await POST(req('/products/prices',f.cookie,{...input,items:[{...input.items[0],value:'1.001'}]}),undefined)).status,400);
+ assert.equal((await POST(req('/products/prices',f.cookie,{...input,items:Array.from({length:101},()=>input.items[0])}),undefined)).status,400);
+ assert.equal((await POST(req('/products/prices',f.cookie,{...input,items:[input.items[0],input.items[0]]}),undefined)).status,400);
+ const {PUT:editProduct}=await import('@/app/api/products/[id]/route');
+ const edit=(cookie:string,data:unknown)=>new NextRequest('http://localhost:3000/api/products/'+f.product.id,{method:'PUT',headers:{cookie,origin:'http://localhost:3000','content-type':'application/json'},body:JSON.stringify(data)});
+ assert.equal((await editProduct(edit(admin.cookie,{costPrice:'55'}),{params:Promise.resolve({id:f.product.id})})).status,403);
+ assert.equal((await editProduct(edit(admin.cookie,{salePrice:'126'}),{params:Promise.resolve({id:f.product.id})})).status,200);
+ assert.equal(await prisma.productPriceHistory.count({where:{productId:f.product.id,source:'catalog.edit',actorId:admin.user.id}}),1);
+ const cv=await changePrices(f.context,cost);await changePrices(f.context,{...cost,preview:false,confirmationHash:cv.confirmationHash});
+ assert.equal((await prisma.product.findUniqueOrThrow({where:{id:f.product.id}})).costPrice.toString(),'60.123456');
+ const exported=await GET(req('/products/prices?field=costPrice&format=csv',f.cookie),undefined);assert.equal(exported.status,200);assert.match((await exported.json()).data.content,/60.123456/);
+ const {GET:catalog}=await import('@/app/api/products/route');const adminCsv=await catalog(req('/products?format=csv&organizationId='+f.org.id,admin.cookie),undefined);assert.equal(adminCsv.status,200);assert.doesNotMatch((await adminCsv.json()).data.content,/Tannarx|60.123456/);
+ await assert.rejects(()=>prisma.productPriceHistory.update({where:{id:history[0].id},data:{newValue:999}}));
+ await assert.rejects(()=>prisma.productPriceHistory.delete({where:{id:history[0].id}}));
+});
+
+test('Damaged return locations and write-off journals are atomic, frozen, immutable and branch scoped',async()=>{
+ const f=await fixture(6),admin=await actor(f.org.id,f.store.id,'admin'),cashier=await actor(f.org.id,f.store.id,'cashier'),foreign=await fixture();
+ const sale=await createDraft(f.context,{...f.draft,items:[{productId:f.product.id,quantity:6,discountAmount:0}]},randomUUID());await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:600}]},randomUUID());
+ await prisma.product.update({where:{id:f.product.id},data:{name:'Renamed',costPrice:999}});
+ const damaged=returnSchema.parse({operationId:randomUUID(),shiftId:f.shift.id,reason:'Damaged goods inspected',items:[{saleItemId:sale.items[0].id,quantity:2,disposition:'damaged'}]});
+ await returnSale(f.context,sale.id,damaged,true);assert.equal(await prisma.damageLocation.count({where:{organizationId:f.org.id}}),0);
+ await Promise.all([returnSale(f.context,sale.id,damaged),returnSale(f.context,sale.id,damaged)]);
+ await returnSale(f.context,sale.id,{...damaged,operationId:randomUUID(),items:[{...damaged.items[0],quantity:1,disposition:'damaged'}]});
+ await returnSale(f.context,sale.id,{...damaged,operationId:randomUUID(),items:[{...damaged.items[0],quantity:1,disposition:'write_off'}]});
+ await returnSale(f.context,sale.id,{...damaged,operationId:randomUUID(),items:[{...damaged.items[0],quantity:1,disposition:'sellable'}]});
+ const entries=await prisma.returnDispositionEntry.findMany({where:{organizationId:f.org.id}});assert.equal(entries.length,3);assert.ok(entries.every(e=>e.unitCost.toString()==='50'&&e.productName==='Frozen'));assert.equal(entries.filter(e=>e.locationId===null).length,1);
+ assert.equal(await prisma.damageLocation.count({where:{organizationId:f.org.id}}),1);
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'1');
+ const {GET}=await import('@/app/api/inventory/dispositions/route');
+ const response=await GET(req('/inventory/dispositions',admin.cookie),undefined);assert.equal(response.status,200);const body=await response.json();assert.equal(body.data.length,3);assert.equal(body.summary.find((b:{disposition:string})=>b.disposition==='damaged')._sum.quantity,'3');
+ assert.equal((await GET(req('/inventory/dispositions',cashier.cookie),undefined)).status,403);
+ assert.equal((await GET(req('/inventory/dispositions?storeId='+foreign.store.id,admin.cookie),undefined)).status,404);
+ const otherStore=await prisma.store.create({data:{organizationId:f.org.id,name:'Unassigned'}});const unassigned=await actor(f.org.id,otherStore.id,'admin');assert.equal((await (await GET(req('/inventory/dispositions',unassigned.cookie),undefined)).json()).data.length,0);
+ const csv=await GET(req('/inventory/dispositions?format=csv',f.cookie),undefined);assert.equal(csv.status,200);assert.match((await csv.json()).data.content,/Brak qaytarmalari/);
+ await assert.rejects(()=>prisma.returnDispositionEntry.update({where:{id:entries[0].id},data:{quantity:100}}));await assert.rejects(()=>prisma.returnDispositionEntry.delete({where:{id:entries[0].id}}));
+ const location=await prisma.damageLocation.findFirstOrThrow({where:{organizationId:f.org.id}});await assert.rejects(()=>prisma.damageLocation.update({where:{id:location.id},data:{storeId:otherStore.id}}));
+ const old=await prisma.returnDispositionEntry.count({where:{organizationId:f.org.id}});
+ await assert.rejects(()=>prisma.$transaction(async tx=>{await tx.returnDispositionEntry.create({data:{...entries[0],id:randomUUID(),returnItemId:entries[1].returnItemId,unitCost:999}});}));assert.equal(await prisma.returnDispositionEntry.count({where:{organizationId:f.org.id}}),old);
+});
+
+test('Late audit failure rolls back a reviewed price batch and the entire damaged-return location/refund',async()=>{
+ const f=await fixture(1);const {changePrices,priceBatchSchema}=await import('@/server/catalog/prices');
+ const sale=await createDraft(f.context,f.draft,randomUUID());await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:100}]},randomUUID());
+ const input=priceBatchSchema.parse({operationId:randomUUID(),field:'salePrice',reason:'Rollback price review',preview:true,items:[{productId:f.product.id,expected:'100',value:'120'}]});const preview=await changePrices(f.context,input);
+ const baseline=await prisma.productPriceHistory.count({where:{organizationId:f.org.id}});
+ const trigger='plus2_audit_'+randomUUID().replaceAll('-','');
+ await prisma.$executeRawUnsafe(`CREATE FUNCTION ${trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."organizationId"='${f.org.id}' THEN RAISE EXCEPTION 'test-only audit failure'; END IF; RETURN NEW; END $$`);
+ await prisma.$executeRawUnsafe(`CREATE TRIGGER ${trigger} BEFORE INSERT ON "AuditLog" FOR EACH ROW EXECUTE FUNCTION ${trigger}()`);
+ try{
+  await assert.rejects(()=>changePrices(f.context,{...input,preview:false,confirmationHash:preview.confirmationHash}));
+  assert.equal((await prisma.product.findUniqueOrThrow({where:{id:f.product.id}})).salePrice.toString(),'100');assert.equal(await prisma.productPriceHistory.count({where:{organizationId:f.org.id}}),baseline);
+  const ret=returnSchema.parse({operationId:randomUUID(),shiftId:f.shift.id,reason:'Rollback damaged return',items:[{saleItemId:sale.items[0].id,quantity:1,disposition:'damaged'}]});await assert.rejects(()=>returnSale(f.context,sale.id,ret));
+  assert.equal(await prisma.damageLocation.count({where:{organizationId:f.org.id}}),0);assert.equal(await prisma.returnDispositionEntry.count({where:{organizationId:f.org.id}}),0);assert.equal(await prisma.saleReturn.count({where:{saleId:sale.id}}),0);assert.equal(await prisma.payment.count({where:{saleId:sale.id,direction:'out'}}),0);assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,key:{in:[input.operationId,ret.operationId]}}}),0);
+ }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${trigger}()`);}
+});

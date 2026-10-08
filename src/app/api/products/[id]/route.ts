@@ -1,3 +1,4 @@
+import {priceActor} from '@/server/catalog/prices'
 import { Prisma } from '@prisma/client'
 import { amountSchema } from '@/server/sales/service'
 import { nonnegativeQuantitySchema } from '@/server/catalog/service'
@@ -102,6 +103,8 @@ async function handlePUT(
     const product = await db.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${id} FOR UPDATE`
       const current=await tx.product.findUniqueOrThrow({where:{id}})
+      if(validatedData.costPrice!==undefined&&!current.costPrice.eq(validatedData.costPrice)&&payload.role!=='owner')throw new AccessError(403,'COST_CHANGE_FORBIDDEN');
+      await priceActor(tx,payload,'catalog.edit');
       if (validatedData.unit!==undefined) {
         if (!await tx.unit.findFirst({where:{organizationId:payload.organizationId,code:validatedData.unit,isActive:true}})) throw new AccessError(400,'INVALID_UNIT')
         if (validatedData.unit!==current.unit && (await tx.saleItem.count({where:{productId:id}}) || await tx.inventoryMovement.count({where:{productId:id}}) || await tx.inventoryBalance.count({where:{productId:id,quantity:{not:0}}}))) throw new AccessError(409,'UNIT_IN_USE','Harakati bor mahsulotning bazaviy birligini o‘zgartirib bo‘lmaydi')

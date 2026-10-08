@@ -1075,3 +1075,10 @@ POS tezkor mahsulotlari mahalliy brauzerda organization/user/register bo‘yicha
 Bank qaytarmasi: original qo‘lda qayd etilgan payment uchun manager avval server previewni ko‘radi, so‘ng tashqarida haqiqatan qaytarilgan summa hujjatini qayd etadi. Preview o‘zgarsa yoki bank hujjati ishlatilgan bo‘lsa return transaction rad etiladi. Click/fiskal/vendor integratsiyasi yo‘q.
 
 `bash scripts/ops/test-release-drill.sh` fresh/legacy migratsiya, shifrlangan backup/empty-db restore va eski app bilan checkout/replayni isolated test muhitida tekshiradi. Restore qabulida `scripts/ops/verify-restored-app.mjs` haqiqiy app handlerlari orqali debt/countni o‘qiydi; iqtisodiy row count o‘zgarmaydi. Fixture RPO/RTO natijasi haqiqiy hosting SLA yoki offsite backup scheduler kafolati emas.
+
+
+### Narxlar va qaytarilgan brak hisobi
+
+Menyudagi **Narxlar tarixi** sahifasida mahsulotlarni toping, yangi narx va sabab kiriting, **Oldindan ko‘rish** orqali tekshiring va tasdiqlang. Har tasdiq 100 mahsulotgacha atomic; o‘zgargan eski narx batchni bekor qiladi. Tannarxni qo‘lda tahrirlash, uning tarixini ko‘rish va katalog/history eksporti biznes egasiga tegishli. Adminning mahsulot tahririda tannarx readonly; narxlar Decimal satr sifatida yuboriladi. Eski cheklar o‘zgarmaydi. Javob yo‘qolganda sahifani qayta ochib **Original amalni qayta tekshirish**ni bosing — yangi amal bilan almashtirmang.
+
+**Brak va hisobdan chiqarish** sahifasi qaytarilgan sotilmaydigan tovarlarni alohida ko‘rsatadi. Brak filialning alohida joylashuvi/qoldig‘ida, hisobdan chiqarilgan mahsulot esa disposal jurnalida qoladi. Ular sotiladigan ombor qoldig‘iga qo‘shilmaydi. Jadval va CSV original chek nomi/SKU/tannarxini saqlaydi; admin faqat biriktirilgan filiallarni ko‘radi. Brakni ta’mirlash/release va umumiy rezerv boshqaruvi alohida ochiq reja bandlari.

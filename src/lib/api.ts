@@ -30,7 +30,7 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; requestId?:string; nextAction?:string; }
 class ApiClient {
-  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
     list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
@@ -162,13 +162,13 @@ class ApiClient {
       return this.request<Product>(`/products?${query.toString()}`);
     },
 
-    create: (data: Partial<Product>) =>
+    create: (data: Partial<Omit<Product,'costPrice'|'salePrice'|'minStock'>>&{costPrice?:string|number;salePrice?:string|number;minStock?:string|number}) =>
       this.request<Product>('/products', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    update: (id: string, data: Partial<Product>) =>
+    update: (id: string, data: Partial<Omit<Product,'costPrice'|'salePrice'|'minStock'>>&{costPrice?:string|number;salePrice?:string|number;minStock?:string|number}) =>
       this.request<Product>(`/products/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),

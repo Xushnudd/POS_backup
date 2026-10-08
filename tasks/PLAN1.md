@@ -1276,7 +1276,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `RET-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RET-01.04** — Tovar omborga qaytadimi, brak omborigami yoki hisobdan chiqadimi — aniq tanlash.
+- [x] **RET-01.04** — Tovar omborga qaytadimi, brak omborigami yoki hisobdan chiqadimi — aniq tanlash.
 
   **Texnologiya:** Prisma warehouse/location + InventoryMovement.
 
@@ -1462,9 +1462,9 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.07** — Narx tarixi va ommaviy o‘zgartirish; tannarx uchun alohida ruxsat.
+- [x] **CAT-01.07** — Narx tarixi va ommaviy o‘zgartirish; tannarx uchun alohida ruxsat.
 
-  **Texnologiya:** Prisma price history, worker batches, RBAC.
+  **Texnologiya:** Prisma ProductPriceHistory, PostgreSQL trigger va 1–100 qatorli atomic transaction batch, Operation/IndexedDB, RBAC. Shu bounded sig‘imda qo‘shimcha worker kerak emas (ADR-029); katta katalog alohida tasdiqlanadigan batchlarga bo‘linadi.
 
   **Bajarish:** Ommaviy o‘zgarishni preview, batch, audit va tasdiq bilan; yangi narx katalogni yangilaydi, eski chekni emas. Tannarx eksporti ham alohida vakolat.
 

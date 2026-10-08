@@ -87,6 +87,12 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
   const ret=await tx.saleReturn.create({data:{saleId:sale.id,returnReceiptNo:'RET-'+randomUUID(),refundAmount:refund,reason:input.reason,processedBy:context.userId,
     approvedBy:context.userId,approvedRole:context.role,approvedAt:new Date(),
     items:{create:rows.map(({unitCost,...row})=>{void unitCost;return row})}},include:{items:true}})
+  for(const row of rows.filter(item=>item.disposition!=='sellable')){
+   const original=sale.items.find(item=>item.id===row.saleItemId)!;
+   const returnedItem=ret.items.find(item=>item.saleItemId===row.saleItemId)!;
+   const location=row.disposition==='damaged'?await tx.damageLocation.upsert({where:{storeId:sale.storeId},create:{organizationId:context.organizationId,storeId:sale.storeId},update:{}}):null;
+   await tx.returnDispositionEntry.create({data:{organizationId:context.organizationId,storeId:sale.storeId,productId:row.productId,returnItemId:returnedItem.id,locationId:location?.id,disposition:row.disposition,quantity:row.quantity,unitCost:row.unitCost,productName:original.productName,sku:original.sku,unit:original.unit,actorId:context.userId}});
+  }
   if (debtReduction.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'return',sourceId:ret.id,saleId:sale.id,amount:debtReduction.negated(),actorId:context.userId}})
   if (split.waived.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'write_off_reversal',sourceId:ret.id,saleId:sale.id,amount:split.waived,actorId:context.userId,note:'Written-off liability returned'}})
   for(const channel of ['cash','card','transfer'] as const)if(split[channel].gt(0))await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:input.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:channel,direction:'out',amount:split[channel],receivedBy:context.userId,note:'return:'+ret.id,...(channel!=='cash'?{referenceNo:input.manualNonCash!.referenceNo}:{})}})

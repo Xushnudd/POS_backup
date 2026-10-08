@@ -129,7 +129,7 @@ async function handleGET(request: NextRequest) {
         const total=await tx.product.count({where})
         if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
         const rows=await tx.product.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,costPrice:true,minStock:true,category:{select:{name:true}},barcodes:{select:{value:true},orderBy:{value:'asc'}}}})
-        return {filename:'products-'+payload.organizationId+'.csv',content:csv([['ID','Mahsulot','SKU','Asosiy barkod','Qo‘shimcha barkodlar','Birlik','Kategoriya','Sotuv narxi','Tannarx','Minimal qoldiq'],...rows.map(row=>[row.id,row.name,row.sku,row.barcode,row.barcodes.map(code=>code.value).join(' | '),row.unit,row.category?.name,numeric(row.salePrice),numeric(row.costPrice,6),numeric(row.minStock,6)])])}
+        return {filename:'products-'+payload.organizationId+'.csv',content:csv([['ID','Mahsulot','SKU','Asosiy barkod','Qo‘shimcha barkodlar','Birlik','Kategoriya','Sotuv narxi',...(payload.role==='owner'?['Tannarx']:[]),'Minimal qoldiq'],...rows.map(row=>[row.id,row.name,row.sku,row.barcode,row.barcodes.map(code=>code.value).join(' | '),row.unit,row.category?.name,numeric(row.salePrice),...(payload.role==='owner'?[numeric(row.costPrice,6)]:[]),numeric(row.minStock,6)])])}
       },{isolationLevel:'RepeatableRead'})
       return NextResponse.json({success:true,data})
     }

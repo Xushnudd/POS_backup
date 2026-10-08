@@ -98,7 +98,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         requestTrace.getStore()!.organizationId=context.organizationId
         assertRoutePermission(path, request.method, context.role)
         const segments = path.split('/').filter(Boolean)
-        if (segments[2] && segments[2] !== 'switch' && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
+        if (segments[2] && segments[2] !== 'switch' && !(segments[1]==='products'&&segments[2]==='prices') && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
         await validateRefs(Object.fromEntries(new URL(request.url).searchParams), context)
       }
       if (mutation) {

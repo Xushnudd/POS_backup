@@ -74,6 +74,7 @@ model User {
   voidedSales             Sale[] @relation("VoidedBy")
   payments                Payment[] @relation("ReceivedBy")
   saleReturns             SaleReturn[] @relation("ProcessedBy")
+  dispositionEntries ReturnDispositionEntry[] @relation("DispositionActor")
   auditLogs               AuditLog[]
   inventoryMovements      InventoryMovement[] @relation("InventoryMovementCreator")
   shiftCorrections        ShiftCorrection[]
@@ -121,6 +122,7 @@ model Store {
   toStockTransfers   StockTransfer[] @relation("ToStore")
   sales          Sale[]
   payments       Payment[]
+  dispositionEntries ReturnDispositionEntry[]
 }
 
 model UserStore {
@@ -197,6 +199,7 @@ model Product {
 
   @@unique([organizationId, sku])
   @@unique([organizationId, barcode])
+  dispositionEntries ReturnDispositionEntry[]
 }
 
 model Customer {
@@ -520,6 +523,7 @@ model SaleReturnItem {
   saleReturn      SaleReturn @relation(fields: [saleReturnId], references: [id], onDelete: Cascade)
   saleItem        SaleItem   @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
   product         Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dispositionEntry ReturnDispositionEntry?
 }
 
 // Control and Service
@@ -789,8 +793,8 @@ model ProductPriceHistory {
  actorId String?
  source String
  createdAt DateTime @default(now())
- organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
- product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  @@index([organizationId,productId,createdAt,id])
 }
 model DamageLocation {
@@ -799,8 +803,8 @@ model DamageLocation {
  storeId String @unique
  name String @default("Brak qaytarmalari")
  createdAt DateTime @default(now())
- organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
- store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  entries ReturnDispositionEntry[]
 }
 model ReturnDispositionEntry {
@@ -818,7 +822,11 @@ model ReturnDispositionEntry {
  unit String?
  actorId String
  createdAt DateTime @default(now())
- organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
- location DamageLocation? @relation(fields:[locationId],references:[id])
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ location DamageLocation? @relation(fields:[locationId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ returnItem SaleReturnItem @relation(fields:[returnItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation("DispositionActor",fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  @@index([organizationId,storeId,disposition,createdAt,id])
 }

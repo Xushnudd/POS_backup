@@ -124,8 +124,8 @@ export default function ProductsPage() {
       !formData.name ||
       !formData.sku ||
       !formData.barcode ||
-      !formData.costPrice || Number(formData.costPrice) < 0 ||
-      !formData.salePrice || Number(formData.salePrice) < 0
+      !/^\d+(?:\.\d{1,6})?$/.test(formData.costPrice.trim()) ||
+      !/^\d+(?:\.\d{1,2})?$/.test(formData.salePrice.trim())
     ) {
       notifyError('Barcha majburiy maydonlarni to‘ldiring; tannarx va sotuv narxi manfiy bo‘lmagan bo‘lsin');
       return;
@@ -140,9 +140,9 @@ export default function ProductsPage() {
         barcode: formData.barcode.trim(),
         categoryId: formData.categoryId || undefined,
         unit: formData.unit,
-        costPrice: Number(formData.costPrice),
-        salePrice: Number(formData.salePrice),
-        minStock: parseFloat(formData.minStock) || 0,
+        costPrice: formData.costPrice.trim(),
+        salePrice: formData.salePrice.trim(),
+        minStock: formData.minStock.trim() || '0',
       };
 
       if (editingProduct) {
@@ -402,6 +402,7 @@ export default function ProductsPage() {
               step="0.000001"
               placeholder="8000"
               value={formData.costPrice}
+              disabled={!!editingProduct&&role!=='owner'}
               onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
               required
             />

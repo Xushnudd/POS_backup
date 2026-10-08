@@ -1,6 +1,6 @@
 # Bajarish statusi
 
-Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
+Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
 ## Checkpoint
 
@@ -71,7 +71,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | RET-01.01 | CORE-1 | done | Original chek bo‘yicha to‘liq va qisman qaytarish. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | RET-01.02 | CORE-1 | done | Oldingi qaytarishlarni hisobga olish; sotilganidan ko‘p qaytarishni taqiqlash. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | RET-01.03 | CORE-1 | in_progress | Chegirma va soliqni qaytarilayotgan qatorga to‘g‘ri taqsimlash. | Internal return service + UI, receipt allocation, cash/debt conservation, retry tests | Disposition UI, repayment-channel policy, tax snapshot, manager approval acceptance |
-| RET-01.04 | CORE-1 | in_progress | Tovar omborga qaytadimi, brak omborigami yoki hisobdan chiqadimi — aniq tanlash. | Per-item sellable/damaged/write_off UI, paginated scoped return history with frozen item names, transactional refund/stock/replay tests | Dedicated damaged-stock warehouse/location remains |
+| RET-01.04 | CORE-1 | done | Sellable/brak/write_off; alohida filial DamageLocation va immutable disposition journal/qoldiq. | Migration036/037; scoped UI/API/CSV; frozen cost; replay/rollback integration; uch-browser acceptance | Repair/release va general reservation INV-02 doirasida ochiq |
 | RET-01.05 | CORE-1 | done | Naqd/karta/nasiya aralash savdoda pul va qarzning qaytarish tartibini belgilash. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | RET-01.06 | EXTERNAL-LATER | deferred | Provayder orqali refund, uning kutish/xato holati va takror so‘rovdan himoya. | ADR-002: foydalanuvchi hozir implementatsiya qilmaslikni belgiladi; vendor contract taxmin qilinmaydi | Alohida topshiriq va rasmiy contract/uskuna tayyor bo‘lganda |
 | RET-01.07 | CORE-1 | done | Sabab, vakolat, tasdiqlovchi, qaytarma chek va audit. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -82,7 +82,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | CAT-01.04 | CORE-1 | todo | Birlik konvertatsiyasi: 1 quti = 12 dona; asosiy birlikda qoldiq, hujjatda savdo birligi. | — | — |
 | CAT-01.05 | CORE-1 | in_progress | Kasr bilan sotish, birlik aniqligi, tarozi barkodidan vazn/narx ajratish. | Existing unit precision/service guard; complete manager paginated unit management/search/CSV | Scale-barcode parsing requires approved format; real scale hardware external-later |
 | CAT-01.06 | CORE-1 | todo | Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx. | — | — |
-| CAT-01.07 | CORE-1 | todo | Narx tarixi va ommaviy o‘zgartirish; tannarx uchun alohida ruxsat. | — | — |
+| CAT-01.07 | CORE-1 | done | Avtomatik narx tarixi; 100lik reviewed atomic batch; cost edit/history/export alohida owner vakolati. | Migration035/037; prices service/UI; expected-price/hash/audit/replay; lost response + exact six-decimal browser test | Katta katalog alohida tasdiqlangan batchlarda; eski chek snapshotlari saqlanadi |
 | CAT-01.08 | CORE-1 | in_progress | Excel/CSV import, oldindan ko‘rish, dublikat/xato qatorlar hisoboti, eksport. | Full filtered active catalog CSV with primary/additional barcodes, Decimal prices/cost, formula protection, tenant/role/cap/rate limit and UI | CSV/XLSX import preview/duplicate/error workflow and XLSX export remain |
 | CAT-01.09 | CORE-1 | todo | Soliq turi, MXIK va markirovka xususiyatlari tegishli tovar uchun. | — | — |
 | INV-01.01 | CORE-1 | done | Har bir o‘zgarish uchun hujjat va ombor harakati; bevosita qoldiqni almashtirishni taqiqlash. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
@@ -952,3 +952,32 @@ Yangi so‘rov baseline **98 done**, maqsad **118 done**. Hozir **1 ta yangi ban
 - Logs `/tmp/pos-twenty-c-{integration,proof,e2e,migrate,fresh,typecheck,lint,build}.log`; doimiy dalil versioned source/tests/migration.
 
 Full FinancialAccount/expense/transfer, supplier qarz/to‘lov va xarid zanjiri, tax snapshots va katalogning boshqa featurelari ochiq. CRM-01.03 manual Payment journalining original store/smena/usul/qabul qiluvchisini saqlash doirasida qabul qilingan; tashqi bank solishtirish yoki Click tasdig‘i bajarildi degan da’vo yo‘q.
+
+## plus-2 — yakuniy qabul (2026-10-08)
+
+Ushbu +2 so‘rov baseline **99 done**, maqsad **101 done**. **RET-01.04 va CAT-01.07 qabul qilindi: 99 → 101 done**. PLAN1 checkboxlari va asosiy ID tracker bir xil101; tarixiy checkpoint/subtasklar yangi vazifa sifatida qayta sanalmadi. Bu butun loyiha yoki tashqi pilot tugadi degani emas.
+
+| ID | Tekshirilgan kirish va kutilgan natija | Haqiqiy natija / doimiy dalil |
+| --- | --- | --- |
+| CAT-01.07 | Ikki mahsulot preview, narx eskirishi, original hash tasdig‘i, parallel original key, cost role/export, late audit failure, lost acknowledgement/reload/temporary replay deny, 90071992547409.123456 cost | Preview writes0; bir stale row butun batchni rollback qiladi; key replay history2/audit1; payload conflict rad. Eski chek100 va original cost40 o‘zgarmadi. Admin sale edit200, manual cost edit/history/export403; katalog CSV cost ustunisiz; cashier history403, foreign product404. History immutable. Audit failure narx/history/Operationni to‘liq rollback qildi. Uch browserda unknown intent/retry deny original keyni saqladi, salePrice history1, katta6-decimal cost aniq saqlandi. prices.ts/routes/price UI; reports-finance integration; E2E Reviewed price batch… |
+| RET-01.04 | Completed sale6; damaged2+1, disposal1, sellable1; original cost50dan katalog999ga o‘zgargan; preview/replay, branch scopes, journal/location tamper, late audit failure | Preview location/journal yozmaydi. Damaged qoldiq3 bitta filial locationida, write_off1 location null; available faqat sellable1. Entry snapshot cost50 va Frozen nomi; same-key duplicate yo‘q. Owner/assigned admin200; cashier403, foreign store404, unassigned admin empty. Location identity va journal update/delete rad. Late audit failure return/location/entry/refund/payment/Operationni rollback qildi. Three-browser journal + original40 cost acceptance. returns/service; dispositions route/UI; migrations036/037; reports-finance integration |
+
+### Texnologiya va doira
+
+- Mavjud Next/Prisma/PostgreSQL/IndexedDB ishlatildi; vendor SDK, yangi queue yoki fake provider yozilmadi. Price bulk1–100 unique mahsulot atomic transaction, katta katalog alohida reviewed batchlarda (ADR-029). Global million-row transaction yoki background worker bajarildi degan da’vo yo‘q.
+- PostgreSQL trigger barcha haqiqiy price/cost o‘zgarishini tutadi; manual edit/bulk actor/source va audit, boshqa tizim cost hisobida source database/actor null. Migration baseline eski narx tarixini taxmin qilmaydi. Cost cheklovi manual catalog edit/history va katalog/history eksporti uchun owner-only; adminning mavjud financial read vakolati saqlangan. Admin product edit cost readonly; Decimal qiymatlar formadan satr bo‘lib yuboriladi.
+- Damaged uchun alohida location va qaytarilgan physical balance; write_off disposal journal. General location/reservation va repair/release INV-02 bandlari alohida ochiq. Sahifa yig‘masi faqat sahifadagi product/store juftliklariga tegishli va ularning barcha matching yozuvlarini jamlaydi; butun katalog yig‘masi deb ko‘rsatilmaydi.
+- Prisma journal relationlari SQL FK/delete/update qoidalariga mos; kelajakdagi generated migrationlar ularni tasodifan olib tashlamasligi uchun inverse relationlar explicit yozilgan. Migration037 history tenant/actor va location immutable identityni himoyalaydi; readiness035–037 markerlarini talab qiladi.
+
+### Yakuniy tekshiruv va versiya
+
+- Git HEAD `bbf07d6318e8d53defb80704f41e73806dd0c3a5` + joriy ishchi daraxt. AI commit/deploy qilinmagan. Node24 / Next16.3.8 / Prisma5.22.
+- `npm run typecheck`, `npm run lint`, disconnected build-only DATABASE_URL va HTTPS APP_ORIGIN bilan `npm run build`: exit0; `/tmp/pos-plus2-{typecheck,lint,build}.log`.
+- `npm test`:27/27, fail/skipped/todo0; `/tmp/pos-plus2-unit.log`. Sandbox faqat7 faylni sanagan natija qabul dalili sifatida ishlatilmadi; actual Node test ijrosi qayta tekshirildi.
+- Final client bilan isolated pos_test `npm run test:integration`:121/121, fail/skipped/todo0; `/tmp/pos-plus2-integration.log`.
+- Broad uch-browser E2E45/48: uchta yangi test Next route announcer bilan ambiguous alert locator sabab yiqildi. Locator to‘g‘rilandi; yangi cost batch uchun alohida sabab kiritish test qadami ham tuzatildi. **Eng yangi build bilan final `npm run test:e2e -- --grep 'Reviewed price batch|catalog management'`:6/6** (2×Chromium/Firefox/WebKit), exit0; `/tmp/pos-plus2-e2e-accepted.log`. Broad48/48 qayta o‘tdi degan da’vo yo‘q. Qolgan45 scenario broad run’da o‘tdi; o‘zgargan katalog va yangi price/disposition oqimlari final6 bilan tekshirildi.
+- `bash scripts/ops/test-migrations.sh`:37 migrations fresh va legacy fixtures, exit0; `/tmp/pos-plus2-migrations.log`. Legacy baseline2 (oldValue null/source migration_baseline) va damaged/write_off2 original date2026-01-15/cost0.5/name Fixture bilan saqlandi. Avvalgi allocation/debt/barcode/unit natijalari ham saqlandi. Return fixture parent/items bitta transactionda, existing immutable-history guard chetlab o‘tilmadi.
+- Fedora WebKit uchun ICU74/JPEG8 faqat /tmp test browser kutubxona katalogiga qo‘yildi; tizim paketlari o‘zgartirilmadi. Database suite, migrations va browser mutating sinovlari ketma-ket bajarildi. Haqiqiy biznes bazasiga tegilmadi.
+- `git diff --check`:exit0. Vaqtinchalik loglar doimiy artefakt emas; qayta ijro manbasi versioned source/tests/migrations/scripts.
+
+Source **297 fayl**, SHA256 `b4a57610f6eafe20587cb4581047a90d731659d2490f52ee85dc5eace702e925`: src/tests/prisma/scripts .ts/.tsx/.sql/.prisma/.cjs/.mjs/.sh; sorted relative path+NUL+bytes+NUL, docs alohida.
