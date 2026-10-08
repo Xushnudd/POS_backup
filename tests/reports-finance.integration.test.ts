@@ -36,6 +36,61 @@ async function fixture(quantity=10,openingCash=0){
  return {org,store,register,shift,product,draft,...owner}
 }
 
+test('Mixed manual cash/card/debt refunds preview exact channels, require proof and conserve repeated partial/full refunds',async()=>{
+ const f=await fixture(3),customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Mixed customer',phone:randomUUID(),creditLimit:1000}});
+ const draft=await createDraft(f.context,{...f.draft,customerId:customer.id,items:[{productId:f.product.id,quantity:3,discountAmount:0}]},randomUUID());
+ await completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:90},{paymentType:'card',amount:60},{paymentType:'credit',amount:150}]},randomUUID());
+ const input=returnSchema.parse({operationId:randomUUID(),shiftId:f.shift.id,reason:'One unit returned',items:[{saleItemId:draft.items[0].id,quantity:1}]});
+ const before=await prisma.operation.count({where:{organizationId:f.org.id}});
+ const preview=await returnSale(f.context,draft.id,input,true);
+ assert.deepEqual(Object.fromEntries(Object.entries(preview.settlement).map(([key,value])=>[key,value.toString()])),{cash:'30',card:'20',transfer:'0',debt:'50',waived:'0'});
+ assert.equal(await prisma.operation.count({where:{organizationId:f.org.id}}),before);assert.equal(await prisma.saleReturn.count({where:{saleId:draft.id}}),0);
+ await assert.rejects(()=>returnSale(f.context,draft.id,input),error=>error instanceof Error&&'code' in error&&error.code==='EXTERNAL_REFUND_REQUIRED');
+ assert.equal(await prisma.payment.count({where:{saleId:draft.id,direction:'out'}}),0);
+ const stringify=(value:typeof preview.settlement)=>Object.fromEntries(Object.entries(value).map(([key,amount])=>[key,amount.toString()])) as Record<'cash'|'card'|'transfer'|'debt'|'waived',string>;
+ const confirmed={...input,manualNonCash:{confirmed:true as const,referenceNo:'BANK-REFUND-20',expectedSettlement:stringify(preview.settlement)}};
+ const first=await returnSale(f.context,draft.id,confirmed);await returnSale(f.context,draft.id,confirmed);
+ assert.equal(first.settlement.card.toString(),'20');assert.equal(await prisma.saleReturn.count({where:{saleId:draft.id}}),1);
+ const remaining={...input,operationId:randomUUID(),items:[{...input.items[0],quantity:2}]};
+ await assert.rejects(()=>returnSale(f.context,draft.id,{...remaining,manualNonCash:confirmed.manualNonCash}),error=>error instanceof Error&&'code' in error&&error.code==='REFUND_ALLOCATION_CHANGED');
+ const finalPreview=await returnSale(f.context,draft.id,remaining,true);
+ await assert.rejects(()=>returnSale(f.context,draft.id,{...remaining,operationId:randomUUID(),manualNonCash:{confirmed:true,referenceNo:'BANK-REFUND-20',expectedSettlement:stringify(finalPreview.settlement)}}));
+ assert.equal(await prisma.saleReturn.count({where:{saleId:draft.id}}),1);
+ await returnSale(f.context,draft.id,{...remaining,manualNonCash:{confirmed:true,referenceNo:'BANK-REFUND-40',expectedSettlement:stringify(finalPreview.settlement)}});
+ const out=await prisma.payment.findMany({where:{saleId:draft.id,direction:'out'}});
+ assert.equal(out.filter(p=>p.paymentType==='cash').reduce((sum,p)=>sum.add(p.amount),new (await import('@prisma/client')).Prisma.Decimal(0)).toString(),'90');
+ assert.equal(out.filter(p=>p.paymentType==='card').reduce((sum,p)=>sum.add(p.amount),new (await import('@prisma/client')).Prisma.Decimal(0)).toString(),'60');
+ assert.ok(out.filter(p=>p.paymentType==='card').every(p=>p.status==='recorded'&&p.referenceNo?.startsWith('BANK-REFUND-')));
+ assert.equal((await prisma.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString(),'0');
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'3');
+});
+
+test('Supplier terms and bank requisites validate, survive archive/restore, export safely and remain tenant/role scoped',async()=>{
+ const f=await fixture(),foreign=await fixture(),cashier=await actor(f.org.id,f.store.id,'cashier');
+ const {POST,GET}=await import('@/app/api/suppliers/route'),{PUT,GET:detail}=await import('@/app/api/suppliers/[id]/route');
+ const data={organizationId:f.org.id,name:'Terms supplier',phone:'998900000000',tin:'operator-supplied',bankName:'Test bank',bankAccount:'opaque-test-account',paymentTerms:'=30 days after acceptance'};
+ const created=await POST(req('/suppliers',f.cookie,data),undefined);assert.equal(created.status,200);const supplier=(await created.json()).data,params={params:Promise.resolve({id:supplier.id})};
+ assert.equal(supplier.paymentTerms,data.paymentTerms);assert.equal(supplier.bankAccount,data.bankAccount);
+ assert.equal((await POST(req('/suppliers',f.cookie,{...data,bankAccount:'x'.repeat(129)}),undefined)).status,400);
+ assert.equal((await POST(req('/suppliers',cashier.cookie,data),undefined)).status,403);
+ assert.equal((await detail(req('/suppliers/'+supplier.id,foreign.cookie),params)).status,404);
+ const put=(body:unknown)=>new NextRequest('http://localhost:3000/api/suppliers/'+supplier.id,{method:'PUT',headers:{cookie:f.cookie,origin:'http://localhost:3000','content-type':'application/json'},body:JSON.stringify(body)});
+ assert.equal((await PUT(put({isActive:false}),params)).status,200);assert.equal((await PUT(put({isActive:true}),params)).status,200);
+ assert.equal((await prisma.supplier.findUniqueOrThrow({where:{id:supplier.id}})).paymentTerms,data.paymentTerms);
+ const exported=await GET(req('/suppliers?organizationId='+f.org.id+'&format=csv',f.cookie),undefined),csv=(await exported.json()).data.content;
+ assert.match(csv,/Bank hisob raqami/);assert.match(csv,/opaque-test-account/);assert.match(csv,/'=30 days after acceptance/);
+ await assert.rejects(()=>prisma.supplier.update({where:{id:supplier.id},data:{paymentTerms:'x'.repeat(2001)}}));
+});
+
+test('Provider provenance cannot pass the manual refund boundary even when its journal is recorded',async()=>{
+ const f=await fixture(0),sale=await posted(f,new Date());
+ await prisma.payment.create({data:{organizationId:f.org.id,storeId:f.store.id,shiftId:f.shift.id,saleId:sale.id,paymentType:'card',direction:'in',amount:'20',receivedBy:f.user.id,status:'recorded',sourceType:'provider'}});
+ const input=returnSchema.parse({operationId:randomUUID(),shiftId:f.shift.id,reason:'Provider journal is not manual',items:[{saleItemId:sale.items[0].id,quantity:2}]});
+ await assert.rejects(()=>returnSale(f.context,sale.id,input,true),error=>error instanceof Error&&'code' in error&&error.code==='EXTERNAL_REFUND_REQUIRED');
+ await assert.rejects(()=>returnSale(f.context,sale.id,{...input,manualNonCash:{confirmed:true,referenceNo:'Operator-proof-is-not-provider-confirmation',expectedSettlement:{cash:'0',card:'20',transfer:'0',debt:'0',waived:'0'}}}),error=>error instanceof Error&&'code' in error&&error.code==='EXTERNAL_REFUND_REQUIRED');
+ assert.equal(await prisma.saleReturn.count({where:{saleId:sale.id}}),0);assert.equal(await prisma.payment.count({where:{saleId:sale.id,direction:'out'}}),0);assert.equal(await prisma.inventoryMovement.count({where:{organizationId:f.org.id}}),0);
+});
+
 test('Staff archive preserves financial history, revokes sessions and restores only to blocked state',async()=>{
  const {updateMember}=await import('@/server/users/service')
  const f=await fixture(),staff=await actor(f.org.id,f.store.id,'cashier')

@@ -184,3 +184,22 @@ Release drill archives RELEASE_BASE (default HEAD^) application source without e
 SEC-02.02 CSRF tanlovi: existing exact Origin + Sec-Fetch-Site + JSON-only + SameSite=Lax browser boundary saqlangan. Alohida double-submit CSRF token kiritilmadi: browser cross-origin JSON preflight/CORS va Origin tekshiruvi bilan rad, form content-type rad. Origin yo‘q automation so‘rovi kuchli opaque session cookie talab qiladi. Testlar foreign/null Origin, cookie flags, idle/absolute expiry, revoke va bearer fallback radini tekshiradi; bu transport qoidasi api.md bilan mos.
 
 2026-10-07 qabul aniqligi: cashier training matnli yo‘riqnoma va organization/user-scoped React mashqi orqali bajariladi. BigInt qaytim arifmetikasi real sale/payment/inventory yozmaydi; iqtisodiy demo tenant seed o‘rniga mashq holati hisob/biznes o‘zgarganda reset qilinadi. Automated browser fixtureda yangi cashier mashqdan so‘ng isolated haqiqiy POS checkoutni bajaradi; human pilot yoki video yaratilgan deb ko‘rsatilmaydi. Packaged non-root worker qabulini `node scripts/ops/test-worker.mjs` qayta bajaradi (`docker build -t pos-app:twenty-test .` va isolated test DB talab qilinadi).
+
+
+## ADR-026 — qo‘lda bank settlement qayd etilishi va scoped quick presets (2026-10-07)
+
+Qo‘lda recorded payment qaytarmasi original payment/collection kanalida yuritiladi. Naqd, karta, transfer, outstanding debt va written-off liability alohida exact buckets; oldingi refundlar ayriladi, oxirgi cent qoldig‘i conservation bilan yopiladi. Operator noncash uchun oldindan server preview, aynan shu expectedSettlement va haqiqiy hujjat raqamini beradi. Bank/provider API chaqirilmaydi, recorded holat provider confirmation hisoblanmaydi. Boshqa provider statusi shu yo‘ldan o‘tolmaydi. Proofsiz/stale/duplicate-reference holat butun transactionni rad etadi; original Operation key replay saqlanadi. Migration031 duplicate reference + status/proof invariantini bazada ham himoya qiladi.
+
+Quick presets faqat ID; organization/user/register local key,12 ta limit; narx/ruxsat har tanlashda serverda qayta olinadi. Keyboard Enter debounce qidiruviga ishonmaydi. Auth response uchun case/snake-case credential deny defense qo‘shildi, financial operator DTO faqat id/fullName, tashkilot nested stores assigned branch bilan; xodimlar owner-only.
+
+Supplier bank rekvizitlari va tijoriy shartlar opaque foydalanuvchi metadata sifatida qo‘shildi (nullable migration032); bank format/protokoli taxmin qilinmadi. Bu supplier payment/debt ledgerning o‘rnini bosmaydi.
+
+
+### ADR-027 — To‘lov manbasi operator tasdig‘idan mustaqil
+
+Migration033 `Payment.sourceType`ni `manual/provider` bilan chegaralaydi. Hozirgi to‘rtta ichki payment constructor manbani serverda explicit `manual` belgilaydi. Kelajakdagi trusted provider posting alohida implementatsiya talab qiladi; `status=recorded` yoki operator hujjati provider refund uchun yetarli emas. Provider kelib chiqishidagi original/qarz-undirish to‘lovi qo‘lda refund boundaryda rad etiladi. Bu o‘zgarish Click API yoki taxminiy vendor protokolini qo‘shmaydi.
+
+
+### ADR-028 — Manual collection kanalini saqlash va hujjatni qayta ishlatmaslik
+
+Debt collection naqd/karta/o‘tkazma journalini explicit tanlaydi. Card uchun operatorning haqiqatda bajarilgan to‘lov tasdig‘i va original hujjat talab qilinadi; bank API taxmin qilinmaydi. Existing transfer API callers buzilmaydi, lekin UI bank/karta tasdiq/hujjat bilan ishlaydi. Organization/channel/document lock va migration034 unique index disjoint customer parallel so‘rovlarini ham himoyalaydi. Card/transfer cash drawer totaliga qo‘shilmaydi. Original payment/debt allocation/smena/receiver va Operation payload saqlanadi. Full FinancialAccount/transfer/expense funksiyalari FIN-02 bandlarida ochiq; bu implementatsiya alohida bank statement reconciliation yoki provider callback o‘rnini bosmaydi.

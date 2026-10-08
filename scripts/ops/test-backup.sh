@@ -2,7 +2,7 @@
 set -euo pipefail
 backup_smoke_dir=$(mktemp -d /tmp/pos-backup-smoke.XXXXXX)
 restore_db="pos_restore_test_$(date +%s)"
-fixture_id="backup_count_$(date +%s)_$RANDOM"
+fixture_id=$(node -e 'process.stdout.write(require("node:crypto").randomUUID())')
 cleanup() {
  docker exec -i pos-plan-test-db psql -U pos_test -d pos_test -v fixture="$fixture_id" >/dev/null <<'SQL'
 DELETE FROM "Organization" WHERE id=:'fixture';
@@ -71,6 +71,7 @@ backup_file=$(find "$BACKUP_DIRECTORY" -name '*.gpg' -print -quit)
 docker exec pos-plan-test-db createdb -U pos_test "$restore_db"
 export RESTORE_DATABASE_URL="postgresql://pos_test:local-test-only@127.0.0.1:55439/$restore_db"
 export RESTORE_CONFIRM_DATABASE="$restore_db"
+restore_started=$(date +%s)
 scripts/ops/restore.sh "$backup_file"
 restored_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d "$restore_db" -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 source_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d pos_test -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
@@ -85,6 +86,11 @@ SELECT amount::text || ':' || "sourceType" || ':' || to_char("effectiveAt",'YYYY
 SQL
 )
 [[ "$restored_debt" == '3.75:opening_debt:2026-01-01:2026-02-01' ]]
+node node_modules/typescript/bin/tsc -p tsconfig.test.json
+DATABASE_URL="$RESTORE_DATABASE_URL" RESTORE_FIXTURE_ID="$fixture_id" node --require ./scripts/test-resolver.cjs scripts/ops/verify-restored-app.mjs
+restore_elapsed=$(($(date +%s)-restore_started))
+[[ "$restore_elapsed" -le 7200 ]]
+printf 'PASS: isolated fixture restore RTO_seconds=%s fixture_RPO_loss=0; hosting schedule/SLA not measured\n' "$restore_elapsed"
 
 
 if scripts/ops/restore.sh "$backup_file"; then

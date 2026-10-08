@@ -120,7 +120,7 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
       await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id],unitCost:product.costPrice}})
       await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
     }
-    for (const p of input.payments) await tx.payment.create({data:{organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
+    for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange},include:{items:true,payments:true}})
     await audit(tx,context,'Sale',sale.id,'completed',{totalAmount:sale.totalAmount,payments:input.payments,cashTendered:tender,cashChange})
     return updated

@@ -260,6 +260,14 @@ test('Bank debt collection never turns into an automatic cash refund',async()=>{
  assert.equal(await prisma.saleReturn.count({where:{saleId:sale.id}}),0)
  assert.equal(await prisma.payment.count({where:{saleId:sale.id,direction:'out',paymentType:'cash'}}),0)
  assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'0')
+ const input={operationId:randomUUID(),shiftId:f.shift.id,reason:'Actual bank settlement',items:[{saleItemId:sale.items[0].id,quantity:1,disposition:'sellable' as const}]};
+ const preview=await returnSale(f.context,sale.id,input,true);
+ assert.equal(preview.settlement.transfer.toString(),'100');assert.equal(preview.settlement.cash.toString(),'0');assert.equal(preview.settlement.debt.toString(),'0');
+ const manualNonCash={confirmed:true as const,referenceNo:'BANK-COLLECTION-REFUND-'+randomUUID(),expectedSettlement:{cash:'0',card:'0',transfer:'100',debt:'0',waived:'0'}};
+ await returnSale(f.context,sale.id,{...input,manualNonCash});await returnSale(f.context,sale.id,{...input,manualNonCash});
+ assert.equal(await prisma.saleReturn.count({where:{saleId:sale.id}}),1);assert.equal(await prisma.payment.count({where:{saleId:sale.id,direction:'out',paymentType:'cash'}}),0);
+ assert.equal((await prisma.payment.findFirstOrThrow({where:{saleId:sale.id,direction:'out',paymentType:'transfer'}})).amount.toString(),'100');
+ assert.equal((await prisma.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString(),'0');
 })
 
 test('Cancellation tombstone blocks delayed draft posting; a committed draft keeps manager-only cancellation',async()=>{
@@ -795,3 +803,26 @@ test('A child edit waiting for checkout cannot change the newly posted receipt',
  await posting;assert.equal((await edit).rejected,true)
  assert.equal((await prisma.saleItem.findUniqueOrThrow({where:{id:draft.items[0].id}})).productName,'P')
 })
+
+
+test('Manual card debt collection requires proof, preserves cash, allocates original debt and replays once',async()=>{
+ const f=await fixture(),customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Manual card debtor',phone:randomUUID(),creditLimit:1000}});
+ const sale=await createDraft(f.context,{...f.draft,customerId:customer.id},randomUUID());
+ await completeSale(f.context,sale.id,{payments:[{paymentType:'credit',amount:'100'}]},randomUUID());
+ const input={organizationId:f.org.id,storeId:f.store.id,customerId:customer.id,shiftId:f.shift.id,operationId:randomUUID(),amount:'30',paymentType:'card' as const,referenceNo:'MANUAL-CARD-DOCUMENT'};
+ await assert.rejects(()=>collectDebt(f.context,input),{code:'MANUAL_PAYMENT_PROOF_REQUIRED'});
+ assert.equal(await prisma.payment.count({where:{customerId:customer.id,paymentType:'card'}}),0);
+ const confirmed={...input,manualConfirmed:true};
+ const [a,b]=await Promise.all([collectDebt(f.context,confirmed),collectDebt(f.context,confirmed)]);assert.equal(a.id,b.id);assert.equal(a.sourceType,'manual');assert.equal(a.status,'recorded');assert.equal(a.referenceNo,input.referenceNo);
+ assert.equal((await prisma.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString(),'70');
+ assert.equal(await prisma.debtEntry.count({where:{customerId:customer.id,saleId:sale.id,sourceType:'collection'}}),1);
+ const payments=await prisma.payment.findMany({where:{shiftId:f.shift.id}});
+ const {shiftCashSummary}=await import('@/server/finance/shifts');assert.equal(shiftCashSummary('0',payments,[]).expectedCash.toString(),'0');
+ await assert.rejects(()=>collectDebt(f.context,{...confirmed,operationId:randomUUID(),amount:'71'}),{code:'DEBT_OVERPAYMENT'});
+ await assert.rejects(()=>collectDebt(f.context,{...confirmed,operationId:randomUUID(),amount:'10'}),{code:'MANUAL_PAYMENT_DOCUMENT_REUSED'});
+ assert.equal((await prisma.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString(),'70');
+ assert.equal(await prisma.payment.count({where:{customerId:customer.id,paymentType:'card'}}),1);
+ const debtors=await Promise.all([0,1].map(async()=>{const debtor=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Proof concurrency',phone:randomUUID()}});await prisma.debtEntry.create({data:{organizationId:f.org.id,customerId:debtor.id,sourceType:'opening_debt',sourceId:randomUUID(),amount:'10',actorId:f.user.id}});return debtor;}));
+ const raced=await Promise.allSettled(debtors.map(debtor=>collectDebt(f.context,{...confirmed,customerId:debtor.id,operationId:randomUUID(),referenceNo:'SAME-BANK-DOCUMENT',amount:'10'})));
+ assert.equal(raced.filter(result=>result.status==='fulfilled').length,1);const rejected=raced.find(result=>result.status==='rejected');assert.ok(rejected&&rejected.status==='rejected');assert.equal(rejected.reason.code,'MANUAL_PAYMENT_DOCUMENT_REUSED');assert.equal(await prisma.payment.count({where:{organizationId:f.org.id,referenceNo:'SAME-BANK-DOCUMENT'}}),1);
+});

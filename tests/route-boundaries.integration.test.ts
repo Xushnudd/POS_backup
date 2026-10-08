@@ -12,6 +12,15 @@ const orgs:string[]=[],users:string[]=[];after(async()=>{await prisma.organizati
 async function account(role:string){const org=await prisma.organization.create({data:{name:'Route matrix',phone:randomUUID()}});orgs.push(org.id);const user=await prisma.user.create({data:{fullName:'Matrix actor',phone:randomUUID(),passwordHash:'not-a-login'}});users.push(user.id);await prisma.organizationUser.create({data:{organizationId:org.id,userId:user.id,role}});const token=randomBytes(32).toString('base64url');await prisma.session.create({data:{organizationId:org.id,userId:user.id,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});return {org,user,cookie:'pos_session='+token}}
 function routes(dir:string):string[]{return readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?routes(join(dir,entry.name)):entry.name==='route.ts'?[join(dir,entry.name)]:[])}
 const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/health/live','/api/health/ready'])
+test('Readiness requires the active manual-refund and supplier migration contract, without leaking dependency details',async()=>{
+ const {GET}=await import('../src/app/api/health/ready/route');
+ assert.equal((await GET()).status,200);
+ try{
+  await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NOW() WHERE migration_name='202610070031_manual_refund_proof'`;
+  const response=await GET();assert.equal(response.status,503);assert.deepEqual(await response.json(),{status:'unavailable'});
+ }finally{await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NULL WHERE migration_name='202610070031_manual_refund_proof'`}
+ assert.equal((await GET()).status,200);
+});
 type Handler=(request:NextRequest,context:{params:Promise<Record<string,string>>})=>Promise<Response>
 test('Every exported protected API handler rejects unauthenticated, foreign tenant and foreign branch requests',async()=>{
  const own=await account('owner'),cashier=await account('cashier'),admin=await account('admin'),foreign=await account('owner')
@@ -54,6 +63,43 @@ test('Positive scoped reads cover API groups alongside exhaustive negative handl
   const route=await import(compiled) as {GET:Handler}
   const request=new NextRequest('http://localhost:3000/api/'+path+'?organizationId='+own.org.id+'&storeId='+store.id+(path.endsWith('/labels')?'&barcodeId='+barcode.id:''),{headers:{cookie:own.cookie}})
   const response=await route.GET(request,{params:Promise.resolve({id:path.includes(product.id)?product.id:customer.id})})
-  assert.equal(response.status,200,path+' owner scoped allow')
+   assert.equal(response.status,200,path+' owner scoped allow')
+  const content=await response.text();
+  assert.doesNotMatch(content,/"(?:passwordHash|tokenHash|resetToken|secret|apiKey|privateKey|clientSecret|accessToken|refreshToken|sessionToken)"\s*:/i,path+' response credentials');
+  assert.ok(!content.includes('not-a-login'),path+' password canary');
  }
 })
+
+test('Organization nested stores/staff and shift operator DTOs respect branch and private-field boundaries',async()=>{
+ const own=await account('owner'),cashier=await account('cashier');
+ const allowed=await prisma.store.create({data:{organizationId:own.org.id,name:'Allowed nested store'}}),hidden=await prisma.store.create({data:{organizationId:own.org.id,name:'Hidden nested store'}});
+ const member=await prisma.organizationUser.create({data:{organizationId:own.org.id,userId:cashier.user.id,role:'cashier',userStores:{create:{storeId:allowed.id}}}});
+ const token=randomBytes(32).toString('base64url');
+ await prisma.session.create({data:{organizationId:own.org.id,userId:cashier.user.id,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});
+ const register=await prisma.register.create({data:{storeId:allowed.id,name:'DTO register',code:'DTO'}});
+ const shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}});
+ const request=(path:string,cookie='pos_session='+token)=>new NextRequest('http://localhost:3000/api/'+path,{headers:{cookie}});
+ const organizations=await import('../src/app/api/organizations/[id]/route');
+ const result=await organizations.GET(request('organizations/'+own.org.id),{params:Promise.resolve({id:own.org.id})});assert.equal(result.status,200);
+ const body=await result.json();assert.deepEqual(body.data.stores.map((store:{id:string})=>store.id),[allowed.id]);assert.deepEqual(body.data.users,[]);assert.ok(!JSON.stringify(body).includes(hidden.id));
+ const owner=await organizations.GET(request('organizations/'+own.org.id,own.cookie),{params:Promise.resolve({id:own.org.id})});const ownerData=await owner.json();assert.equal(ownerData.data.stores.length,2);assert.ok(ownerData.data.users.length>=2);assert.ok(!JSON.stringify(ownerData).includes('not-a-login'));
+ const shifts=await import('../src/app/api/shifts/[id]/route');
+ const response=await shifts.GET(request('shifts/'+shift.id),{params:Promise.resolve({id:shift.id})});assert.equal(response.status,200);
+ const operator=(await response.json()).data.organizationUser.user;
+ assert.deepEqual(Object.keys(operator).sort(),['fullName','id']);assert.equal(operator.id,cashier.user.id);
+});
+
+test('Keyboard identifiers preserve exact SKU/name lookup, reject ambiguity and leave barcode/camera lookup strict',async()=>{
+ const own=await account('owner'),foreign=await account('owner');
+ const product=await prisma.product.create({data:{organizationId:own.org.id,name:'Exact keyboard name',sku:'Exact-SKU',barcode:randomUUID(),unit:'dona',salePrice:'1.01',costPrice:'0.50'}});
+ const {GET}=await import('../src/app/api/products/route');
+ const query=(key:string,value:string,organizationId=own.org.id)=>new NextRequest('http://localhost:3000/api/products?'+new URLSearchParams({organizationId,[key]:value}),{headers:{cookie:own.cookie}});
+ for(const value of ['Exact-SKU','exact-sku','exact keyboard name']){const result=await GET(query('identifier',value),undefined);assert.equal(result.status,200);assert.equal((await result.json()).data.id,product.id)}
+ assert.equal((await GET(query('barcode','Exact-SKU'),undefined)).status,404);
+ for(const partial of ['Exact','Exact-S_U','exact keyboard nam_','%%'])assert.equal((await GET(query('identifier',partial),undefined)).status,404);
+ assert.equal((await GET(query('identifier','Exact-SKU',foreign.org.id),undefined)).status,403);
+ await prisma.product.create({data:{organizationId:own.org.id,name:product.name,sku:'Other-SKU',barcode:randomUUID(),unit:'dona',salePrice:'9.99',costPrice:'1'}});
+ assert.equal((await GET(query('identifier',product.name),undefined)).status,409);
+ assert.equal((await GET(query('identifier','x'.repeat(201)),undefined)).status,400);
+ assert.equal(await prisma.sale.count({where:{organizationId:own.org.id}}),0);
+});

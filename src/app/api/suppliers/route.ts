@@ -15,6 +15,9 @@ const createSupplierSchema = z.object({
   tin: z.string().max(64).optional(),
   address: z.string().max(500).optional(),
   note: z.string().max(2000).optional(),
+  bankName: z.string().trim().max(200).optional(),
+  bankAccount: z.string().trim().max(128).optional(),
+  paymentTerms: z.string().trim().max(2000).optional(),
 })
 
 async function handleGET(request: NextRequest) {
@@ -58,7 +61,7 @@ async function handleGET(request: NextRequest) {
       const total=await tx.supplier.count({where})
       if(exporting&&total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
       const rows=await tx.supplier.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],...(!exporting&&paginated?{skip:(page-1)*limit,take:limit}:{})})
-      if(exporting)return {success:true,data:{filename:'suppliers-'+payload.organizationId+'.csv',content:csv([['ID','Nomi','Telefon','STIR','Manzil','Izoh','Faol'],...rows.map(row=>[row.id,row.name,row.phone,row.tin,row.address,row.note,row.isActive?'ha':'yo‘q'])])}}
+      if(exporting)return {success:true,data:{filename:'suppliers-'+payload.organizationId+'.csv',content:csv([['ID','Nomi','Telefon','STIR','Manzil','Izoh','Bank','Bank hisob raqami','To‘lov/yetkazish shartlari','Faol'],...rows.map(row=>[row.id,row.name,row.phone,row.tin,row.address,row.note,row.bankName,row.bankAccount,row.paymentTerms,row.isActive?'ha':'yo‘q'])])}}
       return {success:true,data:rows,...(paginated?{pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}:{})}
     },{isolationLevel:'RepeatableRead'})
     return NextResponse.json(result)

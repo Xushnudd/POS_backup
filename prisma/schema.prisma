@@ -20,6 +20,9 @@ model Organization {
   receiptFooter    String?
   createdAt        DateTime @default(now())
   
+  priceHistory     ProductPriceHistory[]
+  damageLocations DamageLocation[]
+  dispositions ReturnDispositionEntry[]
   stockCounts      StockCount[]
   units            Unit[]
   productBarcodes  ProductBarcode[]
@@ -94,6 +97,7 @@ model OrganizationUser {
 }
 
 model Store {
+  damageLocations DamageLocation[]
   incidents Incident[]
   stockThresholds StockThreshold[]
   id             String   @id @default(uuid())
@@ -162,6 +166,7 @@ model Category {
 }
 
 model Product {
+  priceHistory ProductPriceHistory[]
   stockThresholds StockThreshold[]
   id             String   @id @default(uuid())
   organizationId String
@@ -222,6 +227,9 @@ model Supplier {
   tin            String?
   address        String?
   note           String?
+  bankName       String?
+  bankAccount    String?
+  paymentTerms   String?
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -455,6 +463,7 @@ model SaleItem {
 }
 
 model Payment {
+  sourceType     String @default("manual") // manual journal versus a future trusted provider posting
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
@@ -766,4 +775,50 @@ model StockThreshold {
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
  @@unique([storeId,productId])
  @@index([organizationId,storeId])
+}
+
+model ProductPriceHistory {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ field String
+ oldValue Decimal? @db.Decimal(20,6)
+ newValue Decimal @db.Decimal(20,6)
+ productName String
+ sku String
+ actorId String?
+ source String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ @@index([organizationId,productId,createdAt,id])
+}
+model DamageLocation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String @unique
+ name String @default("Brak qaytarmalari")
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ entries ReturnDispositionEntry[]
+}
+model ReturnDispositionEntry {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ returnItemId String @unique
+ locationId String?
+ disposition String
+ quantity Decimal @db.Decimal(20,6)
+ unitCost Decimal @db.Decimal(20,6)
+ productName String
+ sku String
+ unit String?
+ actorId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ location DamageLocation? @relation(fields:[locationId],references:[id])
+ @@index([organizationId,storeId,disposition,createdAt,id])
 }

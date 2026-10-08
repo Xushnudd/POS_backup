@@ -60,7 +60,7 @@ async function handleGET(
 
     return NextResponse.json({
       success: true,
-      data: product,
+      data: {...product,unitPrecision:(await db.unit.findFirst({where:{organizationId:payload.organizationId,code:product.unit}}))?.precision??6},
     })
 
   } catch (error) {

@@ -29,6 +29,10 @@ export default function SaleDetailPage() {
   const [returnQty,setReturnQty]=useState<Record<string,string>>({});
   const [returnDisposition,setReturnDisposition]=useState<Record<string,'sellable'|'damaged'|'write_off'>>({});
   const [reason,setReason]=useState('');
+  const [manualNonCash,setManualNonCash]=useState(false);
+  const [manualReference,setManualReference]=useState('');
+  const [preview,setPreview]=useState<{fingerprint:string;value:{cash:string;card:string;transfer:string;debt:string;waived:string}}|null>(null);
+  const [previewing,setPreviewing]=useState(false);
   const [returning,setReturning]=useState(false);
   const returnAttempt=useRef<Parameters<typeof api.sales.returns>[1]|null>(null);
   const [returnUnknown,setReturnUnknown]=useState(false);
@@ -57,7 +61,7 @@ export default function SaleDetailPage() {
           const {saleId,...payload}=saved.payload;
           if(saleId!==id||payload.operationId!==saved.id)throw new Error('Saqlangan qaytarish mos emas');
           const input=payload as Parameters<typeof api.sales.returns>[1];
-          returnAttempt.current=input;setReturnQty(Object.fromEntries(input.items.map(item=>[item.saleItemId,String(item.quantity)])));setReturnDisposition(Object.fromEntries(input.items.map(item=>[item.saleItemId,item.disposition])));setReason(input.reason);setReturnUnknown(true);setReturnOpen(true);
+          returnAttempt.current=input;setReturnQty(Object.fromEntries(input.items.map(item=>[item.saleItemId,String(item.quantity)])));setReturnDisposition(Object.fromEntries(input.items.map(item=>[item.saleItemId,item.disposition])));setReason(input.reason);setManualNonCash(!!input.manualNonCash);setManualReference(input.manualNonCash?.referenceNo??'');setReturnUnknown(true);setReturnOpen(true);
         }
         setLocalReady(true);
       }catch(error){if(!cancelled)setLocalError(error instanceof Error?error.message:'Lokal qaytarish yuklanmadi');}
@@ -101,25 +105,36 @@ export default function SaleDetailPage() {
     if(!sale||!organization||!user||!localReady||returning)return;
     const wasRetry=!!returnAttempt.current;
     if(!wasRetry&&!activeShift){notifyError('Qaytarish uchun ochiq smena kerak');return;}
-    const selected=sale.items.filter(item=>Number(returnQty[item.id??'']??0)>0).map(item=>({saleItemId:item.id!,quantity:Number(returnQty[item.id!]),disposition:returnDisposition[item.id!]??'sellable'}));
+    const selected=sale.items.filter(item=>Number(returnQty[item.id??'']??0)>0).map(item=>({saleItemId:item.id!,quantity:(returnQty[item.id!]??'0').replace(/^\./,'0.').replace(/\.$/,''),disposition:returnDisposition[item.id!]??'sellable'}));
     if (!selected.length || reason.trim().length<2) {notifyError('Miqdor va qaytarish sababini kiriting');return;}
-    returnAttempt.current ??= {operationId:crypto.randomUUID(),shiftId:activeShift!.id,reason,items:selected};setReturning(true);
+    if(!wasRetry&&manualNonCash&&manualReference.trim().length<3){notifyError('Bank qaytarmasining haqiqiy hujjat raqamini kiriting');return;}
+    if(!wasRetry&&manualNonCash&&preview?.fingerprint!==JSON.stringify({saleId:sale.id,shiftId:activeShift!.id,reason,items:selected})){notifyError('Avval qaytariladigan summalarni serverda hisoblang. Miqdor yoki sabab o‘zgarsa qayta hisoblang.');return;}
+    returnAttempt.current ??= {operationId:crypto.randomUUID(),shiftId:activeShift!.id,reason,items:selected,...(manualNonCash?{manualNonCash:{confirmed:true as const,referenceNo:manualReference.trim(),expectedSettlement:preview!.value}}:{})};setReturning(true);
     try {
       await enqueue({id:returnAttempt.current.operationId,scope:{organizationId:organization.id,userId:user.id,deviceId:deviceId()},type:'sale.return',payload:{saleId:sale.id,...returnAttempt.current},state:'pending',createdAt:new Date().toISOString()});
       const result=await api.sales.returns(sale.id,returnAttempt.current);
       await acknowledge(returnAttempt.current.operationId,'synced',result.data);
-      returnAttempt.current=null;setReturnUnknown(false);setReturnOpen(false);setReturnQty({});setReturnDisposition({});setReason('');
+      returnAttempt.current=null;setReturnUnknown(false);setReturnOpen(false);setReturnQty({});setReturnDisposition({});setReason('');setManualNonCash(false);setManualReference('');setPreview(null);
       setReturnVersion(value=>value+1);
       const response=await api.sales.get(sale.id);if(response.data)setSale(response.data);
       notifySuccess('Qaytarish qayd etildi');
     } catch(error) {
       setReturnUnknown(true);
-      if(!wasRetry&&returnAttempt.current&&error instanceof ApiError&&['VALIDATION_ERROR','RETURN_QUANTITY_EXCEEDED','DUPLICATE_ITEM','INVALID_SHIFT','EXTERNAL_REFUND_REQUIRED','DEBT_ALLOCATION_REQUIRED','DEBT_RECONCILIATION_REQUIRED','INVALID_STATUS'].includes(error.code??'')){
+      if(!wasRetry&&returnAttempt.current&&error instanceof ApiError&&['VALIDATION_ERROR','RETURN_QUANTITY_EXCEEDED','DUPLICATE_ITEM','INVALID_SHIFT','EXTERNAL_REFUND_REQUIRED','REFUND_ALLOCATION_CHANGED','DEBT_ALLOCATION_REQUIRED','DEBT_RECONCILIATION_REQUIRED','INVALID_STATUS'].includes(error.code??'')){
         try{await acknowledge(returnAttempt.current.operationId,'rejected',undefined,error.code);returnAttempt.current=null;setReturnUnknown(false);}catch{notifyError('Lokal natija saqlanmadi; asl amalni qayta tekshiring');}
       }
       notifyError(error instanceof Error?error.message:'Qaytarish amalga oshmadi');
     }
     finally{setReturning(false);}
+  };
+  const calculateReturnPreview=async()=>{
+    if(!sale||!activeShift||returnUnknown||returning||previewing)return;
+    const items=sale.items.filter(item=>Number(returnQty[item.id??'']??0)>0).map(item=>({saleItemId:item.id!,quantity:(returnQty[item.id!]??'0').replace(/^\./,'0.').replace(/\.$/,''),disposition:returnDisposition[item.id!]??'sellable'}));
+    const data={operationId:crypto.randomUUID(),shiftId:activeShift.id,reason,items};
+    setPreviewing(true);
+    try{const response=await api.sales.returnPreview(sale.id,data);if(response.data)setPreview({fingerprint:JSON.stringify({saleId:sale.id,shiftId:activeShift.id,reason,items}),value:response.data.settlement});}
+    catch(error){setPreview(null);notifyError(error instanceof Error?error.message:'Qaytarma hisoblanmadi');}
+    finally{setPreviewing(false);}
   };
 
   if (isLoading) {
@@ -150,6 +165,11 @@ export default function SaleDetailPage() {
             <Select id={`return-disposition-${item.id}`} label={`${item.productName}: qaytarilgan tovar holati`} disabled={returning||returnUnknown} value={returnDisposition[item.id!]??'sellable'} options={[{value:'sellable',label:'Sotiladigan qoldiqqa qaytarish'},{value:'damaged',label:'Brak — sotiladigan qoldiqqa qo‘shilmaydi'},{value:'write_off',label:'Hisobdan chiqarish — sotiladigan qoldiqqa qo‘shilmaydi'}]} onChange={e=>setReturnDisposition(values=>({...values,[item.id!]:e.target.value as 'sellable'|'damaged'|'write_off'}))}/>
           </div>)}
           <Input label="Sabab" disabled={returning||returnUnknown} value={reason} onChange={e=>setReason(e.target.value)}/>
+          <Button variant="outline" disabled={!activeShift||returning||returnUnknown||previewing} onClick={calculateReturnPreview}>Qaytariladigan summalarni hisoblash</Button>
+          {preview&&<p role="status">Hisoblangan taqsimot: naqd {preview.value.cash}, karta {preview.value.card}, bank {preview.value.transfer}, qarz {preview.value.debt}, hisobdan chiqarilgan qarz {preview.value.waived}. Miqdor o‘zgarsa qayta hisoblang.</p>}
+          <label className="flex gap-2"><input type="checkbox" checked={manualNonCash} disabled={returning||returnUnknown} onChange={e=>setManualNonCash(e.target.checked)}/>Qo‘lda qayd etilgan karta/bank to‘lovining qaytariladigan qismini tashqarida haqiqatda qaytardim</label>
+          {manualNonCash&&<Input label="Bank qaytarmasi hujjat raqami" maxLength={200} disabled={returning||returnUnknown} value={manualReference} onChange={e=>setManualReference(e.target.value)}/>}
+          <p>Tashqarida bajarilgan bank qaytarmasini haqiqiy hujjat asosida qayd eting. Naqd qismi kassadan, bank qismi o‘z kanalidan, qolgan nasiya esa qarzdan kamayadi.</p>
           <p className="text-xs text-slate-500">Faqat sotilgan va hali qaytarilmagan miqdor qabul qilinadi. Naqd/nasiya hisobini server original chekdan hisoblaydi.</p>
           <p className="text-xs text-slate-500">Brak va hisobdan chiqarilgan tovar qaytarish hujjatida qayd etiladi; alohida brak omboriga ko‘chirilmaydi.</p>
           {returnUnknown&&<p role="status">Oldingi qaytarish natijasi tekshirilishi kerak. Asl miqdor, holat va smena saqlangan.</p>}

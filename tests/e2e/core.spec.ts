@@ -23,6 +23,25 @@ test.afterAll(async()=>{
  await db.user.deleteMany({where:{id:{in:users}}})
  await db.$disconnect()
 })
+test('Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests',async({page})=>{
+ const phone='998'+Date.now();phones.push(phone);
+ const registration=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Refund owner',phone,password:'test-only-password',organizationName:'Manual refund business'}});expect(registration.ok()).toBe(true);
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),member=await db.organizationUser.findFirstOrThrow({where:{organizationId:me.organization.id,userId:me.user.id}});
+ const shift=await db.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Manual refund item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}});
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}});
+ const draftResponse=await page.request.post('/api/sales',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}});expect(draftResponse.ok()).toBe(true);const sale=(await draftResponse.json()).data;
+ expect((await page.request.post(`/api/sales/${sale.id}/complete`,{headers:{Origin:'https://localhost:3100'},data:{payments:[{paymentType:'cash',amount:60},{paymentType:'card',amount:40}]}})).ok()).toBe(true);
+ const external:string[]=[];page.on('request',request=>{if(!new URL(request.url()).hostname.includes('localhost'))external.push(request.url())});
+ await page.goto(`/sales/${sale.id}`);await page.getByRole('button',{name:'Qaytarish',exact:true}).click();const dialog=page.getByRole('dialog');
+ await dialog.getByLabel('Manual refund item',{exact:true}).fill('1');await dialog.getByLabel('Sabab',{exact:true}).fill('Confirmed physical return');await dialog.getByRole('button',{name:'Qaytariladigan summalarni hisoblash',exact:true}).click();
+ await expect(dialog.getByRole('status')).toContainText('naqd 60, karta 40, bank 0, qarz 0');
+ expect(await db.saleReturn.count({where:{saleId:sale.id}})).toBe(0);expect(await db.payment.count({where:{saleId:sale.id,direction:'out'}})).toBe(0);
+ await dialog.getByRole('checkbox',{name:'Qo‘lda qayd etilgan karta/bank to‘lovining qaytariladigan qismini tashqarida haqiqatda qaytardim'}).check();await dialog.getByLabel('Bank qaytarmasi hujjat raqami',{exact:true}).fill('BANK-'+randomUUID());
+ await dialog.getByRole('button',{name:'Qaytarishni tasdiqlash',exact:true}).click();await expect(dialog).not.toBeVisible();
+ const payments=await db.payment.findMany({where:{saleId:sale.id,direction:'out'}});expect(payments).toHaveLength(2);expect(payments.find(row=>row.paymentType==='cash')?.amount.toString()).toBe('60');expect(payments.find(row=>row.paymentType==='card')?.amount.toString()).toBe('40');expect(payments.find(row=>row.paymentType==='card')?.status).toBe('recorded');
+ expect(await db.saleReturn.count({where:{saleId:sale.id}})).toBe(1);expect(external).toEqual([]);
+});
 test('Production HTTPS: register, open shift, restore local basket and sell cash exactly once',async({page,browserName})=>{
  await page.addInitScript(()=>{window.print=()=>{};})
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message))
@@ -56,7 +75,13 @@ test('Production HTTPS: register, open shift, restore local basket and sell cash
  await page.keyboard.press('F2');await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toBeFocused()
  await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('no-such-product')
  await page.keyboard.press('F4');await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toHaveValue('')
- await page.getByRole('heading',{name:'Browser coffee',exact:true}).click()
+ await page.getByRole('button',{name:'Browser coffee — tezkor ro‘yxat',exact:true}).click()
+ await expect(page.getByRole('region',{name:'Tezkor mahsulotlar'})).toBeVisible()
+ await page.reload()
+ await expect(page.getByRole('button',{name:'Browser coffee — tezkor',exact:true})).toBeVisible()
+ // Keyboard-wedge input arriving before the 300ms search debounce must use exact lookup.
+ await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('BROWSER')
+ await page.keyboard.press('Enter')
  await expect(page.getByRole('button',{name:"To'lovga o'tish"})).toBeEnabled()
  // Wait for IndexedDB commit rather than an arbitrary UI delay.
  await expect.poll(()=>page.evaluate(async()=>{
@@ -423,7 +448,7 @@ test('Production HTTPS: catalog management, supplier purchase history and comple
  await page.getByLabel('Yetkazib beruvchi',{exact:true}).selectOption(supplier.id);await page.getByLabel('Mahsulot',{exact:true}).selectOption(product.id);await page.getByRole('button',{name:'Xaridni filtrlash',exact:true}).click()
  await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).not.toContain('BROWSER-DRAFT')
  await page.getByLabel('Xarid tahlili ko‘rinishi',{exact:true}).selectOption('comparison');await page.getByRole('button',{name:'Xaridni filtrlash',exact:true}).click();await expect(page.getByRole('columnheader',{name:'Vaznli o‘rtacha',exact:true})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).toContain('2.000000')
- await page.goto('/suppliers');await page.getByRole('link',{name:'Browser history supplier',exact:true}).click();await expect(page.getByRole('heading',{name:'Yetkazib beruvchi kartasi',exact:true})).toBeVisible();await expect(page.getByText('Sof xarid qiymati: 4 UZS',{exact:true})).toBeVisible();await expect(page.getByText('Supplierga to‘langan pul yoki qarz hisobi emas;',{exact:false})).toBeVisible();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();const historyCsv=await downloadText('Supplier tarixini CSV yuklash');expect(historyCsv).toContain('BROWSER-REVERSED');expect(historyCsv).toContain('"-2.000000"')
+ await page.goto('/suppliers');await page.getByRole('row').filter({hasText:'Browser history supplier'}).getByRole('button',{name:'Tahrirlash',exact:true}).click();await page.getByLabel('Bank nomi',{exact:true}).fill('Browser bank');await page.getByLabel('Bank hisob raqami',{exact:true}).fill('browser-opaque-account');await page.getByLabel('To‘lov va yetkazish shartlari',{exact:true}).fill('30 days after acceptance');await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();await page.getByRole('link',{name:'Browser history supplier',exact:true}).click();await expect(page.getByText('Bank: Browser bank',{exact:true})).toBeVisible();await expect(page.getByText('Hisob raqami: browser-opaque-account',{exact:true})).toBeVisible();await expect(page.getByText('To‘lov va yetkazish shartlari: 30 days after acceptance',{exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Yetkazib beruvchi kartasi',exact:true})).toBeVisible();await expect(page.getByText('Sof xarid qiymati: 4 UZS',{exact:true})).toBeVisible();await expect(page.getByText('Supplierga to‘langan pul yoki qarz hisobi emas;',{exact:false})).toBeVisible();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();const historyCsv=await downloadText('Supplier tarixini CSV yuklash');expect(historyCsv).toContain('BROWSER-REVERSED');expect(historyCsv).toContain('"-2.000000"')
  await page.getByLabel('Hujjat raqami',{exact:true}).fill('CURRENT');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toHaveCount(1);expect((await downloadText('Supplier tarixini CSV yuklash')).includes('BROWSER-DRAFT')).toBe(false)
  await page.goto('/inventory');await page.getByLabel('Mahsulot, SKU yoki barkod',{exact:true}).fill('catalog');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await page.getByText('Faqat kam qolganlar',{exact:true}).click();await expect(page.getByRole('row').filter({hasText:'Browser catalog product'})).toBeVisible();const balanceCsv=await downloadText('Qoldiqlarni CSV yuklash');expect(balanceCsv).toContain('"2.000000","3.000000","1.000000","2.000000","4.00"')
  await page.getByRole('button',{name:'Hujjatlar (Kirim/Tuzatish)',exact:false}).click();await page.getByLabel('Hujjat raqamini qidirish',{exact:true}).fill('BROWSER');await page.getByLabel('Hujjat holati filtri',{exact:true}).selectOption('confirmed');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();expect(await downloadText('Hujjatlarni CSV yuklash')).toContain('BROWSER-CURRENT')
@@ -690,12 +715,26 @@ test('Training is isolated from real money and keyboard-only payment modal traps
  await page.goto('/register');await page.getByLabel('Ism va Familiya').fill('Keyboard Owner');await page.getByLabel('Telefon raqam',{exact:true}).fill(phone);await page.getByLabel("Do'kon yoki Biznes nomi").fill('Keyboard POS');await page.getByLabel(/Parol \(/).fill('test-only-password');await page.getByRole('button',{name:'Hisob yaratish va Boshlash'}).click();await expect(page).toHaveURL(/\/dashboard$/)
  const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
  await page.goto('/training');await page.getByRole('button',{name:'Mashq mahsulotini qo‘shish',exact:true}).click();await page.getByRole('button',{name:'Mashq to‘loviga o‘tish',exact:true}).click();await page.getByLabel('Mashqda berilgan naqd',{exact:true}).fill('15000');await expect(page.getByText('Qaytim: 5000 so‘m',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Faqat mashqni yakunlash',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Mashq yakunlandi'})).toBeVisible();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.payment.count({where:{organizationId:me.organization.id}})).toBe(0)
- const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Keyboard item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Keyboard item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:4}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:3}})
  await page.goto('/pos');const open=page.getByRole('button',{name:'Smenani ochish',exact:true});await expect(page.getByRole('button',{name:'Keyboard item — savatga qo‘shish',exact:true})).toBeVisible();await open.press('Enter');await page.getByRole('dialog').getByRole('button',{name:'Smenani ochish',exact:true}).press('Enter');await expect(page.getByRole('dialog')).not.toBeVisible()
  await page.keyboard.press('F2');const catalogRefresh=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/products'&&new URL(response.url()).searchParams.get('search')==='Keyboard item');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('Keyboard item');const tile=page.getByRole('button',{name:'Keyboard item — savatga qo‘shish',exact:true});await tile.focus();await page.keyboard.press('Enter');await tile.focus();await expect(tile).toBeFocused();await expectReadableText(tile.locator('span,h4'));await page.keyboard.press('F9');const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await expect.poll(()=>page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true);await expectReadableText(dialog.locator('label,button,span'));await catalogRefresh;await expect(page.locator('[data-focus-key]').filter({hasText:'Keyboard item'})).toBeAttached()
  for(let i=0;i<12;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true)}
  await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(tile).toBeFocused()
  expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0)
+ // Complete a fresh checkout with keyboard-wedge input and keyboard actions only.
+ const alias='KEYBOARD-'+randomUUID();
+ expect((await page.request.post(`/api/products/${product.id}/barcodes`,{headers:{Origin:'https://localhost:3100'},data:{value:alias}})).ok()).toBe(true)
+ const wrongIdentifier=page.waitForResponse(response=>new URL(response.url()).searchParams.get('identifier')==='NOT-A-BARCODE');
+ const wrongScan=page.waitForResponse(response=>new URL(response.url()).searchParams.get('barcode')==='NOT-A-BARCODE');
+ await page.keyboard.press('F2');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('NOT-A-BARCODE');await page.keyboard.press('Enter');await wrongScan;await wrongIdentifier;await expect(page.getByRole('status').filter({hasText:'Barkod tekshirilmoqda'})).not.toBeVisible();await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toHaveValue('NOT-A-BARCODE')
+ let releaseScan:(()=>void)|undefined;
+ await page.route('**/api/products?*',async route=>{if(new URL(route.request().url()).searchParams.get('barcode')===alias)await new Promise<void>(resolve=>{releaseScan=resolve});await route.continue()});
+ await page.keyboard.press('F2');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill(alias);await page.keyboard.press('Enter');await expect.poll(()=>Boolean(releaseScan)).toBe(true);
+ await page.keyboard.press('F9');await expect(dialog).not.toBeVisible();await expect(page.getByText('Avval mahsulot tekshiruvi tugashini kuting',{exact:true})).toBeVisible();releaseScan!();
+ await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toHaveValue('');await page.unroute('**/api/products?*');await page.keyboard.press('F2');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('keyboard item');await page.keyboard.press('Enter');await expect(page.getByLabel('POS mahsulot qidirish',{exact:true})).toHaveValue('')
+ await page.keyboard.press('F9');await expect(dialog).toBeVisible();await dialog.getByLabel("Mijoz bergan naqd pul (so'm)").focus();await page.keyboard.insertText('30');await dialog.getByRole('button',{name:/Savdoni yakunlash/}).focus();await page.keyboard.press('Enter')
+ await expect.poll(()=>db.sale.count({where:{organizationId:me.organization.id,status:'completed'}})).toBe(1)
+ const final=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(final.items).toHaveLength(1);expect(final.items[0].quantity.toString()).toBe('3');expect(final.payments).toHaveLength(1);expect(final.totalAmount.toString()).toBe('30')
 })
 
 test('Sync conflict requires manager terminal proof and keeps the original local and server payloads',async({page})=>{
@@ -719,3 +758,24 @@ test('Sync conflict requires manager terminal proof and keeps the original local
  await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish',exact:true}).click();await page.getByRole('button',{name:'Rahbar dalilini lokal navbatga saqlash',exact:true}).click();await expect(page.getByRole('article').filter({hasText:id}).first()).toContainText('rejected')
  expect((await db.syncReview.findUniqueOrThrow({where:{id:review.id}})).payload).toEqual(payload);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.inventoryMovement.count({where:{sourceId:draft.id}})).toBe(0);expect(await db.auditLog.count({where:{entityId:review.id,action:'sync_review_resolved'}})).toBe(1)
 })
+
+
+test('Debt collection UI records exact cash/card/transfer channels with manual document proof',async({page})=>{
+ const phone='998'+Date.now();phones.push(phone);
+ const registration=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Collection owner',phone,password:'test-only-password',organizationName:'Debt channels business'}});expect(registration.ok()).toBe(true);
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),member=await db.organizationUser.findFirstOrThrow({where:{organizationId:me.organization.id,userId:me.user.id}});
+ const shift=await db.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Debt channel item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}}),customer=await db.customer.create({data:{organizationId:me.organization.id,fullName:'Channel customer',phone:randomUUID(),creditLimit:1000}});
+ await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:1}});
+ const draftResponse=await page.request.post('/api/sales',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,customerId:customer.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}});expect(draftResponse.ok()).toBe(true);const sale=(await draftResponse.json()).data;
+ expect((await page.request.post(`/api/sales/${sale.id}/complete`,{headers:{Origin:'https://localhost:3100'},data:{payments:[{paymentType:'credit',amount:100}]}})).ok()).toBe(true);
+ await page.goto(`/customers/${customer.id}`);
+ for(const channel of ['cash','card','transfer']){
+  await page.getByRole('button',{name:'Qarzni undirish',exact:true}).click();const modal=page.getByRole('dialog');
+  await modal.getByLabel("To'lov summasi (so'm) *",{exact:true}).fill('30');await modal.getByLabel('Undirish usuli',{exact:true}).selectOption(channel);
+  if(channel!=='cash'){await modal.getByLabel('To‘lov hujjati raqami',{exact:true}).fill('DEBT-'+randomUUID());await modal.getByRole('checkbox',{name:'To‘lov haqiqatan bajarilganini tasdiqlayman'}).check();}
+  await modal.getByRole('button',{name:'Tasdiqlash',exact:true}).click();await expect(modal).not.toBeVisible();
+ }
+ const payments=await db.payment.findMany({where:{customerId:customer.id,note:'debt_collection'}});expect(payments).toHaveLength(3);for(const channel of ['cash','card','transfer']){const payment=payments.find(row=>row.paymentType===channel);expect(payment?.amount.toString()).toBe('30');expect(payment?.sourceType).toBe('manual');expect(payment?.shiftId).toBe(shift.id);}
+ expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString()).toBe('10');
+});

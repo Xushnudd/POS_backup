@@ -1,0 +1,33 @@
+// Read-only application acceptance against the disposable restored database.
+import assert from 'node:assert/strict';
+import {randomBytes} from 'node:crypto';
+import {createRequire} from 'node:module';
+const url=new URL(process.env.DATABASE_URL??'');
+if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.username!=='pos_test'||!/^\/pos_restore_test_\d+$/.test(url.pathname))throw new Error('Disposable restored database required');
+const fixture=process.env.RESTORE_FIXTURE_ID;
+if(!fixture||!/^[0-9a-f-]{36}$/i.test(fixture))throw new Error('Explicit test fixture required');
+const require=createRequire(import.meta.url);
+const {prisma}=require('../../.test-build/src/lib/prisma.js');
+const {sessionHash}=require('../../.test-build/src/server/auth/session.js');
+const {NextRequest}=require('next/server');
+const count=require('../../.test-build/src/app/api/stock-counts/[id]/route.js');
+const ledger=require('../../.test-build/src/app/api/customers/[id]/ledger/route.js');
+const me=require('../../.test-build/src/app/api/auth/me/route.js');
+const token=randomBytes(32).toString('base64url');
+let session;
+try {
+  const before=await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]);
+  session=await prisma.session.create({data:{organizationId:fixture,userId:fixture,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});
+  const request=path=>new NextRequest('http://localhost:3000/api/'+path,{headers:{cookie:'pos_session='+token}});
+  const context={params:Promise.resolve({id:fixture})};
+  const identity=await me.GET(request('auth/me'));assert.equal(identity.status,200);assert.equal((await identity.json()).data.organization.id,fixture);
+  const counting=await count.GET(request('stock-counts/'+fixture),context);assert.equal(counting.status,200);const restoredCount=(await counting.json()).data;
+  assert.equal(restoredCount.status,'counting');assert.equal(restoredCount.lines.length,1);assert.equal(restoredCount.lines[0].readings[0].quantity,'2');
+  const statement=await ledger.GET(request('customers/'+fixture+'/ledger'),context);assert.equal(statement.status,200);const restoredLedger=(await statement.json()).data;
+  assert.equal(restoredLedger.summary.currentBalance,'3.75');assert.equal(restoredLedger.entries[0].sourceType,'opening_debt');assert.equal(restoredLedger.entries[0].dueAt,'2026-02-01T00:00:00.000Z');
+  assert.deepEqual(await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]),before);
+  console.info('PASS: restored application authenticates scoped fixture, reads frozen count and exact historical debt/due date; economic row counts unchanged; no external calls');
+} finally {
+  if(session)await prisma.session.delete({where:{id:session.id}});
+  await prisma.$disconnect();
+}

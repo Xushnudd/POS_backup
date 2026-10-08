@@ -44,7 +44,7 @@ async function handleGET(
         organizationId: id,
       },
       include: {
-        user: true,
+        user: {select:staffSelect},
         userStores: {
           include: {
             store: true,
@@ -144,3 +144,4 @@ async function handlePOST(
 export const GET = withApi(handleGET)
 
 export const POST = withApi(handlePOST)
+import {staffSelect} from '@/server/auth/user-dto'

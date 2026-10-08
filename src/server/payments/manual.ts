@@ -21,6 +21,7 @@ export async function recordManualPayment(context: TokenPayload, input: z.infer<
       throw new AccessError(409, 'INVALID_RELATION')
     }
     const payment = await tx.payment.create({ data: {
+      sourceType: 'manual',
       organizationId: context.organizationId, storeId: input.storeId, shiftId: shift.id,
       paymentType: input.paymentType, direction: input.direction, amount: money(input.amount),
       referenceNo: input.referenceNo, note: input.note, receivedBy: context.userId, status: 'recorded',

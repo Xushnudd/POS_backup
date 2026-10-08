@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma'
 import { getRequestToken, verifySession } from './auth/session'
 import { AccessError, assertRoutePermission, tenantScope } from './auth/policy'
 import type { TokenPayload } from '@/lib/auth'
+import { sanitizeResponse } from './auth/response'
 
 const refs: Record<string, string> = {
   storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
@@ -40,14 +41,6 @@ async function validateRefs(value: unknown, context: TokenPayload): Promise<void
     if (context.role !== 'owner' && key === 'role' && id === 'owner') throw new AccessError(403,'FORBIDDEN')
     if (id && typeof id === 'object') await validateRefs(id, context)
   }
-}
-function sanitize(value: unknown, role?: string): unknown {
-  if (Array.isArray(value)) return value.map(x => sanitize(x, role))
-  if (!value || typeof value !== 'object') return value
-  return Object.fromEntries(Object.entries(value).filter(([key]) =>
-    !['passwordHash','tokenHash','password','resetToken','secret'].includes(key) &&
-    !(role === 'cashier' && ['costPrice','unitCost','profit','profitMargin','cost'].includes(key))
-  ).map(([key,val]) => [key,sanitize(val,role)]))
 }
 async function boundedBody(request: NextRequest): Promise<string> {
   const reader = request.clone().body?.getReader()
@@ -125,7 +118,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       const data = await result.json()
       if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}
       logEvent('api_response',{status:result.status,durationMs:Date.now()-started,...(data.error?.code?{code:data.error.code}:{})})
-      const response = NextResponse.json(sanitize(data, context?.role), { status: result.status, headers: result.headers })
+      const response = NextResponse.json(sanitizeResponse(data, context?.role), { status: result.status, headers: result.headers })
       response.headers.set('X-Request-Id', requestId)
       response.headers.set('Cache-Control','private, no-store')
       response.headers.set('X-Content-Type-Options','nosniff')
@@ -140,7 +133,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       }
       const guide=errorGuidance(code,message);message=guide.message
       logEvent('api_error',{status,code,durationMs:Date.now()-started})
-      return NextResponse.json({ success:false, error:{code,message,nextAction:guide.nextAction,...(error instanceof z.ZodError?{details:error.issues.map(issue=>({path:issue.path,code:issue.code,message:issue.message}))}:{}),...(error instanceof AccessError&&error.details!==undefined?{details:sanitize(JSON.parse(JSON.stringify(error.details)),'cashier')}:{})}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
+      return NextResponse.json({ success:false, error:{code,message,nextAction:guide.nextAction,...(error instanceof z.ZodError?{details:error.issues.map(issue=>({path:issue.path,code:issue.code,message:issue.message}))}:{}),...(error instanceof AccessError&&error.details!==undefined?{details:sanitizeResponse(JSON.parse(JSON.stringify(error.details)),'cashier')}:{})}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
     }
     })
   }

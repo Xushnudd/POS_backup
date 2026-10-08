@@ -67,7 +67,7 @@ async function handleGET(request: NextRequest) {
         register: true,
         organizationUser: {
           include: {
-            user: true,
+            user: {select:operatorSelect},
           },
         },
       },
@@ -135,3 +135,4 @@ async function handlePOST(request: NextRequest) {
 export const GET = withApi(handleGET)
 
 export const POST = withApi(handlePOST)
+import {operatorSelect} from '@/server/auth/user-dto'

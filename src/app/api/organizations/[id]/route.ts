@@ -42,7 +42,7 @@ async function handleGET(
       where: { id },
       include: {
         stores: {
-          where: { isActive: true },
+          where: { isActive: true, ...(payload.role!=='owner'?{id:{in:payload.storeIds}}:{}) },
           include: {
             registers: {
               where: { isActive: true },
@@ -50,8 +50,9 @@ async function handleGET(
           },
         },
         users: {
+          where: payload.role==='owner'?{}:{id:{in:[]}},
           include: {
-            user: true,
+            user: {select:staffSelect},
           },
         },
       },
@@ -137,3 +138,4 @@ async function handlePUT(
 export const GET = withApi(handleGET)
 
 export const PUT = withApi(handlePUT)
+import {staffSelect} from '@/server/auth/user-dto'

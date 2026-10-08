@@ -825,3 +825,30 @@ Aging yangi hujjatlarning original dueAtidan qolgan summani oladi. Eski nonsale 
 - GET `/sales?organizationId&status=draft&page&limit`, GET `/sales/:id` existing scoped server drafts. UI boshqa qurilmada ayni cashier+register+active shift draftini explicit ochadi, complete ayni Sale/idempotent keyga. Local-only draft server ro‘yxatida bor deb ko‘rsatilmaydi; posted sale PUT rad.
 
 Standart error `{success:false,error:{code,message,nextAction,details?},requestId}`; `X-Request-Id` ayni raqam. Validation details faqat path/code/message, input/stack emas. Body max1MiB; page≥1,limit1–200; no-store. Log allowlist event/requestId/organizationId/operationId/status/code/durationMs/kind/count; raw URL/query/body/error, auth va PII yo‘q. Shared audit helper source transaction ichida requestId va redacted JSON saqlaydi. Decimal API string; shared arithmetic50 significant digits, pul2 kasr HALF_UP, miqdor6 kasr/birlik precision, report NUMERIC aggregation. Pure tax arithmetic helper legal/business tax policy yoki real fiskal postingni yoqmaydi.
+
+
+## 2026-10-07: qo‘lda qayd etilgan bank qaytarmasi
+
+`POST /api/sales/:id/returns/preview` manager vakolati, original filial va ochiq smenani tekshiradi. Body mavjud return body bilan bir xil: `operationId`, `shiftId`, `reason`, `items`. Javob: `refundAmount` va `settlement` (`cash`, `card`, `transfer`, `debt`, `waived`), barcha summalar aniq decimal string. Preview sale/payment/stock/debt/Operation yozmaydi; 30/min actor budget bor.
+
+Original qo‘lda (`recorded`) bank/karta to‘lovi yoki bank orqali undirilgan nasiya qaytarmasi uchun return bodyga `manualNonCash: { confirmed: true, referenceNo, expectedSettlement }` qo‘shiladi. `expectedSettlement` previewdagi beshta summa; server transaction ichida qayta tekshiradi. Bu operator tashqarida haqiqatan bajargan bank qaytarmasini ichki jurnalga qayd etadi. Bank/Click API, callback yoki provider-confirmed holati yaratilmaydi. Providerning boshqa statusidagi payment shu oqim orqali tasdiqlanmaydi.
+
+Proofsiz noncash refund — `EXTERNAL_REFUND_REQUIRED`; eskirgan taqsimot — `REFUND_ALLOCATION_CHANGED`; bir xil tashkilot/kanalda ishlatilgan bank hujjati yangi key bilan ham SQL unique constraint orqali rad etiladi. Original key replay oldingi natijani beradi. Bank qismi cash ledgerga yozilmaydi. Bank amali noma’lum bo‘lsa uni takrorlash o‘rniga haqiqiy hujjat va Operation holatini tekshirish kerak.
+
+Supplier POST/PUT: optional `bankName` (200), `bankAccount` (128), `paymentTerms` (2000 belgi), trim + server/DB length check. Format yoki bank protokoli taxmin qilinmaydi; ma’lumot manager-only karta va to‘liq CSVda ko‘rinadi. Supplier qarzi/to‘lov ledgeri alohida, hali yakunlanmagan.
+
+
+### To‘lov kelib chiqishi va aniq klaviatura qidiruvi (2026-10-07)
+
+`Payment.sourceType` — `manual` yoki `provider`. Hozirgi ichki jurnal xizmatlari `manual`ni serverda belgilaydi; mijoz bu qiymatni o‘zgartira olmaydi. `recorded` holatidagi `provider` yozuvi ham qo‘lda refund qilinmaydi. Migration033 mavjud ichki jurnalni `manual` sifatida saqlaydi. Real Click posting/refund hozir implementatsiya qilinmagan.
+
+`GET /api/products?identifier=...` faol mahsulotni tashkilot ichida aniq SKU, keyin registrga bog‘liq bo‘lmagan aniq SKU/nom bilan izlaydi. `%` va `_` literal belgilar; qisman moslik emas. Bir nechta moslik `409 AMBIGUOUS_PRODUCT`, yo‘q bo‘lsa `404`; uzunlik 2–200. Kamera faqat barkod izlaydi; klaviatura Enter barkod topilmasa shu aniq qidiruvni ishlatadi. Qidiruv tugamaguncha F9/to‘lov/qoralama saqlash yopiq. Qaytarish miqdori UI dan Decimal satr sifatida yuboriladi.
+
+
+### Qarz undirish: qo‘lda karta/bank hujjati (2026-10-07)
+
+`POST /api/payments/credit`: `paymentType` = `cash` (default), `card`, `transfer`. Karta uchun `manualConfirmed:true` va 3–200 belgili `referenceNo` majburiy; aks holda400 `MANUAL_PAYMENT_PROOF_REQUIRED`. UI karta/o‘tkazma uchun tashqarida bajarilgan to‘lov tasdig‘i va hujjatni talab qiladi. Mavjud transfer API contracti saqlangan. Bu so‘rov bankdan pul yechmaydi, Click chaqirmaydi va provider tasdig‘ini yaratmaydi. Payment manbasi explicit `manual`, holati `recorded`; store/shift/receiver serverdagi jonli sessiya va smenaga bog‘liq.
+
+Bir organization/channel ichidagi nonempty trim qilingan bank hujjati debt_collection uchun bir marta ishlatiladi: advisory lock + migration034 unique expression index. Yangi operationId bilan takrorlash409 `MANUAL_PAYMENT_DOCUMENT_REUSED`; transaction payment/debtni o‘zgartirmaydi. Original key bilan qaytarilgan natija idempotent. UI birinchi aniq rad etilgan urinishni rejected qiladi; javobi noma’lum/retry urinishning original payload/key/shift/proofini saqlaydi. Naqd jurnalga faqat cash collection kiradi; card/transfer alohida Payment journalda qoladi.
+
+Migration034 mavjud takror organization/channel/reference hujjatlari bo‘lsa fail-fast qiladi; moliyaviy tarixni o‘zi o‘chirmaydi yoki birlashtirmaydi. Production rollout oldidan ma’lumot preflight va egasi bilan solishtirish kerak. Readiness034 qo‘llanmagan bo‘lsa503.

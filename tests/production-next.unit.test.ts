@@ -3,6 +3,21 @@ import assert from 'node:assert/strict'
 import {allocateMoney,debtClosingBalance,draftTotals,lineTotal,partialReturnAmount,taxAmounts} from '@/server/sales/calculations'
 import {errorGuidance} from '@/lib/error-guidance'
 import {logRecord,requestTrace,safeAudit} from '@/server/observability/context'
+import {quickProductIds,quickProductKey} from '@/lib/quick-products'
+import {sanitizeResponse} from '@/server/auth/response'
+test('API credential defense handles nested arrays, case and snake-case without dropping authorized DTO fields',()=>{
+ const value={id:'ok',phone:'customer-visible',token:'cookie-session',items:[{PasswordHash:'canary',token_hash:'canary',api_key:'canary',PRIVATE_KEY:'canary',clientSecret:'canary',access_token:'canary',refreshToken:'canary',sessionToken:'canary',costPrice:'4',profit:'6',unitPrice:'10'}]};
+ assert.deepEqual(sanitizeResponse(value,'cashier'),{id:'ok',phone:'customer-visible',token:'cookie-session',items:[{unitPrice:'10'}]});
+ assert.deepEqual(sanitizeResponse(value,'owner'),{id:'ok',phone:'customer-visible',token:'cookie-session',items:[{costPrice:'4',profit:'6',unitPrice:'10'}]});
+});
+test('Quick product preferences contain only bounded unique identifiers and isolate organization/user/register',()=>{
+ const ids=Array.from({length:15},(_,i)=>'00000000-0000-4000-8000-'+String(i).padStart(12,'0'));
+ assert.equal(quickProductIds([...ids,ids[0],'not-an-id',{price:1}]).length,12);
+ assert.deepEqual(quickProductIds({ids}),[]);
+ assert.notEqual(quickProductKey('org','user','r1'),quickProductKey('org','user','r2'));
+ assert.notEqual(quickProductKey('org','user','r1'),quickProductKey('other','user','r1'));
+ assert.notEqual(quickProductKey('org','user','r1'),quickProductKey('org','other','r1'));
+});
 test('Exact decimal strings: zero, fractional quantities, discounts and half-up ties',()=>{
  assert.equal(lineTotal('0.333333','0.03').toString(),'0.01')
  assert.equal(draftTotals([{quantity:'1',unitPrice:'999999999999.99',discountAmount:'0.01'}],'0.01').totalAmount.toString(),'999999999999.97')

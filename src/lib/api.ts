@@ -155,6 +155,7 @@ class ApiClient {
     },
 
     get: (id: string) => this.request<Product>(`/products/${id}`),
+    findByIdentifier: (organizationId:string,identifier:string) => this.request<Product>(`/products?${new URLSearchParams({organizationId,identifier})}`),
 
     findByBarcode: (organizationId: string, barcode: string) => {
       const query = new URLSearchParams({ organizationId, barcode });
@@ -249,7 +250,8 @@ class ApiClient {
       }),
 
     returnHistory: (id:string,page=1) => this.request<SaleReturnHistory[]>(`/sales/${id}/returns?page=${page}&limit=20`),
-    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number;disposition:'sellable'|'damaged'|'write_off'}[]}) =>
+    returnPreview: (id:string,data:{operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off'}[]}) => this.request<{refundAmount:string;settlement:{cash:string;card:string;transfer:string;debt:string;waived:string}}>(`/sales/${id}/returns/preview`,{method:'POST',body:JSON.stringify(data)}),
+    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;manualNonCash?:{confirmed:true;referenceNo:string;expectedSettlement:{cash:string;card:string;transfer:string;debt:string;waived:string}};items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off'}[]}) =>
       this.request(`/sales/${id}/returns`, {method:'POST',body:JSON.stringify(data)}),
 
     void: (id: string) =>
@@ -471,6 +473,8 @@ class ApiClient {
       amount: number | string;
       shiftId: string;
       operationId: string;
+      paymentType?: 'cash' | 'card' | 'transfer';
+      manualConfirmed?: boolean;
       referenceNo?: string;
       note?: string;
       allocations?:{saleId:string|null;debtOriginId?:string;amount:string}[];

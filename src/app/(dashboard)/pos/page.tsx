@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -10,6 +10,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { api, ApiError } from '@/lib/api';
 import { posFailure, type PosFailure } from '@/lib/pos-failure';
 import { clientLine } from '@/lib/money';
+import { quickProductKey } from '@/lib/quick-products';
 import Modal from '@/components/ui/Modal';
 import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, acknowledgeRecovered, markCancelled, synchronize } from '@/lib/offline';
 import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
@@ -67,10 +68,16 @@ export default function PosPage() {
 
   const connection=usePosConnection();
   const debouncedSearch = useDebounce(searchQuery, 300);
+  const catalogRequest = useRef(0);
+  const actorScope = organization?.id+':'+user?.id+':'+activeRegister?.id;
+  const liveActor = useRef(actorScope);
+  const lookupCount = useRef(0);
+  useLayoutEffect(() => {liveActor.current=actorScope;}, [actorScope]);
 
   // Load products
   const loadProducts = useCallback(async () => {
     if (!organization?.id) return;
+    const requestNumber=++catalogRequest.current;
     setIsLoadingProducts(true);
     try {
       const res = await api.products.list({
@@ -79,15 +86,15 @@ export default function PosPage() {
         categoryId: selectedCategoryId || undefined,
         limit: 50,
       });
-      if (res.data) {
+      if (res.data && catalogRequest.current===requestNumber) {
         setProducts(res.data);
       }
     } catch (err: unknown) {
-      console.error('Error loading products:', err);
+      if(catalogRequest.current===requestNumber)notifyError(err instanceof Error?err.message:'Mahsulotlarni yuklash amalga oshmadi');
     } finally {
-      setIsLoadingProducts(false);
+      if(catalogRequest.current===requestNumber)setIsLoadingProducts(false);
     }
-  }, [organization, debouncedSearch, selectedCategoryId]);
+  }, [organization, debouncedSearch, selectedCategoryId, notifyError]);
 
   // Load initial data (categories and customers)
   useEffect(() => {
@@ -108,6 +115,7 @@ export default function PosPage() {
 
   // Check if shift is open
   const handleProceedToPayment = () => {
+    if(lookupCount.current>0){notifyError('Avval mahsulot tekshiruvi tugashini kuting');return;}
     if (!activeShift) {
       setIsOpenShiftModalOpen(true);
       notifyError('Savdo qilish uchun avval smenani ochishingiz zarur!');
@@ -121,11 +129,19 @@ export default function PosPage() {
     setIsPaymentModalOpen(true);
   };
 
-  const handleCameraBarcode = async (barcode: string) => {
-    if (!organization?.id) return;
+  const handleCameraBarcode = async (barcode: string, allowCatalogIdentifier=false) => {
+    if (!organization?.id || !localReady || hasPendingCheckout || isProcessingPayment) return;
+    const originalActor=actorScope;
+    lookupCount.current++;
 
     try {
-      const response = await api.products.findByBarcode(organization.id, barcode);
+      let response;
+      try {response = await api.products.findByBarcode(organization.id, barcode);}
+      catch(error){
+        if(!allowCatalogIdentifier||!(error instanceof ApiError)||error.code!=='NOT_FOUND')throw error;
+        response=await api.products.findByIdentifier(organization.id,barcode);
+      }
+      if(liveActor.current!==originalActor)return;
       if (!response.data) {
         notifyError('Barkod bo‘yicha mahsulot topilmadi');
         return;
@@ -136,7 +152,21 @@ export default function PosPage() {
       notifySuccess(`${response.data.name} savatga qo‘shildi`);
     } catch (error: unknown) {
       notifyError(error instanceof Error ? error.message : 'Barkod bo‘yicha mahsulot topilmadi');
+    } finally {
+      lookupCount.current--;
     }
+  };
+
+  const handleQuickProduct = async (id: string) => {
+    if (!localReady || hasPendingCheckout || isProcessingPayment) return;
+    lookupCount.current++;
+    try {
+      const response = await api.products.get(id);
+      if(liveActor.current!==actorScope)return;
+      if (!response.data?.isActive) {notifyError('Mahsulot arxivlangan. Tezkor ro‘yxatdan olib tashlang.');return;}
+      addItem(response.data);
+    } catch {notifyError('Mahsulot tekshirilmadi. Internet va ruxsatni tekshirib qayta urining.');}
+    finally {lookupCount.current--;}
   };
 
   const [localReady,setLocalReady]=useState(false);
@@ -260,6 +290,7 @@ export default function PosPage() {
   const parkAttempt=useRef<{key:string;signature:string}|null>(null);
   const [parkedMessage,setParkedMessage]=useState('');
   const parkDraft=async()=>{
+    if(lookupCount.current>0){notifyError('Avval mahsulot tekshiruvi tugashini kuting');return;}
     if(!organization||!user||!activeShift||!activeStore||!activeRegister||!items.length||hasPendingCheckout||!localReady)return;
     setIsProcessingPayment(true);
     try{
@@ -392,12 +423,13 @@ export default function PosPage() {
       if(event.key==='F4'){event.preventDefault();setSearchQuery('');setSelectedCategoryId('');document.getElementById('pos-product-search')?.focus();}
       if(event.key==='F9'){
         event.preventDefault();
+        if(lookupCount.current>0){notifyError('Avval mahsulot tekshiruvi tugashini kuting');return;}
         if(!activeShift){setIsOpenShiftModalOpen(true);return;}
         if(items.length)setIsPaymentModalOpen(true);
       }
     };
     window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
-  },[localReady,isProcessingPayment,hasPendingCheckout,isPaymentModalOpen,isReceiptModalOpen,isOpenShiftModalOpen,activeShift,items.length]);
+  },[localReady,isProcessingPayment,hasPendingCheckout,isPaymentModalOpen,isReceiptModalOpen,isOpenShiftModalOpen,activeShift,items.length,notifyError]);
 
   return (
     <div data-testid="pos-touch" className="min-h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-5rem)] flex flex-col gap-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11">
@@ -446,6 +478,9 @@ export default function PosPage() {
         {/* Left: Product Catalog & Search (2 cols) */}
         <div className="lg:col-span-2 flex flex-col min-h-[320px] lg:min-h-0">
           <ProductSearch
+            quickScope={organization?.id&&user?.id&&activeRegister?.id?quickProductKey(organization.id,user.id,activeRegister.id):null}
+            onQuickSelect={handleQuickProduct}
+            onKeyboardIdentifier={value=>handleCameraBarcode(value,true)}
             products={products}
             categories={categories}
             selectedCategoryId={selectedCategoryId}

@@ -1,6 +1,6 @@
 # API vakolat va chegara reyestri
 
-2026-10-06. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir89 template va125 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
+2026-10-06. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir90 template va126 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
 
 Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/store bilan; tashkilotni tahrirlash va xodimlarni boshqarish owner-only. Cashier faqat sales/shifts/products/categories/customers/stores/auth/operations/sync; katalog/mijoz/do‘kon mutatsiyalari yopiq. `/void` manager-only. Ownership recipient GET/accept o‘z persistent requestiga ega. **Gateway allow yakuniy ruxsat emas:** return, corrections, bank deposit, settlement, export/cost, pending-close, foreign actor va branch cheklovlari xizmat ichida ham tekshiriladi. UI yashirish himoya o‘rnini bosmaydi.
 
@@ -62,6 +62,7 @@ Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/st
 | /api/sales/[id]/complete | POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/sales/[id]/print-requests | POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/sales/[id]/returns | GET, POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
+| /api/sales/[id]/returns/preview | POST | live session + owner/admin service; cashier denied; original branch; read-only economic preview, budget30/min | unauth401; foreign organization/store403/404; invalid input400; manager required403 |
 | /api/sales/[id] | GET, PUT | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/sales/[id]/void | POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/sales | GET, POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
@@ -97,3 +98,5 @@ Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/st
 | /api/transfers | GET, POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/units/[id] | PUT | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/units | GET, POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
+
+2026-10-07: manual return preview yangi kirish nuqtasi; original sale lock + live context + same-branch shift; iqtisodiy yozuv va Operation yaratilmaydi.

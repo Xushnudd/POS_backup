@@ -40,6 +40,9 @@ export default function CustomerDetailPage() {
   const [isDebtModalOpen, setIsDebtModalOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNote, setPaymentNote] = useState('');
+  const [paymentType,setPaymentType]=useState<'cash'|'card'|'transfer'>('cash');
+  const [paymentReference,setPaymentReference]=useState('');
+  const [manualConfirmed,setManualConfirmed]=useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasPendingPayment,setHasPendingPayment]=useState(false);
   const [ledgerVersion,setLedgerVersion]=useState(0);
@@ -61,7 +64,7 @@ export default function CustomerDetailPage() {
         if(!cancelled&&saved){
           const payload=saved.payload as Parameters<typeof api.payments.credit>[0];
           if(payload.organizationId!==organization.id||payload.customerId!==id||payload.operationId!==saved.id)throw new Error('Saqlangan to‘lov ma’lumotlari mos emas');
-          attempt.current=payload;setHasPendingPayment(true);setPaymentAmount(String(payload.amount));setPaymentNote(payload.note??'');
+          attempt.current=payload;setHasPendingPayment(true);setPaymentAmount(String(payload.amount));setPaymentNote(payload.note??'');setPaymentType(payload.paymentType??'cash');setPaymentReference(payload.referenceNo??'');setManualConfirmed(payload.manualConfirmed??false);
           setAllocationMode(payload.allocations?'explicit':'fifo');setAllocations(payload.allocations??[]);setIsDebtModalOpen(true);
         }
         if(!cancelled)setLocalReady(true);
@@ -131,6 +134,8 @@ export default function CustomerDetailPage() {
         operationId: crypto.randomUUID(),
         amount: amt,
         note: paymentNote.trim() || undefined,
+        paymentType,
+        ...(paymentType!=='cash'?{referenceNo:paymentReference.trim(),manualConfirmed}:{}),
         ...(allocationMode==='explicit'?{allocations:allocations.map(item=>({...item}))}:{}),
       };
       setHasPendingPayment(true);
@@ -146,7 +151,7 @@ export default function CustomerDetailPage() {
       const dRes = await api.customers.getDebt(customer.id);
       if (dRes.data) setDebt(String(dRes.data.totalDebt));
     } catch (err: unknown) {
-      if(!wasRetry&&attempt.current&&err instanceof ApiError&&['VALIDATION_ERROR','DEBT_OVERPAYMENT','DUPLICATE_DEBT_TARGET','DEBT_ALLOCATION_TOTAL_MISMATCH','DEBT_TARGET_NOT_FOUND','DEBT_TARGET_OVERPAYMENT','DEBT_ALLOCATION_MISMATCH'].includes(err.code??'')){
+      if(!wasRetry&&attempt.current&&err instanceof ApiError&&['VALIDATION_ERROR','DEBT_OVERPAYMENT','DUPLICATE_DEBT_TARGET','DEBT_ALLOCATION_TOTAL_MISMATCH','DEBT_TARGET_NOT_FOUND','DEBT_TARGET_OVERPAYMENT','DEBT_ALLOCATION_MISMATCH','MANUAL_PAYMENT_PROOF_REQUIRED','MANUAL_PAYMENT_DOCUMENT_REUSED'].includes(err.code??'')){
         try{await acknowledge(attempt.current.operationId,'rejected',undefined,err.code);attempt.current=null;setHasPendingPayment(false);}catch{notifyError('Lokal holat saqlanmadi. Oldingi to‘lov kaliti saqlangan; qayta tekshiring');}
       }
       notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
@@ -195,7 +200,7 @@ export default function CustomerDetailPage() {
             variant="success"
             disabled={!localReady}
             onClick={() => {
-              if(!attempt.current){setAllocationMode('fifo');setAllocations([]);}
+              if(!attempt.current){setAllocationMode('fifo');setAllocations([]);setPaymentType('cash');setPaymentReference('');setManualConfirmed(false);}
               setPaymentAmount(attempt.current?String(attempt.current.amount):debt);
               if(attempt.current)setPaymentNote(attempt.current.note??'');
               setIsDebtModalOpen(true);
@@ -269,6 +274,9 @@ export default function CustomerDetailPage() {
             onChange={(e) => setPaymentAmount(e.target.value)}
             required
           />
+
+          <Select label="Undirish usuli" value={paymentType} disabled={isProcessing||hasPendingPayment} onChange={event=>{setPaymentType(event.target.value as 'cash'|'card'|'transfer');setManualConfirmed(false);}} options={[{value:'cash',label:'Naqd'},{value:'card',label:'Karta — qo‘lda qayd'},{value:'transfer',label:'Bank o‘tkazmasi — qo‘lda qayd'}]}/>
+          {paymentType!=='cash'&&<><p>Bu yerda tashqarida bajarilgan to‘lov qayd etiladi. Hujjatni tekshiring; bank amalini takrorlamang.</p><Input label="To‘lov hujjati raqami" value={paymentReference} maxLength={200} disabled={isProcessing||hasPendingPayment} onChange={event=>setPaymentReference(event.target.value)} required/><label className="flex gap-2"><input type="checkbox" checked={manualConfirmed} disabled={isProcessing||hasPendingPayment} onChange={event=>setManualConfirmed(event.target.checked)} required/>To‘lov haqiqatan bajarilganini tasdiqlayman</label></>}
 
           <Input
             label="Izoh"

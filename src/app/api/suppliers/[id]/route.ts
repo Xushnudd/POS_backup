@@ -11,6 +11,9 @@ const updateSupplierSchema = z.object({
   tin: z.string().max(64).optional(),
   address: z.string().max(500).optional(),
   note: z.string().max(2000).optional(),
+  bankName: z.string().trim().max(200).optional(),
+  bankAccount: z.string().trim().max(128).optional(),
+  paymentTerms: z.string().trim().max(2000).optional(),
   isActive: z.boolean().optional(),
 })
 

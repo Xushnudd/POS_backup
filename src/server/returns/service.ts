@@ -1,19 +1,27 @@
 import {validateUnitQuantity} from '../catalog/service'
 import { randomUUID } from 'node:crypto'
+import {Prisma} from '@prisma/client'
+import {prisma} from '@/lib/prisma'
 import { z } from 'zod'
 import type { TokenPayload } from '@/lib/auth'
 import { AccessError, tenantScope } from '../auth/policy'
-import { audit, runOperation } from '../operations'
+import { assertLiveContext, audit, runOperation } from '../operations'
 import { moveStock } from '../inventory/movements'
 import { weightedAverage } from '../inventory/valuation'
 import { allocateMoney, decimal, partialReturnAmount } from '../sales/calculations'
-import { quantitySchema, requireOpenShift } from '../sales/service'
+import { amountSchema, quantitySchema, requireOpenShift } from '../sales/service'
 
 export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(2).max(2000),
+ manualNonCash:z.object({confirmed:z.literal(true),referenceNo:z.string().trim().min(3).max(200),expectedSettlement:z.object({cash:amountSchema,card:amountSchema,transfer:amountSchema,debt:amountSchema,waived:amountSchema}).strict()}).strict().optional(),
  items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,disposition:z.enum(['sellable','damaged','write_off']).default('sellable')})).min(1).max(500)})
-export async function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>) {
+type RefundPreview={refundAmount:Prisma.Decimal;settlement:Record<'cash'|'card'|'transfer'|'debt'|'waived',Prisma.Decimal>};
+type PostedReturn=Prisma.SaleReturnGetPayload<{include:{items:true}}>&RefundPreview;
+export function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview?:false):Promise<PostedReturn>;
+export function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview:true):Promise<RefundPreview>;
+export async function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview=false) {
  if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
- return runOperation(context,'sale.return',input.operationId,{saleId,...input},async tx=>{
+ const execute=async(tx:Prisma.TransactionClient)=>{
+  if(preview)await assertLiveContext(tx,context);
   await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
   const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:{include:{saleReturnItems:true}},payments:true,saleReturns:true}})
   if (!sale) throw new AccessError(404,'NOT_FOUND')
@@ -39,9 +47,10 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
   const originalPayments=sale.payments.filter(x=>x.direction==='in' && x.note!=='debt_collection')
   const credit=originalPayments.filter(x=>x.paymentType==='credit').reduce((sum,x)=>sum.add(x.amount),decimal(0))
   const cash=originalPayments.filter(x=>x.paymentType==='cash').reduce((sum,x)=>sum.add(x.amount),decimal(0))
-  const other=sale.totalAmount.sub(credit).sub(cash)
-  // Vendor refunds are deliberately out of scope. Never pretend card/Click was refunded.
-  if (other.gt(0)) throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED','Bu savdoning tashqi to‘lovi qaytarilishi integratsiya tayyor bo‘lgach bajariladi')
+  const paid={cash,card:originalPayments.filter(x=>x.paymentType==='card').reduce((sum,x)=>sum.add(x.amount),decimal(0)),transfer:originalPayments.filter(x=>x.paymentType==='transfer').reduce((sum,x)=>sum.add(x.amount),decimal(0))}
+  // Only internally recorded manual payments are eligible. A provider result is
+  // never inferred from an operator's confirmation or from this local journal.
+  if(originalPayments.some(payment=>payment.sourceType!=='manual'||(payment.paymentType!=='credit'&&payment.status!=='recorded')))throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED')
   let outstandingCredit=decimal(0),waivedCredit=decimal(0)
   if (sale.customerId) {
    await tx.$queryRaw`SELECT id FROM "Customer" WHERE id=${sale.customerId} FOR UPDATE`
@@ -50,17 +59,29 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    const waived=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:sale.id,sourceType:{in:['write_off','write_off_reversal']}},_sum:{amount:true}})
    waivedCredit=decimal(waived._sum.amount??0).negated()
    if(waivedCredit.lt(0))throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
-   // Cash cannot refund a debt repayment received through a bank/other channel.
-   // Preserve its actual channel until an explicit refund settlement flow is available.
    const allocations=await tx.debtEntry.findMany({where:{organizationId:context.organizationId,saleId:sale.id,sourceType:'collection'}})
    const paymentIds=[...new Set(allocations.map(entry=>entry.sourceId.split(':')[0]))]
-   if (paymentIds.length && await tx.payment.count({where:{id:{in:paymentIds},organizationId:context.organizationId,paymentType:{not:'cash'}}})) throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED','Nasiya bank orqali to‘langan; uni avtomatik naqd qaytarish mumkin emas')
+   const collected=await tx.payment.findMany({where:{id:{in:paymentIds},organizationId:context.organizationId}})
+   for(const allocation of allocations){
+    const payment=collected.find(row=>row.id===allocation.sourceId.split(':')[0]);
+    if(!payment||payment.sourceType!=='manual'||payment.status!=='recorded'||!['cash','card','transfer'].includes(payment.paymentType))throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED')
+    const channel=payment.paymentType as keyof typeof paid;
+    paid[channel]=paid[channel].sub(allocation.amount);
+   }
    if (credit.gt(0) && await tx.debtEntry.count({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:null,sourceType:'legacy_payment',amount:{lt:0}}})) throw new AccessError(409,'DEBT_ALLOCATION_REQUIRED','Eski qarz to‘lovlarini original savdolarga taqsimlash kerak')
 
   }
   const remainingLiability=sale.totalAmount.sub(totalReturned)
+  for(const payment of sale.payments.filter(row=>row.direction==='out'&&row.note?.startsWith('return:'))){
+   if(!['cash','card','transfer'].includes(payment.paymentType))throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
+   const channel=payment.paymentType as keyof typeof paid;paid[channel]=paid[channel].sub(payment.amount);
+  }
+  if(Object.values(paid).some(amount=>amount.lt(0))||!paid.cash.add(paid.card).add(paid.transfer).add(outstandingCredit).add(waivedCredit).eq(remainingLiability))throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
   if (outstandingCredit.add(waivedCredit).gt(remainingLiability)) throw new AccessError(409,'DEBT_RECONCILIATION_REQUIRED')
-  const split=allocateMoney(refund,[{id:'cash',weight:remainingLiability.sub(outstandingCredit).sub(waivedCredit)},{id:'credit',weight:outstandingCredit},{id:'waived',weight:waivedCredit}])
+  const split=allocateMoney(refund,[{id:'cash',weight:paid.cash},{id:'card',weight:paid.card},{id:'transfer',weight:paid.transfer},{id:'credit',weight:outstandingCredit},{id:'waived',weight:waivedCredit}])
+  if(preview)return {refundAmount:refund,settlement:{cash:split.cash,card:split.card,transfer:split.transfer,debt:split.credit,waived:split.waived}};
+  if(split.card.add(split.transfer).gt(0)&&!input.manualNonCash)throw new AccessError(409,'EXTERNAL_REFUND_REQUIRED','Bank/karta qismi avtomatik naqd qaytarilmaydi. Faqat haqiqatan tashqarida qaytarilgan qo‘lda to‘lovni tasdiq va hujjat raqami bilan qayd eting.')
+  if(input.manualNonCash){const expected=input.manualNonCash.expectedSettlement;const actual={cash:split.cash,card:split.card,transfer:split.transfer,debt:split.credit,waived:split.waived};for(const key of Object.keys(actual) as (keyof typeof actual)[])if(!actual[key].eq(expected[key]))throw new AccessError(409,'REFUND_ALLOCATION_CHANGED','Qaytarma taqsimoti o‘zgardi. Bank amalini takrorlamang; haqiqiy hujjat va yangi hisobni manager bilan solishtiring.')}
   const debtReduction=split.credit.add(split.waived)
   const cashRefund=split.cash
   const ret=await tx.saleReturn.create({data:{saleId:sale.id,returnReceiptNo:'RET-'+randomUUID(),refundAmount:refund,reason:input.reason,processedBy:context.userId,
@@ -68,7 +89,7 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
     items:{create:rows.map(({unitCost,...row})=>{void unitCost;return row})}},include:{items:true}})
   if (debtReduction.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'return',sourceId:ret.id,saleId:sale.id,amount:debtReduction.negated(),actorId:context.userId}})
   if (split.waived.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'write_off_reversal',sourceId:ret.id,saleId:sale.id,amount:split.waived,actorId:context.userId,note:'Written-off liability returned'}})
-  if (cashRefund.gt(0)) await tx.payment.create({data:{organizationId:context.organizationId,storeId:sale.storeId,shiftId:input.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:'cash',direction:'out',amount:cashRefund,receivedBy:context.userId,note:'return:'+ret.id}})
+  for(const channel of ['cash','card','transfer'] as const)if(split[channel].gt(0))await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:input.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:channel,direction:'out',amount:split[channel],receivedBy:context.userId,note:'return:'+ret.id,...(channel!=='cash'?{referenceNo:input.manualNonCash!.referenceNo}:{})}})
   for (const row of [...rows].sort((a,b)=>a.productId.localeCompare(b.productId))) if (row.disposition==='sellable') {
    await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${row.productId} FOR UPDATE`
    const product=await tx.product.findFirstOrThrow({where:{id:row.productId,organizationId:context.organizationId}})
@@ -83,8 +104,10 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    return previous.add(current).eq(x.quantity)
   })
   await tx.sale.update({where:{id:sale.id},data:{status:allReturned?'returned':'partially_returned'}})
-  await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,waiverReversal:split.waived,reason:input.reason,approvedBy:ret.approvedBy,approvedRole:ret.approvedRole,approvedAt:ret.approvedAt})
-  return ret
- })
+  const settlement={cash:split.cash,card:split.card,transfer:split.transfer,debt:split.credit,waived:split.waived};
+  await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,settlement,manualReference:input.manualNonCash?.referenceNo,waiverReversal:split.waived,reason:input.reason,approvedBy:ret.approvedBy,approvedRole:ret.approvedRole,approvedAt:ret.approvedAt})
+  return {...ret,settlement}
+ };
+ return preview?prisma.$transaction(execute,{isolationLevel:'RepeatableRead'}):runOperation(context,'sale.return',input.operationId,{saleId,...input},execute)
 }
 function PrismaMinZero(value: Parameters<typeof decimal>[0] | null) { const v=decimal(value??0);return v.lt(0)?decimal(0):v }

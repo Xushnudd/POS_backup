@@ -183,6 +183,9 @@ export interface Supplier {
   tin?: string | null;
   address?: string | null;
   note?: string | null;
+  bankName?: string | null;
+  bankAccount?: string | null;
+  paymentTerms?: string | null;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;

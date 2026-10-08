@@ -2,9 +2,11 @@ import {PrismaClient} from '@prisma/client';
 import {randomUUID} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
+import {setTimeout as delay} from 'node:timers/promises';
 const testDatabase='postgresql://pos_test:local-test-only@127.0.0.1:55439/pos_test';
 const db=new PrismaClient({datasources:{db:{url:testDatabase}}});
 let organizationId;
+let ownedContainer;
 async function main(){
  const image='pos-app:twenty-test';
  const inspection=spawnSync('docker',['image','inspect',image,'--format','{{.Config.User}}'],{encoding:'utf8'});
@@ -21,6 +23,14 @@ async function main(){
  assert.equal(await db.auditLog.count({where:{organizationId,actorId:null,action:'system_reconciliation_scanned'}}),2);
  assert.equal((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString(),'2');
  assert.equal(await db.inventoryMovement.count({where:{organizationId}}),0);assert.equal(await db.payment.count({where:{organizationId}}),0);
+ const recurring=spawnSync('docker',['run','-d','--network','host','-e',`DATABASE_URL=${testDatabase}`,'-e','APP_ORIGIN=https://worker-test.example.invalid','-e','RECONCILE_INTERVAL_MS=60000',image,'node','--require','./scripts/worker-resolver.cjs','.worker-build/scripts/workers/reconcile.js'],{encoding:'utf8'});
+ assert.equal(recurring.status,0,recurring.stderr);ownedContainer=recurring.stdout.trim();assert.match(ownedContainer,/^[a-f0-9]{64}$/);
+ const deadline=Date.now()+15000;
+ while(await db.auditLog.count({where:{organizationId,actorId:null,action:'system_reconciliation_scanned'}})<3){assert.ok(Date.now()<deadline,'Recurring worker must complete its owned fixture');await delay(100);}
+ const stopped=spawnSync('docker',['stop','--time','10',ownedContainer],{encoding:'utf8',timeout:15000});assert.equal(stopped.status,0,stopped.stderr);
+ const state=spawnSync('docker',['inspect',ownedContainer,'--format','{{.State.ExitCode}} {{.State.OOMKilled}}'],{encoding:'utf8'});assert.equal(state.status,0);assert.equal(state.stdout.trim(),'0 false');
+ assert.equal(await db.incident.count({where:{organizationId}}),1);assert.equal(await db.auditLog.count({where:{organizationId,actorId:null,action:'system_reconciliation_scanned'}}),3);
  console.log('PASS: non-root packaged worker, two scans, one durable incident, exact evidence0/2/2, system audit2, no stock/payment repair');
+ console.log('PASS: recurring non-root worker completed scan3, SIGTERM drained and disconnected with exit0, no OOM/SIGKILL or duplicate incident');
 }
-main().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{if(organizationId)await db.organization.delete({where:{id:organizationId}});await db.$disconnect();});
+main().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{if(ownedContainer)spawnSync('docker',['rm','-f',ownedContainer],{stdio:'ignore'});if(organizationId)await db.organization.delete({where:{id:organizationId}});await db.$disconnect();});

@@ -758,7 +758,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-02.07** — API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish.
+- [x] **SEC-02.07** — API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish.
 
   **Texnologiya:** Prisma select, TypeScript DTO, log redaction.
 
@@ -771,6 +771,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** API/eksport/log testlarida passwordHash/raw token/secret yo‘q; DTO maydonlari allowlist bilan.
+
+  **Qabul (2026-10-07):** `done`. Individual natija va versiya dalili [joriy checkpointda](EXECUTION_STATUS.md#plus-20-2026-10-07-b--davom-etayotgan-qabul).
 
   **Dalil:** `SEC-02.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1134,7 +1136,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-02.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.05** — Klaviatura tezkor tugmalari, USB skaner, tezkor mahsulotlar, qulay qidiruv.
+- [x] **POS-02.05** — Klaviatura tezkor tugmalari, USB skaner, tezkor mahsulotlar, qulay qidiruv.
 
   **Texnologiya:** Browser keyboard events, React refs, PostgreSQL indexed search, ZXing.
 
@@ -1147,6 +1149,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Klaviatura/skaner/qidiruv orqali mouse talab qilmasdan savdo tugaydi; qo‘llangan tugmalar hujjatlashtirilgan.
+
+  **Qabul (2026-10-07):** `done`. Individual natija va versiya dalili [joriy checkpointda](EXECUTION_STATUS.md#plus-20-2026-10-07-b--davom-etayotgan-qabul).
 
   **Dalil:** `POS-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1288,7 +1292,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `RET-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RET-01.05** — Naqd/karta/nasiya aralash savdoda pul va qarzning qaytarish tartibini belgilash.
+- [x] **RET-01.05** — Naqd/karta/nasiya aralash savdoda pul va qarzning qaytarish tartibini belgilash.
 
   **Texnologiya:** TypeScript refund policy, PostgreSQL debt/cash ledgers.
 
@@ -1301,6 +1305,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Mixed cash/card/debt return allocation qarz va haqiqiy pulni alohida yangilaydi; original ulushlar oshmaydi.
+
+  **Qabul (2026-10-07):** `done`. Individual natija va versiya dalili [joriy checkpointda](EXECUTION_STATUS.md#plus-20-2026-10-07-b--davom-etayotgan-qabul).
 
   **Dalil:** `RET-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1888,7 +1894,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-01.03** — Qarzni naqd/karta/o‘tkazma bilan undirish; pulni haqiqiy smena yoki hisobga yozish.
+- [x] **CRM-01.03** — Qarzni naqd/karta/o‘tkazma bilan undirish; pulni haqiqiy smena yoki hisobga yozish.
 
   **Texnologiya:** React collect form, Prisma payment/debt allocations.
 
@@ -1901,6 +1907,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** 30000 collection debtni 30000 kamaytiradi va tanlangan real cash/bank hisobini shuncha oshiradi.
+
+  **Qabul (2026-10-07):** `done`, manual core kanallari. Provider API alohida deferred. Individual natija/test/versiya EXECUTION_STATUS.md dagi `plus-20-c` bo‘limida.
 
   **Dalil:** `CRM-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3587,7 +3595,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-01.07** — Health/readiness endpoint, nazoratli restart, ulanish pooli va graceful shutdown.
+- [x] **OPS-01.07** — Health/readiness endpoint, nazoratli restart, ulanish pooli va graceful shutdown.
 
   **Texnologiya:** Next.js health routes, Prisma pool, Docker/OS supervisor.
 
@@ -3600,6 +3608,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Readiness DB/queue dependencyga mos; restart/shutdownda completed va pending operations yo‘qolmaydi.
+
+  **Qabul (2026-10-07):** `done`. Individual natija va versiya dalili [joriy checkpointda](EXECUTION_STATUS.md#plus-20-2026-10-07-b--davom-etayotgan-qabul).
 
   **Dalil:** `OPS-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3771,7 +3781,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-03.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-03.04** — Alohida muhitga amaliy tiklash sinovi; faqat “backup olindi” xabari yetarli emas.
+- [x] **OPS-03.04** — Alohida muhitga amaliy tiklash sinovi; faqat “backup olindi” xabari yetarli emas.
 
   **Texnologiya:** Docker isolated restore, PostgreSQL utilities, Node verification.
 
@@ -3784,6 +3794,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Toza isolated restore RPO≤15min/RTO≤4hga mos; app va ledger tekshiruvi o‘tadi.
+
+  **Qabul (2026-10-07):** `done`. Individual natija va versiya dalili [joriy checkpointda](EXECUTION_STATUS.md#plus-20-2026-10-07-b--davom-etayotgan-qabul).
 
   **Dalil:** `OPS-03.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

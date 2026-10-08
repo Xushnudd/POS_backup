@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
+import { quickProductIds, QUICK_PRODUCT_LIMIT } from '@/lib/quick-products';
 import { Category, Product } from '@/types';
 import { formatMoney } from '@/lib/format';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,7 +24,10 @@ interface ProductSearchProps {
   onSearchChange: (query: string) => void;
   onSelectProduct: (product: Product) => void;
   onCameraScan: (barcode: string) => void | Promise<void>;
+  onKeyboardIdentifier: (identifier: string) => Promise<void>;
   isLoading: boolean;
+  quickScope: string | null;
+  onQuickSelect: (id: string) => Promise<void>;
 }
 
 export default function ProductSearch({
@@ -34,9 +39,39 @@ export default function ProductSearch({
   onSearchChange,
   onSelectProduct,
   onCameraScan,
+  onKeyboardIdentifier,
   isLoading,
+  quickScope,
+  onQuickSelect,
 }: ProductSearchProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [quick, setQuick] = useState<{scope: string | null; ids: string[]; products: Product[]}>({scope:null,ids:[],products:[]});
+  const [quickError, setQuickError] = useState('');
+  const [scanBusy, setScanBusy] = useState(false);
+  const scanLock = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      let ids: string[] = [];
+      try { if (quickScope) ids = quickProductIds(JSON.parse(localStorage.getItem(quickScope) || '[]')); } catch { /* Corrupt/disabled preferences never block checkout. */ }
+      const rows = await Promise.all(ids.map(id => api.products.get(id).then(res => res.data?.isActive ? res.data : null).catch(() => null)));
+      if (!cancelled) setQuick({scope:quickScope,ids,products:rows.filter((row): row is Product => row !== null && row !== undefined)});
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, [quickScope]);
+  function toggleQuick(product: Pick<Product, 'id'> & Partial<Product>) {
+    if (!quickScope) return;
+    const current = quick.scope === quickScope ? quick : {scope:quickScope,ids:[],products:[]};
+    const removing = current.ids.includes(product.id);
+    if (!removing && current.ids.length >= QUICK_PRODUCT_LIMIT) {setQuickError('Tezkor mahsulotlar chegarasi: 12 ta. Avval bittasini olib tashlang.');return;}
+    const ids = removing ? current.ids.filter(id => id !== product.id) : [...current.ids, product.id];
+    try {
+      localStorage.setItem(quickScope, JSON.stringify(ids));
+      setQuick({scope:quickScope,ids,products:removing ? current.products.filter(row => row.id !== product.id) : [...current.products,product as Product]});
+      setQuickError('');
+    } catch {setQuickError('Tezkor ro‘yxat saqlanmadi. Brauzer saqlash ruxsatini tekshiring.');}
+  }
 
   // Auto-focus search input for fast barcode scanning
   useEffect(() => {
@@ -44,24 +79,17 @@ export default function ProductSearch({
   }, []);
 
   // Handle Enter key for fast barcode scan
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const trimmed = searchQuery.trim();
       if (!trimmed) return;
 
-      // Check if there is an exact barcode match
-      const exactMatch = products.find(
-        (p) => p.barcode === trimmed || p.sku.toLowerCase() === trimmed.toLowerCase()
-      );
-
-      if (exactMatch) {
-        onSelectProduct(exactMatch);
-        onSearchChange('');
-      } else if (products.length === 1) {
-        onSelectProduct(products[0]);
-        onSearchChange('');
-      }
+      // Resolve the complete scan against the server, never a stale debounced list.
+      if (scanLock.current || e.repeat || e.nativeEvent.isComposing) return;
+      scanLock.current = true; setScanBusy(true);
+      try { await onKeyboardIdentifier(trimmed); }
+      finally { scanLock.current = false; setScanBusy(false); }
     }
   };
 
@@ -105,6 +133,15 @@ export default function ProductSearch({
         />
       </div>
 
+      {scanBusy && <p role="status">Barkod tekshirilmoqda…</p>}
+      {quickError && <p role="alert">{quickError}</p>}
+      {quick.scope === quickScope && quick.ids.length > 0 && <section aria-label="Tezkor mahsulotlar" className="flex flex-wrap gap-2">
+        {quick.ids.map(id => {const product=quick.products.find(row=>row.id===id);return <div key={id} className="flex border rounded-xl bg-white">
+          <button type="button" className="min-h-11 p-2 text-gray-900" disabled={!product} onClick={() => void onQuickSelect(id)}>{product?.name??'Mavjud bo‘lmagan mahsulot'} — tezkor</button>
+          <button type="button" className="min-h-11 min-w-11 text-gray-900" aria-label={(product?.name??'Mavjud bo‘lmagan mahsulot')+' — tezkor ro‘yxatdan olib tashlash'} onClick={() => toggleQuick(product??{id})}>×</button>
+        </div>;})}
+      </section>}
+
       {/* Category Pills Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         <button
@@ -136,8 +173,9 @@ export default function ProductSearch({
       </div>
 
       {/* Products Grid */}
-      <div className="flex-1 overflow-y-auto">
-        {isLoading ? (
+      <div className="flex-1 overflow-y-auto" aria-busy={isLoading}>
+        {isLoading && products.length > 0 && <p role="status" className="text-sm text-gray-700">Mahsulotlar yangilanmoqda…</p>}
+        {isLoading && products.length === 0 ? (
           <div className="h-64 flex items-center justify-center">
             <LoadingSpinner size="lg" text="Mahsulotlar yuklanmoqda..." />
           </div>
@@ -152,6 +190,7 @@ export default function ProductSearch({
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {products.map((p) => (
+              <div key={p.id} className="flex flex-col">
               <button
                 type="button"
                 aria-label={p.name+' — savatga qo‘shish'}
@@ -184,6 +223,8 @@ export default function ProductSearch({
                   </div>
                 </div>
               </button>
+              <button type="button" disabled={!quickScope||quick.scope!==quickScope} aria-pressed={quick.scope===quickScope&&quick.ids.includes(p.id)} aria-label={p.name+' — tezkor ro‘yxat'} className="min-h-11 text-xs text-gray-900 bg-white border rounded-xl" onClick={() => toggleQuick(p)}>{quick.scope===quickScope&&quick.ids.includes(p.id)?'Tezkor ro‘yxatdan olish':'Tezkor ro‘yxatga qo‘shish'}</button>
+              </div>
             ))}
           </div>
         )}

@@ -42,7 +42,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | SEC-02.04 | CORE-1 | todo | Telefon/e-mail tasdiqlash, bir martalik kod muddati va urinishlar chegarasi. | — | — |
 | SEC-02.05 | CORE-1 | in_progress | Kirish, tiklash, import va qimmat so‘rovlarda tezlik/hajm cheklovlari. | PostgreSQL login/register/operation/report/CSV/session budgets; Retry-After; bounded request and 10000-row export caps | Reset/import/worker/hosting traffic protection remains |
 | SEC-02.06 | CORE-1 | todo | Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq. | — | — |
-| SEC-02.07 | CORE-1 | in_progress | API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish. | Live Session, route matrix, scopedPrisma, withApi, SQL scope; tenant/revoke/CSRF tests | Har yangi endpoint/export/worker uchun negative permission coverage va browser acceptance |
+| SEC-02.07 | CORE-1 | done | API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | SEC-02.08 | CORE-1 | in_progress | XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | TLS hosting, reset/import limits, fayl/CSV himoyasi va security-event UI |
 | SEC-02.09 | CORE-1 | in_progress | Sessiyalar va xavfsizlik hodisalari tarixi; shubhali kirish haqida bildirishnoma. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | TLS hosting, reset/import limits, fayl/CSV himoyasi va security-event UI |
 | USR-01.01 | CORE-1 | done | Taklif, rol/filial tahriri, bloklash va explicit arxivlash/tiklash; moliyaviy tarix saqlanadi. | +1 checkpoint: migration026, economic invitation test, reports-finance lifecycle tests, HTTPS browser archive/reload/restore/reactivate | Regressiyani saqlash |
@@ -63,7 +63,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | POS-02.02 | CORE-1 | done | Savatni brauzer yopilishi/yangilanishidan tiklash; qurilma va foydalanuvchi chegarasi. | 2026-10-06: quyidagi “Keyingi 10 ta PLAN1 bandi — savat va to‘lov” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | POS-02.03 | CORE-1 | done | Aralash to‘lov: masalan, 60 000 naqd + 40 000 karta; qisman nasiya. | 2026-10-06: quyidagi “Keyingi 10 ta PLAN1 bandi — savat va to‘lov” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | POS-02.04 | CORE-1 | done | Qaytimni haqiqiy naqd berilgan summa bilan ko‘rsatish, tushumga faqat tegishli summani yozish. | 2026-10-06: quyidagi “Keyingi 10 ta PLAN1 bandi — savat va to‘lov” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
-| POS-02.05 | CORE-1 | in_progress | Klaviatura tezkor tugmalari, USB skaner, tezkor mahsulotlar, qulay qidiruv. | F2/F4/F9/Esc UI shortcuts with local/unknown/dialog/typing guards; existing keyboard barcode input | Quick-product presets and complete scanner/keyboard acceptance remain; special hardware deferred |
+| POS-02.05 | CORE-1 | done | Klaviatura tezkor tugmalari, USB skaner, tezkor mahsulotlar, qulay qidiruv. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | POS-02.06 | CORE-1 | in_progress | Har qator/butun chek chegirmasi; foiz/summa; sabab va tasdiq. | Sales service, Decimal, operation ledger, SQL locks; economic tests; local basket/status recovery UI | Browser checkout/recovery/zero-price/discount tests; qoralama/conflict resolution; fiscal raqam external-later |
 | POS-02.07 | CORE-1 | done | Qoldiq va narx o‘zgarganini savat yakunida tushunarli ko‘rsatish. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
 | POS-02.08 | CORE-1 | done | Mijoz tanlash, chek izohi, sotuvchi/xizmat turi kerak bo‘lsa belgilash. | 2026-10-06: quyidagi “Keyingi 10 ta PLAN1 bandi — savat va to‘lov” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -72,7 +72,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | RET-01.02 | CORE-1 | done | Oldingi qaytarishlarni hisobga olish; sotilganidan ko‘p qaytarishni taqiqlash. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | RET-01.03 | CORE-1 | in_progress | Chegirma va soliqni qaytarilayotgan qatorga to‘g‘ri taqsimlash. | Internal return service + UI, receipt allocation, cash/debt conservation, retry tests | Disposition UI, repayment-channel policy, tax snapshot, manager approval acceptance |
 | RET-01.04 | CORE-1 | in_progress | Tovar omborga qaytadimi, brak omborigami yoki hisobdan chiqadimi — aniq tanlash. | Per-item sellable/damaged/write_off UI, paginated scoped return history with frozen item names, transactional refund/stock/replay tests | Dedicated damaged-stock warehouse/location remains |
-| RET-01.05 | CORE-1 | in_progress | Naqd/karta/nasiya aralash savdoda pul va qarzning qaytarish tartibini belgilash. | Internal return service + UI, receipt allocation, cash/debt conservation, retry tests | Disposition UI, repayment-channel policy, tax snapshot, manager approval acceptance |
+| RET-01.05 | CORE-1 | done | Naqd/karta/nasiya aralash savdoda pul va qarzning qaytarish tartibini belgilash. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | RET-01.06 | EXTERNAL-LATER | deferred | Provayder orqali refund, uning kutish/xato holati va takror so‘rovdan himoya. | ADR-002: foydalanuvchi hozir implementatsiya qilmaslikni belgiladi; vendor contract taxmin qilinmaydi | Alohida topshiriq va rasmiy contract/uskuna tayyor bo‘lganda |
 | RET-01.07 | CORE-1 | done | Sabab, vakolat, tasdiqlovchi, qaytarma chek va audit. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | RET-01.08 | CORE-1 | todo | Tovar almashtirishni original qaytarish + yangi savdo sifatida bog‘lash. | — | — |
@@ -99,7 +99,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | INV-02.05 | CORE-1 | todo | Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish. | — | — |
 | INV-02.06 | CORE-1 | todo | Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1. | — | — |
 | INV-02.07 | CORE-1 | todo | Seriya raqami/kafolat — elektronika segmentida P1. | — | — |
-| PUR-01.01 | CORE-1 | in_progress | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Supplier create/edit/archive/restore/search/paging UI and contacts card; scoped document history/date/status/paging/full CSV; confirmed purchase/reversal value summary | Commercial terms and supplier payment/debt ledger remain |
+| PUR-01.01 | CORE-1 | in_progress | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Migration032 bankName/account/terms; API/UI/CSV, validation/archive/restore/browser sinovlari | Supplier qarz/to‘lov tarixi PUR-01.04 bilan tugatiladi |
 | PUR-01.02 | CORE-1 | todo | Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri. | — | — |
 | PUR-01.03 | CORE-1 | todo | Yetkazib beruvchiga qaytarish, narx/miqdor farqi va qarzni yangilash. | — | — |
 | PUR-01.04 | CORE-1 | todo | Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash. | — | — |
@@ -107,7 +107,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | PUR-01.06 | CORE-1 | done | Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.01 | CORE-1 | done | Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.02 | CORE-1 | done | Qarz yozuvini haqiqiy pul to‘lovidan ajratish: nasiya naqd tushum deb olinmasligi. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
-| CRM-01.03 | CORE-1 | in_progress | Qarzni naqd/karta/o‘tkazma bilan undirish; pulni haqiqiy smena yoki hisobga yozish. | DebtEntry alohida ledger, FIFO collection allocation, customer locking, cash/debt return tests | Opening debt, advance/statement/due-date UI; non-cash refund policy; provider card external-later |
+| CRM-01.03 | CORE-1 | done | Qarzni naqd/karta/o‘tkazma bilan undirish; pulni haqiqiy smena yoki hisobga yozish. | plus-20-c: manual cash/card/transfer UI3 browsers;118 PG+focused proof/readiness2; migration034 unique proof; cash30/debt10 | Regressiyani saqlash; real provider va full finance accounts alohida bandlar |
 | CRM-01.04 | CORE-1 | in_progress | Qisman undirish, oldindan to‘lov, ortiqcha to‘lov va qaytarish qoidalari. | DebtEntry alohida ledger, FIFO collection allocation, customer locking, cash/debt return tests | Opening debt, advance/statement/due-date UI; non-cash refund policy; provider card external-later |
 | CRM-01.05 | CORE-1 | done | To‘lovni qaysi qarz/savdoga ajratishni yuritish; boshlang‘ich qarzni alohida hujjat bilan kiritish. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
 | CRM-01.06 | CORE-1 | done | Qarzni o‘chirish/tuzatish faqat sabab, vakolat va audit bilan. | Owner-only immutable new adjustment/write-off; bounds/tenant/live auth/idempotency; migration015 append-only DB guard; weighted write-off refund conservation tests; real browser duplicate prevention | No original ledger edit/delete; correction is a new audited entry |
@@ -205,7 +205,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OPS-01.04 | CORE-1 | in_progress | CI: lint → turlar → test → build → staging → qabul tekshiruvi → production. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-01.05 | CORE-1 | in_progress | Image versiyasi, minimal vakolatli jarayon, xavfsiz secret saqlash va kalit aylantirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-01.06 | CORE-1 | in_progress | TLS, domen, firewall; bazani umumiy internetga ochmaslik. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
-| OPS-01.07 | CORE-1 | in_progress | Health/readiness endpoint, nazoratli restart, ulanish pooli va graceful shutdown. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-01.07 | CORE-1 | done | Health/readiness endpoint, nazoratli restart, ulanish pooli va graceful shutdown. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | OPS-01.08 | CORE-1 | todo | Yangilash vaqtida savdoni yo‘qotmaslik; texnik xizmat oynasi va xabar berish. | — | — |
 | OPS-02.01 | CORE-1 | done | Tuzilgan loglar, request ID, tashkilot ID; maxfiy/shaxsiy ma’lumotlarni niqoblash. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | OPS-02.02 | CORE-1 | todo | API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi. | — | — |
@@ -216,7 +216,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OPS-03.01 | CORE-1 | in_progress | Shifrlangan avtomatik backup; bazaning asosiy serveridan boshqa saqlash joyi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-03.02 | CORE-1 | todo | Baza bilan birga mahsulot rasmlari, hujjatlar va zarur konfiguratsiya zaxirasi. | — | — |
 | OPS-03.03 | CORE-1 | in_progress | Nuqtaga tiklash imkoniyati, backup muddati va kirish vakolati. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
-| OPS-03.04 | CORE-1 | in_progress | Alohida muhitga amaliy tiklash sinovi; faqat “backup olindi” xabari yetarli emas. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-03.04 | CORE-1 | done | Alohida muhitga amaliy tiklash sinovi; faqat “backup olindi” xabari yetarli emas. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | OPS-03.05 | CORE-1 | in_progress | Tashkilotga tegishli yozuvni tiklashda boshqa tashkilot ma’lumotiga ta’sirni tekshirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-03.06 | CORE-1 | in_progress | Tiklashdan keyin provider, offline navbat va savdo holatlarini solishtirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-04.01 | CORE-1 | todo | Pilotdan katalog, savdo hajmi, kassalar va parallel so‘rovlar profilini olish. | — | — |
@@ -231,7 +231,7 @@ Sana: 2026-10-07. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | QA-01.04 | CORE-1 | done | Tashkilot/rol/do‘kon chegaralarining barcha API guruhlari bo‘yicha testlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | QA-01.05 | CORE-1 | done | Parallel so‘rov va takror amal testlari. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | QA-01.06 | CORE-1 | todo | Provider sandbox, timeout, noto‘g‘ri imzo, takror/kechikkan callback testlari. | — | — |
-| QA-01.07 | CORE-1 | todo | Offline/reconnect, printer uzilishi, brauzer yopilishi va server restart sinovlari. | — | — |
+| QA-01.07 | CORE-1 | in_progress | Offline/reconnect, printer uzilishi, brauzer yopilishi va server restart sinovlari. | Uch browser core offline/reconnect/close/print boundary va actual standalone restart o‘tdi | Haqiqiy printer uzilishi vendor/hardware tayyor bo‘lganda tekshiriladi |
 | QA-01.08 | CORE-1 | todo | Paket xavfsizligi, secret scanning va stagingda xavfsizlik tekshiruvi. | — | — |
 | QA-01.09 | CORE-1 | done | Backup restore, migratsiya va chiqarishdan qaytish mashqi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | BIZ-01.01 | CORE-1 | todo | SaaS obuna, lokal o‘rnatish yoki ikkalasini qo‘llash modelini tanlash. | — | — |
@@ -892,3 +892,63 @@ Artifact SHA256:
 | tsconfig.worker.json | `7eeb77949209051b9b84d7ae493510d6825c3e6fcc7297d3f9e154050b02c596` |
 | playwright.config.ts | `06702319f415d75425d9692a17a3e1fd7f2e90c14c41a715f4e837cb121b4744` |
 | .github/workflows/ci.yml | `ab2106c5d9c100bafaef448863456cbbb62ba4119a42f4d6a28c8c1498916868` |
+
+
+## plus-20-2026-10-07-b — davom etayotgan qabul
+
+Joriy so‘rov boshlanishida **93 done**, maqsad **113 done** (+20). Bu checkpoint oldingi +20 qabulidan alohida. Oldingi done bandlari va test/subtasklar yangi band sifatida sanalmaydi. Hozir **5 ta yangi band qabul qilindi: 93 → 98 done**. +20 maqsadga yana15 band kerak; so‘rov to‘liq tugagan deb belgilanmagan. Quyidagi implementatsiya va qabul dalillari shu checkpointga tegishli.
+
+- POS-02.05: org/user/register-scoped 12 quick-product ID; fresh server validation; primary/alias barcode va aniq SKU/nom keyboard lookup; debounce/repeat/in-flight F9 guard.
+- SEC-02.07: operator/staff DTO, nonowner nested branch/staff chegarasi, credential-key response defense va mavjud log allowlist regressiyasi. Owner invitation capability alohida explicit flow; session token berilmaydi.
+- RET-01.05: cash/card/transfer/debt/waived exact allocation, preview, haqiqiy manual bank proof, stale/reused proof rejection, payment provenance boundary. Migration031/033. Click API implementatsiyasi yo‘q.
+- PUR-01.01: bank rekvizitlari/terms UI/API/CSV, validation/archive/restore. Migration032; supplier qarz/to‘lov tarixi ochiq, band hali done emas.
+- OPS-01.07: dependency/migration readiness, owned standalone app restart va recurring worker SIGTERM acceptance.
+- OPS-03.04: yangi empty DBga encrypted restore va restored app orqali real scoped auth/count/debt acceptance.
+- QA-01.07: core uch-browser offline/reconnect/close/print-boundary va server restart coverage; fizik hardware sinovi hali mavjud emas, full task done emas.
+
+117 PostgreSQL integration va27 unit test o‘tdi; lint/typecheck/production build o‘tdi. 42 browser va migration/restore/restart/packaged worker yakuniy qabul natijalari quyida qo‘shiladi. Real biznes bazasi, deployment va vendor integratsiyalariga tegilmadi.
+
+### Individual qabul natijalari
+
+| ID | Kirish / kutilgan natija | Haqiqiy natija va qayta bajariladigan dalil |
+| --- | --- | --- |
+| SEC-02.07 | Nested credential/PII canary, owner/cashier nested organization, shift operator, API/export/log response | Normalized credential keys chiqarildi; password canary yo‘q; shift faqat id/fullName, nonowner nested staff/foreign branch yo‘q. Unit response/log canary; route-boundaries positive groups/nested DTO, economic/report CSV tests. Ownerning ruxsatli invitation capabilitysi ishlashda qoldi; sessiya tokeni qaytarilmaydi. |
+| POS-02.05 | Quick ID add/reload, stale debounce, exact barcode/alias/SKU/name, noto‘g‘ri yoki ambiguous identifier, in-flight F9, keyboard-only 3 dona savdo | Preset narx saqlamaydi, scope aralashmaydi. Literal %/_ qisman qidiruv emas; ambiguous409, invalid400. Qidiruvda F9 yopiq; total30/payment1/quantity3. Broad suite WebKit focus yo‘qolishini topdi; grid refreshda saqlash tuzatildi, focused uch-browser suite3/3 o‘tdi. ProductSearch/lib/quick-products; E2E register va Training; identifier integration. Maxsus hardware driver dalili emas. |
+| RET-01.05 | Mixed300 =90cash/60card/150credit, qisman return; qarz100 bankda collected; stale/reused proof, provider recorded source | Preview30/20/50, iqtisodiy writes0; manual proof bilan channel-only posting/replay bir marta. Full return90cash/60card/debt0/stock3; bank debt collection transfer100 qaytimi cash0. Stale va reused proof rollback. Provider source ikki yo‘ldan ham409, writes0. returns/service; reports-finance/economic integration; Manual bank refund UI; migration031/033. Real provider refund deferred. |
+| OPS-01.07 | Ready migration marker o‘chiq/DB disconnected; 2 checkout+held draft; 2 SIGTERM/restart+replay; packaged recurring worker SIGTERM | Incomplete marker503, live disconnected200/ready503; completed2/payment2/movement2/balance1, held draft saqlandi. Owned server nazoratli yopildi. Image nextjs; scan3 audit3/incident1, no repair, exit0/noOOM/noSIGKILL. route-boundaries readiness; scripts/ops/test-restart.mjs va test-worker.mjs. Queue hozir Postgres Operation/sync core, qo‘shimcha vendor queue ulanmagan. |
+| OPS-03.04 | GPG backupdan empty isolated DB restore; migration/active count/freeze/debt history va actual app reads; overwrite attempt | Restore33 migration, counting/3/2/3 freeze saqlandi, qarz3.75 original due2026-02-01; actual authenticated app count/debt o‘qidi, economic row count o‘zgarmadi. FixtureRPOloss0, RTO7s; mavjud jadvalga overwrite rad. test-backup.sh/verify-restored-app.mjs. Real offsite schedule/SLA/PITR bandlari ochiq. |
+
+### Sinovdan o‘tgan versiya
+
+- Git HEAD `4d048fc22e15106fc5309c51402b6ad600d06541` + joriy ishchi daraxt; AI commit yaratilmagan. Node24.18.0, Next16.3.8, Prisma5.22.0.
+- Source288 fayl SHA256 `de9df5dec463a9a7f5c1995b771e850e434b064d0dc7e89c51fecc00c2276c1b`: src/tests/prisma/scripts .ts/.tsx/.sql/.prisma/.cjs/.mjs/.sh, sorted relative path+NUL+bytes+NUL; docs alohida.
+- Final Docker image `sha256:6541ce3f58bfd9f32f4d575189f6443af5f3aa58a665fe24680bd9b79af95aa8`, foydalanuvchi `nextjs`; deployment qilinmagan.
+- `npm run typecheck`, `npm run lint`, build-only disconnected placeholder bilan `npm run build`: exit0.
+- `npm test`:27/27; isolated pos_test bilan `npm run test:integration`:117/117.
+- Uch browser broad `POS_E2E_ALL_BROWSERS=1 npm run test:e2e`:41/42; WebKit Training focus regressiyasi topildi. Tuzatishdan keyin yangi production build bilan `npm run test:e2e -- --grep 'Training is isolated'`:3/3 (Chromium/Firefox/WebKit), exit0. Broad42/42 qayta o‘tdi degan da’vo yo‘q; shu fokus muammosi qayta tekshirildi.
+- `RELEASE_BASE=4d048fc bash scripts/ops/test-release-drill.sh`: exit0,33 migrations fresh/legacy, restoreRTO7s, fixtureRPOloss0, old app checkout/replay, total18s/rollback5s. Local fixture dalili; actual staging rollout emas.
+- `DATABASE_URL=<isolated pos_test> node scripts/ops/test-restart.mjs`: exit0; completed2/payment2/movement2/balance1; disconnected live200/ready503.
+- `docker build -t pos-app:twenty-test .` va `node scripts/ops/test-worker.mjs`:exit0; recurring scan3/SIGTERM exit0, no economic repair.
+- Vaqtinchalik loglar `/tmp/pos-next20-{unit,integration,e2e,keyboard,typecheck,lint,build,release,restart,image,worker}.log`; doimiy qayta bajarish manbasi versioned test/migration/scriptlardir.
+
+### Ochiq ishlar
+
+Maqsad113, joriy98: +20 so‘rov hali yakunlanmagan. PUR-01.01 supplier qarz/to‘lov tarixi; QA-01.07 physical printer qabul sinovi; OPS-01.03 actual staging rollout; qolgan core featurelar asosiy trackerda ochiq. Hech bir qabul mezoni sonni oshirish uchun pasaytirilmadi. Real Click/fiskal/hardware, business interviews, legal/pilot yoki hosting SLA bajarildi deb qayd qilinmaydi.
+
+
+## plus-20-c — yangi so‘rov (2026-10-07)
+
+Yangi so‘rov baseline **98 done**, maqsad **118 done**. Hozir **1 ta yangi band: CRM-01.03 qabul qilindi, jami99**. +20 maqsadga19 band qolgan; so‘rov tugadi deb belgilanmagan. Oldingi93→98 qabul qayta sanalmadi.
+
+### CRM-01.03 individual qabul
+
+- Kirish: credit sale100; UI orqali cash30/card30/transfer30, real manual bank hujjati va tasdiq; original key replay; yangi key bilan bir hujjat; bir hujjatga parallel ikki boshqa customer.
+- Kutilgan/haqiqiy: UI3 Payment yozadi (har biri30, original store/shift/receiver, source manual); qarz10, cash journalga faqat30. Card proofsiz400/no write; same-key parallel replay payment1/allocation1; debt100→70, cash0. New-key same proof409 rollback/debt70. Cross-customer race bitta payment, ikkinchisi409. Provider API/fake confirmation yo‘q.
+- Manba: collections.ts; customer detail form; api client; economic integration `Manual card debt collection…`; E2E `Debt collection UI records…`; migration034; health ready requires034.
+- `npm run test:integration` isolated pos_test:118/118, exit0. Yakuniy proof-lock/readiness o‘zgarishidan keyin tsc test compile + node test-name-pattern:2/2, exit0.
+- Eng yangi standalone build bilan Chromium/Firefox/WebKit focused collection E2E:3/3, exit0.
+- Final typecheck/lint/build exit0; `git diff --check` exit0. Fresh+legacy fixture `bash scripts/ops/test-migrations.sh`:34 migratsiya, eski allocation/debt/barcode/unit natijasi saqlandi, exit0.
+- Git HEAD4d048fc22e15106fc5309c51402b6ad600d06541 + ishchi daraxt. Source289 SHA256 `da68755007928402a930e582c5728f529e4f0e515490bfd7bfbf10195fa91568` (oldingi checkpoint bilan bir xil path+NUL+bytes+NUL algoritmi). AI commit/deployment yaratilmagan; real DBga tegilmagan.
+- Logs `/tmp/pos-twenty-c-{integration,proof,e2e,migrate,fresh,typecheck,lint,build}.log`; doimiy dalil versioned source/tests/migration.
+
+Full FinancialAccount/expense/transfer, supplier qarz/to‘lov va xarid zanjiri, tax snapshots va katalogning boshqa featurelari ochiq. CRM-01.03 manual Payment journalining original store/smena/usul/qabul qiluvchisini saqlash doirasida qabul qilingan; tashqi bank solishtirish yoki Click tasdig‘i bajarildi degan da’vo yo‘q.
