@@ -44,6 +44,11 @@ async function handlePUT(
     const validatedData = updateSupplierSchema.parse(body)
 
     const supplier = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Supplier" WHERE id=${id} AND "organizationId"=${payload.organizationId} FOR UPDATE`
+      if(validatedData.isActive===false){
+        const [balance]=await tx.$queryRaw<{blocked:boolean}[]>`SELECT EXISTS(SELECT 1 FROM "SupplierInvoiceBalance" i WHERE i."supplierId"=${id} AND i."organizationId"=${payload.organizationId} AND i."netAmount">COALESCE((SELECT sum(a.amount) FROM "SupplierAllocationBalance" a WHERE a."invoiceId"=i.id),0)) OR EXISTS(SELECT 1 FROM "SupplierPayment" p JOIN "FinancialDocument" d ON d.id=p."financialDocumentId" WHERE p."supplierId"=${id} AND p."organizationId"=${payload.organizationId} AND d.amount>COALESCE((SELECT sum(a.amount) FROM "SupplierAllocationBalance" a WHERE a."paymentId"=p.id),0)) AS blocked`;
+        if(balance.blocked)throw new AccessError(409,'SUPPLIER_BALANCE_NOT_ZERO','Qarz yoki taqsimlanmagan avans bor; avval hisobni solishtiring')
+      }
       const result = await tx.supplier.update({
       where: { id },
       data: validatedData,

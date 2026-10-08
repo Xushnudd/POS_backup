@@ -7,7 +7,7 @@ price_fixture=$(mktemp -d /tmp/pos-price-migrations.XXXXXX)
 cp prisma/schema.prisma "$price_fixture/schema.prisma"
 mkdir "$price_fixture/migrations"
 for migration in prisma/migrations/*; do
- case "$migration" in *202610070036_return_dispositions|*202610080037_price_location_scope|*202610080038_financial_accounts|*202610080039_financial_trigger_record|*202610080040_financial_trigger_alias|*202610080041_financial_cash_mirror) ;; *) cp -a "$migration" "$price_fixture/migrations/" ;; esac
+ case "$migration" in *202610070036_return_dispositions|*202610080037_price_location_scope|*202610080038_financial_accounts|*202610080039_financial_trigger_record|*202610080040_financial_trigger_alias|*202610080041_financial_cash_mirror|*202610080042_supplier_ledger|*202610080043_supplier_trigger_record|*202610080044_supplier_payment_proof|*202610080045_purchase_orders|*202610080046_purchase_receipt_complete|*202610080047_purchase_cascade_constraints|*202610080048_zero_value_receipts|*202610080049_supplier_credits) ;; *) cp -a "$migration" "$price_fixture/migrations/" ;; esac
 done
 cleanup() {
  rm -rf "$price_fixture"

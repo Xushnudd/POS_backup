@@ -13,13 +13,13 @@ import type { TokenPayload } from '@/lib/auth'
 import { sanitizeResponse } from './auth/response'
 
 const refs: Record<string, string> = {
-  storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
-  expenseCategoryId:'ExpenseCategory',accountId:'FinancialAccount',fromAccountId:'FinancialAccount',toAccountId:'FinancialAccount',
+  orderItemId:'PurchaseOrderItem',stockDocumentId:'StockDocument',storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
+  invoiceId:'SupplierInvoice',expenseCategoryId:'ExpenseCategory',accountId:'FinancialAccount',fromAccountId:'FinancialAccount',toAccountId:'FinancialAccount',
   productId:'Product', categoryId:'Category', customerId:'Customer', supplierId:'Supplier',
   organizationUserId:'OrganizationUser', cashierId:'User',
 }
 const pathModels: Record<string, string> = {
-  organizations:'Organization', stores:'Store', registers:'Register', products:'Product', categories:'Category',
+  'supplier-invoices':'SupplierInvoice','purchase-orders':'PurchaseOrder','supplier-payments':'SupplierPayment',organizations:'Organization', stores:'Store', registers:'Register', products:'Product', categories:'Category',
   customers:'Customer', suppliers:'Supplier', sales:'Sale', shifts:'Shift', transfers:'StockTransfer', 'stock-documents':'StockDocument', 'stock-counts':'StockCount',
 }
 async function assertReference(model: string, id: unknown, context: TokenPayload) {
@@ -115,7 +115,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         await consumeLimit('report.read',identity,60,60000)
         if(path==='/api/reports/reconciliation')await consumeLimit('report.reconciliation',identity,10,60000)
       }
-      if(context&&path.startsWith('/api/finance/'))await consumeLimit(mutation?'finance.write':'finance.read',context.organizationId+':'+context.userId,60,60000)
+      if(context&&(path.startsWith('/api/finance/')||path.startsWith('/api/supplier-payments')||path.startsWith('/api/supplier-invoices')||path.startsWith('/api/purchase-orders')||/^\/api\/suppliers\/[0-9a-f-]{36}\/ledger$/i.test(path)))await consumeLimit(mutation?'finance.write':'finance.read',context.organizationId+':'+context.userId,60,60000)
       const result = await handler(request, routeContext)
       const data = await result.json()
       if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}

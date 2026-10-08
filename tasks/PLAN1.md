@@ -1754,7 +1754,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### PUR-01 — xarid va ta’minot [P1]
 
-- [ ] **PUR-01.01** — Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix.
+- [x] **PUR-01.01** — Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix.
 
   **Texnologiya:** React supplier card, Prisma Supplier/terms.
 
@@ -1770,7 +1770,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `PUR-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **PUR-01.02** — Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri.
+- [x] **PUR-01.02** — Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri.
 
   **Texnologiya:** Prisma PurchaseOrder/Receipt/Payable, TypeScript workflow.
 
@@ -1802,7 +1802,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `PUR-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **PUR-01.04** — Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash.
+- [x] **PUR-01.04** — Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash.
 
   **Texnologiya:** PostgreSQL supplier debt/cash journals, Prisma allocation.
 
@@ -2394,7 +2394,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.06** — P1: savdo, mahsulot, kategoriya, kassir, filial va to‘lov turi kesimidagi tahlil.
+- [x] **REP-01.06** — P1: savdo, mahsulot, kategoriya, kassir, filial va to‘lov turi kesimidagi tahlil.
 
   **Texnologiya:** Prisma groupBy, indexed PostgreSQL, React SVG/tables.
 
@@ -2426,7 +2426,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.08** — P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti.
+- [x] **REP-01.08** — P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti.
 
   **Texnologiya:** Prisma report queries, shared Decimal definitions.
 

@@ -1,6 +1,6 @@
 # API vakolat va chegara reyestri
 
-2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir99 template va138 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
+2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir109 template va150 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
 
 Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/store bilan; tashkilotni tahrirlash va xodimlarni boshqarish owner-only. Cashier faqat sales/shifts/products/categories/customers/stores/auth/operations/sync; katalog/mijoz/do‘kon mutatsiyalari yopiq. `/void` manager-only. Ownership recipient GET/accept o‘z persistent requestiga ega. **Gateway allow yakuniy ruxsat emas:** return, corrections, bank deposit, settlement, export/cost, pending-close, foreign actor va branch cheklovlari xizmat ichida ham tekshiriladi. UI yashirish himoya o‘rnini bosmaydi.
 
@@ -125,3 +125,28 @@ Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/st
 | /api/reports/profit | GET | Owner/admin assigned stores; frozen sale costs; report budget |
 
 `reports-finance.integration.test.ts`: cash/bank balancing, duplicate replay, two concurrent debits, audit rollback, immutable cash mirror, cashier/admin deny va cross-branch transfer detail/export/reversal deny. `Finance UI…` browser ssenariyi exact cents va lost-response original reversalni reload orqali tiklaydi. Yangi handlerlar dynamic boundary testiga avtomatik kiradi. Bu qo‘shimcha SEC-01.02/04 ni o‘zi yakunlamaydi: qolgan core guruhlar qabul qilinishda ham reyestr va testlar yangilanadi.
+
+### Savdo kesimlari qo‘shimchasi
+
+| Route | HTTP | Chegara | Dalil |
+| --- | --- | --- | --- |
+| /api/reports/breakdowns | GET | Owner/admin assigned stores; cashier403; explicit dimension allowlist, current live scope, CSV full cap/rate; all five revenue totals reconcile overall | Dynamic route boundaries and five-dimension integration fixture; HTTPS breakdown browser |
+
+Supplier ledger yangi boundaries:
+
+| Route | Methods | Vakolat va scope | Majburiy invariant |
+| --- | --- | --- | --- |
+| /api/suppliers/[id]/ledger | GET, POST | owner/admin; organization + assigned branch | confirmed original receipt; expectedAmount; replay |
+| /api/supplier-payments | POST | owner/admin; live supplier/account/shift | bank proof; cash journal atomic; same branch allocation |
+| /api/supplier-payments/[id]/allocate | POST | owner/admin; scoped payment | existing advance; invoice remaining bound; no extra cash |
+| /api/supplier-payments/[id]/allocations | GET | owner/admin; scoped parent payment | bounded history/count; no foreign rows |
+
+Automatic protected-handler enumeration barcha yangi routega401/tenant/store/cashier negative tekshiruvlarni qo‘llaydi. Positive supplier ledger integration explicit assigned/unassigned admin, foreign owner, owner va cashierni tekshiradi.
+
+| Route | Methods | Vakolat va scope | Majburiy invariant |
+| --- | --- | --- | --- |
+| /api/purchase-orders | GET, POST | owner/admin; organization + assigned branch | immutable original items; order no stock/cash |
+| /api/purchase-orders/[id] | GET | owner/admin; scoped order | aggregate original received/remaining |
+| /api/purchase-orders/[id]/receive | POST | owner/admin; scoped original order/item | stock/invoice/receipt/audit/Operation atomic |
+| /api/purchase-orders/[id]/receipts | GET | owner/admin; scoped parent | bounded receipt/invoice history |
+| /api/reports/supplier-balances | GET | owner/admin; scoped invoice/payment branches | exact aging; past cutoff; full CSV; cashier403 |

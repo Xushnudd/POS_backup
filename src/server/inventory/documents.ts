@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import {Prisma} from '@prisma/client'
 import type { TokenPayload } from '@/lib/auth'
 import { AccessError, tenantScope } from '../auth/policy'
 import { runOperation, audit } from '../operations'
@@ -9,7 +10,10 @@ import { weightedAverage } from './valuation'
 
 export async function confirmStockDocument(context:TokenPayload,id:string) {
  if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
- return runOperation(context,'stock.confirm',id,{id},async tx=>{
+ return runOperation(context,'stock.confirm',id,{id},tx=>confirmStockDocumentTx(tx,context,id))
+}
+export async function confirmStockDocumentTx(tx:Prisma.TransactionClient,context:TokenPayload,id:string) {
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
   await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
   const doc=await tx.stockDocument.findFirst({where:{id,AND:tenantScope('StockDocument',context)},include:{items:true,organization:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
@@ -36,7 +40,6 @@ export async function confirmStockDocument(context:TokenPayload,id:string) {
   const result=await tx.stockDocument.update({where:{id},data:{status:'confirmed',confirmedBy:context.userId,confirmedAt:new Date()},include:{items:true}})
   await audit(tx,context,'StockDocument',id,'confirmed',{type:doc.documentType})
   return result
- })
 }
 export async function sendTransfer(context:TokenPayload,id:string) {
  return runOperation(context,'transfer.send',id,{id},async tx=>{
@@ -83,6 +86,7 @@ export async function reverseStockDocument(context:TokenPayload,id:string,input:
   if (!original) throw new AccessError(404,'NOT_FOUND')
   if (!original.items.length || original.status!=='confirmed' || original.reversalOfId || !['purchase','opening','adjustment','return_in'].includes(original.documentType)) throw new AccessError(409,'INVALID_STATUS')
   if (original.reversal) throw new AccessError(409,'ALREADY_REVERSED')
+  if(await tx.supplierInvoice.findUnique({where:{stockDocumentId:id}}))throw new AccessError(409,'SUPPLIER_INVOICE_TRACKED','Qarzga bog‘langan xarid uchun yetkazib beruvchiga qaytarish oqimidan foydalaning')
   const reversal=await tx.stockDocument.create({data:{organizationId:original.organizationId,storeId:original.storeId,supplierId:original.supplierId,
    documentType:'reversal',documentNo:'REV-'+input.operationId,reversalOfId:id,createdBy:context.userId,note:input.reason,
    items:{create:original.items.map(item=>({productId:item.productId,quantity:item.quantity.negated(),unitCost:item.unitCost,note:item.note}))}}})

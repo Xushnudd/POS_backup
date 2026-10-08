@@ -90,6 +90,8 @@ const navItems: NavItem[] = [
   {href:'/products/categories',label:'Kategoriyalar',icon:faBoxesStacked,roles:['owner','admin']},
   {href:'/archive',label:'Arxiv',icon:faBoxesStacked,roles:['owner','admin']},
   {href:'/suppliers',label:'Yetkazib beruvchilar',icon:faUsers,roles:['owner','admin']},
+  {href:'/reports/supplier-balances',label:'Supplier qarzi hisoboti',icon:faChartLine,roles:['owner','admin']},
+  {href:'/reports/breakdowns',label:'Savdo kesimlari',icon:faChartLine,roles:['owner','admin']},
   {href:'/finance',label:'Hisoblar va xarajatlar',icon:faChartLine,roles:['owner','admin']},
   {href:'/products/prices',label:'Narxlar tarixi',icon:faBoxesStacked,roles:['owner','admin']},
   {href:'/inventory/dispositions',label:'Brak va hisobdan chiqarish',icon:faWarehouse,roles:['owner','admin']},

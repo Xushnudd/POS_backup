@@ -99,10 +99,10 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | INV-02.05 | CORE-1 | todo | Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish. | — | — |
 | INV-02.06 | CORE-1 | todo | Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1. | — | — |
 | INV-02.07 | CORE-1 | todo | Seriya raqami/kafolat — elektronika segmentida P1. | — | — |
-| PUR-01.01 | CORE-1 | in_progress | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Migration032 bankName/account/terms; API/UI/CSV, validation/archive/restore/browser sinovlari | Supplier qarz/to‘lov tarixi PUR-01.04 bilan tugatiladi |
-| PUR-01.02 | CORE-1 | todo | Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri. | — | — |
+| PUR-01.01 | CORE-1 | done | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Migration032 +042..044; scoped card/receipt/price/payment history; validation/archive/restore; supplier acceptance below | — |
+| PUR-01.02 | CORE-1 | done | Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri. | Original Order/Receipt/Stock/Invoice/Allocation FK; atomic partial receipt; races/rollback/3 browsers; migrations045..048 | — |
 | PUR-01.03 | CORE-1 | todo | Yetkazib beruvchiga qaytarish, narx/miqdor farqi va qarzni yangilash. | — | — |
-| PUR-01.04 | CORE-1 | todo | Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash. | — | — |
+| PUR-01.04 | CORE-1 | done | Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash. | Immutable invoice/payment/allocation; cash/bank proof; replay/race/audit rollback; API+three browsers | — |
 | PUR-01.05 | CORE-1 | todo | Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati. | — | — |
 | PUR-01.06 | CORE-1 | done | Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.01 | CORE-1 | done | Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
@@ -136,9 +136,9 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | REP-01.03 | CORE-1 | done | P0: yig‘indilar joriy sahifadan emas, barcha mos yozuvlardan olinishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.04 | CORE-1 | done | P0: sotuv, refund, nasiya va haqiqiy pul tushumi bir-biridan ajratilishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.05 | CORE-1 | done | P0: tannarx har qator `miqdor × tarixiy tannarx`dan hisoblanishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
-| REP-01.06 | CORE-1 | in_progress | P1: savdo, mahsulot, kategoriya, kassir, filial va to‘lov turi kesimidagi tahlil. | Timezone date ranges, global totals, SQL products/lowStock pagination, historical cost/refunds | Reports fixture coverage; full exports, additional breakdowns, repeatable snapshot |
+| REP-01.06 | CORE-1 | done | P1: savdo, mahsulot, kategoriya, kassir, filial va to‘lov turi kesimidagi tahlil. | Yangi +20 checkpoint: 125 PG + final focused report test;3 HTTPS browsers; five exact reconciled dimensions; quyidagi protokol | Regressiyani saqlash; boshqa +20 bandlari ochiq |
 | REP-01.07 | CORE-1 | in_progress | P1: qoldiq qiymati, ombor harakati, kam qoldiq, yaroqlilik va sekin sotiladigan tovarlar. | Scoped movement journal; balance single-snapshot paging/search/lowStock and exact full CSV valuation/shortage | Expiry and slow-moving products analysis remain |
-| REP-01.08 | CORE-1 | in_progress | P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti. | Scoped full shift CSV of frozen close totals/difference; current customer aging/ledger | Supplier debts and full purchase reporting remain |
+| REP-01.08 | CORE-1 | done | P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti. | Supplier balance/aging + existing customer due/shift/purchase; cross-report exact fixture; bounded full CSV + 3 browsers | — |
 | REP-01.09 | CORE-1 | in_progress | P1: to‘liq filtrlangan CSV/XLSX/PDF eksport; katta eksportni fon ishida bajarish. | Full filtered sales/returns, products, categories, units, barcodes, supplier contact/history, stock documents/transfers/balances, movements, shifts and minimal audit CSV; repeatable-read/Decimal/scope,10000 cap, bounded actor budgets, browser downloads | XLSX/PDF and background large exports remain |
 | REP-01.10 | CORE-1 | done | P1: jadvaldagi umumiy son, eksport va dashboard bir davr uchun mos kelishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.11 | EXTENSIONS | deferred | P2: rejalashtirilgan hisobot, filial taqqoslash, KPI va talab prognozi. | — | — |
@@ -1017,3 +1017,68 @@ Oraliq xatolar yashirilmadi: SQL deferred trigger record shakli va OLD alias Pos
 Core cheklovlar: hisob/category ro‘yxati10000 dan oshsa explicit413, qisman natija emas. Cash mirror alohida yana cash balansga qo‘shilmaydi. Bank/provider kitobi qo‘lda qayd etilgan ichki jurnal; real vendor integration/confirmation emas. Tax snapshot va purchase landed-cost bu uch band bilan tugallangan deb da’vo qilinmaydi. `SEC-01.02/04` ham shu guruh bilan avtomatik done emas.
 
 Qolgan17 ID: FIN-02.07/02, PUR-01.01/02/03/04/05, RET-01.03/08, POS-02.06, REP-01.06/08, CRM-01.04, CAT-01.01, DATA-01.09, SEC-01.02/04. Keyingi bajarish purchase/order/supplier payable/advance/return/landed-cost guruhidan davom etadi. Tashqi fiskal/E-POS/Click/hardware implementatsiyalari foydalanuvchi belgilaganidek chetlab o‘tiladi.
+
+## Yangi +20 so‘rov — faol (2026-10-08)
+
+Oldingi moliyaviy uch band bu so‘rovga qayta sanalmaydi. Baseline104, maqsad124 done; joriy yangi done0. So‘ralgan20 to‘liq qabul qilinmaguncha bu checkpoint complete emas. Birinchi guruh: REP-01.06 kesimlarida aynan bir davr savdo va qaytarma summalarini solishtirish; keyingi guruh purchase/supplier va qolgan core vazifalari. Tashqi/vendor integratsiyalar avvalgi taqiq bo‘yicha chetlab o‘tiladi.
+
+
+### Yangi +20 — REP-01.06 qabul protokoli
+
+**104 → 105 done. Bu yangi so‘rovdan1 ta qabul qilindi,19 ta hali ochiq; maqsad124 bajarilmagan.** Oldingi FIN-02.04/05/06 qayta sanalmaydi. Test, dimension, API, UI yoki CSV alohida PLAN1 vazifasi sifatida sanalmaydi.
+
+REP-01.06: `/api/reports/breakdowns` va `/reports/breakdowns` product/category/cashier/store/payment kesimlari, tashkilot timezone davri, asOf, assigned-store scope, stable pagination, explicit refresh va full CSV. Same RepeatableRead snapshotda kesimlarning barcha sahifalar jami financialSummary netSalesga tengligini server tekshiradi. Nomuvofiqlik409 REPORT_UNRECONCILED; formula-safe CSV max10000. Kategoriya/katalog nomlari joriy; qaytarma original kassirga tegishli. Turli birliklar aralashmasligi uchun quantity faqat product kesimida. Payment original sales va refund channels bo‘yicha: later debt collections/manual payments/expenses/internal transfers revenuega qayta qo‘shilmaydi. Payment COGS/profit null: taxminiy taqsimot yo‘q, cash-flow hisoboti deb ko‘rsatilmaydi.
+
+Tekshirilgan dataset: birinchi sale200−discount10=190, original cost100; yarim qaytarma95/cost50; ikkinchi filial/cashier/kategoriyasiz product sale120/cost30; keyingi qarz undirish10. Besh kesimning har birida **netSales215**, economic dimensions **COGS80/gross135**. Limit1da data1, total2; CSV ikki qator, barcha davr215. Birinchi store filtri95; unassigned admin0; cashier403; foreign store404; invalid dimension400. Uch brauzerda API orqali haqiqiy sale95/cost50dan besh UI kesimi95 va CSV download tasdiqlandi.
+
+Dalillar:
+- `npm run typecheck`, `npm run lint`:exit0; `/tmp/pos-new20-typecheck.log`, `/tmp/pos-new20-lint.log`.
+- Build-only invalid DATABASE_URL va HTTPS APP_ORIGIN bilan `npm run build`:exit0; `/tmp/pos-new20-build.log`.
+- Isolated `npm run test:integration`:125/125, `/tmp/pos-new20-integration.log`. Keyingi quantity-null va CSV completeness assertions bilan final focused `node --require ./scripts/test-resolver.cjs --test --test-name-pattern='All five sales breakdown' .test-build/tests/reports-finance.integration.test.js`:1/1; `/tmp/pos-new20-breakdowns.log`.
+- `npm test`:27/27; `/tmp/pos-new20-unit.log`. Birinchi automatic approval review vaqt chegarasiga yetdi; ruxsat etilgan qayta urinish o‘tdi. Hech qanday unsafe action yoki foydalanuvchi approval talabi qolmagan.
+- Final standalone production HTTPS `POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Sales breakdown UI'`:Chromium/Firefox/WebKit3/3; `/tmp/pos-new20-e2e.log`.
+- `git diff --check`:exit0. Haqiqiy DB/deploy/vendor integration ishlatilmadi; yangi migration yoki SDK kerak bo‘lmadi.
+
+Versiya: joriy HEAD `3301aa37f41dfd0649966bbbf51e5bd4b219452e` + ishchi daraxt; AI commit qilmagan. Endpoint SHA256 `7c90588a0ce3442c82d56a17159b96ddeb20723180e8a3f9a3e1378b68f744f9`; UI `5efd597aed3829b2647f83e11aef9a17532c10feda90ab659437174d9e07bdc0`; integration test `4120f860fe1244502c2ec032b1f74e84db942d5a97d7303fd2fd3429424bd825`; browser test `653d5a11fc1fb7bd257d41e94f8afb046a4176f37c38fe8bf8b6a32ccc2d4740`. Vaqtinchalik loglar o‘rniga qayta ijro manbasi versioned route/UI/tests.
+
+Oraliq xatolar: yangi customer fixture phone majburiyligi tuzatildi. ApiResponse summary avval faqat SalesReportSummaryga bog‘langan edi; backward-compatible default generic Summary bilan aniq yangi Totals turi berildi, unknown cast ishlatilmadi. Birinchi build shu type xatosida yiqilgan; final typecheck/build o‘tdi. Qabul mezoni yumshatilmadi.
+
+### Yangi +20 — PUR-01.01 va PUR-01.04 qabul protokoli (2026-10-08)
+
+**105 →107 done. Latest +20 baseline104dan3 qabul,17 hali ochiq; maqsad124.** Bu checkpoint butun loyiha production-ready degani emas.
+
+PUR-01.01: existing kontakt/rekvizit/shartlar, draft/confirmed/reversed receipt history va original receipt price-history reportga qo‘shimcha scoped invoice/payment/allocation tarixi supplier kartasida ishlaydi. Contact/bank/terms bound400, foreign404, cashier403, archive/restore metadata saqlanishi oldingi hamda joriy supplier terms testida tekshirildi. Debt yoki advance nol bo‘lmasa archive409, ikkalasi nol bo‘lganda archive200/history200. Archived tarix o‘chmaydi.
+
+PUR-01.04: avans30; original2×40 receipt invoice80; allocate30 →unpaid50/advance0; yangi cash20 →unpaid30; overpay31 rad va journal o‘zgarmagan. Ikki parallel30 so‘rovdan faqat bitta muvaffaqiyatli; paid80/cash920, invoice qarzi0. Bank proofsiz rad; proofli bank30 original key replayda bir marta. Keyingi invoice30ga uchta10 allocation: limit1 history total3, aggregate30, qarz/avans0. Cash10.25 audit failureda payment/account/shift/Operation rollback, aynan original retry bir marta. SQL immutable/scope/overallocate/source invariantlari triggerlarda; tracked purchase ordinary reversal409, original-bound return hali PUR-01.03 scope.
+
+Browser protocol: invoice80, cash30 partial →qarz50; avans10.25 POST serverda commit bo‘lib javob ataylab uzildi; reload/original pending retry bitta payment; avans allocate→qarz39.75/advance0/cash959.75. Supplier va mavjud Finance recovery regression Chromium/Firefox/WebKit **6/6**.
+
+Dalillar: `npm run typecheck`, `npm run lint`, disconnected-build `npm run build`:exit0, `/tmp/pos-rest19-{typecheck,lint,build}.log`. Isolated `npm run test:integration` **127/127**, `/tmp/pos-rest19-integration.log`; latest bounded history/archive assertions supplier focused **2/2**, `/tmp/pos-rest19-supplier-test.log`. `npm test` **27/27**, `/tmp/pos-rest19-unit.log`. `bash scripts/ops/test-migrations.sh` fresh+legacy **44 migration PASS**, `/tmp/pos-rest19-migrations.log`. HTTPS production `POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Supplier ledger UI|Finance UI'` **6/6**, `/tmp/pos-rest19-e2e.log`. `git diff --check`:exit0. Database faqat isolated localhost55439/pos_test. Vendor API/real biznes DB/deploy/AI commit yo‘q.
+
+Versiya: HEAD3301aa37f41dfd0649966bbbf51e5bd4b219452e + ishchi daraxt; qayta ijro uchun versioned tests/routes/migrations. SHA256:
+- `src/server/purchases/suppliers.ts`: `67ac82486a5dd30f2aa7503930a3508d44b79eeb77ee7da2250f18c621df29c9`.
+- `src/components/suppliers/SupplierLedger.tsx`: `ac576c93bcc4f948987232021ba78f1f3570e664be29de7da0c4c70de88685d2`.
+- `tests/reports-finance.integration.test.ts`: `b61817c971a8123543920c02737055ffab39164a28c02f9bc389afd296ac7b57`.
+- `tests/e2e/core.spec.ts`: `ef25ef39b77538cb41e2dbcc293e0169d088a1e7fb17514be0a6178ddf084ae4`.
+
+### Yangi +20 — PUR-01.02 va REP-01.08 qabul protokoli
+
+**107→109 done. Latest +20 baseline104dan5 qabul qilindi,15 hali ochiq; maqsad124.** Supplier return/landed cost/tax va boshqa ochiq parent vazifalar bu yerda tugadi deb sanalmaydi.
+
+PUR-01.02: buyurtma5×10.25 stock/payable yaratmaydi; birinchi original qabul2→stock2/invoice20.50/remaining3. Qabul4 rad va journal unchanged. Parallel qolgan3ni ikki qabul qilishdan biri commit, ikkinchisi rad; stock5, ikkita receipt/movement/invoice, quantity remaining0. Payment51.25 ikki invoicega20.50/30.75 taqsimlanadi, replay bir marta, qarz/avans0. Foreign/hidden admin404, cashier403, invoice/receipt immutable; receipt history limit1/total2. Late receipt audit failure stock, weighted cost, invoice, original links va Operationni to‘liq rollback qiladi, original retry once. Original birlik o‘zgarsa409, qayta to‘g‘ri birlik bilan retry ishlaydi; complimentary2×0 original receipt/invoice0, yangi payable/cash yo‘q.
+
+REP-01.08: original purchase value51.25. Past due invoice20.50, upcoming20.50, undated10.25; cash15ning10 invoicega/5advance→supplier unpaid41.25=overdue10.50+upcoming20.50+undated10.25, paid15/advance5. Xuddi shu summary supplier ledgerga teng, purchase report51.25. Before-payment asOf qayta o‘qilganda unpaid51.25. Customer future due100→statement currentBalance/debtTotal/upcoming100. Smena opening1000−suppliercash15=expected985, counted980/difference−5 frozen APIga teng. CSV formula safe; scope/cashier/future cutoff rad. Eski unregistered receiptga guessed debt yo‘q.
+
+Browser: supplier ledger regression va purchase UI order5→receipt2→partial→receipt3 lost response→reload/original saved key→received; receipt/invoice2ta, stock5, debt51.25; supplier balance UI undated51.25 va CSV download. Chromium/Firefox/WebKit **6/6**, `/tmp/pos-orders-e2e.log`. Birinchi browser run parent refresh supplierni unmount qilgani uchun selection yo‘qolganini topdi; fix actor-scoped componentni saqlaydi, final6/6. Birinchi integration cleanup FK xatosini topdi, forward047 deferred NO ACTION bilan tuzatildi; applied045 checksum o‘zgartirilmadi.
+
+Final `npm run test:integration`: **131/131**, `/tmp/pos-orders-integration.log`. Latest focused4/4 `/tmp/pos-orders-focused.log`. `bash scripts/ops/test-migrations.sh`: **fresh+legacy48 PASS**, `/tmp/pos-orders-migrations.log`. Typecheck/lint/disconnected production build exit0, `/tmp/pos-orders-{typecheck,lint,build}.log`. Unit27/27 bu turn oldingi supplier stage; pure calculation o‘zgarmagan. `git diff --check` exit0. Real business DB/deploy/vendor API/AI commit yo‘q.
+
+Versiya HEAD3301aa37f41dfd0649966bbbf51e5bd4b219452e + ishchi daraxt; SHA256:
+- `src/server/purchases/orders.ts`: `a894fed6c9d5269d203673a02a3ea7b51c18b9d9530b27c2b4328c2e0975dc18`.
+- `src/components/suppliers/PurchaseOrders.tsx`: `45269b36789a9422ee6ff09d0320f19ce09c35fb40bc597b73b40d07c2baffd3`.
+- `src/app/api/reports/supplier-balances/route.ts`: `724a2e1ca504345ccf2ff2db2118d4cfbbb0a4213cd23e5212fbfad700b8c3c7`.
+- `src/app/(dashboard)/reports/supplier-balances/page.tsx`: `4d37f8204a0c2b7aa13cf07b671785290099c53bef1e59d58c2e5d3fc36ed8c9`.
+- `tests/reports-finance.integration.test.ts`: `9727eb13af9331d853219e7091cb592012cac9bfef10923be23b31cf9f703525`.
+- `tests/e2e/core.spec.ts`: `cf33d92d35ae9749253c36f1a27975e755b0e2c3569386de43b4986cc2471021`.
+
+Davom navbati: FIN-02.07/02, PUR-01.03/05, RET-01.03/08, POS-02.06, CRM-01.04, CAT-01.01, DATA-01.09, SEC-01.02/04; latest +20ning qo‘shimcha uch o‘rni uchun CAT-01.03, INV-02.05, OFF-02.01 core backlogdan tanlanadi. Hozir jami15 ochiq, bu yangi tanlovlar done emas. Sharp rasm sanitizatsiyasi rasmiy constructor/output qo‘llanmasi va mavjud0.35.4 local package bo‘yicha dastlab o‘rganildi, biroq fayl yuklash modeli/dependency/endpoint/implementatsiya bu checkpointda yozilmadi va DATA-01.09 done emas.

@@ -351,7 +351,7 @@ export interface ProductReportItem extends Product {
   profitMargin: number;
 }
 
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown, Summary = SalesReportSummary> {
   success: boolean;
   data?: T;
   message?: string;
@@ -366,7 +366,7 @@ export interface ApiResponse<T = unknown> {
     total: number;
     totalPages: number;
   };
-  summary?: SalesReportSummary;
+  summary?: Summary;
   meta?: {asOf:string;timezone:string;startDate:string|null;endDate:string|null;storeId:string|null};
 }
 

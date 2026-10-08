@@ -19,11 +19,14 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
     case 'SaleItem': return { sale: tenantScope('Sale', context) }
     case 'SaleReturn': return { sale: tenantScope('Sale', context) }
     case 'SaleReturnItem': return { saleReturn: tenantScope('SaleReturn', context) }
+    case 'SupplierCredit': return {invoice:tenantScope('SupplierInvoice',context)}
+    case 'PurchaseOrderItem': return {order:tenantScope('PurchaseOrder',context)}
     case 'StockDocumentItem': return { stockDocument: tenantScope('StockDocument', context) }
     case 'StockTransferItem': return { stockTransfer: tenantScope('StockTransfer', context) }
     case 'StockTransfer': return { organizationId: org, fromStore: stores, toStore: stores }
     case 'UserStore': return { organizationUser: { organizationId: org }, store: stores }
     case 'FinancialDocument': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds},entries:{every:{account:{organizationId:org,storeId:{in:context.storeIds}}}}})}
+    case 'PurchaseOrder': case 'SupplierInvoice': case 'SupplierPayment':
     case 'FinancialAccount': case 'ReturnDispositionEntry': case 'DamageLocation': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
     case 'StockCount': case 'StockDocument': case 'InventoryMovement': case 'Payment': return { organizationId: org, ...storeRelation }
     default: return { organizationId: org }

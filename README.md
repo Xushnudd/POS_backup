@@ -1089,3 +1089,10 @@ Menyudagi **Narxlar tarixi** sahifasida mahsulotlarni toping, yangi narx va saba
 Owner/admin `/finance` orqali ichki hisob balanslari, sababli biznes xarajatlari, hisoblararo teng debit/credit o‘tkazmalar va original hujjatga qarshi qaytarish hujjatini yuritadi. Hisob/toifa yaratish owner-only. Naqd balans mavjud smena kitobidan olinadi; bank/provider kitobi qo‘lda qayd etilgan ichki hisobdir. Ichki o‘tkazma savdo tushumiga kirmaydi.
 
 Yalpi foyda va operatsion foyda alohida ko‘rsatiladi; hisobot ichki boshqaruv uchun. Har amal oldindan ko‘riladi va tasdiqlanadi; noma’lum javobda original kalit/payload lokal saqlanib, sahifa yangilanganda qayta tekshiriladi. Vendor-specific bank/Click/fiskal/hardware integratsiyasi qo‘shilmagan. Contract va cheklovlar `api.md` ichidagi “Ichki moliyaviy hisoblar” bo‘limida.
+
+
+`/reports/breakdowns` mahsulot, kategoriya, kassir, filial va to‘lov kanali bo‘yicha sof savdoni ko‘rsatadi. Davr qaytarmalari va tarixiy tannarx hisobga olinadi; barcha kesimlar jami umumiy sof savdoga mosligi serverda tekshiriladi. Exact Decimal qiymatlar, pagination va full CSV mavjud. To‘lov kesimi pul oqimi emas: keyingi qarz undirish va ichki o‘tkazmalar savdo tushumiga qayta qo‘shilmaydi.
+
+Supplier kartasida tekshirilgan xarid hisob-fakturasi, invoicega qisman to‘lov, alohida avans va avansni keyin taqsimlash mavjud. Naqd chiqim smena journalida, bank/provayder chiqimi operator tasdiqlagan haqiqiy hujjat bilan yoziladi. Vendor API ishlatilmaydi. Noaniq javobdan keyin original intent tiklanadi. Eski xaridlar avtomatik qarz hisoblanmaydi; qarz/avans nol bo‘lmasdan arxivlash mumkin emas. API kontrakti `api.md`da.
+
+Supplier kartasidagi xarid buyurtmasi qisman qabul qilinadi: original qator→receipt→stock→invoice→payment allocation bog‘lanishi saqlanadi. Qabul bitta tranzaksiyada, unknown javob original kalit bilan tekshiriladi. Supplier qarzi/muddati hisoboti alohida Sidebar sahifasida; eski ro‘yxatga olinmagan xaridni unpaid deb taxmin qilmaydi.

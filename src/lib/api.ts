@@ -1,6 +1,7 @@
 import {errorGuidance} from './error-guidance';
 import {
   ApiResponse,
+  SalesReportSummary,
   CatalogUnit,
   ProductBarcode,
   Organization,
@@ -30,7 +31,7 @@ import {
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; requestId?:string; nextAction?:string; }
 class ApiClient {
-  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions'|'/finance/documents',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions'|'/finance/documents'|'/reports/breakdowns'|'/reports/supplier-balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
     list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
@@ -40,10 +41,10 @@ class ApiClient {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
   }
 
-  async request<T>(
+  async request<T, Summary = SalesReportSummary>(
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<ApiResponse<T, Summary>> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),

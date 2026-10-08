@@ -30,18 +30,25 @@ export const GET=withApi(async(request:NextRequest)=>{
    AND d."createdAt"<=${asOf} AND COALESCE(d."confirmedAt",d."createdAt")<=${asOf}
    ${range.gte?Prisma.sql`AND COALESCE(d."confirmedAt",d."createdAt")>=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND COALESCE(d."confirmedAt",d."createdAt")<${range.lt}`:Prisma.empty}
    ${supplierId?Prisma.sql`AND d."supplierId"=${supplierId}`:Prisma.empty} ${productId?Prisma.sql`AND i."productId"=${productId}`:Prisma.empty} ${storeId?Prisma.sql`AND d."storeId"=${storeId}`:Prisma.empty}
+   UNION ALL
+   SELECT ci.id,c.id AS "documentId",'CREDIT-'||c.id AS "documentNo",CASE WHEN c.kind='goods_return' THEN 'supplier_return' ELSE 'supplier_price_correction' END AS "documentType",d.id AS "reversalOfId",d."supplierId",s.name AS "supplierName",d."storeId",st.name AS "storeName",si."productId",p.name AS "productName",p.unit,c."createdAt" AS "eventAt",false AS "legacyDate",-ci.quantity AS quantity,si."unitCost",-ci.amount AS value
+   FROM "SupplierCredit" c JOIN "SupplierCreditItem" ci ON ci."creditId"=c.id JOIN "SupplierInvoice" inv ON inv.id=c."invoiceId" JOIN "StockDocument" d ON d.id=inv."stockDocumentId" JOIN "StockDocumentItem" si ON si.id=ci."stockDocumentItemId" JOIN "Product" p ON p.id=si."productId" JOIN "Store" st ON st.id=d."storeId" LEFT JOIN "Supplier" s ON s.id=d."supplierId"
+   WHERE d."organizationId"=${context.organizationId} ${scope} AND c."createdAt"<=${asOf}
+   ${range.gte?Prisma.sql`AND c."createdAt">=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND c."createdAt"<${range.lt}`:Prisma.empty}
+   ${supplierId?Prisma.sql`AND d."supplierId"=${supplierId}`:Prisma.empty} ${productId?Prisma.sql`AND si."productId"=${productId}`:Prisma.empty} ${storeId?Prisma.sql`AND d."storeId"=${storeId}`:Prisma.empty}
+
   )`
   const selected=view==='history'?Prisma.sql`SELECT * FROM history`:Prisma.sql`SELECT "productId","productName",unit,"supplierId","supplierName",
-   COALESCE(SUM(quantity) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseQuantity",-COALESCE(SUM(quantity) FILTER(WHERE "documentType"='reversal'),0) AS "reversedQuantity",SUM(quantity) AS "netQuantity",
+   COALESCE(SUM(quantity) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseQuantity",-COALESCE(SUM(quantity) FILTER(WHERE "documentType"<>'purchase'),0) AS "reversedQuantity",SUM(quantity) AS "netQuantity",
    MIN("unitCost") FILTER(WHERE "documentType"='purchase') AS "minPrice",MAX("unitCost") FILTER(WHERE "documentType"='purchase') AS "maxPrice",
    ROUND(SUM(quantity*"unitCost") FILTER(WHERE "documentType"='purchase')/NULLIF(SUM(quantity) FILTER(WHERE "documentType"='purchase'),0),6) AS "averagePrice",
    (ARRAY_AGG("unitCost" ORDER BY "eventAt","lineId") FILTER(WHERE "documentType"='purchase'))[1] AS "firstPrice",(ARRAY_AGG("unitCost" ORDER BY "eventAt" DESC,"lineId" DESC) FILTER(WHERE "documentType"='purchase'))[1] AS "latestPrice",
-   COALESCE(SUM(value) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseValue",-COALESCE(SUM(value) FILTER(WHERE "documentType"='reversal'),0) AS "reversalValue",SUM(value) AS "netPurchaseValue"
+   COALESCE(SUM(value) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseValue",-COALESCE(SUM(value) FILTER(WHERE "documentType"<>'purchase'),0) AS "reversalValue",SUM(value) AS "netPurchaseValue"
    FROM history GROUP BY "productId","productName",unit,"supplierId","supplierName"`
   const [count]=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`${cte} SELECT COUNT(*) AS count FROM (${selected}) result`),total=Number(count.count)
   if(isExport)exportCap(total)
   const rows=await tx.$queryRaw<Record<string,unknown>[]>(Prisma.sql`${cte} ${selected} ${view==='history'?Prisma.sql`ORDER BY "eventAt" DESC,"lineId" DESC`:Prisma.sql`ORDER BY "productId","supplierId" NULLS FIRST`} ${isExport?Prisma.empty:Prisma.sql`LIMIT ${limit} OFFSET ${skip}`}`)
-  const [summary]=await tx.$queryRaw<{purchaseValue:Prisma.Decimal;reversalValue:Prisma.Decimal;netPurchaseValue:Prisma.Decimal}[]>(Prisma.sql`${cte} SELECT COALESCE(SUM(value) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseValue",-COALESCE(SUM(value) FILTER(WHERE "documentType"='reversal'),0) AS "reversalValue",COALESCE(SUM(value),0) AS "netPurchaseValue" FROM history`)
+  const [summary]=await tx.$queryRaw<{purchaseValue:Prisma.Decimal;reversalValue:Prisma.Decimal;netPurchaseValue:Prisma.Decimal}[]>(Prisma.sql`${cte} SELECT COALESCE(SUM(value) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseValue",-COALESCE(SUM(value) FILTER(WHERE "documentType"<>'purchase'),0) AS "reversalValue",COALESCE(SUM(value),0) AS "netPurchaseValue" FROM history`)
   const meta={asOf:asOf.toISOString(),timezone:org.timezone,currency:org.currencyCode,basis:'confirmation_event_with_explicit_legacy_created_at',names:'current_catalog',view}
   if(isExport){
    const columns=view==='history'?['lineId','documentId','documentNo','documentType','reversalOfId','eventAt','legacyDate','storeId','storeName','supplierId','supplierName','productId','productName','unit','quantity','unitCost','value']:['productId','productName','unit','supplierId','supplierName','purchaseQuantity','reversedQuantity','netQuantity','minPrice','maxPrice','averagePrice','firstPrice','latestPrice','purchaseValue','reversalValue','netPurchaseValue']

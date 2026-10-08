@@ -891,3 +891,41 @@ Har POST original operationId/payload/actor bilan idempotent; boshqa payload409.
 UI har amalni inson uchun preview qilib explicit tasdiqlatadi. POSTdan oldin original kalit/payload org/user/device-scoped IndexedDBga yoziladi. Noma’lum javob va reload original saqlangan intent bilan tekshiriladi; orphan reversal `/finance` recovery inboxida saqlanadi. `finance.action` avtomatik sync orqali tasdiqsiz yuborilmaydi. Toifa/account yaratish sababi va aynan kiritilgan puldan foydalaniladi; secret/vendor protokoli yo‘q.
 
 Filiallararo transfer documentini admin ko‘rishi/reverse qilishi uchun ikkala account filialiga ham ruxsati bo‘lishi kerak. Migration041 AccountEntryga bog‘langan CashMovementni update/delete qilishdan himoyalaydi (organization cascade istisno); naqd mirror tarixdan ajralib qolmaydi.
+
+### Savdo kesimlari
+
+`GET /api/reports/breakdowns`: owner/admin, assigned filial chegaralari. `dimension=product|category|cashier|store|payment`, `storeId`, `startDate`, `endDate`, `asOf`, `page`, `limit` (max200), `format=csv` (full max10000). Default dimension store. Davr tashkilot timezone bilan; sale completedAt va return returnedAt. Barcha queries bitta RepeatableRead transactionda. Har kesimning barcha sahifalar bo‘yicha revenue jami overall sof savdoga teng bo‘lishi tekshiriladi; nomuvofiq tarix `REPORT_UNRECONCILED`409, qisman “to‘g‘ri” hisobot qaytarilmaydi.
+
+Product/category/cashier/store revenue original lineTotal−receiptDiscount va original return lineTotaldan; tarixiy COGS original SaleItem unitCost bilan. Kategoriyasiz tovar alohida guruh; kategoriya va katalog nomlari joriy ma’lumot. Kassir qaytarma original savdo kassiriga tegishli, return processor emas. Quantity faqat product kesimida mavjud; kategoriya/kassir/filial kesimida null, chunki dona va kg qo‘shilib fizik miqdor sifatida ko‘rsatilmaydi.
+
+Payment revenue original completed-sale recorded in payments (debt_collection excluded) minus davrdagi actual return cash/card/bank va return debt/write-off-reversal. Bu **sof savdo kanallari**, pul oqimi emas; keyingi qarz undirish, qo‘lda kassa, xarajat va ichki bank transfers kirmaydi. Return kanali original credit bo‘yicha keyin undirilgan cashdan qaytarilsa ayrim kanal sof natijasi manfiy bo‘lishi mumkin. Paymentda quantity/cost/profit null: tannarxni pul kanaliga taxminiy taqsimlash yo‘q.
+
+Response `data` paginated rows `{id,name,quantity,revenue,cost,grossProfit}`; Decimal stringlar. `summary={netSales,quantity,cogs,grossProfit}` butun filtered davr uchun, sahifa jami emas. CSV formula-safe, paginationdan mustaqil, summary/asOf bilan. `/reports/breakdowns` UI exact string qiymatlar, davr/kesim, pagination, refresh/new snapshot va CSVni ko‘rsatadi; org/user/role almashsa eski UI holati reset. Existing report.read va scoped export rate budgets qo‘llanadi. Yangi vendor/SDK qo‘shilmadi.
+
+## Supplier invoice, avans va qisman to‘lov
+
+Owner/admin; barcha yozuvlar live organization va assigned filial bilan cheklangan. Cashier403. `operationId` majburiy UUID: noaniq javobdan keyin aynan original body/key qayta yuboriladi. Summa decimal string, floating-point emas.
+
+- `GET /api/suppliers/{id}/ledger?page=1&limit=20`: `invoices`, `payments`, ikkita pagination va to‘liq scoped `summary` (invoiced/allocated/unpaid/paid/advance). Qatorning `allocatedAmount` qiymati barcha allocationlar yig‘indisi; sahifa limiti balansni kesmaydi.
+- `POST /api/suppliers/{id}/ledger`: `{operationId,stockDocumentId,referenceNo,reason,expectedAmount?,dueAt?}`. Faqat shu supplierga tegishli confirmed, unreversed purchase. Summa original receipt satrlarining quantity×unitCost, har satr2 kasr rounding. Invoice ro‘yxatga olish stock yoki cashni qayta yozmaydi. Eski xaridlar avtomatik unpaid deb backfill qilinmaydi: operator haqiqiy hisob-fakturani tekshiradi.
+- `POST /api/supplier-payments`: `{operationId,supplierId,accountId,amount,reason,shiftId?,referenceNo?,manualConfirmed?,allocations:[{invoiceId,amount}]}`. Cash mavjud account/ochiq shift journaliga atomik yoziladi. Bank/provider uchun tashqarida bajarilgan haqiqiy to‘lov tasdig‘i va referenceNo kerak; tashqi API chaqirilmaydi. Bo‘sh allocations to‘liq avans, qoldiq avans alohida hisoblanadi.
+- `POST /api/supplier-payments/{id}/allocate`: `{operationId,reason,allocations:[{invoiceId,amount}]}`. Mavjud avansni invoicega bog‘laydi; yangi cash chiqimi yaratmaydi. Invoice/payment bir supplier va filialniki bo‘lishi kerak.
+- `GET /api/supplier-payments/{id}/allocations?page=1&limit=20`: sahifalangan original invoice/reference/amount tarixi.
+
+Supplier kartasida to‘lov preview/tasdiq va IndexedDBdagi original intentni tiklash bor. Avtomatik offline posting yo‘q. Allocation/invoice/payment immutable; overpayment, parallel takror, audit failure transactionda himoyalangan. Qarz yoki avansdan biri nol bo‘lmasa supplier archive409. Yangi tracked invoice receiptining oddiy reversal409: supplier return alohida original-bound workflow bilan bajarilishi kerak (PUR-01.03 hali ochiq). Legacy receipt reverse o‘z kontraktini saqlaydi.
+
+## Xarid buyurtmasi va original qabul zanjiri
+
+Owner/admin, live organization/assigned branch, supplier/product/store faol.
+
+- `POST /api/purchase-orders`: `{operationId,storeId,supplierId,referenceNo,reason,items:[{productId,quantity,unitCost}]}`; 1..200 unique mahsulot. Original nom/birlik/narx snapshoti; buyurtma stock/cash/payable yaratmaydi.
+- `GET /api/purchase-orders?supplierId=…&page=1&limit=20`: bounded scoped tarix.
+- `GET /api/purchase-orders/{id}`: har original qator quantity/receivedQuantity/remainingQuantity; derived ordered/partial/received holat.
+- `POST /api/purchase-orders/{id}/receive`: `{operationId,referenceNo,reason,dueAt?,items:[{orderItemId,quantity}]}`. Qabul qilingan qatorlar uchun bitta confirmed purchase StockDocument, invoice, receipt va original line FK bitta Serializable Operationda. Supplier invoice raqami unique; stock qabul tasdig‘ida bir marta o‘zgaradi.
+- `GET /api/purchase-orders/{id}/receipts?page=1&limit=20`: bounded original receipt/stock item/invoice tarixi.
+
+Filial yoki mahsulot arxivlangan, original birlik o‘zgargan, qoldiqdan ko‘p qabul, takror line va foreign order rad etiladi. Invoice qiymati nol bo‘lgan complimentary receipt ham original iz bilan saqlanadi, qarz yoki to‘lov uydirilmaydi (migration048). Invoicega supplier payment/advance allocation yuqoridagi supplier ledger orqali ulanadi. Supplier kartasidagi preview/tasdiq saqlangan original key/payload bilan recovery qiladi; avtomatik sync emas. Qabuldan keyin tanlangan order saqlanadi va ledger/history yangilanadi.
+
+## Supplier balans va muddati hisoboti
+
+`GET /api/reports/supplier-balances?supplierId=…&storeId=…&asOf=ISO&page=1&limit=20&format=csv`: owner/admin, assigned branch. Invoice/payment/allocationsning immutable createdAt kesimi, supplier+filial guruhlari. `summary`: invoiced/allocated/unpaid/overdue/upcoming/noDueDate/paid/advance. `unpaid=invoiced−allocated=overdue+upcoming+noDueDate`; `advance=paid−allocated`. Qarz va avans netting qilinmaydi. Muddatsiz invoice muddati taxmin qilinmaydi; ro‘yxatga olinmagan legacy receipts excluded. Full CSV cap10000, formula-safe, summary barcha scoped guruhlar yig‘indisi. `asOf` kelajak bo‘lsa400; nom/currency/timezone joriy metadata, DB snapshot ko‘chirmasi emas.
