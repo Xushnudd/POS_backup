@@ -25,6 +25,7 @@ export const POST=withApi(async(request:NextRequest)=>{
   if(!current.isActive||!session||session.userId!==user.id||session.revokedAt||session.expiresAt<=now||session.idleExpiresAt<=now)throw new AccessError(401,'UNAUTHORIZED')
   if(current.passwordHash!==user.passwordHash)throw new AccessError(409,'PASSWORD_CHANGED','Parol boshqa so‘rovda o‘zgargan; qayta kiring')
   await tx.user.update({where:{id:user.id},data:{passwordHash:hash}})
+  await tx.organizationUser.updateMany({where:{userId:user.id,pinHash:{not:null}},data:{pinHash:null}})
   await tx.session.updateMany({where:{userId:user.id,revokedAt:null},data:{revokedAt:new Date()}})
   await tx.auditLog.create({data:{organizationId:context.organizationId,actorId:user.id,entityType:'User',entityId:user.id,action:'password_changed'}})
  })

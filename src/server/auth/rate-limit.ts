@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import type {Prisma} from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from './policy'
 export async function consumeLimit(category:string,identity:string,limit=5,windowMs=15*60*1000) {
@@ -11,7 +12,7 @@ export async function consumeLimit(category:string,identity:string,limit=5,windo
   RETURNING attempts,"expiresAt"`
  if (rows[0].attempts>limit) throw new AccessError(429,'RATE_LIMITED','Ko‘p urinish. Keyinroq qayta urinib ko‘ring',Math.max(1,Math.ceil((rows[0].expiresAt.getTime()-now.getTime())/1000)))
 }
-export async function clearLimit(category:string,identity:string) {
+export async function clearLimit(category:string,identity:string,tx?:Prisma.TransactionClient) {
  const key=createHash('sha256').update(category+':'+identity).digest('hex')
- await prisma.rateLimit.deleteMany({where:{key}})
+ await (tx??prisma).rateLimit.deleteMany({where:{key}})
 }

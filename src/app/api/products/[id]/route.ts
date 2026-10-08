@@ -11,6 +11,9 @@ import { z } from 'zod'
 
 const updateProductSchema = z.object({
   categoryId: z.string().uuid().optional(),
+  taxProfileId:z.string().uuid().nullable().optional(),
+  brandId: z.string().uuid().nullable().optional(),
+  description: z.string().max(4000).optional(),
   name: z.string().trim().min(2).max(200).optional(),
   sku: z.string().trim().min(2).max(100).optional(),
   barcode: z.string().trim().min(2).max(200).optional(),
@@ -18,7 +21,7 @@ const updateProductSchema = z.object({
   salePrice: amountSchema.optional(),
   costPrice: nonnegativeQuantitySchema.optional(),
   minStock: nonnegativeQuantitySchema.optional(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.union([z.string().url().refine(value=>/^https?:\/\//i.test(value)),z.string().regex(/^\/api\/files\/[0-9a-f-]{36}$/i)]).nullable().optional(),
   isActive: z.boolean().optional(),
 })
 
@@ -48,7 +51,7 @@ async function handleGET(
     const product = await db.product.findUnique({
       where: { id },
       include: {
-        category: true,
+        category: true,brand:true,taxProfile:true,
       },
     })
 

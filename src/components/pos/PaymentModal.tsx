@@ -24,6 +24,8 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   totalAmount: number;
+  taxAmount?:string;
+  netAmount?:string;
   customer: Customer | null;
   onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string) => Promise<void>;
   isLoading: boolean;
@@ -32,7 +34,7 @@ interface PaymentModalProps {
 export default function PaymentModal({
   isOpen,
   onClose,
-  totalAmount,
+  totalAmount,taxAmount,netAmount,
   customer,
   onProcessPayment,
   isLoading,
@@ -135,6 +137,7 @@ export default function PaymentModal({
       }
     >
       <div className="space-y-6">
+      {taxAmount!==undefined&&<p>Server hisobi: jami ichidagi soliq qismi {taxAmount}, soliqsiz {netAmount}.</p>}
         {/* Total sum display */}
         <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">
           <div>

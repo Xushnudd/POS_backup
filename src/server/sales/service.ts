@@ -1,3 +1,7 @@
+import {randomUUID} from 'node:crypto'
+import {discountAmount as resolveDiscount,discountAuthorization} from './discounts'
+import {priceTaxLines} from '../taxes/calculations'
+import {productTaxes,taxFingerprint} from '../taxes/service'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import type { TokenPayload } from '@/lib/auth'
@@ -18,17 +22,18 @@ export const saleDraftSchema=z.object({
   organizationId:z.string().uuid(),storeId:z.string().uuid(),registerId:z.string().uuid(),shiftId:z.string().uuid(),
   cashierId:z.string().uuid().optional(),customerId:z.string().uuid().nullable().optional(),
   sellerId:z.string().uuid().nullable().optional(),serviceType:z.string().trim().min(1).max(100).optional(),
-  operationId:z.string().uuid().optional(), note:z.string().max(2000).optional(),discountAmount:amountSchema.default(0),
-  items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0),expectedUnitPrice:amountSchema.optional()})).min(1).max(500),
+  expectedTotalAmount:amountSchema.optional(),expectedTaxFingerprint:z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  operationId:z.string().uuid().optional(), note:z.string().max(2000).optional(),discountAmount:amountSchema.default(0),discountPercent:amountSchema.refine(v=>decimal(v).lte(100)).optional(),discountReason:z.string().trim().min(3).max(2000).optional(),
+  items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0),discountPercent:amountSchema.refine(v=>decimal(v).lte(100)).optional(),expectedUnitPrice:amountSchema.optional()})).min(1).max(500),
 })
 export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:positiveAmountSchema,referenceNo:z.string().max(200).optional()})
 export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional(),cashTendered:amountSchema.optional()})
 export type DraftInput=z.infer<typeof saleDraftSchema>
-export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string) {
+export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string,options:{discountPercent?:number|string;discountReason?:string|null}={}) {
   const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})
   const units=await tx.unit.findMany({where:{organizationId:context.organizationId,code:{in:[...new Set(products.map(p=>p.unit))]}}})
   // One snapshot/stock posting per SKU, even when scanners submit repeated lines.
-  const combined=new Map<string,{productId:string;quantity:Prisma.Decimal;discountAmount:Prisma.Decimal}>()
+  const combined=new Map<string,{productId:string;quantity:Prisma.Decimal;discountAmount:Prisma.Decimal;discountPercent?:number|string}>()
   for (const item of input) {
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
@@ -37,29 +42,34 @@ export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayl
     if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
     if (decimal(item.quantity).decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
     const previous=combined.get(item.productId)
-    combined.set(item.productId,{productId:item.productId,quantity:decimal(item.quantity).add(previous?.quantity??0),discountAmount:money(item.discountAmount).add(previous?.discountAmount??0)})
+    if(previous&&(item.discountPercent!==undefined||previous.discountPercent!==undefined))throw new AccessError(400,'DUPLICATE_PERCENT_ITEM','Foizli SKU bir qatorda birlashtirilsin')
+    combined.set(item.productId,{productId:item.productId,quantity:decimal(item.quantity).add(previous?.quantity??0),discountAmount:money(item.discountAmount).add(previous?.discountAmount??0),discountPercent:item.discountPercent})
   }
   input=[...combined.values()].sort((a,b)=>a.productId.localeCompare(b.productId)).map(item=>({...item,quantity:quantitySchema.parse(item.quantity.toFixed()),discountAmount:amountSchema.parse(item.discountAmount.toFixed())}))
-  const rows=input.map(item=>{
+  const taxFor=await productTaxes(tx,context.organizationId,products.map(p=>p.taxProfileId));
+  const rawRows=input.map(item=>{
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
     const quantity=decimal(item.quantity)
     const unit=units.find(value=>value.code===product.unit)
     if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
     if (quantity.decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
-    return {productId:product.id,productName:product.name,sku:product.sku,unit:product.unit,quantity,unitPrice:product.salePrice,unitCost:product.costPrice,
-      discountAmount:money(item.discountAmount),lineTotal:lineTotal(quantity,product.salePrice,item.discountAmount)}
+    const discountAmount=resolveDiscount(lineTotal(quantity,product.salePrice,0),item.discountAmount,item.discountPercent)
+    return {id:product.id,...taxFor(product.taxProfileId),productId:product.id,productName:product.name,sku:product.sku,unit:product.unit,quantity,unitPrice:product.salePrice,unitCost:product.costPrice,
+      discountPercent:item.discountPercent===undefined?null:decimal(item.discountPercent),discountAmount,lineTotal:lineTotal(quantity,product.salePrice,discountAmount)}
   })
-  const totals=draftTotals(rows,receiptDiscount)
-  await enforceDiscountLimit(tx,context,rows,totals.totalAmount)
-  return {rows,totals}
+  const base=rawRows.reduce((n,row)=>n.add(row.lineTotal),decimal(0))
+  receiptDiscount=resolveDiscount(base,receiptDiscount,options.discountPercent)
+  const rawTotals=draftTotals(rawRows,receiptDiscount)
+  const authorization=await discountAuthorization(tx,context,rawRows,rawTotals.totalAmount,options.discountReason)
+  const rows=priceTaxLines(rawRows,receiptDiscount).map(row=>({...row,id:randomUUID()}))
+  const taxAmount=rows.reduce((sum,row)=>sum.add(row.taxAmount),decimal(0)),netAmount=rows.reduce((sum,row)=>sum.add(row.taxBase),decimal(0))
+  const totals={...rawTotals,totalAmount:netAmount.add(taxAmount),taxAmount,netAmount}
+  if(totals.totalAmount.gte('1000000000000'))throw new AccessError(400,'INVALID_AMOUNT')
+  return {rows,totals,authorization,taxFingerprint:taxFingerprint(rows)}
 }
-export async function enforceDiscountLimit(tx:Prisma.TransactionClient,context:TokenPayload,rows:{quantity:Prisma.Decimal;unitPrice:Prisma.Decimal}[],totalAmount:Prisma.Decimal) {
-  const gross=rows.reduce((sum,x)=>sum.add(x.quantity.mul(x.unitPrice)),decimal(0))
-  const off=gross.sub(totalAmount)
-  const policy=await tx.discountPolicy.findFirst({where:{organizationId:context.organizationId,isActive:true}})
-  const max=context.role==='owner'?decimal(100):context.role==='admin'?decimal(policy?.adminMaxPercent??0):decimal(policy?.cashierMaxPercent??0)
-  if (gross.gt(0) && off.mul(100).div(gross).gt(max)) throw new AccessError(403,'DISCOUNT_LIMIT','Chegirma vakolat chegarasidan oshdi')
+export async function enforceDiscountLimit(tx:Prisma.TransactionClient,context:TokenPayload,rows:{quantity:Prisma.Decimal;unitPrice:Prisma.Decimal}[],totalAmount:Prisma.Decimal,reason?:string|null,requireReason=true) {
+  return discountAuthorization(tx,context,rows,totalAmount,reason,requireReason)
 }
 export async function requireOpenShift(tx:Prisma.TransactionClient,context:TokenPayload,shiftId:string,closing=false) {
   await tx.$queryRaw`SELECT id FROM "Shift" WHERE id=${shiftId} FOR UPDATE`
@@ -77,9 +87,10 @@ export async function createDraft(context:TokenPayload,input:DraftInput,key:stri
       if(context.role==='cashier'&&input.sellerId!==context.userId)throw new AccessError(403,'SELLER_FORBIDDEN')
       if(!await tx.organizationUser.findFirst({where:{organizationId:context.organizationId,userId:input.sellerId,isActive:true,user:{isActive:true},...(context.role!=='owner'?{userStores:{some:{storeId:input.storeId}}}:{})}}))throw new AccessError(404,'SELLER_NOT_FOUND')
     }
-    const {rows,totals}=await prepareItems(tx,context,input.items,input.discountAmount)
+    const {rows,totals,authorization,taxFingerprint:fingerprint}=await prepareItems(tx,context,input.items,input.discountAmount,input)
+    if(input.expectedTotalAmount!==undefined&&!totals.totalAmount.eq(input.expectedTotalAmount)||input.expectedTaxFingerprint!==undefined&&input.expectedTaxFingerprint!==fingerprint)throw new AccessError(409,'TAX_OR_TOTAL_CHANGED','Narx yoki soliq hisobi o‘zgardi; to‘lov oldidan qayta ko‘rib chiqing')
     const [counter]=await tx.$queryRaw<{value:Prisma.Decimal}[]>`UPDATE "Register" SET "receiptSequence"="receiptSequence"+1 WHERE id=${input.registerId} RETURNING "receiptSequence" AS value`
-    const sale=await tx.sale.create({data:{organizationId:context.organizationId,storeId:input.storeId,registerId:input.registerId,shiftId:input.shiftId,cashierId:context.userId,customerId:input.customerId,receiptNo:'POS-'+counter.value.toFixed(0),note:input.note,sellerId:input.sellerId,serviceType:input.serviceType,...totals,items:{create:rows}},include:{items:true}})
+    const sale=await tx.sale.create({data:{organizationId:context.organizationId,storeId:input.storeId,registerId:input.registerId,shiftId:input.shiftId,cashierId:context.userId,customerId:input.customerId,receiptNo:'POS-'+counter.value.toFixed(0),note:input.note,sellerId:input.sellerId,serviceType:input.serviceType,...authorization,discountPercent:input.discountPercent===undefined?null:decimal(input.discountPercent),...totals,items:{create:rows}},include:{items:true}})
     await audit(tx,context,'Sale',sale.id,'draft_created')
     return sale
   })
@@ -92,7 +103,7 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
     if (sale.status!=='draft') throw new AccessError(409,'INVALID_STATUS','Savdo allaqachon yakunlangan')
     await requireOpenShift(tx,context,sale.shiftId)
     if (!sale.items.length) throw new AccessError(400,'EMPTY_SALE')
-    await enforceDiscountLimit(tx,context,sale.items,sale.totalAmount)
+    const authorization=await enforceDiscountLimit(tx,context,sale.items,draftTotals(sale.items,sale.discountAmount).totalAmount,sale.discountReason,sale.discountPolicySnapshot!==null)
     const total=input.payments.reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
     if (!total.eq(sale.totalAmount)) throw new AccessError(400,'INVALID_PAYMENT','To‘lovlar jami savdoga teng bo‘lishi kerak')
     const appliedCash=input.payments.filter(p=>p.paymentType==='cash').reduce((sum,p)=>sum.add(money(p.amount)),decimal(0))
@@ -111,17 +122,21 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
       await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit,actorId:context.userId,dueAt:input.creditDueAt?new Date(input.creditDueAt):undefined}})
     }
     const allocation=allocateMoney(sale.discountAmount,sale.items.map(x=>({id:x.id,weight:x.lineTotal})))
+    const currentProducts=await tx.product.findMany({where:{id:{in:sale.items.map(i=>i.productId)},organizationId:context.organizationId}})
+    const taxFor=await productTaxes(tx,context.organizationId,currentProducts.map(p=>p.taxProfileId))
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
       const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
       if (product && item.unit && product.unit!==item.unit) throw new AccessError(409,'UNIT_CHANGED','Mahsulot birligi o‘zgardi; savatni yangilang')
       if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; qayta tasdiqlang',undefined,{stage:'sale',productId:item.productId,productName:item.productName,previousPrice:item.unitPrice,currentPrice:product?.salePrice??null})
       const balance=await tx.inventoryBalance.findUnique({where:{storeId_productId:{storeId:sale.storeId,productId:item.productId}}})
       if(!sale.organization.allowNegativeStock && item.quantity.gt(balance?.quantity??0))throw new AccessError(409,'INSUFFICIENT_STOCK','Yetarli qoldiq yo‘q; miqdorni tekshiring',undefined,{stage:'sale',productId:item.productId,productName:item.productName,requestedQuantity:item.quantity,availableQuantity:balance?.quantity??decimal(0)})
-      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:allocation[item.id],unitCost:product.costPrice}})
+      const currentTax=taxFor(product.taxProfileId)
+      if(item.taxVersionId!==currentTax.taxVersionId||item.taxMode!==currentTax.taxMode||!item.taxRate.eq(currentTax.taxRate))throw new AccessError(409,'TAX_CHANGED','Soliq siyosati o‘zgardi; original qoralamani tekshiring va qayta tasdiqlang')
+      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:sale.netAmount===null?allocation[item.id]:item.receiptDiscount,unitCost:product.costPrice}})
       await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
     }
     for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
-    const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange},include:{items:true,payments:true}})
+    const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange,...authorization},include:{items:true,payments:true}})
     await audit(tx,context,'Sale',sale.id,'completed',{totalAmount:sale.totalAmount,payments:input.payments,cashTendered:tender,cashChange})
     return updated
   })

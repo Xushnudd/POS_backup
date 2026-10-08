@@ -1,6 +1,6 @@
 # API vakolat va chegara reyestri
 
-2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir109 template va150 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
+2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir118 template va165 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
 
 Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/store bilan; tashkilotni tahrirlash va xodimlarni boshqarish owner-only. Cashier faqat sales/shifts/products/categories/customers/stores/auth/operations/sync; katalog/mijoz/do‘kon mutatsiyalari yopiq. `/void` manager-only. Ownership recipient GET/accept o‘z persistent requestiga ega. **Gateway allow yakuniy ruxsat emas:** return, corrections, bank deposit, settlement, export/cost, pending-close, foreign actor va branch cheklovlari xizmat ichida ham tekshiriladi. UI yashirish himoya o‘rnini bosmaydi.
 
@@ -17,6 +17,10 @@ Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/st
 | /api/auth/me | GET | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/auth/register | POST | public; JSON/CSRF mutation checks | public exception |
 | /api/auth/sessions | GET, POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
+| /api/brands | GET, POST | live session; same organization; manager mutations/list-files; cashier active brands/protected binary read | unauth401; foreign404; cashier mutation403; expiry/delete410 |
+| /api/brands/[id] | PUT | live session; same organization; manager mutations/list-files; cashier active brands/protected binary read | unauth401; foreign404; cashier mutation403; expiry/delete410 |
+| /api/files | GET, POST | live session; same organization; manager mutations/list-files; cashier active brands/protected binary read | unauth401; foreign404; cashier mutation403; expiry/delete410 |
+| /api/files/[id] | GET, DELETE | live session; same organization; manager mutations/list-files; cashier active brands/protected binary read | unauth401; foreign404; cashier mutation403; expiry/delete410 |
 | /api/categories/[id] | PUT, DELETE | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/categories | GET, POST | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
 | /api/customers/[id]/debt | GET | live session; owner/admin/cashier gateway + service policy | unauth401; foreign organization403/404; foreign store403/404; forbidden cashier403 |
@@ -150,3 +154,21 @@ Automatic protected-handler enumeration barcha yangi routega401/tenant/store/cas
 | /api/purchase-orders/[id]/receive | POST | owner/admin; scoped original order/item | stock/invoice/receipt/audit/Operation atomic |
 | /api/purchase-orders/[id]/receipts | GET | owner/admin; scoped parent | bounded receipt/invoice history |
 | /api/reports/supplier-balances | GET | owner/admin; scoped invoice/payment branches | exact aging; past cutoff; full CSV; cashier403 |
+
+
+| Route | Methods | Vakolat va scope | Majburiy invariant |
+| --- | --- | --- | --- |
+| /api/supplier-invoices/[id] | GET | owner/admin; original invoice organization + assigned branch | original/net value and remaining quantity |
+| /api/supplier-invoices/[id]/credits | GET, POST | owner/admin; scoped invoice + original receipt items | preview, quantity/value bounds, immutable release, atomic stock/debt, no fake cash refund |
+
+Dynamic boundary tests yangi handlerlarni ham tekshiradi. Explicit supplier credit tests foreign owner404/cashier403, paid advance, late audit rollback, parallel original quantity va deferred malformed journal rad holatlarini tekshiradi. Bu SEC-01.02/04ni alohida qabul mezonisiz avtomatik done qilmaydi.
+
+
+| Route | Methods | Vakolat va scope | Majburiy invariant |
+| --- | --- | --- | --- |
+| /api/products/[id]/variants | GET, POST | live owner/admin read/create; cashier read only; parent organization scoped | assigned store quantities, hidden cost, unique canonical options, original operation replay, no invented stock/cash |
+
+Variant POST cashier403/foreign404; GET cashier200 va faqat assigned store qty, foreign404 explicit testli. ProductVariant composite SQL FKs, immutable relation va unit checks negative direct DB testlarda tekshiriladi. Har SKU barcode/sale/return mustaqil; generic boundary inventory yangi GET/POSTni ham qamrab oladi.
+
+| /api/auth/pin | POST | own cashier + password reauthentication | owner/admin403; invalid password403; malformed400; live session401 |
+| /api/auth/pin-switch | GET, POST | live source session; active assigned branch; target cashier only | foreign/hidden403/404; invalidPIN401; rate429; source consumed401; no elevation |

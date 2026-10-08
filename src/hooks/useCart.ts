@@ -1,10 +1,13 @@
-import { clientLine, fixed, displayed } from '@/lib/money';
+import { clientLine, clientPercentage, fixed, displayed } from '@/lib/money';
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Customer, Product } from '@/types';
 
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [cartDiscount, setCartDiscount] = useState<number>(0);
+  const [amountDiscount, setAmountDiscount] = useState<number>(0);
+  const [cartDiscountPercent,setCartDiscountPercent]=useState<number|undefined>();
+  const [discountReason,setDiscountReason]=useState('');
+  const setCartDiscount=useCallback((value:number)=>{setCartDiscountPercent(undefined);setAmountDiscount(value);},[]);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [note, setNote] = useState<string>('');
 
@@ -16,11 +19,12 @@ export function useCart() {
         const updated = [...prev];
         const currentItem = updated[existingIdx];
         const newQty = currentItem.quantity + quantity;
-        const lineTotal = clientLine(newQty, currentItem.unitPrice, currentItem.discountAmount);
+        const discountAmount=currentItem.discountPercent===undefined?currentItem.discountAmount:clientPercentage(clientLine(newQty,currentItem.unitPrice),currentItem.discountPercent);
+        const lineTotal = clientLine(newQty, currentItem.unitPrice, discountAmount);
 
         updated[existingIdx] = {
           ...currentItem,
-          quantity: newQty,
+          quantity: newQty,discountAmount,
           lineTotal: Math.max(0, lineTotal),
         };
         return updated;
@@ -51,10 +55,11 @@ export function useCart() {
     setItems((prev) =>
       prev.map((item) => {
         if (item.product.id === productId) {
-          const lineTotal = clientLine(quantity, item.unitPrice, item.discountAmount);
+          const discountAmount=item.discountPercent===undefined?item.discountAmount:clientPercentage(clientLine(quantity,item.unitPrice),item.discountPercent);
+          const lineTotal = clientLine(quantity, item.unitPrice, discountAmount);
           return {
             ...item,
-            quantity,
+            quantity,discountAmount,
             lineTotal: Math.max(0, lineTotal),
           };
         }
@@ -64,15 +69,15 @@ export function useCart() {
   }, []);
 
   const updateLineDiscount = useCallback(
-    (productId: string, discountAmount: number) => {
+    (productId: string, discountAmount: number,discountPercent?:number) => {
       setItems((prev) =>
         prev.map((item) => {
           if (item.product.id === productId) {
-            const safeDiscount = Math.max(0, Math.min(discountAmount, item.quantity * item.unitPrice));
+            const safeDiscount = discountPercent===undefined?Math.max(0, Math.min(discountAmount, clientLine(item.quantity,item.unitPrice))):clientPercentage(clientLine(item.quantity,item.unitPrice),discountPercent);
             const lineTotal = clientLine(item.quantity, item.unitPrice, safeDiscount);
             return {
               ...item,
-              discountAmount: safeDiscount,
+              discountAmount: safeDiscount,discountPercent,
               lineTotal,
             };
           }
@@ -91,13 +96,14 @@ export function useCart() {
     setItems([]);
     setCartDiscount(0);
     setCustomer(null);
-    setNote('');
-  }, []);
+    setNote('');setCartDiscountPercent(undefined);setDiscountReason('');
+  }, [setCartDiscount]);
 
   const subtotal = useMemo(() => {
     return displayed(items.reduce((sum, item) => sum + fixed(item.lineTotal), BigInt(0)));
   }, [items]);
 
+  const cartDiscount=cartDiscountPercent===undefined?amountDiscount:clientPercentage(subtotal,cartDiscountPercent);
   const totalAmount = useMemo(() => {
     const net=fixed(subtotal)-fixed(Number(cartDiscount)||0);
     return displayed(net<BigInt(0)?BigInt(0):net);
@@ -107,9 +113,9 @@ export function useCart() {
     return items.reduce((sum, item) => sum + item.quantity, 0);
   }, [items]);
 
-  const hydrate = useCallback((snapshot: { items: CartItem[]; cartDiscount: number; customer: Customer | null; note: string }) => {
-    setItems(snapshot.items); setCartDiscount(snapshot.cartDiscount); setCustomer(snapshot.customer); setNote(snapshot.note);
-  }, []);
+  const hydrate = useCallback((snapshot: { items: CartItem[]; cartDiscount: number; customer: Customer | null; note: string;discountReason?:string;cartDiscountPercent?:number }) => {
+    setItems(snapshot.items); setCartDiscount(snapshot.cartDiscount); setCustomer(snapshot.customer); setNote(snapshot.note);setDiscountReason(snapshot.discountReason??'');setCartDiscountPercent(snapshot.cartDiscountPercent);
+  }, [setCartDiscount]);
 
   return {
     hydrate,
@@ -119,7 +125,7 @@ export function useCart() {
     updateLineDiscount,
     removeItem,
     clearCart,
-    cartDiscount,
+    cartDiscount,cartDiscountPercent,setCartDiscountPercent,discountReason,setDiscountReason,
     setCartDiscount,
     customer,
     setCustomer,

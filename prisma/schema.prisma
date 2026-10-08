@@ -10,6 +10,9 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+  taxProfiles TaxProfile[]
+  brands Brand[]
+  files FileAsset[]
   purchaseOrders PurchaseOrder[]
   supplierInvoices SupplierInvoice[]
   supplierPayments SupplierPayment[]
@@ -89,6 +92,7 @@ model User {
 }
 
 model OrganizationUser {
+  pinHash String?
   id             String   @id @default(uuid())
   organizationId String
   userId         String
@@ -167,6 +171,9 @@ model Register {
 
 // Catalog
 model Category {
+  parentId String?
+  parent Category? @relation("CategoryTree",fields:[parentId],references:[id],onDelete:NoAction)
+  children Category[] @relation("CategoryTree")
   id             String   @id @default(uuid())
   organizationId String
   name           String
@@ -182,6 +189,14 @@ model Category {
 }
 
 model Product {
+  taxProfileId String?
+  taxProfile TaxProfile? @relation(fields:[taxProfileId],references:[id],onDelete:NoAction)
+  brandId String?
+  brand Brand? @relation(fields:[brandId],references:[id],onDelete:NoAction)
+  description String @default("")
+  files FileAsset[]
+  variant ProductVariant? @relation("VariantStock")
+  variants ProductVariant[] @relation("VariantRoot")
   purchaseOrderItems PurchaseOrderItem[]
   priceHistory ProductPriceHistory[]
   stockThresholds StockThreshold[]
@@ -430,6 +445,14 @@ model ShiftCorrection {
 }
 
 model Sale {
+  discountPercent Decimal? @db.Decimal(5,2)
+  discountReason String?
+  discountApprovedBy String?
+  discountApprovedRole String?
+  discountApprovedAt DateTime?
+  discountPolicySnapshot Json?
+  taxAmount Decimal @default(0) @db.Decimal(14,2)
+  netAmount Decimal? @db.Decimal(14,2)
   fiscalReceiptNo String?
   id             String   @id @default(uuid())
   organizationId String
@@ -469,6 +492,15 @@ model Sale {
 }
 
 model SaleItem {
+  discountPercent Decimal? @db.Decimal(5,2)
+  taxVersionId String?
+  taxVersion TaxProfileVersion? @relation(fields:[taxVersionId],references:[id],onDelete:NoAction)
+  taxMode String @default("unconfigured")
+  taxRate Decimal @default(0) @db.Decimal(5,2)
+  taxBase Decimal? @db.Decimal(14,2)
+  taxAmount Decimal @default(0) @db.Decimal(14,2)
+  payableAmount Decimal? @db.Decimal(14,2)
+  roundingVersion String @default("legacy-unspecified")
   id             String   @id @default(uuid())
   saleId         String
   productId      String
@@ -534,6 +566,9 @@ model SaleReturn {
 }
 
 model SaleReturnItem {
+  taxAmount Decimal @default(0) @db.Decimal(14,2)
+  taxBase Decimal? @db.Decimal(14,2)
+  discountAmount Decimal @default(0) @db.Decimal(14,2)
   id              String   @id @default(uuid())
   saleReturnId    String
   saleItemId      String
@@ -584,6 +619,8 @@ model AuditLog {
 }
 // Opaque tokens are only sent through an HttpOnly cookie; only SHA-256 is stored.
 model Session {
+  authenticationMethod String @default("password")
+  pinStoreId String?
   id             String @id @default(uuid())
   tokenHash      String @unique
   userId         String
@@ -1051,4 +1088,79 @@ model SupplierAllocationRelease {
  credit SupplierCredit @relation(fields:[creditId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  @@unique([creditId,allocationId])
  @@index([allocationId])
+}
+
+
+// Each SKU remains the stock key; this relation groups independently sellable SKUs.
+model ProductVariant {
+  organizationId String
+  productId String @id
+  rootProductId String
+  options Json @db.JsonB
+  combinationKey String @default(dbgenerated())
+  product Product @relation("VariantStock", fields: [productId], references: [id], onDelete: Cascade)
+  root Product @relation("VariantRoot", fields: [rootProductId], references: [id], onDelete: NoAction)
+  @@unique([rootProductId, combinationKey])
+}
+
+
+model FileAsset {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ createdBy String
+ name String
+ mime String
+ size Int
+ sha256 String
+ width Int
+ height Int
+ data Bytes?
+ createdAt DateTime @default(now())
+ expiresAt DateTime?
+ deletedAt DateTime?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ @@index([organizationId,productId,createdAt])
+}
+
+
+model Brand {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ products Product[]
+ @@unique([organizationId,name])
+}
+
+model TaxProfile {
+  id String @id @default(uuid())
+  organizationId String
+  name String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  versions TaxProfileVersion[]
+  products Product[]
+  @@unique([organizationId,name])
+}
+model TaxProfileVersion {
+  id String @id @default(uuid())
+  profileId String
+  organizationId String
+  mode String
+  rate Decimal @db.Decimal(5,2)
+  exemptionReason String?
+  effectiveAt DateTime
+  createdAt DateTime @default(now())
+  createdBy String
+  profile TaxProfile @relation(fields:[profileId],references:[id],onDelete:Cascade)
+  saleItems SaleItem[]
+  @@unique([profileId,effectiveAt])
+  @@index([organizationId,effectiveAt])
 }

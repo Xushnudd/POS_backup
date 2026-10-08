@@ -776,7 +776,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-02.08** — XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi.
+- [x] **SEC-02.08** — XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi.
 
   **Texnologiya:** React escaping, Zod, Node file checks, CSV xavfsizligi.
 
@@ -789,6 +789,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** XSS payload, zararli fayl/CSV va noto‘g‘ri parametr xavfsiz rad yoki zararsiz ko‘rsatiladi.
+
+  **Qabul:** `done`, 2026-10-08. Protected files/katalog/CSP qabul protokoli EXECUTION_STATUS.md oxirida.
 
   **Dalil:** `SEC-02.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -866,7 +868,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `USR-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **USR-01.04** — Tez kassir almashish uchun PIN; PIN yuqori vakolat o‘rnini bosmasligi.
+- [x] **USR-01.04** — Tez kassir almashish uchun PIN; PIN yuqori vakolat o‘rnini bosmasligi.
 
   **Texnologiya:** bcryptjs, PostgreSQL PIN attempts, React modal.
 
@@ -879,6 +881,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** PIN almashinuvi kassirni to‘g‘ri belgilaydi; PIN owner/admin vakolatini bermaydi va attempts cheklangan.
+
+  **Qabul:** `done`, 2026-10-08. ADR-036 va EXECUTION_STATUS.md cashier PIN qabul protokoli.
 
   **Dalil:** `USR-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1364,7 +1368,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
 #### CAT-01 — savdoga tayyor katalog [P1]
 
-- [ ] **CAT-01.01** — Kategoriya daraxti, brend, rasm, tavsif va faol/arxiv holati.
+- [x] **CAT-01.01** — Kategoriya daraxti, brend, rasm, tavsif va faol/arxiv holati.
 
   **Texnologiya:** Prisma relational models, React/Tailwind, Node file storage.
 
@@ -1377,6 +1381,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Category cycle rad; brand/image/status CRUD ishlaydi; archived mahsulot yangi savdoda tanlanmaydi.
+
+  **Qabul:** `done`, 2026-10-08. Protected files/katalog/CSP qabul protokoli EXECUTION_STATUS.md oxirida.
 
   **Dalil:** `CAT-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1398,7 +1404,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.03** — Rang/o‘lcham kabi variantlar; har variantning alohida qoldig‘i va barkodi.
+- [x] **CAT-01.03** — Rang/o‘lcham kabi variantlar; har variantning alohida qoldig‘i va barkodi.
 
   **Texnologiya:** Prisma ProductVariant/Option, PostgreSQL unique.
 
@@ -1786,7 +1792,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `PUR-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **PUR-01.03** — Yetkazib beruvchiga qaytarish, narx/miqdor farqi va qarzni yangilash.
+- [x] **PUR-01.03** — Yetkazib beruvchiga qaytarish, narx/miqdor farqi va qarzni yangilash.
 
   **Texnologiya:** Prisma PurchaseReturn, SQL locks, debt ledger.
 
@@ -3459,11 +3465,11 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
 
   **Dalil:** `DATA-01.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **DATA-01.09** — Fayllar uchun vakolatli saqlash, yuklash cheklovi va o‘chirish siyosati.
+- [x] **DATA-01.09** — Fayllar uchun vakolatli saqlash, yuklash cheklovi va o‘chirish siyosati.
 
-  **Texnologiya:** Node fs/streams, Next.js protected download, Prisma metadata.
+  **Texnologiya:** Mavjud PostgreSQL durable volume/Bytes, Prisma, Next.js protected binary download, existing sharp image decoder.
 
-  **Bajarish:** Bir instance uchun durable mounted volume, tenant/object ownership va quota; keyin ko‘p instance uchun T10 object storage. Public papkaga mijoz hujjati qo‘yilmaydi.
+  **Bajarish:** Static PNG/JPEG/WebPni512KiB bilan cheklab WebPga sanitizatsiya qilish; bytes/metadata/tenant link/auditni bitta DB transaction va encrypted backupda saqlash. Default100MiB tenant quota, expiry/access/tombstone delete. PostgreSQL mavjud durable volume yetarli; katta fayl ehtiyoji tasdiqlanganda T10 storage. Public papkaga mijoz hujjati qo‘yilmaydi. ADR-035.
 
   **Manba:** FULL_PROJECT_PLAN.md, 380-satr; vazifa №9 (DATA-01).
 
@@ -3472,6 +3478,8 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Upload size/type/access/expiry/delete testlari; begona tenant faylni o‘qiy olmaydi.
+
+  **Qabul:** `done`, 2026-10-08. Protected files/katalog/CSP qabul protokoli EXECUTION_STATUS.md oxirida.
 
   **Dalil:** `DATA-01.09` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

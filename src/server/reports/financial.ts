@@ -21,7 +21,7 @@ export async function financialFilter(tx:Prisma.TransactionClient,context:TokenP
 export type FinancialFilter=Awaited<ReturnType<typeof financialFilter>>
 export async function financialSummary(tx:Prisma.TransactionClient,context:TokenPayload,filter:FinancialFilter) {
  const [total,sums,itemCount,returned]=await Promise.all([
-  tx.sale.count({where:filter.sales}),tx.sale.aggregate({where:filter.sales,_sum:{totalAmount:true,discountAmount:true}}),
+  tx.sale.count({where:filter.sales}),tx.sale.aggregate({where:filter.sales,_sum:{totalAmount:true,discountAmount:true,taxAmount:true}}),
   tx.saleItem.count({where:{sale:filter.sales}}),tx.saleReturn.aggregate({where:filter.returns,_sum:{refundAmount:true}}),
  ])
  const branches=context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND p."storeId" IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`
@@ -36,6 +36,8 @@ export async function financialSummary(tx:Prisma.TransactionClient,context:Token
   FROM "Payment" p WHERE p."organizationId"=${context.organizationId} AND p.status='recorded' AND p."createdAt"<=${filter.asOf} AND p."paidAt"<=${filter.asOf}
   ${branches} ${filter.storeId?Prisma.sql`AND p."storeId"=${filter.storeId}`:Prisma.empty}
   ${filter.range.gte?Prisma.sql`AND p."paidAt">=${filter.range.gte}`:Prisma.empty} ${filter.range.lt?Prisma.sql`AND p."paidAt"<${filter.range.lt}`:Prisma.empty}`)
+ const returnedTax=await tx.saleReturnItem.aggregate({where:{saleReturn:filter.returns},_sum:{taxAmount:true}})
+ const taxAmount=decimal(sums._sum.taxAmount??0).sub(returnedTax._sum.taxAmount??0)
  const grossRevenue=decimal(sums._sum.totalAmount??0),refundAmount=decimal(returned._sum.refundAmount??0),totalRevenue=grossRevenue.sub(refundAmount)
- return {total,summary:{grossRevenue,refundAmount,totalRevenue,totalDiscount:decimal(sums._sum.discountAmount??0),totalItems:itemCount,averageSale:total?totalRevenue.div(total).toDecimalPlaces(2).toString():'0.00',...cash[0]}}
+ return {total,summary:{grossRevenue,refundAmount,totalRevenue,taxAmount,revenueExcludingTax:totalRevenue.sub(taxAmount),totalDiscount:decimal(sums._sum.discountAmount??0),totalItems:itemCount,averageSale:total?totalRevenue.div(total).toDecimalPlaces(2).toString():'0.00',...cash[0]}}
 }

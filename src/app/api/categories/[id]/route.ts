@@ -1,3 +1,5 @@
+import {validateCategoryParent} from '@/server/catalog/category-tree'
+import {Prisma} from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -7,6 +9,7 @@ import { z } from 'zod'
 
 const updateCategorySchema = z.object({
   name: z.string().trim().min(2).max(200).optional(),
+  parentId: z.string().uuid().nullable().optional(),
   sortOrder: z.number().int().min(-2147483648).max(2147483647).optional(),
   isActive: z.boolean().optional(),
 })
@@ -38,11 +41,13 @@ async function handlePUT(
     const validatedData = updateCategorySchema.parse(body)
 
     const category = await db.$transaction(async tx => {
+      if(validatedData.parentId!==undefined)await validateCategoryParent(tx,payload.organizationId,validatedData.parentId,id)
       const result = await tx.category.update({
       where: { id },
       data: validatedData,
     })
       await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"update"}})
+      await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
       return result
     })
 
@@ -53,7 +58,7 @@ async function handlePUT(
     })
 
   } catch (error) {
-    if (error instanceof AccessError) throw error
+    if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
@@ -98,6 +103,7 @@ async function handleDELETE(
       data: { isActive: false },
     })
       await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"update"}})
+      await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
       return result
     })
 
@@ -107,7 +113,7 @@ async function handleDELETE(
     })
 
   } catch (error) {
-    if (error instanceof AccessError) throw error
+    if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }

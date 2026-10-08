@@ -36,7 +36,7 @@ export default function PosPage() {
     items,
     subtotal,
     totalAmount,
-    cartDiscount,
+    cartDiscount,cartDiscountPercent,setCartDiscountPercent,discountReason,setDiscountReason,
     customer,
     note,
     addItem,
@@ -60,6 +60,7 @@ export default function PosPage() {
 
   // Modals
   const [isOpenShiftModalOpen, setIsOpenShiftModalOpen] = useState<boolean>(false);
+  const [paymentQuote,setPaymentQuote]=useState<{signature:string;taxFingerprint:string;totals:{totalAmount:string;taxAmount:string;netAmount:string}}|null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
@@ -113,22 +114,6 @@ export default function PosPage() {
     void Promise.resolve().then(loadProducts);
   }, [loadProducts]);
 
-  // Check if shift is open
-  const handleProceedToPayment = () => {
-    if(lookupCount.current>0){notifyError('Avval mahsulot tekshiruvi tugashini kuting');return;}
-    if (!activeShift) {
-      setIsOpenShiftModalOpen(true);
-      notifyError('Savdo qilish uchun avval smenani ochishingiz zarur!');
-      return;
-    }
-    if(hasPendingCheckout&&!checkoutAttempt.current?.saleId){notifyError('Avval asl qoralama natijasini tekshiring');return;}
-    if (items.length === 0) {
-      notifyError('Savatda hech qanday mahsulot yo\'q');
-      return;
-    }
-    setIsPaymentModalOpen(true);
-  };
-
   const handleCameraBarcode = async (barcode: string, allowCatalogIdentifier=false) => {
     if (!organization?.id || !localReady || hasPendingCheckout || isProcessingPayment) return;
     const originalActor=actorScope;
@@ -171,6 +156,8 @@ export default function PosPage() {
 
   const [localReady,setLocalReady]=useState(false);
   const [serviceType,setServiceType]=useState('');
+  const [localSaveProof,setLocalSaveProof]=useState<string|null>(null);
+  const localSnapshot=JSON.stringify({items,cartDiscount,cartDiscountPercent,discountReason,customer,note,serviceType});
   const [hasPendingCheckout,setHasPendingCheckout]=useState(false);
   const checkoutAttempt = useRef<{ operationId: string; payload: string; saleId?: string } | null>(null);
   useEffect(() => {
@@ -194,11 +181,18 @@ export default function PosPage() {
   useEffect(()=>{
     if (!localReady || !organization?.id || !user?.id) return;
     const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()};
-    const timer=setTimeout(()=>{void saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current}).catch(()=>notifyError('Savat lokal saqlanmadi; ushbu oynani yopmang'));},200);
-    return ()=>clearTimeout(timer);
-  },[localReady,organization?.id,user?.id,items,cartDiscount,customer,note,serviceType,notifyError]);
+    let cancelled=false;
+    const timer=setTimeout(()=>{void saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:checkoutAttempt.current}).then(()=>{if(!cancelled)setLocalSaveProof(localSnapshot);}).catch(()=>notifyError('Savat lokal saqlanmadi; ushbu oynani yopmang'));},200);
+    return ()=>{cancelled=true;clearTimeout(timer);};
+  },[localReady,organization?.id,user?.id,items,cartDiscount,customer,note,cartDiscountPercent,discountReason,serviceType,localSnapshot,notifyError]);
 
-  const buildDraftPayload=()=>{
+  useEffect(()=>{
+    if(!localReady||localSaveProof===localSnapshot)return;
+    const guard=(event:BeforeUnloadEvent)=>{event.preventDefault();};window.addEventListener('beforeunload',guard);
+    return ()=>window.removeEventListener('beforeunload',guard);
+  },[localReady,localSaveProof,localSnapshot]);
+
+  const buildDraftPayload=useCallback(()=>{
     return {
         organizationId: organization?.id,
         storeId: activeStore?.id,
@@ -206,7 +200,7 @@ export default function PosPage() {
         shiftId: activeShift?.id,
         cashierId: user?.id,
         customerId: customer?.id || undefined,
-        discountAmount: cartDiscount,
+        discountAmount: cartDiscount,discountPercent:cartDiscountPercent,discountReason:discountReason.trim()||undefined,
         note: note || undefined,
         sellerId:user?.id,serviceType:serviceType.trim()||undefined,
         items: items.map((i) => ({
@@ -216,10 +210,28 @@ export default function PosPage() {
           quantity: i.quantity,
           unitPrice: i.unitPrice,
           expectedUnitPrice: i.unitPrice,
-          discountAmount: i.discountAmount,
+          discountAmount: i.discountAmount,discountPercent:i.discountPercent,
         })),
       };
-  };
+  },[organization?.id,activeStore?.id,activeRegister?.id,activeShift?.id,user?.id,customer?.id,cartDiscount,cartDiscountPercent,discountReason,note,serviceType,items]);
+
+  // Check if shift is open
+  const handleProceedToPayment = useCallback(async () => {
+    if(lookupCount.current>0){notifyError('Avval mahsulot tekshiruvi tugashini kuting');return;}
+    if (!activeShift) {
+      setIsOpenShiftModalOpen(true);
+      notifyError('Savdo qilish uchun avval smenani ochishingiz zarur!');
+      return;
+    }
+    if(hasPendingCheckout&&!checkoutAttempt.current?.saleId){notifyError('Avval asl qoralama natijasini tekshiring');return;}
+    if (items.length === 0) {
+      notifyError('Savatda hech qanday mahsulot yo\'q');
+      return;
+    }
+    if(connection.state!=='online'||isProcessingPayment){notifyError('To‘lov oldidan server bilan narx/soliqni tekshirish kerak');return;}
+    const actor=actorScope,body=buildDraftPayload();setIsProcessingPayment(true);
+    try{const result=await api.request<{totals:{totalAmount:string;taxAmount:string;netAmount:string};taxFingerprint:string}>('/sales/preview',{method:'POST',body:JSON.stringify(body)});if(actor!==liveActor.current||!result.data)return;setPaymentQuote({...result.data,signature:JSON.stringify(body)});setIsPaymentModalOpen(true);}catch(e){setFailure({...posFailure(e),details:e instanceof ApiError?e.details as NonNullable<typeof failure>['details']:undefined});}finally{setIsProcessingPayment(false);}
+  },[activeShift,hasPendingCheckout,items.length,connection.state,isProcessingPayment,actorScope,buildDraftPayload,notifyError]);
 
   // Process and complete sale
   const handleProcessPayment = async (
@@ -235,7 +247,9 @@ export default function PosPage() {
     setIsProcessingPayment(true);
     try {
       // 1. Create draft sale
-      const draftPayload = buildDraftPayload();
+      const rawDraft=buildDraftPayload();
+      if(!paymentQuote||paymentQuote.signature!==JSON.stringify(rawDraft))throw new Error('Savat o‘zgardi; to‘lov hisobini serverda qayta tekshiring');
+      const draftPayload={...rawDraft,expectedTotalAmount:paymentQuote.totals.totalAmount,expectedTaxFingerprint:paymentQuote.taxFingerprint};
 
       const completion={payments,...(creditDueAt?{creditDueAt}: {}),...(cashTendered!==undefined?{cashTendered}: {})};
       const signature = JSON.stringify(draftPayload);
@@ -247,13 +261,13 @@ export default function PosPage() {
       setHasPendingCheckout(true);
       const currentAttempt=checkoutAttempt.current;if(!currentAttempt)throw new Error('Asl urinishni tekshiring');
       const operationId=currentAttempt.operationId;
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
+      await saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:checkoutAttempt.current});
       if(!currentAttempt.saleId)await enqueue({id:operationId,scope,type:'sale.create',payload:{...draftPayload,operationId},state:'pending',createdAt:new Date().toISOString()});
       const saleRes = currentAttempt.saleId?await api.sales.get(currentAttempt.saleId):await api.sales.create({ ...draftPayload, operationId });
       if (!saleRes.data) throw new Error('Savdo qoralamasi yaratilmadi');
       writeAttempt(checkoutAttempt,{...currentAttempt,saleId:saleRes.data.id});
       if(currentAttempt.payload!=='resumed')await acknowledge(operationId,'synced',saleRes.data);
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
+      await saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:checkoutAttempt.current});
       await enqueue({id:saleRes.data.id,scope,type:'sale.complete',payload:{saleId:saleRes.data.id,...completion},state:'pending',createdAt:new Date().toISOString()});
 
       // 2. Complete sale with payments
@@ -299,7 +313,7 @@ export default function PosPage() {
       parkAttempt.current??={key:crypto.randomUUID(),signature};
       const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId()},operationId=parkAttempt.current.key;
       writeAttempt(checkoutAttempt,{operationId,payload:signature});setHasPendingCheckout(true);
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
+      await saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:checkoutAttempt.current});
       await enqueue({id:operationId,scope,type:'sale.create',payload:{...payload,operationId},state:'pending',createdAt:new Date().toISOString()});
       const result=await api.sales.create({...payload,operationId});if(!result.data)throw new Error('Qoralama natijasini tekshiring');
       await acknowledge(operationId,'synced',result.data);
@@ -317,10 +331,10 @@ export default function PosPage() {
       const response=await api.sales.get(draftToResume),sale=response.data;if(!sale)throw new Error('Qoralama topilmadi');
       if(sale.status!=='draft'||sale.cashierId!==user.id||sale.shiftId!==activeShift.id||sale.registerId!==activeRegister?.id)throw new Error('Faqat o‘zingizning faol kassa/smena qoralamangizni oching; boshqa savdoni tarixdan tekshiring');
       const restored:CartItem[]=[];
-      for(const item of sale.items??[]){const response=await api.products.get(item.productId);if(!response.data)throw new Error('Mahsulot topilmadi');restored.push({product:response.data,quantity:Number(item.quantity),unitPrice:Number(item.unitPrice),discountAmount:Number(item.discountAmount),lineTotal:Number(item.lineTotal)});}
+      for(const item of sale.items??[]){const response=await api.products.get(item.productId);if(!response.data)throw new Error('Mahsulot topilmadi');restored.push({product:response.data,quantity:Number(item.quantity),unitPrice:Number(item.unitPrice),discountAmount:Number(item.discountAmount),discountPercent:item.discountPercent==null?undefined:Number(item.discountPercent),lineTotal:Number(item.lineTotal)});}
       const attempt={operationId:crypto.randomUUID(),payload:'resumed',saleId:sale.id};
-      await saveDraft({organizationId:organization.id,userId:user.id,deviceId:deviceId()},{cart:{items:restored,cartDiscount:Number(sale.discountAmount),customer:sale.customer??null,note:sale.note??''},serviceType:sale.serviceType,attempt});
-      hydrate({items:restored,cartDiscount:Number(sale.discountAmount),customer:sale.customer??null,note:sale.note??''});setServiceType(sale.serviceType??'');
+      await saveDraft({organizationId:organization.id,userId:user.id,deviceId:deviceId()},{cart:{items:restored,cartDiscount:Number(sale.discountAmount),cartDiscountPercent:sale.discountPercent==null?undefined:Number(sale.discountPercent),discountReason:sale.discountReason??'',customer:sale.customer??null,note:sale.note??''},serviceType:sale.serviceType,attempt});
+      hydrate({items:restored,cartDiscount:Number(sale.discountAmount),cartDiscountPercent:sale.discountPercent==null?undefined:Number(sale.discountPercent),discountReason:sale.discountReason??'',customer:sale.customer??null,note:sale.note??''});setServiceType(sale.serviceType??'');
       writeAttempt(checkoutAttempt,{...attempt});setHasPendingCheckout(true);setDraftToResume('');
       setParkedMessage('Server qoralamasi ochildi; narx va qoldiq yakunlashda qayta tekshiriladi.');
     }catch(error){notifyError(error instanceof Error?error.message:'Qoralama ochilmadi');}finally{setIsProcessingPayment(false);}
@@ -339,7 +353,7 @@ export default function PosPage() {
           await api.sales.void(attempt.saleId);
         }else if(current.data?.status!=='voided')throw new Error('Savdo yakunlangan yoki noma’lum; asl natijani tekshiring');
         await markCancelled(attempt.saleId,scope,{saleId:attempt.saleId,state:'voided'});
-        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:null});
+        await saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:null});
         writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);notifySuccess('Server qoralamasi bekor qilinganini tekshirdik');return true;
       }
       const outcome=await api.operations.cancelDraftIntent(attempt.operationId,{...JSON.parse(attempt.payload),operationId:attempt.operationId});
@@ -354,7 +368,7 @@ export default function PosPage() {
         await markCancelled(createdSaleId,scope,{saleId:createdSaleId,state:'voided'});
       }else if(outcome.data?.state!=='cancelled')throw new Error('Server bekor qilishni tasdiqlamadi');
       await markCancelled(attempt.operationId,scope,outcome.data);
-      await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:null});
+      await saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:null});
       writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);setIsPaymentModalOpen(false);
       notifySuccess('Urinish serverda bekor qilindi. Savat saqlangan.');
       return true;
@@ -363,10 +377,9 @@ export default function PosPage() {
   };
 
   const refreshConflictCart=async()=>{
-    if(!checkoutAttempt.current)return;
     try{
-      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,unitPrice:Number(result.data.salePrice),discountAmount:0,lineTotal:clientLine(item.quantity,Number(result.data.salePrice))};}));
-      if(!await cancelPendingCheckout())return;
+      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,unitPrice:Number(result.data.salePrice),discountAmount:0,discountPercent:undefined,lineTotal:clientLine(item.quantity,Number(result.data.salePrice))};}));
+      if(checkoutAttempt.current&&!await cancelPendingCheckout())return;
       hydrate({items:current,cartDiscount:0,customer,note});setFailure(null);await loadProducts();
       notifySuccess('Narxlar yangilandi, chegirmalar tozalandi. Miqdorlarni tekshirib, to‘lovni qayta tasdiqlang.');
     }catch(error){notifyError(error instanceof Error?error.message:'Savat yangilanmadi; asl urinish saqlangan');}
@@ -386,7 +399,7 @@ export default function PosPage() {
         }
         writeAttempt(checkoutAttempt,{...attempt,saleId:draft.data.result.id});
         await acknowledge(attempt.operationId,'synced',draft.data.result);
-        await saveDraft(scope,{cart:{items,cartDiscount,customer,note},serviceType,attempt:checkoutAttempt.current});
+        await saveDraft(scope,{cart:{items,cartDiscount,cartDiscountPercent,discountReason,customer,note},serviceType,attempt:checkoutAttempt.current});
       }
       const recoveredSaleId=checkoutAttempt.current?.saleId;
       if(!recoveredSaleId)throw new Error('Savdo natijasi topilmadi');
@@ -425,11 +438,11 @@ export default function PosPage() {
         event.preventDefault();
         if(lookupCount.current>0){notifyError('Avval mahsulot tekshiruvi tugashini kuting');return;}
         if(!activeShift){setIsOpenShiftModalOpen(true);return;}
-        if(items.length)setIsPaymentModalOpen(true);
+        if(items.length)void handleProceedToPayment();
       }
     };
     window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);
-  },[localReady,isProcessingPayment,hasPendingCheckout,isPaymentModalOpen,isReceiptModalOpen,isOpenShiftModalOpen,activeShift,items.length,notifyError]);
+  },[localReady,isProcessingPayment,hasPendingCheckout,isPaymentModalOpen,isReceiptModalOpen,isOpenShiftModalOpen,activeShift,items.length,notifyError,handleProceedToPayment]);
 
   return (
     <div data-testid="pos-touch" className="min-h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-5rem)] flex flex-col gap-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11">
@@ -474,7 +487,9 @@ export default function PosPage() {
       <label>Chek izohi<textarea aria-label="Chek izohi" maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       <label>Xizmat turi (ixtiyoriy)<input aria-label="Xizmat turi (ixtiyoriy)" maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       {/* Main 2-column layout: Left Catalog, Right Cart */}
-      <fieldset disabled={hasPendingCheckout||isProcessingPayment} className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
+      {!localReady&&<p role="status">Lokal savat tiklanmoqda; mahsulot kiritishni kuting.</p>}
+      <p role="status" className="text-sm text-gray-900">{!localReady?'Lokal savat tiklanmoqda':localSaveProof===localSnapshot?'Savat lokal saqlandi':'Savat lokal saqlanmoqda; oynani yopmang'}</p>
+      <fieldset disabled={!localReady||!activeStore||!activeRegister||hasPendingCheckout} className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
         {/* Left: Product Catalog & Search (2 cols) */}
         <div className="lg:col-span-2 flex flex-col min-h-[320px] lg:min-h-0">
           <ProductSearch
@@ -499,7 +514,7 @@ export default function PosPage() {
             items={items}
             subtotal={subtotal}
             totalAmount={totalAmount}
-            cartDiscount={cartDiscount}
+            cartDiscount={cartDiscount} cartDiscountPercent={cartDiscountPercent} onSetCartPercent={setCartDiscountPercent} discountReason={discountReason} onSetDiscountReason={setDiscountReason}
             customer={customer}
             customers={customers}
             onUpdateQuantity={updateQuantity}
@@ -531,7 +546,9 @@ export default function PosPage() {
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        totalAmount={totalAmount}
+        totalAmount={Number(paymentQuote?.totals.totalAmount??totalAmount)}
+        taxAmount={paymentQuote?.totals.taxAmount}
+        netAmount={paymentQuote?.totals.netAmount}
         customer={customer}
         onProcessPayment={handleProcessPayment}
         isLoading={isProcessingPayment}

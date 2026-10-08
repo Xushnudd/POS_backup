@@ -1,3 +1,5 @@
+import {validateCategoryParent} from '@/server/catalog/category-tree'
+import {Prisma} from '@prisma/client'
 import { csv, numeric } from '@/server/exports/csv'
 import { paging, searchTerm, exporting, exportCap, pagination } from '@/server/catalog/queries'
 import { activeStatus } from '@/server/catalog/status'
@@ -11,6 +13,7 @@ import { z } from 'zod'
 const createCategorySchema = z.object({
   organizationId: z.string().uuid(),
   name: z.string().trim().min(2).max(200),
+  parentId: z.string().uuid().nullable().optional(),
   sortOrder: z.number().int().min(-2147483648).max(2147483647).default(0),
 })
 
@@ -51,14 +54,14 @@ async function handleGET(request: NextRequest) {
     const result=await db.$transaction(async tx=>{
       const total=await tx.category.count({where})
       if(isExport)exportCap(total)
-      const rows=await tx.category.findMany({where,orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated&&!isExport?{skip,take:limit}:{})})
+      const rows=await tx.category.findMany({where,include:{parent:{select:{id:true,name:true}}},orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated&&!isExport?{skip,take:limit}:{})})
       if(isExport)return {success:true,data:{filename:'categories-'+organizationId+'.csv',content:csv([['ID','Nomi','Tartib','Faol'],...rows.map(row=>[row.id,row.name,numeric(row.sortOrder,0),row.isActive?'ha':'yo‘q'])])}}
       return {success:true,data:rows,...(paginated?{pagination:pagination(page,limit,total)}:{})}
     },{isolationLevel:'RepeatableRead'})
     return NextResponse.json(result)
 
   } catch (error) {
-    if (error instanceof AccessError) throw error
+    if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
       { status: 500 }
@@ -89,10 +92,12 @@ async function handlePOST(request: NextRequest) {
     const validatedData = createCategorySchema.parse(body)
 
     const category = await db.$transaction(async tx => {
+      if(validatedData.parentId!==undefined)await validateCategoryParent(tx,payload.organizationId,validatedData.parentId)
       const result = await tx.category.create({
       data: validatedData,
     })
       await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"create"}})
+      await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
       return result
     })
 
@@ -103,7 +108,7 @@ async function handlePOST(request: NextRequest) {
     })
 
   } catch (error) {
-    if (error instanceof AccessError) throw error
+    if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },

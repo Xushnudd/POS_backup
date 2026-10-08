@@ -6,7 +6,7 @@ export function logRecord(fields:Record<string,unknown>){
  return Object.fromEntries(Object.entries({...requestTrace.getStore(),...fields}).filter(([key,value])=>allowed.has(key)&&(typeof value==='string'||typeof value==='number')).map(([key,value])=>[key,typeof value==='string'?value.slice(0,200):value]))
 }
 export function logEvent(event:string,fields:Record<string,unknown>={}){console.info(JSON.stringify(logRecord({...fields,event})))}
-const sensitive=/password|secret|token|cookie|authorization|credential|phone|email|address/i
+const sensitive=/^pin$|pinHash|password|secret|token|cookie|authorization|credential|phone|email|address/i
 export function safeAudit(value:unknown):unknown{
  if(Array.isArray(value))return value.map(safeAudit)
  if(!value||typeof value!=='object')return value

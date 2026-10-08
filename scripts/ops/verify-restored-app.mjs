@@ -1,6 +1,6 @@
 // Read-only application acceptance against the disposable restored database.
 import assert from 'node:assert/strict';
-import {randomBytes} from 'node:crypto';
+import {randomBytes,createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 const url=new URL(process.env.DATABASE_URL??'');
 if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.username!=='pos_test'||!/^\/pos_restore_test_\d+$/.test(url.pathname))throw new Error('Disposable restored database required');
@@ -25,8 +25,13 @@ try {
   assert.equal(restoredCount.status,'counting');assert.equal(restoredCount.lines.length,1);assert.equal(restoredCount.lines[0].readings[0].quantity,'2');
   const statement=await ledger.GET(request('customers/'+fixture+'/ledger'),context);assert.equal(statement.status,200);const restoredLedger=(await statement.json()).data;
   assert.equal(restoredLedger.summary.currentBalance,'3.75');assert.equal(restoredLedger.entries[0].sourceType,'opening_debt');assert.equal(restoredLedger.entries[0].dueAt,'2026-02-01T00:00:00.000Z');
+  const files=require('../../.test-build/src/app/api/files/[id]/route.js');
+  const asset=await prisma.fileAsset.findUniqueOrThrow({where:{id:fixture}});
+  const download=await files.GET(request('files/'+fixture),context);assert.equal(download.status,200);assert.equal(download.headers.get('Content-Type'),'image/webp');
+  assert.equal(createHash('sha256').update(Buffer.from(await download.arrayBuffer())).digest('hex'),asset.sha256);
+  assert.equal((await prisma.product.findUniqueOrThrow({where:{id:fixture}})).imageUrl,'/api/files/'+fixture);
   assert.deepEqual(await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]),before);
-  console.info('PASS: restored application authenticates scoped fixture, reads frozen count and exact historical debt/due date; economic row counts unchanged; no external calls');
+  console.info('PASS: restored application authenticates scoped fixture, reads frozen count and exact historical debt/due date; protected image bytes/SHA256/link recovered; economic row counts unchanged; no external calls');
 } finally {
   if(session)await prisma.session.delete({where:{id:session.id}});
   await prisma.$disconnect();

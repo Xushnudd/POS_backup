@@ -15,11 +15,11 @@ import { sanitizeResponse } from './auth/response'
 const refs: Record<string, string> = {
   orderItemId:'PurchaseOrderItem',stockDocumentId:'StockDocument',storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
   invoiceId:'SupplierInvoice',expenseCategoryId:'ExpenseCategory',accountId:'FinancialAccount',fromAccountId:'FinancialAccount',toAccountId:'FinancialAccount',
-  productId:'Product', categoryId:'Category', customerId:'Customer', supplierId:'Supplier',
-  organizationUserId:'OrganizationUser', cashierId:'User',
+  taxProfileId:'TaxProfile',brandId:'Brand',parentId:'Category',productId:'Product', categoryId:'Category', customerId:'Customer', supplierId:'Supplier',
+  targetMembershipId:'OrganizationUser',organizationUserId:'OrganizationUser', cashierId:'User',
 }
 const pathModels: Record<string, string> = {
-  'supplier-invoices':'SupplierInvoice','purchase-orders':'PurchaseOrder','supplier-payments':'SupplierPayment',organizations:'Organization', stores:'Store', registers:'Register', products:'Product', categories:'Category',
+  brands:'Brand',taxes:'TaxProfile',files:'FileAsset','supplier-invoices':'SupplierInvoice','purchase-orders':'PurchaseOrder','supplier-payments':'SupplierPayment',organizations:'Organization', stores:'Store', registers:'Register', products:'Product', categories:'Category',
   customers:'Customer', suppliers:'Supplier', sales:'Sale', shifts:'Shift', transfers:'StockTransfer', 'stock-documents':'StockDocument', 'stock-counts':'StockCount',
 }
 async function assertReference(model: string, id: unknown, context: TokenPayload) {
@@ -34,6 +34,7 @@ async function validateRefs(value: unknown, context: TokenPayload): Promise<void
   if (Array.isArray(value)) { for (const item of value) await validateRefs(item, context); return }
   if (!value || typeof value !== 'object') return
   for (const [key, id] of Object.entries(value)) {
+    if(key==='imageUrl'&&typeof id==='string'&&id.startsWith('/api/files/')){await assertReference('FileAsset',id.slice(11),context);if(!await prisma.fileAsset.findFirst({where:{id:id.slice(11),organizationId:context.organizationId,deletedAt:null,OR:[{expiresAt:null},{expiresAt:{gt:new Date()}}]}}))throw new AccessError(409,'FILE_UNAVAILABLE')}
     if (key === 'organizationId' && id !== context.organizationId) throw new AccessError(403,'TENANT_MISMATCH')
     if (refs[key] && id !== undefined && id !== null) await assertReference(refs[key], id, context)
     if (key === 'storeIds' && Array.isArray(id)) for (const store of id) await assertReference('Store', store, context)
@@ -68,7 +69,7 @@ async function boundedBody(request: NextRequest): Promise<string> {
     reader.releaseLock()
   }
 }
-export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean } = {}) {
+export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean; binary?: boolean } = {}) {
   return async (request: NextRequest, routeContext: C): Promise<Response> => {
     const requestId = randomUUID()
     return requestTrace.run({requestId},async()=>{
@@ -99,7 +100,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         requestTrace.getStore()!.organizationId=context.organizationId
         assertRoutePermission(path, request.method, context.role)
         const segments = path.split('/').filter(Boolean)
-        if (segments[2] && segments[2] !== 'switch' && !(segments[1]==='products'&&segments[2]==='prices') && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
+        if (segments[2] && segments[2] !== 'switch' && !(segments[1]==='products'&&segments[2]==='prices') && !(segments[1]==='sales'&&segments[2]==='preview') && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
         await validateRefs(Object.fromEntries(new URL(request.url).searchParams), context)
       }
       if (mutation) {
@@ -117,6 +118,11 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       }
       if(context&&(path.startsWith('/api/finance/')||path.startsWith('/api/supplier-payments')||path.startsWith('/api/supplier-invoices')||path.startsWith('/api/purchase-orders')||/^\/api\/suppliers\/[0-9a-f-]{36}\/ledger$/i.test(path)))await consumeLimit(mutation?'finance.write':'finance.read',context.organizationId+':'+context.userId,60,60000)
       const result = await handler(request, routeContext)
+      if(options.binary && result.ok && !result.headers.get('content-type')?.includes('application/json')){
+        const response=new Response(result.body,{status:result.status,headers:result.headers});
+        response.headers.set('X-Request-Id',requestId);response.headers.set('Cache-Control','private, no-store');response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Content-Security-Policy',"default-src 'none'; sandbox");
+        logEvent('api_response',{status:result.status,durationMs:Date.now()-started});return response;
+      }
       const data = await result.json()
       if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}
       logEvent('api_response',{status:result.status,durationMs:Date.now()-started,...(data.error?.code?{code:data.error.code}:{})})

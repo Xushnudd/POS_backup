@@ -25,7 +25,7 @@ async function fixture(quantity=10) {
  await prisma.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity}})
  const session=await prisma.session.create({data:{userId:user.id,organizationId:org.id,tokenHash:randomUUID(),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}})
  const context:TokenPayload={userId:user.id,organizationId:org.id,organizationUserId:member.id,role:'owner',storeIds:[store.id],sessionId:session.id}
- const draft={organizationId:org.id,storeId:store.id,registerId:register.id,shiftId:shift.id,discountAmount:0,items:[{productId:product.id,quantity:1,discountAmount:0}]}
+ const draft={discountReason:'Test customer discount approved by scenario owner',organizationId:org.id,storeId:store.id,registerId:register.id,shiftId:shift.id,discountAmount:0,items:[{productId:product.id,quantity:1,discountAmount:0}]}
  return {org,user,store,shift,product,context,draft}
 }
 test('Create/complete retries are exactly one business effect, conflicts reject, stock atomic',async()=>{
@@ -681,6 +681,7 @@ test('A failure after the first stock posting rolls back stock, snapshots, debt,
  await prisma.inventoryBalance.update({where:{storeId_productId:{storeId:f.store.id,productId:sorted[1].id}},data:{quantity:0}})
  const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Rollback',phone:randomUUID(),creditLimit:500}})
  const draft=await createDraft(f.context,{...f.draft,customerId:customer.id,items:sorted.map(p=>({productId:p.id,quantity:1,discountAmount:0})),discountAmount:1},randomUUID())
+ const before=await prisma.sale.findUniqueOrThrow({where:{id:draft.id},include:{items:true}})
  await assert.rejects(()=>completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:99},{paymentType:'credit',amount:100}]},draft.id),/qoldiq/)
  assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:sorted[0].id}}})).quantity.toString(),'1')
  assert.equal(await prisma.inventoryMovement.count({where:{sourceId:draft.id}}),0)
@@ -689,7 +690,7 @@ test('A failure after the first stock posting rolls back stock, snapshots, debt,
  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,type:'sale.complete'}}),0)
  assert.equal(await prisma.auditLog.count({where:{entityId:draft.id,action:'completed'}}),0)
  const unchanged=await prisma.sale.findUniqueOrThrow({where:{id:draft.id},include:{items:true}})
- assert.equal(unchanged.status,'draft');assert.ok(unchanged.items.every(x=>x.receiptDiscount.isZero()))
+ assert.equal(unchanged.status,'draft');assert.deepEqual({...unchanged,items:unchanged.items.sort((a,b)=>a.id.localeCompare(b.id))},{...before,items:before.items.sort((a,b)=>a.id.localeCompare(b.id))})
 })
 
 test('Checkout rechecks current discount limits and closed shift before any posting',async()=>{

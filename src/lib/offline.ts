@@ -60,7 +60,12 @@ export async function acknowledge(id:string,state:PendingOperation['state'],resu
  return mutateOperation(id,old=>{
   if(!old)throw new Error('Local operation not found')
   if(['synced','cancelled','rejected'].includes(old.state))return {result:undefined}
-  return {record:{...old,state,result,code},result:undefined}
+  let payload=old.payload
+  if(old.type==='finance.action'&&old.payload.path==='/files'&&['synced','rejected','cancelled'].includes(state)){
+   // Original pixels/EXIF are needed only until the server result is known.
+   const body=old.payload.body as Record<string,unknown>;const {base64:discarded,...metadata}=body;void discarded;payload={...old.payload,body:metadata}
+  }
+  return {record:{...old,state,result,code,payload},result:undefined}
  })
 }
 // Owner debt corrections require explicit review/retry on the customer card.

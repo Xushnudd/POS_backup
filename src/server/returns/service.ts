@@ -1,3 +1,5 @@
+import {cumulativeRefundComponent} from '../taxes/calculations'
+import {money} from '../sales/calculations'
 import {validateUnitQuantity} from '../catalog/service'
 import { randomUUID } from 'node:crypto'
 import {Prisma} from '@prisma/client'
@@ -36,9 +38,13 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
    const oldAmount=original.saleReturnItems.reduce((sum,x)=>sum.add(x.lineTotal),decimal(0))
    const qty=decimal(requested.quantity),remaining=original.quantity.sub(returned)
    if (qty.gt(remaining)) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED')
-   const net=original.lineTotal.sub(original.receiptDiscount)
+   const net=original.payableAmount??original.lineTotal.sub(original.receiptDiscount)
    const amount=partialReturnAmount(net,original.quantity,returned,oldAmount,qty)
-   return {saleItemId:original.id,productId:original.productId,quantity:qty,unitPrice:original.unitPrice,lineTotal:amount,disposition:requested.disposition,unitCost:original.unitCost}
+   const oldTax=original.saleReturnItems.reduce((n,r)=>n.add(r.taxAmount),decimal(0)),oldDiscount=original.saleReturnItems.reduce((n,r)=>n.add(r.discountAmount),decimal(0))
+   const taxAmount=original.taxBase===null?decimal(0):cumulativeRefundComponent(original.taxAmount,net,oldAmount,oldTax,amount)
+   const originalDiscount=original.discountAmount.add(original.receiptDiscount),discountTarget=qty.eq(remaining)?originalDiscount:money(originalDiscount.mul(returned.add(qty)).div(original.quantity)),discountAmount=discountTarget.sub(oldDiscount)
+   if(discountAmount.lt(0))throw new AccessError(409,'RETURN_DISCOUNT_RECONCILIATION')
+   return {saleItemId:original.id,productId:original.productId,quantity:qty,unitPrice:original.unitPrice,lineTotal:amount,taxAmount,taxBase:original.taxBase===null?null:amount.sub(taxAmount),discountAmount,disposition:requested.disposition,unitCost:original.unitCost}
   })
   for (const row of rows) { const unit=sale.items.find(item=>item.id===row.saleItemId)?.unit; if(unit) await validateUnitQuantity(tx,context.organizationId,unit,row.quantity) }
   const refund=rows.reduce((sum,x)=>sum.add(x.lineTotal),decimal(0))

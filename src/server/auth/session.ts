@@ -8,12 +8,13 @@ const ABSOLUTE_MS = 24 * 60 * 60 * 1000
 const IDLE_MS = 8 * 60 * 60 * 1000
 export const sessionHash = (token: string) => createHash('sha256').update(token).digest('hex')
 
-export async function createSession(tx: Prisma.TransactionClient, userId: string, organizationId: string) {
+export async function createSession(tx: Prisma.TransactionClient, userId: string, organizationId: string, options?:{pinStoreId:string}) {
   const token = randomBytes(32).toString('base64url')
   const now = Date.now()
   await tx.session.create({ data: {
     tokenHash: sessionHash(token), userId, organizationId,
-    expiresAt: new Date(now + ABSOLUTE_MS), idleExpiresAt: new Date(now + IDLE_MS),
+    expiresAt: new Date(now + (options?IDLE_MS:ABSOLUTE_MS)), idleExpiresAt: new Date(now + IDLE_MS),
+    authenticationMethod:options?'pin':'password',pinStoreId:options?.pinStoreId,
   } })
   return token
 }
@@ -36,6 +37,8 @@ export async function verifySession(token: string) {
     include: { userStores: { include: { store: true } } },
   })
   if (!membership?.isActive || !['owner','admin','cashier'].includes(membership.role)) return null
+  // PIN sessions stay cashier-only in the assigned branch even after role changes.
+  if(session.authenticationMethod==='pin' && (membership.role!=='cashier'||!membership.pinHash||!membership.userStores.some(x=>x.storeId===session.pinStoreId&&x.store.isActive&&x.store.organizationId===session.organizationId)))return null;
   // A conditional touch cannot resurrect revoked or expired sessions.
   const touched = await prisma.session.updateMany({
     where: { id: session.id, revokedAt: null, idleExpiresAt: { gt: now }, expiresAt: { gt: now } },
@@ -45,7 +48,7 @@ export async function verifySession(token: string) {
   return {
     userId: session.userId, organizationId: session.organizationId,
     organizationUserId: membership.id, role: membership.role,
-    storeIds: membership.userStores.filter(x => x.store.isActive && x.store.organizationId === session.organizationId).map(x => x.storeId),
+    storeIds: membership.userStores.filter(x => x.store.isActive && x.store.organizationId === session.organizationId && (session.authenticationMethod!=='pin'||x.storeId===session.pinStoreId)).map(x => x.storeId),
     sessionId: session.id,
   }
 }

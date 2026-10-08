@@ -1,7 +1,7 @@
 // Defense in depth after endpoint DTO selection. Authentication credentials are
 // never JSON response fields. Invitation capabilities are explicitly returned
 // once to an authorized owner by the invitation endpoint, not session tokens.
-const credentials = new Set(['password','passwordhash','tokenhash','resettoken','secret','apikey','privatekey','clientsecret','accesstoken','refreshtoken','sessiontoken','authorization','cookie','credentials']);
+const credentials = new Set(['pin','pinhash','password','passwordhash','tokenhash','resettoken','secret','apikey','privatekey','clientsecret','accesstoken','refreshtoken','sessiontoken','authorization','cookie','credentials']);
 const costs = new Set(['costprice','unitcost','profit','profitmargin','cost']);
 export function sanitizeResponse(value: unknown, role?: string): unknown {
   if (Array.isArray(value)) return value.map(row => sanitizeResponse(row, role));

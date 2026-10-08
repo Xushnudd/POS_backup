@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import DiscountInput from './DiscountInput';
 import { CartItem as ICartItem, Customer } from '@/types';
 import CartItem from './CartItem';
 import Button from '@/components/ui/Button';
@@ -19,13 +20,17 @@ interface CartProps {
   subtotal: number;
   totalAmount: number;
   cartDiscount: number;
+  cartDiscountPercent?:number;
+  onSetCartPercent:(value:number|undefined)=>void;
+  discountReason:string;
+  onSetDiscountReason:(value:string)=>void;
   customer: Customer | null;
   customers: Customer[];
   onUpdateQuantity: (productId: string, quantity: number) => void;
-  onUpdateDiscount: (productId: string, discount: number) => void;
+  onUpdateDiscount: (productId: string, discount: number,percent?:number) => void;
   onRemoveItem: (productId: string) => void;
   onClearCart: () => void;
-  onSetCartDiscount: (discount: number) => void;
+  onSetCartDiscount: (discount: number,percent?:number) => void;
   onSetCustomer: (customer: Customer | null) => void;
   onCheckout: () => void;
   disabled?: boolean;
@@ -35,7 +40,7 @@ export default function Cart({
   items,
   subtotal,
   totalAmount,
-  cartDiscount,
+  cartDiscount,cartDiscountPercent,onSetCartPercent,discountReason,onSetDiscountReason,
   customer,
   customers,
   onUpdateQuantity,
@@ -140,19 +145,14 @@ export default function Cart({
 
             {showDiscountInput && (
               <div className="pt-1 pb-1">
-                <input
-                  type="number"
-                  placeholder="Umumiy chegirma summasi"
-                  min="0"
-                  max={subtotal}
-                  value={cartDiscount || ''}
-                  onChange={(e) => onSetCartDiscount(parseFloat(e.target.value) || 0)}
-                  className="w-full text-xs px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-red-600 font-bold focus:outline-hidden focus:border-red-400"
-                />
+                <DiscountInput label="Butun chek chegirmasi" amount={cartDiscount} percent={cartDiscountPercent} onChange={(amount,percent)=>{if(percent===undefined)onSetCartDiscount(amount);else onSetCartPercent(percent);}}/>
+
               </div>
             )}
           </div>
 
+          <label className="block text-xs text-gray-900">Chegirma sababi<input aria-label="Chegirma sababi" maxLength={2000} value={discountReason} onChange={e=>onSetDiscountReason(e.target.value)} className="w-full border bg-white rounded-lg p-2"/></label>
+          <p className="text-xs text-gray-700">Chegirma vakolati serverda tekshiriladi. Katta chegirmani rahbar o‘z hisobida tasdiqlaydi; sabab chekda saqlanadi.</p>
           {/* Big Total */}
           <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
             <div>

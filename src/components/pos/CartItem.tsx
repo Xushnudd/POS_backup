@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import DiscountInput from './DiscountInput';
 import { CartItem as ICartItem } from '@/types';
 import { formatMoney } from '@/lib/format';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,7 +10,7 @@ import { faPlus, faMinus, faTrash, faPercent } from '@fortawesome/free-solid-svg
 interface CartItemProps {
   item: ICartItem;
   onUpdateQuantity: (productId: string, quantity: number) => void;
-  onUpdateDiscount: (productId: string, discount: number) => void;
+  onUpdateDiscount: (productId: string, discount: number,percent?:number) => void;
   onRemove: (productId: string) => void;
 }
 
@@ -98,15 +99,7 @@ export default function CartItem({
       {/* Optional Line Discount Input */}
       {showDiscount && (
         <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
-          <input
-            type="number"
-            placeholder="Chegirma summasi"
-            min="0"
-            max={item.quantity * item.unitPrice}
-            value={item.discountAmount || ''}
-            onChange={(e) => onUpdateDiscount(item.product.id, parseFloat(e.target.value) || 0)}
-            className="w-full text-xs px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg text-red-600 font-semibold focus:outline-hidden focus:border-red-400"
-          />
+          <DiscountInput label={item.product.name+' qator chegirmasi'} amount={item.discountAmount} percent={item.discountPercent} onChange={(amount,percent)=>onUpdateDiscount(item.product.id,amount,percent)}/>
           <button
             onClick={() => setShowDiscount(false)}
             className="text-[10px] text-gray-600 font-semibold hover:text-gray-700"

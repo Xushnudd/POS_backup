@@ -3,6 +3,9 @@ set -euo pipefail
 backup_smoke_dir=$(mktemp -d /tmp/pos-backup-smoke.XXXXXX)
 restore_db="pos_restore_test_$(date +%s)"
 fixture_id=$(node -e 'process.stdout.write(require("node:crypto").randomUUID())')
+asset_hex=$(node -e 'require("sharp")({create:{width:4,height:3,channels:4,background:"red"}}).webp().toBuffer().then(buffer=>process.stdout.write(buffer.toString("hex")))')
+asset_sha=$(node -e 'process.stdout.write(require("node:crypto").createHash("sha256").update(Buffer.from(process.argv[1],"hex")).digest("hex"))' "$asset_hex")
+asset_size=$((${#asset_hex}/2))
 cleanup() {
  docker exec -i pos-plan-test-db psql -U pos_test -d pos_test -v fixture="$fixture_id" >/dev/null <<'SQL'
 DELETE FROM "Organization" WHERE id=:'fixture';
@@ -50,13 +53,15 @@ export PATH="$backup_smoke_dir/bin:$PATH"
 export DATABASE_URL=postgresql://pos_test:local-test-only@127.0.0.1:55439/pos_test
 export BACKUP_DIRECTORY="$backup_smoke_dir/backups"
 # Exercise recovery of an active count, immutable reading and persistent stock freeze.
-docker exec -i pos-plan-test-db psql -U pos_test -d pos_test -v ON_ERROR_STOP=1 -v fixture="$fixture_id" >/dev/null <<'SQL'
+docker exec -i pos-plan-test-db psql -U pos_test -d pos_test -v ON_ERROR_STOP=1 -v fixture="$fixture_id" -v asset_hex="$asset_hex" -v asset_sha="$asset_sha" -v asset_size="$asset_size" >/dev/null <<'SQL'
 BEGIN;
 INSERT INTO "Organization" (id,name,phone) VALUES (:'fixture','Backup count fixture',:'fixture');
 INSERT INTO "User" (id,"fullName",phone,"passwordHash") VALUES (:'fixture','Fixture operator',:'fixture','not-a-login');
 INSERT INTO "OrganizationUser" (id,"organizationId","userId",role) VALUES (:'fixture',:'fixture',:'fixture','owner');
 INSERT INTO "Store" (id,"organizationId",name,"updatedAt") VALUES (:'fixture',:'fixture','Fixture store',NOW());
 INSERT INTO "Product" (id,"organizationId",name,sku,barcode,unit,"salePrice","costPrice","updatedAt") VALUES (:'fixture',:'fixture','Fixture SKU','FIX','FIX','dona',10,5,NOW());
+INSERT INTO "FileAsset" (id,"organizationId","productId","createdBy",name,mime,size,sha256,width,height,data) VALUES (:'fixture',:'fixture',:'fixture',:'fixture','restore.webp','image/webp',:asset_size,:'asset_sha',4,3,decode(:'asset_hex','hex'));
+UPDATE "Product" SET "imageUrl"='/api/files/'||:'fixture' WHERE id=:'fixture';
 INSERT INTO "InventoryBalance" ("storeId","productId",quantity,"updatedAt") VALUES (:'fixture',:'fixture',3,NOW());
 INSERT INTO "StockCount" (id,"organizationId","storeId",scope,blind,"createdBy") VALUES (:'fixture',:'fixture',:'fixture','partial',TRUE,:'fixture');
 INSERT INTO "StockCountLine" (id,"countId","productId","productName",sku,unit,"expectedQuantity","unitCost") VALUES (:'fixture',:'fixture',:'fixture','Fixture SKU','FIX','dona',3,5);

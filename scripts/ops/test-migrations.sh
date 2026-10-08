@@ -7,7 +7,7 @@ price_fixture=$(mktemp -d /tmp/pos-price-migrations.XXXXXX)
 cp prisma/schema.prisma "$price_fixture/schema.prisma"
 mkdir "$price_fixture/migrations"
 for migration in prisma/migrations/*; do
- case "$migration" in *202610070036_return_dispositions|*202610080037_price_location_scope|*202610080038_financial_accounts|*202610080039_financial_trigger_record|*202610080040_financial_trigger_alias|*202610080041_financial_cash_mirror|*202610080042_supplier_ledger|*202610080043_supplier_trigger_record|*202610080044_supplier_payment_proof|*202610080045_purchase_orders|*202610080046_purchase_receipt_complete|*202610080047_purchase_cascade_constraints|*202610080048_zero_value_receipts|*202610080049_supplier_credits) ;; *) cp -a "$migration" "$price_fixture/migrations/" ;; esac
+ case "$migration" in *202610070036_return_dispositions|*202610080037_price_location_scope|*202610080038_financial_accounts|*202610080039_financial_trigger_record|*202610080040_financial_trigger_alias|*202610080041_financial_cash_mirror|*202610080042_supplier_ledger|*202610080043_supplier_trigger_record|*202610080044_supplier_payment_proof|*202610080045_purchase_orders|*202610080046_purchase_receipt_complete|*202610080047_purchase_cascade_constraints|*202610080048_zero_value_receipts|*202610080049_supplier_credits|*202610080050_product_variants|*202610080051_variant_tenant_fks|*202610080052_protected_files|*202610080053_catalog_metadata|*202610080054_file_image_links|*202610080055_category_graph_lock|*202610080056_cashier_pin|*202610080057_tax_snapshots|*202610080058_return_tax_allocation|*202610080059_discount_authorization) ;; *) cp -a "$migration" "$price_fixture/migrations/" ;; esac
 done
 cleanup() {
  rm -rf "$price_fixture"
@@ -50,4 +50,6 @@ disposition_result=$(docker exec pos-plan-test-db psql -U pos_test -d "$fixture_
 
 fixture_result=$(docker exec pos-plan-test-db psql -U pos_test -d "$fixture_db" -At -v ON_ERROR_STOP=1 -c 'SELECT (SELECT sum("receiptDiscount")::text FROM "SaleItem") || '"'"':'"'"' || (SELECT sum(amount)::text FROM "DebtEntry") || '"'"':'"'"' || (SELECT count(*)::text FROM "ProductBarcode") || '"'"':'"'"' || (SELECT count(*)::text FROM "Unit")')
 [[ "$fixture_result" == '0.01:2.99:1:8' ]]
+variant_result=$(docker exec pos-plan-test-db psql -U pos_test -d "$fixture_db" -At -v ON_ERROR_STOP=1 -c 'SELECT count(*) FROM "ProductVariant" WHERE "productId"='"'"'legacy-product'"'"' AND "rootProductId"="productId" AND options='"'"'{}'"'"'::jsonb')
+[[ "$variant_result" == '1' ]]
 printf 'PASS: fresh migrations and legacy receipt allocation/debt/barcode/unit/price/disposition backfills\n'

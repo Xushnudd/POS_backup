@@ -127,6 +127,8 @@ export default function ReceiptPreview({
           )}
         </div>
 
+        {sale.discountReason&&<p className="break-words">Chegirma sababi: {sale.discountReason}</p>}
+        {sale.discountApprovedRole&&<p>Chegirma vakolati: {sale.discountApprovedRole}</p>}
         {sale.serviceType&&<p>Xizmat: {sale.serviceType}</p>}
         {sale.note&&<p className="break-words">Izoh: {sale.note}</p>}
         {sale.cashTendered!=null&&sale.cashChange!=null&&<div><p>Berilgan naqd: {formatMoney(sale.cashTendered)}</p><p>Qaytim: {formatMoney(sale.cashChange)}</p></div>}
@@ -170,6 +172,7 @@ export default function ReceiptPreview({
               <span>-{formatMoney(sale.discountAmount)}</span>
             </div>
           )}
+          {sale.netAmount!=null&&sale.taxAmount!==undefined&&<div className="flex justify-between text-gray-600"><span>Jami ichidagi soliq qismi:</span><span>{formatMoney(sale.taxAmount)}</span></div>}
           <div className="flex justify-between text-sm font-black text-gray-950 pt-1 border-t border-gray-200">
             <span>JAMI TO&apos;LOV:</span>
             <span className="text-emerald-700">{formatMoney(sale.totalAmount)}</span>

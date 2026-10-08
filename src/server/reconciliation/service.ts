@@ -25,7 +25,7 @@ export function discrepancyQuery(context:ReconciliationScope,kind:Reconciliation
  FROM balances b FULL JOIN journal j USING ("storeId","productId") WHERE COALESCE(b.quantity,0)<>COALESCE(j.quantity,0)`
  if (kind==='sales') return Prisma.sql`
  WITH selected AS (SELECT s.id,s."receiptNo",s."storeId",s."totalAmount" FROM "Sale" s WHERE s."organizationId"=${context.organizationId} AND s.status IN ('completed','partially_returned','returned') ${stores(context,'s',storeId)}),
- lines AS (SELECT i."saleId",SUM(i."lineTotal"-i."receiptDiscount") AS amount FROM "SaleItem" i JOIN selected s ON s.id=i."saleId" GROUP BY i."saleId"),
+ lines AS (SELECT i."saleId",SUM(COALESCE(i."payableAmount",i."lineTotal"-i."receiptDiscount")) AS amount FROM "SaleItem" i JOIN selected s ON s.id=i."saleId" GROUP BY i."saleId"),
  payments AS (SELECT p."saleId",SUM(p.amount) AS amount FROM "Payment" p JOIN selected s ON s.id=p."saleId" WHERE p.direction='in' AND p.status='recorded' AND p.note IS DISTINCT FROM 'debt_collection' GROUP BY p."saleId")
  SELECT s.id AS "saleId",s."receiptNo",s."storeId",s."totalAmount" AS expected,COALESCE(l.amount,0) AS "itemAmount",COALESCE(p.amount,0) AS "paymentAmount"
  FROM selected s LEFT JOIN lines l ON l."saleId"=s.id LEFT JOIN payments p ON p."saleId"=s.id

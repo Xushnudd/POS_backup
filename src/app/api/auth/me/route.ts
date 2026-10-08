@@ -1,4 +1,4 @@
-import { AccessError } from '@/server/auth/policy'
+import { AccessError,tenantScope } from '@/server/auth/policy'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
@@ -35,6 +35,7 @@ async function handleGET(request: NextRequest) {
           include: {
             organization: true,
             userStores: {
+              where:{store:{AND:tenantScope('Store',payload),isActive:true}},
               include: {
                 store: true,
               }

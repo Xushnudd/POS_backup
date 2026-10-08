@@ -14,6 +14,9 @@ import { z } from 'zod'
 const createProductSchema = z.object({
   organizationId: z.string().uuid(),
   categoryId: z.string().uuid().optional(),
+  taxProfileId:z.string().uuid().nullable().optional(),
+  brandId: z.string().uuid().nullable().optional(),
+  description: z.string().max(4000).optional(),
   name: z.string().trim().min(2).max(200),
   sku: z.string().trim().min(2).max(100),
   barcode: z.string().trim().min(2).max(200),
@@ -21,7 +24,7 @@ const createProductSchema = z.object({
   salePrice: amountSchema,
   costPrice: nonnegativeQuantitySchema,
   minStock: nonnegativeQuantitySchema.default(0),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.union([z.string().url().refine(value=>/^https?:\/\//i.test(value)),z.string().regex(/^\/api\/files\/[0-9a-f-]{36}$/i)]).nullable().optional(),
 })
 
 async function handleGET(request: NextRequest) {

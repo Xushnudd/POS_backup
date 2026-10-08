@@ -191,7 +191,7 @@ class ApiClient {
     list: (organizationId: string,params:Record<string,string>={}) =>
       this.request<Category[]>(`/categories?${new URLSearchParams({organizationId,...params})}`),
 
-    create: (data: { organizationId: string; name: string; sortOrder?: number }) =>
+    create: (data: { organizationId: string; name: string; sortOrder?: number; parentId?:string|null }) =>
       this.request<Category>('/categories', {
         method: 'POST',
         body: JSON.stringify(data),

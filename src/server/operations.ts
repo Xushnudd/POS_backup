@@ -13,6 +13,7 @@ export const payloadHash = (value: unknown) => createHash('sha256').update(canon
 export async function assertLiveContext(tx:Prisma.TransactionClient,context:TokenPayload) {
         const active=await tx.session.findFirst({where:{id:context.sessionId,userId:context.userId,organizationId:context.organizationId,revokedAt:null,expiresAt:{gt:new Date()},idleExpiresAt:{gt:new Date()},user:{isActive:true}}})
         const member=await tx.organizationUser.findFirst({where:{id:context.organizationUserId,userId:context.userId,organizationId:context.organizationId,isActive:true},include:{userStores:true}})
+        if(active?.authenticationMethod==='pin' && (context.role!=='cashier'||!member?.pinHash||context.storeIds.length!==1||context.storeIds[0]!==active.pinStoreId||!await tx.store.findFirst({where:{id:active.pinStoreId!,organizationId:context.organizationId,isActive:true}})))throw new AccessError(401,'SESSION_CHANGED');
         if (!active || !member || member.role!==context.role || (context.role!=='owner' && context.storeIds.some(id=>!member.userStores.some(x=>x.storeId===id)))) throw new AccessError(401,'SESSION_CHANGED','Sessiya yoki vakolat o‘zgardi; qayta kiring')
 }
 export async function runOperation<T>(context: TokenPayload, type: string, key: string, payload: unknown, work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
@@ -35,6 +36,8 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
         const result=await work(tx)
         const json=JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue
         await tx.operation.create({data:{organizationId:context.organizationId,actorId:context.userId,type,key,payloadHash:hash,result:json}})
+        // Surface deferred journal violations inside the transaction before returning an acknowledgement.
+        await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
         return JSON.parse(JSON.stringify(result)) as T
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,timeout:15000})
     } catch(error) {

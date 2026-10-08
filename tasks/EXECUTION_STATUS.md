@@ -43,12 +43,12 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | SEC-02.05 | CORE-1 | in_progress | Kirish, tiklash, import va qimmat so‘rovlarda tezlik/hajm cheklovlari. | PostgreSQL login/register/operation/report/CSV/session budgets; Retry-After; bounded request and 10000-row export caps | Reset/import/worker/hosting traffic protection remains |
 | SEC-02.06 | CORE-1 | todo | Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq. | — | — |
 | SEC-02.07 | CORE-1 | done | API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
-| SEC-02.08 | CORE-1 | in_progress | XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | TLS hosting, reset/import limits, fayl/CSV himoyasi va security-event UI |
+| SEC-02.08 | CORE-1 | done | XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | SEC-02.09 | CORE-1 | in_progress | Sessiyalar va xavfsizlik hodisalari tarixi; shubhali kirish haqida bildirishnoma. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | TLS hosting, reset/import limits, fayl/CSV himoyasi va security-event UI |
 | USR-01.01 | CORE-1 | done | Taklif, rol/filial tahriri, bloklash va explicit arxivlash/tiklash; moliyaviy tarix saqlanadi. | +1 checkpoint: migration026, economic invitation test, reports-finance lifecycle tests, HTTPS browser archive/reload/restore/reactivate | Regressiyani saqlash |
 | USR-01.02 | CORE-1 | done | Oxirgi egani o‘chirish/bloklashga yo‘l qo‘ymaslik; egalikni topshirish jarayoni. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | USR-01.03 | CORE-1 | done | Bir foydalanuvchining bir nechta biznesi orasida vakolat bilan almashish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
-| USR-01.04 | CORE-1 | todo | Tez kassir almashish uchun PIN; PIN yuqori vakolat o‘rnini bosmasligi. | — | — |
+| USR-01.04 | CORE-1 | done | Tez kassir almashish uchun PIN; PIN yuqori vakolat o‘rnini bosmasligi. | 2026-10-08 cashier PIN protokoli; migration056 + integration/browser | Regressiyani saqlash |
 | USR-01.05 | CORE-1 | in_progress | Qaytarish, narx o‘zgartirish, katta chegirma va inventar farqiga manager tasdig‘i. | Member update/ownership/switch API, audit, owner guard, role discount policy | Taklif, boshqaruv UI, ownership negative tests, manager approval record |
 | USR-01.06 | CORE-1 | todo | Kelgusida omborchi/buxgalter/kuzatuvchi roli va moslashtiriladigan vakolatlar. | — | — |
 | POS-01.01 | CORE-1 | done | Narx, tannarx, birlik, kassir va vakolatlarni serverda ishonchli manbadan olish. | 2026-10-06: qabul mezoni va regressiya o‘tdi; quyidagi “Yana 10 ta PLAN1 bandi” dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -76,9 +76,9 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | RET-01.06 | EXTERNAL-LATER | deferred | Provayder orqali refund, uning kutish/xato holati va takror so‘rovdan himoya. | ADR-002: foydalanuvchi hozir implementatsiya qilmaslikni belgiladi; vendor contract taxmin qilinmaydi | Alohida topshiriq va rasmiy contract/uskuna tayyor bo‘lganda |
 | RET-01.07 | CORE-1 | done | Sabab, vakolat, tasdiqlovchi, qaytarma chek va audit. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | RET-01.08 | CORE-1 | todo | Tovar almashtirishni original qaytarish + yangi savdo sifatida bog‘lash. | — | — |
-| CAT-01.01 | CORE-1 | in_progress | Kategoriya daraxti, brend, rasm, tavsif va faol/arxiv holati. | Product/category archive filters; category CRUD/order/search/paging/CSV; manager restore UI; historical records retained | Category tree, brand, description/image management remain |
+| CAT-01.01 | CORE-1 | done | Kategoriya daraxti, brend, rasm, tavsif va faol/arxiv holati. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | CAT-01.02 | CORE-1 | done | Bir mahsulot uchun bir nechta barkod; barkod yaratish va etiketka chiqarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
-| CAT-01.03 | CORE-1 | todo | Rang/o‘lcham kabi variantlar; har variantning alohida qoldig‘i va barkodi. | — | — |
+| CAT-01.03 | CORE-1 | done | Canonical rang/o‘lcham variantlari, har SKU stock/barcode mustaqil; eski default backfill. | Quyidagi CAT-01.03 protokoli:138 integration,27 unit,9 browser,fresh/legacy51 | Regressiyani saqlash |
 | CAT-01.04 | CORE-1 | todo | Birlik konvertatsiyasi: 1 quti = 12 dona; asosiy birlikda qoldiq, hujjatda savdo birligi. | — | — |
 | CAT-01.05 | CORE-1 | in_progress | Kasr bilan sotish, birlik aniqligi, tarozi barkodidan vazn/narx ajratish. | Existing unit precision/service guard; complete manager paginated unit management/search/CSV | Scale-barcode parsing requires approved format; real scale hardware external-later |
 | CAT-01.06 | CORE-1 | todo | Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx. | — | — |
@@ -101,7 +101,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | INV-02.07 | CORE-1 | todo | Seriya raqami/kafolat — elektronika segmentida P1. | — | — |
 | PUR-01.01 | CORE-1 | done | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Migration032 +042..044; scoped card/receipt/price/payment history; validation/archive/restore; supplier acceptance below | — |
 | PUR-01.02 | CORE-1 | done | Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri. | Original Order/Receipt/Stock/Invoice/Allocation FK; atomic partial receipt; races/rollback/3 browsers; migrations045..048 | — |
-| PUR-01.03 | CORE-1 | todo | Yetkazib beruvchiga qaytarish, narx/miqdor farqi va qarzni yangilash. | — | — |
+| PUR-01.03 | CORE-1 | done | Original-bound supplier return/price credit, stock/payable/advance atomic. | Quyidagi PUR-01.03 qabul protokoli:135 integration,27 unit,9 browser,fresh/legacy49 | Regressiyani saqlash; actual cash refund va landed cost alohida |
 | PUR-01.04 | CORE-1 | done | Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash. | Immutable invoice/payment/allocation; cash/bank proof; replay/race/audit rollback; API+three browsers | — |
 | PUR-01.05 | CORE-1 | todo | Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati. | — | — |
 | PUR-01.06 | CORE-1 | done | Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
@@ -130,7 +130,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | FIN-02.04 | CORE-1 | done | Biznes xarajatlari, toifalari va to‘lov hisoblari. | plus-20 finance qabul: 124 PG,27 unit,3 HTTPS browser; migration038–041; quyidagi individual protokol | Regressiyani saqlash; boshqa plus-20 bandlari ochiq |
 | FIN-02.05 | CORE-1 | done | Yalpi foyda va operatsion foydani aniq ajratish; to‘liq buxgalteriya hisobi bilan teng deb ko‘rsatmaslik. | plus-20 finance qabul: 124 PG,27 unit,3 HTTPS browser; migration038–041; quyidagi individual protokol | Regressiyani saqlash; boshqa plus-20 bandlari ochiq |
 | FIN-02.06 | CORE-1 | done | Naqd, bank va provayder hisoblari orasidagi pul o‘tkazmalarini ikki marta tushum deb hisoblamaslik. | plus-20 finance qabul: 124 PG,27 unit,3 HTTPS browser; migration038–041; quyidagi individual protokol | Regressiyani saqlash; boshqa plus-20 bandlari ochiq |
-| FIN-02.07 | CORE-1 | todo | Soliq stavkasi, imtiyoz, narx ichida/tashqarisida soliq siyosatini sozlash; stavka tarixini saqlash. | — | — |
+| FIN-02.07 | CORE-1 | in_progress | Soliq stavkasi, imtiyoz, narx ichida/tashqarisida soliq siyosatini sozlash; stavka tarixini saqlash. | — | — |
 | REP-01.01 | CORE-1 | done | P0: tashkilot va do‘kon filtri hamma ko‘rsatkichga tatbiq etilishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.02 | CORE-1 | done | P0: vaqt zonasi, davr boshi/oxiri; oxirgi kun to‘liq kirishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.03 | CORE-1 | done | P0: yig‘indilar joriy sahifadan emas, barcha mos yozuvlardan olinishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -197,7 +197,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | DATA-01.06 | CORE-1 | todo | Tashqi provayder chaqirig‘ini uzoq baza tranzaksiyasi ichida ushlamaslik; navbat va kompensatsiya jarayoni. | — | — |
 | DATA-01.07 | CORE-1 | todo | Tashqi chaqiriq natijasi noma’lum bo‘lsa tekshirish va solishtirish; “ikki tizimda bitta tranzaksiya” deb faraz qilmaslik. | — | — |
 | DATA-01.08 | CORE-1 | done | Standart xato formati, so‘rov identifikatori, pagination/hajm cheklovi va API shartnomasi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
-| DATA-01.09 | CORE-1 | todo | Fayllar uchun vakolatli saqlash, yuklash cheklovi va o‘chirish siyosati. | — | — |
+| DATA-01.09 | CORE-1 | done | Fayllar uchun vakolatli saqlash, yuklash cheklovi va o‘chirish siyosati. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | DATA-01.10 | CORE-1 | in_progress | Migratsiya, ma’lumot ko‘chirish va mavjud hisobni tekshirish uchun skript/reja. | Foundation–006 migration, tenant FK/trigger, isolated PostgreSQL tests | Real eski data clone preflight/backfill va fresh-db qayta qabul sinovi |
 | OPS-01.01 | CORE-1 | in_progress | Development, staging va production alohida baza/kalit bilan. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-01.02 | CORE-1 | done | Builddan `db push`ni chiqarish; versiyalangan migratsiyani alohida chiqarish bosqichida bajarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
@@ -1082,3 +1082,83 @@ Versiya HEAD3301aa37f41dfd0649966bbbf51e5bd4b219452e + ishchi daraxt; SHA256:
 - `tests/e2e/core.spec.ts`: `cf33d92d35ae9749253c36f1a27975e755b0e2c3569386de43b4986cc2471021`.
 
 Davom navbati: FIN-02.07/02, PUR-01.03/05, RET-01.03/08, POS-02.06, CRM-01.04, CAT-01.01, DATA-01.09, SEC-01.02/04; latest +20ning qo‘shimcha uch o‘rni uchun CAT-01.03, INV-02.05, OFF-02.01 core backlogdan tanlanadi. Hozir jami15 ochiq, bu yangi tanlovlar done emas. Sharp rasm sanitizatsiyasi rasmiy constructor/output qo‘llanmasi va mavjud0.35.4 local package bo‘yicha dastlab o‘rganildi, biroq fayl yuklash modeli/dependency/endpoint/implementatsiya bu checkpointda yozilmadi va DATA-01.09 done emas.
+
+
+### Yangi +20 — PUR-01.03 qabul protokoli (2026-10-08)
+
+**109→110 done. Latest +20 baseline104dan6 ta qabul qilindi;14 ta hali ochiq, maqsad124.** UI/API/testlar alohida PLAN1 bandi sifatida sanalmaydi.
+
+Original receipt/invoicega bog‘langan SupplierCredit/Item physical return va price correction ishlaydi. Credit original qolgan quantity/value chegarasida; goods return stockni kamaytiradi, price credit quantityni o‘zgartirmaydi. Qolgan qiymat qolgan quantityga taqsimlanadi; final remainder exact. Paid invoice kamayganda immutable original allocation release aynan original paymentning advance balansiga qaytadi, yangi cash/payment yaratilmaydi. Scope/live session/role, original key replay, locks va Serializable transaction saqlanadi.
+
+Tekshirilgan hisob: original5×10.25=51.25 to‘langan; return2→credit20.50/net30.75/advance20.50; pricecredit5→net25.75/advance25.50; qolgan3 return→net0/advance51.25/stock0. Original cash movement1 va cash948.75 o‘zgarmaydi. Before-credit asOf51.25; joriy purchase gross51.25/credits51.25/net0. Keyingi invoice10ga released advance allocation→advance41.25, yangi cash yo‘q. Parallel original qty cheklovi, stale preview409, foreign404/cashier403, immutable journal, audit rollback va malformed deferred journal rad tekshirildi.
+
+Qo‘shimcha: 1kg×0.01 uch fractional returnda jami0.01/stock0; original10, return0.5→5, pricecredit4, return0.25→0.50, final0.25→0.50; jami10. Price credit tarixiy sale costni qayta yozmaydi; landed-cost/sold-stock correction PUR-01.05. Actual supplier cash refund alohida, bu band bilan implemented deb da’vo qilinmaydi.
+
+Dalillar: final isolated `npm run test:integration`135/135 (`/tmp/pos-supplier-return-integration.log`), `npm test`27/27 (`/tmp/pos-supplier-return-unit.log`), fresh+legacy `bash scripts/ops/test-migrations.sh`49 migration PASS (`/tmp/pos-supplier-return-migrations.log`). Final typecheck/lint va disconnected production build exit0 (`/tmp/pos-supplier-return-{typecheck,lint,build}.log`). Route inventory111 template/153 handler. Database faqat isolated localhost55439/pos_test yoki shu konteynerdagi temporary migration databases; real biznes DB/deploy/vendor API/AI commit yo‘q.
+
+Browser acceptance: final production HTTPS `POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Supplier return UI|Supplier ledger UI|Purchase order UI'` **9/9**, Chromium/Firefox/WebKit (`/tmp/pos-supplier-return-e2e.log`). Oldingi final run8/9 same-invoice selection/refresh lifecycle xatosini topdi. Ayni value qayta tanlanganda detail tozalash olib tashlandi; refresh paytida SupplierCreditsni unmount qilayotgan ledger busy conditional tuzatildi. Test forma ko‘ringach ayni invoice qayta tanlanishini explicit tekshiradi. Final9/9dan keyin checkbox va tracker donega o‘tkazildi. Browser original purchase2×10/paid20, return1 lost response/reload/original retry→credit1/advance10/stock1; finalunit→advance20/stock0, original cash movement1/balance980. WebKit yetishmayotgan ICU74/JPEG8 kutubxonalari faqat /tmp browser treega chiqarildi; system package o‘zgarmadi.
+
+Versiya HEAD `d4662557f3901624392721aafc6e9313c21d5d6f` + ishchi daraxt (AI commit yo‘q). Qayta ijro versioned routes/services/migration049/integration/e2e testsdan. SHA256: credits `350b082107bc8af5d83430bb823aa823b8c518d81332907639175e8ba3c2a27e`; operations `efbf10a4615be9160bdb6c67bbde5c6d26d45b84fc06952e6da8beef7120cb3b`; integration `a4c0ce9e640d6318e613cedf32259430816fe67912a56135694bac92052628d6`; UI `ef358e9c801d41bb3c95cb5b0389fabf40a42e35edcc9d53140d7d3c3dfd9d83`; E2E `b97d6c9a6a904f4ef4fb063cbd831215d61a643b841740d18350c84752ae1677`.
+
+Final SupplierLedger SHA256 `37b9bdb7ea192291bb9ff4f1c0799b27cf5d9b77adeb02cae086206f786ba0a5`. `git diff --check` exit0. Keyingi14 ochiq: FIN-02.07/02, PUR-01.05, RET-01.03/08, POS-02.06, CRM-01.04, CAT-01.01/03, DATA-01.09, SEC-01.02/04, INV-02.05, OFF-02.01. Latest +20 hali complete emas.
+
+
+### Yangi +20 — CAT-01.03 qabul protokoli (2026-10-08)
+
+**110→111 done. Latest +20 baseline104dan7 ta qabul qilindi,13 ta hali ochiq; maqsad124.** Yangi schema/API/UI/testlar bitta parent vazifa sifatida sanaladi. Butun loyiha production-ready deb da’vo qilinmaydi.
+
+ProductVariant existing Product/SKU productIdsini stockKey sifatida saqlaydi. Root default/asl SKU; har child mustaqil barcode, narx, tannarx, stock va sale/return/purchase foreign keys. Rang/o‘lcham JSONB canonical trim/lowercase; option tartibi/case yangi kombinatsiya yaratmaydi, duplicate parallel bir marta. Eski mahsulotlarning name/barcode/quantity/historysi o‘zgarmaydi;050 backfill/default trigger,051 composite tenant FKs root/child scope invarianti. Mavjud texnologiyalar Prisma/PostgreSQL/React/IndexedDB; yangi vendor SDK yoki refactor kerak bo‘lmadi.
+
+Kirish/natija: original stock10; red/M variant stock3, blue/L stock4, barcode lookup red productIdni qaytardi. Red125.50 sale1→red2, blue4/original10 unchanged; original sale return1→red3. Default original barcode va metadata{} saqlangan. Variant yaratish movement/payment0. GET limit1 data1/total3; cashier scoped read200/cost hidden; boshqa filial99 mavjud bo‘lganda assigned store5 ko‘rindi; foreign404, cashierPOST403. Unit/family/options/tenant rewrite SQLda rad; archive metadatani yo‘qotmaydi. Late audit failure product, primary barcode, price history, variant va Operationni to‘liq rollback qildi; original retry bitta child yaratdi.
+
+Browser: existing root stock7. UI red/M12.50 variant creation serverda commit bo‘lib javob uzildi; reload/saved original retry→bitta product, ikki family rows, yangi stock0/movement0/payment0 va originalstock7. Variant tanlash aniq SKU/barcode/quantityni ko‘rsatdi. Chromium/Firefox/WebKit variant va oldingi purchase/return regression **9/9** (`/tmp/pos-variants-e2e.log`).
+
+Dalillar: final isolated `npm run test:integration` **138/138**, `/tmp/pos-variants-integration.log`; `npm test` **27/27**, `/tmp/pos-variants-unit.log`; `bash scripts/ops/test-migrations.sh` fresh+legacy **51 migration PASS** va legacy-product defaultvariant count1, `/tmp/pos-variants-migrations.log`. Typecheck/lint/disconnected production build exit0 (`/tmp/pos-variants-{typecheck,lint,build}.log`); `git diff --check` exit0. Boundary inventory **112 template/155 handler**. Yangi migrationlar faqat isolated DBda; actual business DB/deploy/AI commit/vendor integration yo‘q.
+
+Versiya HEAD `d4662557f3901624392721aafc6e9313c21d5d6f` + ishchi daraxt. SHA256: service `c7ba00f1114e8a19928a21d0107654ab83cda0953da1e1547f59f9b7d1acc627`; UI `7174e377da13beda8c609086bd7a481c903f6e797411d6e3324c4ef0e7a3a514`; integration `ef9482c2a6b739da202fe8279a083d0dac685eec4a584ae912d71beb533a9c37`; E2E `61ae63ceb956debbfe23c8470f6159699f24d00368ce0bdd05e6e3c3edac02f3`. Qayta ijro manbalari versioned migration/service/routes/tests; vaqtinchalik loglar yo‘qolsa ham shu buyruqlar qayta ishlatiladi.
+
+Chegaralar: oilada1000 SKU cap; quantity sahifadagi har SKUning allowed-stores yig‘indisi, family aggregate emas. Variant metadata immutable, archive/restore mavjud Product lifecycle bilan. Bir oilada birlik umumiy; paket/unit conversion CAT-01.04ning alohida vazifasi. OFF/fiscal/Click/hardware shu bandga qo‘shilmadi.
+
+Qolgan13: FIN-02.07/02, PUR-01.05, RET-01.03/08, POS-02.06, CRM-01.04, CAT-01.01, DATA-01.09, SEC-01.02/04, INV-02.05, OFF-02.01. Latest +20 hali complete emas.
+
+
+## Yangi +20 so‘rov — faol (2026-10-08, baseline111)
+
+Baseline111 done, yangi maqsad131. Oldingi so‘rovdagi yetti qabul qayta sanalmaydi. Yangi done4 (115 jami); qolgan16. To‘liq20 ta parent PLAN1 bandi qabul qilinmaguncha checkpoint complete emas. Birinchi guruh DATA-01.09/CAT-01.01/SEC-02.08: bounded protected assets, category tree/brand/description/image va xavfsizlik regressionlari. Tashqi integratsiyalar avvalgi taqiq bo‘yicha chetlab o‘tiladi.
+
+### Yangi +20 — DATA-01.09, CAT-01.01, SEC-02.08 qabul protokoli
+
+111→114 done; bu so‘rovdan3/20,17 ochiq. Uchta parent band sanaldi; endpoint/testlar qo‘shimcha task hisoblanmaydi.
+
+DATA-01.09: PNG/JPEG/WebP canonical base64,512KiB va16Mp cheklovi, qayta WebP encode/EXIF stripping; SVG415/corrupt400/path traversal400/oversize413/foreign404/cashier mutation403. Protected cashier own binary200/private-no-store/nosniff/sandbox, anonymous401, expiry/deleted410. Org locked quota parallel ikki commanddanbitta; audit failure bytes/link/Operation rollback; original replayone; deletion bytesNULL/linkNULL, metadata retained/usedBytes0. Backup encrypted empty restore bytes/SHA256/Productlink/authenticated GETni qayta tikladi; fixture RTO5s/RPO0 hosting SLA emas. Existing PostgreSQL durable volume policy ADR-035; arbitrary hujjat/video allowlistda yo‘q.
+
+CAT-01.01: category parent/tree manager UI, self/descendant/foreign/depth SQL+service guards; helper va raw parallel SQL cyclelardanbitta commit. Brand create/rename/archive/restore scoped/page; product description/image/brand preserved, lifecycle historical SKUga tegmaydi. UI unknown upload commit, lost acknowledgement, reload/original saved retry bitta asset; deletion image/bytes yo‘q, description saqlanadi. Brand search/paging selection va unsaved metadata preservation bor.
+
+SEC-02.08: nonce strict-dynamic CSP document parserga kiritilgan nonce’siz scriptni uchbrauzerda bloklaydi, framework forms/offline/receipt iframe ishlaydi. React description plain-text; active URL/upload formats rad. Existing formula-safe CSV unit/integration tests regressionda. Private API/file عمومی cachega kirmaydi. Trusted browser evaluate runtime injection parser XSSga teng emasligi topildi; test HTML responsega hostile script kiritib haqiqiy mezonni tekshiradi.
+
+Dalillar: unit27/27 `/tmp/pos-files-unit.log`; final full integration142/142 `/tmp/pos-files-integration.log`, latest strengthened files/category focused4/4 `/tmp/pos-files-focused.log`. Typecheck/lint/build exit0 `/tmp/pos-files-{typecheck,lint,build}.log`; fresh+legacy55 migrations PASS `/tmp/pos-files-migrations.log`; encrypted backup PASS `/tmp/pos-files-backup.log`. Final full HTTPS three-browser69 testdan68passed va WebKit count-flow transient failure `/tmp/pos-files-e2e-final.log`; aynan failing scenario unchanged buildda qayta19.2s PASS `/tmp/pos-files-webkit-recheck.log`. Previous full run66existing scenariospassed (new test hidden option selector failure); new catalog/parserCSP3/3 `/tmp/pos-files-media-e2e.log`. Failed inventory count assertion qayta tekshirildi, threshold/status yoki expectation yumshatilmadi; bu full-run69/69 degan da’vo emas.
+
+Versiya HEAD d4662557f3901624392721aafc6e9313c21d5d6f + ishchi daraxt, AI commit yo‘q. Qayta ijro source/test/migration052..055da; faqat isolated55439/pos_test. Route boundary116template162handler. Haqiqiy biznes DB/deploy/vendor API ishlatilmagan. Keyingi cashier PIN bandi hali done emas.
+ff30fb694c1e6cb132e006c4489df7e79577167b9ac86e5946445ccc409dbad0  src/server/files/assets.ts
+4ff9fc3fb44bdda8bfdb60c3f4c0287a9f156bd9581a76a57afbd2558a72faf1  src/proxy.ts
+5a2a520296d82f229eae6013681d1110be33151f2f143251ed94fc9d94c298be  tests/files-catalog.integration.test.ts
+da1c02ec50f41d362f506a5782e06155e12bc07de1bc79eb6dbe1ff3daa9b503  src/app/(dashboard)/products/[id]/media/page.tsx
+
+### Yangi +20 — USR-01.04 kassir PIN qabul protokoli
+
+114→115 done, latest baseline111dan4/20;16 qolmoqda, maqsad131. PIN schema/API/UI/testlar bitta parent banddir. Tax qismi keyingi in-progress ish, bu protokolga kirmaydi.
+
+Own cashier PIN password reauth bilan bcrypt12 hash; owner/admin403, invalidpassword403, malformed400. Source session→assigned active branch cashier target; target/sourcelock, new scoped8h session/source revoke/audit atomic. Role adminga o‘zgarsa PIN session401; organization switch403/passwordrequired; boshqa assigned branch ham PIN sessionga ochilmaydi. Fivewrong attempts401 keyingi429/RetryAfter, yangi sessionyo‘q. Successful PIN resets rate budgets. Configure/disable revokes PIN sessions; password rotation barcha membership PIN NULL va sessions revoked. PIN/hash response/audit/localStoragega chiqmaydi. Parallel source switch1success/1reject; audit trigger failureda original source active va new session0; retryonce.
+
+Browser UI PIN password sozlash→wrongPIN→validswitch→/pos yangi cashier actor; own branchlist1, productPOST403, targetpromotionme401. Uchbrauzer3/3. Birinchi browser run test stores query organizationIdni bermagan400ni topdi; tuzatish davomida existing nested userStores inclusion barcha assigned branchesni qaytarishi aniqlanib tenantScope/active store relation filter bilan tuzatildi; integration ham own branchonly assertionni tekshiradi. Mezon yumshatilmadi. UI pending/conflict intentlar bilan switchblok, old actor draft retained/full reload cache discard.
+
+Dalillar: final full isolated integration145/145 `/tmp/pos-pin-integration-final.log`; focused parallel/rollback/password3/3 `/tmp/pos-pin-focused.log` (latest branch assertion full145da). Unit27/27 `/tmp/pos-pin-unit.log`. Typecheck/lint/build exit0 `/tmp/pos-pin-{typecheck,lint,build}.log`; migration fresh+legacy56 PASS `/tmp/pos-pin-migrations.log`. HTTPS production Chromium/Firefox/WebKit3/3 `/tmp/pos-pin-e2e.log`. Route inventory118templates165handlers. `git diff --check` exit0.
+
+Versiya HEAD d4662557f3901624392721aafc6e9313c21d5d6f + ishchi daraxt; AI commit/deploy/realbusinessDB/vendorAPI yo‘q. Qayta ijro source/routes/migration056/tests orqali. Tax model/migration057 tayyorlanmoqda, hali applied/tested/done emas. Qolgan16 parent: FIN-02.07/.02, RET-01.03, POS-02.06, RET-01.08, CRM-01.04, PUR-01.05, CAT-01.04/.06, INV-02.05, OFF-02.01/.03/.04, SEC-01.02/.04, USR-01.06. Bu tanlovlar hech biri shu protokol bilan yopilmaydi.
+99b7144be0ad4d313b51b1ab7d2f5e32c5e3372d44558d957e792eb78dd35425  src/server/auth/session.ts
+820afb2d4df38719b3f67e4de5cb50a7eaeaa87d19f991d18c0cad50fe56d8a6  src/app/api/auth/pin-switch/route.ts
+8024bec7adc1a27f159522233d6012785762afe186f8c99bfba5f0af30f1aa26  src/components/security/CashierPin.tsx
+43925214dd960f51838d1f3615cc9f5403a6af531db206ff0233274d09d6df48  tests/cashier-pin.integration.test.ts
+
+### Soliq/chegirma joriy ish — hali qabul qilinmagan (2026-10-08)
+057..059 faqat isolated bazaga qo‘llandi; deployed052..058 checksum o‘zgarmadi. FIN-02.07/FIN-02.02/RET-01.03/POS-02.06 uchun server/UI/history/refund kodi tayyorlanmoqda. 151 PG integration va30 unit o‘tdi; final API edit focused9/9. Fresh+legacy59 migratsiya o‘tdi. Birinchi full75 browser68passed/7failed: oldingi conflict/focus oqimi va Chromium terminal-loading scan race; sabablar tuzatildi, yangi buildda focused15 brauzer test ketmoqda. Final browser va backup dalilisiz bu to‘rtta band done qilinmaydi. Hozir115 done, baseline111dan4/20,16 hali ochiq.

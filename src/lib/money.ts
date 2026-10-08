@@ -17,3 +17,7 @@ export function clientLine(quantity:number,price:number,discount=0) {
  const cents=(product+denominator/BigInt(2))/denominator-fixed(discount,2)
  return displayed(cents<BigInt(0)?BigInt(0):cents)
 }
+export function clientPercentage(base:string|number,percent:string|number){
+ const rate=fixed(percent,2);if(rate<BigInt(0)||rate>BigInt(10000))throw new Error('Invalid discount percentage');
+ return displayed((fixed(base,2)*rate+BigInt(5000))/BigInt(10000));
+}

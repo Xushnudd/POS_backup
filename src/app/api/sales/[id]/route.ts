@@ -7,11 +7,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 import { enforceDiscountLimit, prepareItems, quantitySchema, amountSchema } from '@/server/sales/service'
+import {priceTaxLines,type TaxMode} from '@/server/taxes/calculations'
+import {decimal} from '@/server/sales/calculations'
+import {discountAmount as resolveDiscount} from '@/server/sales/discounts'
 import { draftTotals } from '@/server/sales/calculations'
 
 const updateSaleSchema = z.object({
- customerId:z.string().uuid().nullable().optional(),note:z.string().max(2000).optional(),discountAmount:amountSchema.optional(),
- items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0)})).min(1).max(500).optional(),
+ customerId:z.string().uuid().nullable().optional(),note:z.string().max(2000).optional(),discountAmount:amountSchema.optional(),discountPercent:amountSchema.refine(v=>decimal(v).lte(100)).nullable().optional(),discountReason:z.string().trim().min(3).max(2000).optional(),
+ items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0),discountPercent:amountSchema.refine(v=>decimal(v).lte(100)).optional()})).min(1).max(500).optional(),
 })
 
 async function handleGET(
@@ -121,9 +124,20 @@ async function handlePUT(
       const current = await tx.sale.findUniqueOrThrow({ where: { id, AND: tenantScope("Sale", payload) }, include: { items: true } })
       if (current.status !== 'draft') throw new Error('INVALID_STATUS')
       if (validatedData.customerId && !await tx.customer.findFirst({where:{id:validatedData.customerId,organizationId:payload.organizationId,isActive:true}})) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
-      const prepared = validatedData.items ? await prepareItems(tx, payload, validatedData.items, validatedData.discountAmount ?? current.discountAmount) : null
-      const totals = prepared?.totals ?? draftTotals(current.items, validatedData.discountAmount ?? current.discountAmount)
-      if (!prepared) await enforceDiscountLimit(tx,payload,current.items,totals.totalAmount)
+      const receiptPercent=validatedData.discountPercent!==undefined?validatedData.discountPercent??undefined:validatedData.discountAmount===undefined?current.discountPercent?.toFixed():undefined
+      const preparedDiscount=validatedData.discountAmount??(receiptPercent===undefined?current.discountAmount:0)
+      const prepared = validatedData.items ? await prepareItems(tx, payload, validatedData.items, preparedDiscount,{discountReason:validatedData.discountReason??current.discountReason,discountPercent:receiptPercent}) : null
+      const discountChanged=validatedData.discountAmount!==undefined||validatedData.discountPercent!==undefined
+      const receiptDiscount=discountChanged?resolveDiscount(current.subtotal,validatedData.discountAmount??0,validatedData.discountPercent??undefined):current.discountAmount
+      const rawTotals=draftTotals(current.items,receiptDiscount)
+      const authorization=prepared?.authorization??await enforceDiscountLimit(tx,payload,current.items,rawTotals.totalAmount,validatedData.discountReason??current.discountReason,discountChanged||current.discountPolicySnapshot!==null)
+      // Legacy drafts can contain repeated SKU rows. Keep row identity when
+      // allocating cents; product identity would overwrite the first row twice.
+      const uniqueProducts=new Set(current.items.map(i=>i.productId)).size===current.items.length
+      const repriced=!prepared&&discountChanged?priceTaxLines(current.items.map(i=>({...i,id:uniqueProducts?i.productId:i.id,taxMode:i.taxMode as TaxMode})),receiptDiscount):null
+      const totals=prepared?.totals??(repriced?{...rawTotals,taxAmount:repriced.reduce((n,i)=>n.add(i.taxAmount),decimal(0)),netAmount:repriced.reduce((n,i)=>n.add(i.taxBase),decimal(0)),totalAmount:repriced.reduce((n,i)=>n.add(i.payableAmount),decimal(0))}:{subtotal:current.subtotal,discountAmount:current.discountAmount,totalAmount:current.totalAmount,taxAmount:current.taxAmount,netAmount:current.netAmount})
+      if(totals.totalAmount.gte('1000000000000'))throw new AccessError(400,'INVALID_AMOUNT')
+      if(repriced)for(const item of repriced){await tx.saleItem.update({where:{id:uniqueProducts?current.items.find(i=>i.productId===item.productId)!.id:item.id},data:{receiptDiscount:item.receiptDiscount,taxAmount:item.taxAmount,taxBase:item.taxBase,payableAmount:item.payableAmount,roundingVersion:item.roundingVersion}})}
       if (validatedData.items !== undefined) {
         await tx.saleItem.deleteMany({ where: { saleId: id } })
         await tx.saleItem.createMany({
@@ -135,7 +149,8 @@ async function handlePUT(
         data: {
           ...(validatedData.customerId !== undefined && { customerId: validatedData.customerId }),
           ...(validatedData.note !== undefined && { note: validatedData.note }),
-          ...totals,
+          ...totals,...authorization,
+          ...((discountChanged||prepared)&&{discountPercent:receiptPercent===undefined?null:decimal(receiptPercent)}),
         },
         include: { items: true },
       })

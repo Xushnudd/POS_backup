@@ -15,6 +15,7 @@ export const POST=withApi(async(request:NextRequest)=>{
   // Consistent lock order also coordinates membership updates and handover.
   for(const id of [...new Set([context.organizationId,input.targetOrganizationId])].sort())await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${id} FOR UPDATE`
   await assertLiveContext(tx,context)
+  if((await tx.session.findUnique({where:{id:context.sessionId}}))?.authenticationMethod==='pin')throw new AccessError(403,'PASSWORD_LOGIN_REQUIRED','Biznesni almashtirish uchun parol bilan qayta kiring')
   const member=await tx.organizationUser.findUnique({where:{organizationId_userId:{organizationId:input.targetOrganizationId,userId:context.userId}}})
   if (!member?.isActive || !['owner','admin','cashier'].includes(member.role)) throw new AccessError(403,'FORBIDDEN')
   await tx.session.update({where:{id:context.sessionId},data:{revokedAt:new Date()}})

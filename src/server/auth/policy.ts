@@ -40,9 +40,9 @@ export function assertRoutePermission(path: string, method: string, role: string
   if (area === 'organizations' && path.includes('/users') && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
   if(area==='ownership-transfers' && (read || (method==='POST' && /^\/api\/ownership-transfers\/[0-9a-f-]{36}$/i.test(path))))return
   if (role === 'cashier') {
-    const allowed = ['sales', 'shifts', 'products', 'categories', 'customers', 'stores', 'auth', 'operations', 'sync']
+    const allowed = ['sales', 'shifts', 'products', 'categories', 'customers', 'stores', 'auth', 'operations', 'sync', 'files', 'brands', 'taxes']
     if (area === 'organizations' && (read || path.endsWith('/switch'))) return
-    if (!allowed.includes(area) || (['products','categories','customers','stores'].includes(area) && !read)) throw new AccessError(403, 'FORBIDDEN')
+    if (!allowed.includes(area) || (['products','categories','customers','stores','files','brands','taxes'].includes(area) && !read)) throw new AccessError(403, 'FORBIDDEN')
     if (path.endsWith('/void')) throw new AccessError(403, 'MANAGER_REQUIRED')
   }
 }

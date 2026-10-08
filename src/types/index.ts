@@ -63,6 +63,8 @@ export interface AuthData {
 }
 
 export interface Category {
+  parentId?: string | null;
+  parent?: {id:string;name:string}|null;
   id: string;
   organizationId?: string;
   name: string;
@@ -73,6 +75,11 @@ export interface Category {
 }
 
 export interface Product {
+  taxProfileId?:string|null;
+  taxProfile?:{id:string;name:string;isActive:boolean}|null;
+  brandId?: string | null;
+  brand?: {id:string;name:string;isActive:boolean}|null;
+  description?: string;
   id: string;
   organizationId: string;
   categoryId?: string | null;
@@ -232,6 +239,13 @@ export type SaleStatus = 'draft' | 'completed' | 'voided' | 'partially_returned'
 export type PaymentType = 'cash' | 'card' | 'transfer' | 'credit';
 
 export interface SaleItem {
+  discountPercent?:string|null;
+  taxMode?:string;
+  taxRate?:string;
+  taxAmount?:string;
+  taxBase?:string|null;
+  payableAmount?:string|null;
+  roundingVersion?:string;
   id?: string;
   saleId?: string;
   productId: string;
@@ -280,6 +294,13 @@ export interface SaleReturnHistory {
   items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
 }
 export interface Sale {
+  discountReason?:string|null;
+  discountPercent?:string|null;
+  discountApprovedBy?:string|null;
+  discountApprovedRole?:string|null;
+  discountApprovedAt?:string|null;
+  taxAmount?:string;
+  netAmount?:string|null;
   sellerId?: string | null;
   serviceType?: string | null;
   cashTendered?: string | null;
@@ -315,6 +336,7 @@ export interface CartItem {
   unitPrice: number;
   discountAmount: number;
   lineTotal: number;
+  discountPercent?: number;
 }
 
 export interface DashboardReportData {

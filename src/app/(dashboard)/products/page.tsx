@@ -291,7 +291,7 @@ export default function ProductsPage() {
               <tbody className="divide-y divide-gray-100">
                 {products.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50/70 transition">
-                    <td className="py-3.5 px-4 font-bold text-gray-900">{p.name}</td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900">{p.name}<p><Link href={`/products/${p.id}/variants`} className="text-xs text-blue-700">Variantlar</Link>{role!=='cashier'&&<Link href={`/products/${p.id}/media`} className="ml-2 text-xs text-blue-700">Tavsif / rasm</Link>}</p></td>
                     <td className="py-3.5 px-4">
                       <div className="font-mono text-gray-700">{p.sku}</div>
                       <div className="font-mono text-[10px] text-gray-400">{p.barcode}</div>

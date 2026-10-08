@@ -1,4 +1,5 @@
 'use client';
+import CashierPin from '@/components/security/CashierPin';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -51,7 +52,7 @@ export default function SecurityPage(){
   }catch(error){setPasswordError(error instanceof Error?error.message:'Chiqish amalga oshmadi');}
   finally{setChanging(false);}
  };
- return <div className="space-y-4"><h1 className="text-2xl font-bold">Faol sessiyalar</h1><Card>
+ return <div className="space-y-4"><CashierPin/><h1 className="text-2xl font-bold">Faol sessiyalar</h1><Card>
   <p className="text-sm mb-3">Bu ro‘yxat hisobingizning barcha bizneslardagi faol sessiyalarini ko‘rsatadi. Qurilma modeli yoki joylashuv taxmin qilinmaydi. Joriy sessiyadan chiqish uchun menyudagi Chiqish tugmasini ishlating.</p>
   {error&&<div role="alert">{error}<Button onClick={()=>setVersion(value=>value+1)}>Qayta yuklash</Button></div>}
   {busy?<p>Yuklanmoqda...</p>:rows.map(row=><article key={row.id} className="border-t py-3 space-y-1">
