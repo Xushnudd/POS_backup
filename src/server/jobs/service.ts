@@ -6,18 +6,19 @@ import type {TokenPayload} from '@/lib/auth'
 import {AccessError} from '../auth/policy'
 import {assertLiveContext,audit,runOperation} from '../operations'
 import {scanOrganization} from '../monitoring/service'
-export const jobSchema=z.object({operationId:z.string().uuid(),type:z.literal('reconciliation'),storeId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000)}).strict()
+import {catalogExport,exportFilter} from './catalog-export'
+export const jobSchema=z.object({operationId:z.string().uuid(),type:z.enum(['reconciliation','catalog_export']),filter:exportFilter.optional(),storeId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000)}).strict().refine(v=>v.type==='catalog_export'?!v.storeId:!v.filter,'Export faqat katalog filtri, reconciliation faqat filial oladi')
 export const retryJobSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000)}).strict()
-const payloadSchema=z.object({storeId:z.string().uuid().optional()}).strict()
+const payloadSchema=z.object({storeId:z.string().uuid().optional(),filter:exportFilter.optional()}).strict()
 function owner(ctx:TokenPayload){if(ctx.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED')}
 async function event(tx:Prisma.TransactionClient,job:Pick<BackgroundJob,'id'|'attempts'|'generation'>,kind:string,code?:string){await tx.jobEvent.create({data:{jobId:job.id,event:kind,attempt:job.attempts,generation:job.generation,code}})}
-function publicJob(job:BackgroundJob){const {leaseToken,payload,...safe}=job;void leaseToken;void payload;return safe}
+function publicJob(job:BackgroundJob){const {leaseToken,payload,result,...safe}=job;void leaseToken;void payload;return {...safe,result:job.type==='catalog_export'?null:result}}
 async function authorize(tx:Prisma.TransactionClient,ctx:TokenPayload,job:BackgroundJob,reason:string){return tx.jobAuthorization.create({data:{jobId:job.id,organizationId:ctx.organizationId,generation:job.generation,userId:ctx.userId,sessionId:ctx.sessionId,reason}})}
 export async function enqueueJob(ctx:TokenPayload,input:z.infer<typeof jobSchema>){owner(ctx);return runOperation(ctx,'job.enqueue',input.operationId,input,async tx=>{
  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'jobs:'+ctx.organizationId},0))::text`
  if(input.storeId&&!await tx.store.findFirst({where:{id:input.storeId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(404,'STORE_NOT_FOUND')
  if(await tx.backgroundJob.count({where:{organizationId:ctx.organizationId,state:{in:['queued','running']}}})>=20)throw new AccessError(429,'JOB_LIMIT')
- const job=await tx.backgroundJob.create({data:{organizationId:ctx.organizationId,type:input.type,payload:input.storeId?{storeId:input.storeId}:{},expiresAt:new Date(Date.now()+3600000)}})
+ const job=await tx.backgroundJob.create({data:{organizationId:ctx.organizationId,type:input.type,payload:input.type==='catalog_export'?{filter:input.filter??{active:'all'}}:input.storeId?{storeId:input.storeId}:{},expiresAt:new Date(Date.now()+3600000)}})
  await authorize(tx,ctx,job,input.reason);await event(tx,job,'queued');await audit(tx,ctx,'BackgroundJob',job.id,'job_queued',{type:job.type,storeId:input.storeId,reason:input.reason});return publicJob(job)
  })}
 export async function retryJob(ctx:TokenPayload,id:string,input:z.infer<typeof retryJobSchema>){owner(ctx);return runOperation(ctx,'job.retry',input.operationId,{id,...input},async tx=>{
@@ -53,13 +54,19 @@ export async function failJob(job:BackgroundJob,code:'WORK_FAILED'|'AUTHORIZATIO
 export async function executeJob(job:BackgroundJob){let active=true,inFlight:Promise<boolean>|undefined;const timer=setInterval(()=>{if(active&&!inFlight){inFlight=heartbeatJob(job).catch(()=>false);void inFlight.finally(()=>{inFlight=undefined})}},5000);try{
  const result=await prisma.$transaction(async tx=>{
   const source=await tx.backgroundJob.findFirst({where:{id:job.id,state:'running',generation:job.generation,leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}}});if(!source)throw new AccessError(409,'JOB_LEASE_LOST')
-  const payload=await liveAuthorization(tx,source);if(source.type!=='reconciliation')throw new AccessError(400,'UNSUPPORTED_JOB')
-  const result=await scanOrganization(tx,source.organizationId,payload.storeId?[payload.storeId]:undefined)
+  const payload=await liveAuthorization(tx,source);let result:Prisma.InputJsonObject;
+  if(source.type==='reconciliation')result=await scanOrganization(tx,source.organizationId,payload.storeId?[payload.storeId]:undefined)
+  else if(source.type==='catalog_export'){
+   const exported=await catalogExport(source.organizationId,payload.filter??{active:'all'});
+   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'exports:'+source.organizationId},0))::text`;
+   const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});if((used._sum.size??0)+exported.size>32*1024*1024)throw new AccessError(413,'EXPORT_QUOTA');
+   const {data,...meta}=exported;await tx.jobExport.create({data:{jobId:source.id,organizationId:source.organizationId,data,...meta,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}});result={...meta,downloadPath:'/api/jobs/'+source.id+'/export'};
+  }else throw new AccessError(400,'UNSUPPORTED_JOB')
   await liveAuthorization(tx,source,true)
   const updated=await tx.backgroundJob.updateMany({where:{id:job.id,state:'running',generation:job.generation,leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}},data:{state:'succeeded',leaseToken:null,leaseUntil:null,result,lastError:null,updatedAt:new Date()}})
   if(updated.count!==1)throw new AccessError(409,'JOB_LEASE_LOST')
   await event(tx,source,'succeeded');await tx.auditLog.create({data:{organizationId:source.organizationId,actorId:null,entityType:'BackgroundJob',entityId:source.id,action:'system_job_succeeded',afterData:{type:source.type,generation:source.generation,attempt:source.attempts,result}}});return result
- },{isolationLevel:'ReadCommitted',timeout:20000});return {succeeded:true,result}
+ },{isolationLevel:'ReadCommitted',timeout:90000});return {succeeded:true,result}
  }catch(e){await failJob(job,e instanceof AccessError&&e.code==='AUTHORIZATION_CHANGED'?'AUTHORIZATION_CHANGED':'WORK_FAILED');return {succeeded:false}}
  finally{active=false;clearInterval(timer);if(inFlight)await inFlight}
 }

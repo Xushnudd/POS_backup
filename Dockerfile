@@ -14,6 +14,8 @@ RUN npx prisma generate
 
 # ─── Stage 2: builder ─────────────────────────────────────────────────────────
 FROM node:24-slim AS builder
+ARG NEXT_DEPLOYMENT_ID
+ENV NEXT_DEPLOYMENT_ID=${NEXT_DEPLOYMENT_ID}
 
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
@@ -28,6 +30,8 @@ RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:bui
 
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
 FROM node:24-slim AS runner
+ARG NEXT_DEPLOYMENT_ID
+ENV NEXT_DEPLOYMENT_ID=${NEXT_DEPLOYMENT_ID}
 
 # Install openssl — required by Prisma query engine at runtime
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*

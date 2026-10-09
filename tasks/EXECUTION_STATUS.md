@@ -108,7 +108,7 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | CRM-01.01 | CORE-1 | done | Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.02 | CORE-1 | done | Qarz yozuvini haqiqiy pul to‘lovidan ajratish: nasiya naqd tushum deb olinmasligi. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.03 | CORE-1 | done | Qarzni naqd/karta/o‘tkazma bilan undirish; pulni haqiqiy smena yoki hisobga yozish. | plus-20-c: manual cash/card/transfer UI3 browsers;118 PG+focused proof/readiness2; migration034 unique proof; cash30/debt10 | Regressiyani saqlash; real provider va full finance accounts alohida bandlar |
-| CRM-01.04 | CORE-1 | in_progress | Qisman undirish, oldindan to‘lov, ortiqcha to‘lov va qaytarish qoidalari. | DebtEntry alohida ledger, FIFO collection allocation, customer locking, cash/debt return tests | Opening debt, advance/statement/due-date UI; non-cash refund policy; provider card external-later |
+| CRM-01.04 | CORE-1 | done | Qisman undirish, oldindan to‘lov, ortiqcha to‘lov va qaytarish qoidalari. | Immutable cash advance/allocation/refund, original-funded sale return, exact cash/debt balance; full206/browser3/fresh95/restore23s | Real Click/bank advance external-later; unsupported channels fail closed |
 | CRM-01.05 | CORE-1 | done | To‘lovni qaysi qarz/savdoga ajratishni yuritish; boshlang‘ich qarzni alohida hujjat bilan kiritish. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
 | CRM-01.06 | CORE-1 | done | Qarzni o‘chirish/tuzatish faqat sabab, vakolat va audit bilan. | Owner-only immutable new adjustment/write-off; bounds/tenant/live auth/idempotency; migration015 append-only DB guard; weighted write-off refund conservation tests; real browser duplicate prevention | No original ledger edit/delete; correction is a new audited entry |
 | CRM-01.07 | CORE-1 | done | Mijoz ko‘chirmasi: savdo, qaytarish, to‘lov, qarz qoldig‘i va muddat. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
@@ -206,7 +206,7 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OPS-01.05 | CORE-1 | in_progress | Image versiyasi, minimal vakolatli jarayon, xavfsiz secret saqlash va kalit aylantirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-01.06 | CORE-1 | in_progress | TLS, domen, firewall; bazani umumiy internetga ochmaslik. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-01.07 | CORE-1 | done | Health/readiness endpoint, nazoratli restart, ulanish pooli va graceful shutdown. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
-| OPS-01.08 | CORE-1 | todo | Yangilash vaqtida savdoni yo‘qotmaslik; texnik xizmat oynasi va xabar berish. | — | — |
+| OPS-01.08 | CORE-1 | done | Yangilash vaqtida savdoni yo‘qotmaslik; texnik xizmat oynasi va xabar berish. | Operator atomic flag, durable admission/committed replay, readiness/worker drain, notice/native deploymentId; saved basket/pending original-key three-browser recovery | Real host routing/operator release discipline separately required; non-durable metadata CRUD not blanket-blocked |
 | OPS-02.01 | CORE-1 | done | Tuzilgan loglar, request ID, tashkilot ID; maxfiy/shaxsiy ma’lumotlarni niqoblash. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | OPS-02.02 | CORE-1 | todo | API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi. | — | — |
 | OPS-02.03 | CORE-1 | done | Savdo/to‘lov/qoldiq solishtirish farqi uchun biznes ogohlantirishlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
@@ -222,7 +222,7 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OPS-04.01 | CORE-1 | todo | Pilotdan katalog, savdo hajmi, kassalar va parallel so‘rovlar profilini olish. | — | — |
 | OPS-04.02 | CORE-1 | done | Reproducible isolated generator:50000 products,1000000 draft sale lines,20 active tills. | Fresh seed exit0; tasks/evidence/volume-dataset-20261009.json; source/version quyida | Real pilot profili alohida |
 | OPS-04.03 | CORE-1 | done | Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi. | — | — |
-| OPS-04.04 | CORE-1 | todo | N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker. | — | — |
+| OPS-04.04 | CORE-1 | done | N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker. | 50000-row profile: 206 queries, EXPLAIN comparison; snapshot/cursor worker, immutable scoped artifact; full202/focused9/browser6, migrations93/restore | Catalogue CSV only; REP-01.09 and OPS-04.06 separately pending |
 | OPS-04.05 | CORE-1 | done | Hisob/ruxsat ma’lumotini eskirgan keshdan olish xavfini boshqarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | OPS-04.06 | CORE-1 | todo | Stress, uzoq davomli yuklama va tiklanish sinovlari. | — | — |
 | QA-01.01 | CORE-1 | done | Pul/chegirma/soliq/tannarx/nasiya formulalari uchun birlik testlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
@@ -1544,3 +1544,86 @@ Gates: full198/198 `/tmp/pos-inventory-index-regression.log`; Product-before-sto
 835cd6dca3a57da48d98c5e0a895ad15ce643e7dcc09f68a45f4192a8a5aa4f7  tests/performance/core-measure.ts
 2a5a5c158a8d52548f56e603a1dd638648a065da66d9351400bec1c4448eb2e8  tasks/evidence/volume-measure-jitter-20261009.json
 396f9da5ba9cfc694a6b6284bc351fe0a140a15cb6b494679c79ef02cdcc56c2  tasks/evidence/volume-measure-repeat-20261009.json
+
+
+### OPS-04.04 — fon katalog eksporti, hali done emas
+
+PostgreSQL mavjud BackgroundJob/lease/owner authorization/Node worker kengaytirildi:catalog_export payload strict own filter, RepeatableRead cursor500,100000rows/16MiBfile/32MiBorg budget,24h download va expired bytes erasure. JobExport metadata/bytes SQL immutable guards; current owner+tenant download/hash verification/10permin/private no-store; expired410. List API artifact contentini chiqarmaydi. Owner jobs UI review/original-key recovery/download.092–093 additive applied; ready gate64markers. Applied088–092 tahrirlanmagan.
+
+9focused job/export PG PASS `/tmp/pos-export-focused-expanded.log`:1001rows exactcost/formula-safe/oneartifact/currenttenant+role+session, revoke fails closed, lateaudit rollback, original source retry, expiredbyteprune+metadatahistory.93 fresh/legacy PASS `/tmp/pos-export-migrations-fresh.log`. Unit16PASS; typecheck/lint/build/worker old-source gates to‘liq qayta yakunlanadi.
+
+Real synthetic50000product profile:206SQLqueries (500cursorpagesize),7150137bytes,3168.504686ms read+worker artifact total, exactrowcount/SHA256match. `tasks/evidence/catalog-export-profile-20261009.json`:querycount, heap before/after, EXPLAIN(ANALYZE,BUFFERS) sequential planner comparison va actualindexedplan. Sequential comparison actual historical old-schema evidence deb talqin qilinmaydi. No production/pilot/vendor/XLSX/PDF guarantee. Browser/fullregression/backup qabul tugamaguncha totaldone140/yangi4of20.
+
+
+Export birinchi browser runi qabul emas:binary CSVendpointda withApi `{binary:true}` yoqilmagani JSONparse500 va downloadtimeoutni ko‘rsatdi. Tuzatish qo‘shildi, HTTP test200/content-type/attachment/exactbytes/no-store tekshiradi. Birinchi running keyingi WebKit bosqichi build davomida ishga tushgan serverdan foydalangani sabab ham yaroqsiz; corrected build uchun yangi server bilan6browser scenario qayta bajariladi. Birinchi4fail/2pass log `/tmp/pos-export-browser.log` saqlanadi.
+
+
+Corrected binaryrun5/6 browser PASS, WebKit GET200/download event absent with response CSPsandbox:CSV UI now uses bounded authenticated fetch→Blob→existing downloadBlob helper, preserves BOM/exact bytes and shows errors in-page rather than navigating. Server attachment/nosniff/private/CSP remain. Actual CSV HTTP regression checks status200,content-type,attachment,exactBuffer/no-store. No test assertion relaxed. Blob browser rerun pending.
+
+Full final PostgreSQL202/202 PASS `/tmp/pos-export-integration-final.log`,427094ms (large fixture cleanup included). Unit16/16, type/lint/worker/webpack clean. Source version now HEADf5fa8aabd692f814a0411b57ac2a6dad27fe61d0 (user commit step-31) + current export working tree; no AI commit.
+
+
+93migration encrypted empty DB restore PASS `/tmp/pos-export-backup-final.log`:protected export bytes/size/SHA/erased-state fingerprint equal, recovered fixture app authenticated, RTO23s/RPO0, existing DB rejection. Final50000profile memorymetrics artefakt yangilandi:206queries/7150137bytes/3822.642722ms;beforeRSS98.8MB/after246.4MB (includes separate read+worker+artifact verification, not leak/soak proof).
+
+Large download now native stream64KiB chunks with2active source buffers perprocess,5min transfer budget, abort/cancel/read failure/EOF releases slot once; busy429/Retry-After3. No new storage/queue. Direct stream unit2assertion casesPASS `/tmp/pos-export-stream-unit-assertions.log`;17unit file suitesPASS `/tmp/pos-export-stream-unit.log`;poststream9focusedPG including actualHTTPexactbytesPASS `/tmp/pos-export-stream-focused.log`. Core/worker/full202PASS remains; only readonly delivery changed after fullrun. Streamtype/lint/worker/webpack clean; final3browserstreamrunpending.
+
+
+### +20 — 5/20 qabul: OPS-04.04
+
+Original done136 →141; maqsad156, qolgan15. Yakuniy Chromium/Firefox/WebKit6/6 PASS `/tmp/pos-export-stream-browser.log`. Native64KiB streaming/2slot/5min budgetdan keyin unit17 file suite, stream2 named assertions, actual HTTP bilan9 focused PostgreSQL test PASS. Oldingi full202/202, fresh/legacy93 migration va encrypted empty recovery PASS; typecheck/lint/worker/webpack clean. Backup RTO23s/RPO0 fixture, protected export bytes/size/hash/erased-state aynan tiklangan.
+
+Qayta ijro: `npm test`, `npm run typecheck`, `npm run lint`, `npm run worker:build`, `npm run build -- --webpack`; isolated DB bilan `npm run test:integration`; `POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Catalogue export UI|Background jobs UI'`; `tests/performance/export-profile.ts` explicit isolated fixture guard. Version HEAD `f5fa8aabd692f814a0411b57ac2a6dad27fe61d0` + export working tree; AI commit/deployment yo‘q. Versioned profile `tasks/evidence/catalog-export-profile-20261009.json`:50000rows/7150137bytes/206queries/3822.642722ms. EXPLAIN comparison controlled planner comparison, historical old schema yoki public SLA dalili emas. Before/after process memory alohida read/worker/artifact verificationni ham o‘z ichiga oladi; soak testi deb hisoblanmaydi.
+
+Qabul chegarasi: katalog CSV bounded background export va indeks/query evidence. XLSX/PDF/report export, 2hsoak, real pilot yoki tashqi provayder integratsiyalari shu band orqali yopilmaydi.
+ccf8d4dbbec48285d160bb0e42ccf1228addba40927db37caec327cecc7be9b8  src/server/jobs/catalog-export.ts
+6b424edd2efd2cb4781080961d6bb81e2615ca99b6573d78d9691c5f5f64cb38  src/server/jobs/download-stream.ts
+9123d34478f3ef883db50c87d5a119c7b93ed9817cb9239b030324c93cce77da  tests/job-export.integration.test.ts
+d8d2ce29166d908a5c5ea642f183367458bf0f9735753a82159e815d4541e2fd  tests/export-download.unit.test.ts
+8c04aa54302a2f203d00a8684477360768740f722013c1e8a641d1177de54894  tasks/evidence/catalog-export-profile-20261009.json
+
+### CRM-01.04 — Naqd avans core va UI, qabul jarayonida
+Receive/explicit allocation/unused refund alohida immutable source-linked ledger bilan implementatsiya qilindi. Physical cash book bitta kirim/chiqim, allocation faqat DebtEntry; paid-by-advance sale return existing cash Payment.outdan foydalanadi. Owner/tenant/live-session, account/open-shift/currentfunds, exact Decimal/transaction/idempotency. SQL budget/source/tenant/debt/immutable guards, unused advance archive/merge denial. Statement va commercial CSV alohida avans va haqiqiy cash eventsni chiqaradi. Owner UI DurableMutation/PendingActions original-key recovery/review va bounded pagination. Real provider/bank/hardware integratsiyasi yozilmagan.
+094isolated applied; birinchi test triggerdagi unassigned PL/pgSQL record/SQL alias ambiguityni topdi;095additive tuzatish, applied094unchanged. Corrected focused advance3+customer identity+financial regression71/71PASS `/tmp/pos-advance-focused-final.log`; unit17file suitePASS. Actual HTTP strict-input/commercial CSV uchun4-test qo‘shilgan; yangi full regression, production UI browser, migration/recovery gates yakunlanmaguncha CRM-01.04 done emas. +20hisob5/20originaldone141saqlanadi.
+
+
+### +20 — 6/20 qabul: CRM-01.04
+
+Original done136 →142, maqsad156, qolgan14. Partial cash/debt collection va explicit source allocation mavjud ishlashi saqlandi; ortiqcha pul alohida cash advance, qarz yashirin manfiy qilinmaydi. Receive120.25→sale debt100ni40.25+59.75ajratish→unused20.25refund→paid-by-advance sale100cashrefund = cashnet0/debt0/advance0. Original receive va unusedrefundning concurrent duplicate keys bittadan yoziladi; distinct raced7refunddan10.01availablega faqatbittasi commit, remaining3.01. Opening12.01/advance20→allocated12.01/remaining7.99. SQL journal/source immutability, over-allocation/refund/foreign/archived/admin/revoked session guards. Actual HTTP strict precision/unknownfields, repeatedoriginalkey and commercial CSV cash receive/refund tests.
+
+Gates: full206/206 `/tmp/pos-advance-full.log`312963ms; focused71/71 `/tmp/pos-advance-focused-final.log` (new actualHTTP case included in finalfull); unit17file suites; type/lint/worker/webpack clean. Customer advance UI3/3 Chromium/Firefox/WebKit `/tmp/pos-advance-browser.log`:actualPOSTcommit+lostack→reloadoriginalreplay→openingdebt allocation→unusedrefund, single records/exactjournal. Fresh/legacy95migrationPASS `/tmp/pos-advance-migrations-fresh.log`; encrypted95restore `/tmp/pos-advance-backup.log`PASS, original13.25advance/1.25allocation/-1.25DebtEntry/2.01refund/9.99available recovered; cash/source journals preserved, recovered app authenticates, existingDBreject, fixtureRTO23s/RPO0. Historical failed094aliasrunnotPASS;095additivefix and correctedrunsaccepted,094notedited.
+
+Version HEAD `f5fa8aabd692f814a0411b57ac2a6dad27fe61d0` + working tree; no AIcommit/liveDB/deploy. Reproducible source/tests/migrations094–095/UI/e2e and ADR057, APIcontract in api.md. Real provider/bank confirmation is not invented; unsupported advance channel fails closed. Existing manually confirmed non-cash sale/collection refund policy remains covered by fullregression. +20goalnotcomplete; original task/checklist counts6accepted,14remaining, subtasksnotcounted.
+ae16a47f5374def765b60d17a5b18978fc3997c9f35c8633567c8fcb2724a57a  src/server/customers/advances.ts
+7e155a52cd76fb431e30fe0b8aa5c08ab8c8332a6cd78cd61078fde0e51f7c62  src/server/returns/service.ts
+003f7a4e0844dd4a8bf4a921115db02e44a819aa62ae8d593bdf41df1381657f  src/components/customers/CustomerAdvances.tsx
+b8d4f950f961085797f667fad7a8f53dbf470374e1a777cd573c5c610b9134cd  tests/customer-advances.integration.test.ts
+405f1064acecf029c0a8c89654c02c186d35180147363ccdd9251ec578d68183  prisma/migrations/202610090094_customer_advances/migration.sql
+cab95a6711ce5e148392d6672b73eb73f115707ec32a103a4968c34ffefd406b  prisma/migrations/202610090095_advance_trigger_alias/migration.sql
+
+### OPS-01.08 — maintenance core, qabul jarayonida
+Operator-owned bounded/strict/read-only configfile, atomic publication CLI, authenticated no-store notice/status, durable runOperation admission after current-authorized committed replay, readiness503 va worker claimpause implementatsiya qilindi. In-flight operation finishes, newOperation503/RetryAfter30, existingkey result actor/hash/sessionchecked. Dashboard notice keeps basket/queue, releasechange informs user. Next16.3.8 local deploymentId/self-hosting guides read; NEXT_DEPLOYMENT_ID nativeversionprotection, hostrouting remainsoperator. Non-durable CRUD blanketguard deb claim qilinmaydi; rollout operator discipline/runbook `docs/operations/maintenance.md`da. Unit18filesPASS, focused5(includingadvance)PASS; centralguardfullregression/browserpending. Originaldone142/+20qabul6saqlanadi.
+
+Maintenance firstfull206/207 (1route-boundary failure) and firstbrowser0/3 are not accepted. New deployment endpoint now common withApi/authenticated readonly for all live business roles; original route-boundary tests unchanged, correctedfocused6/6PASS. Correct browser3/3PASS `/tmp/pos-maintenance-browser-corrected.log`: readiness disables new checkout, basket persisted; operator toggles drain between successfulquote and actualwrite→503pending originalkey→reload→off→sync sameintent→cash complete, total2cash sales/stock1. Operator config/CLI direct2assertioncasesPASS,18unitfilesPASS. Correctedfinalfullinprogress. Additional cashadvance lock-order review identified Customer-before-Shift inversion risk againstreturns; receive/refund now Account→Shift→Customer→Advance, matchingfinance andreturns. Dedicated realShiftLock→waitingreceipt→Customer acquisition test added; no appliedmigration edited; focusedverification pending, no new originaldonecount.
+
+
+### +20 — 7/20 qabul: OPS-01.08
+
+Original done136 →143; target156, remaining13. Maintenance operatorflag admissionni nazorat qiladi, oldin admittedwork tugaydi, yangi durable work503/RetryAfter30 bilan hech qanday business/Operation posting yozmaydi. Current-authorized original actor/payload/key committedreplay ishlaydi, alteredkey/revokedSession rad etiladi. Worker nextcyclepause, readiness503/livenessseparate, authenticated withApi notice/currentrelease; local baskets/operation keys saqlanadi. Docker builder/runner bir xil NEXT_DEPLOYMENT_ID argumentini oladi; Compose POS_RELEASEbuildarg va optional read-only shared-directory overlay. Compose --env-file /dev/null --no-interpolate configPASS; real image build/deploy/hostrouting claimyo‘q. Runbook `docs/operations/maintenance.md` controlledwindow, backup/migration/drain/recovery tartibini va non-durableCRUD/operator cheklovini tushuntiradi.
+
+Finalgates: correctedfull207/207 `/tmp/pos-maintenance-corrected-full.log`,309667ms **lastcash lock-order refinementdan oldin**. Postrefinement79/79 economic+identity+returns+maintenance+allrouteboundaries `/tmp/pos-final-economic-focused.log`:real Shiftlock ostida receipt kutganda Customer lock500ms budget ichida olish mumkinligi isbotlandi, source/cash/debt/return balances exact. Financial source semantics/schema unchanged; matching Account→Shift→Customer order added, sourceBudget/SQL guards preserved. Finalbuild `/tmp/pos-final-build.log`, finaltype/lint/worker clean. Unit18file suitesPASS `/tmp/pos-final-unit.log`; operator config/CLI2namedassertioncasesPASS.95fresh/legacy+encryptedrestore23s/RPO0previouslyPASS, maintenance adds no schema.
+
+Finalbrowser12/12 `/tmp/pos-final-browser-confirmed.log`:4real scenarios×Chromium/Firefox/WebKit (backgroundjob retries, exactCSVexport, customeradvance, maintenance). Maintenance verifies committedcash replay duringdrain, disablednewcheckout, persisted basket, operator toggle **between successfulquote and actualwrite**, actualPOST503MAINTENANCE, IndexedDBsameoriginalkey inbothdraft+pendingoperation, reload, off, originalsynchronize, draftcashcompletiononce, total2payments/stock1. Previous11/12combinedrun failed because test reloaded at earlyReactpending display before actual503/persistence; acceptedtest waitsactualresponseandstoredoriginalkey, no arbitrarysleep/assertionrelaxation. Earlierfailedfull/publicstatus and incorrectenabledbutton assumptions remain recorded above; none countedPASS.
+
+Sourceversion HEAD `f5fa8aabd692f814a0411b57ac2a6dad27fe61d0` + current workingtree, no AIcommit/deploy/livebusinessDB. Local secret scan585sourcefiles/0findings `/tmp/pos-final-secret-scan-approved.log`; initial sandbox subprocessfailedrun notaccepted. Scanner does notopen env/key stores, scanGitHistory/images or send dataexternally. This does not close QA-01.08/dependency audit. +20originalparentcount7accepted/13remaining; no scenario/subtask/check added to count. Original+20notcomplete.
+152427e39024bcbef4f8bc1ecb5fcf795a4cfed8097134e4b21bb2cce050c61d  src/server/deployment/state.ts
+9c19f492f9480fc51190b2e7fff15638eefb60257ac21cd466e11e4cbdae4f74  src/server/operations.ts
+e63267ad38c9ac61ef5c19449aa8bdfe6e8ac9b5a676bb6a8aa34a4982d16de0  src/app/api/deployment/status/route.ts
+7c2bc4163a55366ceedceeafebadc92fc73145b024cdcca6c5d9e3f04d4eacbb  src/components/operations/DeploymentNotice.tsx
+e2bc37aa8ff0c785c70c78b658dac7d2b08b179f5d00d07479c7d4604c8396ca  scripts/ops/set-maintenance.mjs
+94ca05c4a03455029a71aed6bab2c955de9fcb72c57cb5ad23aa3191dd4f0db7  tests/deployment.integration.test.ts
+d074c317344f955893272caf1d3c4fc612d4fa84cefaae4723e0c3abf8867dd3  tests/deployment-state.unit.test.ts
+4569830e404d55c274dae3f4341e6f2cfa9a852506b085ad2ab2bbbcce08c281  src/server/customers/advances.ts
+a84874d9b9951520d668b0f58f3a1eab4f5a3c29aae2e8e8822643f44c60c61d  tests/customer-advances.integration.test.ts
+de802130257de711b476ec0ad927096ba95b1e407c7e987401dbf19a0b4e8dc6  Dockerfile
+99d35489041aa9f022ad55037c708b9e448b93e1038527e4e8cb6a95f5d2a1b6  docker-compose.yml
+1bcbaf94bb28d5dcc6da0473850175285b61ff3f45194414c107b0b836802270  docker-compose.maintenance.yml

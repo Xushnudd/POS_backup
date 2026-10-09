@@ -82,6 +82,8 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
     const channel=payment.paymentType as keyof typeof paid;
     paid[channel]=paid[channel].sub(allocation.amount);
    }
+   const advanceCash=await tx.$queryRaw<{amount:Prisma.Decimal}[]>`SELECT COALESCE(sum(x.amount),0) AS amount FROM "CustomerAdvanceAllocation" x JOIN "DebtEntry" e ON e.id=x."debtEntryId" JOIN "CustomerAdvance" a ON a.id=x."advanceId" WHERE e."saleId"=${sale.id} AND a."organizationId"=${context.organizationId} AND a."customerId"=${sale.customerId}`
+   paid.cash=paid.cash.add(advanceCash[0].amount)
    if (credit.gt(0) && await tx.debtEntry.count({where:{organizationId:context.organizationId,customerId:sale.customerId,saleId:null,sourceType:'legacy_payment',amount:{lt:0}}})) throw new AccessError(409,'DEBT_ALLOCATION_REQUIRED','Eski qarz to‘lovlarini original savdolarga taqsimlash kerak')
 
   }

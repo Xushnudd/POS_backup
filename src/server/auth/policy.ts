@@ -19,6 +19,7 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
     case 'SaleItem': return { sale: tenantScope('Sale', context) }
     case 'SaleReturn': return { sale: tenantScope('Sale', context) }
     case 'SaleReturnItem': return { saleReturn: tenantScope('SaleReturn', context) }
+    case 'CustomerAdvanceAllocation': case 'CustomerAdvanceRefund': return {advance:{organizationId:org}}
     case 'SupplierCredit': return {invoice:tenantScope('SupplierInvoice',context)}
     case 'PurchaseOrderItem': return {order:tenantScope('PurchaseOrder',context)}
     case 'StockDocumentItem': return { stockDocument: tenantScope('StockDocument', context) }
@@ -38,6 +39,8 @@ export function assertRoutePermission(path: string, method: string, role: string
   const read = method === 'GET' || method === 'HEAD'
   // Platform/support actions have their own operator + explicit owner-grant DAL.
   // A business role never grants cross-organization support access by itself.
+  if(area==='deployment'&&read)return
+  if(area==='deployment')throw new AccessError(403,'FORBIDDEN')
   if(area==='support')return
   if(area==='offline-cash')return
   if(area==='price-rules'&&path==='/api/price-rules/quote'&&method==='POST')return

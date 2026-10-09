@@ -1,3 +1,4 @@
+import {assertNewOperationAllowed} from './deployment/state'
 import {requestTrace, safeAudit, logEvent} from './observability/context'
 import { createHash, randomInt } from 'node:crypto'
 import { Prisma } from '@prisma/client'
@@ -52,6 +53,7 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
           if (old.state==='cancelled') throw new AccessError(409,'OPERATION_CANCELLED','Bu urinish bekor qilingan; yangi amal kaliti kerak')
           return old.result as T
         }
+        await assertNewOperationAllowed()
         const result=await work(tx)
         const json=JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue
         await tx.operation.create({data:{organizationId:context.organizationId,actorId:context.userId,type,key,payloadHash:hash,result:json}})

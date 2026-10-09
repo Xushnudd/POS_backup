@@ -1,3 +1,4 @@
+import {unusedAdvance} from './advances'
 import { debtTargets } from './targets'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
@@ -64,6 +65,6 @@ export async function customerStatement(context:TokenPayload,customerId:string,o
    ORDER BY statement."effectiveAt",statement.id LIMIT ${limit} OFFSET ${(page-1)*limit}`
   const all=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId},_sum:{amount:true}})
   const aging=await debtAging(tx,context.organizationId,customerId,new Date())
-  return {aging,timezone:organization.timezone,customer:{id:customer.id,fullName:customer.fullName},entries,summary:{openingBalance,increases:totals.increases,reductions:totals.reductions,closingBalance:debtClosingBalance(openingBalance,totals.increases,totals.reductions),currentBalance:decimal(all._sum.amount??0)},pagination:{page,limit,total:Number(totals.total),totalPages:Math.ceil(Number(totals.total)/limit)}}
+  return {advanceAvailable:await unusedAdvance(tx,context.organizationId,customerId),aging,timezone:organization.timezone,customer:{id:customer.id,fullName:customer.fullName},entries,summary:{openingBalance,increases:totals.increases,reductions:totals.reductions,closingBalance:debtClosingBalance(openingBalance,totals.increases,totals.reductions),currentBalance:decimal(all._sum.amount??0)},pagination:{page,limit,total:Number(totals.total),totalPages:Math.ceil(Number(totals.total)/limit)}}
  },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead})
 }

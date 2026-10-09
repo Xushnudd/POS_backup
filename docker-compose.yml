@@ -1,3 +1,8 @@
+x-app-build: &app-build
+  context: .
+  args:
+    NEXT_DEPLOYMENT_ID: ${POS_RELEASE:-}
+
 services:
   db:
     image: postgres:15-alpine
@@ -16,7 +21,7 @@ services:
 
   migrate:
     image: ${POS_IMAGE:-pos-app:local}
-    build: .
+    build: *app-build
     profiles: ["migration"]
     command: ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
     environment:
@@ -27,7 +32,7 @@ services:
 
   app:
     image: ${POS_IMAGE:-pos-app:local}
-    build: .
+    build: *app-build
     restart: unless-stopped
     ports:
       - "${POS_BIND_ADDRESS:-127.0.0.1}:${POS_PORT:-3000}:3000"
@@ -51,7 +56,7 @@ services:
 
   reconciliation:
     image: ${POS_IMAGE:-pos-app:local}
-    build: .
+    build: *app-build
     profiles: ["monitoring"]
     command: ["node", "--require", "./scripts/worker-resolver.cjs", ".worker-build/scripts/workers/reconcile.js"]
     restart: unless-stopped
@@ -68,7 +73,7 @@ services:
 
   jobs:
     image: ${POS_IMAGE:-pos-app:local}
-    build: .
+    build: *app-build
     profiles: ["jobs"]
     command: ["node", "--require", "./scripts/worker-resolver.cjs", ".worker-build/scripts/workers/jobs.js"]
     restart: unless-stopped

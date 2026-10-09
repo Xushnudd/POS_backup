@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { DebtAllocationPicker } from '@/components/customers/DebtAllocationPicker';
 import Select from '@/components/ui/Select';
 import { CustomerSales } from '@/components/customers/CustomerSales';
+import {CustomerAdvances} from '@/components/customers/CustomerAdvances';
 import { CustomerLedger } from '@/components/customers/CustomerLedger';
 import { deviceId, pendingOperations, enqueue, acknowledge } from '@/lib/offline';
 import { fixed } from '@/lib/money';
@@ -250,6 +251,7 @@ export default function CustomerDetailPage() {
       </Card>
 
       <CustomerSales key={'sales:'+id} customerId={id} version={ledgerVersion}/>
+      {role==='owner'&&<CustomerAdvances key={'advance:'+id} customerId={id} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));setLedgerVersion(v=>v+1)}}/>}
       {role==='owner'&&<CustomerLedger key={id} customerId={id} version={ledgerVersion} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));}}/>}
       {/* Debt Payment Modal */}
       <Modal

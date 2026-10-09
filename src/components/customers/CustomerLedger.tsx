@@ -12,7 +12,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
-const names:Record<string,string>={sale:'Nasiya savdo',collection:'Qarz undirish',return:'Qaytarish qarz tuzatishi',opening_debt:'Boshlang‘ich qarz',debt_adjustment:'Qarz tuzatishi',write_off:'Qarzni hisobdan chiqarish',write_off_reversal:'Qaytarishdagi write-off tuzatishi'};
+const names:Record<string,string>={advance_allocation:'Avansdan qarzni yopish',sale:'Nasiya savdo',collection:'Qarz undirish',return:'Qaytarish qarz tuzatishi',opening_debt:'Boshlang‘ich qarz',debt_adjustment:'Qarz tuzatishi',write_off:'Qarzni hisobdan chiqarish',write_off_reversal:'Qaytarishdagi write-off tuzatishi'};
 export function CustomerLedger({customerId,onChanged,version=0}:{customerId:string;onChanged:()=>Promise<void>;version?:number}){
  const {organization,user}=useAuth(),{notifyError,notifySuccess}=useNotification();
  const [statement,setStatement]=useState<CustomerStatement|null>(null),[page,setPage]=useState(1),[from,setFrom]=useState(''),[to,setTo]=useState('');

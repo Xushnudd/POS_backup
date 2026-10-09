@@ -73,6 +73,21 @@ INSERT INTO "StockCountReading" (id,"lineId",round,quantity,"countedBy") VALUES 
 INSERT INTO "StockFreeze" ("storeId","productId","countId") VALUES (:'fixture',:'fixture',:'fixture');
 INSERT INTO "Customer" (id,"organizationId","fullName",phone,"creditLimit","updatedAt") VALUES (:'fixture',:'fixture','Ledger fixture',:'fixture',100,NOW());
 INSERT INTO "DebtEntry" (id,"organizationId","customerId","sourceType","sourceId",amount,"actorId","effectiveAt","dueAt") VALUES (:'fixture',:'fixture',:'fixture','opening_debt',:'fixture',3.75,:'fixture','2026-01-01','2026-02-01');
+-- Restore must preserve source-linked advance, allocation and unused refund too.
+INSERT INTO "Register" (id,"storeId",name,code) VALUES (:'fixture',:'fixture','Restore cash register','RESTORE');
+INSERT INTO "Shift" (id,"registerId","organizationUserId","openingCash") VALUES (:'fixture',:'fixture',:'fixture',0);
+INSERT INTO "FinancialAccount" (id,"organizationId","storeId","registerId",name,kind) VALUES (:'fixture',:'fixture',:'fixture',:'fixture','Restore cash','cash');
+INSERT INTO "FinancialDocument" (id,"organizationId","storeId",kind,amount,reason,"actorId") VALUES (:'fixture'||'-advance',:'fixture',:'fixture','customer_advance',13.25,'Restore advance receipt',:'fixture');
+INSERT INTO "CashMovement" (id,"shiftId","movementType",amount,reason,"createdBy") VALUES (:'fixture'||'-advance',:'fixture','cash_in',13.25,'Restore advance receipt',:'fixture');
+INSERT INTO "AccountEntry" (id,"organizationId","accountId","documentId",amount,"cashMovementId") VALUES (:'fixture'||'-advance',:'fixture',:'fixture',:'fixture'||'-advance',13.25,:'fixture'||'-advance');
+INSERT INTO "CustomerAdvance" (id,"organizationId","customerId","documentId",amount) VALUES (:'fixture',:'fixture',:'fixture',:'fixture'||'-advance',13.25);
+INSERT INTO "DebtEntry" (id,"organizationId","customerId","sourceType","sourceId",amount,"actorId") VALUES (:'fixture'||'-advance-debt',:'fixture',:'fixture','opening_debt',:'fixture'||'-advance-debt',1.25,:'fixture');
+INSERT INTO "CustomerAdvanceAllocation" (id,"advanceId","debtEntryId",amount) VALUES (:'fixture',:'fixture',:'fixture'||'-allocated',1.25);
+INSERT INTO "DebtEntry" (id,"organizationId","customerId","debtOriginId","sourceType","sourceId",amount,"actorId") VALUES (:'fixture'||'-allocated',:'fixture',:'fixture',:'fixture'||'-advance-debt','advance_allocation',:'fixture',-1.25,:'fixture');
+INSERT INTO "FinancialDocument" (id,"organizationId","storeId",kind,amount,reason,"actorId") VALUES (:'fixture'||'-refund',:'fixture',:'fixture','customer_refund',2.01,'Restore unused advance refund',:'fixture');
+INSERT INTO "CashMovement" (id,"shiftId","movementType",amount,reason,"createdBy") VALUES (:'fixture'||'-refund',:'fixture','cash_out',2.01,'Restore unused advance refund',:'fixture');
+INSERT INTO "AccountEntry" (id,"organizationId","accountId","documentId",amount,"cashMovementId") VALUES (:'fixture'||'-refund',:'fixture',:'fixture',:'fixture'||'-refund',-2.01,:'fixture'||'-refund');
+INSERT INTO "CustomerAdvanceRefund" (id,"advanceId","documentId",amount) VALUES (:'fixture',:'fixture',:'fixture'||'-refund',2.01);
 INSERT INTO "Session" (id,"organizationId","userId","tokenHash","expiresAt","idleExpiresAt") VALUES (:'fixture',:'fixture',:'fixture',md5(:'fixture')||md5(:'fixture'),NOW()+INTERVAL '1 hour',NOW()+INTERVAL '1 hour');
 INSERT INTO "SecurityEvent" (id,"organizationId","userId",type,suspicious,"sourceSessionId","expiresAt") VALUES (:'fixture',:'fixture',:'fixture','login_failed',TRUE,:'fixture',CURRENT_TIMESTAMP+INTERVAL '90 days');
 INSERT INTO "BackgroundJob" (id,"organizationId",type,payload,state,attempts,"maxAttempts","lastError","expiresAt") VALUES (:'fixture',:'fixture','reconciliation',jsonb_build_object('storeId',:'fixture'),'dead',3,3,'WORK_FAILED',NOW()+INTERVAL '1 hour');
@@ -94,6 +109,7 @@ gpg --quiet --batch --output "$backup_smoke_dir/recovered-secret" --decrypt "$se
 cmp "$POS_SECRET_BACKUP_FILE" "$backup_smoke_dir/recovered-secret"
 [[ $(stat -c '%a' "$secret_file") == 600 ]]
 export POS_SECRET_RECOVERY_REFERENCE="$(basename "$secret_file")"
+source_export_fingerprint=$(docker exec pos-plan-test-db psql -U pos_test -d pos_test -Atc 'SELECT COALESCE(md5(string_agg("jobId" || sha256 || size::text || COALESCE(md5(data),'"'"'erased'"'"'), '"'"'|'"'"' ORDER BY "jobId")),md5('"'"''"'"')) FROM "JobExport"')
 scripts/ops/backup.sh
 backup_file=$(find "$BACKUP_DIRECTORY" -name '*.bundle-v1.dump.gpg' -print -quit)
 docker exec pos-plan-test-db createdb -U pos_test "$restore_db"
@@ -111,6 +127,9 @@ fi
 restored_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d "$restore_db" -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 source_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d pos_test -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 [[ "$restored_migrations" == "$source_migrations" ]]
+restored_export_fingerprint=$(docker exec pos-plan-test-db psql -U pos_test -d "$restore_db" -Atc 'SELECT COALESCE(md5(string_agg("jobId" || sha256 || size::text || COALESCE(md5(data),'"'"'erased'"'"'), '"'"'|'"'"' ORDER BY "jobId")),md5('"'"''"'"')) FROM "JobExport"')
+[[ "$restored_export_fingerprint" == "$source_export_fingerprint" ]]
+printf 'PASS: protected export bytes, sizes, hashes and erased-state fingerprint recovered\n'
 restored_count=$(docker exec -i pos-plan-test-db psql -U pos_test -d "$restore_db" -At -v fixture="$fixture_id" <<'SQL'
 SELECT c.status || ':' || l."expectedQuantity"::text || ':' || r.quantity::text || ':' || b.quantity::text FROM "StockCount" c JOIN "StockCountLine" l ON l."countId"=c.id JOIN "StockCountReading" r ON r."lineId"=l.id JOIN "StockFreeze" f ON f."countId"=c.id JOIN "InventoryBalance" b ON b."storeId"=f."storeId" AND b."productId"=f."productId" WHERE c.id=:'fixture';
 SQL
@@ -121,6 +140,12 @@ SELECT amount::text || ':' || "sourceType" || ':' || to_char("effectiveAt",'YYYY
 SQL
 )
 [[ "$restored_debt" == '3.75:opening_debt:2026-01-01:2026-02-01' ]]
+restored_advance=$(docker exec -i pos-plan-test-db psql -U pos_test -d "$restore_db" -At -v fixture="$fixture_id" <<'SQL'
+SELECT a.amount::text || ':' || a.available::text || ':' || x.amount::text || ':' || e.amount::text || ':' || r.amount::text FROM "CustomerAdvanceBalance" a JOIN "CustomerAdvanceAllocation" x ON x."advanceId"=a.id JOIN "DebtEntry" e ON e.id=x."debtEntryId" JOIN "CustomerAdvanceRefund" r ON r."advanceId"=a.id WHERE a.id=:'fixture' AND e."sourceType"='advance_allocation' AND e."sourceId"=x.id;
+SQL
+)
+[[ "$restored_advance" == '13.25:9.99:1.25:-1.25:2.01' ]]
+printf 'PASS: original advance, allocation/debt source, unused refund and exact 9.99 balance recovered\n'
 node node_modules/typescript/bin/tsc -p tsconfig.test.json
 DATABASE_URL="$RESTORE_DATABASE_URL" RESTORE_FIXTURE_ID="$fixture_id" node --require ./scripts/test-resolver.cjs scripts/ops/verify-restored-app.mjs
 restore_elapsed=$(($(date +%s)-restore_started))

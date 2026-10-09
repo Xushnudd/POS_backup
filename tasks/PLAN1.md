@@ -1932,7 +1932,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-01.04** — Qisman undirish, oldindan to‘lov, ortiqcha to‘lov va qaytarish qoidalari.
+- [x] **CRM-01.04** — Qisman undirish, oldindan to‘lov, ortiqcha to‘lov va qaytarish qoidalari.
 
   **Texnologiya:** Prisma allocation rules, Decimal.
 
@@ -3643,7 +3643,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-01.08** — Yangilash vaqtida savdoni yo‘qotmaslik; texnik xizmat oynasi va xabar berish.
+- [x] **OPS-01.08** — Yangilash vaqtida savdoni yo‘qotmaslik; texnik xizmat oynasi va xabar berish.
 
   **Texnologiya:** Next.js deploy version, Docker drain, outbox/idempotency.
 
@@ -3915,7 +3915,7 @@ Boshlang‘ich muhandislik maqsadlari: oylik mavjudlik **99,9%**, backupdagi rux
 
   **Dalil:** `OPS-04.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-04.04** — N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker.
+- [x] **OPS-04.04** — N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker.
 
   **Texnologiya:** Prisma select/include/batching, PostgreSQL indexes/keyset, Node worker.
 

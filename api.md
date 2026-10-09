@@ -1088,3 +1088,21 @@ Checkout va offline naqd ruxsat olishda `CLASSIFICATION_REQUIRED` / `PRODUCT_TAX
 Sale draft/quote `items[]`ga optional `tradeUnit` va `expectedConversionRatio` qo‘shildi. Unit yo‘q bo‘lsa avvalgi base-unit API ishlaydi. Masalan1quti ratio12 → SaleItem.quantity12dona, base price100 → total1200; `conversionSnapshot` original1quti/12dona nisbatini saqlaydi. `CONVERSION_CHANGED`/`CONVERSION_UNAVAILABLE`409, aralash SKU birliklari400. Konvertatsiya qoldiqni yaxlitlamaydi.
 
 Stock document item optional `tradeUnit`; `unitCost` doim **asosiy birlik** tannarxi.2quti ratio12, unitCost50/dona → quantity24, cost50/dona; hujjat original2qutini snapshotda saqlaydi. Tasdiqlash stale ratio bilan bloklanadi. Sale return itemda optional original `tradeUnit` yuborilsa quantity original receipt ratio orqali base quantityga aylanadi. Unit ko‘rsatilmasa oldingi base quantity ishlatiladi; boshqa current trade unit qabul qilinmaydi. Fizik stock/payment/profit jurnallari base birlikda qoladi.
+
+
+### Fon katalog CSV eksporti
+
+`POST /api/jobs` owner: `{operationId,type:"catalog_export",filter:{search?,categoryId?,active:"all"|"active"|"archived"},reason}`. `storeId` bu turda qabul qilinmaydi; reconciliationda `filter` qabul qilinmaydi. Mavjud original-key replay/queuebudget/sourceauthorization/leaseheartbeat/deadletter qo‘llanadi.
+
+Succeededdan keyin `GET /api/jobs/{id}/export`:current owner/tenant-only CSVattachment,private no-store/nosniff,10download/min. Frozen500cursor snapshot, exactmoney/cost string, formula-safe text;100000row/16MiBcap,32MiBactiveartifactorgquota. Fayl24h yuklanadi; expiry410, worker expiredbytesni o‘chiradi, metadata/job history qoladi. CSVowner costni o‘z ichiga oladi. `/api/jobs` listing CSVbaytlarini bermaydi. `npm run worker:build` va production `worker:jobs` service kerak. Realproviders/hardware ishlatilmaydi.
+
+### Mijozning naqd avansi
+`GET /api/customers/:id/advances?page=1&limit=50` — faqat owner, limit1–200: asl avanslar, qabul/ajratilgan/qaytarilgan/ishlatilmagan summalar. Tenant va joriy sessiya tekshiriladi.
+`POST /api/customers/:id/advances` — strict body, barcha amallar `operationId` UUID va kamida3belgili `reason`, musbat `amount` (2kasr) bilan:
+- `action: receive`, `accountId`, `shiftId`: haqiqiy ochiq naqd kassa hisobiga kirim; qarz o‘zgarmaydi.
+- `action: allocate`, `advanceId`, `targetKey: sale:<uuid> | document:<uuid>`: mavjud avansni aniq qarzga ajratish, yangi pul kirimi yaratmaydi. Avans va target qoldig‘idan oshmaydi; noma’lum tarixiy taqsimotga taxmin qilmaydi.
+- `action: refund`, `advanceId`, `accountId`, `shiftId`: faqat ishlatilmagan avansning asl manbaga bog‘langan naqd qaytarmasi. Ochiq smena va mavjud jismoniy kassa qoldig‘i talab qilinadi.
+Real Click/bank/provider tasdig‘i mavjud emas; bank/provider hisobidagi avans `ADVANCE_CASH_ONLY` bilan rad etiladi. Oldingi qarz undirish endpointi implicit overpaymentni hamon rad etadi. Ortiqcha pulni alohida avans sifatida qabul qilish va ajratish kerak. Savdo qaytarmasi avansdan qoplangan naqd qismini hisobga oladi; ishlatilgan avans qayta walletga avtomatik qaytarilmaydi. Customer statement `advanceAvailable`ni qarzdan alohida beradi; commercial CSV avans kirim/qaytarmasini pul hodisasi sifatida ko‘rsatadi, ajratish esa faqat debt hodisasi.
+
+### Yangilash / maintenance holati
+`GET /api/deployment/status` — joriy sessiya talab qiladigan kichik no-store status: `maintenance`, xavfsiz foydalanuvchiga mo‘ljallangan `message`, optional `expectedEndAt`, `release`, `configurationValid`. Configuration yo‘li/mazmuni/sirlar chiqarilmaydi. Operator fileconfigured va noto‘g‘ri/yo‘q bo‘lsa failclosed maintenance; konfiguratsiya yo‘q bo‘lsa default off. `/api/health/ready` drain vaqtida503; live alohida. `runOperation` yangi core amallariga503 `MAINTENANCE`/Retry-After30 beradi; oldin commit qilingan actor/hash/key freshauth bilan qaytariladi, oldin admissiondan o‘tgan work tugaydi. Bu generic katalog CRUDning universal blokirovkasi emas; rollout qo‘llanmasi `docs/operations/maintenance.md`da.

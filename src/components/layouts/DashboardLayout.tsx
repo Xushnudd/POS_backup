@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import DeploymentNotice from '@/components/operations/DeploymentNotice';
 import OperationalAlerts from '@/components/operations/OperationalAlerts';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
@@ -38,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <div className="lg:pl-64 flex flex-col flex-1">
         <Header onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
-        <main id="main-content" className="flex-1 p-4 lg:p-6 overflow-x-hidden"><OperationalAlerts/>{children}</main>
+        <main id="main-content" className="flex-1 p-4 lg:p-6 overflow-x-hidden"><DeploymentNotice/><OperationalAlerts/>{children}</main>
       </div>
     </div>
   );

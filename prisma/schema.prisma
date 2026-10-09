@@ -10,6 +10,7 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+ customerAdvances CustomerAdvance[]
   securityEvents SecurityEvent[]
   backgroundJobs BackgroundJob[]
   jobAuthorizations JobAuthorization[]
@@ -257,6 +258,7 @@ model Product {
 }
 
 model Customer {
+ advances CustomerAdvance[]
   canonicalPhone String?
   mergedIntoId String?
   groupId        String?
@@ -759,6 +761,7 @@ model Operation {
 }
 
 model DebtEntry {
+ advanceAllocation CustomerAdvanceAllocation?
   debtOriginId String?
   actorId        String?
   effectiveAt    DateTime @default(now())
@@ -1055,6 +1058,8 @@ model ExpenseCategory {
 }
 
 model FinancialDocument {
+ customerAdvance CustomerAdvance?
+ customerAdvanceRefund CustomerAdvanceRefund?
   supplierPayment SupplierPayment?
  id String @id @default(uuid())
  organizationId String
@@ -1523,6 +1528,21 @@ model SaleExchange {
  @@index([organizationId,storeId,createdAt])
 }
 
+model JobExport {
+ jobId String @id
+ organizationId String
+ data Bytes?
+ filename String
+ mime String
+ size Int
+ sha256 String
+ rowCount Int
+ asOf DateTime
+ expiresAt DateTime
+ job BackgroundJob @relation(fields:[jobId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ @@index([organizationId,expiresAt])
+}
+
 model BackgroundJob {
  id String @id @default(uuid())
  organizationId String
@@ -1544,6 +1564,8 @@ model BackgroundJob {
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
  authorizations JobAuthorization[]
  events JobEvent[]
+ exports JobExport[]
+ @@unique([id,organizationId])
  @@index([state,nextRunAt])
  @@index([organizationId,createdAt])
 }
@@ -1630,4 +1652,40 @@ model ProductUnitConversion {
  trade Unit @relation("ConversionTradeUnit",fields:[organizationId,tradeUnit],references:[organizationId,code],onDelete:NoAction,onUpdate:NoAction)
  @@unique([productId,tradeUnit])
  @@index([organizationId,tradeUnit])
+}
+
+// Immutable cash advance journals; migration094 also enforces exact source and budget.
+model CustomerAdvance {
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ allocations CustomerAdvanceAllocation[]
+ refunds CustomerAdvanceRefund[]
+ id String @id @default(uuid())
+ organizationId String
+ customerId String
+ documentId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ @@index([organizationId,customerId,createdAt,id],map:"CustomerAdvance_customer_idx")
+}
+model CustomerAdvanceAllocation {
+ advance CustomerAdvance @relation(fields:[advanceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ debtEntry DebtEntry @relation(fields:[debtEntryId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ id String @id @default(uuid())
+ advanceId String
+ debtEntryId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ @@index([advanceId],map:"CustomerAdvanceAllocation_advance_idx")
+}
+model CustomerAdvanceRefund {
+ advance CustomerAdvance @relation(fields:[advanceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ id String @id @default(uuid())
+ advanceId String
+ documentId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ @@index([advanceId],map:"CustomerAdvanceRefund_advance_idx")
 }
