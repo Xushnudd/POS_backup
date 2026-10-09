@@ -205,6 +205,12 @@ model Category {
 }
 
 model Product {
+  unitConversions ProductUnitConversion[]
+  mxik String?
+  mxikSource String?
+  mxikRequired Boolean @default(false)
+  taxRequired Boolean @default(false)
+  markingRequired Boolean @default(false)
   priceRules         PriceRule[]
   taxProfileId String?
   taxProfile TaxProfile? @relation(fields:[taxProfileId],references:[id],onDelete:NoAction)
@@ -245,6 +251,7 @@ model Product {
   saleReturnItems       SaleReturnItem[]
   dispositionEntries ReturnDispositionEntry[]
 
+  @@unique([id,organizationId])
   @@unique([organizationId, sku])
   @@unique([organizationId, barcode])
 }
@@ -326,6 +333,7 @@ model StockDocument {
 }
 
 model StockDocumentItem {
+  conversionSnapshot Json?
  supplierCreditItems SupplierCreditItem[]
   purchaseReceiptLine PurchaseReceiptLine?
   id              String   @id @default(uuid())
@@ -369,6 +377,7 @@ model InventoryBalance {
   product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   
   @@id([storeId, productId])
+  @@index([productId])
 }
 
 model StockTransfer {
@@ -572,6 +581,8 @@ model Sale {
 }
 
 model SaleItem {
+  conversionSnapshot Json?
+  complianceSnapshot Json?
   priceRuleId     String?
   priceRule       PriceRule?         @relation(fields: [priceRuleId], references: [id], onDelete: NoAction)
   priceSnapshot   Json?
@@ -630,6 +641,8 @@ model Payment {
   sale           Sale?        @relation(fields: [saleId], references: [id], onDelete: Cascade)
   customer       Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   receiver       User         @relation("ReceivedBy", fields: [receivedBy], references: [id])
+  @@index([saleId])
+  @@index([shiftId,paymentType,status])
 }
 
 model SaleReturn {
@@ -794,6 +807,8 @@ model Invitation {
 }
 
 model Unit {
+ conversionBase ProductUnitConversion[] @relation("ConversionBaseUnit")
+ conversionTrade ProductUnitConversion[] @relation("ConversionTradeUnit")
  id             String @id @default(uuid())
  organizationId String
  code           String
@@ -1598,4 +1613,21 @@ model SecurityNotice {
   createdAt DateTime @default(now())
   readAt DateTime?
   event SecurityEvent @relation(fields:[eventId],references:[id],onDelete:Cascade)
+}
+
+
+model ProductUnitConversion {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ baseUnit String
+ tradeUnit String
+ ratio Decimal @db.Decimal(14,6)
+ isActive Boolean @default(true)
+ updatedAt DateTime @updatedAt
+ product Product @relation(fields:[productId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ base Unit @relation("ConversionBaseUnit",fields:[organizationId,baseUnit],references:[organizationId,code],onDelete:NoAction,onUpdate:NoAction)
+ trade Unit @relation("ConversionTradeUnit",fields:[organizationId,tradeUnit],references:[organizationId,code],onDelete:NoAction,onUpdate:NoAction)
+ @@unique([productId,tradeUnit])
+ @@index([organizationId,tradeUnit])
 }

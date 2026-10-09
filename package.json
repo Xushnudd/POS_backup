@@ -16,7 +16,9 @@
     "worker:build": "tsc -p tsconfig.worker.json",
     "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js",
     "prebuild": "node scripts/build-offline.cjs",
-    "worker:jobs": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/jobs.js"
+    "worker:jobs": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/jobs.js",
+    "security:scan": "node scripts/security/scan.mjs",
+    "security:scan:test": "node --test scripts/security/scan.test.mjs"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",

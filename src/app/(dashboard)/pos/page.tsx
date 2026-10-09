@@ -40,7 +40,7 @@ export default function PosPage() {
     customer,
     note,
     addItem,
-    updateQuantity,
+    updateQuantity,selectTradeUnit,updateTradeQuantity,
     updateLineDiscount,
     removeItem,
     clearCart,
@@ -219,7 +219,7 @@ export default function PosPage() {
           productId: i.product.id,
           productName: i.product.name,
           sku: i.product.sku,
-          quantity: i.quantity,
+          quantity: i.tradeQuantity??i.quantity,tradeUnit:i.tradeUnit,expectedConversionRatio:i.conversionRatio,
           unitPrice: i.unitPrice,
           expectedUnitPrice: i.unitPrice,
           discountAmount: i.discountAmount,discountPercent:i.discountPercent,
@@ -392,10 +392,10 @@ export default function PosPage() {
     try{
       if(!activeStore)throw new Error('Filial tanlang')
       const quote=await api.request<{productId:string;unitPrice:string}[]>('/price-rules/quote',{method:'POST',body:JSON.stringify({storeId:activeStore.id,customerId:customer?.id,items:items.map(i=>({productId:i.product.id,quantity:i.quantity}))})});if(!quote.data||quote.data.length!==items.length)throw new Error('Narx darajasi tekshirilmadi')
-      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,unitPrice:Number(quote.data!.find(p=>p.productId===item.product.id)!.unitPrice),discountAmount:0,discountPercent:undefined,lineTotal:clientLine(item.quantity,Number(quote.data!.find(p=>p.productId===item.product.id)!.unitPrice))};}));
+      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,tradeUnit:undefined,tradeQuantity:undefined,conversionRatio:undefined,unitPrice:Number(quote.data!.find(p=>p.productId===item.product.id)!.unitPrice),discountAmount:0,discountPercent:undefined,lineTotal:clientLine(item.quantity,Number(quote.data!.find(p=>p.productId===item.product.id)!.unitPrice))};}));
       if(checkoutAttempt.current&&!await cancelPendingCheckout())return;
       hydrate({items:current,cartDiscount:0,customer,note});setFailure(null);await loadProducts();
-      notifySuccess('Narxlar yangilandi, chegirmalar tozalandi. Miqdorlarni tekshirib, to‘lovni qayta tasdiqlang.');
+      notifySuccess('Narxlar yangilandi, chegirmalar tozalandi; miqdorlar asosiy birlikda. Miqdorlarni tekshirib, to‘lovni qayta tasdiqlang.');
     }catch(error){notifyError(error instanceof Error?error.message:'Savat yangilanmadi; asl urinish saqlangan');}
   };
 
@@ -532,7 +532,7 @@ export default function PosPage() {
             cartDiscount={cartDiscount} cartDiscountPercent={cartDiscountPercent} onSetCartPercent={setCartDiscountPercent} discountReason={discountReason} onSetDiscountReason={setDiscountReason}
             customer={customer}
             customers={customers}
-            onUpdateQuantity={updateQuantity}
+            onUpdateQuantity={updateQuantity} onSelectUnit={selectTradeUnit} onUpdateTradeQuantity={updateTradeQuantity}
             onUpdateDiscount={updateLineDiscount}
             onRemoveItem={removeItem}
             onClearCart={clearCart}

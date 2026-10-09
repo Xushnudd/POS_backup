@@ -1,3 +1,5 @@
+import type {ConversionSnapshot} from '../catalog/conversion-math'
+import {assertCurrentConversion} from '../catalog/conversions'
 import { z } from 'zod'
 import {Prisma} from '@prisma/client'
 import type { TokenPayload } from '@/lib/auth'
@@ -22,6 +24,7 @@ export async function confirmStockDocumentTx(tx:Prisma.TransactionClient,context
   if (doc.status!=='draft') throw new AccessError(409,'INVALID_STATUS')
   if (!doc.items.length || !['purchase','opening','adjustment','return_in'].includes(doc.documentType)) throw new AccessError(400,'INVALID_DOCUMENT','Transfer uchun transfer oqimidan foydalaning')
   for (const item of [...doc.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
+   const conversionProduct=await tx.product.findFirstOrThrow({where:{id:item.productId,organizationId:context.organizationId}});await assertCurrentConversion(tx,context.organizationId,conversionProduct,item.quantity,item.conversionSnapshot);
    if (item.quantity.isZero() || (doc.documentType!=='adjustment' && item.quantity.lt(0))) throw new AccessError(400,'INVALID_QUANTITY')
    if(doc.documentType==='opening'){
     if(!doc.note||doc.note.trim().length<3)throw new AccessError(400,'REASON_REQUIRED')
@@ -98,7 +101,7 @@ export async function reverseStockDocument(context:TokenPayload,id:string,input:
   if(await tx.supplierInvoice.findUnique({where:{stockDocumentId:id}}))throw new AccessError(409,'SUPPLIER_INVOICE_TRACKED','Qarzga bog‘langan xarid uchun yetkazib beruvchiga qaytarish oqimidan foydalaning')
   const reversal=await tx.stockDocument.create({data:{organizationId:original.organizationId,storeId:original.storeId,supplierId:original.supplierId,
    documentType:'reversal',documentNo:'REV-'+input.operationId,reversalOfId:id,createdBy:context.userId,note:input.reason,
-   items:{create:original.items.map(item=>({productId:item.productId,quantity:item.quantity.negated(),unitCost:item.unitCost,note:item.note}))}}})
+   items:{create:original.items.map(item=>({productId:item.productId,quantity:item.quantity.negated(),unitCost:item.unitCost,note:item.note,conversionSnapshot:item.conversionSnapshot?{...(item.conversionSnapshot as unknown as ConversionSnapshot),tradeQuantity:decimal((item.conversionSnapshot as unknown as ConversionSnapshot).tradeQuantity).negated().toFixed()}:Prisma.DbNull}))}}})
   for (const item of [...original.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
    if (['purchase','opening'].includes(original.documentType)) {
     await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${item.productId} FOR UPDATE`

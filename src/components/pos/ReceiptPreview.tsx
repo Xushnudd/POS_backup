@@ -147,7 +147,7 @@ export default function ReceiptPreview({
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-600">
                   <span>
-                    {item.quantity} {item.unit??''} x {formatMoney(item.unitPrice)}
+                    {item.quantity} {item.unit??''} x {formatMoney(item.unitPrice)}{item.conversionSnapshot&&<span className="block">Asl: {item.conversionSnapshot.tradeQuantity} {item.conversionSnapshot.tradeUnit}; 1 = {item.conversionSnapshot.ratio} {item.conversionSnapshot.baseUnit}</span>}
                   </span>
                   {item.discountAmount > 0 && (
                     <span className="text-red-500">

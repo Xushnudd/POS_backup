@@ -1,3 +1,4 @@
+import {clientBaseQuantity,clientQuantitySum} from '@/lib/unit-conversion';
 import { clientLine, clientPercentage, fixed, displayed } from '@/lib/money';
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Customer, Product } from '@/types';
@@ -18,13 +19,14 @@ export function useCart() {
       if (existingIdx > -1) {
         const updated = [...prev];
         const currentItem = updated[existingIdx];
-        const newQty = currentItem.quantity + quantity;
+        const tradeQuantity=currentItem.tradeUnit?clientQuantitySum(currentItem.tradeQuantity??'1',quantity):undefined;
+        const newQty = tradeQuantity?Number(clientBaseQuantity(tradeQuantity,currentItem.conversionRatio??'1',product.unitPrecision??6)):currentItem.quantity + quantity;
         const discountAmount=currentItem.discountPercent===undefined?currentItem.discountAmount:clientPercentage(clientLine(newQty,currentItem.unitPrice),currentItem.discountPercent);
         const lineTotal = clientLine(newQty, currentItem.unitPrice, discountAmount);
 
         updated[existingIdx] = {
           ...currentItem,
-          quantity: newQty,discountAmount,
+          quantity: newQty,tradeQuantity,discountAmount,
           lineTotal: Math.max(0, lineTotal),
         };
         return updated;
@@ -67,6 +69,17 @@ export function useCart() {
       })
     );
   }, []);
+
+  const selectTradeUnit=useCallback((productId:string,tradeUnit:string)=>{
+    const item=items.find(row=>row.product.id===productId);if(!item)return;const conversion=item.product.unitConversions?.find(row=>row.tradeUnit===tradeUnit&&row.isActive);
+    if(tradeUnit!==item.product.unit&&!conversion)throw new Error('Birlik nisbati mavjud emas');const ratio=conversion?.ratio??'1',quantity=Number(clientBaseQuantity('1',ratio,item.product.unitPrecision??6));const lineTotal=clientLine(quantity,item.unitPrice);
+    setItems(previous=>previous.map(row=>row.product.id===productId?{...row,tradeUnit:conversion?tradeUnit:undefined,conversionRatio:conversion?.ratio,tradeQuantity:conversion?'1':undefined,quantity,discountAmount:0,discountPercent:undefined,lineTotal}:row));
+  },[items]);
+  const updateTradeQuantity=useCallback((productId:string,value:string)=>{
+    const item=items.find(row=>row.product.id===productId);if(!item)return;const conversion=item.product.unitConversions?.find(row=>row.tradeUnit===item.tradeUnit),precision=conversion?.tradePrecision??6;
+    if(fixed(value,6)%BigInt(10)**BigInt(6-precision)!==BigInt(0))throw new Error('Savdo birligi kasr aniqligiga mos emas');const quantity=Number(clientBaseQuantity(value,item.conversionRatio??'1',item.product.unitPrecision??6)),discountAmount=item.discountPercent===undefined?item.discountAmount:clientPercentage(clientLine(quantity,item.unitPrice),item.discountPercent),lineTotal=clientLine(quantity,item.unitPrice,discountAmount);
+    setItems(previous=>previous.map(row=>row.product.id===productId?{...row,tradeQuantity:value,quantity,discountAmount,lineTotal}:row));
+  },[items]);
 
   const updateLineDiscount = useCallback(
     (productId: string, discountAmount: number,discountPercent?:number) => {
@@ -121,7 +134,7 @@ export function useCart() {
     hydrate,
     items,
     addItem,
-    updateQuantity,
+    updateQuantity,selectTradeUnit,updateTradeQuantity,
     updateLineDiscount,
     removeItem,
     clearCart,

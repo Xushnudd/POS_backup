@@ -1430,7 +1430,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.04** — Birlik konvertatsiyasi: 1 quti = 12 dona; asosiy birlikda qoldiq, hujjatda savdo birligi.
+- [x] **CAT-01.04** — Birlik konvertatsiyasi: 1 quti = 12 dona; asosiy birlikda qoldiq, hujjatda savdo birligi.
 
   **Texnologiya:** Prisma Decimal conversion, TypeScript unit service.
 
@@ -1512,7 +1512,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.09** — Soliq turi, MXIK va markirovka xususiyatlari tegishli tovar uchun.
+- [x] **CAT-01.09** — Soliq turi, MXIK va markirovka xususiyatlari tegishli tovar uchun.
 
   **Texnologiya:** Prisma tax/classification fields, Zod, provider adapter.
 
@@ -3883,7 +3883,7 @@ Boshlang‘ich muhandislik maqsadlari: oylik mavjudlik **99,9%**, backupdagi rux
 
   **Dalil:** `OPS-04.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-04.02** — Dastlabki test profili: bir tashkilotda 50 000 mahsulot, 1 million savdo qatori, 20 parallel faol kassa.
+- [x] **OPS-04.02** — Dastlabki test profili: bir tashkilotda 50 000 mahsulot, 1 million savdo qatori, 20 parallel faol kassa.
 
   **Texnologiya:** Node seed generator, PostgreSQL, Docker test environment.
 
@@ -3899,7 +3899,7 @@ Boshlang‘ich muhandislik maqsadlari: oylik mavjudlik **99,9%**, backupdagi rux
 
   **Dalil:** `OPS-04.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-04.03** — Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi.
+- [x] **OPS-04.03** — Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi.
 
   **Texnologiya:** Node performance/HTTP harness, PostgreSQL EXPLAIN, T09 k6 zarur bo‘lsa.
 

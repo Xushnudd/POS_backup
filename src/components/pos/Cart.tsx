@@ -26,6 +26,8 @@ interface CartProps {
   onSetDiscountReason:(value:string)=>void;
   customer: Customer | null;
   customers: Customer[];
+  onSelectUnit:(productId:string,unit:string)=>void;
+  onUpdateTradeQuantity:(productId:string,value:string)=>void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onUpdateDiscount: (productId: string, discount: number,percent?:number) => void;
   onRemoveItem: (productId: string) => void;
@@ -43,7 +45,7 @@ export default function Cart({
   cartDiscount,cartDiscountPercent,onSetCartPercent,discountReason,onSetDiscountReason,
   customer,
   customers,
-  onUpdateQuantity,
+  onUpdateQuantity,onSelectUnit,onUpdateTradeQuantity,
   onUpdateDiscount,
   onRemoveItem,
   onClearCart,
@@ -111,7 +113,7 @@ export default function Cart({
             <CartItem
               key={item.product.id}
               item={item}
-              onUpdateQuantity={onUpdateQuantity}
+              onUpdateQuantity={onUpdateQuantity} onSelectUnit={onSelectUnit} onUpdateTradeQuantity={onUpdateTradeQuantity} disabled={disabled}
               onUpdateDiscount={onUpdateDiscount}
               onRemove={onRemoveItem}
             />

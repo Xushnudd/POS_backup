@@ -6,7 +6,8 @@ import {runOperation} from '@/server/operations'
 import {AccessError} from '@/server/auth/policy'
 import type {TokenPayload} from '@/lib/auth'
 test('Serialization and deadlock retry stop at three attempts with a controlled conflict',async()=>{
- const original=prisma.$transaction
+ const original=prisma.$transaction,originalLookup=prisma.operation.findUnique
+ prisma.operation.findUnique=(async()=>null) as unknown as typeof prisma.operation.findUnique
  const context={} as TokenPayload
  try{
   for(const error of [new Prisma.PrismaClientKnownRequestError('serialization',{code:'P2034',clientVersion:'5.22.0'}),new Prisma.PrismaClientKnownRequestError('deadlock',{code:'P2010',clientVersion:'5.22.0',meta:{code:'40P01'}})]){
@@ -18,5 +19,5 @@ test('Serialization and deadlock retry stop at three attempts with a controlled 
   let attempts=0;const forbidden=new AccessError(403,'FORBIDDEN')
   prisma.$transaction=(async()=>{attempts++;throw forbidden}) as typeof prisma.$transaction
   await assert.rejects(()=>runOperation(context,'test','key',{},async()=>null),error=>error===forbidden);assert.equal(attempts,1)
- }finally{prisma.$transaction=original;await prisma.$disconnect()}
+ }finally{prisma.$transaction=original;prisma.operation.findUnique=originalLookup;await prisma.$disconnect()}
 })

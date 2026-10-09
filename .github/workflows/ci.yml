@@ -29,6 +29,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run db:migrate
+      - run: npm run security:scan:test
+      - run: npm run security:scan
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run worker:build

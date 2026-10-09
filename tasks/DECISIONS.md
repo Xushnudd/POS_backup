@@ -389,3 +389,34 @@ Node jobs worker DB-only outboxni SKIP LOCKED bilan oladi, actual faol qabul qil
 History va inbox90kun. Worker ko‘pi100expired security events/batchni tozalaydi; pending/dead xabar muddati tugaganda system audit yoziladi. Event bilan faqat uning notice/outbox metadata-si cascade o‘chadi. Audit va moliyaviy/offline Session identities purge qilinmaydi; session history API90kunlik safe metadata qaytaradi. Umumiy AuditLogning alohida retention siyosati bu vazifa bilan o‘zgarmaydi. Header polling ko‘rinadigan oynada60s; security GET gateway va handler no-touch auth qiladi, idle expiry uzaymaydi. Read/retry esa foydalanuvchining aniq amali bo‘lib default touch va live transaction tekshiruvini saqlaydi.
 
 Worker ishga tushirilishi production operatorining release tartibiga kiritiladi. In-app delivery ishlaydi; SMS/e-mail/Click/fiskal/hardware integratsiyasi, MFA yoki password reset shu qaror bilan implementatsiya qilinmaydi.
+
+## ADR-053 — Mahsulot tasnifi va tashqi markirovka chegarasi
+
+CAT-01.09 mavjud Prisma/PostgreSQL, Zod va React orqali bajariladi. Owner mahsulotning MXIK kodi, tekshirilgan manba qaydi hamda MXIK/soliq/markirovka majburiyligini sabab bilan belgilaydi. Ushbu qayd rasmiy katalog yoki huquqiy tasdiq o‘rnini bosmaydi; kod formatlari taxmin qilinmaydi.
+
+Majburiy MXIK va manba yo‘q bo‘lsa yoki kuchga kirgan soliq versiyasi yo‘q bo‘lsa checkout atomik bekor qilinadi. Markirovka majburiy mahsulot uchun haqiqiy integratsiya tayyor bo‘lmaguncha 503 qaytariladi. Bunday savatga offline naqd ruxsat ham berilmaydi. Oddiy mahsulotlar uchun yangi majburiy shart yo‘q. Real fiskal/Click/hardware implementatsiyasi qo‘shilmadi.
+
+Tasnif checkout paytida mahsulot row locki ostida qayta tekshiriladi va SaleItem.complianceSnapshot ichida muzlatiladi. Keyingi katalog tahriri original chekni o‘zgartirmaydi. 087 migration completion uchun deferred DB guard va matn uzunligi cheklovlarini qo‘shadi. Owner-only tahrir mavjud serializable runOperation, original operationId, audit va IndexedDB orqali natija noma’lum bo‘lgandagi tiklash oqimidan foydalanadi.
+
+## ADR-054 — Savdo birligi va asosiy ombor birligi
+
+Mahsulotning Product.unit maydoni asosiy birlik bo‘lib qoladi. ProductUnitConversion owner tasdiqlagan tradeUnit/baseUnit/ratio aloqasini saqlaydi; ratio Decimal(14,6). Bir savdo birligi asosiy birlik aniqligiga to‘liq sig‘ishi shart: qoldiq yashirin yaxlitlanmaydi. Birlik o‘zgartirish va nisbat tahriri original operationId bilan audited runOperation orqali bajariladi. Konvertatsiyasi mavjud SKUning asosiy birligini o‘zgartirish uchun yangi mahsulot kerak.
+
+SaleItem va StockDocumentItem original tradeQuantity/tradeUnit/baseUnit/ratio JSON snapshotini saqlaydi; quantity, unitPrice va unitCost asosiy birlikda qoladi. Shu sabab mavjud stock/payment/profit/tax/discount/allocation hisoblari o‘zgarmaydi. Bir SKUning bitta hujjatdagi aralash birliklari rad etiladi; ayni birlikdagi takror qatorlar bazaviy miqdorda birlashtiriladi. Current conversion checkout, stock confirmation va offline ticket chiqarishda qayta tekshiriladi; o‘zgargan nisbat uchun ochiq savat qayta ko‘rib chiqiladi.
+
+Kirim tannarxi asosiy birlik uchun kiritiladi, UI buni ochiq yozadi. Savdoda qaytarish uchun default quantity asosiy birlikda; original tradeUnit ko‘rsatilsa faqat original chekning muzlatilgan ratio si ishlatiladi. Keyingi katalog nisbati original pul va stockni qayta yozmaydi. Reversal original snapshotning manfiy tradeQuantity qiymatini saqlaydi. POS barcha hisoblarni base quantity bilan bajaradi; trade unit tanlash miqdorni1 va chegirmani0 ga qaytarishi UI da yozilgan. Konfliktni yangilash trade tanlovini asosiy birlikka qaytaradi va qayta tasdiq talab qiladi.
+
+088 additive migration, ratio/unit FK va snapshot quantity DB guards. Unit va Product kompozit relationlari Prisma schemada SQL FKlariga mos NoAction bilan ifodalangan. Unit catalog aniqligi/active holatini in-use trade unitda o‘zgartirish bloklangan. Real hardware/fiskal/Click qo‘shilmadi.
+
+## ADR-055 — PostgreSQL SSI: mustaqil kassalar uchun tor o‘qish
+
+50k mahsulot/1m draft qator/20 kassa testida dastlab concurrent conflict ko‘p bo‘ldi. Real pg_locks probe kichik Register/Shift jadvallari sequential readida relation-wide SIReadLock va Operation missing-key unique-index gaplarini ko‘rsatdi. Isolation SERIALIZABLE qoladi. runOperation ichida enable_seqscan=off va jit=off faqat transaction-local: tor indexed predicate reads tanlanadi, indekssiz scanlar imkoniyati qoladi. Read/report so‘rovlarining global planner konfiguratsiyasi o‘zgarmaydi.
+
+Operation identity select(id) transaction ochilishidan avval tekshiriladi; bu authorization yoki result emas. Transaction joriy session/user/membership/branchni tekshiradi, original key advisory lockini oladi va mavjud recordni PK bo‘yicha qayta o‘qib tenant/type/key/actor/hash/cancellationni tasdiqlaydi. Probe va lock orasida shu key commit bo‘lsa unique conflict yoki stale409dan keyin faqat exact committed key mavjudligida fresh transactionga retry qilinadi. Business work + Operation + deferred constraints commit atomik; uch urinish chegarasi saqlanadi.
+
+Checkout Payment.saleId FK indekssiz edi va receipt include/journal tekshiruvi relation-wide predicate lock olib boshqa kassa insertlari bilan to‘qnashdi. 089 saleId,090 shiftId/paymentType/status concurrent indexes. Har migrationda bitta concurrent statement; failed test089 recordi rolled-back bo‘lib, hali qo‘llanmagan fayl tuzatildi. Applied migrationlar tahrirlanmadi. 20 parallel owner kassa, bir itemli100 cash checkout,100 search:0 error; p95 search304.75ms/checkout140.56ms. Bu isolated service-level synthetic dalil, public network/real pilot/katta savat yoki vendor SLA kafolati emas.
+
+
+ADR-055 qo‘shimcha qabul (2026-10-09): fresh profildagi birinchi qayta o‘lchov97checkout/98search/1exhaustedSSI conflict bilan muvaffaqiyatsiz bo‘ldi. Deterministik retry delay parallel transactionsni bir vaqtda qayta to‘qnashtirayotgan edi; Node crypto.randomInt orqali bounded20–80/40–160ms jitter, unchanged3attempt va SERIALIZABLE. Fresh profile ketma-ket ikki run:100/100search,100/100checkout,0errors; p95 search388.87/393.69ms, checkout132.23/114.99ms. Failed run saqlanadi, yashirilmaydi.
+
+Katta regressiya fixture cleanupi InventoryBalance.productId FK scanini aniqladi:091 concurrentindex qo‘shildi, Product FK uchun source index Prisma bilan mos. Count/checkout deadlock uchun startCount Productlarni id tartibida stock advisorylockdan oldin lock qiladi; FK insert keyshare va checkout FORUPDATE orasidagi inversion yo‘qoladi. Applied088–090 tahrirlanmagan.

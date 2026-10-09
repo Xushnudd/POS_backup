@@ -33,7 +33,7 @@ export async function updateUnit(context:TokenPayload,id:string,input:z.infer<ty
   const unit=await tx.unit.findFirst({where:{id,organizationId:context.organizationId}})
   if (!unit) throw new AccessError(404,'NOT_FOUND')
   if ((input.precision!==undefined && input.precision!==unit.precision) || input.isActive===false) {
-   if (await tx.product.count({where:{organizationId:context.organizationId,unit:unit.code}})) throw new AccessError(409,'UNIT_IN_USE','Ishlatilgan birlik aniqligi yoki faol holatini o‘zgartirib bo‘lmaydi')
+   if (await tx.product.count({where:{organizationId:context.organizationId,unit:unit.code}})||await tx.productUnitConversion.count({where:{organizationId:context.organizationId,tradeUnit:unit.code}})) throw new AccessError(409,'UNIT_IN_USE','Ishlatilgan birlik aniqligi yoki faol holatini o‘zgartirib bo‘lmaydi')
   }
   const result=await tx.unit.update({where:{id},data:input})
   await audit(tx,context,'Unit',id,'unit_updated',input)

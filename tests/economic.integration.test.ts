@@ -289,7 +289,7 @@ test('Cancellation tombstone blocks delayed draft posting; a committed draft kee
   const outcomes=await Promise.allSettled([createDraft(f.context,f.draft,raceKey),cancelDraftIntent(f.context,{operationId:raceKey,payload:f.draft})])
   const operation=await prisma.operation.findUniqueOrThrow({where:{organizationId_type_key:{organizationId:f.org.id,type:'sale.create',key:raceKey}}})
   if(operation.state==='cancelled')assert.equal(outcomes[0].status,'rejected')
-  else {assert.equal(outcomes[0].status,'fulfilled');assert.equal(outcomes[1].status,'fulfilled');if(outcomes[1].status==='fulfilled')assert.equal(outcomes[1].value.state,'created')}
+  else {assert.equal(outcomes[0].status,'fulfilled',outcomes[0].status==='rejected'?String(outcomes[0].reason):undefined);assert.equal(outcomes[1].status,'fulfilled');if(outcomes[1].status==='fulfilled')assert.equal(outcomes[1].value.state,'created')}
  }
 })
 
@@ -440,7 +440,7 @@ test('Full count/cancellation and concurrent checkout preserve the count checkpo
    startCount(f.context,{operationId:randomUUID(),organizationId:f.org.id,storeId:f.store.id,scope:'full',blind:false}),
    completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:100}]},randomUUID())
   ])
-  assert.equal(outcomes[0].status,'fulfilled')
+  assert.equal(outcomes[0].status,'fulfilled',outcomes[0].status==='rejected'?String(outcomes[0].reason):undefined)
   const count=outcomes[0].value,after=await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})
   assert.equal(count.lines[0].expectedQuantity?.toString(),after.quantity.toString())
   assert.equal(before.quantity.sub(after.quantity).toString(),outcomes[1].status==='fulfilled'?'1':'0')
@@ -740,7 +740,7 @@ test('Posted receipt DB snapshots resist edit/delete/insert and parent cascades;
  await assert.rejects(()=>prisma.saleItem.update({where:{id:item.id},data:{unitCost:1}}))
  await assert.rejects(()=>prisma.saleItem.delete({where:{id:item.id}}))
  const {id:discard,createdAt:timestamp,...copy}=item;void discard;void timestamp
- await assert.rejects(()=>prisma.saleItem.create({data:{...copy,priceSnapshot:copy.priceSnapshot===null?Prisma.DbNull:copy.priceSnapshot as Prisma.InputJsonValue}}))
+ await assert.rejects(()=>prisma.saleItem.create({data:{...copy,conversionSnapshot:copy.conversionSnapshot===null?Prisma.DbNull:copy.conversionSnapshot as Prisma.InputJsonValue,complianceSnapshot:copy.complianceSnapshot===null?Prisma.DbNull:copy.complianceSnapshot as Prisma.InputJsonValue,priceSnapshot:copy.priceSnapshot===null?Prisma.DbNull:copy.priceSnapshot as Prisma.InputJsonValue}}))
  await assert.rejects(()=>prisma.product.delete({where:{id:f.product.id}}))
  await assert.rejects(()=>prisma.store.delete({where:{id:f.store.id}}))
  const ret=await returnSale(f.context,sale.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Explicit correction',items:[{saleItemId:item.id,quantity:1,disposition:'sellable'}]})

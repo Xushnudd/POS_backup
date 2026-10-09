@@ -1,3 +1,6 @@
+import {prisma} from '@/lib/prisma'
+import {assertLiveContext} from '@/server/operations'
+import {resolveConversion} from '@/server/catalog/conversions'
 import { documentFilters } from '@/server/inventory/list-filters'
 import { csv, numeric, productValue } from '@/server/exports/csv'
 import { paging, exporting, exportCap, pagination } from '@/server/catalog/queries'
@@ -20,6 +23,7 @@ const createStockDocumentSchema = z.object({
   items: z.array(z.object({
     productId: z.string().uuid(),
     quantity: signedQuantitySchema,
+    tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/).optional(),
     unitCost: nonnegativeQuantitySchema,
     note: z.string().trim().max(2000).optional(),
   })).min(1).max(500),
@@ -95,19 +99,21 @@ async function handlePOST(request: NextRequest) {
         { status: 401 }
       )
     }
-    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = createStockDocumentSchema.parse(body)
     const { items, ...documentData } = validatedData
 
-    const document = await db.$transaction(async tx => {
+    const document = await prisma.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      const prepared=[];
+      for(const item of items){const product=await tx.product.findFirst({where:{id:item.productId,organizationId:payload.organizationId}});if(!product)throw new AccessError(404,'PRODUCT_NOT_FOUND');const converted=await resolveConversion(tx,payload.organizationId,product,item.quantity,item.tradeUnit);const {tradeUnit:ignored,...row}=item;void ignored;prepared.push({...row,quantity:converted.quantity,conversionSnapshot:converted.snapshot??Prisma.DbNull})}
       const result = await tx.stockDocument.create({
       data: {
         ...documentData,
         createdBy: payload.userId,
         items: {
-          create: items,
+          create: prepared,
         },
       },
       include: {

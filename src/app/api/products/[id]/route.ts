@@ -52,7 +52,7 @@ async function handleGET(
     const product = await db.product.findUnique({
       where: { id },
       include: {
-        category: true,brand:true,taxProfile:true,
+        category: true,unitConversions:{where:{isActive:true},orderBy:{tradeUnit:'asc'}},brand:true,taxProfile:true,
       },
     })
 

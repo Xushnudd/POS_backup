@@ -34,6 +34,10 @@ export async function startCount(context:TokenPayload,input:z.infer<typeof start
   if(ids && ids.length!==input.productIds!.length)throw new AccessError(400,'DUPLICATE_PRODUCTS')
   const products=await tx.product.findMany({where:{organizationId:context.organizationId,...(input.scope==='partial'?{id:{in:ids}}:{OR:[{isActive:true},{inventoryBalances:{some:{storeId:store.id,quantity:{not:0}}}}]})},orderBy:{id:'asc'},take:2001})
   if(!products.length||products.length>2000||(input.scope==='partial'&&products.length!==ids!.length))throw new AccessError(400,'INVALID_COUNT_SCOPE','Bir sanashda 1–2000 mahsulot bo‘lishi kerak; katta katalogni qismlarga ajrating')
+  // Checkout holds Product before the stock advisory lock. Take the same
+  // order before FK inserts, otherwise a count can hold stock while waiting
+  // for checkout’s Product row and deadlock the two operations.
+  await tx.$queryRaw`SELECT id FROM "Product" WHERE "organizationId"=${context.organizationId} AND id IN (${Prisma.join(products.map(p=>p.id))}) ORDER BY id FOR UPDATE`
   // Short transaction locks only selected SKU balances; no DB locks span UI time.
   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended('stock:' || ${store.id} || ':' || id,0))::text FROM (SELECT unnest(ARRAY[${Prisma.join(products.map(p=>p.id))}]::text[]) AS id ORDER BY id) selected`
   const uncertain=await tx.$queryRaw<{id:string}[]>`SELECT i.id FROM "ReservationItem" i JOIN "StockReservation" r ON r.id=i."reservationId" WHERE i."organizationId"=${context.organizationId} AND i."storeId"=${store.id} AND i."productId" IN (${Prisma.join(products.map(p=>p.id))}) AND r.kind='cash_ticket' AND r.status='active' AND i."remainingQuantity">0 LIMIT 1`

@@ -55,7 +55,7 @@ export default function InventoryPage() {
   const [docSupplierId, setDocSupplierId] = useState<string>('');
   const [docNote, setDocNote] = useState<string>('');
   const [docItems, setDocItems] = useState<
-    { productId: string; quantity: number; unitCost: number }[]
+    { productId: string; quantity: number; unitCost: number;tradeUnit?:string }[]
   >([]);
   const [isSavingDoc, setIsSavingDoc] = useState(false);
   const [reverseTarget,setReverseTarget]=useState<{id:string;operationId:string}|null>(null);
@@ -184,7 +184,7 @@ export default function InventoryPage() {
         items: docItems.map((item) => ({
           productId: item.productId,
           quantity: Number(item.quantity),
-          unitCost: Number(item.unitCost) || 0,
+          unitCost: Number(item.unitCost) || 0,tradeUnit:item.tradeUnit,
         })),
       });
 
@@ -500,6 +500,7 @@ export default function InventoryPage() {
               </Button>
             </div>
 
+            <p>Tannarx har doim mahsulotning asosiy birligi uchun kiritiladi; hujjat miqdori tanlangan birlikdan konvertatsiya qilinadi.</p>
             <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50">
               {docItems.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-gray-200">
@@ -509,7 +510,7 @@ export default function InventoryPage() {
                       onChange={(e) => {
                         const selProd = products.find((p) => p.id === e.target.value);
                         const updated = [...docItems];
-                        updated[idx].productId = e.target.value;
+                        updated[idx].productId = e.target.value;updated[idx].tradeUnit=undefined;
                         if (selProd) {
                           updated[idx].unitCost = Number(selProd.costPrice) || 0;
                         }
@@ -525,6 +526,7 @@ export default function InventoryPage() {
                     </select>
                   </div>
 
+                  <label className="text-xs">Hujjat birligi<select aria-label={'Hujjat birligi '+idx} value={item.tradeUnit??products.find(p=>p.id===item.productId)?.unit??''} onChange={e=>{const updated=[...docItems];updated[idx]={...item,tradeUnit:e.target.value};setDocItems(updated)}}><option value={products.find(p=>p.id===item.productId)?.unit}>{products.find(p=>p.id===item.productId)?.unit}</option>{products.find(p=>p.id===item.productId)?.unitConversions?.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}:1={row.ratio} {row.baseUnit}</option>)}</select></label>
                   <div className="w-24">
                     <input
                       type="number"
@@ -544,7 +546,8 @@ export default function InventoryPage() {
                   <div className="w-32">
                     <input
                       type="number"
-                      placeholder="Tannarx"
+                      placeholder="Asosiy birlik tannarxi"
+                      aria-label={'Asosiy birlik tannarxi '+idx}
                       min="0"
                       step="100"
                       value={item.unitCost}

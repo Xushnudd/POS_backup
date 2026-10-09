@@ -1,3 +1,4 @@
+import {snapshotQuantity,type ConversionSnapshot} from '../catalog/conversion-math'
 import {cumulativeRefundComponent} from '../taxes/calculations'
 import {money} from '../sales/calculations'
 import {validateUnitQuantity} from '../catalog/service'
@@ -15,7 +16,7 @@ import { amountSchema, quantitySchema, requireOpenShift } from '../sales/service
 
 export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(2).max(2000),
  manualNonCash:z.object({confirmed:z.literal(true),referenceNo:z.string().trim().min(3).max(200),expectedSettlement:z.object({cash:amountSchema,card:amountSchema,transfer:amountSchema,debt:amountSchema,waived:amountSchema}).strict()}).strict().optional(),
- items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,disposition:z.enum(['sellable','damaged','write_off']).default('sellable')})).min(1).max(500)})
+ items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/).optional(),disposition:z.enum(['sellable','damaged','write_off']).default('sellable')})).min(1).max(500)})
 export type RefundPreview={refundAmount:Prisma.Decimal;settlement:Record<'cash'|'card'|'transfer'|'debt'|'waived',Prisma.Decimal>};
 export type PostedReturn=Prisma.SaleReturnGetPayload<{include:{items:true}}>&RefundPreview;
 export function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview?:false):Promise<PostedReturn>;
@@ -41,7 +42,9 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
    if (!original) throw new AccessError(404,'ITEM_NOT_FOUND')
    const returned=original.saleReturnItems.reduce((sum,x)=>sum.add(x.quantity),decimal(0))
    const oldAmount=original.saleReturnItems.reduce((sum,x)=>sum.add(x.lineTotal),decimal(0))
-   const qty=decimal(requested.quantity),remaining=original.quantity.sub(returned)
+   let qty=decimal(requested.quantity);
+   if(requested.tradeUnit&&requested.tradeUnit!==original.unit){const snapshot=original.conversionSnapshot as unknown as ConversionSnapshot|null;if(!snapshot||snapshot.tradeUnit!==requested.tradeUnit)throw new AccessError(409,'RETURN_UNIT_INVALID');qty=snapshotQuantity(snapshot,requested.quantity,original.unit)}
+   const remaining=original.quantity.sub(returned)
    if (qty.gt(remaining)) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED')
    const net=original.payableAmount??original.lineTotal.sub(original.receiptDiscount)
    const amount=partialReturnAmount(net,original.quantity,returned,oldAmount,qty)

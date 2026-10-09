@@ -79,12 +79,12 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | CAT-01.01 | CORE-1 | done | Kategoriya daraxti, brend, rasm, tavsif va faol/arxiv holati. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | CAT-01.02 | CORE-1 | done | Bir mahsulot uchun bir nechta barkod; barkod yaratish va etiketka chiqarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | CAT-01.03 | CORE-1 | done | Canonical rang/o‘lcham variantlari, har SKU stock/barcode mustaqil; eski default backfill. | Quyidagi CAT-01.03 protokoli:138 integration,27 unit,9 browser,fresh/legacy51 | Regressiyani saqlash |
-| CAT-01.04 | CORE-1 | todo | Birlik konvertatsiyasi: 1 quti = 12 dona; asosiy birlikda qoldiq, hujjatda savdo birligi. | — | — |
+| CAT-01.04 | CORE-1 | done | Birlik konvertatsiyasi: 1 quti = 12 dona; asosiy birlikda qoldiq, hujjatda savdo birligi. | — | — |
 | CAT-01.05 | CORE-1 | in_progress | Kasr bilan sotish, birlik aniqligi, tarozi barkodidan vazn/narx ajratish. | Existing unit precision/service guard; complete manager paginated unit management/search/CSV | Scale-barcode parsing requires approved format; real scale hardware external-later |
 | CAT-01.06 | CORE-1 | done | Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx. | ADR044/045; immutable rule/receipt, normalized duplicates + settled alias history; full163, finalfocused5, unit35,73migration,browser18 | Regression; open debt merge blocked, external verification not assumed |
 | CAT-01.07 | CORE-1 | done | Avtomatik narx tarixi; 100lik reviewed atomic batch; cost edit/history/export alohida owner vakolati. | Migration035/037; prices service/UI; expected-price/hash/audit/replay; lost response + exact six-decimal browser test | Katta katalog alohida tasdiqlangan batchlarda; eski chek snapshotlari saqlanadi |
 | CAT-01.08 | CORE-1 | done | Excel/CSV import, oldindan ko‘rish, dublikat/xato qatorlar hisoboti, eksport. | ADR048 va quyidagi2026-10-09 import qabul protokoli:3 focused,174 full PG,40unit,9browser,standalone | Regressiyani saqlash; import faqat reviewed new products, no silent updates |
-| CAT-01.09 | CORE-1 | todo | Soliq turi, MXIK va markirovka xususiyatlari tegishli tovar uchun. | — | — |
+| CAT-01.09 | CORE-1 | done | Owner tasnifi, MXIK manbasi va tax/marking checkout/offline fail-closed; immutable receipt snapshot. | ADR053;194 PG,14unit,3browser,87fresh/legacy,encrypted restore6s; dalil quyida | Rasmiy katalog/vendor integratsiyasi alohida |
 | INV-01.01 | CORE-1 | done | Har bir o‘zgarish uchun hujjat va ombor harakati; bevosita qoldiqni almashtirishni taqiqlash. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | INV-01.02 | CORE-1 | done | Boshlang‘ich qoldiqni hujjat bilan kiritish; musbat/manfiy tuzatish, sabab va tasdiq. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | INV-01.03 | CORE-1 | done | Tasdiqlangan hujjat o‘zgarmasligi; xatoni bekor qiluvchi yoki qarshi hujjat. | Migration011 DB guards + unique original/reversal link; service/API/UI; economic.integration stock reversal/rollback tests; Chromium UI reversal passed | — |
@@ -220,8 +220,8 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OPS-03.05 | CORE-1 | in_progress | Tashkilotga tegishli yozuvni tiklashda boshqa tashkilot ma’lumotiga ta’sirni tekshirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-03.06 | CORE-1 | in_progress | Tiklashdan keyin provider, offline navbat va savdo holatlarini solishtirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
 | OPS-04.01 | CORE-1 | todo | Pilotdan katalog, savdo hajmi, kassalar va parallel so‘rovlar profilini olish. | — | — |
-| OPS-04.02 | CORE-1 | todo | Dastlabki test profili: bir tashkilotda 50 000 mahsulot, 1 million savdo qatori, 20 parallel faol kassa. | — | — |
-| OPS-04.03 | CORE-1 | todo | Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi. | — | — |
+| OPS-04.02 | CORE-1 | done | Reproducible isolated generator:50000 products,1000000 draft sale lines,20 active tills. | Fresh seed exit0; tasks/evidence/volume-dataset-20261009.json; source/version quyida | Real pilot profili alohida |
+| OPS-04.03 | CORE-1 | done | Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi. | — | — |
 | OPS-04.04 | CORE-1 | todo | N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker. | — | — |
 | OPS-04.05 | CORE-1 | done | Hisob/ruxsat ma’lumotini eskirgan keshdan olish xavfini boshqarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | OPS-04.06 | CORE-1 | todo | Stress, uzoq davomli yuklama va tiklanish sinovlari. | — | — |
@@ -1461,3 +1461,86 @@ eefb55f38769de7e631ece6d08e0d62cc1d02f0a4538c1e1009e01ce5ea417b4  src/server/sec
 89a950325786847d0a9d9d3a3bd709c04141a04e1fd3e9fac6cce1a08f8cc537  tests/security-events.integration.test.ts
 a75c2abf8dd961dab1ced97bc626dd6621d93dc025cb6827ae8f8ee5bd358c5a  scripts/workers/jobs.ts
 ```
+
+### Yangi +20 topshirig‘i (2026-10-09)
+
+Baseline136, maqsad156: yangi20ta original checklist bandi. Model/scenario/stage yoki yangi subtasklar hisobni to‘ldirish uchun checklist vazifasi o‘rnida sanalmaydi. Tashqi hardware/Click/fiskal integratsiyalar bo‘yicha oldingi taqiq saqlanadi. CAT-01.09 ishlanmoqda: owner manual classification/source/tax flags va marking fail-closed boundary; tax/MXIK zarur bo‘lsa missing bilan checkout0, oddiy goods unchanged, original frozen snapshot. Qabul va testdan oldin done emas.
+
+
+### +20 — 1/20 qabul: CAT-01.09
+
+Baseline136 →137 done. Test muhit: localhost:55439/pos_test; haqiqiy biznes bazasi o‘zgartirilmagan. MXIK/manba yo‘q →409, majburiy tax versiyasi yo‘q →409, marking →503 va payment/stock/lease yozilmaydi. Oddiy mahsulot checkouti ishlaydi. Tax/source snapshot katalog tahriridan keyin o‘zgarmaydi. Parallel bir xil kalitda bitta audit, owner/tenant/current-session va strict validation tekshirilgan.
+
+`npm test`:14/14; `npm run test:integration`:194/194; focused classification:3/3 (offline issue assertion bilan); Playwright classification UI:Chromium/Firefox/WebKit3/3. Typecheck, lint, worker build va webpack production build o‘tdi. 87 migration fresh va legacy fixturega qo‘llandi; encrypted backup bo‘sh bazaga tiklandi, RTO6s/RPO0 fixtureda. Loglar `/tmp/pos-classification-{unit,integration,focused,type,lint,worker,build,migrations,backup,browser}.log`. Rasmiy katalogning huquqiy tasdig‘i va real markirovka integratsiyasi bu qabulga kirmaydi.
+
+Versiya: HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d + ishchi daraxt (commit yaratilmagan). Individual source SHA256 quyida.
+6b3539d95b2cd2688da430d1e98deb22ff928af3401c64cfd5eada909733909b  src/server/catalog/compliance.ts
+d49d348fa53216a0a900d3e23a6d87cf183f5fa0fb29f5f65f0c894a5f2b2d34  src/server/sales/service.ts
+4f3d708db12097fa378fe832a927fedf40fb16d6a7fca8cef5b73043655e739a  src/server/offline/cash.ts
+feaefae27389d5327e4105e337a35a28ba56c0df50f49dad6f32a96a620b06d8  src/app/api/products/[id]/compliance/route.ts
+457745c17ac57b4e470a9b03bc40a8029e7728ee639ee8990203fcbe8bee16c7  src/app/(dashboard)/products/[id]/compliance/page.tsx
+fe06768fd44a21dfeb4943d9105a4874ac943d6e06486167031957609854e6a8  prisma/migrations/202610090087_product_classification/migration.sql
+61d9e891d217ea401adb49db336be70fadc63076f1ebe95854928549f18397e8  tests/classification.integration.test.ts
+
+
+### QA-01.08 — lokal source scanner, hali done emas
+
+`npm run security:scan` tracked va nonignored source ichidagi ma’lum private-key/token formatlarini tekshiradi. Natija faqat path/line/type; secret bytes chiqmaydi, `.env`/key store kontenti ochilmaydi. Repository inventarida credential store topilsa alohida bloklovchi finding. Scannerning ikki testi token matni logga chiqmasligini va takroriy regex holatini tekshiradi; CI ga lokal gate qo‘shildi. Bu minimal scanner git tarixini yoki container image CVElarini tekshirmaydi, to‘liq audit o‘rnini bosmaydi.
+
+2026-10-09 automatic approval review `npm audit --json`ni rad etdi: dependency daraxti va loyiha metadata’sini tashqi npm registry’ga chiqarish uchun explicit ruxsat yo‘q. Ruxsat savoli yuborildi; audit ishga tushirilmadi va rad etilgan action aylanib o‘tilmadi. Dependency/image/staging scan dalili to‘liq emas; QA-01.08 qabul qilinmagan.
+
+
+### +20 — konvertatsiya va yuklama davom etmoqda
+
+CAT-01.04: ProductUnitConversion, original trade/base/ratio/quantity snapshot, base stock/pricing, purchase base-unit cost, original-ratio returns; owner form va POS unit selector. 088 applied, hali brauzer/fresh migration/regression qabul to‘liq emas. 50 focused classification/conversion/economic PG testi o‘tdi. Original total done137, yangi1/20 saqlanadi.
+
+OPS-04.02/03: 50000 mahsulot, 1000000 sintetik draft SaleItem,20 active register haqiqatan yaratildi. Real measured cash checkout normal core service orqali. Birinchi urinishlar inventory compound PK/bulk advisory lock limitini ko‘rsatdi; batchlar kichraytirildi. SERIALIZABLE probe Register/Shift relation-wide predicate locks va Operation missing-key index gaplarni aniqladi; narrow indexed transaction planning + identity-only preprobe qo‘shildi (live context/actor/hash/cancellation transaction ichida tekshiriladi). Payment.saleId indeksi yo‘q edi:089/090 concurrent indexes qo‘shildi. 089 testda ikki concurrent statement bilan qo‘llanmadi; faqat qo‘llanmagan migration tuzatildi, failed test record rolled-back qilindi, har migrationda bitta statement bilan muvaffaqiyatli qo‘llandi. Applied old migrations o‘zgarmadi.
+
+Haqiqiy yakuniy o‘lchov `/tmp/pos-volume-measure.json`:20 parallel tills,100 search +100 checkout, errors0; search p95=304.746707ms, checkout p95=140.561261ms. Bu service-level isolated synthetic muhit; real pilot, public network SLA yoki vendor vaqti emas. Reproducible fresh generator, qolgan full regressiya va version artefakti qabuldan oldin tekshiriladi.
+
+
+197/197 full PG regressiya (2026-10-09) `/tmp/pos-conversion-integration.log`;50/50 focused `/tmp/pos-conversion-focused.log`; typecheck/lint clean. Birinchi focused urinishdagi yangi test201 kutishi existing API200 contractiga moslashtirildi; unit precisionning eski tushunarli `aniqligi` xabarini saqlash tuzatildi. Count/checkpoint invariant assertlari yumshatilmadi. Hozir final browser va fresh generator qabul ketmoqda.
+
+
+### +20 — 2/20 qabul: OPS-04.02
+
+136 →138 original done. `DATABASE_URL=<isolated pos_test> node --require ./scripts/test-resolver.cjs .test-build/tests/performance/core-profile.js --seed-only` fresh generator exit0. Bitta yangi sintetik tashkilotda exact50000 product,1000000 SaleItem,20 active register assertlari o‘tdi. `tasks/evidence/volume-dataset-20261009.json` artefakti, `/tmp/pos-volume-fresh-seed.log`. `--seed-only` faqat guarded test DBda fixture ni qayta measure/stress uchun saqlaydi; default run cleanup qiladi. Test SKU/row distribution deterministik, identity fresh UUID namespace. Rows draft; fabricated paid history yo‘q. Actual cash measure normal core service. Production yoki pilot DBga test yuborilmagan.
+
+Versiya HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d + uncommitted working tree; source SHA256 quyida.
+ccfed12edfabf5f734d4f115f0543d51d94c2c71eb0dfd73136536fc2a46630c  tests/performance/core-profile.ts
+835cd6dca3a57da48d98c5e0a895ad15ce643e7dcc09f68a45f4192a8a5aa4f7  tests/performance/core-measure.ts
+edd8aaa4b2a8516bc87c8f6360d0430042d651f0f67c5c8ec67cae1f75f382eb  tasks/evidence/volume-dataset-20261009.json
+
+
+### +20 — 3/20 qabul: CAT-01.04
+
+136 →139 original done. Bir quti savdosi12base unit/1200cash/24→12stock; katalogratio10ga tahriridan keyin original0.5quti return6base/600cash/stock18. Purchase2quti→24base, basecost50; stale draft/expected ratio, foreign tenant/owner-only, precision/mixedSKU va SQL snapshot mismatch guards tekshirildi. Exact barcode/alias/SKU/list bir xil conversion metadata beradi. Owner unknown-ack recovery original key/audit1; POS barcode-unit selector va receipt original quantity barcha3brauzerda tasdiqlandi.
+
+Dalil:16/16 unit `/tmp/pos-conversion-unit-final.log`;197/197 full PG `/tmp/pos-conversion-integration.log`; yangi lookup bilan4/4 focused `/tmp/pos-conversion-api-final.log`;6/6 classification/conversion Chromium/Firefox/WebKit `/tmp/pos-conversion-browser-final.log`. Typecheck/lint/worker build/webpack production build clean.90migration fresh va legacy `/tmp/pos-conversion-migrations-final.log`. Encrypted backup empty-db recovery `/tmp/pos-conversion-backup-final.log`:RTO22s fixture/RPO0, source migration records match, existing DB rejection. No real hardware/provider calls.
+
+Versiya HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d + uncommitted working tree.
+
+Fresh volume measurementda birinchi97checkout/98search/1exhaustedSSI conflict topildi:OPS-04.03 hali qabul emas. Retry delay deterministik20/40ms o‘rniga bounded cryptographic jitter20–80/40–160ms; uchattempt/SERIALIZABLE/idempotency/authorization saqlanadi. SSI pg_locks probe20mustaqil till fulfilled; repeating workload verification davom etmoqda.
+15c2e5a089998f01929f8a01fe0c3e6178da38906c6e1266a2516384c887bfd5  src/server/catalog/conversions.ts
+264ad3a53417cb6f526e5e32621018dd5cbfba063ee25a62bcc8d7113b8d2ca0  src/server/catalog/conversion-math.ts
+1a7999fcec044ab9ba4cb98bbcfdbe579573f98379fb53bf204ed329d33fb7ce  src/app/api/products/route.ts
+83755df0fcdd87298cef1609d5da1069f89e2a8a68fbbbad52bfd82363a1a6b1  prisma/migrations/202610090088_unit_conversions/migration.sql
+de78ae2b46ef360457f2428ebd25078db6b4b7bef26b6e91ecd4c7b074636d2e  tests/conversions.integration.test.ts
+
+
+Yakuniy regressiya birinchi qayta runida198business testdan197pass,1count/checkout deadlock va cancelled cleanup hook xatosi ko‘rsatdi (199total/197pass/2fail). Bu run PASS sifatida qabul qilinmaydi. Count stock advisorylockni olganidan keyingi Product FK inserti checkout Product FORUPDATE→stocklock tartibiga teskari edi; startCount Productlarni deterministic id tartibida avval lock qiladi. InventoryBalance.productId FK indeksi yo‘qligi katta fixture cleanupni140sga cho‘zdi; faqat stalled isolated cleanup SELECT pg_cancel_backend bilan rollback qilindi.091 additive concurrent productId index applied, ready gate62markers, fresh/legacy91PASS. Qayta full/focused regression talab qilinadi. Yangi done hisob3/20 saqlanadi.
+
+
+### +20 — 4/20 qabul: OPS-04.03
+
+136 →140 original done. Fresh OPS-04.02 dataset bilan20parallel tills, owner sessions,1item/sale, normal cash core:100search/100checkout,0errors. Ketma-ket ikki run p95search388.871303/393.694858ms (target500), checkout132.229206/114.994945ms (target2000). Provider vaqtiga real chaqiruv yo‘q, cash internal only. Bu service-level isolated Node24/PostgreSQL synthetic, network/realpilot/device/katta basket SLA emas. Environment va sample/error/limit metadata versioned `tasks/evidence/volume-measure-{jitter,repeat}-20261009.json` ichida. Birinchi failed run va bottleneck yozuvlari yuqorida saqlangan.
+
+Gates: full198/198 `/tmp/pos-inventory-index-regression.log`; Product-before-stock lock-order correctiondan keyin focused economic+conversion48/48 `/tmp/pos-count-lock-focused.log`; unit16/16; typecheck/lint/worker/webpack final build clean `/tmp/pos-count-lock-{unit,type,lint,worker,build}.log`. Fresh/legacy91migration PASS `/tmp/pos-inventory-index-fresh.log`. Encrypted empty DB recovery90migrationdagi RTO22s/RPO0;091 faqat index, oxirgi restore91bilan qayta bajarilmagan. Version HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d + uncommitted tree.
+
++20 maqsad hali tugamagan:4qabul/16qolgan. OPS-04.04 katta worker export, OPS-04.06 15minstress/2hsoak haliqabul emas; index yoki kichik100sample bu parentlarni avtomatikdone qilmaydi. Tashqi integration/pilot/owner business approval cheklovlari saqlanadi.
+6cc211409363a77bf9cd77634da397e5bc7b71e6e2e861b91a47edec8fa66f34  src/server/operations.ts
+83a3462991f33e7fa7d665d32ada0897cc826efa8b9fcb7a61a34912ac6b9e94  src/server/inventory/counts.ts
+6a1fc29718a94dcb4d2d1934b7b478b6536264b6555333f2b4496155ac4a8249  prisma/migrations/202610090091_inventory_product_index/migration.sql
+835cd6dca3a57da48d98c5e0a895ad15ce643e7dcc09f68a45f4192a8a5aa4f7  tests/performance/core-measure.ts
+2a5a5c158a8d52548f56e603a1dd638648a065da66d9351400bec1c4448eb2e8  tasks/evidence/volume-measure-jitter-20261009.json
+396f9da5ba9cfc694a6b6284bc351fe0a140a15cb6b494679c79ef02cdcc56c2  tasks/evidence/volume-measure-repeat-20261009.json

@@ -1,3 +1,5 @@
+import {assertCurrentConversion} from '../catalog/conversions'
+import {assertProductCompliance} from '../catalog/compliance'
 import {generateKeyPairSync,sign,verify,createPublicKey,randomUUID,type JsonWebKey as NodeJsonWebKey} from 'node:crypto'
 import {Prisma} from '@prisma/client'
 import {z} from 'zod'
@@ -23,7 +25,9 @@ export async function issueCashTicket(ctx:TokenPayload,input:z.infer<typeof issu
  const session=await tx.session.findUniqueOrThrow({where:{id:ctx.sessionId}}),now=new Date(),expiry=new Date(Math.min(now.getTime()+policy.ttlSeconds*1000,session.expiresAt.getTime(),session.idleExpiresAt.getTime()));if(expiry.getTime()-now.getTime()<30000)throw new AccessError(409,'OFFLINE_SESSION_TOO_SHORT')
  if(sale.customerId&&!await tx.customer.findFirst({where:{id:sale.customerId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(409,'CUSTOMER_UNAVAILABLE')
  if(sale.items.length>100||sale.items.length!==new Set(sale.items.map(i=>i.productId)).size)throw new AccessError(409,'OFFLINE_BASKET_LIMIT')
+ for(const item of sale.items){const product=await tx.product.findFirstOrThrow({where:{id:item.productId,organizationId:ctx.organizationId}});await assertCurrentConversion(tx,ctx.organizationId,product,item.quantity,item.conversionSnapshot)}
  const current=await prepareItems(tx,ctx,sale.items.map(i=>({productId:i.productId,quantity:i.quantity.toString(),discountAmount:i.discountAmount.toString(),expectedUnitPrice:i.unitPrice.toString()})),sale.discountAmount,{storeId:sale.storeId,customerId:sale.customerId,discountReason:sale.discountReason??undefined})
+ for(const row of current.rows)assertProductCompliance(row.complianceSnapshot,row)
  if(!current.totals.totalAmount.eq(sale.totalAmount)||current.rows.some(row=>{const old=sale.items.find(i=>i.productId===row.productId)!;return row.taxVersionId!==old.taxVersionId||row.taxMode!==old.taxMode||!row.taxRate.eq(old.taxRate)||row.priceRuleId!==old.priceRuleId}))throw new AccessError(409,'OFFLINE_PRICE_OR_TAX_CHANGED')
  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'offline-quota:'+sale.storeId},0))`
  if(await tx.offlineCashLease.count({where:{organizationId:ctx.organizationId,storeId:sale.storeId,state:'issued'}})>=100)throw new AccessError(409,'OFFLINE_TICKET_LIMIT')

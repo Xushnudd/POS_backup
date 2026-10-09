@@ -75,6 +75,8 @@ export interface Category {
 }
 
 export interface Product {
+  unitConversions?:{id:string;tradeUnit:string;baseUnit:string;ratio:string;isActive:boolean;tradePrecision?:number}[];
+  mxik?:string|null;mxikSource?:string|null;mxikRequired?:boolean;taxRequired?:boolean;markingRequired?:boolean;
   taxProfileId?:string|null;
   taxProfile?:{id:string;name:string;isActive:boolean}|null;
   brandId?: string | null;
@@ -112,6 +114,7 @@ export type DocumentType = 'purchase' | 'opening' | 'adjustment' | 'transfer_out
 export type DocumentStatus = 'draft' | 'confirmed';
 
 export interface StockDocumentItem {
+  conversionSnapshot?:{baseUnit:string;tradeUnit:string;ratio:string;tradeQuantity:string}|null;
   id?: string;
   stockDocumentId?: string;
   productId: string;
@@ -242,6 +245,7 @@ export type SaleStatus = 'draft' | 'completed' | 'voided' | 'partially_returned'
 export type PaymentType = 'cash' | 'card' | 'transfer' | 'credit';
 
 export interface SaleItem {
+  conversionSnapshot?:{baseUnit:string;tradeUnit:string;ratio:string;tradeQuantity:string}|null;
   discountPercent?:string|null;
   taxMode?:string;
   taxRate?:string;
@@ -334,6 +338,9 @@ export interface Sale {
 }
 
 export interface CartItem {
+  tradeUnit?:string;
+  tradeQuantity?:string;
+  conversionRatio?:string;
   product: Product;
   quantity: number;
   unitPrice: number;

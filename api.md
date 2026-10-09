@@ -1074,3 +1074,17 @@ Node worker `FOR UPDATE SKIP LOCKED` bilan claim,30slease,5sheartbeat; bounded2^
 `POST /api/auth/security/read`: strict `{operationId:UUID,noticeId:UUID}`, read30/min/account. Own live notice; first readAt o‘zgarmas, original Operation replay bir xil natija. Foreign/muddati tugagan404, revoked401.
 
 `POST /api/auth/security/retry`: strict `{operationId:UUID,eventId:UUID}`, retry10/min/account. Own live event outbox dead bo‘lsagina +3urinish bilan pending; jami30urinish. Old attempts saqlanadi, actual actor audit/Operation bilan original replay. Javob `{eventId,state,attempts,maxAttempts}`. Foreign/expired404; not-dead409 NOTICE_NOT_RETRYABLE; budget30tugasa409 NOTICE_RETRY_LIMIT. UI noaniq ACKni authoritative GET bilan tekshiradi, unresolved original kalitni saqlaydi. Worker yetkazishda eski login sessioni active bo‘lishini talab qilmaydi; actual global User.isActive talab qilinadi. Hech qanday tashqi servisga so‘rov yuborilmaydi.
+
+### Mahsulot tasnifi — CAT-01.09
+
+`GET /api/products/:id/compliance` joriy tashkilot mahsulotining MXIK/manba/soliq va markirovka cheklovlarini qaytaradi. `POST` faqat owner uchun: `{ operationId, mxik: string|null, mxikSource: string|null, mxikRequired: boolean, taxRequired: boolean, markingRequired: boolean, taxProfileId: UUID|null, reason: string }`. Noma’lum maydonlar rad etiladi; bir xil operationId ayni natijani qaytaradi, boshqa payload bilan qayta ishlatilmaydi. Faol soliq profili shu tashkilotga tegishli bo‘lishi kerak.
+
+Checkout va offline naqd ruxsat olishda `CLASSIFICATION_REQUIRED` / `PRODUCT_TAX_REQUIRED` — 409; markirovka majburiy, xizmat hali ulanmagan bo‘lsa `MARKING_INTEGRATION_UNAVAILABLE` — 503. Payment/stock yozilmaydi. Rasmiy MXIK katalogi yoki markirovka protokoli taxmin qilinmaydi. Original receipt tasnifi `SaleItem.complianceSnapshot` bilan saqlanadi.
+
+### Birlik konvertatsiyasi — CAT-01.04
+
+`GET /api/products/:id/units` joriy mahsulot asosiy birligi va configured conversionsni beradi. `POST` owner-only strict body: `{ operationId, tradeUnit, ratio: decimalString, isActive, reason }`. `ratio` ko‘pi6 kasr, musbat va100000000dan kichik; 1 trade unit bazaviy birlik aniqligiga mos bo‘lishi shart. Faol shu tashkilot birliklari, original key va audit talab qilinadi.
+
+Sale draft/quote `items[]`ga optional `tradeUnit` va `expectedConversionRatio` qo‘shildi. Unit yo‘q bo‘lsa avvalgi base-unit API ishlaydi. Masalan1quti ratio12 → SaleItem.quantity12dona, base price100 → total1200; `conversionSnapshot` original1quti/12dona nisbatini saqlaydi. `CONVERSION_CHANGED`/`CONVERSION_UNAVAILABLE`409, aralash SKU birliklari400. Konvertatsiya qoldiqni yaxlitlamaydi.
+
+Stock document item optional `tradeUnit`; `unitCost` doim **asosiy birlik** tannarxi.2quti ratio12, unitCost50/dona → quantity24, cost50/dona; hujjat original2qutini snapshotda saqlaydi. Tasdiqlash stale ratio bilan bloklanadi. Sale return itemda optional original `tradeUnit` yuborilsa quantity original receipt ratio orqali base quantityga aylanadi. Unit ko‘rsatilmasa oldingi base quantity ishlatiladi; boshqa current trade unit qabul qilinmaydi. Fizik stock/payment/profit jurnallari base birlikda qoladi.

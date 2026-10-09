@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import {clientQuantitySum} from '@/lib/unit-conversion';
 import DiscountInput from './DiscountInput';
 import { CartItem as ICartItem } from '@/types';
 import { formatMoney } from '@/lib/format';
@@ -9,6 +10,9 @@ import { faPlus, faMinus, faTrash, faPercent } from '@fortawesome/free-solid-svg
 
 interface CartItemProps {
   item: ICartItem;
+  disabled?:boolean;
+  onSelectUnit:(productId:string,unit:string)=>void;
+  onUpdateTradeQuantity:(productId:string,value:string)=>void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   onUpdateDiscount: (productId: string, discount: number,percent?:number) => void;
   onRemove: (productId: string) => void;
@@ -16,11 +20,14 @@ interface CartItemProps {
 
 export default function CartItem({
   item,
-  onUpdateQuantity,
+  onUpdateQuantity,onSelectUnit,onUpdateTradeQuantity,disabled,
   onUpdateDiscount,
   onRemove,
 }: CartItemProps) {
   const [showDiscount, setShowDiscount] = useState(false);
+  const [unitError,setUnitError]=useState('');
+  const precision=item.tradeUnit?(item.product.unitConversions?.find(row=>row.tradeUnit===item.tradeUnit)?.tradePrecision??6):(item.product.unitPrecision??(item.product.unit==='dona'?0:6));const quantityStep=precision===0?'1':`0.${'0'.repeat(precision-1)}1`;
+  const changeTrade=(value:string)=>{if(value==='0'){onRemove(item.product.id);return}try{onUpdateTradeQuantity(item.product.id,value);setUnitError('')}catch(e){setUnitError(e instanceof Error?e.message:'Birlik miqdori noto‘g‘ri')}};
 
   return (
     <div className="p-3 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition shadow-2xs space-y-2">
@@ -44,6 +51,8 @@ export default function CartItem({
         </button>
       </div>
 
+      {!!item.product.unitConversions?.length&&<label className="text-xs">Savdo birligi (tanlash miqdorni 1 ga, chegirmani 0 ga qaytaradi)<select aria-label={item.product.name+' savdo birligi'} disabled={disabled} value={item.tradeUnit??item.product.unit} onChange={e=>{try{onSelectUnit(item.product.id,e.target.value);setUnitError('')}catch(error){setUnitError(error instanceof Error?error.message:'Birlik tanlanmadi')}}}><option value={item.product.unit}>{item.product.unit} (asosiy)</option>{item.product.unitConversions.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}: 1 = {row.ratio} {item.product.unit}</option>)}</select></label>}
+      {item.tradeUnit&&<p className="text-xs">{item.tradeQuantity} {item.tradeUnit} = {item.quantity} {item.product.unit}; narx asosiy birlik uchun.</p>}{unitError&&<p role="alert">{unitError}</p>}
       {/* Middle: Quantity controls & Line Total */}
       <div className="flex items-center justify-between gap-2">
         {/* Quantity buttons */}
@@ -51,7 +60,7 @@ export default function CartItem({
           <button
             type="button"
             aria-label={item.product.name+' miqdorini kamaytirish'}
-            onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
+            onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',-1)):onUpdateQuantity(item.product.id, item.quantity - 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
             <FontAwesomeIcon icon={faMinus} className="text-[10px]" />
@@ -60,11 +69,11 @@ export default function CartItem({
           <input
             aria-label={item.product.name+' miqdori'}
             type="number"
-            min="0.1"
-            step={item.product.unitPrecision===0 || item.product.unit==='dona'?'1':`0.${'0'.repeat(Math.max(0,(item.product.unitPrecision??6)-1))}1`}
-            value={item.quantity}
+            min={quantityStep}
+            step={quantityStep}
+            value={item.tradeUnit?item.tradeQuantity:item.quantity}
             onChange={(e) => {
-              const val = parseFloat(e.target.value);
+              if(item.tradeUnit){changeTrade(e.target.value);return}const val = parseFloat(e.target.value);
               if (!isNaN(val)) onUpdateQuantity(item.product.id, val);
             }}
             className="w-12 h-7 text-center text-xs font-bold bg-white text-gray-800 border-x border-gray-200 focus:outline-hidden"
@@ -73,7 +82,7 @@ export default function CartItem({
           <button
             type="button"
             aria-label={item.product.name+' miqdorini oshirish'}
-            onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+            onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',1)):onUpdateQuantity(item.product.id, item.quantity + 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
             <FontAwesomeIcon icon={faPlus} className="text-[10px]" />

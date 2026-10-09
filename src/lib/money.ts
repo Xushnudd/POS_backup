@@ -1,6 +1,10 @@
 // Client calculations use fixed-point BigInt; numbers are only display values.
 export function fixed(value:string|number,scale=2):bigint {
- const input=String(value)
+ let input=String(value)
+ if(typeof value==='number'&&Number.isFinite(value)&&input.toLowerCase().includes('e')){
+  const [coefficient,exponent]=input.toLowerCase().split('e'),power=Number(exponent);if(!Number.isInteger(power)||Math.abs(power)>20)throw new Error('Decimal range exceeded');const negative=coefficient.startsWith('-'),[whole,fraction='']=coefficient.replace(/^-/, '').split('.'),digits=whole+fraction,point=whole.length+power;
+  input=(negative?'-':'')+(point<=0?'0.'+'0'.repeat(-point)+digits:point>=digits.length?digits+'0'.repeat(point-digits.length):digits.slice(0,point)+'.'+digits.slice(point));
+ }
  const match=/^(-?)(\d+)(?:\.(\d+))?$/.exec(input)
  if (!match) throw new Error('Invalid decimal')
  const fraction=match[3]??'',digits=fraction.padEnd(scale,'0').slice(0,scale)
