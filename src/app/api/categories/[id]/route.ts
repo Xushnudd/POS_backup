@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import {validateCategoryParent} from '@/server/catalog/category-tree'
 import {Prisma} from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
@@ -41,6 +42,7 @@ async function handlePUT(
     const validatedData = updateCategorySchema.parse(body)
 
     const category = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       if(validatedData.parentId!==undefined)await validateCategoryParent(tx,payload.organizationId,validatedData.parentId,id)
       const result = await tx.category.update({
       where: { id },
@@ -98,6 +100,7 @@ async function handleDELETE(
 
     // Soft delete
     await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const result = await tx.category.update({
       where: { id },
       data: { isActive: false },

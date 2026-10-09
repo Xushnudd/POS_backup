@@ -1,3 +1,4 @@
+import {expireReservations} from '../../src/server/inventory/reservations'
 import {prisma} from '../../src/lib/prisma'
 import {scanOrganization} from '../../src/server/monitoring/service'
 import {logEvent} from '../../src/server/observability/context'
@@ -12,6 +13,7 @@ async function batch(){
   for(const org of organizations){
    if(stopping)break
    try{
+    await expireReservations(org.id)
     const counts=await prisma.$transaction(async tx=>{
      const lock=await tx.$queryRaw<{locked:boolean}[]>`SELECT pg_try_advisory_xact_lock(hashtextextended(${'monitor:'+org.id},0)) AS locked`
      if(!lock[0].locked)return

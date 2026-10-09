@@ -20,6 +20,10 @@ export GNUPGHOME="$backup_smoke_dir/keys"
 gpg --batch --passphrase '' --quick-generate-key 'POS isolated backup test' rsa2048 encr 1d >/dev/null 2>&1
 BACKUP_RECIPIENT=$(gpg --batch --with-colons --list-keys 2>/dev/null | awk -F: '$1=="fpr"{print $10;exit}')
 export BACKUP_RECIPIENT
+export POS_BACKUP_APP_VERSION=isolated-test-release
+export POS_SECRET_RECOVERY_REFERENCE=isolated-test-key-store
+export POS_FILE_QUOTA_BYTES=104857600
+export APP_ORIGIN=https://restore-test.example.invalid
 for command_name in pg_dump pg_restore psql; do
  cat > "$backup_smoke_dir/bin/$command_name" <<'SHIM'
 #!/usr/bin/env bash
@@ -71,13 +75,34 @@ INSERT INTO "Customer" (id,"organizationId","fullName",phone,"creditLimit","upda
 INSERT INTO "DebtEntry" (id,"organizationId","customerId","sourceType","sourceId",amount,"actorId","effectiveAt","dueAt") VALUES (:'fixture',:'fixture',:'fixture','opening_debt',:'fixture',3.75,:'fixture','2026-01-01','2026-02-01');
 COMMIT;
 SQL
+printf 'isolated fixture credentials; never a real secret\n' > "$backup_smoke_dir/isolated-secret"
+chmod 600 "$backup_smoke_dir/isolated-secret"
+export POS_SECRET_BACKUP_FILE="$backup_smoke_dir/isolated-secret"
+scripts/ops/backup-secrets.sh
+chmod 644 "$POS_SECRET_BACKUP_FILE"
+if scripts/ops/backup-secrets.sh > "$backup_smoke_dir/unsafe-secret.log" 2>&1; then
+ printf 'ERROR: unsafe secret permissions accepted\n' >&2; exit 1
+fi
+chmod 600 "$POS_SECRET_BACKUP_FILE"
+secret_file=$(find "$BACKUP_DIRECTORY" -name 'pos-secrets-*.gpg' -print -quit)
+gpg --quiet --batch --output "$backup_smoke_dir/recovered-secret" --decrypt "$secret_file"
+cmp "$POS_SECRET_BACKUP_FILE" "$backup_smoke_dir/recovered-secret"
+[[ $(stat -c '%a' "$secret_file") == 600 ]]
+export POS_SECRET_RECOVERY_REFERENCE="$(basename "$secret_file")"
 scripts/ops/backup.sh
-backup_file=$(find "$BACKUP_DIRECTORY" -name '*.gpg' -print -quit)
+backup_file=$(find "$BACKUP_DIRECTORY" -name '*.bundle-v1.dump.gpg' -print -quit)
 docker exec pos-plan-test-db createdb -U pos_test "$restore_db"
 export RESTORE_DATABASE_URL="postgresql://pos_test:local-test-only@127.0.0.1:55439/$restore_db"
 export RESTORE_CONFIRM_DATABASE="$restore_db"
 restore_started=$(date +%s)
+export RESTORE_CONFIGURATION_DIRECTORY="$backup_smoke_dir/recovered-config"
 scripts/ops/restore.sh "$backup_file"
+node -e 'const fs=require("node:fs"),assert=require("node:assert/strict");const m=JSON.parse(fs.readFileSync(process.argv[1]));assert.equal(m.appVersion,"isolated-test-release");assert.equal(m.configuration.POS_FILE_QUOTA_BYTES,"104857600");assert.equal(m.configuration.APP_ORIGIN,"https://restore-test.example.invalid");assert.match(m.secretRecoveryReference,/^pos-secrets-.*\.gpg$/);assert.ok(!("DATABASE_URL" in m.configuration));assert.ok(!("BACKUP_RECIPIENT" in m.configuration));' "$RESTORE_CONFIGURATION_DIRECTORY/recovery-manifest.json"
+gpg --quiet --batch --output "$backup_smoke_dir/manifest-check.json" --decrypt "$backup_file.manifest.gpg"
+printf 'different database bytes\n' > "$backup_smoke_dir/wrong-dump"
+if node scripts/ops/backup-manifest.mjs verify "$backup_smoke_dir/manifest-check.json" "$backup_smoke_dir/wrong-dump" > "$backup_smoke_dir/mismatch.log" 2>&1; then
+ printf 'ERROR: mismatching manifest accepted\n' >&2; exit 1
+fi
 restored_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d "$restore_db" -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 source_migrations=$(docker exec pos-plan-test-db psql -U pos_test -d pos_test -Atc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL')
 [[ "$restored_migrations" == "$source_migrations" ]]

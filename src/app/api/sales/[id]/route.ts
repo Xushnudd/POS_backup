@@ -126,7 +126,9 @@ async function handlePUT(
       if (validatedData.customerId && !await tx.customer.findFirst({where:{id:validatedData.customerId,organizationId:payload.organizationId,isActive:true}})) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
       const receiptPercent=validatedData.discountPercent!==undefined?validatedData.discountPercent??undefined:validatedData.discountAmount===undefined?current.discountPercent?.toFixed():undefined
       const preparedDiscount=validatedData.discountAmount??(receiptPercent===undefined?current.discountAmount:0)
-      const prepared = validatedData.items ? await prepareItems(tx, payload, validatedData.items, preparedDiscount,{discountReason:validatedData.discountReason??current.discountReason,discountPercent:receiptPercent}) : null
+      const pricingChanged=validatedData.customerId!==undefined&&validatedData.customerId!==current.customerId
+      const effectiveItems=validatedData.items??(pricingChanged?current.items.map(i=>({productId:i.productId,quantity:i.quantity.toFixed(),discountAmount:i.discountAmount.toFixed(),...(i.discountPercent?{discountPercent:i.discountPercent.toFixed()}:{} )})):undefined)
+      const prepared = effectiveItems ? await prepareItems(tx, payload, effectiveItems, preparedDiscount,{storeId:current.storeId,customerId:validatedData.customerId!==undefined?validatedData.customerId:current.customerId,discountReason:validatedData.discountReason??current.discountReason,discountPercent:receiptPercent}) : null
       const discountChanged=validatedData.discountAmount!==undefined||validatedData.discountPercent!==undefined
       const receiptDiscount=discountChanged?resolveDiscount(current.subtotal,validatedData.discountAmount??0,validatedData.discountPercent??undefined):current.discountAmount
       const rawTotals=draftTotals(current.items,receiptDiscount)
@@ -138,7 +140,8 @@ async function handlePUT(
       const totals=prepared?.totals??(repriced?{...rawTotals,taxAmount:repriced.reduce((n,i)=>n.add(i.taxAmount),decimal(0)),netAmount:repriced.reduce((n,i)=>n.add(i.taxBase),decimal(0)),totalAmount:repriced.reduce((n,i)=>n.add(i.payableAmount),decimal(0))}:{subtotal:current.subtotal,discountAmount:current.discountAmount,totalAmount:current.totalAmount,taxAmount:current.taxAmount,netAmount:current.netAmount})
       if(totals.totalAmount.gte('1000000000000'))throw new AccessError(400,'INVALID_AMOUNT')
       if(repriced)for(const item of repriced){await tx.saleItem.update({where:{id:uniqueProducts?current.items.find(i=>i.productId===item.productId)!.id:item.id},data:{receiptDiscount:item.receiptDiscount,taxAmount:item.taxAmount,taxBase:item.taxBase,payableAmount:item.payableAmount,roundingVersion:item.roundingVersion}})}
-      if (validatedData.items !== undefined) {
+      if(pricingChanged)await tx.sale.update({where:{id},data:{customerId:validatedData.customerId}})
+      if (effectiveItems !== undefined) {
         await tx.saleItem.deleteMany({ where: { saleId: id } })
         await tx.saleItem.createMany({
           data: prepared!.rows.map(item => ({...item,saleId:id})),

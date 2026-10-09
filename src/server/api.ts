@@ -13,7 +13,7 @@ import type { TokenPayload } from '@/lib/auth'
 import { sanitizeResponse } from './auth/response'
 
 const refs: Record<string, string> = {
-  orderItemId:'PurchaseOrderItem',stockDocumentId:'StockDocument',storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
+  reservationId:'StockReservation',locationId:'StockLocation',fromLocationId:'StockLocation',toLocationId:'StockLocation',orderItemId:'PurchaseOrderItem',stockDocumentId:'StockDocument',storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
   invoiceId:'SupplierInvoice',expenseCategoryId:'ExpenseCategory',accountId:'FinancialAccount',fromAccountId:'FinancialAccount',toAccountId:'FinancialAccount',
   taxProfileId:'TaxProfile',brandId:'Brand',parentId:'Category',productId:'Product', categoryId:'Category', customerId:'Customer', supplierId:'Supplier',
   targetMembershipId:'OrganizationUser',organizationUserId:'OrganizationUser', cashierId:'User',

@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import { AccessError,tenantScope } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -129,6 +130,7 @@ async function handlePOST(request: NextRequest) {
     }
 
     const store = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const result = await tx.store.create({
       data: validatedData,
     })

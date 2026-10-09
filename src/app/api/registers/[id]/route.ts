@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -38,6 +39,7 @@ async function handlePUT(
     const validatedData = updateRegisterSchema.parse(body)
 
     const register = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const result = await tx.register.update({
       where: { id },
       data: validatedData,

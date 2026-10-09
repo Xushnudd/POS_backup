@@ -108,7 +108,7 @@ export async function finishCount(context:TokenPayload,id:string,input:z.infer<t
    }
   }
   await tx.stockCount.update({where:{id},data:{status:cancel?'cancelled':'approved',approvedBy:context.userId,approvedAt:new Date(),reason:input.reason,adjustmentId}})
-  await audit(tx,context,'StockCount',id,cancel?'cancelled':'approved',{reason:input.reason,adjustmentId})
+  await audit(tx,context,'StockCount',id,cancel?'cancelled':'approved',{reason:input.reason,adjustmentId,approvedBy:context.userId,approvedRole:context.role,reviewedState:{countId:count.id,storeId:count.storeId,submittedAt:count.submittedAt,lines:count.lines.map(line=>({lineId:line.id,productId:line.productId,expectedQuantity:line.expectedQuantity,readingId:line.readings.at(-1)?.id,readingRound:line.readings.at(-1)?.round,quantity:line.readings.at(-1)?.quantity,unit:line.unit,unitCost:line.unitCost}))}})
   return countView(await lockedCount(tx,context,id))
  })
 }

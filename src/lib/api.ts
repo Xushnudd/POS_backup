@@ -406,9 +406,10 @@ class ApiClient {
         method: 'POST',
       }),
 
-    receive: (id: string) =>
+    receive: (id: string,data?:{operationId:string;reason?:string;items:{itemId:string;quantity:string;damagedQuantity?:string;shortageQuantity?:string}[]}) =>
       this.request<StockTransfer>(`/transfers/${id}/receive`, {
         method: 'POST',
+        ...(data?{body:JSON.stringify(data)}:{}),
       }),
   };
 

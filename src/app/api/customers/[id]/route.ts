@@ -1,3 +1,6 @@
+import {customerPhoneSchema,assertCustomerPhone,normalizeCustomerPhone} from '@/server/customers/identity'
+import {amountSchema} from '@/server/sales/service'
+import {assertLiveContext} from '@/server/operations'
 import { assertCustomerCanArchive } from '@/server/customers/archive'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -8,10 +11,10 @@ import { z } from 'zod'
 
 const updateCustomerSchema = z.object({
   fullName: z.string().min(2).optional(),
-  phone: z.string().min(9).optional(),
+  phone: customerPhoneSchema.optional(),
   address: z.string().optional(),
   note: z.string().optional(),
-  creditLimit: z.number().optional(),
+  creditLimit: amountSchema.optional(),
   isActive: z.boolean().optional(),
 })
 
@@ -90,6 +93,10 @@ async function handlePUT(
     const validatedData = updateCustomerSchema.parse(body)
 
     const customer = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      await tx.$queryRaw`SELECT id FROM "Customer" WHERE id=${id} AND "organizationId"=${payload.organizationId} FOR UPDATE`
+      const current=await tx.customer.findFirst({where:{id,organizationId:payload.organizationId}});if(!current)throw new AccessError(404,'CUSTOMER_NOT_FOUND');if(current.mergedIntoId)throw new AccessError(409,'CUSTOMER_MERGED','Original karta merge tarixida saqlangan; asosiy kartani tahrirlang')
+      if(validatedData.phone!==undefined||(validatedData.isActive===true&&normalizeCustomerPhone(current.phone)!==null))await assertCustomerPhone(tx,payload,validatedData.phone??current.phone,id)
       if(validatedData.isActive===false)await assertCustomerCanArchive(tx,payload.organizationId,id)
       const result = await tx.customer.update({
       where: { id },
@@ -146,6 +153,8 @@ async function handleDELETE(
 
     // Soft delete
     await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      const current=await tx.customer.findFirst({where:{id,organizationId:payload.organizationId}});if(!current)throw new AccessError(404,'CUSTOMER_NOT_FOUND');if(current.mergedIntoId)throw new AccessError(409,'CUSTOMER_MERGED','Original merge karta tarixda saqlanadi')
       await assertCustomerCanArchive(tx,payload.organizationId,id)
       const result = await tx.customer.update({
       where: { id },

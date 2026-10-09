@@ -7,6 +7,8 @@ import { decimal } from '../sales/calculations'
 import { moveStock } from './movements'
 import { quantitySchema } from '../sales/service'
 import { weightedAverage } from './valuation'
+import {nonnegativeQuantitySchema,validateUnitQuantity} from '../catalog/service'
+const transitRemaining=(item:{quantity:Prisma.Decimal;receivedQuantity:Prisma.Decimal;returnedQuantity:Prisma.Decimal;damagedQuantity:Prisma.Decimal;shortageQuantity:Prisma.Decimal})=>item.quantity.sub(item.receivedQuantity).sub(item.returnedQuantity).sub(item.damagedQuantity).sub(item.shortageQuantity);
 
 export async function confirmStockDocument(context:TokenPayload,id:string) {
  if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
@@ -42,6 +44,7 @@ export async function confirmStockDocumentTx(tx:Prisma.TransactionClient,context
   return result
 }
 export async function sendTransfer(context:TokenPayload,id:string) {
+ if(!['owner','admin'].includes(context.role))throw new AccessError(403,'MANAGER_REQUIRED');
  return runOperation(context,'transfer.send',id,{id},async tx=>{
   await tx.$queryRaw`SELECT id FROM "StockTransfer" WHERE id=${id} FOR UPDATE`
   const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
@@ -53,26 +56,32 @@ export async function sendTransfer(context:TokenPayload,id:string) {
   return result
  })
 }
-export const receiveSchema=z.object({operationId:z.string().uuid().optional(),items:z.array(z.object({itemId:z.string().uuid(),quantity:quantitySchema})).min(1).optional()})
+export const receiveSchema=z.object({operationId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000).optional(),items:z.array(z.object({itemId:z.string().uuid(),quantity:nonnegativeQuantitySchema,damagedQuantity:nonnegativeQuantitySchema.optional(),shortageQuantity:nonnegativeQuantitySchema.optional()}).strict()).min(1).max(500).optional()}).strict()
 export async function receiveTransfer(context:TokenPayload,id:string,input:z.infer<typeof receiveSchema>) {
+ if(!['owner','admin'].includes(context.role))throw new AccessError(403,'MANAGER_REQUIRED');
  const key=input.operationId??id+':all'
- return runOperation(context,'transfer.receive',key,{id,items:input.items??'all'},async tx=>{
+ return runOperation(context,'transfer.receive',key,{id,items:input.items??'all',...(input.reason?{reason:input.reason}:{})},async tx=>{
   await tx.$queryRaw`SELECT id FROM "StockTransfer" WHERE id=${id} FOR UPDATE`
   const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
   if (doc.status!=='sent') throw new AccessError(409,'INVALID_STATUS')
-  const rows=input.items??doc.items.filter(x=>x.receivedQuantity.add(x.returnedQuantity).lt(x.quantity)).map(x=>({itemId:x.id,quantity:x.quantity.sub(x.receivedQuantity).sub(x.returnedQuantity).toString()}))
+  const rows=input.items??doc.items.filter(x=>transitRemaining(x).gt(0)).map(x=>({itemId:x.id,quantity:transitRemaining(x).toString(),damagedQuantity:undefined,shortageQuantity:undefined}))
   if (new Set(rows.map(x=>x.itemId)).size!==rows.length || !rows.length) throw new AccessError(400,'INVALID_ITEMS')
   for (const row of [...rows].sort((a,b)=>a.itemId.localeCompare(b.itemId))) {
    const original=doc.items.find(x=>x.id===row.itemId)
-   if (!original || decimal(row.quantity).gt(original.quantity.sub(original.receivedQuantity).sub(original.returnedQuantity))) throw new AccessError(409,'RECEIVE_QUANTITY_EXCEEDED')
-   await moveStock(tx,context,{storeId:doc.toStoreId,productId:original.productId,delta:row.quantity,unitCost:original.unitCost,sourceType:'transfer_in',sourceId:key})
-   await tx.stockTransferItem.update({where:{id:original.id},data:{receivedQuantity:{increment:decimal(row.quantity)}}})
+   const received=decimal(row.quantity),damaged=decimal(row.damagedQuantity??0),shortage=decimal(row.shortageQuantity??0),settled=received.add(damaged).add(shortage);
+   if (!original||received.lt(0)||damaged.lt(0)||shortage.lt(0)||settled.lte(0)||settled.gt(transitRemaining(original))) throw new AccessError(409,'RECEIVE_QUANTITY_EXCEEDED');
+   const product=await tx.product.findFirstOrThrow({where:{id:original.productId,organizationId:context.organizationId}});
+   for(const quantity of [received,damaged,shortage])if(quantity.gt(0))await validateUnitQuantity(tx,context.organizationId,product.unit,quantity);
+   if(damaged.add(shortage).gt(0)&&(!input.reason||input.reason.trim().length<3))throw new AccessError(400,'REASON_REQUIRED','Brak/kamomad tasdig‘iga sabab kerak');
+   if(received.gt(0))await moveStock(tx,context,{storeId:doc.toStoreId,productId:original.productId,delta:received,unitCost:original.unitCost,sourceType:'transfer_in',sourceId:key});
+   for(const [disposition,quantity] of [['damaged',damaged],['shortage',shortage]] as const)if(quantity.gt(0))await tx.transferDispositionEntry.create({data:{organizationId:context.organizationId,storeId:doc.toStoreId,productId:product.id,itemId:original.id,operationId:key,disposition,quantity,unitCost:original.unitCost,productName:product.name,sku:product.sku,unit:product.unit,reason:input.reason!,actorId:context.userId}});
+   await tx.stockTransferItem.update({where:{id:original.id},data:{receivedQuantity:{increment:received},damagedQuantity:{increment:damaged},shortageQuantity:{increment:shortage}}})
   }
   const remaining=await tx.stockTransferItem.findMany({where:{stockTransferId:doc.id}})
-  const done=remaining.every(x=>x.receivedQuantity.add(x.returnedQuantity).eq(x.quantity))
-  const result=await tx.stockTransfer.update({where:{id},data:{status:done?(remaining.some(x=>x.returnedQuantity.gt(0))?'closed':'received'):'sent',...(done&&{receivedAt:new Date()})},include:{items:true}})
-  await audit(tx,context,'StockTransfer',id,'received',{items:rows,complete:done})
+  const done=remaining.every(x=>transitRemaining(x).eq(0))
+  const result=await tx.stockTransfer.update({where:{id},data:{status:done?(remaining.some(x=>x.returnedQuantity.add(x.damagedQuantity).add(x.shortageQuantity).gt(0))?'closed':'received'):'sent',...(done&&{receivedAt:new Date()})},include:{items:{include:{dispositions:true}}}})
+  await audit(tx,context,'StockTransfer',id,'received',{items:rows,complete:done,reason:input.reason,approvedBy:context.userId,approvedRole:context.role})
   return result
  })
 }
@@ -133,16 +142,16 @@ export async function returnTransfer(context:TokenPayload,id:string,input:z.infe
   const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
   if (doc.status!=='sent') throw new AccessError(409,'INVALID_STATUS')
-  const rows=input.items??doc.items.filter(x=>x.receivedQuantity.add(x.returnedQuantity).lt(x.quantity)).map(x=>({itemId:x.id,quantity:x.quantity.sub(x.receivedQuantity).sub(x.returnedQuantity).toString()}))
+  const rows=input.items??doc.items.filter(x=>transitRemaining(x).gt(0)).map(x=>({itemId:x.id,quantity:transitRemaining(x).toString()}))
   if (!rows.length || new Set(rows.map(x=>x.itemId)).size!==rows.length) throw new AccessError(400,'INVALID_ITEMS')
   for (const row of [...rows].sort((a,b)=>a.itemId.localeCompare(b.itemId))) {
    const item=doc.items.find(x=>x.id===row.itemId)
-   if(!item || decimal(row.quantity).gt(item.quantity.sub(item.receivedQuantity).sub(item.returnedQuantity))) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED','Faqat hali qabul qilinmagan miqdorni qaytarish mumkin')
+   if(!item || decimal(row.quantity).gt(transitRemaining(item))) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED','Faqat hali qabul qilinmagan miqdorni qaytarish mumkin')
    await moveStock(tx,context,{storeId:doc.fromStoreId,productId:item.productId,delta:row.quantity,unitCost:item.unitCost,sourceType:'transfer_return',sourceId:input.operationId})
    await tx.stockTransferItem.update({where:{id:item.id},data:{returnedQuantity:{increment:decimal(row.quantity)}}})
   }
   const remaining=await tx.stockTransferItem.findMany({where:{stockTransferId:id}})
-  const done=remaining.every(item=>item.receivedQuantity.add(item.returnedQuantity).eq(item.quantity))
+  const done=remaining.every(item=>transitRemaining(item).eq(0))
   const result=await tx.stockTransfer.update({where:{id},data:{status:done?'closed':'sent'},include:{items:true}})
   await audit(tx,context,'StockTransfer',id,'transit_returned',{items:rows,reason:input.reason,complete:done})
   return result

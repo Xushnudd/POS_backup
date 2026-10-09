@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { withApi } from '@/server/api'
 import { getRequestToken, verifyToken } from '@/lib/auth'
 import { AccessError } from '@/server/auth/policy'
-import { audit } from '@/server/operations'
+import { audit,assertLiveContext } from '@/server/operations'
 const schema=z.object({cashierMaxPercent:z.number().min(0).max(100),adminMaxPercent:z.number().min(0).max(100),requireReasonFromPercent:z.number().min(0).max(100)})
 export const GET=withApi(async(request:NextRequest)=>{
  const context=await verifyToken(getRequestToken(request)??'')
@@ -16,6 +16,7 @@ export const PUT=withApi(async(request:NextRequest)=>{
  if (!context || context.role!=='owner') throw new AccessError(403,'FORBIDDEN')
  const input=schema.parse(await request.json())
  const result=await prisma.$transaction(async tx=>{
+  await assertLiveContext(tx,context)
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
   await tx.discountPolicy.updateMany({where:{organizationId:context.organizationId},data:{isActive:false}})
   const policy=await tx.discountPolicy.create({data:{organizationId:context.organizationId,...input}})

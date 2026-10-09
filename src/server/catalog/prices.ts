@@ -28,7 +28,7 @@ export async function changePrices(ctx:TokenPayload,input:z.infer<typeof priceBa
   if(input.confirmationHash!==hash)throw new AccessError(409,'PRICE_PREVIEW_REQUIRED','Oldindan ko‘rilgan narxlarni qayta tasdiqlang');
   await priceActor(tx,ctx,'catalog.bulk');
   for(const row of rows)await tx.product.update({where:{id:row.productId},data:{[input.field]:new Prisma.Decimal(row.value)}});
-  await audit(tx,ctx,'PriceBatch',input.operationId,'prices_changed',{field:input.field,count:rows.length,reason:input.reason,confirmationHash:hash});
+  await audit(tx,ctx,'PriceBatch',input.operationId,'prices_changed',{field:input.field,count:rows.length,reason:input.reason,confirmationHash:hash,approvedBy:ctx.userId,approvedRole:ctx.role,items:rows});
   return {items:rows,confirmationHash:hash};
  };
  return input.preview?prisma.$transaction(execute,{isolationLevel:'RepeatableRead'}):runOperation(ctx,'catalog.prices',input.operationId,input,execute);

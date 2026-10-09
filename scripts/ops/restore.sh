@@ -26,5 +26,13 @@ if [[ "$restore_tables" != 0 ]]; then
 fi
 (cd "$(dirname "$restore_file")" && sha256sum -c "$(basename "$restore_file").sha256")
 gpg --quiet --batch --output "$restore_workdir/database.dump" --decrypt "$restore_file"
+if [[ "$restore_file" == *.bundle-v1.dump.gpg ]]; then
+ (cd "$(dirname "$restore_file")" && sha256sum -c "$(basename "$restore_file").manifest.gpg.sha256")
+ gpg --quiet --batch --output "$restore_workdir/manifest.json" --decrypt "$restore_file.manifest.gpg"
+ node "$(dirname "$0")/backup-manifest.mjs" verify "$restore_workdir/manifest.json" "$restore_workdir/database.dump"
+fi
 pg_restore --dbname="$PGDATABASE" --exit-on-error --single-transaction --no-owner --no-acl "$restore_workdir/database.dump"
+if [[ "$restore_file" == *.bundle-v1.dump.gpg ]]; then
+ node "$(dirname "$0")/backup-manifest.mjs" export "$restore_workdir/manifest.json" "$restore_workdir/database.dump"
+fi
 printf 'Restored into confirmed empty database: %s\n' "$restore_database"

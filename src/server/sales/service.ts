@@ -1,3 +1,5 @@
+import {consumeStock} from '../inventory/reservations'
+import {resolvePrices} from '../catalog/price-rules'
 import {randomUUID} from 'node:crypto'
 import {discountAmount as resolveDiscount,discountAuthorization} from './discounts'
 import {priceTaxLines} from '../taxes/calculations'
@@ -27,9 +29,10 @@ export const saleDraftSchema=z.object({
   items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,discountAmount:amountSchema.default(0),discountPercent:amountSchema.refine(v=>decimal(v).lte(100)).optional(),expectedUnitPrice:amountSchema.optional()})).min(1).max(500),
 })
 export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:positiveAmountSchema,referenceNo:z.string().max(200).optional()})
-export const completeSchema=z.object({operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional(),cashTendered:amountSchema.optional()})
+export const completeSchema=z.object({reservationId:z.string().uuid().optional(),operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional(),cashTendered:amountSchema.optional()})
 export type DraftInput=z.infer<typeof saleDraftSchema>
-export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string,options:{discountPercent?:number|string;discountReason?:string|null}={}) {
+export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string,options:{discountPercent?:number|string;discountReason?:string|null;storeId?:string;customerId?:string|null}={}) {
+  const argumentsExpected=input
   const products=await tx.product.findMany({where:{id:{in:input.map(x=>x.productId)},organizationId:context.organizationId,isActive:true}})
   const units=await tx.unit.findMany({where:{organizationId:context.organizationId,code:{in:[...new Set(products.map(p=>p.unit))]}}})
   // One snapshot/stock posting per SKU, even when scanners submit repeated lines.
@@ -37,7 +40,6 @@ export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayl
   for (const item of input) {
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
-    if(item.expectedUnitPrice!==undefined&&!product.salePrice.eq(item.expectedUnitPrice))throw new AccessError(409,'PRICE_CHANGED','Savatdagi narx eskirgan; qayta tasdiqlang',undefined,{stage:'sale',productId:product.id,productName:product.name,previousPrice:money(item.expectedUnitPrice),currentPrice:product.salePrice})
     const unit=units.find(value=>value.code===product.unit)
     if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
     if (decimal(item.quantity).decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
@@ -46,17 +48,20 @@ export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayl
     combined.set(item.productId,{productId:item.productId,quantity:decimal(item.quantity).add(previous?.quantity??0),discountAmount:money(item.discountAmount).add(previous?.discountAmount??0),discountPercent:item.discountPercent})
   }
   input=[...combined.values()].sort((a,b)=>a.productId.localeCompare(b.productId)).map(item=>({...item,quantity:quantitySchema.parse(item.quantity.toFixed()),discountAmount:amountSchema.parse(item.discountAmount.toFixed())}))
+  const prices=await resolvePrices(tx,context,input.map(item=>({productId:item.productId,quantity:decimal(item.quantity),basePrice:products.find(p=>p.id===item.productId)!.salePrice})),options)
+  for(const item of argumentsExpected){const price=prices.get(item.productId)!;if(item.expectedUnitPrice!==undefined&&!price.unitPrice.eq(item.expectedUnitPrice))throw new AccessError(409,'PRICE_CHANGED','Narx darajasi yoki sana o‘zgardi; savatni yangilang',undefined,{stage:'sale',productId:item.productId,productName:products.find(p=>p.id===item.productId)?.name,previousPrice:money(item.expectedUnitPrice),currentPrice:price.unitPrice})}
   const taxFor=await productTaxes(tx,context.organizationId,products.map(p=>p.taxProfileId));
   const rawRows=input.map(item=>{
     const product=products.find(p=>p.id===item.productId)
     if (!product) throw new AccessError(404,'PRODUCT_NOT_FOUND')
+    const price=prices.get(item.productId)!
     const quantity=decimal(item.quantity)
     const unit=units.find(value=>value.code===product.unit)
     if (!unit?.isActive) throw new AccessError(409,'UNIT_UNAVAILABLE')
     if (quantity.decimalPlaces()>unit.precision) throw new AccessError(400,'INVALID_UNIT_PRECISION',`${unit.name} uchun kasr aniqligi ${unit.precision}`)
-    const discountAmount=resolveDiscount(lineTotal(quantity,product.salePrice,0),item.discountAmount,item.discountPercent)
-    return {id:product.id,...taxFor(product.taxProfileId),productId:product.id,productName:product.name,sku:product.sku,unit:product.unit,quantity,unitPrice:product.salePrice,unitCost:product.costPrice,
-      discountPercent:item.discountPercent===undefined?null:decimal(item.discountPercent),discountAmount,lineTotal:lineTotal(quantity,product.salePrice,discountAmount)}
+    const discountAmount=resolveDiscount(lineTotal(quantity,price.unitPrice,0),item.discountAmount,item.discountPercent)
+    return {id:product.id,priceRuleId:price.priceRuleId,priceSnapshot:price.priceSnapshot,...taxFor(product.taxProfileId),productId:product.id,productName:product.name,sku:product.sku,unit:product.unit,quantity,unitPrice:price.unitPrice,unitCost:product.costPrice,
+      discountPercent:item.discountPercent===undefined?null:decimal(item.discountPercent),discountAmount,lineTotal:lineTotal(quantity,price.unitPrice,discountAmount)}
   })
   const base=rawRows.reduce((n,row)=>n.add(row.lineTotal),decimal(0))
   receiptDiscount=resolveDiscount(base,receiptDiscount,options.discountPercent)
@@ -96,7 +101,7 @@ export async function createDraft(context:TokenPayload,input:DraftInput,key:stri
   })
 }
 export async function completeSale(context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string) {
-  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},async tx=>{
+  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.reservationId?{reservationId:input.reservationId}:{}),...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},async tx=>{
     await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
     const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:true,organization:true}})
     if (!sale) throw new AccessError(404,'NOT_FOUND')
@@ -121,19 +126,21 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
       if (decimal(debt._sum.amount??0).add(credit).gt(customer.creditLimit)) throw new AccessError(409,'CREDIT_LIMIT','Nasiya limiti oshdi')
       await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit,actorId:context.userId,dueAt:input.creditDueAt?new Date(input.creditDueAt):undefined}})
     }
+    const reservedSources=input.reservationId?await consumeStock(tx,context,input.reservationId,sale,key):undefined
     const allocation=allocateMoney(sale.discountAmount,sale.items.map(x=>({id:x.id,weight:x.lineTotal})))
     const currentProducts=await tx.product.findMany({where:{id:{in:sale.items.map(i=>i.productId)},organizationId:context.organizationId}})
+    const currentPrices=await resolvePrices(tx,context,sale.items.map(item=>({productId:item.productId,quantity:item.quantity,basePrice:currentProducts.find(p=>p.id===item.productId)?.salePrice??decimal(0)})),{storeId:sale.storeId,customerId:sale.customerId})
     const taxFor=await productTaxes(tx,context.organizationId,currentProducts.map(p=>p.taxProfileId))
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
       const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
       if (product && item.unit && product.unit!==item.unit) throw new AccessError(409,'UNIT_CHANGED','Mahsulot birligi o‘zgardi; savatni yangilang')
-      if (!product || !product.salePrice.eq(item.unitPrice)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; qayta tasdiqlang',undefined,{stage:'sale',productId:item.productId,productName:item.productName,previousPrice:item.unitPrice,currentPrice:product?.salePrice??null})
+      if (!product || !currentPrices.get(item.productId)!.unitPrice.eq(item.unitPrice) || (item.priceSnapshot!==null && currentPrices.get(item.productId)!.priceRuleId!==item.priceRuleId)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; qayta tasdiqlang',undefined,{stage:'sale',productId:item.productId,productName:item.productName,previousPrice:item.unitPrice,currentPrice:product?currentPrices.get(item.productId)!.unitPrice:null})
       const balance=await tx.inventoryBalance.findUnique({where:{storeId_productId:{storeId:sale.storeId,productId:item.productId}}})
       if(!sale.organization.allowNegativeStock && item.quantity.gt(balance?.quantity??0))throw new AccessError(409,'INSUFFICIENT_STOCK','Yetarli qoldiq yo‘q; miqdorni tekshiring',undefined,{stage:'sale',productId:item.productId,productName:item.productName,requestedQuantity:item.quantity,availableQuantity:balance?.quantity??decimal(0)})
       const currentTax=taxFor(product.taxProfileId)
       if(item.taxVersionId!==currentTax.taxVersionId||item.taxMode!==currentTax.taxMode||!item.taxRate.eq(currentTax.taxRate))throw new AccessError(409,'TAX_CHANGED','Soliq siyosati o‘zgardi; original qoralamani tekshiring va qayta tasdiqlang')
       await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:sale.netAmount===null?allocation[item.id]:item.receiptDiscount,unitCost:product.costPrice}})
-      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock})
+      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock,...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
     }
     for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange,...authorization},include:{items:true,payments:true}})

@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
@@ -44,6 +45,7 @@ async function handlePUT(
     const validatedData = updateSupplierSchema.parse(body)
 
     const supplier = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       await tx.$queryRaw`SELECT id FROM "Supplier" WHERE id=${id} AND "organizationId"=${payload.organizationId} FOR UPDATE`
       if(validatedData.isActive===false){
         const [balance]=await tx.$queryRaw<{blocked:boolean}[]>`SELECT EXISTS(SELECT 1 FROM "SupplierInvoiceBalance" i WHERE i."supplierId"=${id} AND i."organizationId"=${payload.organizationId} AND i."netAmount">COALESCE((SELECT sum(a.amount) FROM "SupplierAllocationBalance" a WHERE a."invoiceId"=i.id),0)) OR EXISTS(SELECT 1 FROM "SupplierPayment" p JOIN "FinancialDocument" d ON d.id=p."financialDocumentId" WHERE p."supplierId"=${id} AND p."organizationId"=${payload.organizationId} AND d.amount>COALESCE((SELECT sum(a.amount) FROM "SupplierAllocationBalance" a WHERE a."paymentId"=p.id),0)) AS blocked`;

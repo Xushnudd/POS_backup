@@ -223,6 +223,9 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      {['owner','admin'].includes(role??'')&&<a href="/settings/prices" className="underline text-blue-800">Narx darajalari va mijoz guruhlari</a>}
+      {role==='owner'&&<a href="/settings/support" className="underline text-blue-800">Support uchun vaqtli kirish ruxsati</a>}
+
       {/* Top Header */}
       <div>
         <h1 className="text-2xl font-black text-gray-900 tracking-tight">Tizim Sozlamalari</h1>

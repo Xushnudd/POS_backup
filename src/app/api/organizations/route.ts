@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
 import { withApi } from '@/server/api'
@@ -94,6 +95,7 @@ async function handlePOST(request: NextRequest) {
     const validatedData = createOrganizationSchema.parse(body)
 
     const organization = await prisma.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const organization=await tx.organization.create({data:validatedData})
       await tx.organizationUser.create({data:{organizationId:organization.id,userId:payload.userId,role:'owner'}})
       return organization

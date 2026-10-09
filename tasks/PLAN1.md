@@ -554,7 +554,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-01.02** — Har bir ro‘yxat, tafsilot, o‘zgartirish, eksport, fayl va fon ishida tashkilot chegarasini tekshirish.
+- [x] **SEC-01.02** — Har bir ro‘yxat, tafsilot, o‘zgartirish, eksport, fayl va fon ishida tashkilot chegarasini tekshirish.
 
   **Texnologiya:** TypeScript DAL va Prisma tenant filtrlari.
 
@@ -569,6 +569,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** API/eksport/fayl/worker reyestridagi har kirish nuqtasi A/B tenant testidan o‘tgan; yashirin maydon sizib chiqmaydi.
 
   **Dalil:** `SEC-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
 - [x] **SEC-01.03** — Do‘kon, kassa, smena, mahsulot, mijoz va to‘lov bir tashkilotga tegishli ekanini tekshirish.
 
@@ -640,7 +642,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-01.07** — Admin panel va yordam xizmati kirishlarini ham shu nazoratga olish.
+- [x] **SEC-01.07** — Admin panel va yordam xizmati kirishlarini ham shu nazoratga olish.
 
   **Texnologiya:** Next.js platforma DAL, PostgreSQL support grants va AuditLog.
 
@@ -653,6 +655,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Platforma/support kirishi scope va audit bilan; ruxsatsiz business data o‘qish rad etiladi.
+
+  **Qabul:** `done`, 2026-10-08. [Support yakuniy qabul](EXECUTION_STATUS.md#support-yakuniy-qabul-2026-10-08).
 
   **Dalil:** `SEC-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -886,7 +890,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `USR-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **USR-01.05** — Qaytarish, narx o‘zgartirish, katta chegirma va inventar farqiga manager tasdig‘i.
+- [x] **USR-01.05** — Qaytarish, narx o‘zgartirish, katta chegirma va inventar farqiga manager tasdig‘i.
 
   **Texnologiya:** TypeScript approval service, Prisma Approval, manager session.
 
@@ -901,6 +905,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Tasdiq aniq amal/miqdor/hujjat versiyasiga bog‘langan; boshqa hujjat yoki takror amal uchun ishlamaydi.
 
   **Dalil:** `USR-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Individual dalil EXECUTION_STATUS.md dagi “PWA va manager tasdig‘i” protokolida.
 
 - [ ] **USR-01.06** — Kelgusida omborchi/buxgalter/kuzatuvchi roli va moslashtiriladigan vakolatlar.
 
@@ -1158,7 +1164,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.06** — Har qator/butun chek chegirmasi; foiz/summa; sabab va tasdiq.
+- [x] **POS-02.06** — Har qator/butun chek chegirmasi; foiz/summa; sabab va tasdiq.
 
   **Texnologiya:** React discount controls, Zod, Decimal va Approval.
 
@@ -1173,6 +1179,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Line va receipt chegirmalari uchun foiz/summa/zero/boundary testlari; approval va sabab saqlanadi.
 
   **Dalil:** `POS-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
 - [x] **POS-02.07** — Qoldiq va narx o‘zgarganini savat yakunida tushunarli ko‘rsatish.
 
@@ -1264,7 +1272,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `RET-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RET-01.03** — Chegirma va soliqni qaytarilayotgan qatorga to‘g‘ri taqsimlash.
+- [x] **RET-01.03** — Chegirma va soliqni qaytarilayotgan qatorga to‘g‘ri taqsimlash.
 
   **Texnologiya:** Prisma.Decimal, original sale snapshots.
 
@@ -1279,6 +1287,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Chegirmali/soliqli partial returns jami original to‘langan summadan oshmaydi; oxirgi rounding qoldig‘i yopiladi.
 
   **Dalil:** `RET-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
 - [x] **RET-01.04** — Tovar omborga qaytadimi, brak omborigami yoki hisobdan chiqadimi — aniq tanlash.
 
@@ -1452,7 +1462,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.06** — Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx.
+- [x] **CAT-01.06** — Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx.
 
   **Texnologiya:** Prisma price lists, PostgreSQL validity intervals.
 
@@ -1465,6 +1475,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Retail/wholesale/customer/store/date precedence deterministic; effective date chegarasi testlangan.
+
+  **Qabul:** `done`, 2026-10-08. [Narx va mijoz yakuniy qabul](EXECUTION_STATUS.md#narx-va-mijoz-yakuniy-qabul-2026-10-08).
 
   **Dalil:** `CAT-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -1574,7 +1586,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-01.04** — Jo‘natishda yetarli qoldiq, yo‘ldagi mahsulot, qisman qabul, kamomad/brak hisobini yuritish.
+- [x] **INV-01.04** — Jo‘natishda yetarli qoldiq, yo‘ldagi mahsulot, qisman qabul, kamomad/brak hisobini yuritish.
 
   **Texnologiya:** Prisma transfer shipment/receipt items, SQL conditional stock.
 
@@ -1589,6 +1601,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Send/partial receive/shortage/brak oqimida sent=received+in-transit+tasdiqlangan farq; stok ikki marta kirmaydi.
 
   **Dalil:** `INV-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Individual transfer conservation va qabul dalili EXECUTION_STATUS.md oxirida.
 
 - [x] **INV-01.05** — Transferni jo‘natishdan oldin bekor qilish; jo‘natilgandan keyingi qaytarish qoidasi.
 
@@ -1986,7 +2000,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
 #### CRM-02 — mijoz bilan ishlash [P1/P2]
 
-- [ ] **CRM-02.01** — P1: mijoz qidirish, dublikatlarni nazorat qilish, xarid tarixi, guruhlar va narx darajasi.
+- [x] **CRM-02.01** — P1: mijoz qidirish, dublikatlarni nazorat qilish, xarid tarixi, guruhlar va narx darajasi.
 
   **Texnologiya:** Prisma customer group/pricelist, PostgreSQL search.
 
@@ -1999,6 +2013,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Search/history/group/pricing tenant scope bilan; duplicate merge original tarixni saqlaydi.
+
+  **Qabul:** `done`, 2026-10-08. [Narx va mijoz yakuniy qabul](EXECUTION_STATUS.md#narx-va-mijoz-yakuniy-qabul-2026-10-08).
 
   **Dalil:** `CRM-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2210,7 +2226,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-02.02** — Har savdo qatorining tarixiy tannarxi, chegirmasi, solig‘i va yaxlitlanishini saqlash.
+- [x] **FIN-02.02** — Har savdo qatorining tarixiy tannarxi, chegirmasi, solig‘i va yaxlitlanishini saqlash.
 
   **Texnologiya:** Prisma SaleItem snapshot, Decimal rounding policy.
 
@@ -2225,6 +2241,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Bandning qabul mezoni:** Keyingi price/cost/tax o‘zgarishi oldingi sale snapshot va profitni o‘zgartirmaydi.
 
   **Dalil:** `FIN-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
 - [x] **FIN-02.03** — Chek chegirmasini qatorlarga taqsimlash; qaytarishni shu qiymatlardan hisoblash.
 
@@ -2292,7 +2310,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `FIN-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIN-02.07** — Soliq stavkasi, imtiyoz, narx ichida/tashqarisida soliq siyosatini sozlash; stavka tarixini saqlash.
+- [x] **FIN-02.07** — Soliq stavkasi, imtiyoz, narx ichida/tashqarisida soliq siyosatini sozlash; stavka tarixini saqlash.
 
   **Texnologiya:** Prisma tax profiles/history, Decimal tax service.
 
@@ -2309,6 +2327,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Dalil:** `FIN-02.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
 #### REP-01 — ishonchli hisobotlar [P0/P1]
+
+  **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
 - [x] **REP-01.01** — P0: tashkilot va do‘kon filtri hamma ko‘rsatkichga tatbiq etilishi.
 
@@ -2926,7 +2946,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
 #### OFF-02 — to‘liq offline savdo [P1, talab etilgan mijoz uchun]
 
-- [ ] **OFF-02.01** — PWA va lokal saqlash; mahsulot/narxlar uchun yangilanish chegarasi.
+- [x] **OFF-02.01** — PWA va lokal saqlash; mahsulot/narxlar uchun yangilanish chegarasi.
 
   **Texnologiya:** Next.js manifest, Browser Service Worker/Cache API/IndexedDB.
 
@@ -2941,6 +2961,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Bandning qabul mezoni:** PWA install/cache/update ishlaydi; tenant scoped catalog version/TTL eskirganda offline checkout blok.
 
   **Dalil:** `OFF-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Individual dalil EXECUTION_STATUS.md dagi “PWA va manager tasdig‘i” protokolida.
 
 - [x] **OFF-02.02** — Lokal savdo navbati, qurilma identifikatori va server bilan bir martalik sinxronlash.
 
@@ -3757,7 +3779,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-03.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-03.02** — Baza bilan birga mahsulot rasmlari, hujjatlar va zarur konfiguratsiya zaxirasi.
+- [x] **OPS-03.02** — Baza bilan birga mahsulot rasmlari, hujjatlar va zarur konfiguratsiya zaxirasi.
 
   **Texnologiya:** Durable file volumes/object store, PostgreSQL metadata, backup manifest.
 
@@ -3772,6 +3794,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Bandning qabul mezoni:** DB/file/config manifest restoreda mos; secret nusxasi alohida himoyalangan.
 
   **Dalil:** `OPS-03.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
 - [ ] **OPS-03.03** — Nuqtaga tiklash imkoniyati, backup muddati va kirish vakolati.
 
@@ -4252,7 +4276,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Dalil:** `BIZ-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-02.02** — Support biznes ma’lumotiga faqat vaqtli, ruxsatli va auditli kira olishi.
+- [x] **BIZ-02.02** — Support biznes ma’lumotiga faqat vaqtli, ruxsatli va auditli kira olishi.
 
   **Texnologiya:** Prisma SupportGrant, server DAL, AuditLog.
 
@@ -4265,6 +4289,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Support grant tenant/actor/reason/expiry scope bilan; revoke/expiry darhol deny va audit yaratadi.
+
+  **Qabul:** `done`, 2026-10-08. [Support yakuniy qabul](EXECUTION_STATUS.md#support-yakuniy-qabul-2026-10-08).
 
   **Dalil:** `BIZ-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

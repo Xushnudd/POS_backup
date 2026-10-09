@@ -17,6 +17,8 @@ import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import TransferReceipt,{remainingTransfer} from '@/components/inventory/TransferReceipt';
+import PendingActions from '@/components/forms/PendingActions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faRightLeft,
@@ -47,6 +49,7 @@ export default function StockTransfersPage() {
   const [note, setNote] = useState('');
   const [items, setItems] = useState<{ productId: string; quantity: number; unitCost: number }[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [receiving,setReceiving]=useState<StockTransfer|null>(null),[receiptRevision,setReceiptRevision]=useState(0);
 
   const loadTransfers = useCallback(async () => {
     if (!organization?.id) return;
@@ -166,18 +169,9 @@ export default function StockTransfersPage() {
     }
   };
 
-  const handleReceive = async (id: string) => {
-    try {
-      await api.transfers.receive(id);
-      notifySuccess('Transfer qabul qilindi va qoldiqlar yangilandi');
-      loadTransfers();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Transferni qabul qilishda xatolik');
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <PendingActions prefix="/transfers/" returnPath="/inventory/transfers" revision={receiptRevision} onDone={()=>{setReceiptRevision(value=>value+1);void loadTransfers()}}/>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link href="/inventory">
@@ -251,6 +245,7 @@ export default function StockTransfersPage() {
                     </td>
                     <td className="py-3.5 px-4 text-center font-bold text-blue-600">
                       {t.items?.length || 0} ta
+                      <details><summary>Qabul va farqlar</summary>{t.items.map(item=><div key={item.id} className="text-left text-gray-900"><p>{item.product?.name??item.productId}: jo‘natilgan {String(item.quantity)}, soz {String(item.receivedQuantity??0)}, manbaga qaytgan {String(item.returnedQuantity??0)}, brak {String(item.damagedQuantity??0)}, kamomad {String(item.shortageQuantity??0)}, yo‘lda {remainingTransfer(item)}</p>{item.dispositions?.map(entry=><p key={entry.id}>{entry.disposition==='damaged'?'Brak':'Kamomad'} {entry.quantity}: {entry.reason}</p>)}</div>)}</details>
                     </td>
                     <td className="py-3.5 px-4 text-gray-500">
                       {formatDate(t.createdAt, true)}
@@ -287,7 +282,7 @@ export default function StockTransfersPage() {
                         <Button
                           variant="success"
                           size="sm"
-                          onClick={() => handleReceive(t.id)}
+                          onClick={() => setReceiving(t)}
                           leftIcon={<FontAwesomeIcon icon={faInbox} />}
                         >
                           Qabul qilish
@@ -301,6 +296,7 @@ export default function StockTransfersPage() {
           </div>
         )}
       </Card>
+      <Modal isOpen={!!receiving} onClose={()=>{setReceiving(null);setReceiptRevision(value=>value+1)}} title="Transferni qisman qabul qilish" size="lg">{receiving&&<TransferReceipt key={receiving.id} id={receiving.id} items={receiving.items} onDone={()=>{setReceiving(null);setReceiptRevision(value=>value+1);notifySuccess('Qabul qayd etildi; yo‘ldagi qoldiq yangilandi');void loadTransfers()}}/>}</Modal>
 
       {/* Transfer Modal */}
       <Modal

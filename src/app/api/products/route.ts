@@ -1,3 +1,6 @@
+import {assertLiveContext} from '@/server/operations'
+import {createHash} from 'node:crypto'
+import {CATALOG_TTL_MS} from '@/lib/catalog-cache'
 import { activeStatus } from '@/server/catalog/status'
 import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
 import { consumeLimit } from '@/server/auth/rate-limit'
@@ -129,6 +132,7 @@ async function handleGET(request: NextRequest) {
       if(payload.role==='cashier')throw new AccessError(403,'FORBIDDEN')
       await consumeLimit('catalog.export',payload.organizationId+':'+payload.userId,10,60000)
       const data=await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
         const total=await tx.product.count({where})
         if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
         const rows=await tx.product.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,costPrice:true,minStock:true,category:{select:{name:true}},barcodes:{select:{value:true},orderBy:{value:'asc'}}}})
@@ -138,14 +142,18 @@ async function handleGET(request: NextRequest) {
     }
 
     const [products, total] = await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
       const rows=await tx.product.findMany({where,include:{category:true},orderBy:[{name:'asc'},{id:'asc'}],skip,take:limit})
       return [rows,await tx.product.count({where})] as const
     },{isolationLevel:'RepeatableRead'})
 
     const units=await db.unit.findMany({where:{code:{in:products.map(product=>product.unit)}}})
+    const catalogData=products.map(product=>({...product,unitPrecision:units.find(unit=>unit.code===product.unit)?.precision??6}));
+    const issuedAt=new Date();
     return NextResponse.json({
       success: true,
-      data: products.map(product=>({...product,unitPrecision:units.find(unit=>unit.code===product.unit)?.precision??6})),
+      data: catalogData,
+      catalogLease:{version:createHash('sha256').update(JSON.stringify({organizationId:payload.organizationId,role:payload.role,search,categoryId,page,limit,products:catalogData.map(p=>({id:p.id,updatedAt:p.updatedAt,price:p.salePrice,unit:p.unit,precision:p.unitPrecision,active:p.isActive}))})).digest('hex'),issuedAt:issuedAt.toISOString(),expiresAt:new Date(issuedAt.getTime()+CATALOG_TTL_MS).toISOString()},
       pagination: {
         page,
         limit,
@@ -209,6 +217,7 @@ async function handlePOST(request: NextRequest) {
     }
 
     const product = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const result = await tx.product.create({
       data: validatedData,
       include: {

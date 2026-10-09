@@ -145,6 +145,7 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {role==='owner'&&<Link href="/customers/duplicates" className="text-blue-700 underline">Legacy telefon dublikatlarini tekshirish</Link>}
       {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{})}} label="Mijozlarni CSV yuklash"/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -216,7 +217,7 @@ export default function CustomersPage() {
                   const hasDebt = fixed(c.debt ?? '0') > BigInt(0);
                   return (
                     <tr key={c.id} className="hover:bg-gray-50/70 transition">
-                      <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link></td>
+                      <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link><br/><Link className="text-blue-700 underline" href={`/customers/${c.id}/history`}>Xarid tarixi va merge</Link></td>
                       <td className="py-3.5 px-4 text-gray-700 font-mono">
                         {formatPhone(c.phone)}
                       </td>

@@ -15,6 +15,9 @@ cpSync('.next/static',path.join(standalone,'.next/static'),{recursive:true})
 cpSync('public',path.join(standalone,'public'),{recursive:true})
 const child=spawn(process.execPath,[path.join(standalone,'server.js')],{cwd:standalone,env:{...process.env,PORT:'3101',HOSTNAME:'127.0.0.1',APP_ORIGIN:'https://localhost:3100',NODE_ENV:'production'},stdio:'inherit'})
 const server=https.createServer({key:readFileSync(key),cert:readFileSync(cert)},(request,response)=>{
+ // Test-only transport outage: also affects service-worker requests. Browser
+ // setOffline implementations do not consistently disconnect worker networking.
+ if(request.url==='/__test-offline-navigation'){request.destroy();return}
  const upstream=http.request({hostname:'127.0.0.1',port:3101,path:request.url,method:request.method,headers:{...request.headers,'x-forwarded-proto':'https','x-forwarded-host':'localhost:3100','x-real-ip':'127.0.0.1'}},result=>{
   response.writeHead(result.statusCode??502,result.headers);result.pipe(response)
  })

@@ -1,6 +1,6 @@
 # API vakolat va chegara reyestri
 
-2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir118 template va165 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
+2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir133 template va186 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
 
 Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/store bilan; tashkilotni tahrirlash va xodimlarni boshqarish owner-only. Cashier faqat sales/shifts/products/categories/customers/stores/auth/operations/sync; katalog/mijoz/do‘kon mutatsiyalari yopiq. `/void` manager-only. Ownership recipient GET/accept o‘z persistent requestiga ega. **Gateway allow yakuniy ruxsat emas:** return, corrections, bank deposit, settlement, export/cost, pending-close, foreign actor va branch cheklovlari xizmat ichida ham tekshiriladi. UI yashirish himoya o‘rnini bosmaydi.
 
@@ -172,3 +172,19 @@ Variant POST cashier403/foreign404; GET cashier200 va faqat assigned store qty, 
 
 | /api/auth/pin | POST | own cashier + password reauthentication | owner/admin403; invalid password403; malformed400; live session401 |
 | /api/auth/pin-switch | GET, POST | live source session; active assigned branch; target cashier only | foreign/hidden403/404; invalidPIN401; rate429; source consumed401; no elevation |
+
+### Soliq/chegirma va PIN scope qo‘shimchasi (057..059)
+GET/POST `/taxes`, PUT `/taxes/[id]`, GET/POST `/taxes/[id]/versions`, POST `/sales/preview` common withApi orqali. Soliq mutatsiyasi owner-only; cashier faqat active konfiguratsiyani o‘qiydi. Preview scope/own-open-shiftni talab qiladi, financial side effect yaratmaydi; price/tax fingerprint create va completionda qayta tekshiriladi. PIN-switch `targetMembershipId` maxsus scoped maydoni orqali target cashier/branchni tekshiradi, `auth/me` PIN sessionda boshqa branchni nested DTOda chiqarmaydi. Yangi foiz/sabab/approval request actorni almashtira olmaydi; cashier limit va current policy yakunlashda ham tekshiriladi. 151 PG integration va focused9; final browser protokoli statusda. Bu yozuv SEC-01.02/04ni avtomatik yopmaydi.
+
+
+Support DAL qo‘shimchasi (2026-10-08): gateway `support` uchun oddiy biznes rolini yakuniy ruxsat deb olmaydi, xizmatning owner/operator-grant nazorati majburiy. `/api/support/operators` GET owner/password-session; `/api/support/grants` GET issued owner yoki received explicit operator, POST owner explicit consent; `/api/support/grants/[id]/revoke` POST own owner; `/api/support/grants/[id]/view` GET grant operator/password session + active branch/scope/current expiry/revoke. Foreign organization/store query umumiy guardda rad. New route inventory126/176; dedicated support integration wrong actor/platform_admin auto-bypass/foreign branch/missing scope/expiry/revoke/disabled operator/session/SQL/audit failure sinovlari bor. SupportGrant bilan biznesga soxta owner role/session berilmaydi; readonly limited DTO, write routes mavjud emas.
+
+
+Narx/mijoz qo‘shimcha DALlari: price-rules GET manager scoped shared/assigned branch history; POST shared owner yoki assigned-branch admin, archive same branch va live operation; POSTquote cashier/manager scoped store/product/customer read-only, no stock/payment. customer-groups GET tenant bounded names, POST/assign owner-only. customer-merges GET normalized legacy duplicates va POST reviewed settled merge owner-only; customer history root+immutable original aliases receiptlari own tenant + branch + cashier-own-sale scope. Source/target/group scope SQL FK bilan ham saqlanadi, kerakli live session transaction ichida qayta tekshiriladi. Bular SEC-01.04 exhaustive semantic owner/admin/cashier har-action positive matritsasini o‘z-o‘zidan complete qilmaydi.
+| /api/price-rules | GET, POST | manager history; global mutation owner / branch admin DAL | common negative inventory + price integration |
+| /api/price-rules/[id]/archive | POST | live owner or assigned branch admin | scoped operation/replay + price integration |
+| /api/price-rules/quote | POST | cashier/manager scoped read-only quote | foreign store/customer/product/session + price integration |
+| /api/customer-groups | GET, POST | tenant list; owner create | common negative inventory + group integration |
+| /api/customer-groups/assign | POST | owner, tenant active customer/group | common negative inventory + group integration |
+| /api/customer-merges | GET, POST | owner-only legacy diagnosis / settled merge | tenant/admin/session + identity integration |
+| /api/customers/[id]/history | GET | own tenant/store/cashier own receipts, root+aliases | common inventory + identity integration |

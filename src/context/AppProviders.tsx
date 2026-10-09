@@ -7,6 +7,7 @@ import { NotificationProvider } from './NotificationContext';
 import { AuthProvider } from './AuthContext';
 import { OrganizationProvider } from './OrganizationContext';
 import { ToastContainer } from '@/components/ui/ToastContainer';
+import PwaStatus from '@/components/security/PwaStatus';
 
 config.autoAddCss = false;
 
@@ -16,6 +17,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         <OrganizationProvider>
           {children}
+          <PwaStatus />
           <ToastContainer />
         </OrganizationProvider>
       </AuthProvider>

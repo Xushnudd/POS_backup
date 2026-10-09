@@ -26,8 +26,8 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
     case 'StockTransfer': return { organizationId: org, fromStore: stores, toStore: stores }
     case 'UserStore': return { organizationUser: { organizationId: org }, store: stores }
     case 'FinancialDocument': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds},entries:{every:{account:{organizationId:org,storeId:{in:context.storeIds}}}}})}
-    case 'PurchaseOrder': case 'SupplierInvoice': case 'SupplierPayment':
-    case 'FinancialAccount': case 'ReturnDispositionEntry': case 'DamageLocation': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
+    case 'StockLocation': case 'StockReservation': case 'LocationBalance': case 'ReservationItem': case 'PurchaseOrder': case 'SupplierInvoice': case 'SupplierPayment':
+    case 'FinancialAccount': case 'ReturnDispositionEntry': case 'TransferDispositionEntry': case 'DamageLocation': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
     case 'StockCount': case 'StockDocument': case 'InventoryMovement': case 'Payment': return { organizationId: org, ...storeRelation }
     default: return { organizationId: org }
   }
@@ -36,6 +36,10 @@ export function assertRoutePermission(path: string, method: string, role: string
   if (!['owner', 'admin', 'cashier'].includes(role)) throw new AccessError(403, 'FORBIDDEN')
   const area = path.split('/')[2]
   const read = method === 'GET' || method === 'HEAD'
+  // Platform/support actions have their own operator + explicit owner-grant DAL.
+  // A business role never grants cross-organization support access by itself.
+  if(area==='support')return
+  if(area==='price-rules'&&path==='/api/price-rules/quote'&&method==='POST')return
   if (area === 'organizations' && !path.endsWith('/switch') && !read && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
   if (area === 'organizations' && path.includes('/users') && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
   if(area==='ownership-transfers' && (read || (method==='POST' && /^\/api\/ownership-transfers\/[0-9a-f-]{36}$/i.test(path))))return

@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import { newPasswordSchema } from '@/server/auth/password-policy'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
@@ -111,6 +112,7 @@ async function handlePOST(
     if (await prisma.user.findUnique({where:{phone:validatedData.phone}})) throw new AccessError(409,'INVITATION_REQUIRED','Mavjud hisobga taklif yuborish kerak')
     const passwordHash = await hashPassword(validatedData.password)
     const organizationUser = await prisma.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const user = await tx.user.create({data:{fullName:validatedData.fullName,phone:validatedData.phone,email:validatedData.email,passwordHash}})
       const member = await tx.organizationUser.create({data:{organizationId:id,userId:user.id,role:validatedData.role}})
       if (validatedData.storeIds?.length) await tx.userStore.createMany({data:[...new Set(validatedData.storeIds)].map(storeId=>({organizationUserId:member.id,storeId}))})

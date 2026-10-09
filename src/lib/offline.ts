@@ -1,11 +1,13 @@
+import {catalogKey,minimalCatalog,usableCatalog,type CachedCatalog,type CatalogScope,type CatalogLease} from './catalog-cache';
+import type {Product} from '@/types';
 export type OfflineScope={organizationId:string;userId:string;deviceId:string}
 export type PendingOperation={id:string;scope:OfflineScope;type:'sale.create'|'sale.complete'|'sale.return'|'debt.collect'|'debt.document'|'shift.correct'|'shift.cash'|'catalog.prices'|'finance.action';payload:Record<string,unknown>;state:'pending'|'synced'|'conflict'|'cancelled'|'rejected';createdAt:string;result?:unknown;code?:string}
 const database='shuni-pos-local-v1'
 function open():Promise<IDBDatabase> {
  return new Promise((resolve,reject)=>{
-  const request=indexedDB.open(database,1)
-  request.onupgradeneeded=()=>{request.result.createObjectStore('operations',{keyPath:'id'});request.result.createObjectStore('drafts',{keyPath:'id'})}
-  request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)
+  const request=indexedDB.open(database,2)
+  request.onupgradeneeded=()=>{for(const name of ['operations','drafts','catalogs'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name,{keyPath:'id'})}
+  request.onsuccess=()=>{request.result.onversionchange=()=>request.result.close();resolve(request.result)};request.onerror=()=>reject(request.error)
  })
 }
 async function transact<T>(store:string,mode:IDBTransactionMode,work:(store:IDBObjectStore)=>IDBRequest<T>):Promise<T> {
@@ -85,7 +87,9 @@ async function synchronizeBatch(scope:OfflineScope) {
 export async function clearScope(scope:OfflineScope) {
  const db=await open()
  return new Promise<void>((resolve,reject)=>{
-  const tx=db.transaction(['operations','drafts'],'readwrite'),ops=tx.objectStore('operations'),query=ops.getAll();let failure:unknown
+  const tx=db.transaction(['operations','drafts','catalogs'],'readwrite'),ops=tx.objectStore('operations'),query=ops.getAll();let failure:unknown
+  const catalogs=tx.objectStore('catalogs'),catalogQuery=catalogs.getAll();
+  catalogQuery.onsuccess=()=>{for(const value of catalogQuery.result as CachedCatalog[])if(scopeKey(value.scope)===scopeKey(scope))catalogs.delete(value.id)};
   query.onsuccess=()=>{
    const owned=(query.result as PendingOperation[]).filter(op=>scopeKey(op.scope)===scopeKey(scope))
    if(owned.some(op=>['pending','conflict'].includes(op.state))){failure=new Error('Sinxronlanmagan amallar bor; avval natijani tekshiring');tx.abort();return}
@@ -121,4 +125,17 @@ export async function acknowledgeRecovered(id:string,scope:OfflineScope,result:u
   if(old&&scopeKey(old.scope)!==scopeKey(scope))throw new Error('Operation scope mismatch')
   return {record:old?{...old,state:'synced',result}:{id,scope,type:'sale.complete',payload:{saleId:id},state:'synced',createdAt:new Date().toISOString(),result},result:undefined}
  })
+}
+
+export async function saveCatalog(scope:CatalogScope,query:string,lease:CatalogLease,products:Product[]){
+ const record:CachedCatalog={id:catalogKey(scope,query),schemaVersion:1,scope,query,lease,products:minimalCatalog(products)};
+ if(!usableCatalog(record,scope,query))throw new Error('Katalog muddati yoki chegarasi noto‘g‘ri');
+ // One latest search page per actor/register bounds disk use; never claim a full catalog.
+ const db=await open();
+ return new Promise<void>((resolve,reject)=>{const tx=db.transaction('catalogs','readwrite'),store=tx.objectStore('catalogs'),read=store.getAll();read.onsuccess=()=>{for(const old of read.result as CachedCatalog[])if(catalogKey(old.scope,'')===catalogKey(scope,''))store.delete(old.id);store.put(record)};tx.oncomplete=()=>{db.close();resolve()};tx.onabort=tx.onerror=()=>{db.close();reject(tx.error??new Error('Katalog saqlanmadi'))}});
+}
+export async function loadCatalog(scope:CatalogScope,query:string){
+ const key=catalogKey(scope,query),record=await transact<CachedCatalog|undefined>('catalogs','readonly',store=>store.get(key));
+ if(!usableCatalog(record,scope,query)){if(record)await transact('catalogs','readwrite',store=>store.delete(key));return undefined;}
+ return record;
 }

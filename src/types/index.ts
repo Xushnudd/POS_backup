@@ -148,6 +148,9 @@ export interface StockTransferItem {
   product?: Product;
   receivedQuantity?: number;
   returnedQuantity?: number;
+  damagedQuantity?:number;
+  shortageQuantity?:number;
+  dispositions?:{id:string;disposition:'damaged'|'shortage';quantity:string;unitCost:string;reason:string;actorId:string;createdAt:string}[];
   quantity: number;
   unitCost: number;
 }
@@ -374,6 +377,7 @@ export interface ProductReportItem extends Product {
 }
 
 export interface ApiResponse<T = unknown, Summary = SalesReportSummary> {
+  catalogLease?:{version:string;issuedAt:string;expiresAt:string};
   success: boolean;
   data?: T;
   message?: string;

@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import {priceActor} from '@/server/catalog/prices'
 import { Prisma } from '@prisma/client'
 import { amountSchema } from '@/server/sales/service'
@@ -104,6 +105,7 @@ async function handlePUT(
     const validatedData = updateProductSchema.parse(body)
 
     const product = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${id} FOR UPDATE`
       const current=await tx.product.findUniqueOrThrow({where:{id}})
       if(validatedData.costPrice!==undefined&&!current.costPrice.eq(validatedData.costPrice)&&payload.role!=='owner')throw new AccessError(403,'COST_CHANGE_FORBIDDEN');
@@ -124,7 +126,7 @@ async function handlePUT(
         category: true,
       },
     })
-      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Product",entityId:result.id,action:"update"}})
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Product",entityId:result.id,action:"update",afterData:{approvedBy:payload.userId,approvedRole:payload.role,prices:{salePrice:{before:current.salePrice.toFixed(),after:result.salePrice.toFixed()},costPrice:{before:current.costPrice.toFixed(),after:result.costPrice.toFixed()}}}}})
       return result
     })
 
@@ -176,6 +178,7 @@ async function handleDELETE(
 
     // Soft delete
     await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const result = await tx.product.update({
       where: { id },
       data: { isActive: false },

@@ -1,3 +1,6 @@
+import {customerPhoneSchema,normalizeCustomerPhone,assertCustomerPhone} from '@/server/customers/identity'
+import {amountSchema} from '@/server/sales/service'
+import {assertLiveContext} from '@/server/operations'
 import { activeStatus } from '@/server/catalog/status'
 import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
 import { consumeLimit } from '@/server/auth/rate-limit'
@@ -12,10 +15,10 @@ import { z } from 'zod'
 const createCustomerSchema = z.object({
   organizationId: z.string().uuid(),
   fullName: z.string().min(2),
-  phone: z.string().min(9),
+  phone: customerPhoneSchema,
   address: z.string().optional(),
   note: z.string().optional(),
-  creditLimit: z.number().default(0),
+  creditLimit: amountSchema.default(0),
 })
 
 async function handleGET(request: NextRequest) {
@@ -59,7 +62,8 @@ async function handleGET(request: NextRequest) {
     if (search) {
       where.OR = [
         { fullName: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: normalizeCustomerPhone(search)??search, mode: 'insensitive' } },
+        ...(normalizeCustomerPhone(search)?[{canonicalPhone:{contains:normalizeCustomerPhone(search)!}}]:[]),
       ]
     }
 
@@ -67,6 +71,7 @@ async function handleGET(request: NextRequest) {
       if(payload.role!=='owner')throw new AccessError(403,'FORBIDDEN')
       await consumeLimit('customers.export',payload.organizationId+':'+payload.userId,10,60000)
       const data=await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
         const total=await tx.customer.count({where})
         if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
         const rows=await tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],select:{id:true,fullName:true,phone:true,address:true,creditLimit:true}})
@@ -78,6 +83,7 @@ async function handleGET(request: NextRequest) {
     }
 
     const [customers, total] = await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
       const rows=await tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],skip,take:limit})
       return [rows,await tx.customer.count({where})] as const
     },{isolationLevel:'RepeatableRead'})
@@ -124,24 +130,11 @@ async function handlePOST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createCustomerSchema.parse(body)
 
-    // Check if phone already exists
-    const existingCustomer = await db.customer.findFirst({
-      where: {
-        organizationId: validatedData.organizationId,
-        phone: validatedData.phone,
-      },
-    })
-
-    if (existingCustomer) {
-      return NextResponse.json(
-        { success: false, error: { code: 'DUPLICATE', message: 'Bu telefon raqam allaqachon mavjud' } },
-        { status: 400 }
-      )
-    }
-
     const customer = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      await assertCustomerPhone(tx,payload,validatedData.phone)
       const result = await tx.customer.create({
-      data: validatedData,
+      data: {...validatedData,creditLimit:new Prisma.Decimal(validatedData.creditLimit)},
     })
       await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Customer",entityId:result.id,action:"create"}})
       return result

@@ -5,6 +5,10 @@ import {errorGuidance} from '@/lib/error-guidance'
 import {logRecord,requestTrace,safeAudit} from '@/server/observability/context'
 import {quickProductIds,quickProductKey} from '@/lib/quick-products'
 import {sanitizeResponse} from '@/server/auth/response'
+import {Prisma} from '@prisma/client'
+test('Audit snapshots preserve exact financial decimals and approval timestamps while filtering nested secrets',()=>{
+ assert.deepEqual(safeAudit({approvedAt:new Date('2026-10-08T10:00:00Z'),amount:new Prisma.Decimal('999999999999.99'),items:[{quantity:new Prisma.Decimal('0.000001'),passwordHash:'hidden'}]}),{approvedAt:'2026-10-08T10:00:00.000Z',amount:'999999999999.99',items:[{quantity:'0.000001'}]});
+});
 test('API credential defense handles nested arrays, case and snake-case without dropping authorized DTO fields',()=>{
  const value={id:'ok',phone:'customer-visible',token:'cookie-session',items:[{PasswordHash:'canary',token_hash:'canary',api_key:'canary',PRIVATE_KEY:'canary',clientSecret:'canary',access_token:'canary',refreshToken:'canary',sessionToken:'canary',costPrice:'4',profit:'6',unitPrice:'10'}]};
  assert.deepEqual(sanitizeResponse(value,'cashier'),{id:'ok',phone:'customer-visible',token:'cookie-session',items:[{unitPrice:'10'}]});

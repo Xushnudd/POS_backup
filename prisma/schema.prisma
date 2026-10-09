@@ -10,6 +10,9 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+  priceRules         PriceRule[]
+  customerGroups     CustomerGroup[]
+  supportGrants      SupportGrant[]
   taxProfiles TaxProfile[]
   brands Brand[]
   files FileAsset[]
@@ -60,6 +63,8 @@ model Organization {
 }
 
 model User {
+  platformOperator      PlatformOperator?
+  approvedSupportGrants SupportGrant[]      @relation("SupportApprover")
   financialDocuments FinancialDocument[]
   resolvedIncidents Incident[]
   syncSources SyncReview[] @relation("SyncActor")
@@ -189,6 +194,7 @@ model Category {
 }
 
 model Product {
+  priceRules         PriceRule[]
   taxProfileId String?
   taxProfile TaxProfile? @relation(fields:[taxProfileId],references:[id],onDelete:NoAction)
   brandId String?
@@ -209,7 +215,7 @@ model Product {
   unit           String   // dona, kg, litr, etc.
   salePrice      Decimal  @db.Decimal(14, 2)
   costPrice      Decimal  @db.Decimal(20, 6)
-  minStock       Decimal  @db.Decimal(20, 6) @default(0)
+  minStock           Decimal               @default(0) @db.Decimal(20, 6)
   imageUrl       String?
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
@@ -226,20 +232,25 @@ model Product {
   inventoryBalances    InventoryBalance[]
   saleItems             SaleItem[]
   saleReturnItems       SaleReturnItem[]
+  dispositionEntries ReturnDispositionEntry[]
 
   @@unique([organizationId, sku])
   @@unique([organizationId, barcode])
-  dispositionEntries ReturnDispositionEntry[]
 }
 
 model Customer {
+  canonicalPhone String?
+  mergedIntoId String?
+  groupId        String?
+  group          CustomerGroup? @relation(fields: [groupId], references: [id], onDelete: NoAction)
+  priceRules     PriceRule[]
   id             String   @id @default(uuid())
   organizationId String
   fullName       String
   phone          String
   address        String?
   note           String?
-  creditLimit    Decimal  @db.Decimal(14, 2) @default(0)
+  creditLimit    Decimal        @default(0) @db.Decimal(14, 2)
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -340,7 +351,7 @@ model InventoryMovement {
 model InventoryBalance {
   storeId   String
   productId String
-  quantity  Decimal @db.Decimal(20, 6) @default(0)
+  quantity  Decimal  @default(0) @db.Decimal(20, 6)
   updatedAt DateTime @updatedAt
   
   store    Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -372,13 +383,67 @@ model StockTransferItem {
   id              String   @id @default(uuid())
   stockTransferId String
   productId       String
-  receivedQuantity Decimal @db.Decimal(20, 6) @default(0)
-  returnedQuantity Decimal @db.Decimal(20, 6) @default(0)
+  receivedQuantity Decimal @default(0) @db.Decimal(20, 6)
+  returnedQuantity Decimal @default(0) @db.Decimal(20, 6)
+  damagedQuantity  Decimal @default(0) @db.Decimal(20, 6)
+  shortageQuantity Decimal @default(0) @db.Decimal(20, 6)
   quantity        Decimal  @db.Decimal(20, 6)
   unitCost        Decimal  @db.Decimal(20, 6)
   
   stockTransfer   StockTransfer @relation(fields: [stockTransferId], references: [id], onDelete: Cascade)
   product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dispositions  TransferDispositionEntry[]
+}
+
+model TransferDispositionEntry {
+  id             String            @id @default(uuid())
+  organizationId String
+  storeId        String
+  productId      String
+  itemId         String
+  operationId    String
+  disposition    String
+  quantity       Decimal           @db.Decimal(20, 6)
+  unitCost       Decimal           @db.Decimal(20, 6)
+  productName    String
+  sku            String
+  unit           String
+  reason         String
+  actorId        String
+  createdAt      DateTime          @default(now())
+  item           StockTransferItem @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([itemId, operationId, disposition])
+  @@index([organizationId, storeId, createdAt, id])
+}
+
+model PlatformOperator {
+  userId    String         @id
+  role      String
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  grants    SupportGrant[]
+}
+
+model SupportGrant {
+  id             String           @id @default(uuid())
+  organizationId String
+  operatorUserId String
+  approvedBy     String
+  reason         String
+  scopes         String[]
+  storeIds       String[]
+  createdAt      DateTime         @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  revokedBy      String?
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  operator       PlatformOperator @relation(fields: [operatorUserId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  approver       User             @relation("SupportApprover", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([organizationId, createdAt, id])
+  @@index([operatorUserId, expiresAt])
 }
 
 // Sales and POS
@@ -441,6 +506,7 @@ model ShiftCorrection {
   postingShift     Shift @relation("PostingShift", fields: [postingShiftId], references: [id], onDelete: Cascade)
   cashMovement     CashMovement @relation(fields: [cashMovementId], references: [id], onDelete: Cascade)
   creator          User @relation(fields: [createdBy], references: [id])
+
   @@index([organizationId, originalShiftId, createdAt])
 }
 
@@ -464,7 +530,7 @@ model Sale {
   receiptNo      String
   status         String   @default("draft") // draft, completed, voided, partially_returned, returned
   subtotal       Decimal  @db.Decimal(14, 2)
-  discountAmount Decimal  @db.Decimal(14, 2) @default(0)
+  discountAmount         Decimal   @default(0) @db.Decimal(14, 2)
   totalAmount    Decimal  @db.Decimal(14, 2)
   cashTendered   Decimal? @db.Decimal(14, 2)
   cashChange     Decimal? @db.Decimal(14, 2)
@@ -489,9 +555,13 @@ model Sale {
   saleReturns    SaleReturn[]
   
   @@unique([registerId, receiptNo])
+  @@index([customerId,completedAt])
 }
 
 model SaleItem {
+  priceRuleId     String?
+  priceRule       PriceRule?         @relation(fields: [priceRuleId], references: [id], onDelete: NoAction)
+  priceSnapshot   Json?
   discountPercent Decimal? @db.Decimal(5,2)
   taxVersionId String?
   taxVersion TaxProfileVersion? @relation(fields:[taxVersionId],references:[id],onDelete:NoAction)
@@ -509,15 +579,18 @@ model SaleItem {
   unit           String?  // Legacy receipts did not snapshot a unit.
   quantity       Decimal  @db.Decimal(20, 6)
   unitPrice      Decimal  @db.Decimal(14, 2)
-  discountAmount Decimal  @db.Decimal(14, 2) @default(0)
+  discountAmount  Decimal            @default(0) @db.Decimal(14, 2)
   lineTotal      Decimal  @db.Decimal(14, 2)
   unitCost       Decimal  @db.Decimal(20, 6)
-  receiptDiscount Decimal @db.Decimal(14, 2) @default(0)
+  receiptDiscount Decimal            @default(0) @db.Decimal(14, 2)
   createdAt      DateTime @default(now())
   
   sale           Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
   product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   saleReturnItems SaleReturnItem[]
+  @@index([saleId,productId])
+  @@index([productId])
+  @@index([priceRuleId])
 }
 
 model Payment {
@@ -563,6 +636,7 @@ model SaleReturn {
   sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   processor       User     @relation("ProcessedBy", fields: [processedBy], references: [id])
   items           SaleReturnItem[]
+  @@index([saleId,returnedAt])
 }
 
 model SaleReturnItem {
@@ -582,15 +656,18 @@ model SaleReturnItem {
   saleItem        SaleItem   @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
   product         Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
   dispositionEntry ReturnDispositionEntry?
+  @@index([saleReturnId])
+  @@index([saleItemId])
+  @@index([productId])
 }
 
 // Control and Service
 model DiscountPolicy {
   id                       String   @id @default(uuid())
   organizationId           String
-  cashierMaxPercent        Decimal  @db.Decimal(5, 2) @default(0)
-  adminMaxPercent          Decimal  @db.Decimal(5, 2) @default(100)
-  requireReasonFromPercent Decimal  @db.Decimal(5, 2) @default(10)
+  cashierMaxPercent        Decimal  @default(0) @db.Decimal(5, 2)
+  adminMaxPercent          Decimal  @default(100) @db.Decimal(5, 2)
+  requireReasonFromPercent Decimal  @default(10) @db.Decimal(5, 2)
   isActive                 Boolean  @default(true)
   updatedAt                DateTime @updatedAt
   
@@ -617,6 +694,7 @@ model AuditLog {
   @@index([createdAt])
   @@index([organizationId, createdAt(sort: Desc), id], map: "AuditLog_organization_created_id")
 }
+
 // Opaque tokens are only sent through an HttpOnly cookie; only SHA-256 is stored.
 model Session {
   authenticationMethod String @default("password")
@@ -631,6 +709,7 @@ model Session {
   createdAt      DateTime @default(now())
   user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   @@index([userId, revokedAt])
   @@index([expiresAt])
 }
@@ -646,12 +725,13 @@ model Operation {
   result         Json
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   @@unique([organizationId, type, key])
   @@index([organizationId, createdAt])
 }
+
 model DebtEntry {
   debtOriginId String?
-  @@index([debtOriginId])
   actorId        String?
   effectiveAt    DateTime @default(now())
   dueAt          DateTime?
@@ -666,7 +746,9 @@ model DebtEntry {
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   customer       Customer @relation(fields: [customerId], references: [id], onDelete: NoAction)
+
   @@unique([organizationId, sourceType, sourceId])
+  @@index([debtOriginId])
   @@index([customerId, createdAt])
 }
 
@@ -674,6 +756,7 @@ model RateLimit {
  key String @id
  attempts Int @default(0)
  expiresAt DateTime
+
  @@index([expiresAt])
 }
 
@@ -691,6 +774,7 @@ model Invitation {
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
   inviter        User @relation(fields:[invitedBy],references:[id])
+
   @@index([organizationId,createdAt])
 }
 
@@ -702,8 +786,10 @@ model Unit {
  precision      Int
  isActive       Boolean @default(true)
  organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
  @@unique([organizationId,code])
 }
+
 model ProductBarcode {
  id             String @id @default(uuid())
  organizationId String
@@ -713,6 +799,7 @@ model ProductBarcode {
  createdAt      DateTime @default(now())
  organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
  product        Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+
  @@unique([organizationId,value])
  @@index([productId])
 }
@@ -736,8 +823,10 @@ model StockCount {
  adjustment StockDocument? @relation(fields:[adjustmentId],references:[id],onDelete:NoAction)
  lines StockCountLine[]
  freezes StockFreeze[]
+
  @@index([organizationId,storeId,status])
 }
+
 model StockCountLine {
  id String @id @default(uuid())
  countId String
@@ -750,8 +839,10 @@ model StockCountLine {
  count StockCount @relation(fields:[countId],references:[id],onDelete:Cascade)
  product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
  readings StockCountReading[]
+
  @@unique([countId,productId])
 }
+
 model StockCountReading {
  id String @id @default(uuid())
  lineId String
@@ -760,8 +851,10 @@ model StockCountReading {
  countedBy String
  countedAt DateTime @default(now())
  line StockCountLine @relation(fields:[lineId],references:[id],onDelete:Cascade)
+
  @@unique([lineId,round])
 }
+
 model StockFreeze {
  storeId String
  productId String
@@ -769,6 +862,7 @@ model StockFreeze {
  store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
  product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
  count StockCount @relation(fields:[countId],references:[id],onDelete:Cascade)
+
  @@id([storeId,productId])
  @@index([countId])
 }
@@ -783,6 +877,7 @@ model OwnershipTransfer {
  acceptedAt DateTime?
  createdAt DateTime @default(now())
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
  @@index([organizationId,state])
 }
 
@@ -803,9 +898,11 @@ model Incident {
  resolvedBy String?
  resolutionReason String?
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
  @@unique([organizationId,kind,entityKey])
  @@index([organizationId,state,storeId])
 }
+
 model SyncReview {
  actor User @relation("SyncActor",fields:[actorId],references:[id])
  resolver User? @relation("SyncResolver",fields:[resolvedBy],references:[id],onDelete:SetNull)
@@ -824,9 +921,11 @@ model SyncReview {
  resolvedBy String?
  reason String?
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
  @@unique([organizationId,commandType,operationId])
  @@index([organizationId,state])
 }
+
 model StockThreshold {
  store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
  product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
@@ -837,6 +936,7 @@ model StockThreshold {
  minimum Decimal @db.Decimal(20,6)
  maximum Decimal @db.Decimal(20,6)
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
  @@unique([storeId,productId])
  @@index([organizationId,storeId])
 }
@@ -855,8 +955,10 @@ model ProductPriceHistory {
  createdAt DateTime @default(now())
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  product Product @relation(fields:[productId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
  @@index([organizationId,productId,createdAt,id])
 }
+
 model DamageLocation {
  id String @id @default(uuid())
  organizationId String
@@ -867,6 +969,7 @@ model DamageLocation {
  store Store @relation(fields:[storeId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  entries ReturnDispositionEntry[]
 }
+
 model ReturnDispositionEntry {
  id String @id @default(uuid())
  organizationId String
@@ -888,6 +991,7 @@ model ReturnDispositionEntry {
  product Product @relation(fields:[productId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  returnItem SaleReturnItem @relation(fields:[returnItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  actor User @relation("DispositionActor",fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
  @@index([organizationId,storeId,disposition,createdAt,id])
 }
 
@@ -904,8 +1008,10 @@ model FinancialAccount {
  store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  register Register? @relation(fields:[registerId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  entries AccountEntry[]
+
  @@index([organizationId,storeId,kind])
 }
+
 model ExpenseCategory {
  id String @id @default(uuid())
  organizationId String
@@ -914,8 +1020,10 @@ model ExpenseCategory {
  isActive Boolean @default(true)
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  documents FinancialDocument[]
+
  @@unique([organizationId,name])
 }
+
 model FinancialDocument {
   supplierPayment SupplierPayment?
  id String @id @default(uuid())
@@ -935,8 +1043,10 @@ model FinancialDocument {
  original FinancialDocument? @relation("FinancialReversal",fields:[reversalOfId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  reversal FinancialDocument? @relation("FinancialReversal")
  entries AccountEntry[]
+
  @@index([organizationId,storeId,createdAt,id])
 }
+
 model AccountEntry {
  id String @id @default(uuid())
  organizationId String
@@ -949,6 +1059,7 @@ model AccountEntry {
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  account FinancialAccount @relation(fields:[accountId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
  @@unique([documentId,accountId])
  @@index([organizationId,accountId,createdAt,id])
 }
@@ -970,9 +1081,11 @@ model SupplierInvoice {
  supplier Supplier @relation(fields:[supplierId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  stockDocument StockDocument @relation(fields:[stockDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  allocations SupplierAllocation[]
+
  @@unique([organizationId,supplierId,referenceNo])
  @@index([organizationId,storeId,supplierId,createdAt])
 }
+
 model SupplierPayment {
  id String @id @default(uuid())
  organizationId String
@@ -986,9 +1099,11 @@ model SupplierPayment {
  supplier Supplier @relation(fields:[supplierId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  financialDocument FinancialDocument @relation(fields:[financialDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  allocations SupplierAllocation[]
+
  @@unique([organizationId,referenceNo])
  @@index([organizationId,storeId,supplierId,createdAt])
 }
+
 model SupplierAllocation {
  releases SupplierAllocationRelease[]
  id String @id @default(uuid())
@@ -998,6 +1113,7 @@ model SupplierAllocation {
  createdAt DateTime @default(now())
  invoice SupplierInvoice @relation(fields:[invoiceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  payment SupplierPayment @relation(fields:[paymentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
  @@index([invoiceId])
  @@index([paymentId])
 }
@@ -1016,9 +1132,11 @@ model PurchaseOrder {
   supplier Supplier @relation(fields:[supplierId],references:[id],onDelete:NoAction,onUpdate:NoAction)
   items PurchaseOrderItem[]
   receipts PurchaseReceipt[]
+
   @@unique([organizationId,referenceNo])
   @@index([organizationId,storeId,supplierId,createdAt])
 }
+
 model PurchaseOrderItem {
   id String @id @default(uuid())
   orderId String
@@ -1030,8 +1148,10 @@ model PurchaseOrderItem {
   order PurchaseOrder @relation(fields:[orderId],references:[id],onDelete:Cascade,onUpdate:NoAction)
   product Product @relation(fields:[productId],references:[id],onDelete:NoAction,onUpdate:NoAction)
   receiptLines PurchaseReceiptLine[]
+
   @@unique([orderId,productId])
 }
+
 model PurchaseReceipt {
   id String @id @default(uuid())
   orderId String
@@ -1040,8 +1160,10 @@ model PurchaseReceipt {
   order PurchaseOrder @relation(fields:[orderId],references:[id],onDelete:Cascade,onUpdate:NoAction)
   stockDocument StockDocument @relation(fields:[stockDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
   lines PurchaseReceiptLine[]
+
   @@index([orderId,createdAt])
 }
+
 model PurchaseReceiptLine {
   id String @id @default(uuid())
   receiptId String
@@ -1050,6 +1172,7 @@ model PurchaseReceiptLine {
   receipt PurchaseReceipt @relation(fields:[receiptId],references:[id],onDelete:Cascade,onUpdate:NoAction)
   orderItem PurchaseOrderItem @relation(fields:[orderItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
   stockDocumentItem StockDocumentItem @relation(fields:[stockDocumentItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
   @@unique([receiptId,orderItemId])
   @@index([orderItemId])
 }
@@ -1065,8 +1188,10 @@ model SupplierCredit {
  invoice SupplierInvoice @relation(fields:[invoiceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  items SupplierCreditItem[]
  releases SupplierAllocationRelease[]
+
  @@index([invoiceId,createdAt])
 }
+
 model SupplierCreditItem {
  id String @id @default(uuid())
  creditId String
@@ -1075,9 +1200,11 @@ model SupplierCreditItem {
  amount Decimal @db.Decimal(14,2)
  credit SupplierCredit @relation(fields:[creditId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  stockDocumentItem StockDocumentItem @relation(fields:[stockDocumentItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
  @@unique([creditId,stockDocumentItemId])
  @@index([stockDocumentItemId])
 }
+
 model SupplierAllocationRelease {
  id String @id @default(uuid())
  allocationId String
@@ -1086,10 +1213,10 @@ model SupplierAllocationRelease {
  createdAt DateTime @default(now())
  allocation SupplierAllocation @relation(fields:[allocationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  credit SupplierCredit @relation(fields:[creditId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
  @@unique([creditId,allocationId])
  @@index([allocationId])
 }
-
 
 // Each SKU remains the stock key; this relation groups independently sellable SKUs.
 model ProductVariant {
@@ -1100,9 +1227,9 @@ model ProductVariant {
   combinationKey String @default(dbgenerated())
   product Product @relation("VariantStock", fields: [productId], references: [id], onDelete: Cascade)
   root Product @relation("VariantRoot", fields: [rootProductId], references: [id], onDelete: NoAction)
+
   @@unique([rootProductId, combinationKey])
 }
-
 
 model FileAsset {
  id String @id @default(uuid())
@@ -1121,9 +1248,9 @@ model FileAsset {
  deletedAt DateTime?
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
  product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+
  @@index([organizationId,productId,createdAt])
 }
-
 
 model Brand {
  id String @id @default(uuid())
@@ -1134,6 +1261,7 @@ model Brand {
  updatedAt DateTime @updatedAt
  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
  products Product[]
+
  @@unique([organizationId,name])
 }
 
@@ -1147,8 +1275,10 @@ model TaxProfile {
   organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
   versions TaxProfileVersion[]
   products Product[]
+
   @@unique([organizationId,name])
 }
+
 model TaxProfileVersion {
   id String @id @default(uuid())
   profileId String
@@ -1161,6 +1291,125 @@ model TaxProfileVersion {
   createdBy String
   profile TaxProfile @relation(fields:[profileId],references:[id],onDelete:Cascade)
   saleItems SaleItem[]
+
   @@unique([profileId,effectiveAt])
   @@index([organizationId,effectiveAt])
+}
+
+model CustomerGroup {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customers      Customer[]
+  priceRules     PriceRule[]
+
+  @@unique([organizationId, name])
+}
+
+model PriceRule {
+  id              String         @id @default(uuid())
+  organizationId  String
+  productId       String
+  kind            String
+  storeId         String?
+  customerId      String?
+  groupId         String?
+  minimumQuantity Decimal        @default(1) @db.Decimal(20, 6)
+  unitPrice       Decimal        @db.Decimal(14, 2)
+  startsAt        DateTime
+  endsAt          DateTime?
+  archivedAt      DateTime?
+  reason          String
+  createdBy       String
+  createdAt       DateTime       @default(now())
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product         Product        @relation(fields: [productId], references: [id], onDelete: NoAction)
+  customer        Customer?      @relation(fields: [customerId], references: [id], onDelete: NoAction)
+  group           CustomerGroup? @relation(fields: [groupId], references: [id], onDelete: NoAction)
+  saleItems       SaleItem[]
+
+  @@index([organizationId, productId, startsAt])
+}
+
+model StockLocation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ name String
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+ @@unique([storeId,name])
+ @@index([organizationId,storeId])
+}
+model LocationBalance {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ locationId String
+ quantity Decimal @db.Decimal(20,6) @default(0)
+ @@unique([locationId,productId])
+ @@index([storeId,productId])
+}
+model LocationEntry {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ locationId String
+ quantityDelta Decimal @db.Decimal(20,6)
+ sourceType String
+ sourceId String
+ unit String
+ reason String
+ actorId String
+ createdAt DateTime @default(now())
+ @@index([locationId,productId,createdAt])
+ @@index([organizationId,storeId,productId])
+}
+model StockReservation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ registerId String?
+ userId String
+ sessionId String
+ deviceId String?
+ kind String @default("manual")
+ status String @default("active")
+ expiresAt DateTime
+ reason String
+ createdAt DateTime @default(now())
+ @@index([organizationId,storeId,status,expiresAt])
+}
+model ReservationItem {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ reservationId String
+ productId String
+ locationId String?
+ quantity Decimal @db.Decimal(20,6)
+ remainingQuantity Decimal @db.Decimal(20,6)
+ unit String
+ @@unique([reservationId,productId])
+ @@index([storeId,productId])
+}
+model ReservationEntry {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ itemId String
+ quantity Decimal @db.Decimal(20,6)
+ kind String
+ operationKey String
+ saleId String?
+ actorId String?
+ reason String
+ createdAt DateTime @default(now())
+ @@unique([itemId,operationKey])
+ @@index([organizationId,storeId,createdAt])
 }

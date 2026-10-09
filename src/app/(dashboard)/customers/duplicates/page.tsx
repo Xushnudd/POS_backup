@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState} from 'react';
+import Link from 'next/link';
+import {useAuth} from '@/context/AuthContext';
+import {api} from '@/lib/api';
+import Input from '@/components/ui/Input';
+import Pagination from '@/components/ui/Pagination';
+type Duplicate={id:string;fullName:string;phone:string;key:string;duplicates:number};
+export default function CustomerDuplicatesPage(){const {organization,user,role}=useAuth();return organization&&user&&role==='owner'?<List key={organization.id+':'+user.id}/>:<p>Mijoz identity tekshiruvi egasi vakolatida.</p>}
+function List(){const [rows,setRows]=useState<Duplicate[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(0),[phone,setPhone]=useState(''),[error,setError]=useState(''),[revision,setRevision]=useState(0);useEffect(()=>{let live=true;const timer=setTimeout(()=>{void api.request<Duplicate[]>('/customer-merges?page='+page+'&limit=20'+(phone?'&phone='+encodeURIComponent(phone):'')).then(r=>{if(live){setRows(r.data??[]);setPages(r.pagination?.totalPages??0);setError('')}}).catch(e=>{if(live){setRows([]);setError(String(e))}})},300);return()=>{live=false;clearTimeout(timer)}},[page,phone,revision]);return <div className="space-y-4"><h1>Legacy telefon dublikatlari</h1><Link href="/customers">Mijozlar</Link><p>Avvalgi kartalar avtomatik birlashtirilmaydi. Bir xil raqam bir shaxs ekanini o‘zingiz tekshiring; kerak bo‘lsa telefonni tuzating yoki original qarz/qoralamalar yopilgach merge qiling. Yangi valid duplicate karta yaratilmaydi.</p><Input label="Dublikatning to‘liq telefoni (ixtiyoriy)" value={phone} onChange={e=>{setPhone(e.target.value);setPage(1)}}/>{error&&<p role="alert">{error}</p>}{rows.map(r=><article key={r.id}><p>{r.fullName} · Original {r.phone} · Normal {r.key} · {r.duplicates} karta</p><Link href={'/customers/'+r.id+'/history'}>Original tarixni ko‘rish va merge</Link></article>)}{!error&&!rows.length&&<p>Faol valid telefon dublikati topilmadi.</p>}<Pagination page={page} pages={pages} busy={false} onPage={setPage} retry={()=>setRevision(n=>n+1)}/></div>}

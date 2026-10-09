@@ -12,7 +12,7 @@ import { posFailure, type PosFailure } from '@/lib/pos-failure';
 import { clientLine } from '@/lib/money';
 import { quickProductKey } from '@/lib/quick-products';
 import Modal from '@/components/ui/Modal';
-import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, acknowledgeRecovered, markCancelled, synchronize } from '@/lib/offline';
+import { deviceId, saveDraft, loadDraft, enqueue, acknowledge, acknowledgeRecovered, markCancelled, synchronize,saveCatalog,loadCatalog } from '@/lib/offline';
 import { Category, Customer, PaymentType, Product, Sale, CartItem } from '@/types';
 import ProductSearch from '@/components/pos/ProductSearch';
 import Cart from '@/components/pos/Cart';
@@ -57,6 +57,8 @@ export default function PosPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(false);
+  const [catalogNotice,setCatalogNotice]=useState('');
+  const [catalogExpiresAt,setCatalogExpiresAt]=useState<string|null>(null);
 
   // Modals
   const [isOpenShiftModalOpen, setIsOpenShiftModalOpen] = useState<boolean>(false);
@@ -77,8 +79,10 @@ export default function PosPage() {
 
   // Load products
   const loadProducts = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organization?.id||!user?.id||!activeRegister?.id) return;
     const requestNumber=++catalogRequest.current;
+    const scope={organizationId:organization.id,userId:user.id,deviceId:deviceId(),registerId:activeRegister.id};
+    const query=JSON.stringify([debouncedSearch,selectedCategoryId]);
     setIsLoadingProducts(true);
     try {
       const res = await api.products.list({
@@ -89,13 +93,19 @@ export default function PosPage() {
       });
       if (res.data && catalogRequest.current===requestNumber) {
         setProducts(res.data);
+        setCatalogExpiresAt(res.catalogLease?.expiresAt??null);
+        setCatalogNotice('');
+        if(res.catalogLease)try{await saveCatalog(scope,query,res.catalogLease,res.data)}catch{if(catalogRequest.current===requestNumber)setCatalogNotice('Katalog lokal saqlanmadi; internet uzilganda ro‘yxat tiklanmaydi.');}
       }
     } catch (err: unknown) {
-      if(catalogRequest.current===requestNumber)notifyError(err instanceof Error?err.message:'Mahsulotlarni yuklash amalga oshmadi');
+      if(catalogRequest.current!==requestNumber)return;
+      if(err instanceof ApiError&&err.code==='NETWORK_ERROR'){
+        try{const saved=await loadCatalog(scope,query);if(catalogRequest.current!==requestNumber)return;setProducts(saved?.products??[]);setCatalogExpiresAt(saved?.lease.expiresAt??null);setCatalogNotice(saved?'Oxirgi qidiruvning lokal katalogi (5 daqiqagacha). Narx va qoldiq serverda qayta tekshirilmaguncha savdo yakunlanmaydi.':'Lokal katalog yo‘q yoki muddati tugagan. Internetni tiklang.');}catch{if(catalogRequest.current!==requestNumber)return;setProducts([]);setCatalogNotice('Lokal katalog o‘qilmadi. Internetni tiklang.');}
+      }else{setProducts([]);setCatalogNotice('Katalog ruxsati tekshirilmadi.');notifyError(err instanceof Error?err.message:'Mahsulotlarni yuklash amalga oshmadi');}
     } finally {
       if(catalogRequest.current===requestNumber)setIsLoadingProducts(false);
     }
-  }, [organization, debouncedSearch, selectedCategoryId, notifyError]);
+  }, [organization,user,activeRegister, debouncedSearch, selectedCategoryId, notifyError]);
 
   // Load initial data (categories and customers)
   useEffect(() => {
@@ -113,6 +123,8 @@ export default function PosPage() {
   useEffect(() => {
     void Promise.resolve().then(loadProducts);
   }, [loadProducts]);
+  useEffect(()=>{const reload=()=>{void loadProducts()};window.addEventListener('online',reload);window.addEventListener('offline',reload);const timer=setInterval(reload,60000);return()=>{clearInterval(timer);window.removeEventListener('online',reload);window.removeEventListener('offline',reload)}},[loadProducts]);
+  useEffect(()=>{if(!catalogExpiresAt)return;const timer=setTimeout(()=>{setProducts([]);setCatalogNotice('Katalog muddati tugadi. Internetni tiklab narxlarni yangilang.');},Math.max(0,Date.parse(catalogExpiresAt)-Date.now()));return()=>clearTimeout(timer)},[catalogExpiresAt]);
 
   const handleCameraBarcode = async (barcode: string, allowCatalogIdentifier=false) => {
     if (!organization?.id || !localReady || hasPendingCheckout || isProcessingPayment) return;
@@ -378,7 +390,9 @@ export default function PosPage() {
 
   const refreshConflictCart=async()=>{
     try{
-      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,unitPrice:Number(result.data.salePrice),discountAmount:0,discountPercent:undefined,lineTotal:clientLine(item.quantity,Number(result.data.salePrice))};}));
+      if(!activeStore)throw new Error('Filial tanlang')
+      const quote=await api.request<{productId:string;unitPrice:string}[]>('/price-rules/quote',{method:'POST',body:JSON.stringify({storeId:activeStore.id,customerId:customer?.id,items:items.map(i=>({productId:i.product.id,quantity:i.quantity}))})});if(!quote.data||quote.data.length!==items.length)throw new Error('Narx darajasi tekshirilmadi')
+      const current=await Promise.all(items.map(async item=>{const result=await api.products.get(item.product.id);if(!result.data||!result.data.isActive)throw new Error('Mahsulot arxivlangan; rahbar bilan savatni tekshiring');return {...item,product:result.data,unitPrice:Number(quote.data!.find(p=>p.productId===item.product.id)!.unitPrice),discountAmount:0,discountPercent:undefined,lineTotal:clientLine(item.quantity,Number(quote.data!.find(p=>p.productId===item.product.id)!.unitPrice))};}));
       if(checkoutAttempt.current&&!await cancelPendingCheckout())return;
       hydrate({items:current,cartDiscount:0,customer,note});setFailure(null);await loadProducts();
       notifySuccess('Narxlar yangilandi, chegirmalar tozalandi. Miqdorlarni tekshirib, to‘lovni qayta tasdiqlang.');
@@ -488,6 +502,7 @@ export default function PosPage() {
       <label>Xizmat turi (ixtiyoriy)<input aria-label="Xizmat turi (ixtiyoriy)" maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       {/* Main 2-column layout: Left Catalog, Right Cart */}
       {!localReady&&<p role="status">Lokal savat tiklanmoqda; mahsulot kiritishni kuting.</p>}
+      {catalogNotice&&<p role="status">{catalogNotice}</p>}
       <p role="status" className="text-sm text-gray-900">{!localReady?'Lokal savat tiklanmoqda':localSaveProof===localSnapshot?'Savat lokal saqlandi':'Savat lokal saqlanmoqda; oynani yopmang'}</p>
       <fieldset disabled={!localReady||!activeStore||!activeRegister||hasPendingCheckout} className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
         {/* Left: Product Catalog & Search (2 cols) */}

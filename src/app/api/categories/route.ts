@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import {validateCategoryParent} from '@/server/catalog/category-tree'
 import {Prisma} from '@prisma/client'
 import { csv, numeric } from '@/server/exports/csv'
@@ -52,6 +53,7 @@ async function handleGET(request: NextRequest) {
     const {page,limit,skip}=paging(searchParams)
     const isExport=await exporting(searchParams,payload,'category.export')
     const result=await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
       const total=await tx.category.count({where})
       if(isExport)exportCap(total)
       const rows=await tx.category.findMany({where,include:{parent:{select:{id:true,name:true}}},orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated&&!isExport?{skip,take:limit}:{})})
@@ -92,6 +94,7 @@ async function handlePOST(request: NextRequest) {
     const validatedData = createCategorySchema.parse(body)
 
     const category = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       if(validatedData.parentId!==undefined)await validateCategoryParent(tx,payload.organizationId,validatedData.parentId)
       const result = await tx.category.create({
       data: validatedData,

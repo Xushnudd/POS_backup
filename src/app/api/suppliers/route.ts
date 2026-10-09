@@ -1,3 +1,4 @@
+import {assertLiveContext} from '@/server/operations'
 import { activeStatus } from '@/server/catalog/status'
 import { csv, EXPORT_CAP } from '@/server/exports/csv'
 import { consumeLimit } from '@/server/auth/rate-limit'
@@ -58,6 +59,7 @@ async function handleGET(request: NextRequest) {
     if(exporting)await consumeLimit('supplier.export',payload.organizationId+':'+payload.userId,10,60000)
     const paginated=['status','search','page','limit'].some(key=>searchParams.has(key))
     const result=await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
       const total=await tx.supplier.count({where})
       if(exporting&&total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
       const rows=await tx.supplier.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],...(!exporting&&paginated?{skip:(page-1)*limit,take:limit}:{})})
@@ -98,6 +100,7 @@ async function handlePOST(request: NextRequest) {
     const validatedData = createSupplierSchema.parse(body)
 
     const supplier = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
       const result = await tx.supplier.create({
       data: validatedData,
     })
