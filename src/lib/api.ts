@@ -30,11 +30,54 @@ import {
 } from '@/types';
 
 export class ApiError extends Error { code?: string; details?: unknown; status?: number; requestId?:string; nextAction?:string; }
+export type SecurityEventType = 'session_created'|'session_revoked'|'login_succeeded'|'login_failed'|'password_changed'|'cashier_pin_changed'|'member_updated'|'ownership_transferred';
+export interface SecurityEventRow {
+  id: string;
+  type: SecurityEventType;
+  suspicious: boolean;
+  organizationId: string;
+  sourceSessionId: string|null;
+  createdAt: string;
+  expiresAt: string;
+  deliveryState: string|null;
+  canRetry: boolean;
+  deliveryAttempts: number|null;
+  deliveryMaxAttempts: number|null;
+}
+export interface SecurityNoticeRow {
+  id: string;
+  eventId: string;
+  type: 'login_succeeded'|'login_failed';
+  organizationId: string;
+  createdAt: string;
+  readAt: string|null;
+}
+export interface SecurityHistoryData {
+  events: SecurityEventRow[];
+  notices: SecurityNoticeRow[];
+  unread: number;
+}
+export interface AccountSessionRow {
+  id:string;
+  organizationId:string;
+  createdAt:string;
+  expiresAt:string;
+  idleExpiresAt:string;
+  current:boolean;
+  authenticationMethod:'password'|'pin';
+  revokedAt:string|null;
+  status:'active'|'revoked'|'expired';
+}
 class ApiClient {
   csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions'|'/finance/documents'|'/reports/breakdowns'|'/reports/supplier-balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
-    list:(page=1)=>this.request<{id:string;organizationId:string;createdAt:string;expiresAt:string;idleExpiresAt:string;current:boolean}[]>(`/auth/sessions?page=${page}&limit=20`),
+    list:(page=1,state:'active'|'all'|'revoked'|'expired'='active')=>this.request<AccountSessionRow[]>(`/auth/sessions?page=${page}&limit=20&state=${state}`,{cache:'no-store'}),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
+  };
+  security = {
+    list: (page=1)=>this.request<SecurityHistoryData>(`/auth/security?page=${page}&limit=20`,{cache:'no-store'}),
+    read: (noticeId:string,operationId:string)=>this.request<{id:string;readAt:string}>('/auth/security/read',{method:'POST',body:JSON.stringify({operationId,noticeId})}),
+    retry: (eventId:string,operationId:string)=>this.request<{eventId:string;state:string;attempts:number;maxAttempts:number}>('/auth/security/retry',{method:'POST',body:JSON.stringify({operationId,eventId})}),
   };
   auditSummary = (params:Record<string,string>) => this.request<AuditSummary[]>(`/audit?${new URLSearchParams({...params,view:'summary',limit:'50'})}`);
   private getBaseUrl(): string {
@@ -91,7 +134,7 @@ class ApiClient {
 
   // Authentication
   auth = {
-    login: (body: { phone: string; password: string }) =>
+    login: (body: { phone: string; password: string; deviceId?:string }) =>
       this.request<AuthData>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(body),

@@ -2,6 +2,22 @@
 
 Bu yo‘riqnoma real hostingni yaratmaydi. Domen, TLS reverse proxy, secret boshqaruvi, off-site saqlash va navbatchi hali tanlanishi kerak. Fiskal/Click/hardware adapterlari ishga tushirilmaydi.
 
+## Fon ishlar worker’i
+
+86 migratsiyadan keyin `npm run worker:build` va `npm run worker:jobs` ichki PostgreSQL navbatini bajaradi. `npm run worker:jobs -- --once` joriy tayyor navbatni ko‘pi100ishgacha tekshiradi; bajarilgan ish fail bo‘lsa exit1. Container uchun `docker compose --profile jobs up -d jobs` mavjud image va private env bilan ishlatiladi; ushbu yo‘riqnoma real deployni avtomatik bajarmaydi. Worker SIGTERMdan keyin yangi ish olmaydi, joriy20sDB transactionini yakunlaydi;35sgrace period yetadi. Eski reconciliation worker alohida monitoring profili sifatida saqlanadi.
+
+Owner `/jobs`da source filial va sababni tanlaydi; `dead` filtrdagi ishlarni sababini tekshirib fresh authorization bilan qayta tasdiqlaydi. Har tasdiqqa3attempt, umumiy10generation/30attempt; eski source/history o‘chmaydi. AUTHORIZATION_CHANGED uchun source sessiya/vakolatini tekshiring, yangi owner authorizationidan keyingina retry qiling. JOB_EXPIRED cancellation uchun original natijani tekshirib yangi job yaratish kerak; completed job qayta post qilinmaydi. Tashqi servis yoki SQL payloadni queuega kiritish yo‘li yo‘q.
+
+Worker crash lease30sdan keyin recover qilinadi; joriy live lease5sheartbeat qiladi. Avvalgi workerning natijasi yangi leasega yozilmaydi. Ichki Incident/result/system audit atomik, worker actor null; queue/retry actual owner actor va source sessiya alohida proof. Secret/worker leaseToken API/logda ko‘rinmaydi. UI avtomatik success taxmin qilmaydi; noaniq enqueue/retry ACK uchun saqlangan original kalitni qayta tekshiring. Lease/retry/dead holatlari va eventlari PostgreSQL backupning bir qismi; hosting monitoring/navbatchi tasdig‘i hali alohida OPS bandlarida.
+
+## Xavfsizlik bildirishnomalari
+
+085/086 migrationdan keyin yuqoridagi jobs worker majburiy: u xavfsizlik outbox va90kunlik metadata retentionni ham bajaradi. `npm run worker:jobs -- --once` tayyor xabarlarni DB-only tarzda yetkazadi; delivery failure bo‘lsa exit1, doimiy rejim xavfsiz code/count bilan log beradi. SIGTERM har yangi notice orasida tekshiriladi, joriy10snotice transactionidan keyin yangi ish olinmaydi. Inbox/audit/outbox bir transaction, tashqi provayder credentiali kerak emas. Production operator worker restart/holatini monitoring qiladi; local sinov hosting alertini o‘rnatmaydi.
+
+Foydalanuvchi `/security`da o‘z xabarining `Yetkazishda xato` holatini ko‘rsa, sabab bartaraf etilgach `Bildirishnomani qayta yetkazish`ni tasdiqlaydi. Har tasdiq +3, jami30 urinish; eski source/attempts saqlanadi. Max30tugasa mas’ul original failure code va DB healthni tekshiradi; terminal yozuvni taxminiy SQL bilan reset qilmang. Source expired/global hisob inactive bo‘lsa delivery skipped, false-success xabari yo‘q. Xabar hisob egasiga, shu jumladan kassirning o‘z hisobiga yetadi; tashkilot bo‘yicha broadcast yoki SMS/e-mail yo‘q.
+
+Retention faqat SecurityEvent/Notice/Outbox metadata-sini90kundan keyin bounded batch bilan o‘chiradi. Undelivered expiry auditga tushadi; source Session/moliyaviy/offline/job proof/AuditLog o‘chmaydi. Web expired historyni darhol yashiradi; worker to‘xtagan bo‘lsa fizik cleanup worker qayta ishga tushgach davom etadi. Raw telefon/IP/UA/device hint/tokenni diagnostika loglariga yoki support chatga chiqarish kerak emas. Backup/restore test pending alert va uning source tarixini ham tekshiradi; restored worker haqiqiy user aktivligini yana tekshiradi.
+
 ## Release tartibi
 
 1. Node24 ishlating. `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` va alohida `pos_test` PostgreSQL bazasida `npm run db:migrate`, `npm run test:integration`, so‘ng `npm run build`. `npm audit --omit=dev --audit-level=high`, `npx playwright install --with-deps chromium` va shu izolyatsiyalangan bazada `npm run test:e2e` ham bajariladi. Browser test production buildni vaqtinchalik localhost HTTPS proxy orqali tekshiradi. CI shu tekshiruvlarga sozlangan; productionga avtomatik deploy yo‘q.

@@ -39,6 +39,7 @@ export function assertRoutePermission(path: string, method: string, role: string
   // Platform/support actions have their own operator + explicit owner-grant DAL.
   // A business role never grants cross-organization support access by itself.
   if(area==='support')return
+  if(area==='offline-cash')return
   if(area==='price-rules'&&path==='/api/price-rules/quote'&&method==='POST')return
   if (area === 'organizations' && !path.endsWith('/switch') && !read && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
   if (area === 'organizations' && path.includes('/users') && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')

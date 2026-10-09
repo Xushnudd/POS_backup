@@ -1,3 +1,4 @@
+import {hasUnresolvedCash} from './offline-cash-store'
 import {catalogKey,minimalCatalog,usableCatalog,type CachedCatalog,type CatalogScope,type CatalogLease} from './catalog-cache';
 import type {Product} from '@/types';
 export type OfflineScope={organizationId:string;userId:string;deviceId:string}
@@ -85,6 +86,7 @@ async function synchronizeBatch(scope:OfflineScope) {
 }
 
 export async function clearScope(scope:OfflineScope) {
+ if(await hasUnresolvedCash(scope.organizationId,scope.userId,scope.deviceId))throw new Error('Hal qilinmagan offline cash ruxsati bor; original natijani tekshiring')
  const db=await open()
  return new Promise<void>((resolve,reject)=>{
   const tx=db.transaction(['operations','drafts','catalogs'],'readwrite'),ops=tx.objectStore('operations'),query=ops.getAll();let failure:unknown

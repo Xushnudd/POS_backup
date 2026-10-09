@@ -69,7 +69,7 @@ async function boundedBody(request: NextRequest): Promise<string> {
     reader.releaseLock()
   }
 }
-export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean; binary?: boolean } = {}) {
+export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean; binary?: boolean; touchSession?:boolean } = {}) {
   return async (request: NextRequest, routeContext: C): Promise<Response> => {
     const requestId = randomUUID()
     return requestTrace.run({requestId},async()=>{
@@ -95,7 +95,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       let context: TokenPayload | null = null
       if (!options.public) {
         const token = getRequestToken(request)
-        context = token ? await verifySession(token) : null
+        context = token ? await verifySession(token,{touch:options.touchSession!==false}) : null
         if (!context) throw new AccessError(401,'UNAUTHORIZED','Avtorizatsiya talab qilinadi')
         requestTrace.getStore()!.organizationId=context.organizationId
         assertRoutePermission(path, request.method, context.role)
@@ -111,6 +111,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
           if (context && options.validateBodyReferences !== false) await validateRefs(body, context)
         }
       }
+      if(context&&path.startsWith('/api/offline-cash'))await consumeLimit(mutation?'offline-cash.write':'offline-cash.read',context.organizationId+':'+context.userId,mutation?30:120,60000)
       if(context&&request.method==='GET'&&path.startsWith('/api/reports/')){
         const identity=context.organizationId+':'+context.userId
         await consumeLimit('report.read',identity,60,60000)

@@ -16,13 +16,18 @@ import { amountSchema, quantitySchema, requireOpenShift } from '../sales/service
 export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(2).max(2000),
  manualNonCash:z.object({confirmed:z.literal(true),referenceNo:z.string().trim().min(3).max(200),expectedSettlement:z.object({cash:amountSchema,card:amountSchema,transfer:amountSchema,debt:amountSchema,waived:amountSchema}).strict()}).strict().optional(),
  items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,disposition:z.enum(['sellable','damaged','write_off']).default('sellable')})).min(1).max(500)})
-type RefundPreview={refundAmount:Prisma.Decimal;settlement:Record<'cash'|'card'|'transfer'|'debt'|'waived',Prisma.Decimal>};
-type PostedReturn=Prisma.SaleReturnGetPayload<{include:{items:true}}>&RefundPreview;
+export type RefundPreview={refundAmount:Prisma.Decimal;settlement:Record<'cash'|'card'|'transfer'|'debt'|'waived',Prisma.Decimal>};
+export type PostedReturn=Prisma.SaleReturnGetPayload<{include:{items:true}}>&RefundPreview;
 export function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview?:false):Promise<PostedReturn>;
 export function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview:true):Promise<RefundPreview>;
 export async function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview=false) {
  if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
- const execute=async(tx:Prisma.TransactionClient)=>{
+ return preview?prisma.$transaction(tx=>returnSaleTx(tx,context,saleId,input,true),{isolationLevel:'RepeatableRead'}):runOperation(context,'sale.return',input.operationId,{saleId,...input},tx=>returnSaleTx(tx,context,saleId,input))
+}
+export function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview?:false):Promise<PostedReturn>;
+export function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview:true):Promise<RefundPreview>;
+export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview=false) {
+ if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
   if(preview)await assertLiveContext(tx,context);
   await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
   const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:{include:{saleReturnItems:true}},payments:true,saleReturns:true}})
@@ -119,7 +124,6 @@ export async function returnSale(context:TokenPayload,saleId:string,input:z.infe
   const settlement={cash:split.cash,card:split.card,transfer:split.transfer,debt:split.credit,waived:split.waived};
   await audit(tx,context,'SaleReturn',ret.id,'returned',{saleId,refundAmount:refund,debtReduction,cashRefund,settlement,manualReference:input.manualNonCash?.referenceNo,waiverReversal:split.waived,reason:input.reason,approvedBy:ret.approvedBy,approvedRole:ret.approvedRole,approvedAt:ret.approvedAt})
   return {...ret,settlement}
- };
- return preview?prisma.$transaction(execute,{isolationLevel:'RepeatableRead'}):runOperation(context,'sale.return',input.operationId,{saleId,...input},execute)
 }
+
 function PrismaMinZero(value: Parameters<typeof decimal>[0] | null) { const v=decimal(value??0);return v.lt(0)?decimal(0):v }

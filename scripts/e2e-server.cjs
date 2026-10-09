@@ -17,6 +17,7 @@ const child=spawn(process.execPath,[path.join(standalone,'server.js')],{cwd:stan
 const server=https.createServer({key:readFileSync(key),cert:readFileSync(cert)},(request,response)=>{
  // Test-only transport outage: also affects service-worker requests. Browser
  // setOffline implementations do not consistently disconnect worker networking.
+ if(request.headers.cookie?.split(';').some(c=>c.trim()==='pos_test_transport_offline=1')){request.destroy();return}
  if(request.url==='/__test-offline-navigation'){request.destroy();return}
  const upstream=http.request({hostname:'127.0.0.1',port:3101,path:request.url,method:request.method,headers:{...request.headers,'x-forwarded-proto':'https','x-forwarded-host':'localhost:3100','x-real-ip':'127.0.0.1'}},result=>{
   response.writeHead(result.statusCode??502,result.headers);result.pipe(response)

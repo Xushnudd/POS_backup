@@ -190,6 +190,7 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
             Mahsulotlar katalogi
           </h1>
+          {role==='owner'&&<Link href="/products/import">CSV / Excel import va eksport</Link>}
           <p className="text-sm text-gray-500 mt-0.5">
             Tovar va xizmatlar narxi, o&apos;lchov birligi va zaxira parametrlari
           </p>

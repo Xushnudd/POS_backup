@@ -30,7 +30,8 @@ export async function resolveReview(context:TokenPayload,id:string,input:{operat
    const source=(review.payload&&typeof review.payload==='object'?review.payload:{}) as Record<string,unknown>
    const saleId=typeof source.saleId==='string'?source.saleId:undefined
    const sale=saleId?await tx.sale.findFirst({where:{id:saleId,organizationId:context.organizationId}}):null
-   const storeId=typeof source.storeId==='string'?source.storeId:sale?.storeId
+   const lease=review.commandType==='offline.cash'&&typeof source.leaseId==='string'?await tx.offlineCashLease.findFirst({where:{id:source.leaseId,organizationId:context.organizationId}}):null
+   const storeId=typeof source.storeId==='string'?source.storeId:sale?.storeId??lease?.storeId
    if(!storeId||!context.storeIds.includes(storeId))throw new AccessError(403,'FORBIDDEN')
   }
   if(review.state==='resolved')return review
@@ -42,6 +43,10 @@ export async function resolveReview(context:TokenPayload,id:string,input:{operat
     if(!sale||sale.status==='draft')throw new AccessError(409,'UNRESOLVED_DRAFT')
    }
    proof={operationState:op.state,operationId:op.id,originalPayloadHash:op.payloadHash,reviewPayloadHash:review.payloadHash,resolution:'existing_result_reviewed'}
+  }else if(review.commandType==='offline.cash'){
+   const leaseId=(review.payload as {leaseId?:string}|null)?.leaseId,lease=leaseId?await tx.offlineCashLease.findFirst({where:{id:leaseId,organizationId:context.organizationId,userId:review.actorId,cashOperationId:review.operationId,state:{in:['cancelled','consumed']}}}):null
+   if(!lease||(lease.state==='cancelled'?!lease.cancellationProof:!lease.settlementProof))throw new AccessError(409,'RESULT_UNKNOWN','Offline pul/tovar original natijasi hal qilinmagan')
+   proof={leaseId:lease.id,cashOperationId:lease.cashOperationId,resolution:lease.state==='cancelled'?'owner_physical_reconciliation':'owner_original_sale_settlement',physicalProof:(lease.cancellationProof??lease.settlementProof) as Prisma.InputJsonValue}
   }else if(review.commandType==='sale.complete'){
    const saleId=(review.payload as {saleId?:string}|null)?.saleId
    const sale=saleId?await tx.sale.findFirst({where:{id:saleId,organizationId:context.organizationId,status:'voided'}}):null

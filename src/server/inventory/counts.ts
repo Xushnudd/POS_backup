@@ -36,6 +36,8 @@ export async function startCount(context:TokenPayload,input:z.infer<typeof start
   if(!products.length||products.length>2000||(input.scope==='partial'&&products.length!==ids!.length))throw new AccessError(400,'INVALID_COUNT_SCOPE','Bir sanashda 1–2000 mahsulot bo‘lishi kerak; katta katalogni qismlarga ajrating')
   // Short transaction locks only selected SKU balances; no DB locks span UI time.
   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended('stock:' || ${store.id} || ':' || id,0))::text FROM (SELECT unnest(ARRAY[${Prisma.join(products.map(p=>p.id))}]::text[]) AS id ORDER BY id) selected`
+  const uncertain=await tx.$queryRaw<{id:string}[]>`SELECT i.id FROM "ReservationItem" i JOIN "StockReservation" r ON r.id=i."reservationId" WHERE i."organizationId"=${context.organizationId} AND i."storeId"=${store.id} AND i."productId" IN (${Prisma.join(products.map(p=>p.id))}) AND r.kind='cash_ticket' AND r.status='active' AND i."remainingQuantity">0 LIMIT 1`
+  if(uncertain.length)throw new AccessError(409,'UNRESOLVED_OFFLINE_STOCK','Sanashdan oldin offline pul/tovar natijasini hal qiling')
   if(await tx.stockFreeze.count({where:{storeId:store.id,productId:{in:products.map(p=>p.id)}}}))throw new AccessError(409,'COUNT_ALREADY_ACTIVE')
   await tx.inventoryBalance.createMany({data:products.map(p=>({storeId:store.id,productId:p.id,quantity:0})),skipDuplicates:true})
   // Version write makes transactions with snapshots predating the freeze retry.

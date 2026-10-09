@@ -1,6 +1,6 @@
 # Bajarish statusi
 
-Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
+Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
 ## Checkpoint
 
@@ -44,7 +44,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | SEC-02.06 | CORE-1 | todo | Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq. | — | — |
 | SEC-02.07 | CORE-1 | done | API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | SEC-02.08 | CORE-1 | done | XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
-| SEC-02.09 | CORE-1 | in_progress | Sessiyalar va xavfsizlik hodisalari tarixi; shubhali kirish haqida bildirishnoma. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | TLS hosting, reset/import limits, fayl/CSV himoyasi va security-event UI |
+| SEC-02.09 | CORE-1 | done | Own-account90kun security/session history, suspicious login inbox, audited bounded retry va passive no-touch polling. | ADR052;191full+6focused PG,40unit,86migrations/restore,6browser realworker; qabul quyida | Regression; production jobs worker operator tomonidan ishga tushiriladi |
 | USR-01.01 | CORE-1 | done | Taklif, rol/filial tahriri, bloklash va explicit arxivlash/tiklash; moliyaviy tarix saqlanadi. | +1 checkpoint: migration026, economic invitation test, reports-finance lifecycle tests, HTTPS browser archive/reload/restore/reactivate | Regressiyani saqlash |
 | USR-01.02 | CORE-1 | done | Oxirgi egani o‘chirish/bloklashga yo‘l qo‘ymaslik; egalikni topshirish jarayoni. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | USR-01.03 | CORE-1 | done | Bir foydalanuvchining bir nechta biznesi orasida vakolat bilan almashish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
@@ -75,7 +75,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | RET-01.05 | CORE-1 | done | Naqd/karta/nasiya aralash savdoda pul va qarzning qaytarish tartibini belgilash. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | RET-01.06 | EXTERNAL-LATER | deferred | Provayder orqali refund, uning kutish/xato holati va takror so‘rovdan himoya. | ADR-002: foydalanuvchi hozir implementatsiya qilmaslikni belgiladi; vendor contract taxmin qilinmaydi | Alohida topshiriq va rasmiy contract/uskuna tayyor bo‘lganda |
 | RET-01.07 | CORE-1 | done | Sabab, vakolat, tasdiqlovchi, qaytarma chek va audit. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
-| RET-01.08 | CORE-1 | todo | Tovar almashtirishni original qaytarish + yangi savdo sifatida bog‘lash. | — | — |
+| RET-01.08 | CORE-1 | done | Tovar almashtirishni original qaytarish + yangi savdo sifatida bog‘lash. | ADR050;179 full PG+4focused,83fresh/legacy,40unit,9browser; qabul quyida | Original exchange/naqd/nasiya/rollback regressiyasini saqlash |
 | CAT-01.01 | CORE-1 | done | Kategoriya daraxti, brend, rasm, tavsif va faol/arxiv holati. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | CAT-01.02 | CORE-1 | done | Bir mahsulot uchun bir nechta barkod; barkod yaratish va etiketka chiqarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | CAT-01.03 | CORE-1 | done | Canonical rang/o‘lcham variantlari, har SKU stock/barcode mustaqil; eski default backfill. | Quyidagi CAT-01.03 protokoli:138 integration,27 unit,9 browser,fresh/legacy51 | Regressiyani saqlash |
@@ -83,7 +83,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | CAT-01.05 | CORE-1 | in_progress | Kasr bilan sotish, birlik aniqligi, tarozi barkodidan vazn/narx ajratish. | Existing unit precision/service guard; complete manager paginated unit management/search/CSV | Scale-barcode parsing requires approved format; real scale hardware external-later |
 | CAT-01.06 | CORE-1 | done | Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx. | ADR044/045; immutable rule/receipt, normalized duplicates + settled alias history; full163, finalfocused5, unit35,73migration,browser18 | Regression; open debt merge blocked, external verification not assumed |
 | CAT-01.07 | CORE-1 | done | Avtomatik narx tarixi; 100lik reviewed atomic batch; cost edit/history/export alohida owner vakolati. | Migration035/037; prices service/UI; expected-price/hash/audit/replay; lost response + exact six-decimal browser test | Katta katalog alohida tasdiqlangan batchlarda; eski chek snapshotlari saqlanadi |
-| CAT-01.08 | CORE-1 | in_progress | Excel/CSV import, oldindan ko‘rish, dublikat/xato qatorlar hisoboti, eksport. | Full filtered active catalog CSV with primary/additional barcodes, Decimal prices/cost, formula protection, tenant/role/cap/rate limit and UI | CSV/XLSX import preview/duplicate/error workflow and XLSX export remain |
+| CAT-01.08 | CORE-1 | done | Excel/CSV import, oldindan ko‘rish, dublikat/xato qatorlar hisoboti, eksport. | ADR048 va quyidagi2026-10-09 import qabul protokoli:3 focused,174 full PG,40unit,9browser,standalone | Regressiyani saqlash; import faqat reviewed new products, no silent updates |
 | CAT-01.09 | CORE-1 | todo | Soliq turi, MXIK va markirovka xususiyatlari tegishli tovar uchun. | — | — |
 | INV-01.01 | CORE-1 | done | Har bir o‘zgarish uchun hujjat va ombor harakati; bevosita qoldiqni almashtirishni taqiqlash. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | INV-01.02 | CORE-1 | done | Boshlang‘ich qoldiqni hujjat bilan kiritish; musbat/manfiy tuzatish, sabab va tasdiq. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
@@ -96,7 +96,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | INV-02.02 | CORE-1 | done | Sanash davridagi savdolarni hisobga olish yoki vaqtinchalik bloklash siyosati. | Selected SKU logical freeze; short common advisory lock+balance version; DB freeze trigger; concurrent checkout checkpoint test and unselected SKU sale | No long DB transaction during physical counting; manager finalizes/cancels active freezes |
 | INV-02.03 | CORE-1 | done | Farq hujjati, qayta sanash va tasdiqlovchi. | Append-only rounds/actor/time; nonzero requires recount; idempotent linked adjustment+journal+manager reason/audit; terminal history guards; browser approval | — |
 | INV-02.04 | CORE-1 | done | Minimal/maksimal qoldiq, tugayotgan mahsulot va qayta buyurtma tavsiyasi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
-| INV-02.05 | CORE-1 | todo | Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish. | — | — |
+| INV-02.05 | CORE-1 | done | Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish. | 2026-10-09: zona/rezerv qabul protokoli, 074/075 va versioned tests | Regressiyani saqlash |
 | INV-02.06 | CORE-1 | todo | Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1. | — | — |
 | INV-02.07 | CORE-1 | todo | Seriya raqami/kafolat — elektronika segmentida P1. | — | — |
 | PUR-01.01 | CORE-1 | done | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Migration032 +042..044; scoped card/receipt/price/payment history; validation/archive/restore; supplier acceptance below | — |
@@ -169,8 +169,8 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OFF-01.05 | CORE-1 | done | Integratsiya xatosi, savdo xatosi va faqat chek chop etish xatosini alohida ko‘rsatish. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
 | OFF-02.01 | CORE-1 | done | PWA va lokal saqlash; mahsulot/narxlar uchun yangilanish chegarasi. | 2026-10-08: PWA/manager protokoli, versioned service/unit/integration/E2E | Regressiyani saqlash |
 | OFF-02.02 | CORE-1 | done | Lokal savdo navbati, qurilma identifikatori va server bilan bir martalik sinxronlash. | 2026-10-06: quyidagi “Keyingi 10 ta PLAN1 bandi — savat va to‘lov” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
-| OFF-02.03 | CORE-1 | in_progress | Offline qoldiqni bir nechta kassada mutlaq kafolatlab bo‘lmasligini siyosat bilan hal qilish: rezerv, limit yoki ruxsatli manfiy qoldiq. | Scoped IndexedDB cart/queue, status lookup, sync core, server-authoritative posting | PWA/catalog cache, conflict/cancel resolution UI, offline policy and browser crash tests |
-| OFF-02.04 | CORE-1 | in_progress | Eskirgan narx, nasiya limiti, bloklangan xodim va smena uchun alohida cheklov. | Scoped IndexedDB cart/queue, status lookup, sync core, server-authoritative posting | PWA/catalog cache, conflict/cancel resolution UI, offline policy and browser crash tests |
+| OFF-02.03 | CORE-1 | done | Offline qoldiqni bir nechta kassada mutlaq kafolatlab bo‘lmasligini siyosat bilan hal qilish: rezerv, limit yoki ruxsatli manfiy qoldiq. | 2026-10-09: quyidagi offline cash yakuniy qabul; 171 PG,38 unit,27 browser,81 migration/restore va source SHA256 | Regressiyani saqlash; native cash-only, tashqi vendor/hardware deferred |
+| OFF-02.04 | CORE-1 | done | Eskirgan narx, nasiya limiti, bloklangan xodim va smena uchun alohida cheklov. | 2026-10-09: quyidagi offline cash yakuniy qabul; 171 PG,38 unit,27 browser,81 migration/restore va source SHA256 | Regressiyani saqlash; native cash-only, tashqi vendor/hardware deferred |
 | OFF-02.05 | CORE-1 | done | Lokal ma’lumot xavfsizligi, chiqishda tozalash va sinxronlanmagan savdoni yo‘qotishdan himoya. | 2026-10-06: quyidagi “Keyingi 10 ta PLAN1 bandi — savat va to‘lov” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | OFF-02.06 | EXTERNAL-LATER | deferred | Kartali to‘lov, markirovka va fiskal amallar offline rejimda faqat provayder/qoidalar ruxsat bergan tartibda. | ADR-002: foydalanuvchi hozir implementatsiya qilmaslikni belgiladi; vendor contract taxmin qilinmaydi | Alohida topshiriq va rasmiy contract/uskuna tayyor bo‘lganda |
 | OFF-02.07 | CORE-1 | done | Navbat holati, xato savdolarni qo‘lda hal qilish, egaga ogohlantirish. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
@@ -180,7 +180,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | HW-01.04 | EXTERNAL-LATER | deferred | Windows kassasi, planshet va mobil ekranlarda real sinov. | ADR-002: foydalanuvchi hozir implementatsiya qilmaslikni belgiladi; vendor contract taxmin qilinmaydi | Alohida topshiriq va rasmiy contract/uskuna tayyor bo‘lganda |
 | HW-01.05 | CORE-1 | done | Kassir ekrani uchun katta tugmalar; egaga telefon orqali dashboard. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
 | HW-01.06 | EXTENSIONS | deferred | P2: mijoz displeyi, alohida mobil ilova va ombor terminali. | — | — |
-| UX-01.01 | CORE-1 | todo | Birlamchi sozlash: tashkilot → filial/kassa → import → boshlang‘ich qoldiq → sinov savdo. | — | — |
+| UX-01.01 | CORE-1 | done | Birlamchi sozlash: tashkilot → filial/kassa → import → boshlang‘ich qoldiq → sinov savdo. | ADR049;176 PG,82migration/restore,40unit,6browser; quyidagi qabul | Source va immutable progress regressiyasini saqlash |
 | UX-01.02 | CORE-1 | todo | O‘zbek lotin va rus tili; barcha ishchi matnlarni yagona tarjima tizimiga olish. | — | — |
 | UX-01.03 | CORE-1 | todo | Bir xil jadval/formalar, qidiruv, filtr, saralash, sahifalash va bo‘sh holatlar. | — | — |
 | UX-01.04 | CORE-1 | done | Xatolarni odam tushunadigan qilib yozish; foydalanuvchi keyin nima qilishi ko‘rsatilishi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
@@ -210,7 +210,7 @@ Sana: 2026-10-08. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | OPS-02.01 | CORE-1 | done | Tuzilgan loglar, request ID, tashkilot ID; maxfiy/shaxsiy ma’lumotlarni niqoblash. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | OPS-02.02 | CORE-1 | todo | API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi. | — | — |
 | OPS-02.03 | CORE-1 | done | Savdo/to‘lov/qoldiq solishtirish farqi uchun biznes ogohlantirishlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
-| OPS-02.04 | CORE-1 | todo | Navbatdagi ishlarni takrorlash va yechilmagan ishlar ro‘yxati. | — | — |
+| OPS-02.04 | CORE-1 | done | Navbatdagi ishlarni takrorlash va yechilmagan ishlar ro‘yxati. | ADR051;183full+5focused PG,84migrations/restore,40unit,6browser realworker; qabul quyida | Lease/authorization/history/retry regressiyasini saqlash |
 | OPS-02.05 | CORE-1 | todo | Xatoni mas’ul xodimga yuborish va eskalatsiya; kim javob berishi aniq bo‘lishi. | — | — |
 | OPS-02.06 | CORE-1 | todo | Status sahifasi, hodisa jurnali va jiddiy hodisadan keyingi tahlil. | — | — |
 | OPS-03.01 | CORE-1 | in_progress | Shifrlangan avtomatik backup; bazaning asosiy serveridan boshqa saqlash joyi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
@@ -1263,3 +1263,201 @@ a2df08d6161262c40772cd25974e12e73cf616580035af79ff47f4995fb866ce  tests/customer
 ### Zona/rezerv core — bajarilmoqda, hali done emas
 
 Joriy128done, baseline111dan17/20; uch parent hali ochiq. INV-02.05 uchun migration074 stock locations/reservations va immutable journals, deferred onHand/zone/reserved/available conservation;075 original unit/precision guard isolated pos_testga qo‘llandi. Existing physical inventory backfill qilinmaydi, zonaga biriktirilmagan hisoblanadi. Server sorted stock locks, exact quantities, tenant/store/live-role, manager reserve/release, exact-basket reserved-sale consumption, expiry worker SKIP LOCKED + system audit. UI reviewed durable relocation/reserve/release va original retry. Birinchi focused1/2da native upsert negative INSERT constraint update branchdan oldin tekshirishi topildi; create0+separate conditional stock-locked update bilan tuzatildi; ayni focused2/2 PASS `/tmp/pos-reservations-focused-final.log`. Full regression, fresh/legacy, worker/build va browser qabul hali tugamagan, hisob o‘zgarmadi. Applied074/075 checksumlariga tegilmaydi. OFF-02.03/.04 hali implementatsiya qilinmagan; hech qanday vendor/hardware yoki real business DB ishlatilmagan.
+
+### INV-02.05 — zona/rezerv yakuniy qabul (2026-10-09)
+
+**128→129 done; baseline111dan18/20. Qolgan ikki parent OFF-02.03/.04; maqsad131.**
+
+Fizik5→zona3/unassigned2. Zonehold2 + ikki raqobatdosh unassignedhold2 so‘rovidan bittasi qabul: reserved4/available1; allowNegative=true ham rezervlangan2ni oddiy sotuvda ishlata olmaydi. Bir xil hold/release/sale original key replay ta’siri bittadan. Rezerv exactbasket2 cash20.50 bilan asl zonadan iste’mol qilinadi: physical3/zone1/reserved2; release→reserved0/available3, fysisk stock boshqa o‘zgarmaydi. Relocation InventoryMovement/Payment yaratmaydi; sellable/brak/rezerv alohida. Brak qaytarma va transfer disposition immutable journalidan yig‘iladi, sotiladigan qoldiqdan chiqarilgan. Physical negative legacy siyosati holds bo‘lmaganda saqlangan. Original unit/precision o‘zgarishi zoned/reserved quantity borligida rad. Foreign branch/SKU/location/session, cashier writes, journal/counter/expiry snapshot rawSQL rewrite rad; audit failure butun rezerv/Operationni rollback qiladi. Server-expiredhold immediately available formuladan chiqadi; scoped worker100/SKIPLOCKED bir expiry journal/system audit yozadi, qayta worker0. Shu sabab expired kvota offline ruxsat degani emas.
+
+Manager UI create/relocate/reserve/release, physical/reserved/available/unassigned/brak counters, paginated reservation/draft history, exact original lost-ack/reload retry. Reserved sale reviewed selected draft + exact stock reservation + actual cash tender; general POS checkout holdni avtomatik ishlatmaydi. Bir filialda100 location technical cap,100 SKU/hold, GET20 headers/page; empty zones defaultlegacyrewrite yo‘q.
+
+Dalil: full core **165/165** `/tmp/pos-reservations-integration.log` including138template/192handler; final unit/precision assertions bilan focused **2/2** `/tmp/pos-reservations-focused-final.log`. Fresh+legacy **75 migrations PASS** `/tmp/pos-reservations-migrations.log`; worker build PASS `/tmp/pos-reservations-worker-build.log`. Unit **37/37** `/tmp/pos-reservations-unit.log` (ikki yangi crypto unit offline parentlarni yopmaydi). Final typecheck/lint/build PASS `/tmp/pos-reservations-{typecheck,lint}-final.log`, `/tmp/pos-reservations-build.log`. Production HTTPS Chromium/Firefox/WebKit **9/9** `/tmp/pos-reservations-e2e.log`: stock-zone lost reservation acknowledgement→reload originalretry1/audit1→release no economic movement, previous price tier and customer historical merge/refund regression.
+
+Old focused failure negative native upsert INSERT check fixed, unchanged assertions final2passed. BigInt literal compile target failure yangi offline utilityda BigInt(...)ga moslandi; TS target/strictness/testlar yumshatilmadi. Applied074/075 immutable. Version HEAD44d6849c70f68556bcaebc0279632f440df7aeee + dirtytree; onlyisolated DB, no deployment/AIcommit/livehardware/API. OFF-02.03/.04 hali ochiq; source crypto/store code implementation boshlanishi qabul emas. +20 hali tugamadi.
+47f1549a41457738838457be64bee7a7c068196d2980e2c97965fc20e7135da0  src/server/inventory/reservations.ts
+83a67ea4ac0e689fcf96af73c22943a133976e1d0d0649b1f742e266ad408c0b  src/server/inventory/movements.ts
+b9c3b6e8c2a494c7872888d328f3be34ea0f0184e903731b92c8db7cb28f5a86  tests/reservations.integration.test.ts
+
+### Offline cash — joriy implementatsiya, hali done emas (2026-10-09)
+
+Jami129done, baseline111dan18/20; OFF-02.03/.04 hali ochiq.076..078 faqat isolated bazaga applied. Ownerning defaultdisabled branch-wide unresolved-cash summa limiti va30–300s explicit siyosati; own parked draft + current register/shift/user/session/device, fixed original cash operation, Ed25519 immutable signed ticket, source SKU exact reserve. Offline debt/card/transfer yo‘q. IndexedDB ticket AES-GCM/PBKDF2 unlock phrase serverga yuborilmaydi; original issuance resultdan lokal ack faqatleaseID, successful sale ack ham minimal receipt metadata, cost/PII snapshot yo‘q. Public shell staticcode-only, API/privateNextHTMLcacheyo‘q; local same-ticket cash claim IDB lease/actions bitta transactionda. Reconnect source livecontext/role/session/price/tax/policy/shift/customer/expiry validates before single cash/payment/stock transaction. Owner physical goods/cash reconciliation closes unknown ticket and voids original draft, old queued payment cannot repost it. No fake provider/hardware.
+
+Muhim077: cash-ticket expiry authorizationni to‘xtatadi, ammo noma’lum offline tovar avtomatik availablega qaytmaydi. Cash-ticket hold pul/tovar haqiqatan hal qilinmaguncha saqlanadi; faqat manual reservations expiry worker bilan bo‘shaydi. Old INV-02.05 expiry protokoli manual holds uchun; yangi cash-ticket uncertainty bilan bu qoida kengaytirildi. Shift unresolved lease borida, expiry bo‘lsa ham, yopilmaydi.
+
+Focused offline4+reservation2 **6/6** o‘tdi; canonical signature JSONB key-orderga bog‘liq emas. First browser6dan2pass/4fail: lost-ack network error inglizcha raw fetch matnida original saqlangan xabar yo‘q edi; UXga original amal saqlangan matni qo‘shildi. WebKit real worker reload `context.setOffline`da internal browsererror berdi; test-only disposable TLS transport-cookie server socketoutage ishlatilmoqda, production CSP/offline authorization yumshatilmadi. Source-context fixture closed shiftni reopen qilgani SQL immutable guardda rad bo‘ldi; test closed holatni saqladi. Inactive/revoke assertion existingSESSION_CHANGEDcontractga moslandi. Final full regression, migrations/browser qabul ketmoqda, hech biri success/done deb taxmin qilinmaydi.
+
+### OFF-02.03 / OFF-02.04 — offline cash yakuniy qabul (2026-10-09)
+
+**129→131 done. Faol +20 so‘rov: baseline111→131, aynan20 yangi PLAN1 parent band qabul qilindi.** Tarixiy checkpoint, test yoki yordamchi subtask qayta sanalmadi. SEC-01.04 exhaustive semantic role matritsasi, tashqi provayder/hardware, real hosting/pilot/huquqiy qabul hali o‘z bandlarida ochiq. Bu butun loyiha productionga deploy qilindi degani emas.
+
+**OFF-02.03 — kirish/kutilgan/haqiqiy natija:** fizik stock5, ikki haqiqiy register/device bir SKUdan4tadan parallel rezerv qiladi. Bitta ticket/hold4 muvaffaqiyatli, ikkinchisi insufficient available bilan rad; available1, stock5. Filial jami unresolved quota25: bir ticket20.50dan keyin10.25lik ikkinchisi rad. Scope/SKU/amount/signature original sourcega bog‘liq, boshqa device/organization/key yoki o‘zgargan quantity rad. Offline native naqd20 uchun10.25 savdo/change9.75 lokal pending; server payment0/stock5, ikki tabdan original claim faqat1. Reload va real server transport outage cached public shell bilan ishlaydi. Reconnect yoki lost-ack recovery bitta payment, bitta stockmovement, stock4 va no debt; original operationId saqlanadi. Xatolar alohida SyncReview/local conflictda qoladi. Authorization expiry cash holdni avtomatik bo‘shatmaydi: noma’lum tovar qayta sotilmaydi; actual cancel yoki verified owner settlement kerak. Cash holdli SKU count/opening/adjustment va unresolved shiftclose blok.
+
+**OFF-02.04 — kirish/kutilgan/haqiqiy natija:** server issued Ed25519 quote30–300s, source session absolute/idle expiryidan uzoq emas; owner explicit policy, defaultdisabled. Unit test expiry exact boundary, clock rollback va other device failclosed. Server signed-past source fixture expiry bilan payment/stock yaratmaydi; worker cash holdsni saqlaydi, manual expiry oldingi INV kontraktiga mos ishlaydi. Changed price/tax/rule, disabled policy/customer/staff, revoked/changed session/role, closed shift va source scope rad, original audit/hold/stock/payment o‘zgarmaydi. Strict cash commandga credit/card/arbitrary basket field yuborish mumkin emas; offline debt umuman yaratilmaydi. Offline revoke darhol yetishmasligi explicit amount/stock limit va qisqa TTL bilan cheklanadi, reconnect live authorization majburiy. Native AES-GCM/PBKDF2 encrypted IndexedDBda unlock phrase/PII/cost saqlanmaydi; wrong phrase/signature/tamper rad, API/privateHTML/Nextchunks cachega kirmaydi.
+
+**Haqiqiy noaniq savdoni hal qilish:** egasi actual goods returned/notdelivered va net cash refunded/never received proof bilan draftni void qiladi; eski queued payment sourcega qayta post bo‘la olmaydi. Mijoz tovar bilan ketgan bo‘lsa, boshqa actual live owner ham asl signed davr ichidagi kuzatilgan vaqt, goods+cash, tender, evidence va sababni tekshirib `/settle` qiladi. Bloklangan original actor impersonation qilinmaydi, original cashier saqlanadi; actual owner receivedBy/audit actor. Current price11/cost9/archivedproduct bo‘lsa ham verified original quote10.25/cost4 saqlanadi, completedAt hozirgi server vaqti. Replay1payment/1movement, audit failure normal syncda butun transaction rollback; owner proof keyin immutable. Original expired sync operation uchun fake commit yo‘q; SyncReview owner terminal evidence bilan resolved. Keyingi real refund10.25 stockni5ga qaytaradi, ordinary refund journal ishlaydi. Browser owner confirmation original reviewni ko‘rsatadi; settlement lost acknowledgement/reload original keyni qayta tekshirib bitta receiptga olib keladi.
+
+**Yakuniy tekshiruvlar, faqat disposable pos_test:**
+
+- `DATABASE_URL=<isolated> npm run test:integration`: **171/171**, exit0; `/tmp/pos-offline-integration81.log`. Boundary inventory143templates/198handlers. Full run schema/service exports stable bo‘lgach boshlandi.
+- Focused compile + `node --require ./scripts/test-resolver.cjs --test --test-concurrency=1 .test-build/tests/offline-cash.integration.test.js .test-build/tests/reservations.integration.test.js`: **8/8**, exit0; `/tmp/pos-offline-owner-focused3.log`. Full171 ham shu final service/migrationlarni tekshiradi.
+- `npm test`: **38/38**, exit0; `/tmp/pos-offline-unit81.log`.
+- `bash scripts/ops/test-migrations.sh`: **81 migration fresh + legacy035→81**, exact original allocation/debt/barcode/unit/price/disposition/variant/identity backfills PASS; `/tmp/pos-offline-migrations81.log`.
+- `bash scripts/ops/test-backup.sh`: encrypted bundle/config/files+dummy recoverysecret, confirmedempty restore,81migration records/source economic counts, scoped authenticated ledger/count/image recovery, existing-table guard PASS; `/tmp/pos-offline-backup81.log`. Fixture RTO10s/RPOloss0; real hosting SLA emas.
+- `npm run typecheck`, `npm run worker:build`, `npm run lint`, `npm run build`: exit0; `/tmp/pos-offline-type81.log`, `/tmp/pos-offline-worker81.log`, `/tmp/pos-offline-lint81.log`, `/tmp/pos-offline-build81.log`. Existing TypeScript compiler `prebuild` native three public modulesni chiqaradi.
+- `DATABASE_URL=<isolated> PLAYWRIGHT_BROWSERS_PATH=/tmp/pos-playwright-browsers POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Offline signed cash|Offline issuer|Owner reviews a changed-price|Stock zone UI|PWA private catalog|Configured tax UI|Discount UI|Sync conflict requires manager|Manual bank refund UI'`: **27/27**, Chromium/Firefox/WebKit, exit0; `/tmp/pos-offline-browser81.log`. Real worker transport outage, encrypted reload/wrong phrase/tamperedquantity/twotab, issue/sync/owner-settlement lostack va old tax/discount/manualrefund/reservation regressions.
+- `git diff --check`: exit0. `.env`/`.env_backup` o‘qilmadi, hech qanday real API/hardware/live DB/deploy/AIcommit ishlatilmadi. Normal build environment autoload original loyiha mexanizmi.
+
+Owner-focused birinchi testda runOperation JSON resultidagi completedAt string Date bilan bevosita solishtirilgani false bo‘ldi; test actual ISO vaqtni Datega parse qilib accounting-now invariantni saqladi. Sandboxdagi local TCP testlar ulanish cheklovida yiqilgan run acceptance emas; approved isolated connection bilan focused8 va full171 o‘tdi. Old browser6dan4failure UX/testtransport sababi yuqoridagi tarixiy checkpointda; final27 actual assertions bilan o‘tdi. Testlar va production permissions yumshatilmadi.076..081 applied checksumlar tahrirlanmadi;081 owner evidence missing-key SQL NULL semantics uchun alohida migration.
+
+Faol +20 qabul IDlari: DATA-01.09, CAT-01.01, SEC-02.08, USR-01.04, FIN-02.07, FIN-02.02, RET-01.03, POS-02.06, SEC-01.02, OPS-03.02, USR-01.05, OFF-02.01, INV-01.04, SEC-01.07, BIZ-02.02, CAT-01.06, CRM-02.01, INV-02.05, OFF-02.03, OFF-02.04. Oldingi18ning individual test/versiya protokollari yuqorida saqlangan.
+
+Versiya: HEAD `0bb58a44212068f8bfaeb592d7473e5cce94ed9d` + shu ishchi daraxt. AI commit yaratmagan. Quyidagi SHA256lar tekshirilgan source versiyalaridir:
+
+```text
+8b08592eb1f86f5e5e748227532ffefb39bf868d35c8c9bf04fd33f17c15bc7d  src/server/offline/cash.ts
+fff7dc32eee80affc7abcd18c4c09b88c06a71079b35d8e10f5f1b841ae4affa  src/server/sales/service.ts
+2fa70092cf7587fa3cf341a7935202027591e1f4aabd1dd85809789631c80dda  src/server/inventory/reservations.ts
+ce37bd2b85ddadb51bd30a4f88d8e341ca686ba45b4e5fcce45335a7dd54d103  src/server/inventory/movements.ts
+6c521e3aa15a73da4e7f887b6d0b8de33ab05b97fda68701addbd53487fbcf6b  src/server/sync/reviews.ts
+bd0b91d5a14f898f278a21d1f697d801c5af860cf5c9055c848c80b06bfb3773  src/lib/offline-cash-crypto.ts
+bce26a9fd356f8ae7ade2c0d65139b87fdf67af272fab433652af6535e11e184  src/lib/offline-cash-store.ts
+2fe16d9c1ea99bca5bc5236f65f42fbd20ca541864a126f7112686b522144cbe  src/offline/cash-screen.ts
+8f9fae7de645cbf3eb7718576ec6fd4f0f2d6feb9b2cb0d0847741a9ddec13dd  tests/offline-cash.integration.test.ts
+efb93c6cc734dab984dfe1a3188dfbc7e1cec1070b1436896b6b75c521d51c79  tests/e2e/core.spec.ts
+131c11e15fb3406c53624c9bf1d438d5515c7e5aaa29d47467d4ffcf9c375c61  prisma/migrations/202610090080_offline_owner_settlement/migration.sql
+d9e983a26fa68edc019ff6709d7924e343f5650d1b9e7f7af5ac84127ecf6627  prisma/migrations/202610090081_offline_settlement_proof_guards/migration.sql
+```
+
+### Yangi +20 so‘rov — boshlanish (2026-10-09)
+
+Baseline **131 done**, yangi maqsad **151 done**. Oldingi111→131 yigirmatalik qabul qayta sanalmaydi. Hozir **0/20** yangi qabul. Katalog import/export/onboarding, ombor tracking/valuation, xarid/customer/return business logic, UX va ichki security/worker vazifalari bo‘yicha yangi dalillar tayyorlanadi. Tashqi vendor/hardware/SMS endpointlari taxmin qilinmaydi, live business data va `.env` o‘qilmaydi. Bandlar actual qabul mezonlari bajarilmasdan `done`ga o‘tkazilmaydi.
+
+### CAT-01.08 — CSV / Excel import va eksport qabul (2026-10-09)
+
+**131→132 done; yangi +20 baseline131dan1/20. Maqsad151, yana19 parent band ochiq.**
+
+Kirish: CSV5row (2valid, duplicateSKU, invalidprice, unknownunit), aniq leading-zero barcode va90071992547409.123456 cost; XLSX1000row. Kutilgan/haqiqiy: preview product/audit/Operation0; reviewed valid2 created, error3 explicit report; same-key parallel replaycreated2/audit1/Operation1, changed payload409. Exported Excel boshqatenant own owner importiga2valid va exact cost/alias;1000qator truncate emas, stock/payment0. Stale preview yangi SKU bilan409; live actualadmin/cashier403, revoked-session409; late audit failure barcha product/barcode/Operationni rollback qiladi. Active formula/object/multi-sheet/malformed/oversized row/workbook unitda rad. Owner UI lostack/reload originalintent bilan product1/importaudit1/Operation1; Excel download1.01 va0.333333 exact string; old zone/offline naqd regressiyalar saqlangan. Preview persistent staging yozmasdan read-only; PostgreSQLda final import row/source/result proof mavjud Operation+audit bilan saqlanadi (ADR048).
+
+Dalillar: `npm run test:integration`174/174, `/tmp/pos-import-integration-final.log` (146templates/201handlers); runtime resolver fixdan keyin `npm test`40/40 va focusedimport3/3 `/tmp/pos-import-unit-runtime.log`, `/tmp/pos-import-focused-runtime.log`; typecheck/lint/build exit0 `/tmp/pos-import-{type,lint,build}-runtime.log`. Native ExcelJS `.next/standalone/node_modules/exceljs/excel.js` traced. `POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep "Catalog CSV import|Stock zone UI|Offline signed cash"`9/9 Chromium/Firefox/WebKit, `/tmp/pos-import-browser-runtime.log`. Full DBsuite171→174; no new migration for import, current81 remains. Only disposableDB, no deployment/vendor/hardware/env read/AIcommit.
+
+Birinchi unit compile async callbackda await syntax errorni ko‘rsatdi, tuzatildi. Birinchi browser9dan6pass/3fail: Turbopack require.resolve moduleIDnumberni Workerga yubordi. Node createRequire runtime nativepath va traced external dependency bilan tuzatildi; assertions unchanged, final9passed. Failure qabul dalili deb sanalmadi. Sharp0.35.5/source-map-js1.2.2 auditpatchlari backend/build/image-regression bilan tekshirildi; boshqa dependency/security release findinglar QA-01.08ni avtomatik yopmaydi.
+
+Versiya HEAD 0bb58a44212068f8bfaeb592d7473e5cce94ed9d + dirty tree, SHA256:
+
+```text
+f79f69225a433c4b1976d4ae3fb098ae568156e39185b449600504871d545e07  src/server/catalog/imports.ts
+232660121e40593cf318f3dbb556dfdb78681b0461a5a481a5abfbb789258260  src/server/catalog/spreadsheets.ts
+0e8618c993510de8008fabdf2c852327638e3bcaf7de61ee9a2daa37ac6a9af1  src/server/exports/xlsx.ts
+d2f45d4d112ee9ed9c014872d1b5f62119ff341966b7a50826e5a0573c52722b  src/app/(dashboard)/products/import/page.tsx
+a54b3d884efb3da00cefcd025db2afc66dfaa2b6001a3131c80ab601494c3379  tests/catalog-import.integration.test.ts
+6a6bd9d86ddcce26864db12f31fb7cc5a3c3cbc3a5a539eebc11fd0bfbc79e50  tests/catalog-import.unit.test.ts
+1139297b373c4ea282dd5fda7320458d7a832b758011f1ea830e67e764b16592  package-lock.json
+```
+
+### UX-01.01 — onboarding ishlab chiqilmoqda, hali qabul emas
+
+Yangi +20 hisobi1/20/jami132. OnboardingCheckpoint82 migration faqat disposableDBga applied, serverda6bosqich immutable proof/actor/time+operation/audit. Bosqich source actual organization/register/import/opening/cashier/normalcompleted sale bilan tekshiriladi, oldingi checkpointlarsiz skip rad. Source keyin blocked bo‘lsa progress joriy invalidni ko‘rsatadi; eski tasdiq rewrite bo‘lmaydi. Worker/provider/hardware yoki avtomatik fake trial sale yozilmaydi. Existing /training faqat isolated local mashq, actual checkout odatiy physical/money journals. `/onboarding` owner wizard, scope remount, durable original confirmation/recovery.
+
+Focused2/2 actual coreflow va auditrollback/scope/role/immutablehistory o‘tdi `/tmp/pos-onboarding-focused3.log`. Initial test fixture typed missing discountAmount/organizationId compilefail dalil sifatida qabul qilinmadi, required fields qo‘shildi. Full regression/migrations/backup/build va actual owner wizard uchbrowser qabul ketmoqda; parent hali done emas.
+
+### UX-01.01 — onboarding qabul (2026-10-09)
+
+**132→133 done; yangi +20 baseline131dan2/20. Maqsad151, yana18 band.**
+
+Kirish: yangi owner, filial/kassa, CSV orqali1SKU(1.01 narx/0.333333 tannarx), boshlang‘ich5dona, shu filialga assigned cashier, isolated training va odatiy naqd POS savdosi. Kutilgan/haqiqiy:6ordered checkpoints, trainingdan Sale0; actual sale1/payment1/stock4; checkpoints/audit6. Lost checkpoint ACK/reload original key recovery1; old checkpointdan keyingi stage tiklandi. DraftSale readyfalse, skip409, boshqa tenant/actualadmin/cashier rad; register bloklanganda confirmedtrue/completefalse, immutable proof/history; audit xatosida checkpoint/Operation0.
+
+Dalillar: full176/176 `/tmp/pos-onboarding-integration.log`; fresh+legacy82 `/tmp/pos-onboarding-migrations.log`; encrypted restore82 `/tmp/pos-onboarding-backup.log` RTO6s/fixtureRPO0. Native runtime resolverdan keyin focused5/5 `/tmp/pos-onboarding-focused-native.log`,40unit `/tmp/pos-onboarding-unit-native.log`, type/lint/build exit0 `/tmp/pos-onboarding-{type,lint,build}-native.log`. Browser6/6 Chromium/Firefox/WebKit `/tmp/pos-onboarding-browser-native.log` import+orderedwizard+original recovery+actualPOS. Workerbuild old core regressiya exit0 `/tmp/pos-onboarding-worker.log`.
+
+Dastlab browser5pass/1fail Chromium sibling durableintent race; revision key remount bilan fixed. Default Turbopack localport OS1; Next hujjatdagi Webpack build used, production config o‘zgarmadi. Birinchi Webpack browser import failed: bundler moduleID rewrite; native Node builtin resolver bilan fixed, final6pass. Bu failures done deb sanalmadi. DB82 applied migration immutable. No liveDB/deploy/vendor/hardware/.env read/AIcommit. Versiya HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d+dirty tree.
+
+SHA256 onboarding qabul versiyasi:
+
+```text
+792bb2da2be882d596e787be679c3977d01e2283070e4fb4c58f17d63f9b8c09  src/server/onboarding/service.ts
+918408e4e1d9384b0f63c5cb75fbf7351b4f272fa65769b08e4eaa0dae8d15d5  src/app/(dashboard)/onboarding/page.tsx
+595c16c24c76f96209c5c555461908cec9829a61222f42630d4728b80c9a7155  prisma/migrations/202610090082_onboarding_checkpoints/migration.sql
+233f674f0c422206580c83ac7ee47dfebc38cb41b7382b2e2c30a0951d600eb7  tests/onboarding.integration.test.ts
+adbb285b304cb311485c10b96ebf03ff994eb751b1e83984ce48ae668def581b  src/server/catalog/spreadsheets.ts
+```
+
+### RET-01.08 — atomic exchange ishlab chiqilmoqda, hali qabul emas
+
+Yangi +20 hisob2/20/jami133. Original return/replacement sale relations uchun83 migration disposableDBga qo‘llandi. Mavjud createDraft/returnSale wrapperlari saqlanib Tx funksiyalari ajratildi; naqd/nasiya quote va transaction service, owner/admin forma/history/recovery qurilmoqda. Native gross journalsning net farqi actual physical tender/change bilan exchange hujjatida ajraladi; original/new sale tenderiga taxminiy full amount yozilmaydi. Stock/credit fail ikkala yangi hujjatni rollback qiladi. Tests, fresh/legacy migrations va uchbrowser qabul hali tugamagan; done emas.
+
+### RET-01.08 — atomic exchange qabul (2026-10-09)
+
+**133→134 done; baseline131dan3/20, maqsad151, yana17 parent band.**
+
+Kirish: original10.01 naqd/nasiya, replacement12.03, physical tender5.00; cheaper replacement5.01; asli cashier/owner/admin sessiyalari, bir branch/smena. Kutilgan/haqiqiy: diffCash2.02/change2.98, debtDiff2.02/currentDebt12.03; cheaper diff−5/refundDue5/tender0. Gross cash journals actual netcashga teng; replacement.cashTenderedNULL. Parallel original replay exchange1/return1/replacement1/operation1/audit1. Oldcost3.333333/newcost4.444444 va stock10/9 saqlanadi. Stale narx409; foreign404, actualassignedadmin success/actualcashier403, revokedsession401. Yetarli stock yo‘q yoki late auditfaultda return0/replacement0/advance journal0/Operation0; original sale/payment/debt/stock untouched. Immutable exchange update rad.
+
+Dalillar: `/tmp/pos-exchange-integration.log`179/179 barcha old native refund/credit/stock/tax/offline regressiyalar; qo‘shimcha actualadmin/cashier+lateaudit kiritilgach4/4 `/tmp/pos-exchange-focused-final.log`. `npm test`40/40 `/tmp/pos-exchange-unit-final.log`. Fresh/legacy83 `/tmp/pos-exchange-migrations.log`. Workerbuild/type/lint/build exit0 `/tmp/pos-exchange-worker-final.log`, `/tmp/pos-exchange-{type,lint,build}-ui.log`. Browser9/9 Chromium/Firefox/WebKit `/tmp/pos-exchange-browser-ui.log`: original unknown ACK/reload/key once, linked replacement receipt actualtender/history, ordinary manualbankrefund va onboarding6step actualsale.
+
+Initial Prisma client stale generation va test async callback compile xatosi tuzatildi; failure qabul emas. Birinchi browser exchange products query requiredorganizationIdni tashlab yuborgani ko‘rsatdi; own org query bilan fixed, assertions unchanged/final9passed.83 applied migration immutable. Taxminiy vendor/hardware/Click/liveDB/envread/deploy/AIcommit yo‘q. Versiya HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d+dirty tree.
+
+```text
+407f9b12654046a93a8225d14792cba7a0860bdfa30cbf159f441d27dd36e9ea  src/server/returns/exchanges.ts
+948d799ca538eb554f112d8abf3c1a956bb73588dad00e4fda4a1100102ff599  src/server/returns/service.ts
+4dfe1dc90c55d99bfa3389aa96444dd3415ba345d1956e5bb7f2593ed605413b  src/server/sales/service.ts
+fb40f3114611a8b9147be46293bf9ee878f85862bed24a13698c51eb9591f7f4  src/app/(dashboard)/sales/[id]/exchange/page.tsx
+a4856f3ae2d3788f67f1ed5016b17005ca187d24570fd7e998102e80f1f47bdd  src/components/pos/ExchangeHistory.tsx
+e5db3191919d24746a011edee7e373c66ce0aab6a54e51ecc202554ae2993d2c  prisma/migrations/202610090083_sale_exchanges/migration.sql
+b132be54e3d1bb43e8e6ea6848a73e215d366a58369051a2c631f124deb5eb8f  tests/exchanges.integration.test.ts
+f7551aaedf48db2b807e87abff0c8738d4adfe0dafd22759dd5cac5ad7a454a9  tests/e2e/core.spec.ts
+```
+
+### OPS-02.04 — fon navbati qabul yakunlanmoqda, hali done emas
+
+Yangi hisob3/20/jami134. BackgroundJob/JobAuthorization/JobEvent84 migration applied onlydisposableDB, immutable source va actual owner proof. Native Node worker va owner/jobs UI implemented;3focused/183full PG/84freshlegacy/6browser(real compiledworker exhaustion+manualretry+exchange)/encryptedJobHistory restore passed. Quota20/rate429/size413/unknown-kind bo‘yicha qo‘shimcha qabul testi yakunlanmoqda. Birinchi test block sintaksisi vaAPI withApi context typecompile xatolari fixed; browser birinchi filial hydration typed reasonni yo‘qotgani corrected. Finalqabul olmadi degan bandni countga qo‘shmaymiz.
+
+### OPS-02.04 — PostgreSQL fon navbati qabul (2026-10-09)
+
+**134→135 done; baseline131dan4/20, maqsad151, yana16 parent band.**
+
+Kirish: original owner queue/current branch, concurrent claim2, leaseexpiry→newclaim, samekey enqueue/retry,3actual auditfaults, slow7sDB scan +5sautoheartbeat +midwork sessionrevoke,20active-job boundary va actorAPI5/min. Kutilgan/haqiqiy: claim1, oldlease heartbeatfalse/resultfalse/Incident0; original source in-memory scope o‘zgartirilsa ham onlyselectedbranch Incident1/systemaudit1. Attempts3dead/visible; replaymanualretry generation1/authorization2/Operation1/audit1, worker succeeds once, historicalattempts kept. Current session revoke oldjobdead/AUTHORIZATION_CHANGED, actualadmin/cashier403, foreign404, expiredqueuecancelled/noeffects. Autoheartbeat actuallyticks before7squery ends; midrunrevoke rollsback allIncidents/systemaudit. Capacity19→parallel2 exactly1accepted/1JOB_LIMIT; replayoldkeynoadditionaljob. NativeHTTP5success→429RetryAfter, oversized413, unknownexternaltype400/nojob.
+
+Dalillar:183/183full `/tmp/pos-jobs-integration.log` (3initialjobtests+4exchange); final5/5 includingquota/slowrealheartbeat `/tmp/pos-jobs-focused-heartbeat.log`;40unit `/tmp/pos-jobs-unit-heartbeat.log`.84fresh/legacy `/tmp/pos-jobs-migrations.log`; worker/type/lint/build exit0 `/tmp/pos-jobs-worker.log`, `/tmp/pos-jobs-{type,lint,build}-ui.log`; extraquota type/lint0 `/tmp/pos-jobs-{type,lint}-quota2.log`.6/6 Chromium/Firefox/WebKit `/tmp/pos-jobs-browser-ui.log`: actual compiledproductionNodeworker3faults→dead→ownerlostretryACK/reload→worker success1 +oldexchange. Encrypted deadjob/source-session-authorization/event restore `/tmp/pos-jobs-backup.log`: migration84/RTO11s/fixtureRPO0/economiccountsunchanged/overwriteguard.
+
+Initial test brace/handler-context typecompile failures tuzatildi. Initial browser60stimeout reason typed beforestore hydration thenkeyremount erasedinput; wizardorg/user scope and actualstoredbranchname review fixed, final6passed.84 applied migration immutable. No realhosting/deploy/vendor/hardware/envread/AIcommit. HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d+dirty tree.
+
+```text
+3768265726df3f3a22bb6fa402480b08fd9ac45445b334178022c263e7a5f77c  src/server/jobs/service.ts
+9811ec70a75386e22030410eb85fe127e526e86e402411e3a45ca98f6cecebb2  scripts/workers/jobs.ts
+769bd7fba34ed62f915bff72844c1b176ed9ad57a4dbb690f8f3c113bdd566c8  src/app/(dashboard)/jobs/page.tsx
+a414633944e6ff1a98c1d96fc1c6f0a4569947d55370006f1155423668ef2526  prisma/migrations/202610090084_background_jobs/migration.sql
+dfe5c5c71297df17131ac605dd1e555bec093f5e9ffed290d17a60fde6e2c192  tests/jobs.integration.test.ts
+d057a089bb5951a9b7aa001862fda968c912ac9658bc709c681b01b54009b3aa  scripts/ops/test-backup.sh
+e378f853f4e7d042ccadb123292b78859eb8302c6d40e228f9b9723f26885926  scripts/ops/verify-restored-app.mjs
+```
+
+### Joriy topshiriq doirasi: faqat bitta vazifa (2026-10-09)
+
+Oxirgi foydalanuvchi ko‘rsatmasi oldingi +20 maqsadini shu bosqich uchun almashtirdi. Baseline135, maqsad136: faqat SEC-02.09. Xavfsizlik hodisalari/sessiyalar tarixi va ichki shubhali kirish bildirishnomasi qabuldan o‘tmaguncha done hisoblanmaydi.
+
+### SEC-02.09 — xavfsizlik hodisalari va ichki bildirishnomalar qabul (2026-10-09)
+
+**Faqat bitta yangi parent vazifa bajarildi:135→136 done. Oxirgi “faqat1ta vazifa” topshirig‘i1/1 tugadi. Boshqa parent statuslar o‘zgartirilmadi.**
+
+Kirish: actual owner parol loginlari, bir brauzer hinti takrori va yangi browserUUID, parallel3invalidpassword,6thratelimit, source session revoke, ikki concurrent Node delivery, actual cashier scope, sourceSession/job FKhold, expired event va actual password change. Kutilgan/haqiqiy: firstknownbaseline noalert; newhint suspicious outbox1/inbox1/systemaudit1, revoked original session deliveryni to‘smasligi. Noto‘g‘ri parollar401 va failure auditactorNULL, uchinchidan suspicious, UTC15min bucketda1notice;6th429. Actual own account barcha bizneslardagi safehistoryni oladi; foreignaccount notice404, revokedcaller401. Token/hash/rawdevice/UA/phone/password/IP javob/history/auditga chiqmaydi. DefaultactiveSession behavior/PIN8h/password24h saqlanadi; explicitall/revoked/expired history90kun. UnreferencedSessiondelete immutable snapshotni o‘chirmaydi; financial/job-heldSession FKsaqlanadi.
+
+Late login auditfaultda session/lastLoginAt/loginEvent rollback. Delivery auditfault3dead, inbox0; faulttuzalgach ownaccount paralleloriginal retry bitta Operation/audit bilan +3budget(old attempts3 preserved), nativeworker inbox1. Retry onlydead, max30; foreign/expiredsource va revokedcontext rad. SecurityEvent/Notice/source immutable SQL;90kun expiry faqatsecuritymetadata+outboxni o‘chiradi, pendingexpiry systemauditga yoziladi, sourceSession/JobAuthorization/moliyaviycounts untouched. Headerning passivGETi idledeadline’ni uzaytirmaydi, expired401; explicit normalSessionactivity touchni saqlaydi.
+
+Dalillar: `npm test`40/40 `/tmp/pos-security-unit-final2.log`. `DATABASE_URL=<isolated127.0.0.1:55439/pos_test> npm run test:integration`191/191 `/tmp/pos-security-integration-final.log`, APIinventory155templates/213handlers;6securityintegrationtest shu fullsuite ichida (focused6/6 `/tmp/pos-security-focused-retry.log`, budgetfenced fixdan keyingi full191 yakuniy). Typecheck/lint/workerbuild/Webpackproductionbuild exit0 `/tmp/pos-security-{type,lint,worker}-final2.log`, `/tmp/pos-security-build-final.log`. NextdefaultTurbopack sandbox localport cheklovi uchun hujjatdagi Webpack flag ishlatildi, defaultdeploybuild o‘zgarmadi.
+
+`86`fresh+legacy migrations `/tmp/pos-security-migrations-final.log`; encryptedrestore `/tmp/pos-security-backup-final.log`: security event/pendingoutbox+deadjob/sourceSession+stockfreeze+debt+protectedimage recovered, economiccountsunchanged, RTO7s/fixtureRPO0, existingDBoverwriteguard. `POS_E2E_ALL_BROWSERS=1 npm run test:e2e -- --grep 'Security history|Background jobs UI'`6/6 Chromium/Firefox/WebKit `/tmp/pos-security-browser.log`. Actual browserformdeviceB login, actual compiledproductionNodeworker deliveryfault3dead→UIoriginalretry lostACK/reconcile→workeronce inbox1, readACKlost→GETreadAt/Operation1/badge1→0, reload/actualrevokedSessionhistory; oldjobsworkerretry regression ham passed. Native delivery toaffected ownaccount, tashqi servisga so‘rov yo‘q.
+
+Review yangi tuzatishlari: deadalert uchun retry yetishmasligi086additiveguard/service/UI bilan; loginresponse oldrole snapshoti transactionrole bilan; passivpoll idleuzaytirishi gateway+handler no-touch bilan tuzatildi va test qilindi. Applied085/086 migrationlar o‘zgarmas. Qabuldan oldingi190tests/85restore final86/191dalil o‘rnida ishlatilmadi. Realhosting/liveDB/deploy/vendor/hardware/envread/AIcommit yo‘q. Productionda existingjobsworker ishga tushirilishi kerak; OPSexternalhosting/MFA/reset alohida ochiq bandlar.
+
+Versiya HEAD0bb58a44212068f8bfaeb592d7473e5cce94ed9d+dirtytree. Qabul sourceSHA256:
+
+```text
+eefb55f38769de7e631ece6d08e0d62cc1d02f0a4538c1e1009e01ce5ea417b4  src/server/security/service.ts
+6995858223745994f9b00c11a0a9d5b42db5813a9f2d0df200fe88960940e083  src/server/auth/session.ts
+2af5844a56c72cb6e570744c2e4d1b972b950410602a38557bca48495fdeb97b  src/app/api/auth/login/route.ts
+4ee8e062c7b2a8716438234238e0ff53a3dfa506d61189acbea71fced0e0ecfa  src/components/security/SecurityHistory.tsx
+03067a2d4c9b2540fe9f41f0657db3cfa4218fa9590d26a91e6a903bc5f18455  src/components/security/SecurityNoticeBadge.tsx
+25c96024ec67df50fcba598d46727e3f036b83011188df2e48214cea5d73807d  prisma/migrations/202610090085_security_events/migration.sql
+61b2658d937df27717fc2b4788705c27ff1950159b3472f2eca5acefc8614a37  prisma/migrations/202610090086_security_notice_retry/migration.sql
+89a950325786847d0a9d9d3a3bd709c04141a04e1fd3e9fac6cce1a08f8cc537  tests/security-events.integration.test.ts
+a75c2abf8dd961dab1ced97bc626dd6621d93dc025cb6827ae8f8ee5bd358c5a  scripts/workers/jobs.ts
+```

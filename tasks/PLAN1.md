@@ -798,7 +798,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-02.09** — Sessiyalar va xavfsizlik hodisalari tarixi; shubhali kirish haqida bildirishnoma.
+- [x] **SEC-02.09** — Sessiyalar va xavfsizlik hodisalari tarixi; shubhali kirish haqida bildirishnoma.
 
   **Texnologiya:** Prisma SecurityEvent/Session, worker outbox.
 
@@ -1358,7 +1358,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `RET-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RET-01.08** — Tovar almashtirishni original qaytarish + yangi savdo sifatida bog‘lash.
+- [x] **RET-01.08** — Tovar almashtirishni original qaytarish + yangi savdo sifatida bog‘lash.
 
   **Texnologiya:** Prisma relation va TypeScript exchange workflow.
 
@@ -1496,7 +1496,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CAT-01.08** — Excel/CSV import, oldindan ko‘rish, dublikat/xato qatorlar hisoboti, eksport.
+- [x] **CAT-01.08** — Excel/CSV import, oldindan ko‘rish, dublikat/xato qatorlar hisoboti, eksport.
 
   **Texnologiya:** T03 ExcelJS, Zod, PostgreSQL import staging, Node streams.
 
@@ -1724,7 +1724,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-02.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-02.05** — Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish.
+- [x] **INV-02.05** — Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish.
 
   **Texnologiya:** Prisma location/reservation models, SQL conditional reserve.
 
@@ -2982,7 +2982,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `OFF-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-02.03** — Offline qoldiqni bir nechta kassada mutlaq kafolatlab bo‘lmasligini siyosat bilan hal qilish: rezerv, limit yoki ruxsatli manfiy qoldiq.
+- [x] **OFF-02.03** — Offline qoldiqni bir nechta kassada mutlaq kafolatlab bo‘lmasligini siyosat bilan hal qilish: rezerv, limit yoki ruxsatli manfiy qoldiq.
 
   **Texnologiya:** Prisma reservations, PostgreSQL stock policy, local limits.
 
@@ -2998,7 +2998,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `OFF-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OFF-02.04** — Eskirgan narx, nasiya limiti, bloklangan xodim va smena uchun alohida cheklov.
+- [x] **OFF-02.04** — Eskirgan narx, nasiya limiti, bloklangan xodim va smena uchun alohida cheklov.
 
   **Texnologiya:** PostgreSQL signed offline lease, IndexedDB snapshots, Node crypto.
 
@@ -3170,7 +3170,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
 #### UX-01 — mahsulotdan foydalanish sifati [P1]
 
-- [ ] **UX-01.01** — Birlamchi sozlash: tashkilot → filial/kassa → import → boshlang‘ich qoldiq → sinov savdo.
+- [x] **UX-01.01** — Birlamchi sozlash: tashkilot → filial/kassa → import → boshlang‘ich qoldiq → sinov savdo.
 
   **Texnologiya:** React wizard, Prisma onboarding progress, Zod.
 
@@ -3713,7 +3713,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-02.04** — Navbatdagi ishlarni takrorlash va yechilmagan ishlar ro‘yxati.
+- [x] **OPS-02.04** — Navbatdagi ishlarni takrorlash va yechilmagan ishlar ro‘yxati.
 
   **Texnologiya:** PostgreSQL Job/outbox, Node worker, React admin.
 

@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (phone: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await api.auth.login({ phone, password });
+      const res = await api.auth.login({ phone, password, deviceId:deviceId() });
       if (res.data) {
         setAuthData(res.data);
       }

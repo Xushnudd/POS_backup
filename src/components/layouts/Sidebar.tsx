@@ -35,6 +35,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {href:'/onboarding',label:'Birlamchi sozlash',icon:faGear,roles:['owner']},
+  {href:'/jobs',label:'Fon ishlari',icon:faGear,roles:['owner']},
   {
     href: '/pos',
     label: 'POS Kassa',

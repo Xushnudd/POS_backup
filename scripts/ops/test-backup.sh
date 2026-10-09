@@ -73,6 +73,11 @@ INSERT INTO "StockCountReading" (id,"lineId",round,quantity,"countedBy") VALUES 
 INSERT INTO "StockFreeze" ("storeId","productId","countId") VALUES (:'fixture',:'fixture',:'fixture');
 INSERT INTO "Customer" (id,"organizationId","fullName",phone,"creditLimit","updatedAt") VALUES (:'fixture',:'fixture','Ledger fixture',:'fixture',100,NOW());
 INSERT INTO "DebtEntry" (id,"organizationId","customerId","sourceType","sourceId",amount,"actorId","effectiveAt","dueAt") VALUES (:'fixture',:'fixture',:'fixture','opening_debt',:'fixture',3.75,:'fixture','2026-01-01','2026-02-01');
+INSERT INTO "Session" (id,"organizationId","userId","tokenHash","expiresAt","idleExpiresAt") VALUES (:'fixture',:'fixture',:'fixture',md5(:'fixture')||md5(:'fixture'),NOW()+INTERVAL '1 hour',NOW()+INTERVAL '1 hour');
+INSERT INTO "SecurityEvent" (id,"organizationId","userId",type,suspicious,"sourceSessionId","expiresAt") VALUES (:'fixture',:'fixture',:'fixture','login_failed',TRUE,:'fixture',CURRENT_TIMESTAMP+INTERVAL '90 days');
+INSERT INTO "BackgroundJob" (id,"organizationId",type,payload,state,attempts,"maxAttempts","lastError","expiresAt") VALUES (:'fixture',:'fixture','reconciliation',jsonb_build_object('storeId',:'fixture'),'dead',3,3,'WORK_FAILED',NOW()+INTERVAL '1 hour');
+INSERT INTO "JobAuthorization" (id,"organizationId","jobId",generation,"userId","sessionId",reason) VALUES (:'fixture',:'fixture',:'fixture',0,:'fixture',:'fixture','Backup fixture original authorization');
+INSERT INTO "JobEvent" (id,"jobId",event,attempt,generation,code) VALUES (:'fixture',:'fixture','dead',3,0,'WORK_FAILED');
 COMMIT;
 SQL
 printf 'isolated fixture credentials; never a real secret\n' > "$backup_smoke_dir/isolated-secret"

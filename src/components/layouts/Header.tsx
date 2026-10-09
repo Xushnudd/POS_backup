@@ -18,6 +18,7 @@ import {
   faBolt,
 } from '@fortawesome/free-solid-svg-icons';
 import OwnershipRequests from '@/components/users/OwnershipRequests';
+import SecurityNoticeBadge from '@/components/security/SecurityNoticeBadge';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 
@@ -102,6 +103,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
       {/* Right: Quick POS link, User profile & Logout */}
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <SecurityNoticeBadge/>
         {businesses.length>1 && <select aria-label="Biznesni almashtirish" value={organization?.id??''} disabled={switching} onChange={e=>{void switchBusiness(e.target.value);}} className="max-w-24 sm:max-w-36 min-w-0 text-xs border rounded-lg p-2">
           {businesses.map(business=><option key={business.id} value={business.id}>{business.name}</option>)}
         </select>}

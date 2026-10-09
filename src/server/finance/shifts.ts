@@ -39,6 +39,7 @@ export async function openShift(context:TokenPayload,input:z.infer<typeof openSc
 export async function closeShift(context:TokenPayload,id:string,input:z.infer<typeof closeSchema>) {
  return runOperation(context,'shift.close',input.approvalRequestId??input.operationId??id,input.approvalRequestId||input.operationId?{shiftId:id,...input}:input,async tx=>{
   const shift=await requireOpenShift(tx,context,id,true)
+  if(await tx.offlineCashLease.count({where:{shiftId:shift.id,organizationId:context.organizationId,state:'issued'}}))throw new AccessError(409,'UNRESOLVED_OFFLINE_CASH','Offline pul/tovar natijalarini avval hal qiling')
   if (await tx.sale.count({where:{shiftId:id,status:'draft'}})) throw new AccessError(409,'OPEN_DRAFTS','Qoralama savdolarni yakunlang yoki bekor qiling')
   if (await tx.payment.count({where:{shiftId:id,status:{in:['pending','unknown']}}})) throw new AccessError(409,'UNRESOLVED_PAYMENTS')
   const payments=await tx.payment.findMany({where:{shiftId:id,paymentType:'cash',status:'recorded'}})

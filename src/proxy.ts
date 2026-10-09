@@ -6,4 +6,4 @@ export function proxy(request:NextRequest){
  const incoming=new Headers(request.headers);incoming.set('x-nonce',nonce);incoming.set('Content-Security-Policy',csp)
  const response=NextResponse.next({request:{headers:incoming}});response.headers.set('Content-Security-Policy',csp);response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Referrer-Policy','same-origin');response.headers.set('X-Frame-Options','SAMEORIGIN');response.headers.set('Cache-Control','private, no-store');return response;
 }
-export const config={matcher:['/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|svg|ico|css|js)$).*)']}
+export const config={matcher:['/((?!api/|pwa/|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|svg|ico|css|js)$).*)']}

@@ -1,3 +1,4 @@
+import {commitOfflineCash,commitCashSchema} from '@/server/offline/cash'
 import {recordConflict} from '@/server/sync/reviews'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -7,7 +8,7 @@ import { AccessError, assertRoutePermission } from '@/server/auth/policy'
 import { createDraft, saleDraftSchema, completeSale, completeSchema } from '@/server/sales/service'
 import { returnSale, returnSchema } from '@/server/returns/service'
 import { collectDebt, collectionSchema } from '@/server/payments/collections'
-const schema=z.object({commands:z.array(z.object({operationId:z.string().uuid(),type:z.enum(['sale.create','sale.complete','sale.return','debt.collect']),payload:z.unknown()})).min(1).max(25)})
+const schema=z.object({commands:z.array(z.object({operationId:z.string().uuid(),type:z.enum(['sale.create','sale.complete','sale.return','debt.collect','offline.cash']),payload:z.unknown()})).min(1).max(25)})
 export const POST=withApi(async(request:NextRequest)=>{
  const context=await verifyToken(getRequestToken(request)??'')
  if (!context) throw new AccessError(401,'UNAUTHORIZED')
@@ -17,7 +18,9 @@ export const POST=withApi(async(request:NextRequest)=>{
   try {
    let result:unknown
    const object=z.record(z.string(),z.unknown()).parse(command.payload)
-   if (command.type==='sale.create') {
+   if(command.type==='offline.cash'){
+    result=await commitOfflineCash(context,commitCashSchema.parse({...object,operationId:command.operationId}))
+   } else if (command.type==='sale.create') {
     assertRoutePermission('/api/sales','POST',context.role)
     const data=saleDraftSchema.parse({...object,operationId:command.operationId})
     result=await createDraft(context,data,command.operationId)

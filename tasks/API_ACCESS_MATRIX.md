@@ -1,6 +1,6 @@
 # API vakolat va chegara reyestri
 
-2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir133 template va186 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
+2026-10-08. Bu reyestr route-boundaries.integration.test.ts bilan birga yuritiladi. Test har bir real export qilingan protected HTTP handlerni chaqiradi; yangi route ham avtomatik sinovga kiradi. Hozir146 template va201 handler. Public istisnolar login/register/invitation acceptance/logout hamda health. Public degani CSRF/JSON/hajm limitidan ozod degani emas.
 
 Gateway matritsasi `src/server/auth/policy.ts`: owner/admin serverdagi tenant/store bilan; tashkilotni tahrirlash va xodimlarni boshqarish owner-only. Cashier faqat sales/shifts/products/categories/customers/stores/auth/operations/sync; katalog/mijoz/do‘kon mutatsiyalari yopiq. `/void` manager-only. Ownership recipient GET/accept o‘z persistent requestiga ega. **Gateway allow yakuniy ruxsat emas:** return, corrections, bank deposit, settlement, export/cost, pending-close, foreign actor va branch cheklovlari xizmat ichida ham tekshiriladi. UI yashirish himoya o‘rnini bosmaydi.
 
@@ -188,3 +188,34 @@ Narx/mijoz qo‘shimcha DALlari: price-rules GET manager scoped shared/assigned 
 | /api/customer-groups/assign | POST | owner, tenant active customer/group | common negative inventory + group integration |
 | /api/customer-merges | GET, POST | owner-only legacy diagnosis / settled merge | tenant/admin/session + identity integration |
 | /api/customers/[id]/history | GET | own tenant/store/cashier own receipts, root+aliases | common inventory + identity integration |
+
+| /api/inventory/locations | GET, POST | manager scoped branch locations/reservations; reviewed create | inventory negative192 + reservation role/live tests |
+| /api/inventory/locations/move | POST | manager scoped product/source/destination, stock freeze and exact available | journal/conservation/replay integration |
+| /api/inventory/reservations | POST | manager scoped exact quantities; expiry <=24h | competing holds/tenant/cashier/revoke integration |
+| /api/inventory/reservations/[id]/release | POST | manager scoped original reservation, immutable release | replay/expiry/journal integration |
+| /api/inventory/position | GET | manager live branch/product, bounded zones; no cost/PII | common inventory + formula integration |
+
+Worker expiry organizationId scope, max100/SKIPLOCKED, source actor NULL/system audit; no impersonation. Stock reservation consumption is manager-only for manual holds, source-bound for future cash tickets. Sale completion receives reservationId in its immutable idempotency payload, never trusts client stock balances.
+
+
+Offline cash DAL (2026-10-09): quyidagi gateway yo‘llari owner/admin/cashier business rolelar uchun ko‘rinishi mumkin, ammo yakuniy vakolat live transaction ichida tekshiriladi. Owner branch siyosatini boshqaradi; cashier/admin faqat o‘z source lease/draftidan foydalanadi. Native rate30write/120read per actor/min. Foreign tenant/store/reference, disabled source, expired/changed session, boshqa device/shift/role va arbitrary payment rad. Worker cash-ticket holdni expiry bilan yechmaydi. Owner original cashierga aylantirilmaydi. Full boundary inventory143/198 va dedicated offline PG testlar shu kontraktlarni tekshiradi; **SEC-01.04 exhaustive semantic har-action positive role matritsasi hali ochiq**.
+
+| Route template | HTTP exports | Kirish siyosati | Avtomatik tekshiruv |
+| --- | --- | --- | --- |
+| /api/offline-cash | GET, POST | live branch; owner lists branch / others own leases; issue own current draft/session/device/shift | quota, two devices, exact stock and replay, tenant/source checks |
+| /api/offline-cash/policy | POST | live owner only; current branch | disabled default, amount/TTL validation, idempotency/audit rollback |
+| /api/offline-cash/[id] | GET | original user or owner, same branch; minimal terminal proof | source identity + exact original sale/operation proof |
+| /api/offline-cash/[id]/cancel | POST | live owner actual goods/cash reconciliation; unposted source only | net-refund proof, expiry hold retention, void/replay/no fake payment |
+| /api/offline-cash/[id]/settle | POST | live owner verified original goods+cash/evidence, open source shift | different owner/blocked source/expired lease, original quote/cost, refund/replay/audit |
+| /api/sync | POST | original live session/device for offline.cash; current price/tax/policy/expiry/shift | strict cash-only payload, conflicts durable, atomic sale/payment/stock |
+
+
+Katalog import: POST `/catalog-import/preview` va `/catalog-import`, GET `/catalog-import/export` live owner-only DAL. Preview read-only bounded worker, commit operation+current confirmationHash+SQL unique; other tenant/customer IDs uploadedfiledan foydalanib scope o‘zgartira olmaydi. Full146/201 negativeinventory va dedicatedimport3test owner/actualadmin/cashier/revoke/rollback; SEC-01.04 exhaustive semantic matrix hali ochiq.
+
+Onboarding GET/POST `/api/onboarding`: live owner va own active branch; stale hash/ordered source/immutable checkpoints. Exchange GET/POST `/api/exchanges`, POST `/api/exchanges/preview`: live owner/admin, original sale branch va own current open shift; cashier403. Full149templates/206handlers negativeinventory `/tmp/pos-exchange-integration.log`; actual assigned admin/cashier, tenant/session, auditrollback dedicated4tests. Source sale/customer/product references DALda tekshiriladi, nested replacement organization/register/cashier clientdan olinmaydi. Bu qo‘shimchalar SEC-01.04 barcha semantik amallar matritsasini avtomatik yopmaydi.
+
+Jobs GET/POST `/api/jobs`, GET `/api/jobs/[id]/events`, POST `/api/jobs/[id]/retry`: live owner, tenant/source branch, strict allowlisted reconciliation, active source session and final authorization check. Full152templates/210handlers negativeinventory `/tmp/pos-jobs-integration.log`; dedicated5actual source/role/revoke/claim/recovery/quota/HTTP429/413 cases. Native worker reads stored source, final fence+systemactor=null; actualowner queue/retry actors alohida immutable proof. Worker credential/token frontendga yuborilmaydi.
+
+SEC-02.09: GET `/api/auth/security` va POST `/api/auth/security/read`, `/api/auth/security/retry` owner/admin/cashierning faqat own global accounti. Membership/Session current-context tekshiruvi; history account-wide, org-wide boshqa xodim history accessi yo‘q. NoticeId/EventId source DALda userId bilan bog‘lanadi; raw device/token/phone/IP/UA/hash DTOga chiqmaydi. GET no-touch polling, POST real user action/live runOperation+actor proof. Foreign404, revoked401, retry onlydead/bounded30, read/rate60/30 va retry10/min. Worker systemactor=null, source recipient Event.userId, global inactive user skipped, Event/Notice unique+SQL immutable guards. Dedicated security PG va HTTPS uchbrowser qabul artefaktlari EXECUTION_STATUSdagi individual protokolda beriladi; SEC-01.04 umumiy matritsa alohida ochiq qoladi.
+
+SEC-02.09 yakuniy qabul: full155templates/213handlers va191PG tests `/tmp/pos-security-integration-final.log`,6browser `/tmp/pos-security-browser.log`. Har biri actualownsource/liveauthority va negative route inventory bilan; umumiy SEC-01.04 holati o‘zgartirilmagan.

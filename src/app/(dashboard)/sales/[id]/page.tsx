@@ -18,6 +18,7 @@ import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ReceiptPreview from '@/components/pos/ReceiptPreview';
 import ReturnHistory from '@/components/pos/ReturnHistory';
+import ExchangeHistory from '@/components/pos/ExchangeHistory';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPrint, faBan } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '@/context/NotificationContext';
@@ -203,6 +204,7 @@ export default function SaleDetailPage() {
             Chekni chop etish
           </Button>
 
+          {role !== 'cashier' && ['completed','partially_returned'].includes(sale.status) && <Link href={'/sales/'+sale.id+'/exchange'}>Tovar almashtirish</Link>}
           {role !== 'cashier' && (returnUnknown||['completed','partially_returned'].includes(sale.status)) && <Button onClick={()=>setReturnOpen(true)}>Qaytarish</Button>}
           {role !== 'cashier' && sale.status === 'draft' && (
             <Button
@@ -273,6 +275,7 @@ export default function SaleDetailPage() {
       </Card>
 
       <ReturnHistory key={sale.id} saleId={sale.id} timezone={organization?.timezone??'Asia/Tashkent'} version={returnVersion}/>
+      {role !== 'cashier' && <ExchangeHistory saleId={sale.id}/>}
       <ReceiptPreview
         copy
         isOpen={isReceiptOpen}

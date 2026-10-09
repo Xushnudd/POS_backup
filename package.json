@@ -14,7 +14,9 @@
     "test:integration": "node scripts/test.cjs --integration",
     "test:e2e": "playwright test",
     "worker:build": "tsc -p tsconfig.worker.json",
-    "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js"
+    "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js",
+    "prebuild": "node scripts/build-offline.cjs",
+    "worker:jobs": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/jobs.js"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",
@@ -25,11 +27,12 @@
     "@zxing/browser": "^0.2.1",
     "bcryptjs": "^3.0.3",
     "bwip-js": "^4.11.4",
+    "exceljs": "4.4.0",
     "jsonwebtoken": "^9.0.3",
     "next": "16.3.8",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "zod": "^4.5.4"
   },
   "devDependencies": {

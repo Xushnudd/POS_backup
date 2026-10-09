@@ -27,7 +27,7 @@ export function setSessionCookie(response: NextResponse, token: string) {
 export function getRequestToken(request: NextRequest) {
   return request.cookies.get(SESSION_COOKIE)?.value ?? null
 }
-export async function verifySession(token: string) {
+export async function verifySession(token: string, options?:{touch?:boolean}) {
   if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return null
   const now = new Date()
   const session = await prisma.session.findUnique({ where: { tokenHash: sessionHash(token) }, include: { user: true } })
@@ -40,11 +40,14 @@ export async function verifySession(token: string) {
   // PIN sessions stay cashier-only in the assigned branch even after role changes.
   if(session.authenticationMethod==='pin' && (membership.role!=='cashier'||!membership.pinHash||!membership.userStores.some(x=>x.storeId===session.pinStoreId&&x.store.isActive&&x.store.organizationId===session.organizationId)))return null;
   // A conditional touch cannot resurrect revoked or expired sessions.
-  const touched = await prisma.session.updateMany({
-    where: { id: session.id, revokedAt: null, idleExpiresAt: { gt: now }, expiresAt: { gt: now } },
-    data: { idleExpiresAt: new Date(Math.min(session.expiresAt.getTime(), now.getTime() + IDLE_MS)) },
-  })
-  if (!touched.count) return null
+  const liveWhere={id:session.id,revokedAt:null, idleExpiresAt:{gt:now},expiresAt:{gt:now}}
+  if(options?.touch===false){
+    // Automated account-status polling must not count as user activity.
+    if(!await prisma.session.count({where:liveWhere}))return null
+  }else{
+    const touched=await prisma.session.updateMany({where:liveWhere,data:{idleExpiresAt:new Date(Math.min(session.expiresAt.getTime(),now.getTime()+IDLE_MS))}})
+    if(!touched.count)return null
+  }
   return {
     userId: session.userId, organizationId: session.organizationId,
     organizationUserId: membership.id, role: membership.role,

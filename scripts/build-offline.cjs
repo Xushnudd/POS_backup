@@ -1,0 +1,5 @@
+const ts=require('typescript');
+const {readFileSync,writeFileSync}=require('node:fs');
+const modules=[['src/lib/offline-cash-crypto.ts','cash-crypto.js'],['src/lib/offline-cash-store.ts','cash-store.js'],['src/offline/cash-screen.ts','cash-screen.js']];
+const imports={'./offline-cash-crypto':'./cash-crypto.js','../lib/offline-cash-store':'./cash-store.js','../lib/offline-cash-crypto':'./cash-crypto.js'};
+for(const [source,target] of modules){let output=ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.ESNext,strict:true},fileName:source,reportDiagnostics:true});if(output.diagnostics?.some(d=>d.category===ts.DiagnosticCategory.Error))throw new Error('Offline public module compilation failed: '+source);let code=output.outputText.replace(/from ['"]([^'"]+)['"]/g,(statement,path)=>{if(!imports[path])throw new Error('Non-public offline import: '+path);return "from '"+imports[path]+"'"});writeFileSync('public/pwa/'+target,code)}

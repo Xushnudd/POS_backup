@@ -123,6 +123,7 @@ async function handlePUT(
       await tx.$queryRaw`SELECT id FROM "Sale" WHERE id = ${id} FOR UPDATE`
       const current = await tx.sale.findUniqueOrThrow({ where: { id, AND: tenantScope("Sale", payload) }, include: { items: true } })
       if (current.status !== 'draft') throw new Error('INVALID_STATUS')
+      if(await tx.offlineCashLease.findFirst({where:{saleId:id,state:'issued'}}))throw new AccessError(409,'OFFLINE_TICKET_PENDING','Offline ticketni avval hal qiling')
       if (validatedData.customerId && !await tx.customer.findFirst({where:{id:validatedData.customerId,organizationId:payload.organizationId,isActive:true}})) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
       const receiptPercent=validatedData.discountPercent!==undefined?validatedData.discountPercent??undefined:validatedData.discountAmount===undefined?current.discountPercent?.toFixed():undefined
       const preparedDiscount=validatedData.discountAmount??(receiptPercent===undefined?current.discountAmount:0)

@@ -2,6 +2,14 @@
 
 Kichik va o‘rta bizneslar uchun brauzerda ishlovchi savdo va ombor boshqaruvi tizimi. MVPning vazifasi: kassada savdoni tez rasmiylashtirish, qoldiqni aniq yuritish va egaga kunlik moliyaviy ko‘rinish berish.
 
+Amaldagi ishlab chiqish holati [EXECUTION_STATUS.md](tasks/EXECUTION_STATUS.md)da yuritiladi. Egasi `/products/import` orqali CSV/XLSXni oldindan tekshiradi, xato qatorlarni ko‘radi va yaroqli yangi mahsulotlarni tasdiqlaydi; mavjud narx/qoldiq avtomatik almashtirilmaydi. `/onboarding` har filialning haqiqiy import, tasdiqlangan boshlang‘ich qoldiq, kassir va odatiy savdo bosqichlarini qayta davom ettirish imkonini beradi. `/training` mashqi haqiqiy pul/qoldiqka ta’sir qilmaydi.
+
+Savdo sahifasidagi “Tovar almashtirish” owner/admin uchun original qaytarish va yangi savdoni bir tranzaksiyada bog‘laydi. Naqd/nasiya farqi oldindan ko‘riladi; haqiqiy berilgan naqd va qaytim ikkala savdoda ko‘rinadi. Yetarli qoldiq yoki nasiya limiti bo‘lmasa qaytarish ham yozilmaydi. Noma’lum javobda saqlangan original amalni tekshiring. Bu oqim ichki naqd/nasiya uchun; real fiskal/Click/hardware integratsiyalari hozir ulanmagan.
+
+`/security` hisobning90kunlik xavfsizlik/sessiya tarixini, shubhali kirish xabarlarini va o‘qilganlik holatini ko‘rsatadi. Bildirishnoma ichki inboxga jobs worker orqali atomik yetkaziladi; yetkazish xatosiga auditli cheklangan retry bor. Background badge sessiya idle muddatini uzaytirmaydi. 085/086 migration va worker ishga tushirish tartibi [OPERATIONS_RUNBOOK.md](tasks/OPERATIONS_RUNBOOK.md)da.
+
+Owner `/jobs`da ichki hisob solishtirishni fon navbatiga qo‘yadi, xatoli ish tarixini ko‘radi va sabab bilan qayta tasdiqlaydi. `npm run worker:build`dan keyin `npm run worker:jobs` navbatni bajaradi; productionda worker ham alohida ishga tushiriladi. Uchta cheklangan urinish, lease/heartbeat va original idempotency kaliti duplicate natijani himoya qiladi. Batafsil ishga tushirish va tiklash tartibi [OPERATIONS_RUNBOOK.md](tasks/OPERATIONS_RUNBOOK.md)da.
+
 ## MVP doirasi
 
 | Modul | MVPda bo‘ladi | Natija |
@@ -1118,3 +1126,10 @@ Narx darajalari `/settings/prices`da: chakana, ulgurji, guruh va individual mijo
 Mijoz valid telefoni normalizatsiya qilinadi va faol tenant kartalarida dublikatdan himoyalanadi. Eski ambiguous kartalar avtomatik tanlanmaydi/o‘chirilmaydi: egasi `/customers/duplicates` orqali ko‘radi. `/customers/:id/history` original cheklar/qisman qaytarmalar va bog‘langan kartalarni ko‘rsatadi; qoralama va qarzi yopilgan source reviewed durable merge bilan inactive alias bo‘ladi, moliyaviy hujjatlar original IDlarda qoladi. Ochiq qarz ko‘chirilmaydi, avval original ledgerda yakunlanadi. Guruh yangi savdo narx darajasini belgilaydi, eski receiptni o‘zgartirmaydi.
 
 Receipt/history/FK indekslari066–073da har biri alohida `CREATE INDEX CONCURRENTLY` migration. Ularni boshqa migration bilan umumiy SQL transactionga o‘ramang. Live rolloutdan oldin staging restore + yangi/legacy migration drill talab qilinadi. Agar concurrent build uzilsa, migration log va `pg_index.indisvalid`ni tekshiring; faqat o‘sha failed, invalid indeksni operator nazoratida `DROP INDEX CONCURRENTLY` qilib, failed migrationni rolled-back qayd etib asl SQLni qayta qo‘llang. Applied migration checksumlari tahrirlanmaydi. Bu repodagi tekshiruvlar isolated test DB uchun; real deployment qilinmagan.
+
+Ombor `/inventory/locations`: zonaga ajratish, exact rezerv, bo‘shatish va tanlangan qoralamani rezerv bilan naqd sotish. Fizik, rezerv, mavjud, zonaga biriktirilmagan va brak alohida; oddiy POS boshqa rezervni yechmaydi. `worker:reconcile` organization-scoped expired manual holdsni100tadan immutable journal bilan yakunlaydi. Migration074/075 eski qoldiqni qayta yozmaydi. Katalog cache o‘zi offline savdo ruxsati emas; offline naqd oqimi quyida.
+
+
+Offline naqd: POSda aniq savatni serverda qoralama qilib saqlang, `/pos/offline`da o‘z filial/kassa/smenangiz uchun ruxsat oling. Default o‘chiq; egasi filialning jami hal qilinmagan summasi limitini va30–300soniya muddatni tasdiqlaydi. Ruxsat aynan bitta savat va bitta naqd to‘lovga; nasiya/karta yoki boshqa savat offline qabul qilinmaydi. Qurilmadagi ticket unlock iborasi bilan shifrlanadi; ibora serverga yuborilmaydi. `/pwa/cash.html` real tarmoq uzilishida ochiladi, bir ticket ikki tabda takroran ishlatilmaydi. Aloqa qaytganda shu sahifada original natijani sinxronlang, noma’lum natijada yangi pul olmang.
+
+Expiry yoki narx/sessiya/smena konflikti original amalni yo‘qotmaydi. Noma’lum tovar rezervi avtomatik bo‘shamaydi, shiftclose/count ham cheklanadi. Egasi `/pos/offline`da haqiqiy tovar/pul qaytarilganini qayd etib draftni bekor qiladi yoki tovar berilgan va cash shu smenaga haqiqatan olinganini dalil bilan tekshirib asl savdoni qayd etadi. Ikkinchi yo‘l original narx/soliq/tannarxni saqlaydi, hisobga olish serverning hozirgi vaqti bilan; actual owner audit/pul qabul qiluvchi, original cashier tarixi saqlanadi. Committed sale qaytarilishi oddiy refund orqali. Bloklangan xodim haqidagi yangi qaror offline qurilmaga darhol yetmaydi; qisqa muddat, summa va stock rezervi xavfni cheklaydi. Tashqi Click/fiskal/hardware bu oqimga ulanmagan.

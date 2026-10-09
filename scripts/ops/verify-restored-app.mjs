@@ -30,8 +30,17 @@ try {
   const download=await files.GET(request('files/'+fixture),context);assert.equal(download.status,200);assert.equal(download.headers.get('Content-Type'),'image/webp');
   assert.equal(createHash('sha256').update(Buffer.from(await download.arrayBuffer())).digest('hex'),asset.sha256);
   assert.equal((await prisma.product.findUniqueOrThrow({where:{id:fixture}})).imageUrl,'/api/files/'+fixture);
+  const jobs=require('../../.test-build/src/app/api/jobs/route.js');
+  const restoredJobs=await jobs.GET(request('jobs?state=dead'));assert.equal(restoredJobs.status,200);const restoredJob=(await restoredJobs.json()).data.find(job=>job.id===fixture);
+  assert.ok(restoredJob);assert.equal(restoredJob.attempts,3);assert.equal(restoredJob.lastError,'WORK_FAILED');assert.equal('leaseToken'in restoredJob,false);
+  assert.equal((await prisma.jobAuthorization.findUniqueOrThrow({where:{jobId_generation:{jobId:fixture,generation:0}}})).sessionId,fixture);
+  assert.equal((await prisma.jobEvent.findUniqueOrThrow({where:{id:fixture}})).event,'dead');
+  const security=require('../../.test-build/src/app/api/auth/security/route.js');
+  const restoredSecurity=await security.GET(request('auth/security?limit=100'));assert.equal(restoredSecurity.status,200);const events=(await restoredSecurity.json()).data.events;
+  assert.ok(events.some(event=>event.id===fixture&&event.type==='login_failed'&&event.suspicious&&event.deliveryState==='pending'));
+  assert.equal('clientHash' in events[0],false);assert.equal((await prisma.securityNoticeOutbox.findUniqueOrThrow({where:{eventId:fixture}})).state,'pending');
   assert.deepEqual(await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]),before);
-  console.info('PASS: restored application authenticates scoped fixture, reads frozen count and exact historical debt/due date; protected image bytes/SHA256/link recovered; economic row counts unchanged; no external calls');
+  console.info('PASS: restored application authenticates scoped fixture, reads frozen count and exact historical debt/due date; protected image bytes/SHA256/link and dead-job/source-authorization/event history and security event/pending outbox recovered; economic row counts unchanged; no external calls');
 } finally {
   if(session)await prisma.session.delete({where:{id:session.id}});
   await prisma.$disconnect();

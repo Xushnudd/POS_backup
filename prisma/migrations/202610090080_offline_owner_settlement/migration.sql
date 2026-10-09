@@ -1,0 +1,8 @@
+ALTER TABLE "OfflineCashLease" ADD COLUMN "settlementProof" JSONB,ADD COLUMN "settledBy" TEXT REFERENCES "User"(id),ADD COLUMN "settledAt" TIMESTAMP(3);
+ALTER TABLE "OfflineCashLease" ADD CONSTRAINT offline_owner_settlement_shape CHECK(("settlementProof" IS NULL AND "settledBy" IS NULL AND "settledAt" IS NULL) OR (state='consumed' AND "settlementProof" IS NOT NULL AND "settledBy" IS NOT NULL AND "settledAt" IS NOT NULL));
+CREATE FUNCTION offline_owner_settlement_guard() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
+ IF NEW."settlementProof" IS NOT NULL AND (TG_OP='INSERT' OR OLD.state<>'issued' OR NOT EXISTS(SELECT 1 FROM "OrganizationUser" WHERE "organizationId"=NEW."organizationId" AND "userId"=NEW."settledBy" AND role='owner' AND "isActive")) THEN RAISE EXCEPTION 'Live owner settlement required';END IF;RETURN NEW;
+END $$;
+CREATE TRIGGER offline_owner_settlement_guard BEFORE INSERT OR UPDATE ON "OfflineCashLease" FOR EACH ROW EXECUTE FUNCTION offline_owner_settlement_guard();
+ALTER TABLE "OfflineCashLease" ADD CONSTRAINT offline_owner_settlement_proof CHECK("settlementProof" IS NULL OR (
+ "settlementProof"->>'approvedBy'="settledBy" AND "settlementProof"->>'leaseId'=id AND "settlementProof"->>'cashOperationId'="cashOperationId" AND "settlementProof"->>'originalUserId'="userId" AND "settlementProof"->>'quotedSnapshotHash'="payloadHash" AND "settlementProof"->>'goodsDeliveredAndNetCashReceived'='true' AND length(trim("settlementProof"->>'reason'))>=3 AND length(trim("settlementProof"->>'evidenceReference'))>=3 AND ("settlementProof"->>'observedSaleAt')::timestamptz>="createdAt" AND ("settlementProof"->>'observedSaleAt')::timestamptz<"expiresAt" AND ("settlementProof"->>'cashTendered')::numeric>=(payload->>'totalAmount')::numeric));

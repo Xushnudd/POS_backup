@@ -84,7 +84,9 @@ export async function requireOpenShift(tx:Prisma.TransactionClient,context:Token
   return shift
 }
 export async function createDraft(context:TokenPayload,input:DraftInput,key:string) {
-  return runOperation(context,'sale.create',key,input,async tx=>{
+  return runOperation(context,'sale.create',key,input,tx=>createDraftTx(tx,context,input))
+}
+export async function createDraftTx(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput) {
     const shift=await requireOpenShift(tx,context,input.shiftId)
     if (shift.registerId!==input.registerId || shift.register.storeId!==input.storeId || input.organizationId!==context.organizationId) throw new AccessError(409,'INVALID_RELATION')
     if (input.customerId && !await tx.customer.findFirst({where:{id:input.customerId,organizationId:context.organizationId,isActive:true}})) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
@@ -98,14 +100,17 @@ export async function createDraft(context:TokenPayload,input:DraftInput,key:stri
     const sale=await tx.sale.create({data:{organizationId:context.organizationId,storeId:input.storeId,registerId:input.registerId,shiftId:input.shiftId,cashierId:context.userId,customerId:input.customerId,receiptNo:'POS-'+counter.value.toFixed(0),note:input.note,sellerId:input.sellerId,serviceType:input.serviceType,...authorization,discountPercent:input.discountPercent===undefined?null:decimal(input.discountPercent),...totals,items:{create:rows}},include:{items:true}})
     await audit(tx,context,'Sale',sale.id,'draft_created')
     return sale
-  })
 }
 export async function completeSale(context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string) {
-  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.reservationId?{reservationId:input.reservationId}:{}),...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},async tx=>{
+  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.reservationId?{reservationId:input.reservationId}:{}),...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},tx=>completeSaleTx(tx,context,saleId,input,key))
+}
+export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string,allowedOfflineLeaseId?:string,ownerReviewedOffline=false) {
     await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
     const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:true,organization:true}})
     if (!sale) throw new AccessError(404,'NOT_FOUND')
     if (sale.status!=='draft') throw new AccessError(409,'INVALID_STATUS','Savdo allaqachon yakunlangan')
+    const offlineLease=await tx.offlineCashLease.findFirst({where:{saleId:sale.id,state:'issued'}});if(offlineLease&&offlineLease.id!==allowedOfflineLeaseId)throw new AccessError(409,'OFFLINE_TICKET_PENDING','Offline ticketni sinxronlang yoki rahbar bilan hal qiling')
+    if(ownerReviewedOffline){const proof=allowedOfflineLeaseId?await tx.offlineCashLease.findFirst({where:{id:allowedOfflineLeaseId,organizationId:context.organizationId,saleId:sale.id,state:'consumed',settledBy:context.userId,settlementProof:{not:Prisma.DbNull}}}):null;if(context.role!=='owner'||!proof||input.reservationId!==proof.id||input.payments.length!==1||input.payments[0].paymentType!=='cash')throw new AccessError(403,'OWNER_REQUIRED')}
     await requireOpenShift(tx,context,sale.shiftId)
     if (!sale.items.length) throw new AccessError(400,'EMPTY_SALE')
     const authorization=await enforceDiscountLimit(tx,context,sale.items,draftTotals(sale.items,sale.discountAmount).totalAmount,sale.discountReason,sale.discountPolicySnapshot!==null)
@@ -126,25 +131,24 @@ export async function completeSale(context:TokenPayload,saleId:string,input:z.in
       if (decimal(debt._sum.amount??0).add(credit).gt(customer.creditLimit)) throw new AccessError(409,'CREDIT_LIMIT','Nasiya limiti oshdi')
       await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit,actorId:context.userId,dueAt:input.creditDueAt?new Date(input.creditDueAt):undefined}})
     }
-    const reservedSources=input.reservationId?await consumeStock(tx,context,input.reservationId,sale,key):undefined
+    const reservedSources=input.reservationId?await consumeStock(tx,context,input.reservationId,sale,key,ownerReviewedOffline):undefined
     const allocation=allocateMoney(sale.discountAmount,sale.items.map(x=>({id:x.id,weight:x.lineTotal})))
     const currentProducts=await tx.product.findMany({where:{id:{in:sale.items.map(i=>i.productId)},organizationId:context.organizationId}})
-    const currentPrices=await resolvePrices(tx,context,sale.items.map(item=>({productId:item.productId,quantity:item.quantity,basePrice:currentProducts.find(p=>p.id===item.productId)?.salePrice??decimal(0)})),{storeId:sale.storeId,customerId:sale.customerId})
-    const taxFor=await productTaxes(tx,context.organizationId,currentProducts.map(p=>p.taxProfileId))
+    const currentPrices=ownerReviewedOffline?new Map(sale.items.map(item=>[item.productId,{unitPrice:item.unitPrice,priceRuleId:item.priceRuleId}])):await resolvePrices(tx,context,sale.items.map(item=>({productId:item.productId,quantity:item.quantity,basePrice:currentProducts.find(p=>p.id===item.productId)?.salePrice??decimal(0)})),{storeId:sale.storeId,customerId:sale.customerId})
+    const taxFor=ownerReviewedOffline?null:await productTaxes(tx,context.organizationId,currentProducts.map(p=>p.taxProfileId))
     for (const item of [...sale.items].sort((a,b)=>a.productId.localeCompare(b.productId))) {
-      const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,isActive:true}})
+      const product=await tx.product.findFirst({where:{id:item.productId,organizationId:context.organizationId,...(ownerReviewedOffline?{}:{isActive:true})}})
       if (product && item.unit && product.unit!==item.unit) throw new AccessError(409,'UNIT_CHANGED','Mahsulot birligi o‘zgardi; savatni yangilang')
-      if (!product || !currentPrices.get(item.productId)!.unitPrice.eq(item.unitPrice) || (item.priceSnapshot!==null && currentPrices.get(item.productId)!.priceRuleId!==item.priceRuleId)) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; qayta tasdiqlang',undefined,{stage:'sale',productId:item.productId,productName:item.productName,previousPrice:item.unitPrice,currentPrice:product?currentPrices.get(item.productId)!.unitPrice:null})
+      if (!product || (!ownerReviewedOffline&&(!currentPrices.get(item.productId)!.unitPrice.eq(item.unitPrice) || (item.priceSnapshot!==null && currentPrices.get(item.productId)!.priceRuleId!==item.priceRuleId)))) throw new AccessError(409,'PRICE_CHANGED','Narx o‘zgardi; qayta tasdiqlang',undefined,{stage:'sale',productId:item.productId,productName:item.productName,previousPrice:item.unitPrice,currentPrice:product?currentPrices.get(item.productId)!.unitPrice:null})
       const balance=await tx.inventoryBalance.findUnique({where:{storeId_productId:{storeId:sale.storeId,productId:item.productId}}})
       if(!sale.organization.allowNegativeStock && item.quantity.gt(balance?.quantity??0))throw new AccessError(409,'INSUFFICIENT_STOCK','Yetarli qoldiq yo‘q; miqdorni tekshiring',undefined,{stage:'sale',productId:item.productId,productName:item.productName,requestedQuantity:item.quantity,availableQuantity:balance?.quantity??decimal(0)})
-      const currentTax=taxFor(product.taxProfileId)
-      if(item.taxVersionId!==currentTax.taxVersionId||item.taxMode!==currentTax.taxMode||!item.taxRate.eq(currentTax.taxRate))throw new AccessError(409,'TAX_CHANGED','Soliq siyosati o‘zgardi; original qoralamani tekshiring va qayta tasdiqlang')
-      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:sale.netAmount===null?allocation[item.id]:item.receiptDiscount,unitCost:product.costPrice}})
-      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock,...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
+      const currentTax=taxFor?.(product.taxProfileId)
+      if(!ownerReviewedOffline&&(!currentTax||item.taxVersionId!==currentTax.taxVersionId||item.taxMode!==currentTax.taxMode||!item.taxRate.eq(currentTax.taxRate)))throw new AccessError(409,'TAX_CHANGED','Soliq siyosati o‘zgardi; original qoralamani tekshiring va qayta tasdiqlang')
+      await tx.saleItem.update({where:{id:item.id},data:{receiptDiscount:sale.netAmount===null?allocation[item.id]:item.receiptDiscount,unitCost:ownerReviewedOffline?item.unitCost:product.costPrice}})
+      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:ownerReviewedOffline?item.unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock,...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
     }
     for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange,...authorization},include:{items:true,payments:true}})
     await audit(tx,context,'Sale',sale.id,'completed',{totalAmount:sale.totalAmount,payments:input.payments,cashTendered:tender,cashChange})
     return updated
-  })
 }

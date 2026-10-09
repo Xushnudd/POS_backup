@@ -12,6 +12,7 @@ export const POST=withApi(async(request:NextRequest,{params}:{params:Promise<{id
   await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${id} FOR UPDATE`
   const sale=await tx.sale.findFirst({where:{id,AND:tenantScope('Sale',context)}})
   if (!sale) throw new AccessError(404,'NOT_FOUND')
+  if(await tx.offlineCashLease.findFirst({where:{saleId:id,state:'issued'}}))throw new AccessError(409,'OFFLINE_TICKET_PENDING','Offline ticketni avval hal qiling')
   if (sale.status!=='draft') throw new AccessError(409,'INVALID_STATUS')
   const result=await tx.sale.update({where:{id},data:{status:'voided',voidedAt:new Date(),voidedBy:context.userId}})
   await audit(tx,context,'Sale',id,'draft_voided')

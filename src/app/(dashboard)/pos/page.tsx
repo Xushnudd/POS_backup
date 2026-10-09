@@ -495,7 +495,7 @@ export default function PosPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={parkDraft} disabled={!localReady||hasPendingCheckout||isProcessingPayment||!activeShift||!items.length||connection.state!=='online'}>Qoralamani serverda saqlash</Button><a href="/drafts" className="text-blue-800 underline p-2">Server qoralamalari</a><a href="/sync-review" className="text-blue-800 underline p-2">Navbat va konfliktlar</a><a href="/help" className="text-blue-800 underline p-2">Yordam</a></div>
+      <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={parkDraft} disabled={!localReady||hasPendingCheckout||isProcessingPayment||!activeShift||!items.length||connection.state!=='online'}>Qoralamani serverda saqlash</Button><a href="/pos/offline" className="text-blue-800 underline p-2">Offline ruxsat olish</a><a href="/drafts" className="text-blue-800 underline p-2">Server qoralamalari</a><a href="/sync-review" className="text-blue-800 underline p-2">Navbat va konfliktlar</a><a href="/help" className="text-blue-800 underline p-2">Yordam</a></div>
       {draftToResume&&<Button disabled={!localReady||!activeShift||isProcessingPayment} onClick={openServerDraft}>Tanlangan server qoralamasini ochish</Button>}
       {parkedMessage&&<p role="status">{parkedMessage}</p>}
       <label>Chek izohi<textarea aria-label="Chek izohi" maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>

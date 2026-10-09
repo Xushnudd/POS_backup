@@ -10,6 +10,11 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+  securityEvents SecurityEvent[]
+  backgroundJobs BackgroundJob[]
+  jobAuthorizations JobAuthorization[]
+  exchanges SaleExchange[]
+  onboardingCheckpoints OnboardingCheckpoint[]
   priceRules         PriceRule[]
   customerGroups     CustomerGroup[]
   supportGrants      SupportGrant[]
@@ -63,6 +68,10 @@ model Organization {
 }
 
 model User {
+  securityEvents SecurityEvent[]
+  jobAuthorizations JobAuthorization[]
+  exchanges SaleExchange[]
+  onboardingCheckpoints OnboardingCheckpoint[]
   platformOperator      PlatformOperator?
   approvedSupportGrants SupportGrant[]      @relation("SupportApprover")
   financialDocuments FinancialDocument[]
@@ -115,6 +124,8 @@ model OrganizationUser {
 }
 
 model Store {
+  exchanges SaleExchange[]
+  onboardingCheckpoints OnboardingCheckpoint[]
   purchaseOrders PurchaseOrder[]
   supplierInvoices SupplierInvoice[]
   supplierPayments SupplierPayment[]
@@ -511,6 +522,8 @@ model ShiftCorrection {
 }
 
 model Sale {
+  originalExchanges SaleExchange[] @relation("ExchangeOriginal")
+  replacementExchange SaleExchange? @relation("ExchangeReplacement")
   discountPercent Decimal? @db.Decimal(5,2)
   discountReason String?
   discountApprovedBy String?
@@ -620,6 +633,7 @@ model Payment {
 }
 
 model SaleReturn {
+  exchange SaleExchange?
   id              String   @id @default(uuid())
   saleId          String
   returnReceiptNo String
@@ -697,6 +711,7 @@ model AuditLog {
 
 // Opaque tokens are only sent through an HttpOnly cookie; only SHA-256 is stored.
 model Session {
+  jobAuthorizations JobAuthorization[]
   authenticationMethod String @default("password")
   pinStoreId String?
   id             String @id @default(uuid())
@@ -1412,4 +1427,175 @@ model ReservationEntry {
  createdAt DateTime @default(now())
  @@unique([itemId,operationKey])
  @@index([organizationId,storeId,createdAt])
+}
+
+model OfflineCashPolicy {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String @unique
+ enabled Boolean @default(false)
+ maxAmount Decimal @db.Decimal(14,2)
+ ttlSeconds Int
+ reason String
+ updatedBy String
+ updatedAt DateTime @default(now())
+ @@index([organizationId,storeId])
+}
+model OfflineCashLease {
+ id String @id
+ organizationId String
+ storeId String
+ registerId String
+ shiftId String
+ saleId String
+ userId String
+ sessionId String
+ deviceId String
+ cashOperationId String @unique
+ state String @default("issued")
+ payload Json
+ publicKey Json
+ signature String
+ payloadHash String
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ settlementProof Json?
+ settledBy String?
+ settledAt DateTime?
+ cancellationProof Json?
+ cancelledBy String?
+ cancelledAt DateTime?
+ @@index([organizationId,storeId,state])
+ @@index([saleId,state])
+ @@index([shiftId,state])
+}
+
+model OnboardingCheckpoint {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ step String
+ proof Json
+ confirmedBy String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction)
+ actor User @relation(fields:[confirmedBy],references:[id],onDelete:NoAction)
+ @@unique([organizationId,storeId,step])
+}
+
+model SaleExchange {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ originalSaleId String
+ saleReturnId String @unique
+ replacementSaleId String @unique
+ actorId String
+ cashDifference Decimal @db.Decimal(14,2)
+ debtDifference Decimal @db.Decimal(14,2)
+ cashTendered Decimal @db.Decimal(14,2)
+ cashChange Decimal @db.Decimal(14,2)
+ settlementSnapshot Json
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction)
+ originalSale Sale @relation("ExchangeOriginal",fields:[originalSaleId],references:[id],onDelete:NoAction)
+ saleReturn SaleReturn @relation(fields:[saleReturnId],references:[id],onDelete:NoAction)
+ replacementSale Sale @relation("ExchangeReplacement",fields:[replacementSaleId],references:[id],onDelete:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction)
+ @@index([organizationId,storeId,createdAt])
+}
+
+model BackgroundJob {
+ id String @id @default(uuid())
+ organizationId String
+ type String
+ payload Json
+ state String @default("queued")
+ generation Int @default(0)
+ attempts Int @default(0)
+ maxAttempts Int @default(3)
+ nextRunAt DateTime @default(now())
+ leaseToken String?
+ leaseUntil DateTime?
+ heartbeatAt DateTime?
+ lastError String?
+ result Json?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @default(now())
+ expiresAt DateTime
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ authorizations JobAuthorization[]
+ events JobEvent[]
+ @@index([state,nextRunAt])
+ @@index([organizationId,createdAt])
+}
+model JobAuthorization {
+ id String @id @default(uuid())
+ organizationId String
+ jobId String
+ generation Int
+ userId String
+ sessionId String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ job BackgroundJob @relation(fields:[jobId],references:[id],onDelete:Cascade)
+ user User @relation(fields:[userId],references:[id],onDelete:NoAction)
+ session Session @relation(fields:[sessionId],references:[id],onDelete:NoAction)
+ @@unique([jobId,generation])
+}
+model JobEvent {
+ id String @id @default(uuid())
+ jobId String
+ event String
+ attempt Int
+ generation Int
+ code String?
+ createdAt DateTime @default(now())
+ job BackgroundJob @relation(fields:[jobId],references:[id],onDelete:Cascade)
+ @@index([jobId,createdAt])
+}
+
+// Account-only security history. No credentials or raw client metadata enter these tables.
+model SecurityEvent {
+  id String @id @default(uuid())
+  organizationId String
+  userId String
+  type String
+  suspicious Boolean @default(false)
+  sourceSessionId String?
+  sourceAuditLogId String? @unique
+  clientHash String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  outbox SecurityNoticeOutbox?
+  notice SecurityNotice?
+  @@index([userId,createdAt(sort:Desc),id])
+  @@index([expiresAt])
+}
+model SecurityNoticeOutbox {
+  id String @id @default(uuid())
+  eventId String @unique
+  state String @default("pending")
+  dedupeKey String @unique
+  attempts Int @default(0)
+  maxAttempts Int @default(3)
+  nextRunAt DateTime @default(now())
+  lastError String?
+  createdAt DateTime @default(now())
+  deliveredAt DateTime?
+  event SecurityEvent @relation(fields:[eventId],references:[id],onDelete:Cascade)
+  @@index([state,nextRunAt])
+}
+model SecurityNotice {
+  id String @id @default(uuid())
+  eventId String @unique
+  createdAt DateTime @default(now())
+  readAt DateTime?
+  event SecurityEvent @relation(fields:[eventId],references:[id],onDelete:Cascade)
 }

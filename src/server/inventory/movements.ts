@@ -30,6 +30,13 @@ export async function moveStock(tx: Prisma.TransactionClient, context: TokenPayl
     }
     if(remainder.gt(0)&&!input.allowNegative)throw new AccessError(409,'INSUFFICIENT_STOCK')
   }
+  if(input.sourceType==='stock_document'){
+    const document=await tx.stockDocument.findUnique({where:{id:input.sourceId},select:{documentType:true}})
+    if(document&&['adjustment','opening'].includes(document.documentType)){
+      const uncertain=await tx.$queryRaw<{id:string}[]>`SELECT i.id FROM "ReservationItem" i JOIN "StockReservation" r ON r.id=i."reservationId" WHERE i."organizationId"=${context.organizationId} AND i."storeId"=${input.storeId} AND i."productId"=${input.productId} AND r.kind='cash_ticket' AND r.status='active' AND i."remainingQuantity">0 LIMIT 1`
+      if(uncertain.length)throw new AccessError(409,'UNRESOLVED_OFFLINE_STOCK','Stockni tuzatishdan oldin offline pul/tovar natijasini hal qiling')
+    }
+  }
   const where={storeId_productId:{storeId:input.storeId,productId:input.productId}}
   await tx.inventoryBalance.upsert({where,create:{storeId:input.storeId,productId:input.productId,quantity:0},update:{}})
   const update=await tx.inventoryBalance.updateMany({
