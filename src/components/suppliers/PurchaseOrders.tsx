@@ -6,14 +6,15 @@ import {useOrganization} from '@/context/OrganizationContext';
 import DurableMutation from '@/components/forms/DurableMutation';
 import CatalogFilter from '@/components/reports/CatalogFilter';
 import Card from '@/components/ui/Card';
+import LandedCostPreview from './LandedCostPreview';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Pagination from '@/components/ui/Pagination';
 type Order={id:string;referenceNo:string;store:{name:string};createdAt:string};
-type Item={id:string;productName:string;unit:string;quantity:string;unitCost:string;receivedQuantity:string;remainingQuantity:string};
+type Item={id:string;productId:string;productName:string;unit:string;quantity:string;unitCost:string;receivedQuantity:string;remainingQuantity:string};
 type Details=Order&{items:Item[];status:string};
-type Receipt={id:string;stockDocument:{id:string;documentNo:string;supplierInvoice:{id:string;amount:string;dueAt:string|null};items:{quantity:string;unitCost:string}[]}};
+type Receipt={id:string;stockDocument:{id:string;documentNo:string;supplierInvoice:{id:string;amount:string;dueAt:string|null};items:{id:string;productId:string;quantity:string;unitCost:string}[]}};
 export default function PurchaseOrders({supplierId,onPosted}:{supplierId:string;onPosted:()=>void}){
  const {stores}=useOrganization(),returnPath='/suppliers/'+supplierId;
  const [orders,setOrders]=useState<Order[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(0),[revision,setRevision]=useState(0),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -29,6 +30,6 @@ export default function PurchaseOrders({supplierId,onPosted}:{supplierId:string;
  </DurableMutation></Card><Card><h3>Buyurtma tarixi</h3>{orders.map(o=><Button key={o.id} onClick={()=>{setOrderId(o.id);setDetail(null);setReceiptPage(1);setReceive({});setRevision(v=>v+1);}}>{o.referenceNo} · {o.store.name}</Button>)}{!busy&&!orders.length&&<p>Buyurtma yo‘q.</p>}<Pagination page={page} pages={pages} busy={busy} onPage={setPage} retry={refresh}/></Card>
  {detail&&<Card><h3>Buyurtma: {detail.referenceNo}</h3><p>Buyurtma holati: {detail.status}</p><DurableMutation key={orderId+':'+revision} returnPath={returnPath} path={'/purchase-orders/'+orderId+'/receive'} body={{referenceNo:receiptNo,reason:receiptReason,dueAt:dueAt?new Date(dueAt).toISOString():undefined,items:detail.items.filter(i=>receive[i.id]?.trim()).map(i=>({orderItemId:i.id,quantity:receive[i.id]}))}} label="Buyurtmani qabul qilish" review={[receiptNo,receiptReason,...detail.items.filter(i=>receive[i.id]?.trim()).map(i=>i.productName+': '+receive[i.id]+' '+i.unit+' × '+i.unitCost),'Faqat haqiqatan kelgan miqdorni kiriting. Ombor kirimi va to‘lanmagan invoice birga yaratiladi.']} onDone={received}>
  {detail.items.map((i,index)=><div key={i.id}><p>{i.productName}: buyurtma {i.quantity}, qabul {i.receivedQuantity}, qoldiq {i.remainingQuantity} {i.unit} · narx {i.unitCost}</p><Input label={'Qabul miqdori '+(index+1)} inputMode="decimal" value={receive[i.id]??''} onChange={e=>setReceive(old=>({...old,[i.id]:e.target.value}))}/></div>)}<Input label="Qabul invoice raqami" value={receiptNo} onChange={e=>setReceiptNo(e.target.value)} maxLength={200}/><Input label="Qabul sababi" value={receiptReason} onChange={e=>setReceiptReason(e.target.value)} maxLength={2000}/><Input label="Invoice to‘lov muddati" type="datetime-local" value={dueAt} onChange={e=>setDueAt(e.target.value)}/>
- </DurableMutation><h3>Original qabullar</h3>{receipts.map(r=><p key={r.id}>{r.stockDocument.documentNo} · invoice {r.stockDocument.supplierInvoice.amount} · {r.stockDocument.items.map(i=>i.quantity+' × '+i.unitCost).join('; ')}</p>)}<Pagination page={receiptPage} pages={receiptPages} busy={false} onPage={setReceiptPage} retry={refresh}/><p>Invoicega to‘lov/avans yuqoridagi supplier hisobida bog‘lanadi.</p><Link prefetch={false} href="/reports/purchases">Tasdiqlangan xaridlar hisobotini ochish</Link></Card>}
+ </DurableMutation><h3>Original qabullar</h3>{receipts.map(r=><div key={r.id}><p>{r.stockDocument.documentNo} · invoice {r.stockDocument.supplierInvoice.amount} · {r.stockDocument.items.map(i=>i.quantity+' × '+i.unitCost).join('; ')}</p><LandedCostPreview documentId={r.stockDocument.id} documentNo={r.stockDocument.documentNo} items={r.stockDocument.items} originals={detail.items}/></div>)}<Pagination page={receiptPage} pages={receiptPages} busy={false} onPage={setReceiptPage} retry={refresh}/><p>Invoicega to‘lov/avans yuqoridagi supplier hisobida bog‘lanadi.</p><Link prefetch={false} href="/reports/purchases">Tasdiqlangan xaridlar hisobotini ochish</Link></Card>}
  </section>;
 }

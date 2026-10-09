@@ -103,7 +103,7 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | PUR-01.02 | CORE-1 | done | Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri. | Original Order/Receipt/Stock/Invoice/Allocation FK; atomic partial receipt; races/rollback/3 browsers; migrations045..048 | — |
 | PUR-01.03 | CORE-1 | done | Original-bound supplier return/price credit, stock/payable/advance atomic. | Quyidagi PUR-01.03 qabul protokoli:135 integration,27 unit,9 browser,fresh/legacy49 | Regressiyani saqlash; actual cash refund va landed cost alohida |
 | PUR-01.04 | CORE-1 | done | Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash. | Immutable invoice/payment/allocation; cash/bank proof; replay/race/audit rollback; API+three browsers | — |
-| PUR-01.05 | CORE-1 | todo | Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati. | — | — |
+| PUR-01.05 | CORE-1 | in_progress | Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati. | 2026-10-09: exact BigInt allocation; Receipt-backed preview API/UI; durable prepared/cancelled expense-linked immutable plan, 096–097 source/reversal/unique guards, exact source amount and audit rollback; 75 focused financial cases/5 final plan cases PASS | Apply inventory value/COGS corrections and reporting, apply/cancel UI recovery, backup fixture acceptance remain |
 | PUR-01.06 | CORE-1 | done | Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.01 | CORE-1 | done | Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.02 | CORE-1 | done | Qarz yozuvini haqiqiy pul to‘lovidan ajratish: nasiya naqd tushum deb olinmasligi. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
@@ -1627,3 +1627,167 @@ a84874d9b9951520d668b0f58f3a1eab4f5a3c29aae2e8e8822643f44c60c61d  tests/customer
 de802130257de711b476ec0ad927096ba95b1e407c7e987401dbf19a0b4e8dc6  Dockerfile
 99d35489041aa9f022ad55037c708b9e448b93e1038527e4e8cb6a95f5d2a1b6  docker-compose.yml
 1bcbaf94bb28d5dcc6da0473850175285b61ff3f45194414c107b0b836802270  docker-compose.maintenance.yml
+
+### PUR-01.05 — exact allocation foundation (2026-10-09)
+
+Source version `02253115d6d7dcf97e195332015b877041e25e75` + working tree.
+Existing moving-average purchase confirmation inspected; no original receipt or
+SaleItem cost history was changed. `src/server/purchases/landed-cost.ts` adds a
+strict, bounded pure allocation calculator using existing Zod/Decimal and native
+BigInt, with no new dependency. Value, homogeneous-base-unit quantity and explicit
+kg snapshot weight methods supported. Integer cents conserve total exactly;
+canonical final positive row receives residual, zero-basis rows receive zero.
+Six-place unit-cost rounding residual is returned separately, not silently lost.
+No API/posting/production financial effect yet; contract and remaining integration
+requirements are in `docs/operations/landed-cost.md`.
+
+Evidence: `tests/landed-cost.unit.test.ts`, five named cases PASS
+`/tmp/pos-landed-direct.log`; covers two-cent/three-line last-line residual,
+permuted input, quantity/weight/value differences, missing weight/mixed units,
+zero denominator, duplicate/empty/over-limit rows, invalid decimal precision,
+near-limit BigInt ratios and 200 deterministic fractional conservation inputs.
+`npm test` 19/19 file suites PASS `/tmp/pos-landed-unit.log`, typecheck PASS
+`/tmp/pos-landed-type.log`, lint PASS `/tmp/pos-landed-lint.log`, diff check clean.
+Initial compile rejected BigInt literals under repository ES target; fixed locally
+with `BigInt()` constants, no global compiler-target change. Initial failed compile
+is not acceptance evidence. No database migration, integration test or browser
+run is claimed for this pure module.
+
+PUR-01.05 remains `in_progress`; PLAN1 checkbox stays open. Receipt-source posting,
+immutable cost-correction journal, sold-stock attribution/reporting, transactional
+API/UI and corresponding acceptance tests remain. Original done stays143 and the
+ongoing +20 goal stays7/20 (13 remaining); this foundation is not a new parent done.
+No AI commit, live-business DB, secret access or real vendor integration.
+
+### PUR-01.05 — receipt-backed preview API (2026-10-09)
+
+Source base `02253115d6d7dcf97e195332015b877041e25e75` + working tree; preceding
+allocation module preserved. Local Next route handler guide read before changes.
+Added `src/server/purchases/landed-cost-preview.ts` and protected POST
+`/api/stock-documents/[id]/landed-cost-preview`. Server loads confirmed original
+purchase receipt, takes actual partial receipt quantity/cost and original order
+unit snapshot; no client quantity/cost/unit accepted. Product current cost does
+not replace original receipt cost. Manual receipt with no original unit snapshot
+fails closed. Reversal, role/session/tenant/assigned-branch checks, bounded 201-row
+read with 200-row acceptance, strict weight completeness and 30/minute rate limit.
+Returns explicit previewOnly/no-store; no Operation, stock, debt or cash posting.
+
+Tests `tests/landed-cost.integration.test.ts`: actual registration/order/partial
+receive through services; original3×2 despite cataloguecost999; allocation0.03
+conserved0.01+0.02; forgedquantity/precision/missing/zero/NaN/Infinity/non-numeric
+weights400; non-receipt row400 INVALID_ITEMS; foreigntenant404; assignedadmin200,
+unassignedadmin404, cashier403, revokedSession401. Existing SQL base-unit-history
+guard stays active and is positively checked; no weakening of database triggers.
+Final focused13/13 PASS `/tmp/pos-landed-api-integration-final.log`,19284ms,
+including all route inventory/authorization checks and catalog/purchase regression.
+Final unit19/19 file suites, typecheck/lint PASS at `/tmp/pos-landed-api-unit.log`,
+`/tmp/pos-landed-api-type.log`, `/tmp/pos-landed-api-lint.log`.
+
+Initial fixture omitted required barcode; corrected before acceptance. Initial
+fixture tried changing a historical base unit and was correctly rejected by SQL;
+test now explicitly verifies that guard and changes only cataloguecost. Initial
+foreign row test expected404; contract actually returns400 INVALID_ITEMS for a
+non-member receipt line, assertion now checks both status and exact code. Earlier
+failed runs are not PASS evidence. Malformed Decimal refinement now produces Zod
+validation errors rather than throwing constructor errors into HTTP500.
+
+API contract in api.md and docs/operations/landed-cost.md updated. No migration,
+real business database, deployment or vendor integration. PUR-01.05 checkbox
+stays open: preview does not complete landed-cost journal/sold-stock corrections.
+Original done143 and ongoing +20 7/20 remain unchanged (13 remaining).
+
+Final production webpack build PASS `/tmp/pos-landed-api-build-final.log`;
+new preview route included. `git diff --check` clean. No browser UI was changed,
+and no browser acceptance is claimed for this API-only increment.
+
+### PUR-01.05 — original receipt preview UI (2026-10-09)
+
+Working tree above source base02253115. Existing capitalised expense/cash
+documents and profit summary inspected before any financial change: current
+moving-average architecture has no exact additional-value journal or historical
+sold-stock attribution. Merely changing Product.costPrice would hide rounding
+residuals and misstate late expense/profit; no such posting was introduced.
+This increment connects the accepted receipt preview API to actual PurchaseOrders
+original receipt panels through `LandedCostPreview.tsx`.
+
+Value/quantity/weight selector, exact string amount and per-line kg/base-unit
+inputs, original received quantity/unit, allocatedAmount, landedUnitCost and
+signed roundingResidual shown. Explicit preview/no balance or financial document
+posting notice. Editing input removes stale result immediately; synchronous
+pending guard prevents double submit, inputs disabled in flight, 15s timeout,
+error retains form and exposes retry. Unmounted panel does not accept late state
+updates. Existing purchase/receipt DurableMutation paths unchanged.
+
+Versioned browser scenario in tests/e2e/core.spec.ts: register real isolated
+account→create original10×2order→partial receipt3×2→supplier UI→0.01expense
+preview shows3dona/2.003333unitcost/0.000001residual→edit12 clears oldresult→weight
+0.5→actualnetworkfailure→visibleerror→retry12/6.000000. Asserts no new Operation,
+stock3/catalogcost2/invoice6 unchanged. Chromium/Firefox/WebKit3/3 PASS
+`/tmp/pos-landed-ui-browser.log`,9.4s. Typecheck/lint/production webpack PASS
+`/tmp/pos-landed-ui-type.log`, `/tmp/pos-landed-ui-lint.log`,
+`/tmp/pos-landed-ui-build.log`; diff check clean. Local Next forms guide read.
+
+No new migration/ledger posting or vendor implementation; UI usage documented
+in docs/operations/landed-cost.md. PUR-01.05 remains in_progress, original done143,
+ongoing +20 remains7/20. Full parent still requires immutable financial value
+posting, sold-stock correction, profit/valuation integration and concurrency/SQL
+acceptance. UI scenario is not counted as an additional original done.
+
+Existing Purchase order original-key partial receive recovery and Supplier return
+lost-credit/released-advance/no-cash-refund browser regressions6/6 PASS
+`/tmp/pos-landed-ui-regression.log`,20.7s (both scenarios in all three browsers).
+This increment total browser acceptance9/9 across new preview and existing flows;
+no full end-to-end suite or real hardware/provider acceptance is claimed.
+
+### PUR-01.05 — durable prepared allocation journal (2026-10-09)
+
+Source base02253115 + working tree. Migration096 adds ReceiptCostPlan with
+prepared/cancelled lifecycle, immutable original receipt allocation snapshot,
+original paid capitalised expense FK, org/store/creator/cancellation metadata,
+active-expense partial unique index, source/line/amount/rounding SQL guards.
+097 additive constraint explicitly forbids null cancellation reasons because
+SQL CHECK UNKNOWN otherwise passes; applied096 was not edited. Schema includes
+all inverse relations with explicit NoAction matching SQL; client regenerated.
+Migration test's pre-finance subset excludes both new migrations appropriately.
+
+prepareReceiptCost consumes existing expense identity/amount, creates no second
+cash debit/expense, derives original partial receipt allocation transactionally.
+Expense→receipt→plan lock order, existing SERIALIZABLE runOperation/original key,
+audit atomicity, tenant/store/role/current session, 30/min write limit. Source
+amount cannot be changed; only unreversed capitalised expense in same store is
+accepted. One expense only one active prepared plan. Cancel preserves snapshot,
+adds actor/time/reason, frees preparation slot, does not reverse cash. Both SQL
+and finance DAL reject source expense reversal until plan cancelled; raw SQL
+stock reversal likewise guarded. Protected create/list/cancel routes, list20/page
+with safe integer/32-bit offset bounds. Preview helper shared transactionally.
+
+Acceptance tests: same original key concurrent twice→oneplan; two different keys
+raced→oneactive assignment; cash/account book stays7.99 after original20−12.01,
+catalogcost2/stock3 unchanged; reason mutation/delete/raw-null cancellation reject;
+cancel replay once, reprepare allowed, cancel then real finance reversal restores20,
+reversed source denied. Foreign tenant404, cashier403, malformed source amount409,
+actual API duplicate409 EXPENSE_ALREADY_ASSIGNED; raw expense reversal reject.
+Late AuditLog failure rolls back plan and Operation; original retry creates one.
+SQL rejects altered original quantity999; high offset rejects400 before query.
+
+Gates: after097 focused75/75 financial+routes+plan cases PASS
+`/tmp/pos-cost-plan-focused-097.log`,24747ms. After final pagination guard,
+all5 plan cases PASS `/tmp/pos-cost-plan-final-five.log`,3121ms; unit19/19 files
+PASS `/tmp/pos-cost-plan-unit-final.log`. Type/lint PASS
+`/tmp/pos-cost-plan-type-final.log`, `/tmp/pos-cost-plan-lint-final.log` after
+the final pagination guard.
+Worker build PASS `/tmp/pos-cost-plan-worker.log`. Fresh/legacy migrations through
+097 PASS `/tmp/pos-cost-plan-migrations-097.log`. Existing preview three-browser
+3/3 PASS `/tmp/pos-cost-plan-browser-regression.log`,8.9s after helper/schema changes;
+no new plan UI/browser recovery is claimed. Initial compile used older generated
+client and failed; corrected client+successful final compilation accepted.
+
+This is durable preparation, NOT applied inventory valuation or historical COGS
+correction. No fabricated capitalization/financial profit correction. Apply-stage
+value journal/reporting, apply UI/recovery and backup fixture gate remain. Parent
+PUR-01.05 stays in_progress, checklist open; original done143/+20 remains7/20.
+Docs/api reflect prepared status explicitly. No live business DB/deploy/vendor
+integration/AI commit. Applied096–097 immutable; diff check clean.
+
+Final production webpack build after pagination guard PASS
+`/tmp/pos-cost-plan-build-final.log`; prepared/cancel endpoints included.

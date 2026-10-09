@@ -25,6 +25,43 @@ test.afterAll(async()=>{
  await db.user.deleteMany({where:{id:{in:users}}})
  await db.$disconnect()
 })
+test('Landed cost UI previews partial receipts, invalidates edited results and retries without posting', async ({page}) => {
+ const phone='landed-browser-'+randomUUID();phones.push(phone);
+ const registration=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Landed owner',phone,password:'test-only-password',organizationName:'Landed business'}});expect(registration.ok()).toBe(true);
+ const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);
+ const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}});
+ const supplier=await db.supplier.create({data:{organizationId:me.organization.id,name:'Landed supplier'}});
+ const product=await db.product.create({data:{organizationId:me.organization.id,name:'Landed item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:10,costPrice:2}});
+ const ordered=await page.request.post('/api/purchase-orders',{headers:{Origin:'https://localhost:3100'},data:{operationId:randomUUID(),storeId:store.id,supplierId:supplier.id,referenceNo:'LANDED-ORDER',reason:'Browser purchase',items:[{productId:product.id,quantity:'10',unitCost:'2'}]}});expect(ordered.ok()).toBe(true);
+ const order=(await ordered.json()).data;
+ const received=await page.request.post(`/api/purchase-orders/${order.id}/receive`,{headers:{Origin:'https://localhost:3100'},data:{operationId:randomUUID(),referenceNo:'LANDED-RECEIPT',reason:'Partial browser receipt',items:[{orderItemId:order.items[0].id,quantity:'3'}]}});expect(received.ok()).toBe(true);
+ const stock=(await received.json()).data.stockDocument;
+ const before=await db.operation.count({where:{organizationId:me.organization.id}});
+ await page.goto('/suppliers/'+supplier.id);
+ await page.getByRole('button',{name:/LANDED-ORDER/}).click();
+ const panel=page.getByRole('region',{name:'Kirim xarajatlari: LANDED-RECEIPT'});
+ await panel.getByLabel('Qo‘shimcha xarajat summasi').fill('0.01');
+ await panel.getByRole('button',{name:'Taqsimotni hisoblash',exact:true}).click();
+ await expect(panel.getByRole('status')).toContainText('Jami xarajat: 0.01');
+ await expect(panel.getByRole('cell',{name:'3 dona',exact:true})).toBeVisible();
+ await expect(panel.getByRole('cell',{name:'2.003333',exact:true})).toBeVisible();
+ await expect(panel.getByRole('cell',{name:'0.000001',exact:true})).toBeVisible();
+ await panel.getByLabel('Qo‘shimcha xarajat summasi').fill('12');
+ await expect(panel.getByRole('status')).toHaveCount(0);
+ await panel.getByLabel('Taqsimlash usuli').selectOption('weight');
+ await panel.getByLabel('Landed item: kg / bazaviy birlik').fill('0.5');
+ let fail=true;
+ await page.route('**/landed-cost-preview',async route=>{if(fail){fail=false;await route.abort('failed');}else await route.continue();});
+ await panel.getByRole('button',{name:'Taqsimotni hisoblash',exact:true}).click();
+ await expect(panel.getByRole('alert')).toBeVisible();
+ await panel.getByRole('button',{name:'Qayta hisoblash',exact:true}).click();
+ await expect(panel.getByRole('status')).toContainText('Jami xarajat: 12.00');
+ await expect(panel.getByRole('cell',{name:'6.000000',exact:true})).toBeVisible();
+ expect(await db.operation.count({where:{organizationId:me.organization.id}})).toBe(before);
+ expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('3');
+ expect((await db.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toString()).toBe('2');
+ expect((await db.supplierInvoice.findUniqueOrThrow({where:{stockDocumentId:stock.id}})).amount.toString()).toBe('6');
+});
 test('Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests',async({page})=>{
  const phone='998'+Date.now();phones.push(phone);
  const registration=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Refund owner',phone,password:'test-only-password',organizationName:'Manual refund business'}});expect(registration.ok()).toBe(true);

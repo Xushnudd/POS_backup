@@ -1,5 +1,34 @@
 # Shuni POS API hujjati
 
+### Kirim xarajatlari preview (2026-10-09)
+
+`POST /api/stock-documents/{id}/landed-cost-preview`: owner/assigned-branch admin,
+live session, JSON/CSRF va tenant tekshiruvlari; 30 so‘rov/minut/user/tashkilot.
+Body: `{"amount":"120.25","method":"value"}` yoki `quantity`; `weight`da
+`weights: [{stockDocumentItemId: UUID, unitWeightKg: "0.5"}]` aynan shu kirimning
+barcha qatorlariga beriladi. Narx/miqdor/birlik clientdan qabul qilinmaydi.
+
+Faqat tasdiqlangan buyurtma kirimi: quantity/cost original StockDocumentItemdan,
+unit original buyurtma snapshotidan. Partial receipt qabul qilingan miqdor bilan
+hisoblanadi. Javob `success/data` ichida `previewOnly: true`, stockDocumentId,
+storeId, amount, method va allocatedAmount/landedUnitCost/roundingResidual qatorlari.
+Bu moliyaviy posting yaratmaydi; operationId kerak emas. Manual kirimda original
+unit snapshot bo‘lmasa `409 PURCHASE_RECEIPT_REQUIRED`; nol denominator
+`422 LANDED_COST_ZERO_DENOMINATOR`; begona yoki yetishmayotgan vazn qatori
+`400 INVALID_ITEMS`. Rounding va qolgan posting ishlari:
+[landed-cost contracti](docs/operations/landed-cost.md).
+
+`POST /api/stock-documents/{id}/cost-plans`: durable **prepared** taqsimot.
+Preview bodyga `operationId`, `expenseDocumentId`, `reason` qo‘shiladi. Source
+bekor qilinmagan `capitalised` expense, original amount va kirim bilan bir xil
+tenant/filial. Bu endpoint yangi cash/expense yoki inventory/COGS posting qilmaydi.
+Expensega faqat bitta faol plan: `409 EXPENSE_ALREADY_ASSIGNED`. Faol plan bilan
+expense reversal `409 RECEIPT_COST_PLAN_ACTIVE`. Original-key replay qo‘llanadi.
+`GET /api/stock-documents/{id}/cost-plans?page=1`: data.rows/data.total,20/page.
+`POST /api/stock-documents/{id}/cost-plans/{planId}/cancel`: operationId/reason,
+immutable historyda cancellation, pulga tegmaydi. Tayyorlash/bekor qilish uchun
+30 writes/minute/user/tenant, owner yoki assigned-branch admin.
+
 Bu hujjat `src/app/api` ichidagi mavjud Next.js Route Handlerlarga asoslangan. Bazaviy manzil: `/api`.
 
 ## Umumiy qoidalar

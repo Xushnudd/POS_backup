@@ -63,6 +63,7 @@ export async function reverseFinancialDocument(ctx:TokenPayload,id:string,input:
  await tx.$queryRaw`SELECT id FROM "FinancialDocument" WHERE id=${id} FOR UPDATE`;
  const original=await tx.financialDocument.findFirst({where:{id,AND:tenantScope('FinancialDocument',ctx)},include:{entries:true,reversal:true}});
  if(!original)throw new AccessError(404,'NOT_FOUND');if(!['expense','transfer'].includes(original.kind)||original.reversal)throw new AccessError(409,'INVALID_REVERSAL');
+ if(await tx.receiptCostPlan.findFirst({where:{expenseDocumentId:id,status:'prepared'}}))throw new AccessError(409,'RECEIPT_COST_PLAN_ACTIVE','Avval kirim xarajatlari tayyor taqsimotini bekor qiling');
  const accounts=await lockAccounts(tx,ctx,original.entries.map(e=>e.accountId));
  const doc=await tx.financialDocument.create({data:{organizationId:ctx.organizationId,storeId:original.storeId,kind:original.kind+'_reversal',amount:original.amount,categoryId:original.categoryId,reversalOfId:original.id,reason:input.reason,actorId:ctx.userId}});
  // Debit before credit so both funding checks refer to committed available money.
