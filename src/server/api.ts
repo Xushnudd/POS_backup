@@ -13,6 +13,7 @@ import type { TokenPayload } from '@/lib/auth'
 import { apiMetrics } from './monitoring/metrics'
 import { billingDatabaseError } from './billing/errors'
 import { sanitizeResponse } from './auth/response'
+import { consumeRequestBudget,consumePublicRequestBudget,requestBudgetSetting } from './auth/request-budget'
 
 const refs: Record<string, string> = {
   reservationId:'StockReservation',locationId:'StockLocation',fromLocationId:'StockLocation',toLocationId:'StockLocation',orderItemId:'PurchaseOrderItem',stockDocumentId:'StockDocument',storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
@@ -47,13 +48,16 @@ async function validateRefs(value: unknown, context: TokenPayload): Promise<void
   }
 }
 async function boundedBody(request: NextRequest): Promise<string> {
+  const deadlineMs=requestBudgetSetting('API_BODY_TIMEOUT_MS')
   const reader = request.clone().body?.getReader()
   if (!reader) return ''
   const decoder = new TextDecoder('utf-8', { fatal: true })
   let size = 0, text = ''
+  let timer:ReturnType<typeof setTimeout>|undefined
+  const deadline=new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new AccessError(408,'REQUEST_BODY_TIMEOUT')),deadlineMs);timer.unref()})
   try {
     for (;;) {
-      const { value, done } = await reader.read()
+      const { value, done } = await Promise.race([reader.read(),deadline])
       if (done) break
       size += value.byteLength
       if (size > 1024 * 1024) {
@@ -65,9 +69,11 @@ async function boundedBody(request: NextRequest): Promise<string> {
     }
     return text + decoder.decode()
   } catch (error) {
+    void reader.cancel().catch(()=>undefined)
     if (error instanceof AccessError) throw error
     throw new AccessError(400, 'INVALID_JSON')
   } finally {
+    if(timer)clearTimeout(timer)
     reader.releaseLock()
   }
 }
@@ -95,12 +101,18 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         if (length && Number(length) > 1024 * 1024) throw new AccessError(413,'PAYLOAD_TOO_LARGE')
       }
       let context: TokenPayload | null = null
+      // Keep health probes and logout usable; public authentication writes share
+      // a bounded admission budget even when no trusted client IP is available.
+      if(options.public&&mutation&&path!=='/api/auth/logout')await consumePublicRequestBudget(request.headers)
       if (!options.public) {
         const token = getRequestToken(request)
         context = token ? await verifySession(token,{touch:options.touchSession!==false}) : null
         if (!context) throw new AccessError(401,'UNAUTHORIZED','Avtorizatsiya talab qilinadi')
         requestTrace.getStore()!.organizationId=context.organizationId
         assertRoutePermission(path, request.method, context.role)
+        // Shared across replicas, scoped to tenant + actor, before reference scans,
+        // parsing/import workers and business handlers. Specific budgets still apply.
+        await consumeRequestBudget(context,request.method)
         const segments = path.split('/').filter(Boolean)
         if (segments[2] && segments[2] !== 'switch' && !(segments[1]==='products'&&segments[2]==='prices') && !(segments[1]==='sales'&&segments[2]==='preview') && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
         await validateRefs(Object.fromEntries(new URL(request.url).searchParams), context)

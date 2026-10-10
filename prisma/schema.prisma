@@ -583,6 +583,7 @@ model ShiftCorrection {
 }
 
 model Sale {
+  receiptSnapshot Json?
   originalExchanges SaleExchange[] @relation("ExchangeOriginal")
   replacementExchange SaleExchange? @relation("ExchangeReplacement")
   discountPercent Decimal? @db.Decimal(5,2)
@@ -1998,4 +1999,24 @@ model SupportTicketEvent {
  ticket SupportTicket @relation(fields:[ticketId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
  actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  @@index([ticketId,createdAt,id])
+}
+
+model RetentionPolicyVersion {
+ id String @id @default(uuid())
+ version Int @unique
+ expiredSubscriptionDays Int
+ closureCancellationDays Int
+ auditRetentionDays Int?
+ technicalLogRetentionDays Int?
+ backupRetentionDays Int?
+ proposedFinancialRetentionYears Int
+ createdBy String?
+ reason String
+ createdAt DateTime @default(now())
+ policies RetentionPolicy[]
+}
+model RetentionPolicy {
+ key String @id
+ currentVersionId String
+ currentVersion RetentionPolicyVersion @relation(fields:[currentVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
 }

@@ -33,6 +33,12 @@ export default function ReceiptPreview({
   const printAttempt=useRef<{saleId:string;operationId:string;width:58|80;copy:boolean;markup:string}|null>(null);
 
   if (!sale) return null;
+  const identity = sale.receiptSnapshot;
+  const draft = sale.status === 'draft';
+  const receiptName = identity?.organizationName ?? (draft ? organization?.name : 'Original rekvizitlar saqlanmagan');
+  const receiptPhone = identity?.organizationPhone ?? (draft ? organization?.phone : null);
+  const receiptTin = identity ? identity.tin : (draft ? organization?.tin : null);
+  const receiptTimezone = identity?.timezone ?? organization?.timezone ?? 'Asia/Tashkent';
 
   const handlePrint = async () => {
     // This records only a browser print request, never hardware confirmation.
@@ -95,14 +101,16 @@ export default function ReceiptPreview({
         <p className="text-center font-bold">{sale.status==='draft'?'QORALAMA · ':''}{copy?'CHEK NUSXASI':'SAVDO CHEKI'} · FISKAL EMAS</p>
         <div className="text-center pb-3 border-b border-dashed border-gray-300">
           <h2 className="text-base font-black uppercase text-gray-900 tracking-wider">
-            {organization?.name || 'SHUNI POS'}
+            {receiptName || 'SHUNI POS'}
           </h2>
-          {organization?.phone && (
-            <p className="text-[11px] text-gray-600 mt-0.5">Tel: {organization.phone}</p>
+          {receiptPhone && (
+            <p className="text-[11px] text-gray-600 mt-0.5">Tel: {receiptPhone}</p>
           )}
-          {organization?.tin && (
-            <p className="text-[11px] text-gray-600">STIR: {organization.tin}</p>
+          {receiptTin && (
+            <p className="text-[11px] text-gray-600">STIR: {receiptTin}</p>
           )}
+          {identity && <><p>{identity.storeName} · {identity.registerName} ({identity.registerCode})</p>{identity.storeAddress && <p>{identity.storeAddress}</p>}<p>Valyuta: {identity.currencyCode}</p></>}
+          {!identity && !draft && <p>Eski chek: tashkilot/filial/kassirning tarixiy rekvizitlari yozilmagan. Sana joriy vaqt zonasida ko‘rsatiladi.</p>}
         </div>
 
         {/* Info */}
@@ -113,11 +121,11 @@ export default function ReceiptPreview({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Sana:</span>
-            <span>{new Date(sale.completedAt||sale.createdAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone??'Asia/Tashkent'})}</span>
+            <span>{new Date(sale.completedAt||sale.createdAt).toLocaleString('uz-UZ',{timeZone:receiptTimezone})}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Kassir:</span>
-            <span>{sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:'Chekdagi kassir ID: '+sale.cashierId)}</span>
+            <span>{identity?.cashierName || (draft ? sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:'Chekdagi kassir ID: '+sale.cashierId) : 'Chekdagi kassir ID: '+sale.cashierId)}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between">
@@ -202,7 +210,7 @@ export default function ReceiptPreview({
 
         {/* Footer message */}
         <div className="text-center pt-4 text-[11px] text-gray-600">
-          <p>{organization?.receiptFooter || 'Xaridingiz uchun rahmat!'}</p>
+          <p>{identity ? identity.receiptFooter || 'Xaridingiz uchun rahmat!' : draft ? organization?.receiptFooter || 'Xaridingiz uchun rahmat!' : 'Xaridingiz uchun rahmat!'}</p>
           <p className="text-[9px] text-gray-600 mt-2">Dastur: Shuni POS</p>
         </div>
       </div>

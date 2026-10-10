@@ -12,5 +12,5 @@ test('Workbook active content, multiple sheets, malformed/base64/large files fai
  const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Data');sheet.addRow(['sku']);sheet.getCell('A2').value={formula:'1+1',result:2};await assert.rejects(async()=>spreadsheetRows('xlsx',Buffer.from(await book.xlsx.writeBuffer()).toString('base64')),/Fayl oddiy/)
  book.addWorksheet('Other');await assert.rejects(async()=>spreadsheetRows('xlsx',Buffer.from(await book.xlsx.writeBuffer()).toString('base64')))
  await assert.rejects(()=>spreadsheetRows('xlsx',Buffer.from('invalid').toString('base64')));await assert.rejects(()=>spreadsheetRows('csv','%%%'));await assert.rejects(()=>spreadsheetRows('csv','A'.repeat(700004)))
- const huge='sku\n'+'entry\n'.repeat(1001);await assert.rejects(()=>spreadsheetRows('csv',Buffer.from(huge).toString('base64')))
+ const huge='sku\n'+'entry\n'.repeat(1001);await assert.rejects(()=>spreadsheetRows('csv',Buffer.from(huge).toString('base64')),{status:413,code:'IMPORT_FILE_LIMIT'})
 })

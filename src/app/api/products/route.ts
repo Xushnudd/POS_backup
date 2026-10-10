@@ -166,6 +166,7 @@ async function handleGET(request: NextRequest) {
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof z.ZodError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
@@ -238,6 +239,7 @@ async function handlePOST(request: NextRequest) {
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {

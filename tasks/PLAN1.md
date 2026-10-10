@@ -590,7 +590,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-01.04** — Egasi/admin/kassir uchun amallar jadvalini yozish va serverda qo‘llash.
+- [x] **SEC-01.04** — Egasi/admin/kassir uchun amallar jadvalini yozish va serverda qo‘llash.
 
   **Texnologiya:** TypeScript permission map va server services.
 
@@ -603,6 +603,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Owner/admin/cashier matritsasi bor; har amal uchun allow va deny server testi o‘tadi.
+
+  **Qabul (2026-10-10):** `done`. 243 explicit protected action role map, unknown-action failclosed, har amal owner/admin/cashier/unknown role policy testlari, real HTTP deny va revoked-session tranzaksiya/brauzer sinovlari. Dalil: `tasks/evidence/permission-receipt-20261010.json`; permission-matrix.md.
 
   **Dalil:** `SEC-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -730,7 +732,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-02.05** — Kirish, tiklash, import va qimmat so‘rovlarda tezlik/hajm cheklovlari.
+- [x] **SEC-02.05** — Kirish, tiklash, import va qimmat so‘rovlarda tezlik/hajm cheklovlari.
 
   **Texnologiya:** PostgreSQL atomik rate-limit counters va ingress.
 
@@ -743,6 +745,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Har cheklangan endpoint uchun limit testi 429/413 va retry yo‘lini ko‘rsatadi; tenantlar limiti izolyatsiyalangan.
+
+  **Qabul:** `done`,2026-10-10. Barcha243protected HTTP handler umumiy DB budget bilan429/Retry-After; public auth admission/IP spoofing, parallel counter, tenant isolation, expiry/retry, login/register/reset/import limitlari, streamed1MiB413/slow-body408 va original-key browser recovery. Full250/250; final configuration focused6/6; unit24/24; three-browser9/9; production build/lint/typecheck/worker PASS. [Dalil va qabul chegarasi](EXECUTION_STATUS.md#sec-0205-qabul--2026-10-10); `tasks/evidence/request-limits-20261010.json`. Actual hosting/TCP firewall/WAF deploymenti ushbu application limit acceptance bilan yopilmaydi.
 
   **Dalil:** `SEC-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -4377,6 +4381,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Dalil:** `BIZ-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
 - [ ] **BIZ-02.07** — Xizmatdan chiqishda to‘liq ma’lumot eksporti va saqlash/o‘chirish tartibi.
+
+  **Joriy holat (2026-10-10): in_progress.** ADR-062 asosida migration110, DBda immutable retention versiyalari, platform-admin tahriri, owner uchun xavfsiz ko‘rish, haqiqiy obuna sanasidan review muddatini hisoblash, transaction/audit/idempotency va lost-ACK UI tayyor. Bir xil versiyaga sakkiz parallel tahrirdan faqat bittasi qabul qilinadi. Bu sozlamalar o‘chirishni boshlamaydi. Migration111–112 bilan mavjud fon navbatida barcha filiallarning reviewed biznes JSON eksporti, manifest/row counts/hashlar, credential omissions va bounded artifact core qo‘shildi; qabul dalili `tasks/evidence/tenant-export-20261010.json`. Migration113–116 bilan obuna read-only SQL/operation guardlari, original committed replay, wall-clock expiry rollback, subscription snapshot lock, billing/export/auth/support recovery va tor manual expiry/draft tombstone istisnolari qo‘shildi; dalil `tasks/evidence/subscription-readonly-20261010.json`. Owner reauthentication bilan yopish/bekor qilish va closure lifecycle hali bajarilishi kerak. Huquqiy toifalar va irreversible deletion `blocked_external`; band `done` emas. Contract: `docs/operations/retention-policy.md`; dalil: `tasks/evidence/retention-policy-20261010.json`.
 
   **Texnologiya:** Node worker export/retention, T03 ExcelJS, Prisma audit.
 

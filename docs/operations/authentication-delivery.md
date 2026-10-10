@@ -31,6 +31,10 @@ va token. Network transaction tashqarisida; lease UUID fencing. Unknown delivery
 qayta shu original kodni yuborishi mumkin, at-most-once SMS va’dasi yo‘q.
 Bu moliyaviy posting emas; challenge esa faqat bir marta iste’mol qilinadi.
 Yangi resend avvalgi shu purpose/session challengeni bekor qiladi.
+Muddati tugagan navbatdagi ciphertext provayder yoki encryption key olib tashlangan
+bo‘lsa ham worker tomonidan tozalanadi. Har aylanishdagi cleanup delivery batch
+limitidan oshmaydi va band qatorlarni SKIP LOCKED bilan chetlab o‘tadi. Tarixiy
+metadata qoladi; cleanup yuborilgan/tasdiqlangan holat yaratmaydi.
 Public reset known/unknown akkaunt uchun bir xil accepted DTO qaytaradi,
 transportni response yo‘lida kutmaydi; source va token qaytarilmaydi.
 Akkauntga bog‘liq resend cheklovi ham accepted qaytaradi, yangi token yaratmaydi;

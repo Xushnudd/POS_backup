@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
-import { randomUUID } from 'node:crypto'
+import { randomUUID,createHash } from 'node:crypto'
 const url=new URL(process.env.DATABASE_URL??'')
 if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.pathname!=='/pos_test')throw new Error('Isolated test DB only')
 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
@@ -23,9 +23,9 @@ test('Billing displays DB prices/Pro trial and recovers lost invoice acknowledge
  await expect(page.getByText('Amaldagi tarif: Pro')).toBeVisible()
  await expect(page.getByText('99000 UZS/oy',{exact:true})).toBeVisible()
  await expect(page.getByRole('button',{name:'Tarifni tahrirlash'})).toHaveCount(0)
- let lost=false
+ let lost=false,originalKey=''
  await page.route('**/api/billing/invoices',async route=>{
-  if(route.request().method()==='POST'&&!lost){lost=true;const response=await route.fetch();expect(response.ok()).toBe(true);await route.abort('failed')}
+  if(route.request().method()==='POST'&&!lost){lost=true;originalKey=route.request().postDataJSON().operationId;const response=await route.fetch();expect(response.ok()).toBe(true);await route.abort('failed')}
   else await route.continue()
  })
  const invoices=page.getByRole('region',{name:'Obuna invoicelari'})
@@ -35,6 +35,14 @@ test('Billing displays DB prices/Pro trial and recovers lost invoice acknowledge
  await expect(invoices.getByRole('button',{name:'Original amalni qayta tekshirish'})).toBeVisible()
  await expect.poll(()=>db.billingInvoice.count({where:{organizationId:me.organization.id}})).toBe(1)
  await expect(invoices.getByRole('button',{name:'Original amalni qayta tekshirish'})).toBeEnabled()
+ const budgetKey=createHash('sha256').update('api.write:'+me.organization.id+':'+me.user.id).digest('hex')
+ await db.rateLimit.upsert({where:{key:budgetKey},create:{key:budgetKey,attempts:300,expiresAt:new Date(Date.now()+60000)},update:{attempts:300,expiresAt:new Date(Date.now()+60000)}})
+ const limited=page.waitForResponse(response=>response.url().includes('/api/billing/invoices')&&response.request().method()==='POST')
+ await invoices.getByRole('button',{name:'Original amalni qayta tekshirish'}).click()
+ const denied=await limited;expect(denied.status()).toBe(429);expect(Number(denied.headers()['retry-after'])).toBeGreaterThan(0)
+ await expect(invoices.getByText('Original kalit: '+originalKey,{exact:true})).toBeVisible()
+ expect(await db.billingInvoice.count({where:{organizationId:me.organization.id}})).toBe(1)
+ await db.rateLimit.update({where:{key:budgetKey},data:{expiresAt:new Date(Date.now()-1000)}})
  await page.reload()
  await expect(invoices.getByRole('button',{name:'Original amalni qayta tekshirish'})).toBeVisible()
  await invoices.getByRole('button',{name:'Original amalni qayta tekshirish'}).click()

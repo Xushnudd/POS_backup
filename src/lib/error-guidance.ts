@@ -9,7 +9,7 @@ const guidance:Record<string,ErrorGuidance>={
  TICKET_STATE_UNCHANGED:{message:'Murojaat allaqachon shu holatda.',nextAction:'Joriy holat va tarixni yangilang; yangi takroriy amal yaratmang.'},
  INVALID_TICKET_TRANSITION:{message:'Murojaat holatlari orasida bunday o‘tish mumkin emas.',nextAction:'Yakunlangan murojaatni avval qayta oching yoki yechilgan murojaatni yoping.'},
  PLAN_LIMIT_REACHED:{message:'Tarif limiti tugagan.',nextAction:'Tarifni yangilang. Mavjud yozuvlar saqlanadi; arxivlash limitni oshirmaydi.'},
- SUBSCRIPTION_EXPIRED:{message:'Obuna muddati tugagan.',nextAction:'Obunani yangilang. Mavjud ma’lumotlarni ko‘rish va eksport qilish mumkin.'},
+ SUBSCRIPTION_EXPIRED:{message:'Obuna muddati tugagan.',nextAction:'Obunani yangilang. Yangi biznes amallari cheklangan; mavjud ma’lumotlarni ko‘rish va eksport qilish mumkin.'},
  BILLING_PLAN_CHANGED:{message:'Tarif narxi yoki limiti o‘zgargan.',nextAction:'Tarif sahifasini yangilang, joriy versiyani ko‘rib qayta tasdiqlang.'},
  BILLING_INVOICE_OPEN:{message:'To‘lanmagan invoice mavjud.',nextAction:'Original invoiceni tekshiring yoki to‘lanmagan bo‘lsa uni bekor qiling.'},
  BILLING_INVOICE_FINAL:{message:'Invoice allaqachon yakunlangan.',nextAction:'Original invoice va to‘lov tarixini tekshiring. Takror to‘lamang.'},
@@ -40,6 +40,8 @@ const guidance:Record<string,ErrorGuidance>={
  NOT_FOUND:{message:'Resurs topilmadi yoki unga kirish yopiq.',nextAction:'Tanlangan biznes/filialni tekshiring va ro‘yxatni yangilang.'},
  PAYLOAD_TOO_LARGE:{message:'So‘rov hajmi ruxsat etilgan chegaradan katta.',nextAction:'So‘rovni1MiBdan kichik yoki importni kichik guruhlarga ajrating.'},
  RATE_LIMITED:{message:'So‘rovlar juda ko‘p.',nextAction:'Ko‘rsatilgan muddatni kuting; iqtisodiy amal kalitini saqlang.'},
+ REQUEST_BODY_TIMEOUT:{message:'So‘rov tanasi belgilangan vaqtda yetib kelmadi.',nextAction:'Ulanishni tekshiring; original amal kalitini saqlab qayta tekshiring.'},
+ REQUEST_BUDGET_UNAVAILABLE:{message:'So‘rov himoyasi konfiguratsiyasi noto‘g‘ri.',nextAction:'Administratorga murojaat qiling; original amal kalitini saqlang.'},
  INTERNAL_ERROR:{message:'Server amalni yakunlay olmadi.',nextAction:'Asl natijani tekshiring. So‘rov raqamini yordam xizmatiga bering; maxfiy ma’lumot yubormang.'},
 }
 export function errorGuidance(code:string,message?:string):ErrorGuidance{

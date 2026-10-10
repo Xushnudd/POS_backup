@@ -119,3 +119,14 @@ test('Delivery failure cannot confirm a contact; competing workers send once and
  await assert.rejects(verifyChallenge(failed.context,{challengeId:pending.challengeId,code:'000000'},failedDeps),{code:'AUTH_CHALLENGE_INVALID'})
  assert.equal(await prisma.verifiedContact.count({where:{userId:failed.user.id}}),0)
 })
+
+test('Expired queued secret is erased without a configured provider or encryption key, retaining unverified history',async()=>{
+ const f=await fixture(),mock=mockAuthenticationDelivery('sms')
+ const pending=await requestChallenge(f.context,{kind:'verify_phone',channel:'sms'},{delivery:mock.provider,secret,ttlMs:1000})
+ await new Promise(resolve=>setTimeout(resolve,1100))
+ assert.deepEqual(await processAuthenticationDeliveries(20),{processed:0,delivered:0,failed:0})
+ const row=await prisma.authChallenge.findUniqueOrThrow({where:{id:pending.challengeId}})
+ assert.ok(row.failedAt);assert.equal(row.sealedSecret,null);assert.equal(row.deliveredAt,null);assert.equal(row.usedAt,null)
+ assert.equal(mock.messages.length,0)
+ assert.equal(await prisma.verifiedContact.count({where:{userId:f.user.id}}),0)
+})

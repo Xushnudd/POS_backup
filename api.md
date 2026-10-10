@@ -1,5 +1,26 @@
 # Shuni POS API hujjati
 
+Himoyalangan endpointlarning rol→amal admission jadvali:
+[permission matrix](docs/operations/permission-matrix.md). `withApi` ga kelgan ro‘yxatdan o‘tmagan yo‘l yoki
+HTTP usuli default `403 FORBIDDEN`; `Ha` deb ko‘rsatilgan rol uchun ham DAL
+sessiya, tenant, filial, smena egasi va maxsus platforma/support vakolatini tekshiradi.
+
+Yangi yakunlangan savdo javobida `receiptSnapshot` bor: tashkilot/filial/kassa,
+valyuta/vaqt zonasi va kassirning yakunlash paytidagi rekvizitlari. U server/DB
+tomonidan olinadi va immutable; draft yoki eski tarixda `null` bo‘lishi mumkin.
+[Chek rekvizitlari](docs/operations/receipt-identity.md). Bu fiskal yoki SMS/e-mail
+yetkazish implementatsiyasi emas.
+
+### Umumiy API admission va body chegarasi
+
+Protected APIlar organization+actor bo‘yicha DB-shared read600/write300 per minute
+budget ishlatadi; maxsus tor limitlar saqlanadi. Public auth write1200/min: trusted
+proxy IP yoki umumiy unattributed bucket; forged header orqali bypass yo‘q.
+Health/logout umumiy admissiondan mustasno.429 RATE_LIMITED va Retry-After;
+original operationId saqlanadi. JSON≤1MiB, stream body default10s deadline408;
+import1000qator/30ustun/4000belgi-katak oshsa413. Environment orqali bounded
+konfiguratsiya va deployment chegaralari: [request limits](docs/operations/request-limits.md).
+
 ### Ichki support murojaatlari (2026-10-10)
 
 `GET/POST /api/support/tickets`, `GET /api/support/tickets/:id`,
@@ -1227,3 +1248,15 @@ Production provider registry bo‘sh; real Click/fiskal/hardware API mavjud emas
 `GET /api/integration-operations?page=1`: current owner, org/store scope, 20/page; request/hash/externalId/lease sir saqlanadi.
 `POST /api/integration-operations/{id}/lookup`: strict `{operationId:UUID,reason:string(3..2000)}`, owner,10/minute; review holatini faqat lookupga qaytaradi. Lifetime32 lookup; har8 urinish yoki not_found review. Original operationId replay bir marta. Bu charge/resend endpointi emas.
 Business intent faqat authorized server business transaction ichida yoziladi; original subject uchun boshqa key/provider bilan active duplicate rad etiladi. Timeout/expired lease faqat lookup; terminal posting fenced va transactional. Real adapter hamda uning domain postingi alohida rasmiy contractdan keyin ulanadi. [Operator contract va tiklash](docs/operations/provider-outbox.md).
+
+### Retention rejasi — `GET/POST /api/billing/retention`
+
+GET: faol owner yoki haqiqiy platforma administratoriga konfiguratsiya va o‘z tashkiloti actual obunasidan hisoblangan plannedReviewAt/reviewDue. Legacy holatda deadlineNULL. Ichki creator/reason yashiriladi; no-touch session; tor read30/min. POST faqat faol platform_admin/password session: original operationId, expectedVersionId va barcha policy maydonlari/reason majburiy. Current version o‘zgargan bo‘lsa409 RETENTION_POLICY_CHANGED; role403; yo‘q config503. Audit/version/pointer bitta transaction; original retry bitta versiya. `automaticDeletionEnabled=false`, `legalPolicyStatus=review_required`, `closureAvailable=false`: bu API tashkilotni yopmaydi/o‘chirmaydi. [Contract va qolgan scope](docs/operations/retention-policy.md).
+
+### Tashkilot biznes eksporti — mavjud `/api/jobs`
+
+`POST /api/jobs`: `{operationId:UUID,type:"tenant_export",reason:string(3..2000)}`; faol owner/password session, barcha filiallar, storeId/filter rad etiladi. Asl kalit bilan replay bitta job. Mavjud worker JSON artifact + dataset manifest/row counts/hashlarni yaratadi; Decimal string, binary base64. Download `GET /api/jobs/{id}/export` owner/live password session va tenant scope bilan `application/json` attachment. Jami100000qator/16MiB,24soat artifact; overflow/unreviewed schema/corruption aniq dead code va qisman faylsiz. Credentials, authentication va internal operational/proof toifalari manifestda ochiq chiqarib tashlangan; database restore emas. [Contract va qabul doirasi](docs/operations/tenant-export.md).
+
+### Obuna read-only — ADR-062
+
+`GET /api/billing`: `businessWritesAllowed` (legacy/trial/active/grace true, expired false); eski `newSalesAllowed` saqlanadi. Grace tugaganda yangi biznes yozuvlari SUBSCRIPTION_EXPIRED409 oladi; original committed operation actor/hash/live authorization bilan qayta olinadi. SQL guard direct root/child writes va terminal Operation INSERTni ham tekshiradi. Eksport, billing renewal, auth/security/support recovery ochiq, ularning vakolatlari saqlanadi. Ish davomida grace tugasa transaction rollback. [Contract va exceptionlar](docs/operations/subscription-read-only.md).

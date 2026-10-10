@@ -69,6 +69,7 @@ async function handleGET(
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
@@ -137,6 +138,7 @@ async function handlePUT(
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
@@ -193,6 +195,7 @@ async function handleDELETE(
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(

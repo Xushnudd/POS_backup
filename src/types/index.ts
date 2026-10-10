@@ -301,6 +301,12 @@ export interface SaleReturnHistory {
   items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
 }
 export interface Sale {
+  receiptSnapshot?: {
+    version: 1; capturedAt: string; organizationName: string; organizationPhone: string;
+    tin: string | null; currencyCode: string; timezone: string; receiptFooter: string | null;
+    storeName: string; storeAddress: string | null; storePhone: string | null;
+    registerName: string; registerCode: string; cashierName: string;
+  } | null;
   discountReason?:string|null;
   discountPercent?:string|null;
   discountApprovedBy?:string|null;

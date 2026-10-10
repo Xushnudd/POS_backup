@@ -1,3 +1,4 @@
+import { requestBudgetSetting } from './auth/request-budget-config'
 export function validateProductionEnvironment(env: NodeJS.ProcessEnv = process.env) {
   if (env.NODE_ENV !== 'production') return
   if (!env.DATABASE_URL || !env.APP_ORIGIN) throw new Error('Production requires DATABASE_URL and APP_ORIGIN')
@@ -12,4 +13,5 @@ export function validateProductionEnvironment(env: NodeJS.ProcessEnv = process.e
   }
   if (env.TRUST_PROXY_IP && env.TRUST_PROXY_IP !== 'true') throw new Error('TRUST_PROXY_IP must be true or omitted')
   if(env.AUTH_CHALLENGE_SECRET&&!/^[0-9a-f]{64}$/i.test(env.AUTH_CHALLENGE_SECRET))throw new Error('AUTH_CHALLENGE_SECRET must be a separate 32-byte hexadecimal key')
+  for(const name of ['API_READS_PER_MINUTE','API_WRITES_PER_MINUTE','API_PUBLIC_WRITES_PER_MINUTE','API_BODY_TIMEOUT_MS'] as const)requestBudgetSetting(name,env)
 }

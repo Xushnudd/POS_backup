@@ -118,11 +118,11 @@ test('Expired trial denies new sale/object, preserves reads and restores paid en
   const store = await prisma.store.create({ data: { organizationId: f.org.id, name: 'Existing data retained' } })
   const register = await prisma.register.create({ data: { storeId: store.id, name: 'Existing terminal', code: 'BILLING' } })
   const shift = await prisma.shift.create({ data: { registerId: register.id, organizationUserId: f.context.organizationUserId, openingCash: 0 } })
+  const retained=await prisma.product.create({data:{organizationId:f.org.id,name:'Export after expiry',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'10',costPrice:'3'}})
   await prisma.organizationSubscription.create({ data: { organizationId: f.org.id, planVersionId: 'initial-pro-v1',
     trialStartedAt: new Date(Date.now() - 30 * 86400000), trialEndsAt: new Date(Date.now() - 8 * 86400000) } })
   const expired = await billingStatus(f.context)
   assert.equal(expired.state, 'expired'); assert.equal(expired.newSalesAllowed, false)
-  const retained=await prisma.product.create({data:{organizationId:f.org.id,name:'Export after expiry',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'10',costPrice:'3'}})
   const exported=await productsAPI(new NextRequest(`http://localhost:3000/api/products?organizationId=${f.org.id}&format=csv`,{headers:{cookie:'pos_session='+f.token}}),undefined)
   assert.equal(exported.status,200);assert.ok(JSON.stringify(await exported.json()).includes(retained.name))
   await assert.rejects(prisma.store.create({ data: { organizationId: f.org.id, name: 'Denied new branch' } }), error => billingDatabaseError(error)?.code === 'SUBSCRIPTION_EXPIRED')

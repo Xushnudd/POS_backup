@@ -49,7 +49,7 @@ export async function billingStatus(context: TokenPayload) {
     const usage = { branches: await tx.store.count({ where: { organizationId: context.organizationId } }),
       registers: await tx.register.count({ where: { store: { organizationId: context.organizationId } } }),
       staff: await tx.organizationUser.count({ where: { organizationId: context.organizationId } }) }
-    if (!subscription) return { state: 'legacy_unmanaged', newSalesAllowed: true, subscription: null, plans, usage, now, canManagePlans }
+    if (!subscription) return { state: 'legacy_unmanaged', newSalesAllowed: true, businessWritesAllowed: true, subscription: null, plans, usage, now, canManagePlans }
     return { ...subscriptionPhase(now, { ...subscription, graceDays: subscription.planVersion.graceDays }), subscription: {...subscription,planVersion:publicVersion(subscription.planVersion)}, plans, usage, now, canManagePlans }
   }, { isolationLevel: 'RepeatableRead' })
 }

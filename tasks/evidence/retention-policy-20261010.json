@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-10T11:17:17.857453+00:00",
+  "sourceCommit": "975427bcbba849c25a9e120509135115d90393d2",
+  "workingTree": true,
+  "originalDoneBaseline": 153,
+  "originalDoneCurrent": 154,
+  "requestedAdditional": 20,
+  "acceptedAdditional": 1,
+  "remainingTarget": 19,
+  "task": "BIZ-02.07",
+  "status": "in_progress",
+  "coreAccepted": [
+    "DB versioned retention configuration and immutable SQL guards",
+    "live platform authority, no-touch owner read, strict validation",
+    "atomic audit rollback and original-key replay",
+    "eight concurrent edits: one accepted, seven stale-version conflicts",
+    "HTTPS browser lost-ACK recovery and no duplicate version"
+  ],
+  "notImplemented": [
+    "full tenant export/manifest",
+    "owner reauthenticated closure/cancellation",
+    "all business-write read-only enforcement",
+    "legal category approval and irreversible deletion"
+  ],
+  "gates": {
+    "fullIntegration": {
+      "pass": 258,
+      "total": 258,
+      "durationMs": 326635.451685,
+      "stage": "Before final no-touch GET and row-lock hardening; not a final-source full rerun"
+    },
+    "finalFocused": {
+      "pass": 11,
+      "total": 11,
+      "durationMs": 6171.668489
+    },
+    "finalUnit": {
+      "pass": 62,
+      "total": 62,
+      "files": 26
+    },
+    "finalProductionHttpsBrowsers": {
+      "pass": 6,
+      "total": 6,
+      "durationSeconds": 14.4,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "finalBuild": "PASS",
+    "finalLint": "PASS",
+    "freshAndLegacyMigrations": 110,
+    "workerBuild": "PASS before final server-only row-lock change",
+    "typecheck": "PASS before final server-only row-lock change; final production build typecheck PASS"
+  },
+  "sourcesSha256": {
+    "prisma/schema.prisma": "7a3caf8be65c674e3eb7230f6c46c14156d9d5643611767e7f43555212dd0f63",
+    "prisma/migrations/202610100110_retention_policy/migration.sql": "70e95470b47fdc3fdb5429aed869ea28a5fa003690857f992e28fca91641b61e",
+    "src/server/retention/phase.ts": "4ed98fda4dea158ae6f50a228c729e77df32146dbd711a7fd41759c5a4e072b3",
+    "src/server/retention/service.ts": "2ccce459b66f120f8edbec1436ba9fd8ea453cf9da434322391b10df396758bc",
+    "src/app/api/billing/retention/route.ts": "1119f0acf62346a064d0f0c7a5cf7ecf6683c85ea59956dac7112a133dc7ccda",
+    "src/components/billing/Retention.tsx": "b99e5234dad59306884ed509a67ad19c42042a05e7f8041303c66250f14fbd47",
+    "src/app/(dashboard)/billing/page.tsx": "a22fcd02264373c188c8ae316ba25ebfe745242ad0baef9b4fa5c59b25510184",
+    "src/components/forms/DurableMutation.tsx": "afb178099d1a187b1de92a070256803ff19401900fc3e4b5663ce676e08ff5eb",
+    "tests/retention-phase.unit.test.ts": "5129ca3c4c9f938ff92a1d4df261ac647f594ca1ed7239deff70b688b2d8c6e1",
+    "tests/retention-policy.integration.test.ts": "cd05b57e44ca86d4119c147e98013dc6be7a51226c4fb88fe8b4ff660a1914d3",
+    "tests/e2e/retention.spec.ts": "5001f16002ac6575ccf8146f43da0a048eb81112bcbe8c9451702ddc93219ea7",
+    "src/server/auth/route-permissions.ts": "ea2ab11fb4c4b4097e83d65184f7ee1481359c357d2ef39e6cfc87996fd87bee",
+    "docs/operations/retention-policy.md": "b7fb5a96f8cf9b46fe139bb3c23ca6f6d1f927b9051a13500aaf74d96095a294"
+  },
+  "logsSha256": {
+    "/tmp/pos-retention-integration.log": "8d229452347432f469cc64b570af61301bce098b200de8d78e18fdc8bf5e340b",
+    "/tmp/pos-retention-lock-unit.log": "30feb144f079c8ac0b031166b405849f029a488f7d67888e8b878a6d4342da8a",
+    "/tmp/pos-retention-lock-focused.log": "82dc834de387615e0d27de3c3242f095d506fdf7a3439d5217b8479fe8dc8a11",
+    "/tmp/pos-retention-lock-build.log": "3ef8fd4969f077ef777bea85864cd52c4ce645c6f221ce453eafd71dfe4afc5e",
+    "/tmp/pos-retention-lock-browser.log": "505d2ddde3c0e601f7d36be6148c3e9f090a3e8a6e447c8e53fbaba832fefb30",
+    "/tmp/pos-retention-lock-lint.log": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+    "/tmp/pos-retention-migrations.log": "36c60f9f214db15a3f96b0476dc7aca5e37e1e7d7bc770ab1be1220846bdc391",
+    "/tmp/pos-retention-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-retention-types.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39"
+  },
+  "productionDatabaseChanged": false,
+  "deployed": false,
+  "vendorImplementationAdded": false,
+  "automaticDeletionEnabled": false
+}

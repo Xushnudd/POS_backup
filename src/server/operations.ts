@@ -1,3 +1,5 @@
+import {READ_ONLY_OPERATION_EXCEPTIONS} from './billing/read-only-policy'
+import {billingDatabaseError} from './billing/errors'
 import {assertNewOperationAllowed} from './deployment/state'
 import {requestTrace, safeAudit, logEvent} from './observability/context'
 import { createHash, randomInt } from 'node:crypto'
@@ -57,6 +59,9 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
           return old.result as T
         }
         await assertNewOperationAllowed()
+        if(!(READ_ONLY_OPERATION_EXCEPTIONS as readonly string[]).includes(type)){
+          try{await tx.$queryRaw`SELECT assert_business_writable(${context.organizationId})::text`}catch(error){throw billingDatabaseError(error)??error}
+        }
         const result=await work(tx)
         const json=JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue
         await tx.operation.create({data:{organizationId:context.organizationId,actorId:context.userId,type,key,payloadHash:hash,result:json}})

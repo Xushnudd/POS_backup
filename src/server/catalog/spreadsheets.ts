@@ -13,7 +13,7 @@ if(sheet.rowCount>1001||sheet.columnCount>30)throw Error('IMPORT_ROW_LIMIT');con
 sheet.eachRow({includeEmpty:true},(row,n)=>{const values=[];for(let i=1;i<=sheet.columnCount;i++){const v=row.getCell(i).value;
 if(v!==null&&typeof v!=='string'&&typeof v!=='number')throw Error('PLAIN_VALUES_REQUIRED');
 const text=v===null?'':String(v);if(text.length>4000)throw Error('IMPORT_CELL_LIMIT');values.push(text)}rows.push(values)});
-parentPort.postMessage({rows})})().catch(()=>parentPort.postMessage({error:true}));`
+parentPort.postMessage({rows})})().catch(error=>parentPort.postMessage({error:['IMPORT_ROW_LIMIT','IMPORT_CELL_LIMIT'].includes(error.message)?'limit':true}));`
 let active=0
 export async function spreadsheetRows(format:'csv'|'xlsx',content:string):Promise<string[][]>{
  if(!/^[A-Za-z0-9+/]*={0,2}$/.test(content)||content.length>700000||Buffer.from(content,'base64').toString('base64')!==content)throw new AccessError(413,'IMPORT_FILE_LIMIT')
@@ -23,8 +23,8 @@ export async function spreadsheetRows(format:'csv'|'xlsx',content:string):Promis
   // Resolve at native runtime: bundlers can otherwise replace resolve() with
   // a numeric module ID, which a separate Node worker cannot require.
   let finished=false,worker:Worker;try{const nativeRequire=process.getBuiltinModule('module').createRequire(join(process.cwd(),'package.json'));worker=new Worker(parser,{eval:true,workerData:{module:nativeRequire.resolve('exceljs'),format,content},resourceLimits:{maxOldGenerationSizeMb:128,maxYoungGenerationSizeMb:16,stackSizeMb:4}})}catch{active--;reject(new AccessError(503,'IMPORT_BUSY'));return}
-  const finish=(rows?:string[][])=>{if(finished)return;finished=true;clearTimeout(timer);active--;void worker.terminate();if(rows)resolve(rows);else reject(new AccessError(400,'INVALID_IMPORT_FILE','Fayl oddiy qiymatli bitta jadval, eng ko‘pi1000 qator va30 ustun bo‘lsin'))}
+  const finish=(rows?:string[][],overflow=false)=>{if(finished)return;finished=true;clearTimeout(timer);active--;void worker.terminate();if(rows)resolve(rows);else if(overflow)reject(new AccessError(413,'IMPORT_FILE_LIMIT','Import eng ko‘pi1000 qator,30 ustun va4000 belgili kataklardan iborat bo‘lsin'));else reject(new AccessError(400,'INVALID_IMPORT_FILE','Fayl oddiy qiymatli bitta jadval, eng ko‘pi1000 qator va30 ustun bo‘lsin'))}
   const timer=setTimeout(()=>finish(),10000)
-  worker.once('message',(m:{rows?:string[][]})=>finish(m.rows));worker.once('error',()=>finish());worker.once('exit',()=>{if(!finished)finish()})
+  worker.once('message',(m:{rows?:string[][];error?:unknown})=>finish(m.rows,m.error==='limit'));worker.once('error',()=>finish());worker.once('exit',()=>{if(!finished)finish()})
  })
 }

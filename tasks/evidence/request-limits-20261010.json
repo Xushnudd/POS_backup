@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-10",
+  "task": "SEC-02.05",
+  "status": "done",
+  "baseline_original_done": 152,
+  "accepted_original_done": 153,
+  "latest_request": "1/1 original task",
+  "git_head": "975427bcbba849c25a9e120509135115d90393d2",
+  "version": "HEAD + working tree; no AI commit",
+  "source_sha256": {
+    "src/server/api.ts": "2a82b3246cb19c649904aae5815542d05a90281fc5e0e79b4874af3e3deab080",
+    "src/server/auth/request-budget.ts": "18f3970f2e96c372199eda9fb1e8cd749541c2cdc70c8aa20fa1ce44c455837b",
+    "src/server/auth/request-budget-config.ts": "03f03cf473a07a81b66179d28835e7a06e5a39c88a84a1d3c0c9449195d656d2",
+    "src/server/auth/rate-limit.ts": "ecbc025173f0d0fbc0b6f1ff219720b0d7325039f0039947eaeaa75f2489dcc4",
+    "src/server/config.ts": "7712a0f6b28d209c6ccb7be544ae994c6cfbc9a02f64a90e83b0d4e64268a531",
+    "src/server/catalog/spreadsheets.ts": "4d7f32a976dc613d7ca7a39fb20349555a52153d87503394bb0b4680a34aa975",
+    "tests/request-budgets.integration.test.ts": "7bb68dd454015aace15fa3a1c512a62c65200a1d2a539aa0b3939fa79e2568a7",
+    "tests/request-budget-config.unit.test.ts": "76c7148c04e93e5d71291229434906fb8f68e2293a7ba810c3d1d33929e217e8",
+    "tests/catalog-import.unit.test.ts": "90ce1f19d4b1c09190bfc4409d60b31afc448555fb87460f626eeb6ee250469d",
+    "tests/e2e/billing.spec.ts": "905fdb72e7961fe072743cc912e39462a2637a381f91e7747c02f53cb9adb075",
+    "tests/e2e/request-budget.spec.ts": "9c7be3f2d8f3d443ba3d556934ca8d355580dfa9d69d5e84961b0b159543b1ae",
+    "docs/operations/request-limits.md": "1a6e6e162fa61bb27bd1cb3891626f455fdbfcc9029e21f485e5ebe5226d4905"
+  },
+  "gates": {
+    "full_regression": {
+      "log": "/tmp/pos-request-budget-full.log",
+      "sha256": "f658d31773d6ea7f14760839107dc3fcd8a0c1250c2eefb5a477ff1de129a3ac",
+      "result": "PASS:250/250,325162.784215ms; before final fail-closed body config assertion and lint-only test variable rename"
+    },
+    "final_configuration": {
+      "log": "/tmp/pos-request-budget-final-configuration.log",
+      "sha256": "ddcbde6abe4e2b916e5f738106a3133eacca4cb487ad8f8294f01223f1ef7f6e",
+      "result": "PASS:6/6,3217.119111ms; final source,243 protected handler inventory and public auth admission"
+    },
+    "unit": {
+      "log": "/tmp/pos-request-budget-unit-latest.log",
+      "sha256": "33c0ad271d625c270bcd47ab895976d10ab6710446b9080ad80eb8cc09429301",
+      "result": "PASS:24/24"
+    },
+    "browsers": {
+      "log": "/tmp/pos-request-budget-browser-accepted.log",
+      "sha256": "bf18d13549a839e58a4c5d85a0575217d019b708ce981d716d7866dd8b95ab7d",
+      "result": "PASS:9/9,46.5s; final production HTTPS build, all three engines"
+    },
+    "production_build": {
+      "log": "/tmp/pos-request-budget-build-accepted.log",
+      "sha256": "c22ddf427612e8a92dce70cb0558f063fb2e6db19cefa18d4be8e6b315faa168",
+      "result": "PASS"
+    },
+    "lint": {
+      "log": "/tmp/pos-request-budget-lint-latest.log",
+      "sha256": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+      "result": "PASS"
+    },
+    "types": {
+      "log": "/tmp/pos-request-budget-types-final.log",
+      "sha256": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+      "result": "PASS"
+    },
+    "worker_build": {
+      "log": "/tmp/pos-request-budget-worker-latest.log",
+      "sha256": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+      "result": "PASS"
+    }
+  },
+  "scope": [
+    "Application API admission, shared PostgreSQL counters, org+actor isolation",
+    "Specific auth/import/report/worker limits retained",
+    "Body size and deadline; import row/cell overflow413",
+    "Original key survives real429/reload/retry, one invoice only"
+  ],
+  "excluded": [
+    "Actual reverse proxy/firewall/WAF/TCP hosting deployment",
+    "Real vendor/SMS/email/hardware integrations",
+    "Production deployment, live business DB changes"
+  ],
+  "failed_attempts": [
+    "Initial isolated DB container stopped: connectivity failure, restarted only test container; subsequent gates passed",
+    "Initial browsers missing after /tmp cleanup: restored official binaries and isolated libraries; final9 passed",
+    "Next.js environment type and reserved module variable caught by build/lint; fixed, final gates passed"
+  ],
+  "schema_change": false
+}

@@ -60,6 +60,7 @@ async function handlePUT(
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -116,6 +117,7 @@ async function handleDELETE(
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },

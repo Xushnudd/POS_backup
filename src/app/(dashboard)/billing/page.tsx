@@ -5,8 +5,9 @@ import { useAuth } from '@/context/AuthContext'
 import DurableMutation from '@/components/forms/DurableMutation'
 import Invoices from '@/components/billing/Invoices'
 import Costs from '@/components/billing/Costs'
+import Retention from '@/components/billing/Retention'
 type Version = { id:string; code: string; name: string; version: number; monthlyPrice: string; currency: string; branchLimit: number; registerLimit: number; staffLimit: number; trialDays: number; graceDays: number }
-type Status = { state: string; newSalesAllowed: boolean; canManagePlans: boolean; plans: { code: string; currentVersion: Version }[];
+type Status = { state: string; newSalesAllowed: boolean; businessWritesAllowed:boolean; canManagePlans: boolean; plans: { code: string; currentVersion: Version }[];
   usage: { branches: number; registers: number; staff: number }; subscription: { trialEndsAt: string; paidThrough: string | null; cancelAtPeriodEnd:boolean; planVersion: Version } | null; graceEndsAt?: string }
 const names: Record<string,string> = { trial: 'Sinov davri', active: 'Faol obuna', grace: 'Imtiyozli muddat', expired: 'Obuna muddati tugagan', legacy_unmanaged: 'Administrator tarifga ko‘chirishi kutilmoqda' }
 export default function BillingPage() {
@@ -25,7 +26,7 @@ function Billing({organizationId}:{organizationId:string}) {
     {error && <div role="alert">{error}<button onClick={load} className="ml-3 underline">Qayta urinish</button></div>}
     {!data && !error && <p role="status">Yuklanmoqda…</p>}
     {data && <><section aria-label="Obuna holati"><h2>{names[data.state] ?? data.state}</h2>
-      {!data.newSalesAllowed && <p role="alert">Yangi savdo yaratish yopilgan. Mavjud ma’lumotlar va eksport saqlanadi; ma’lumotlar o‘chirilmaydi.</p>}
+      {!data.businessWritesAllowed && <p role="alert">Tashkilot faqat o‘qish rejimida. Savdo, kirim, qaytarish, to‘lov va biznes sozlamalarini o‘zgartirish yopilgan. Mavjud ma’lumotlar va eksport saqlanadi; ma’lumotlar o‘chirilmaydi.</p>}
       {data.state === 'grace' && <p role="status">Imtiyozli muddatda amaldagi imkoniyatlar ishlaydi. Muddat tugashidan oldin obunani yangilang.</p>}
       {data.subscription && <><p>Amaldagi tarif: {data.subscription.planVersion.name}</p><p>Trial yakuni: {data.subscription.trialEndsAt}</p><p>To‘langan muddat: {data.subscription.paidThrough ?? 'To‘lov qayd etilmagan'}</p><p>Grace yakuni: {data.graceEndsAt}</p></>}
       <p>Jami: {data.usage.branches} filial, {data.usage.registers} kassa, {data.usage.staff} xodim.</p>
@@ -56,5 +57,6 @@ function Billing({organizationId}:{organizationId:string}) {
       </DurableMutation>
     </section>}
     {data?.canManagePlans&&<Costs organizationId={organizationId}/>}
+    {data&&(role==='owner'||data.canManagePlans)&&<Retention/>}
   </div>
 }

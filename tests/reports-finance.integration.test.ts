@@ -625,7 +625,8 @@ test('Unconfigured integration boundary returns a distinct sanitized HTTP state 
  const {withApi}=await import('@/server/api'),{IntegrationUnavailable}=await import('@/server/integrations/contracts')
  const f=await fixture()
  const handler=withApi(async()=>{throw new IntegrationUnavailable('payment')})
- const result=await handler(req('/operations/boundary',f.cookie,{}),undefined)
+ // Exercise error mapping on an admitted operation, not an unreviewed URL.
+ const result=await handler(req('/operations/cancel',f.cookie,{}),undefined)
  assert.equal(result.status,503);assert.equal((await result.json()).error.code,'INTEGRATION_UNAVAILABLE')
  assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),0)
  assert.equal(await prisma.payment.count({where:{organizationId:f.org.id}}),0)

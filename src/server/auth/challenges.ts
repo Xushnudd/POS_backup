@@ -153,13 +153,19 @@ export async function completePasswordReset(input:z.input<typeof resetCompleteSc
 
 export async function processAuthenticationDeliveries(limit=20,deps:Dependencies={}){
  if(!Number.isInteger(limit)||limit<1||limit>100)throw new Error('Invalid authentication batch')
+ // Expired secrets must be erased even after the delivery provider/key is removed.
+ // Bound cleanup and skip live worker locks; retain challenge metadata for history.
+ await prisma.$executeRaw`WITH expired AS (
+  SELECT id FROM "AuthChallenge" WHERE "usedAt" IS NULL AND "failedAt" IS NULL
+   AND "deliveredAt" IS NULL AND "expiresAt"<=clock_timestamp()
+  ORDER BY "expiresAt",id FOR UPDATE SKIP LOCKED LIMIT ${limit}
+ ) UPDATE "AuthChallenge" c SET "failedAt"=clock_timestamp(),"sealedSecret"=NULL,
+  "deliveryLease"=NULL,"deliveryLeaseUntil"=NULL FROM expired WHERE c.id=expired.id`
  const status=authenticationDeliveryStatus(),channels=deps.delivery?[deps.delivery.channel]:(['sms','email'] as const).filter(channel=>status[channel])
  // An unconfigured production worker neither sends nor simulates success.
  if(!channels.length)return {processed:0,delivered:0,failed:0}
  const key=pepper(deps);for(const channel of channels)authenticationDelivery(channel,deps.delivery)
  let processed=0,delivered=0,failed=0
- const now=new Date()
- await prisma.authChallenge.updateMany({where:{usedAt:null,failedAt:null,deliveredAt:null,expiresAt:{lte:now}},data:{failedAt:now,sealedSecret:null,deliveryLease:null,deliveryLeaseUntil:null}})
  for(let i=0;i<limit;i++){
   const lease=randomUUID()
   const source=await prisma.$transaction(async tx=>{

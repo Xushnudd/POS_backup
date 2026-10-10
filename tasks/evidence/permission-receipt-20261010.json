@@ -1,0 +1,88 @@
+{
+  "date": "2026-10-10T09:33:16.118953+00:00",
+  "sourceCommit": "975427bcbba849c25a9e120509135115d90393d2",
+  "workingTree": true,
+  "originalDoneBaseline": 153,
+  "originalDoneCurrent": 154,
+  "requestedAdditional": 20,
+  "acceptedAdditional": 1,
+  "acceptedOriginalTasks": [
+    "SEC-01.04"
+  ],
+  "remainingTarget": 19,
+  "coreChangesNotCounted": [
+    "POS-02.09 historical receipt identity; token-link/electronic delivery remain",
+    "BIZ-02.07 approved retention policy recorded only"
+  ],
+  "gates": {
+    "fullIntegration": {
+      "pass": 253,
+      "total": 253,
+      "durationMs": 328466.068883,
+      "stage": "Before final HEAD fallback/policy consolidation/readiness109 fault-injection assertion"
+    },
+    "finalFocusedIntegration": {
+      "pass": 16,
+      "total": 16,
+      "durationMs": 10859.520199
+    },
+    "unitFiles": {
+      "pass": 25,
+      "total": 25
+    },
+    "productionHttpsBrowsers": {
+      "pass": 12,
+      "total": 12,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "durationSeconds": 23.2,
+      "nativePrintDialog": "test-only stub; rendered HTML and HTTP audit actual; no physical hardware claim"
+    },
+    "freshAndLegacyMigrations": 109,
+    "productionBuild": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "workerBuild": "PASS"
+  },
+  "database": "isolated pos_test and disposable fresh/legacy databases only",
+  "productionDeployment": false,
+  "vendorImplementations": false,
+  "automaticDeletion": false,
+  "sourceSha256": {
+    "src/server/auth/policy.ts": "7593d2b0881d4e59dc8c188929c55a39f099c6debbc025f27c33f6970dafc1cb",
+    "src/server/auth/route-permissions.ts": "d050b165b4ba62546313abd8d2459febbbc68d493da78567069a40269cde2529",
+    "tests/route-permissions.unit.test.ts": "24eda88f99246e3b259924ce1bdc78851262ccd1a2226642013f1820c117ac8c",
+    "tests/route-boundaries.integration.test.ts": "c5cd47f863e6efc2c9b31ed67dd38781aa9224e993dddce895890f53ab6ccf0b",
+    "tests/permission-transactions.integration.test.ts": "972eae356c12e8580294d3d1699fe58cb3d057a2bc2375fda3e911e188532a86",
+    "tests/receipt-identity.integration.test.ts": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052",
+    "tests/reports-finance.integration.test.ts": "f0e2fdbf47adee06095657dc7da0691d9a6e172b090b3e00f7c51a89d3ffb4da",
+    "tests/e2e/permission-receipts.spec.ts": "fd7c41dd38dfe1b2c8364aabcaa2b11927a83fbd9b999c215021a8fada11697f",
+    "src/components/pos/ReceiptPreview.tsx": "02aae54cd454a9e123f84f1e9bc9ce9a0f69165eb13d038bf4dc4ddd1358f3ba",
+    "src/types/index.ts": "8faadd4b9133997ff8cee21383b91ae493aaa162109921449fa5feb4c159f328",
+    "prisma/schema.prisma": "cbe6d0393b96e308a5445ec7ad54bbd857619bb301902a02bfb1b3886c6e4d90",
+    "prisma/migrations/202610100109_receipt_identity_snapshot/migration.sql": "04f6e3d6ae804f6322f0907ded6b27d63c75dca74d1e1989d1e585ee85e85e64",
+    "src/app/api/health/ready/route.ts": "5fe36edfe02f6a3981d2ae691e501cd0e18b3df6212cb7853b8265765e49b53d",
+    "scripts/ops/test-migrations.sh": "318e4fcb389b3dcc55bdef7d3fb3762ce5e63225bb80b2d3a88e668a2faea603",
+    "docs/operations/permission-matrix.md": "b1fab95cc3c48c1ca2d1c515047af33d6c308ba02c18b920f174d253cdfec84d",
+    "docs/operations/receipt-identity.md": "1b699565f7a497880722525d6247cff43ccc3ac15a1b748ac5d0a1efc04b83a7"
+  },
+  "logSha256": {
+    "/tmp/pos-permission-receipt-integration-accepted.log": "3d4ff3f486b05c04416dd0f207f837f417d8b4a9bdba0c3dd0c8984620e432a7",
+    "/tmp/pos-permission-receipt-focused.log": "04b8e6dd0c602e82eed495ff95e123c687b1bf4f3ce8cbf5ba5f3878ce0608ab",
+    "/tmp/pos-permission-receipt-unit-final.log": "58f0924499c71139306ec578131e0b82cc6354befc67d4d8149e191a529008d4",
+    "/tmp/pos-permission-receipt-browser-final.log": "e5f5ccf8f9bdd0bd9e58c290477b945cacedf0ae3bc2558dd64036c151200d25",
+    "/tmp/pos-permission-receipt-production.log": "cd67620656f0fcb19abe5dc8c0649ef1d5e773a8b658193e20a4d97ed63e2700",
+    "/tmp/pos-permission-receipt-migrations.log": "f347c81c41ed03d866af07d2fdc0c45bfc22366273fe59866874bae4b681da26",
+    "/tmp/pos-permission-receipt-lint-accepted.log": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+    "/tmp/pos-permission-receipt-types-accepted.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-permission-receipt-worker-final.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355"
+  },
+  "initialFailures": [
+    "First full249/250 unreviewed test route, corrected to admitted route",
+    "Sandbox generation did not produce updated client; escalated local generation succeeded",
+    "First browser10/12 native print; second10/12 iframe asynchronous creation; final12/12"
+  ]
+}

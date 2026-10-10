@@ -1,4 +1,5 @@
 import type { TokenPayload } from '@/lib/auth'
+import { routePermissionRoles, type BusinessRole } from './route-permissions'
 
 export class AccessError extends Error {
   constructor(public status: number, public code: string, message = 'Bu amal uchun ruxsat yo‘q', public retryAfterSeconds?:number, public details?:unknown) { super(message) }
@@ -35,23 +36,8 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
 }
 export function assertRoutePermission(path: string, method: string, role: string) {
   if (!['owner', 'admin', 'cashier'].includes(role)) throw new AccessError(403, 'FORBIDDEN')
-  const area = path.split('/')[2]
-  const read = method === 'GET' || method === 'HEAD'
-  if (area === 'billing' && read) return
-  // Platform/support actions have their own operator + explicit owner-grant DAL.
-  // A business role never grants cross-organization support access by itself.
-  if(area==='deployment'&&read)return
-  if(area==='deployment')throw new AccessError(403,'FORBIDDEN')
-  if(area==='support')return
-  if(area==='offline-cash')return
-  if(area==='price-rules'&&path==='/api/price-rules/quote'&&method==='POST')return
-  if (area === 'organizations' && !path.endsWith('/switch') && !read && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
-  if (area === 'organizations' && path.includes('/users') && role !== 'owner') throw new AccessError(403, 'FORBIDDEN')
-  if(area==='ownership-transfers' && (read || (method==='POST' && /^\/api\/ownership-transfers\/[0-9a-f-]{36}$/i.test(path))))return
-  if (role === 'cashier') {
-    const allowed = ['sales', 'shifts', 'products', 'categories', 'customers', 'stores', 'auth', 'operations', 'sync', 'files', 'brands', 'taxes']
-    if (area === 'organizations' && (read || path.endsWith('/switch'))) return
-    if (!allowed.includes(area) || (['products','categories','customers','stores','files','brands','taxes'].includes(area) && !read)) throw new AccessError(403, 'FORBIDDEN')
-    if (path.endsWith('/void')) throw new AccessError(403, 'MANAGER_REQUIRED')
+  const roles = routePermissionRoles(path, method)
+  if (!roles?.includes(role as BusinessRole)) {
+    throw new AccessError(403, path.endsWith('/void') && role === 'cashier' ? 'MANAGER_REQUIRED' : 'FORBIDDEN')
   }
 }

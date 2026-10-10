@@ -15,10 +15,10 @@ const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/log
 test('Readiness requires the active manual-refund and supplier migration contract, without leaking dependency details',async()=>{
  const {GET}=await import('../src/app/api/health/ready/route');
  assert.equal((await GET()).status,200);
- try{
-  await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NOW() WHERE migration_name='202610070031_manual_refund_proof'`;
+ for(const migration of ['202610070031_manual_refund_proof','202610100109_receipt_identity_snapshot'])try{
+  await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NOW() WHERE migration_name=${migration}`;
   const response=await GET();assert.equal(response.status,503);assert.deepEqual(await response.json(),{status:'unavailable'});
- }finally{await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NULL WHERE migration_name='202610070031_manual_refund_proof'`}
+ }finally{await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NULL WHERE migration_name=${migration}`}
  assert.equal((await GET()).status,200);
 });
 type Handler=(request:NextRequest,context:{params:Promise<Record<string,string>>})=>Promise<Response>
@@ -44,8 +44,10 @@ test('Every exported protected API handler rejects unauthenticated, foreign tena
    assert.ok([403,404].includes(crossTenant.status),method+' '+template+' foreign tenant '+crossTenant.status)
    const crossStore=await routeModule[method](request(admin.cookie,'?storeId='+foreignStore.id),context)
    assert.ok([403,404].includes(crossStore.status),method+' '+template+' foreign store '+crossStore.status)
-   let denied=false;try{assertRoutePermission(path,method,'cashier')}catch{denied=true}
-   if(denied)assert.equal((await routeModule[method](request(cashier.cookie,''),context)).status,403,method+' '+template+' cashier denied before handler')
+   for(const [role,actor] of [['owner',own],['admin',admin],['cashier',cashier]] as const){
+    let denied=false;try{assertRoutePermission(path,method,role)}catch{denied=true}
+    if(denied)assert.equal((await routeModule[method](request(actor.cookie,''),context)).status,403,method+' '+template+' '+role+' denied before handler')
+   }
   }
  }
  assert.ok(inventory.length>=100,'Guard inventory includes all HTTP methods; no silent shrinking')
@@ -102,4 +104,19 @@ test('Keyboard identifiers preserve exact SKU/name lookup, reject ambiguity and 
  assert.equal((await GET(query('identifier',product.name),undefined)).status,409);
  assert.equal((await GET(query('identifier','x'.repeat(201)),undefined)).status,400);
  assert.equal(await prisma.sale.count({where:{organizationId:own.org.id}}),0);
+});
+
+test('Common HTTP guard denies unreviewed endpoints and methods for every business role before handler execution',async()=>{
+ const {withApi}=await import('@/server/api');let invoked=0;
+ const guarded=withApi(async()=>{invoked++;return Response.json({unexpected:true})});
+ for(const role of ['owner','admin','cashier']){
+  const actor=await account(role);
+  for(const [method,path] of [['GET','/api/new-sensitive-feature'],['POST','/api/products/unreviewed/action'],['PATCH','/api/reports/profit']] as const){
+   const request=new NextRequest('http://localhost:3000'+path,{method,headers:{cookie:actor.cookie,origin:'http://localhost:3000','content-type':'application/json'},...(method==='GET'?{}:{body:'{}'})});
+   const response=await guarded(request,undefined);assert.equal(response.status,403,role+' '+method+' '+path);assert.equal((await response.json()).error.code,'FORBIDDEN');
+  }
+  assert.equal(await prisma.operation.count({where:{organizationId:actor.org.id}}),0);
+  assert.equal(await prisma.sale.count({where:{organizationId:actor.org.id}}),0);
+ }
+ assert.equal(invoked,0);
 });
