@@ -10,6 +10,11 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+ supportTickets SupportTicket[]
+ integrationCosts IntegrationCost[]
+ billingInvoices BillingInvoice[]
+ billingPayments BillingPayment[]
+ subscription OrganizationSubscription?
  providerIntents ProviderIntent[]
  receiptCostPlans ReceiptCostPlan[]
  customerAdvances CustomerAdvance[]
@@ -71,6 +76,16 @@ model Organization {
 }
 
 model User {
+ requestedSupportTickets SupportTicket[] @relation("SupportTicketRequester")
+ assignedSupportTickets SupportTicket[] @relation("SupportTicketAssignee")
+ supportTicketEvents SupportTicketEvent[]
+ authChallenges AuthChallenge[]
+ verifiedContacts VerifiedContact[]
+ billingInvoices BillingInvoice[]
+ billingPayments BillingPayment[]
+ createdIntegrationCosts IntegrationCost[] @relation("IntegrationCostCreator")
+ cancelledIntegrationCosts IntegrationCost[] @relation("IntegrationCostCanceller")
+ billingPlanVersions BillingPlanVersion[]
  providerIntents ProviderIntent[]
  createdReceiptCostPlans ReceiptCostPlan[] @relation("ReceiptCostCreator")
  cancelledReceiptCostPlans ReceiptCostPlan[] @relation("ReceiptCostCanceller")
@@ -1783,4 +1798,204 @@ model CustomerAdvanceRefund {
  amount Decimal @db.Decimal(14,2)
  createdAt DateTime @default(now())
  @@index([advanceId],map:"CustomerAdvanceRefund_advance_idx")
+}
+
+model BillingPlanVersion {
+ id String @id @default(uuid())
+ code String
+ version Int
+ name String
+ monthlyPrice Decimal @db.Decimal(14,2)
+ currency String
+ branchLimit Int
+ registerLimit Int
+ staffLimit Int
+ trialDays Int
+ graceDays Int
+ createdBy String?
+ createdAt DateTime @default(now())
+ creator User? @relation(fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ plans BillingPlan[]
+ invoices BillingInvoice[]
+ subscriptions OrganizationSubscription[]
+ @@unique([code,version])
+}
+model BillingPlan {
+ code String @id
+ currentVersionId String
+ isActive Boolean @default(true)
+ isTrial Boolean @default(false)
+ currentVersion BillingPlanVersion @relation(fields:[currentVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+model OrganizationSubscription {
+ organizationId String @id
+ planVersionId String
+ trialStartedAt DateTime
+ trialEndsAt DateTime
+ paidThrough DateTime?
+ cancelAtPeriodEnd Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ planVersion BillingPlanVersion @relation(fields:[planVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+
+model BillingInvoice {
+ id String @id @default(uuid())
+ organizationId String
+ planVersionId String
+ amount Decimal @db.Decimal(14,2)
+ currency String
+ periodStart DateTime
+ periodEnd DateTime
+ state String @default("open")
+ createdBy String
+ createdAt DateTime @default(now())
+ cancelledAt DateTime?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ planVersion BillingPlanVersion @relation(fields:[planVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ payment BillingPayment?
+ @@index([organizationId,createdAt,id])
+}
+model BillingPayment {
+ id String @id @default(uuid())
+ organizationId String
+ invoiceId String @unique
+ amount Decimal @db.Decimal(14,2)
+ currency String
+ channel String
+ proofHash String @unique
+ confirmedBy String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ invoice BillingInvoice @relation(fields:[invoiceId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ confirmer User @relation(fields:[confirmedBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+
+model IntegrationCost {
+ id String @id @default(uuid())
+ organizationId String
+ kind String
+ source String
+ currency String
+ periodStart DateTime
+ periodEnd DateTime
+ usageQuantity Decimal @db.Decimal(20,6)
+ unitPrice Decimal @db.Decimal(20,6)
+ amount Decimal @db.Decimal(14,2)
+ estimated Boolean
+ basis String
+ reason String
+ createdBy String
+ createdAt DateTime @default(now())
+ cancelledAt DateTime?
+ cancelledBy String?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ creator User @relation("IntegrationCostCreator",fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ canceller User? @relation("IntegrationCostCanceller",fields:[cancelledBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([organizationId,periodStart,id])
+}
+
+model AuthChallenge {
+ id String @id @default(uuid())
+ userId String
+ sessionId String?
+ kind String
+ channel String
+ providerId String
+ providerMode String
+ targetHash String
+ secretHash String
+ sealedSecret String?
+ deliveryAttempts Int @default(0)
+ deliveryLease String?
+ deliveryLeaseUntil DateTime?
+ nextDeliveryAt DateTime @default(now())
+ action String?
+ operationKey String?
+ payloadHash String?
+ attempts Int @default(0)
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ deliveredAt DateTime?
+ failedAt DateTime?
+ usedAt DateTime?
+ approvedOperationAt DateTime?
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ verifiedContact VerifiedContact?
+ @@index([userId,kind,createdAt])
+ @@index([expiresAt])
+ @@index([nextDeliveryAt])
+ @@index([secretHash])
+}
+model VerifiedContact {
+ id String @id @default(uuid())
+ userId String
+ channel String
+ targetHash String
+ challengeId String @unique
+ verifiedAt DateTime @default(now())
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ challenge AuthChallenge @relation(fields:[challengeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@unique([userId,channel])
+}
+
+model SupportPolicyVersion {
+ id String @id @default(uuid())
+ version Int @unique
+ timezone String
+ weekdays Int[]
+ opensMinute Int
+ closesMinute Int
+ firstResponseMinutes Int
+ escalationMinutes Int
+ status String @default("draft")
+ createdBy String?
+ reason String
+ createdAt DateTime @default(now())
+ tickets SupportTicket[]
+}
+model SupportTicket {
+ id String @id @default(uuid())
+ organizationId String
+ requestedBy String
+ assignedTo String?
+ title String
+ description String
+ diagnostics Json
+ severity String
+ state String @default("open")
+ policyVersionId String
+ firstResponseDueAt DateTime
+ escalationDueAt DateTime
+ createdAt DateTime @default(now())
+ firstRespondedAt DateTime?
+ firstResolvedAt DateTime?
+ resolvedAt DateTime?
+ updatedAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ requester User @relation("SupportTicketRequester",fields:[requestedBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ assignee User? @relation("SupportTicketAssignee",fields:[assignedTo],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ policy SupportPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ events SupportTicketEvent[]
+ @@unique([id,organizationId])
+ @@index([organizationId,createdAt,id])
+ @@index([state,severity,createdAt])
+}
+model SupportTicketEvent {
+ id String @id @default(uuid())
+ ticketId String
+ organizationId String
+ actorId String
+ kind String
+ message String
+ metadata Json
+ createdAt DateTime @default(now())
+ ticket SupportTicket @relation(fields:[ticketId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([ticketId,createdAt,id])
 }

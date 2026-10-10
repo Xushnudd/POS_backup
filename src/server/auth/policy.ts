@@ -37,6 +37,7 @@ export function assertRoutePermission(path: string, method: string, role: string
   if (!['owner', 'admin', 'cashier'].includes(role)) throw new AccessError(403, 'FORBIDDEN')
   const area = path.split('/')[2]
   const read = method === 'GET' || method === 'HEAD'
+  if (area === 'billing' && read) return
   // Platform/support actions have their own operator + explicit owner-grant DAL.
   // A business role never grants cross-organization support access by itself.
   if(area==='deployment'&&read)return

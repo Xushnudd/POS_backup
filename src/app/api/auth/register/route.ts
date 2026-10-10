@@ -1,3 +1,4 @@
+import {billingDatabaseError} from '@/server/billing/errors'
 import { consumeLimit } from '@/server/auth/rate-limit'
 import { newPasswordSchema } from '@/server/auth/password-policy'
 import { AccessError } from '@/server/auth/policy'
@@ -132,6 +133,7 @@ async function handlePOST(request: NextRequest) {
     return response
 
   } catch (error) {
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(

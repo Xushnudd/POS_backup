@@ -10,6 +10,8 @@ import { prisma } from '@/lib/prisma'
 import { getRequestToken, verifySession } from './auth/session'
 import { AccessError, assertRoutePermission, tenantScope } from './auth/policy'
 import type { TokenPayload } from '@/lib/auth'
+import { apiMetrics } from './monitoring/metrics'
+import { billingDatabaseError } from './billing/errors'
 import { sanitizeResponse } from './auth/response'
 
 const refs: Record<string, string> = {
@@ -122,10 +124,12 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       if(options.binary && result.ok && !result.headers.get('content-type')?.includes('application/json')){
         const response=new Response(result.body,{status:result.status,headers:result.headers});
         response.headers.set('X-Request-Id',requestId);response.headers.set('Cache-Control','private, no-store');response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Content-Security-Policy',"default-src 'none'; sandbox");
+        apiMetrics.record(context?.organizationId,result.status,Date.now()-started)
         logEvent('api_response',{status:result.status,durationMs:Date.now()-started});return response;
       }
       const data = await result.json()
       if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}
+      apiMetrics.record(context?.organizationId,result.status,Date.now()-started)
       logEvent('api_response',{status:result.status,durationMs:Date.now()-started,...(data.error?.code?{code:data.error.code}:{})})
       const response = NextResponse.json(sanitizeResponse(data, context?.role), { status: result.status, headers: result.headers })
       response.headers.set('X-Request-Id', requestId)
@@ -133,6 +137,8 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       response.headers.set('X-Content-Type-Options','nosniff')
       return response
     } catch (error) {
+      const billingError = billingDatabaseError(error)
+      if (billingError) error = billingError
       let status = 500, code = 'INTERNAL_ERROR', message = 'Server xatosi'
       if (error instanceof AccessError) ({status,code,message} = error)
       else if(error instanceof IntegrationUnavailable){status=503;code='INTEGRATION_UNAVAILABLE';message='Tashqi xizmat sozlanmagan; rahbarga murojaat qiling'}
@@ -141,6 +147,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         status = error.code === 'P2025' ? 404 : 409; code = error.code === 'P2025' ? 'NOT_FOUND' : 'CONFLICT'; message = 'Resurs topilmadi yoki amal takrorlangan'
       }
       const guide=errorGuidance(code,message);message=guide.message
+      apiMetrics.record(requestTrace.getStore()?.organizationId,status,Date.now()-started)
       logEvent('api_error',{status,code,durationMs:Date.now()-started})
       return NextResponse.json({ success:false, error:{code,message,nextAction:guide.nextAction,...(error instanceof z.ZodError?{details:error.issues.map(issue=>({path:issue.path,code:issue.code,message:issue.message}))}:{}),...(error instanceof AccessError&&error.details!==undefined?{details:sanitizeResponse(JSON.parse(JSON.stringify(error.details)),'cashier')}:{})}, requestId }, { status, headers:{'X-Request-Id':requestId,'Cache-Control':'private, no-store',...(error instanceof AccessError&&error.retryAfterSeconds?{'Retry-After':String(error.retryAfterSeconds)}:{})} })
     }

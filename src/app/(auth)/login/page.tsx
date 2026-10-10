@@ -111,6 +111,8 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          <Link href="/forgot-password" className="mt-4 block text-sm text-blue-600 underline">Parolni unutdingizmi?</Link>
+
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-600">
               Hisobingiz yo&apos;qmi?{' '}

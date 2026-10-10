@@ -35,6 +35,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {href:'/tickets',label:'Yordam murojaatlari',icon:faReceipt},
+  {href:'/billing',label:'Tarif va obuna',icon:faReceipt},
   {href:'/onboarding',label:'Birlamchi sozlash',icon:faGear,roles:['owner']},
   {href:'/jobs',label:'Fon ishlari',icon:faGear,roles:['owner']},
   {

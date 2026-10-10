@@ -11,7 +11,7 @@ const connection=new URL(process.env.DATABASE_URL??'');if(connection.hostname!==
 const orgs:string[]=[],users:string[]=[];after(async()=>{await prisma.organization.deleteMany({where:{id:{in:orgs}}});await prisma.user.deleteMany({where:{id:{in:users}}});await prisma.$disconnect()})
 async function account(role:string){const org=await prisma.organization.create({data:{name:'Route matrix',phone:randomUUID()}});orgs.push(org.id);const user=await prisma.user.create({data:{fullName:'Matrix actor',phone:randomUUID(),passwordHash:'not-a-login'}});users.push(user.id);await prisma.organizationUser.create({data:{organizationId:org.id,userId:user.id,role}});const token=randomBytes(32).toString('base64url');await prisma.session.create({data:{organizationId:org.id,userId:user.id,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});return {org,user,cookie:'pos_session='+token}}
 function routes(dir:string):string[]{return readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?routes(join(dir,entry.name)):entry.name==='route.ts'?[join(dir,entry.name)]:[])}
-const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/health/live','/api/health/ready'])
+const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready'])
 test('Readiness requires the active manual-refund and supplier migration contract, without leaking dependency details',async()=>{
  const {GET}=await import('../src/app/api/health/ready/route');
  assert.equal((await GET()).status,200);

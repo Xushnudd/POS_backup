@@ -1,3 +1,4 @@
+import {billingDatabaseError} from '@/server/billing/errors'
 import { Prisma } from '@prisma/client'
 import { AccessError } from '@/server/auth/policy'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
@@ -80,6 +81,7 @@ async function handleGET(request: NextRequest) {
     })
 
   } catch (error) {
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
@@ -116,6 +118,7 @@ async function handlePOST(request: NextRequest) {
     })
 
   } catch (error) {
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(

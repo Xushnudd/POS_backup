@@ -4150,7 +4150,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
 #### BIZ-01 — tijoriy model [P1, SaaS bo‘lsa]
 
-- [ ] **BIZ-01.01** — SaaS obuna, lokal o‘rnatish yoki ikkalasini qo‘llash modelini tanlash.
+- [x] **BIZ-01.01** — SaaS obuna, lokal o‘rnatish yoki ikkalasini qo‘llash modelini tanlash.
 
   **Texnologiya:** Docker bir xil artefakt, Next.js deployment profiles, Markdown ADR.
 
@@ -4164,9 +4164,11 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Bandning qabul mezoni:** SaaS-first ADR va support doirasi owner tomonidan tasdiqlangan; local deployment alohida release.
 
+  **Qabul:** `done`,2026-10-10; mahsulot egasi SaaS-first va support doirasini tasdiqladi, ADR-059.
+
   **Dalil:** `BIZ-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-01.02** — Tarifni filial/kassa/xodim yoki funksiyalar bo‘yicha tushunarli belgilash.
+- [x] **BIZ-01.02** — Tarifni filial/kassa/xodim yoki funksiyalar bo‘yicha tushunarli belgilash.
 
   **Texnologiya:** Prisma Plan/Entitlement va React pricing.
 
@@ -4180,9 +4182,11 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Bandning qabul mezoni:** Tarif birligi/limit/feature va narx/currency owner tasdiqli; UI/backend entitlement bir xil.
 
+  **Qabul:** `done`, 2026-10-10; tasdiqlangan SaaS/Pro-trial siyosati, SQL/API/race/replay va browser dalillari: `tasks/evidence/saas-core-20261010.json`. Real Click/fiscal/hardware yoki production hosting qabul qilinmadi.
+
   **Dalil:** `BIZ-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-01.03** — Sinov davri, obuna, hisob/invoice, to‘lov tarixi, yangilash va bekor qilish.
+- [x] **BIZ-01.03** — Sinov davri, obuna, hisob/invoice, to‘lov tarixi, yangilash va bekor qilish.
 
   **Texnologiya:** Prisma Subscription/Invoice, Node worker, T08 payment.
 
@@ -4196,9 +4200,11 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Bandning qabul mezoni:** Trial/subscription/invoice/payment/renew/cancel state testlari duplicate billing yaratmaydi.
 
+  **Qabul:** `done`, 2026-10-10; tasdiqlangan SaaS/Pro-trial siyosati, SQL/API/race/replay va browser dalillari: `tasks/evidence/saas-core-20261010.json`. Real Click/fiscal/hardware yoki production hosting qabul qilinmadi.
+
   **Dalil:** `BIZ-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-01.04** — Tarif limitlarini backendda tekshirish; mavjud ma’lumotni limitdan oshganda yo‘qotmaslik.
+- [x] **BIZ-01.04** — Tarif limitlarini backendda tekshirish; mavjud ma’lumotni limitdan oshganda yo‘qotmaslik.
 
   **Texnologiya:** Next.js entitlement service, PostgreSQL transaction.
 
@@ -4212,9 +4218,11 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Bandning qabul mezoni:** Limit bypass API orqali rad; limit kamayganda existing data o‘chmaydi va eksport mumkin.
 
+  **Qabul:** `done`, 2026-10-10; tasdiqlangan SaaS/Pro-trial siyosati, SQL/API/race/replay va browser dalillari: `tasks/evidence/saas-core-20261010.json`. Real Click/fiscal/hardware yoki production hosting qabul qilinmadi.
+
   **Dalil:** `BIZ-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-01.05** — Obuna tugaganda xabar, imtiyozli muddat, eksport va xavfsiz o‘qish rejimi siyosati.
+- [x] **BIZ-01.05** — Obuna tugaganda xabar, imtiyozli muddat, eksport va xavfsiz o‘qish rejimi siyosati.
 
   **Texnologiya:** Prisma billing dates, scheduled worker, React banner.
 
@@ -4228,9 +4236,11 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Bandning qabul mezoni:** Expiry notice/grace/read-only/export policy konfiguratsiyasi boundary testlaridan o‘tadi.
 
+  **Qabul:** `done`, 2026-10-10; tasdiqlangan SaaS/Pro-trial siyosati, SQL/API/race/replay va browser dalillari: `tasks/evidence/saas-core-20261010.json`. Real Click/fiscal/hardware yoki production hosting qabul qilinmadi.
+
   **Dalil:** `BIZ-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-01.06** — Fiskal provayder, SMS, printer agenti va integratsiya xarajatlarini alohida hisoblash.
+- [x] **BIZ-01.06** — Fiskal provayder, SMS, printer agenti va integratsiya xarajatlarini alohida hisoblash.
 
   **Texnologiya:** PostgreSQL usage/cost aggregates, CSV budget.
 
@@ -4244,9 +4254,11 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Bandning qabul mezoni:** Provider/SMS/agent/integration xarajat jadvali valyuta/davr/manba bilan; taxminlar belgili.
 
+  **Qabul:** `done`, 2026-10-10; tasdiqlangan SaaS/Pro-trial siyosati, SQL/API/race/replay va browser dalillari: `tasks/evidence/saas-core-20261010.json`. Real Click/fiscal/hardware yoki production hosting qabul qilinmadi.
+
   **Dalil:** `BIZ-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **BIZ-01.07** — Marketing sahifasida haqiqatda ishlaydigan funksiyalar, narx, mos qurilmalar va yordam tartibi.
+- [x] **BIZ-01.07** — Marketing sahifasida haqiqatda ishlaydigan funksiyalar, narx, mos qurilmalar va yordam tartibi.
 
   **Texnologiya:** Next.js Server Components/metadata, Tailwind, Prisma/public config.
 
@@ -4259,6 +4271,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Marketingdagi har feature release capability va acceptance daliliga bog‘langan; conditional xususiyatlar aniq.
+
+  **Qabul:** `done`, 2026-10-10; tasdiqlangan SaaS/Pro-trial siyosati, SQL/API/race/replay va browser dalillari: `tasks/evidence/saas-core-20261010.json`. Real Click/fiscal/hardware yoki production hosting qabul qilinmadi.
 
   **Dalil:** `BIZ-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

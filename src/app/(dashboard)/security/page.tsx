@@ -1,6 +1,7 @@
 'use client';
 import CashierPin from '@/components/security/CashierPin';
 import SecurityHistory from '@/components/security/SecurityHistory';
+import ContactVerification from '@/components/security/ContactVerification';
 import { useEffect, useState } from 'react';
 import { api,type AccountSessionRow } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -58,7 +59,7 @@ function AccountSecurityPage(){
   finally{setChanging(false);}
  };
  const changeSessionView=(view:'active'|'all')=>{setRows([]);setPage(1);setPages(0);setBusy(true);setSessionView(view);};
- return <div className="space-y-4"><CashierPin/><h1 className="text-2xl font-bold">{sessionView==='active'?'Faol sessiyalar':'Sessiyalar tarixi'}</h1><Card>
+ return <div className="space-y-4"><CashierPin/><ContactVerification/><h1 className="text-2xl font-bold">{sessionView==='active'?'Faol sessiyalar':'Sessiyalar tarixi'}</h1><Card>
   <p className="text-sm mb-3">Bu ro‘yxat hisobingizning barcha bizneslardagi {sessionView==='active'?'faol sessiyalarini':'saqlangan sessiyalarini, jumladan bekor qilingan va muddati tugagan kirishlarini'} ko‘rsatadi. Qurilma modeli yoki joylashuv taxmin qilinmaydi. Joriy sessiyadan chiqish uchun menyudagi Chiqish tugmasini ishlating.</p>
   {sessionView==='all'&&<p className="mb-3 text-sm text-gray-600">Sessiyalar tarixida oxirgi 90 kunda yaratilgan kirishlar ko‘rsatiladi.</p>}
   <div className="mb-3 flex flex-wrap gap-2"><Button size="sm" aria-pressed={sessionView==='active'} disabled={!!revoking||sessionView==='active'} onClick={()=>changeSessionView('active')}>Faol sessiyalar</Button><Button size="sm" aria-pressed={sessionView==='all'} disabled={!!revoking||sessionView==='all'} onClick={()=>changeSessionView('all')}>Sessiyalar tarixi</Button></div>

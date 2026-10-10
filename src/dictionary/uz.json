@@ -9,21 +9,17 @@
   },
   "banner": {
     "title": "Savdoni oson va <span class='text-green-700'>aqlli</span> boshqaring",
-    "caption": "{logo} - kichik va o'rta biznes uchun eng qulay savdi tizimi. MVP versiyasida barcha zarur xususiyatlar jamlangan, tezkor va ishonchli.",
+    "caption": "{logo} — naqd savdo, ombor, mijoz qarzi va hisobotlar uchun POS.",
     "buttons": [
       {
-        "name": "Bepul boshlash",
+        "name": "Sinovni boshlash",
         "style": "success"
-      },
-      {
-        "name": "Demo video ko'rish",
-        "style": "default"
       }
     ]
   },
   "mystore": {
-    "title": "100+ do'konlar bizni tanlagan",
-    "caption": "O'zbekiston bo'ylab ishonchli hamkorlar"
+    "title": "Savdo, ombor va hisoblar",
+    "caption": "Tasdiqlangan imkoniyatlar va amaldagi tariflar"
   },
   "control_info": {
     "title": "Biznesingiz uchun zarur bo'lgan barcha vositalar",
@@ -45,48 +41,7 @@
   },
   "prices": {
     "title": "Oddiy va shaffof narxlar",
-    "caption": "Yashirin to'lovlarsiz. O'z biznesingiz hajmi va ehtiyojlariga mos tarifni tanlang.",
-    "cards": [
-      {
-        "title": "Bepul",
-        "price": 0,
-        "caption": [
-          "Bitta kassa",
-          "100 ta mahsulotgacha",
-          "Asosiy hisobotlar"
-        ],
-        "button": {
-          "title": "Boshlash",
-          "style": "default"
-        }
-      },
-      {
-        "title": "Pro",
-        "price": 25000,
-        "caption": [
-          "Cheksiz kassalar",
-          "Cheksiz mahsulotlar",
-          "Kengaytirilgan hisobotlar"
-        ],
-        "button": {
-          "title": "Pro ni tanlash",
-          "style": "success"
-        }
-      },
-      {
-        "title": "Business",
-        "price": 50000,
-        "caption": [
-          "Barcha Pro imkoniyatlari",
-          "Bir nechta do'konlar tarmog'i",
-          "Shaxsiy menejer"
-        ],
-        "button": {
-          "title": "Bog'lanish",
-          "style": "default"
-        }
-      }
-    ]
+    "caption": "Yashirin to'lovlarsiz. O'z biznesingiz hajmi va ehtiyojlariga mos tarifni tanlang."
   },
   "trade": {
     "title": "Savdoni keyingi bosqichga olib chiqing",

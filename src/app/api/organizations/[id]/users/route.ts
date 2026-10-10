@@ -1,3 +1,4 @@
+import {billingDatabaseError} from '@/server/billing/errors'
 import {assertLiveContext} from '@/server/operations'
 import { newPasswordSchema } from '@/server/auth/password-policy'
 import { prisma } from '@/lib/prisma'
@@ -77,6 +78,7 @@ async function handleGET(
     })
 
   } catch (error) {
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
@@ -129,6 +131,7 @@ async function handlePOST(
     })
 
   } catch (error) {
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(

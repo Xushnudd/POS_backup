@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-10",
+  "git_head": "8bef83af8a9d0d607d3833c219c4ef2cb7599cc7",
+  "version": "HEAD + working tree; no AI commit",
+  "scope": "Authentication delivery and support internal core only",
+  "original_done": 152,
+  "batch_original_done": "7/20",
+  "new_original_done_from_this_core": 0,
+  "source_sha256": {
+    "src/server/auth/challenges.ts": "b63ede8d963e90d5192df03974e8a078b8a6b41159411848b0309c84bb86a251",
+    "src/server/auth/delivery.ts": "e13082264ca5665199eaaa0af056b38b028a349ea3c9af56947cc39e016694b8",
+    "src/server/support/calendar.ts": "bf07dd22df06d966a951d1d86b8feff56116b40a4f17d82efc13af49586ad114",
+    "src/server/support/tickets.ts": "95b00685e53ccf5715f05f6c82b18fd1138c029e727c18a04e9ce4fcfc9f35ce",
+    "src/components/support/TicketList.tsx": "3e3a5c957d48d722410dd56b21a6929aa97dfa132d59f854e7cf566429024909",
+    "src/components/support/TicketDetail.tsx": "abe3c7db53536ef0a667b4b528b3de955fc7db2c668606e5f6921f4e3d65df6c",
+    "src/components/forms/DurableMutation.tsx": "2519952493cca65a0f709cad628f1de8ae1a7b952cff1a59a62ab4449a058600",
+    "tests/auth-challenges.integration.test.ts": "2ab727fa1fbd23821d177d446b519b293665802f0152b872c6b3bd09174721e4",
+    "tests/support-tickets.integration.test.ts": "956ba92acd2af548b74c4484472ccd6fe19dea0f6e5f7d7c77c1998000957da9",
+    "tests/route-boundaries.integration.test.ts": "012ea75a12326d4a0354f131a3b9f56b93548441f0e0e460e017507239d81540",
+    "tests/e2e/support-tickets.spec.ts": "57dd496f9aec28e7446e2dff446556c05137f0e225465ad4e1eec5a22f0dd603",
+    "prisma/schema.prisma": "80cf34bccc50cc4caece4eddf33cab66fd368acb04a460bcc13d078e664bb90a",
+    "prisma/migrations/202610100106_auth_challenges/migration.sql": "f6ddc76baa8747bd3749e97ef108c2be95620b41d0921c4b493bfc23ad47bef1",
+    "prisma/migrations/202610100107_contact_proof_session_history/migration.sql": "42e66f76e6685031a033533db075fc64840d4293d78423d7dcc1d924ef25a327",
+    "prisma/migrations/202610100108_support_tickets/migration.sql": "2282bd14ffbd856500aaee29e71cf06b3e8df99249bb83d55e1167d6d3ecc044"
+  },
+  "gates": {
+    "unit": {
+      "log": "/tmp/pos-support-unit-108.log",
+      "sha256": "f774af7ebba5e2a7164230172c7a663c767ceada74664679af6557fb9f9b6239",
+      "result": "PASS:23/23"
+    },
+    "focused_final": {
+      "log": "/tmp/pos-support-final-focused-108.log",
+      "sha256": "788fdb37d29b7c325f089d7d9d518eefaad76786070504b4ce638d2e64174f9e",
+      "result": "PASS:16/16; auth6/support5/route5 after resend privacy and route inventory fixes"
+    },
+    "three_browsers": {
+      "log": "/tmp/pos-support-final-browser-108.log",
+      "sha256": "81533b314b72118ba0719c4aa7abf4791592c407af70b286fb0cfd5b66c76afe",
+      "result": "PASS:6/6"
+    },
+    "build": {
+      "log": "/tmp/pos-support-final-build-108b.log",
+      "sha256": "d671724a3dd3874e781fc30fbe5c8f52c5c6cb1981ec968c158cecfe133deb47",
+      "result": "PASS"
+    },
+    "lint": {
+      "log": "/tmp/pos-support-final-lint-108b.log",
+      "sha256": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+      "result": "PASS"
+    },
+    "worker": {
+      "log": "/tmp/pos-support-worker-108.log",
+      "sha256": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+      "result": "PASS"
+    },
+    "typecheck": {
+      "log": "/tmp/pos-support-typecheck-108.log",
+      "sha256": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+      "result": "PASS"
+    },
+    "schema": {
+      "log": "/tmp/pos-support-schema-108.log",
+      "sha256": "919c26cbd154c540c8a110d57d3f91dc02c8c73f4e8edb56cddc7bb0b4beea22",
+      "result": "PASS"
+    },
+    "fresh_legacy_migrations": {
+      "log": "/tmp/pos-support-migrations-108.log",
+      "sha256": "a69fc12d7aaa640ea3adb796642821be81f7f996d82f5699fc7eed5c516644b6",
+      "result": "PASS"
+    },
+    "probes": {
+      "log": "/tmp/pos-support-probes-108.log",
+      "sha256": "a9a16160bea57ed94040bcd4b6f67e04351b46359714ca09d863bf747336a69c",
+      "result": "PASS:2/2"
+    },
+    "full_before_final_fixes": {
+      "log": "/tmp/pos-support-full-108.log",
+      "sha256": "2a26276df4c493c2d3c21bd1f488f899081604af59c9a787e0936dbd44e46144",
+      "result": "242 PASS / 1 FAIL: public password-reset incorrectly classified protected; corrected inventory passed final focused16; no claim of rerun full243"
+    }
+  },
+  "limitations": [
+    "SMS/email registry empty; real delivery unavailable and vendor tasks blocked_external",
+    "No production mock verification",
+    "TOTP interface only; global critical-action MFA enforcement incomplete",
+    "Support policy draft; no approved customer SLA or emergency channel",
+    "No live business DB, real vendor/hardware integration or deployment",
+    "Initial browser failure was ambiguous alert selector; final six tests passed",
+    "Applied migrations106-108 immutable;108 initial SQL failure rolled back before successful corrected application"
+  ]
+}

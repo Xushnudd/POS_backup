@@ -25,7 +25,7 @@ export async function assertLiveContext(tx:Pick<Prisma.TransactionClient,'$query
   if(!active||active.role!==context.role||(context.role!=='owner'&&context.storeIds.some(id=>!active.storeIds.includes(id))))throw new AccessError(401,'SESSION_CHANGED','Sessiya yoki vakolat o‘zgardi; qayta kiring');
   if(active.authenticationMethod==='pin'&&(context.role!=='cashier'||!active.pinEnabled||context.storeIds.length!==1||context.storeIds[0]!==active.pinStoreId||!active.storeIds.includes(active.pinStoreId!)))throw new AccessError(401,'SESSION_CHANGED');
 }
-export async function runOperation<T>(context: TokenPayload, type: string, key: string, payload: unknown, work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+export async function runOperation<T>(context: TokenPayload, type: string, key: string, payload: unknown, work: (tx: Prisma.TransactionClient) => Promise<T>, authorize?: (tx: Prisma.TransactionClient) => Promise<void>): Promise<T> {
   if (!key || key.length > 200) throw new AccessError(400,'OPERATION_ID_REQUIRED','Yagona amal identifikatori talab qilinadi')
   const trace=requestTrace.getStore();if(trace)trace.operationId=key
   const hash=payloadHash(payload)
@@ -43,6 +43,9 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
         await tx.$executeRaw`SET LOCAL enable_seqscan = off`
         await tx.$executeRaw`SET LOCAL jit = off`
         await assertLiveContext(tx,context)
+        // Extra privileges can be revoked independently of the business role.
+        // Authorize stored-result replays as well as first execution.
+        if(authorize)await authorize(tx)
         const lock=`${context.organizationId}:${type}:${key}`
         await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lock},0))::text`
         const old=observed?await tx.operation.findUnique({where:{id:observed.id}}):null

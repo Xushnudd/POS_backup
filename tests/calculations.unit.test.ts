@@ -43,6 +43,7 @@ test('Production config requires a HTTPS origin and PostgreSQL connection withou
  assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'http://pos.example.invalid'}))
  assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid/path'}))
  assert.doesNotThrow(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid'}))
+ assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid',AUTH_CHALLENGE_SECRET:'weak'}))
 })
 
 test('CSV text keeps delimiters and quotes in one cell and neutralizes spreadsheet formulas',async()=>{

@@ -1,5 +1,90 @@
 # Shuni POS API hujjati
 
+### Ichki support murojaatlari (2026-10-10)
+
+`GET/POST /api/support/tickets`, `GET /api/support/tickets/:id`,
+`POST /api/support/tickets/:id/commands`, `GET /api/support/tickets/operators`,
+`GET/POST /api/support/policy`: ticket yaratish, kuzatish, javob, holat/daraja/mas’ul
+va administrator boshqaradigan o‘zgarmas ichki ish tartibi versiyalari.
+Yozishlar strict body, CSRF va original operationId UUID bilan; tenant/platform
+vakolati replayda ham tekshiriladi. Oddiy foydalanuvchi o‘z murojaatini, owner
+o‘z tashkilotini, faol platforma operatori explicit platform navbatini ko‘radi.
+Birinchi javob va birinchi yechim vaqtlari alohida. Dastlabki4ishsoati rasmiy
+SLA emas, favqulodda kanal tasdiqlanmagan, tashqi xabar yuborilmaydi.
+[Maydonlar, vakolatlar va operator tartibi](docs/operations/support-tickets.md).
+
+### Authentication delivery core (2026-10-10)
+
+`GET /api/auth/delivery`: current own-account SMS/email/totp availability va
+phoneVerified/emailVerified/hasEmail booleans. Contact hash, secret yoki provider
+credentials qaytarilmaydi. Production mock proof tasdiq sifatida ko‘rsatilmaydi.
+`POST /api/auth/challenges`: live session, kind verify_phone/verify_email/step_up,
+channel sms/email. Step-up uchun action, operationKey UUID, payloadHash64hex
+majburiy; oddiy contact verification bu maydonlarni qabul qilmaydi.
+Javob faqat challengeId/expiresAt; code/token yo‘q. OTP5min, one-use,5attempt.
+`POST /api/auth/challenges/verify`: challengeId UUID, code6raqam string;
+current user/session/target/delivery/expiry tekshiriladi. Invalid/expired/replay409
+AUTH_CHALLENGE_INVALID. Attempt counter failure javobidan oldin saqlanadi.
+
+`POST /api/auth/password-reset/request`: public CSRF/JSON bounds, identifier,
+channel sms/email. Sozlangan real yetkazishda known/unknown bir xil accepted DTO,
+encrypted queue; user ID/token qaytarilmaydi. `POST /complete`: token43base64url,
+newPassword shared UTF8≤72bayt policy; atomic one-use reset, all sessions/PIN revoke.
+Token URL query/log/localStoragega yozilmasin. Production real providers hozir
+sozlanmagan: request503 AUTH_DELIVERY_UNAVAILABLE, avtomatik tasdiq yo‘q.
+Worker retry/lease, key rotation, rate/resend va MFA enforcement qabul chegarasi:
+[authentication delivery](docs/operations/authentication-delivery.md).
+
+### SaaS obuna va xarajat budjeti (2026-10-10)
+
+`GET /api/billing`: live tenant session, tariflar va original subscription versiyasi,
+trial/active/grace/expired/legacy_unmanaged, graceEndsAt, newSalesAllowed, jami
+branches/registers/staff, canManagePlans. Public/private narxlar DBdan; creator PII
+chiqmaydi. GET polling idle sessionni uzaytirmaydi; 30/min org/user.
+
+`POST /api/billing/plans`: active platform_admin, password session; operationId,
+code/name, monthlyPrice decimal string, currency UZS, branchLimit/registerLimit/
+staffLimit integer1..100000, trialDays1..365, graceDays0..365, reason.
+Immutable yangi versiya; existing subscriber avtomatik o‘zgarmaydi. 10/min user.
+`POST /api/billing/assign`: shu platforma vakolati, operationId,
+targetOrganizationId UUID, planCode, reason. Legacy alohida enrollment, trial
+qayta berilmaydi, paidThrough yoki fake payment yaratilmaydi.
+
+`GET /api/billing/invoices?page=1`: owner, faqat current org, sahifa20, payment
+tarixi proofHashsiz. `POST`: operationId, planCode, **planVersionId** (UUID bo‘lishi
+shart emas; seed versiyalar ham bor). Server narx/currency/davrni oladi;
+eski quote409 BILLING_PLAN_CHANGED; bir open invoice/org. `POST /invoices/{id}/cancel`:
+owner, operationId/reason, open-only. Paid invoice yoki haqiqiy refund yaratilmaydi.
+`POST /api/billing/payments`: platform_admin password session, operationId,
+billingInvoiceId UUID, proofReference, reason. Qo‘lda original bank tushumi
+tekshirilganidan keyin tasdiqlash; real Click/bank API emas. Original invoice,
+proof, paidThrough, plan va audit bir transaction; proof qayta ishlatilmaydi.
+`POST /api/billing/cancel`: owner, operationId/cancelAtPeriodEnd boolean/reason;
+paid muddat saqlanadi. Invoice/payment/cancel20/min user.
+
+`GET /api/billing/costs`: platform_admin, targetOrganizationId/from/to ISO offset,
+page1..100000; grouping kind/currency/estimated, whole-period source rows,
+missingKinds/overlappingPeriodsExcluded/marginComplete va recorded UZS farq.
+`format=csv` to‘liq filtrlangan formula-safe CSV;10000 cap,413. Sahifa20.
+`POST`: operationId, targetOrganizationId, kind(fiscal/sms/printer_agent/payment/
+hosting/backup/other), source3..200, currency uppercase3, periodStart/periodEnd ISO,
+usageQuantity positive decimal string≤6kasr, unitPrice nonnegative≤6kasr,
+estimated boolean, basis2..80, reason3..2000. Server exact amount hisoblaydi.
+`POST /api/billing/costs/{id}/cancel`: operationId/reason, tarix saqlanadi.
+Cost20/min user. Bu budget; POS cash/ledger posting yoki FX conversion yo‘q.
+
+Barcha POST strict validation, CSRF, current live permission, Operation/audit va
+original-key replay bilan. PLAN_LIMIT_REACHED/SUBSCRIPTION_EXPIRED409 SQLda ham
+tekshiriladi; expired read/export qoladi. Operator qo‘llanma:
+[billing](docs/operations/billing.md).
+
+`GET /api/monitoring`: owner, current org,12/min org/user, sessiya idle muddatini
+uzaytirmaydi. Bounded5min process-local API latency/error buckets, scoped queue/
+provider reconciliation counts, DB round-trip va safe alerts. Payload/secret/tenant
+IDs chiqmaydi; cluster-wide durable monitoring degan va’da yo‘q.
+Independent uptime/disk probe konfiguratsiyasi va deploy chegarasi:
+[monitoring](docs/operations/monitoring.md).
+
 ### Kirim xarajatlari preview (2026-10-09)
 
 `POST /api/stock-documents/{id}/landed-cost-preview`: owner/assigned-branch admin,

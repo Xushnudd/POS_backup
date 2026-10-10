@@ -11,4 +11,5 @@ export function validateProductionEnvironment(env: NodeJS.ProcessEnv = process.e
     throw new Error('APP_ORIGIN must be a single HTTPS origin')
   }
   if (env.TRUST_PROXY_IP && env.TRUST_PROXY_IP !== 'true') throw new Error('TRUST_PROXY_IP must be true or omitted')
+  if(env.AUTH_CHALLENGE_SECRET&&!/^[0-9a-f]{64}$/i.test(env.AUTH_CHALLENGE_SECRET))throw new Error('AUTH_CHALLENGE_SECRET must be a separate 32-byte hexadecimal key')
 }
