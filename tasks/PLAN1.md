@@ -3437,7 +3437,7 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
 
   **Dalil:** `DATA-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **DATA-01.06** — Tashqi provayder chaqirig‘ini uzoq baza tranzaksiyasi ichida ushlamaslik; navbat va kompensatsiya jarayoni.
+- [x] **DATA-01.06** — Tashqi provayder chaqirig‘ini uzoq baza tranzaksiyasi ichida ushlamaslik; navbat va kompensatsiya jarayoni.
 
   **Texnologiya:** PostgreSQL outbox + Node worker.
 
@@ -3451,9 +3451,11 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
 
   **Bandning qabul mezoni:** Provider call DB lockni ushlab turmaydi; committed outbox restartdan keyin qayta ishlanadi.
 
+  **Qabul:** `done`, 2026-10-10; vendor-neutral core. [Test va cheklovlar](EXECUTION_STATUS.md#data-core-plus-2-2026-10-10).
+
   **Dalil:** `DATA-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **DATA-01.07** — Tashqi chaqiriq natijasi noma’lum bo‘lsa tekshirish va solishtirish; “ikki tizimda bitta tranzaksiya” deb faraz qilmaslik.
+- [x] **DATA-01.07** — Tashqi chaqiriq natijasi noma’lum bo‘lsa tekshirish va solishtirish; “ikki tizimda bitta tranzaksiya” deb faraz qilmaslik.
 
   **Texnologiya:** Node fetch status adapter, Prisma reconciliation.
 
@@ -3466,6 +3468,8 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Unknown provider result lookup/reconcile orqali hal qilinadi; avtomatik duplicate charge yaratilmaydi.
+
+  **Qabul:** `done`, 2026-10-10; vendor-neutral core. [Test va cheklovlar](EXECUTION_STATUS.md#data-core-plus-2-2026-10-10).
 
   **Dalil:** `DATA-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

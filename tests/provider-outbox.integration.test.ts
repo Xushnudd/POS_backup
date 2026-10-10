@@ -120,6 +120,24 @@ test('Lost acknowledgement without external ID reconciles by original key, never
   await assert.rejects(enqueue(f, 'different-provider'), { code: 'PROVIDER_BUSINESS_ALREADY_ASSIGNED' })
 })
 
+test('Changed external identity stays unknown and never posts the wrong proof', async () => {
+  const f = await fixture(), intent = await enqueue(f)
+  let calls = 0, lookups = 0
+  const binding = adapter(async () => { calls++; return { state: 'pending', externalId: 'test-original-proof' } }, async identity => {
+    assert.equal(identity.externalId, 'test-original-proof')
+    lookups++
+    return { state: 'confirmed', externalId: lookups === 1 ? 'test-wrong-proof' : 'test-original-proof' }
+  })
+  assert.equal((await processProviderOutbox(registry(binding))).state, 'unknown')
+  await due(intent.id)
+  assert.equal((await processProviderOutbox(registry(binding))).state, 'unknown')
+  assert.equal(await confirmations(intent.id), 0)
+  assert.equal((await prisma.providerOutbox.findUniqueOrThrow({ where: { intentId: intent.id } })).externalId, 'test-original-proof')
+  await due(intent.id)
+  assert.equal((await processProviderOutbox(registry(binding))).state, 'confirmed')
+  assert.equal(calls, 1); assert.equal(lookups, 2); assert.equal(await confirmations(intent.id), 1)
+})
+
 test('Expired lease recovers only lookup; stale worker result cannot finalize or submit again', async () => {
   const f = await fixture(), intent = await enqueue(f)
   let start!: () => void, release!: (value: ProviderOutcome) => void, calls = 0

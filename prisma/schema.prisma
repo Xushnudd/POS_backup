@@ -820,7 +820,7 @@ model ProviderIntent {
  outbox ProviderOutbox?
  events ProviderEvent[]
 
- @@unique([organizationId,sourceType,sourceKey,provider,capability])
+ @@unique([organizationId,sourceType,sourceKey,provider,capability], map: "ProviderIntent_organizationId_sourceType_sourceKey_provider_cap")
  @@index([organizationId,storeId,createdAt,id])
 }
 

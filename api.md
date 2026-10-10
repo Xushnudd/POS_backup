@@ -1135,3 +1135,10 @@ Real Click/bank/provider tasdig‘i mavjud emas; bank/provider hisobidagi avans 
 
 ### Yangilash / maintenance holati
 `GET /api/deployment/status` — joriy sessiya talab qiladigan kichik no-store status: `maintenance`, xavfsiz foydalanuvchiga mo‘ljallangan `message`, optional `expectedEndAt`, `release`, `configurationValid`. Configuration yo‘li/mazmuni/sirlar chiqarilmaydi. Operator fileconfigured va noto‘g‘ri/yo‘q bo‘lsa failclosed maintenance; konfiguratsiya yo‘q bo‘lsa default off. `/api/health/ready` drain vaqtida503; live alohida. `runOperation` yangi core amallariga503 `MAINTENANCE`/Retry-After30 beradi; oldin commit qilingan actor/hash/key freshauth bilan qaytariladi, oldin admissiondan o‘tgan work tugaydi. Bu generic katalog CRUDning universal blokirovkasi emas; rollout qo‘llanmasi `docs/operations/maintenance.md`da.
+
+## Vendor-neutral integration operation core
+
+Production provider registry bo‘sh; real Click/fiskal/hardware API mavjud emas.
+`GET /api/integration-operations?page=1`: current owner, org/store scope, 20/page; request/hash/externalId/lease sir saqlanadi.
+`POST /api/integration-operations/{id}/lookup`: strict `{operationId:UUID,reason:string(3..2000)}`, owner,10/minute; review holatini faqat lookupga qaytaradi. Lifetime32 lookup; har8 urinish yoki not_found review. Original operationId replay bir marta. Bu charge/resend endpointi emas.
+Business intent faqat authorized server business transaction ichida yoziladi; original subject uchun boshqa key/provider bilan active duplicate rad etiladi. Timeout/expired lease faqat lookup; terminal posting fenced va transactional. Real adapter hamda uning domain postingi alohida rasmiy contractdan keyin ulanadi. [Operator contract va tiklash](docs/operations/provider-outbox.md).

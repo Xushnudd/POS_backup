@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-10",
+  "tasks": [
+    "DATA-01.06",
+    "DATA-01.07"
+  ],
+  "scope": "vendor-neutral core; production provider registry empty",
+  "head": "9eada1c75240c00a3d98435f67490a61a654f9d7",
+  "gates": {
+    "unit": {
+      "pass": 19,
+      "fail": 0
+    },
+    "full_integration_before_additional_identity_test": {
+      "pass": 221,
+      "fail": 0
+    },
+    "final_provider_core": {
+      "pass": 9,
+      "fail": 0
+    },
+    "lint": "pass",
+    "typecheck": "pass",
+    "worker_build": "pass",
+    "webpack_build": "pass",
+    "fresh_legacy_migrations": "pass through 099"
+  },
+  "sha256": {
+    "src/server/integrations/outbox.ts": "fd0f301d08b725218395e01825704d92afb259ed8077344e822ade5e7a5839da",
+    "prisma/schema.prisma": "dd33eafc79d7b78b022aa13aded4784be0022933c12f8631dd09eeca3edb58e0",
+    "tests/provider-outbox.integration.test.ts": "889c3f4587757da4f1ea89382fb7c1a72f51cfa84d6788bb81f682070b5dbe7f",
+    "tests/fixtures/provider-worker.ts": "42171b29a49fa329648209058131566e11f020e866c72773a9642eaf695fb887",
+    "prisma/migrations/202610090098_provider_outbox_core/migration.sql": "09ad9f2e03c496814e3f7b16b2381705dc18da9de9fd5e5e45337022f5cbadaa",
+    "prisma/migrations/202610090099_provider_business_identity/migration.sql": "85c802455aed06236d743601df9e539c9a681c748bb6cf4edc30fd2cf725cd5b"
+  }
+}
