@@ -36,8 +36,8 @@ async function assertReference(model: string, id: unknown, context: TokenPayload
   const found = await delegate.findFirst({ where: { id, AND: tenantScope(model, context) }, select: { id: true } })
   if (!found) throw new AccessError(404,'NOT_FOUND','Resurs topilmadi')
 }
-async function validateRefs(value: unknown, context: TokenPayload): Promise<void> {
-  if (Array.isArray(value)) { for (const item of value) await validateRefs(item, context); return }
+export async function validateTenantReferences(value: unknown, context: TokenPayload): Promise<void> {
+  if (Array.isArray(value)) { for (const item of value) await validateTenantReferences(item, context); return }
   if (!value || typeof value !== 'object') return
   for (const [key, id] of Object.entries(value)) {
     if(key==='imageUrl'&&typeof id==='string'&&id.startsWith('/api/files/')){await assertReference('FileAsset',id.slice(11),context);if(!await prisma.fileAsset.findFirst({where:{id:id.slice(11),organizationId:context.organizationId,deletedAt:null,OR:[{expiresAt:null},{expiresAt:{gt:new Date()}}]}}))throw new AccessError(409,'FILE_UNAVAILABLE')}
@@ -47,7 +47,7 @@ async function validateRefs(value: unknown, context: TokenPayload): Promise<void
     if (context.role === 'cashier' && key === 'organizationUserId' && id !== context.organizationUserId) throw new AccessError(403,'FORBIDDEN')
     if (key === 'cashierId' && id !== context.userId) throw new AccessError(403,'FORBIDDEN')
     if (context.role !== 'owner' && key === 'role' && id === 'owner') throw new AccessError(403,'FORBIDDEN')
-    if (id && typeof id === 'object') await validateRefs(id, context)
+    if (id && typeof id === 'object') await validateTenantReferences(id, context)
   }
 }
 async function boundedBody(request: NextRequest): Promise<string> {
@@ -119,14 +119,14 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         await consumeRequestBudget(context,request.method)
         const segments = path.split('/').filter(Boolean)
         if (segments[2] && segments[2] !== 'switch' && !(segments[1]==='products'&&segments[2]==='prices') && !(segments[1]==='sales'&&segments[2]==='preview') && pathModels[segments[1]]) await assertReference(pathModels[segments[1]], segments[2], context)
-        await validateRefs(Object.fromEntries(new URL(request.url).searchParams), context)
+        await validateTenantReferences(Object.fromEntries(new URL(request.url).searchParams), context)
       }
       if (mutation) {
         const text = await boundedBody(request)
         if (text) {
           let body: unknown
           try { body = JSON.parse(text) } catch { throw new AccessError(400,'INVALID_JSON','JSON noto‘g‘ri') }
-          if (context && options.validateBodyReferences !== false) await validateRefs(body, context)
+          if (context && options.validateBodyReferences !== false) await validateTenantReferences(body, context)
         }
       }
       if(context&&path.startsWith('/api/offline-cash'))await consumeLimit(mutation?'offline-cash.write':'offline-cash.read',context.organizationId+':'+context.userId,mutation?30:120,60000)

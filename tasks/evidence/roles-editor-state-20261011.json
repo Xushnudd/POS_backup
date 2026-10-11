@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-11",
+  "task": "UX-01.05 partial roles editor acceptance",
+  "status": "in_progress",
+  "originalDoneBaseline": 159,
+  "originalDoneAdded": 0,
+  "target": 179,
+  "environment": "isolated localhost:55439/pos_test; localhost HTTPS; no production deployment",
+  "checks": {
+    "browser": {
+      "passed": 21,
+      "failed": 0,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "includes": "roles 9 plus catalog/product regression 12"
+    },
+    "unitPassedFiles": 34,
+    "build": "Next16 webpack passed",
+    "typecheck": "passed",
+    "eslint": "changed files passed",
+    "diffCheck": "passed",
+    "security": {
+      "scanned": 841,
+      "findings": [],
+      "scope": "working tree; credentials/history/images excluded"
+    }
+  },
+  "accepted": [
+    "Independent immutable role and assignment request snapshots after lost acknowledgement",
+    "Real mandatory TOTP on original writes; identical bound proof on replay; two operations and one audit per mutation",
+    "Rejected discard preserves drafts; permissions set equality; current member profile preselected",
+    "Known revision conflict remains editable; acknowledged save survives list refresh error"
+  ],
+  "limits": [
+    "Component-memory pending requests do not survive reload or confirmed navigation",
+    "Other editors and SPA back/forward remain unaccepted; original UX-01.05 stays open"
+  ],
+  "sourceSha256": {
+    "src/app/(dashboard)/roles/page.tsx": "26a024880ae90cbf5b7f1c1f99f2a9ac03d27ccc43513d58fca2217ea4d3f0e0",
+    "src/hooks/useUnsavedChanges.ts": "fe3b8e0ddc8e97a6ccefb56a06510eca80ef7e332aabb8c7098f0ab2265c8bd7",
+    "tests/e2e/roles-state.spec.ts": "133210dc7bf3c5dad1e1548c0fc070f4cbd9cd1a9f66e632ad733f01f4827987"
+  }
+}

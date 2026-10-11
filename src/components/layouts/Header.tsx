@@ -2,6 +2,7 @@
 
 import React, {useEffect,useState} from 'react';
 import {api} from '@/lib/api';
+import {confirmPageNavigation,commitPageNavigation} from '@/lib/page-navigation';
 import {deviceId,pendingOperations} from '@/lib/offline';
 import type {Organization} from '@/types';
 import Link from 'next/link';
@@ -39,12 +40,13 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     return ()=>{cancelled=true;};
   },[organization?.id]);
   const switchBusiness=async(target:string)=>{
-    if (!organization?.id || !user?.id || target===organization.id) return;
+    if (!organization?.id || !user?.id || target===organization.id || !confirmPageNavigation()) return;
     setSwitching(true);
     try{
       if ((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length) throw new Error('Avval kutilayotgan savdo natijalarini tekshiring');
       await api.organizations.switch(target);
       localStorage.removeItem('pos_active_store');localStorage.removeItem('pos_active_register');
+      commitPageNavigation();
       window.location.assign(new URL('/pos', window.location.origin).toString());
     }catch(error){notifyError(error instanceof Error?error.message:'Biznes almashtirilmadi');setSwitching(false);}
   };

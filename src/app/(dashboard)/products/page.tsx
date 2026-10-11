@@ -2,7 +2,7 @@
 
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
@@ -17,6 +17,7 @@ import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import CameraBarcodeScanner from '@/components/pos/CameraBarcodeScanner';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -27,6 +28,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ProductsPage() {
+  const {organization,user,role}=useAuth();
+  return organization&&user?<ProductsEditor key={[organization.id,user.id,role].join(':')}/>:null;
+}
+
+function ProductsEditor() {
   const { organization, role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -36,6 +42,8 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError,setLoadError]=useState('');
+  const loadSequence=useRef({value:0}),flight=useRef(false),categoryFlight=useRef(false);
 
   // Modals
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -56,10 +64,18 @@ export default function ProductsPage() {
 
   const [categoryName, setCategoryName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isCategorySaving,setIsCategorySaving]=useState(false);
+  const [baseline,setBaseline]=useState(formData);
+  const productDirty=isProductModalOpen&&Object.keys(formData).some(key=>formData[key as keyof typeof formData]!==baseline[key as keyof typeof baseline]);
+  const categoryDirty=isCategoryModalOpen&&categoryName.length>0;
+  const confirmDiscard=useUnsavedChanges(productDirty||categoryDirty,isSaving||isCategorySaving);
+  const closeProduct=()=>{if(confirmDiscard())setIsProductModalOpen(false);};
+  const closeCategory=()=>{if(confirmDiscard())setIsCategoryModalOpen(false);};
 
   const loadData = useCallback(async () => {
     if (!organization?.id) return;
-    setIsLoading(true);
+    const sequence=++loadSequence.current.value;
+    setIsLoading(true);setLoadError('');
     try {
       const [prodsRes, catsRes, unitsRes] = await Promise.all([
         api.products.list({
@@ -72,23 +88,27 @@ export default function ProductsPage() {
         role!=='cashier'?api.units.list():Promise.resolve({data:[]}),
       ]);
 
+      if(sequence!==loadSequence.current.value)return;
       if (prodsRes.data) setProducts(prodsRes.data);
       if (catsRes.data) setCategories(catsRes.data);
       if (unitsRes.data?.length) setUnitOptions(unitsRes.data.filter(unit=>unit.isActive).map(unit=>({value:unit.code,label:unit.name})));
     } catch (err: unknown) {
-      console.error('Failed to load products:', err);
+      if(sequence===loadSequence.current.value)setLoadError(err instanceof Error?err.message:'Mahsulotlar yuklanmadi');
     } finally {
-      setIsLoading(false);
+      if(sequence===loadSequence.current.value)setIsLoading(false);
     }
   }, [organization, searchQuery, selectedCategory, role]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadData);
+    const tracker=loadSequence.current;let cancelled=false;
+    void Promise.resolve().then(()=>{if(!cancelled)return loadData();});
+    return()=>{cancelled=true;tracker.value++;};
   }, [loadData]);
 
   const openCreateModal = () => {
+    if(!confirmDiscard())return;
     setEditingProduct(null);
-    setFormData({
+    const initial={
       name: '',
       sku: `SKU-${Date.now().toString().slice(-6)}`,
       barcode: `${Math.floor(100000000000 + Math.random() * 900000000000)}`,
@@ -97,13 +117,14 @@ export default function ProductsPage() {
       costPrice: '',
       salePrice: '',
       minStock: '5',
-    });
+    };setFormData(initial);setBaseline(initial);
     setIsProductModalOpen(true);
   };
 
   const openEditModal = (p: Product) => {
+    if(!confirmDiscard())return;
     setEditingProduct(p);
-    setFormData({
+    const initial={
       name: p.name,
       sku: p.sku,
       barcode: p.barcode,
@@ -112,13 +133,13 @@ export default function ProductsPage() {
       costPrice: String(p.costPrice),
       salePrice: String(p.salePrice),
       minStock: String(p.minStock),
-    });
+    };setFormData(initial);setBaseline(initial);
     setIsProductModalOpen(true);
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id) return;
+    if (!organization?.id||flight.current||categoryFlight.current) return;
 
     if (
       !formData.name ||
@@ -131,7 +152,7 @@ export default function ProductsPage() {
       return;
     }
 
-    setIsSaving(true);
+    flight.current=true;setIsSaving(true);
     try {
       const payload = {
         organizationId: organization.id,
@@ -158,14 +179,15 @@ export default function ProductsPage() {
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Mahsulotni saqlashda xatolik');
     } finally {
-      setIsSaving(false);
+      flight.current=false;setIsSaving(false);
     }
   };
 
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id || !categoryName.trim()) return;
+    if (!organization?.id || !categoryName.trim()||categoryFlight.current||flight.current) return;
 
+    categoryFlight.current=true;setIsCategorySaving(true);
     try {
       await api.categories.create({
         organizationId: organization.id,
@@ -178,11 +200,14 @@ export default function ProductsPage() {
 
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Kategoriya qo\'shishda xatolik');
+    } finally {
+      categoryFlight.current=false;setIsCategorySaving(false);
     }
   };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={isLoading} onClick={()=>void loadData()}>Qayta yuklash</Button></div>}
       {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{})}} label="Katalogni CSV yuklash"/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -340,11 +365,13 @@ export default function ProductsPage() {
       {/* Product Form Modal */}
       <Modal
         isOpen={isProductModalOpen}
-        onClose={() => setIsProductModalOpen(false)}
+        onClose={closeProduct}
         title={editingProduct ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot qo\'shish'}
         size="lg"
       >
         <form onSubmit={handleSaveProduct} className="space-y-4">
+          {productDirty&&<p role="status">Saqlanmagan mahsulot o‘zgarishlari bor.</p>}
+          <fieldset disabled={isSaving||isCategorySaving} className="space-y-4">
           <Input
             label="Mahsulot nomi *"
             placeholder="Coca-Cola 1.5L"
@@ -372,6 +399,7 @@ export default function ProductsPage() {
                 required
               />
               <CameraBarcodeScanner
+                disabled={isSaving||isCategorySaving}
                 onDetected={(barcode) => setFormData((current) => ({ ...current, barcode }))}
                 className="absolute right-1 top-7 p-2"
               />
@@ -424,17 +452,19 @@ export default function ProductsPage() {
               type="number"
               min="0"
               placeholder="5"
+              step="0.000001"
               value={formData.minStock}
               onChange={(e) => setFormData({ ...formData, minStock: e.target.value })}
               helperText="Kam qolganda ogohlantirish"
             />
           </div>
+          </fieldset>
 
           <div className="pt-3 flex justify-end gap-3 border-t border-gray-100">
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsProductModalOpen(false)}
+              onClick={closeProduct}
               disabled={isSaving}
             >
               Bekor qilish
@@ -449,13 +479,16 @@ export default function ProductsPage() {
       {/* Categories Management Modal */}
       <Modal
         isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+        onClose={closeCategory}
         title="Kategoriyalar boshqaruvi"
         size="md"
       >
         <div className="space-y-4">
+          {categoryDirty&&<p role="status">Saqlanmagan kategoriya o‘zgarishlari bor.</p>}
           <form onSubmit={handleCreateCategory} className="flex gap-2">
             <Input
+              label="Yangi kategoriya nomi"
+              disabled={isCategorySaving||isSaving}
               placeholder="Yangi kategoriya nomi..."
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
@@ -463,6 +496,8 @@ export default function ProductsPage() {
             />
             <Button
               type="submit"
+              isLoading={isCategorySaving}
+              disabled={isSaving}
               variant="primary"
               leftIcon={<FontAwesomeIcon icon={faPlus} />}
               className="whitespace-nowrap"

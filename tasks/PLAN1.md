@@ -466,7 +466,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `FIX-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **FIX-01.07** — SKU va barkod noyobligini tashkilot doirasiga o‘tkazish; mavjud bazaga xavfsiz migratsiya tayyorlash.
+- [x] **FIX-01.07** — SKU va barkod noyobligini tashkilot doirasiga o‘tkazish; mavjud bazaga xavfsiz migratsiya tayyorlash.
 
   **Texnologiya:** Prisma Migrate va PostgreSQL composite unique.
 
@@ -481,6 +481,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Bir tenantdagi dublikat SKU/barkod rad, ikki tenantdagi bir xil qiymat ruxsat; eski data migratsiya bilan saqlangan.
 
   **Dalil:** `FIX-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul holati (2026-10-11): done.** Tenant SKU/primary/alias uniqueness, parallel single winner, invalid legacy duplicate preflight rejection va actual dump-clone/fresh/rollback preservation PASS.132 migrationli isolated synthetic rehearsal; real customer/staging rollout OPS gate’larida ochiq. [163 qabul protokoli](EXECUTION_STATUS.md#original-160163--fix-0107-data-0104-rep-0109-qabuli-2026-10-11). `tasks/evidence/core-163-20261011.json`.
 
 - [x] **FIX-01.08** — `ignoreBuildErrors`ni olib tashlash; paketlar mosligini va Prisma client yaratishni majburiy tekshirish.
 
@@ -2478,7 +2480,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.09** — P1: to‘liq filtrlangan CSV/XLSX/PDF eksport; katta eksportni fon ishida bajarish.
+- [x] **REP-01.09** — P1: to‘liq filtrlangan CSV/XLSX/PDF eksport; katta eksportni fon ishida bajarish.
 
   **Texnologiya:** Node streams, T03 ExcelJS, HTML print/T04 Playwright PDF, worker.
 
@@ -2493,6 +2495,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Bandning qabul mezoni:** 1000+ filtered rows CSV/XLSX/PDFga to‘liq kiradi; async export tenant authorization va expiry bilan.
 
   **Dalil:** `REP-01.09` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul holati (2026-10-11): done.** 18 shared query, cursor/snapshot full CSV/XLSX/browser print-to-PDF, background live authorization/lease/audit/hash/expiry.1001 filtered sale rows va1011.01 total CSV/XLSX/actual29-page PDFda to‘liq; UI1001 product rows Chromium/Firefox/WebKitda PASS. PDF — original rejadagi user print-to-PDF varianti; downloadable automatic server PDF emas. [163 qabul protokoli](EXECUTION_STATUS.md#original-160163--fix-0107-data-0104-rep-0109-qabuli-2026-10-11). `tasks/evidence/core-163-20261011.json`.
 
 - [x] **REP-01.10** — P1: jadvaldagi umumiy son, eksport va dashboard bir davr uchun mos kelishi.
 
@@ -3413,7 +3417,7 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
 
   **Dalil:** `DATA-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **DATA-01.04** — Tashkilot kaliti va bog‘langan resurs egaligini butun modelda izchil qo‘llash.
+- [x] **DATA-01.04** — Tashkilot kaliti va bog‘langan resurs egaligini butun modelda izchil qo‘llash.
 
   **Texnologiya:** TypeScript AuthorizedContext, Prisma relations, SQL tenant keys.
 
@@ -3428,6 +3432,8 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
   **Bandning qabul mezoni:** Cross-tenant relation schema/service testlari rad; tenant scope backfillda bo‘sh qolmagan.
 
   **Dalil:** `DATA-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul holati (2026-10-11): done.** 113 model explicit root/global classification, scoped insert/child branch/cashier filters,97 scoped table edge+ownership guards va Organization identity guard, native SQL-only FK inventory/preflight, cross-parent/native/create rejection; clone backfill roots preserved. RLS qo‘shilmadi. [163 qabul protokoli](EXECUTION_STATUS.md#original-160163--fix-0107-data-0104-rep-0109-qabuli-2026-10-11). `tasks/evidence/core-163-20261011.json`.
 
 - [x] **DATA-01.05** — Audit yozuvini biznes o‘zgarishi bilan bir tranzaksiyada saqlash.
 
@@ -3519,7 +3525,7 @@ Bu jadval tayyor sxema emas; funksiyalarni amalga oshirishda ma’lumot modelini
 
   **Dalil:** `DATA-01.09` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **DATA-01.10** — Migratsiya, ma’lumot ko‘chirish va mavjud hisobni tekshirish uchun skript/reja.
+- [x] **DATA-01.10** — Migratsiya, ma’lumot ko‘chirish va mavjud hisobni tekshirish uchun skript/reja.
 
   **Texnologiya:** Prisma Migrate, Node batches, PostgreSQL checks.
 
@@ -3534,6 +3540,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Old dataset clone migration/backfill/reconcile testida saqlangan; fresh install va rollback rejasi tekshirilgan.
+
+  **Qabul holati (2026-10-11): done.** Read-only snapshot/ledger CLI, real pg_dump/pg_restore orqali synthetic eski dataset clone,128 migration, original25table/4040row preservation, repeated113table/4067row backfill idempotency, fresh install, clone constraint validation, offline backup rollback va previous committed app compatibility PASS. Bu real customer/staging/production migration dalili emas; ular OPS/pilot gate’larida ochiq. [DATA-01.10 protokoli](EXECUTION_STATUS.md#data-0110--160-original-bandning-qabuli-2026-10-11); `tasks/evidence/migration-dataset-20261011.json`.
 
   **Dalil:** `DATA-01.10` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -4680,7 +4688,7 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
 
   **Dalil:** `RELEASE-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RELEASE-01.03** — Qaytarish, nasiya, xarid va smena hisoblari bir-biriga mos.
+- [x] **RELEASE-01.03** — Qaytarish, nasiya, xarid va smena hisoblari bir-biriga mos.
 
   **Texnologiya:** PostgreSQL cross-ledger reconciliation.
 
@@ -4693,6 +4701,8 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Return/debt/purchase/shift ledger/report reconciliation nol tushuntirilmagan farq bilan.
+
+  **Qabul (2026-10-11):** `done` — ichki cross-ledger mezoni isolated actual business-service ssenariysi va68moliyaviy regressiya bilan tekshirildi. Real PILOT/production va butun RELEASE qabuli ochiq. [Dalil](evidence/release-ledger-20261011.json).
 
   **Dalil:** `RELEASE-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

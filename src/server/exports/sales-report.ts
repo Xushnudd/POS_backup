@@ -1,3 +1,4 @@
+import {cursorExport,EXPORT_PAGE_SIZE} from './cursor'
 import { reportDecimal } from '../reports/numeric'
 import type { TokenPayload } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -14,8 +15,8 @@ export async function salesReportCsv(context:TokenPayload,params:URLSearchParams
   const {timezone}=filter.meta
   const count=await tx.sale.count({where}),returnCount=await tx.saleReturn.count({where:returnsWhere})
   if(count+returnCount>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 hodisadan oshdi; davrni toraytiring')
-  const sales=await tx.sale.findMany({where,orderBy:[{completedAt:'asc'},{id:'asc'}],select:{id:true,receiptNo:true,completedAt:true,totalAmount:true,discountAmount:true,status:true,customer:{select:{fullName:true}},cashier:{select:{fullName:true}},store:{select:{name:true}}}})
-  const returns=await tx.saleReturn.findMany({where:returnsWhere,orderBy:[{returnedAt:'asc'},{id:'asc'}],select:{id:true,returnReceiptNo:true,returnedAt:true,refundAmount:true,sale:{select:{receiptNo:true,store:{select:{name:true}}}}}})
+  const sales=await cursorExport(cursor=>tx.sale.findMany({where,take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{}),orderBy:[{completedAt:'asc'},{id:'asc'}],select:{id:true,receiptNo:true,completedAt:true,totalAmount:true,discountAmount:true,status:true,customer:{select:{fullName:true}},cashier:{select:{fullName:true}},store:{select:{name:true}}}}))
+  const returns=await cursorExport(cursor=>tx.saleReturn.findMany({where:returnsWhere,take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{}),orderBy:[{returnedAt:'asc'},{id:'asc'}],select:{id:true,returnReceiptNo:true,returnedAt:true,refundAmount:true,sale:{select:{receiptNo:true,store:{select:{name:true}}}}}}))
   const {summary}=await financialSummary(tx,context,filter)
   const gross=reportDecimal(summary.grossRevenue),refund=reportDecimal(summary.refundAmount)
   return {filename:'sales-report-'+context.organizationId+'.csv',meta:filter.meta,summary,content:csv([

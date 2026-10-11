@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-11",
+  "task": "UX-01.05 partial product editor acceptance",
+  "status": "in_progress",
+  "originalDoneBaseline": 159,
+  "originalDoneAdded": 0,
+  "target": 179,
+  "head": "9f5a43258c7980a565dd27dc10d42688bd5e7ab4",
+  "uncommittedChanges": true,
+  "environment": "isolated localhost:55439/pos_test; local HTTPS; no production deployment",
+  "checks": {
+    "browser": {
+      "passed": 12,
+      "failed": 0,
+      "durationSeconds": 55.5,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "casesPerProject": 4
+    },
+    "unit": {
+      "passedFiles": 34,
+      "failed": 0
+    },
+    "build": "passed Next16 webpack",
+    "typecheck": "passed",
+    "eslint": "passed changed files",
+    "security": {
+      "scanned": 838,
+      "findings": [],
+      "scope": "working tree; credential stores/history/container images excluded"
+    }
+  },
+  "accepted": [
+    "Detail loading failure distinguished from missing product; retry succeeds",
+    "Exact cost and stock 99999999999999.123456 and price 999999999999.99 browser-to-database roundtrip",
+    "Rejected navigation/save preserves main and barcode drafts",
+    "Saving main form keeps unsaved additional barcode on same page",
+    "Delayed main/product-create/category-create/barcode-add response prevents duplicate requestSubmit HTTP calls",
+    "Create/edit/category modal close cancellation preserves input; acknowledged save resets dirty state",
+    "Delayed previous search cannot overwrite newer rows/loading state",
+    "Previous five-form unsaved regression retained"
+  ],
+  "notAccepted": [
+    "Whole UX-01.05 task",
+    "All other editor and navigation/recovery paths",
+    "Vendor, real hardware, production or pilot acceptance"
+  ],
+  "sources": {
+    "src/app/(dashboard)/products/page.tsx": "a62c5682d2097a880727165ab0059f76985e3630cfeb7f199367c44a0d7a7c09",
+    "src/app/(dashboard)/products/[id]/page.tsx": "86296ba32b23da5eab5012ff3f15b364bd80c5150e00b1cb10c4f07f13b03a71",
+    "src/components/catalog/ProductBarcodes.tsx": "182f517b4f2fce7bc419fda457df42375311507c4d56b67981ad165463b7b14f",
+    "src/hooks/useUnsavedChanges.ts": "f4f5f9a5fb67f11b10867534a7783816052214009751860cee32f6acde3be464",
+    "tests/e2e/product-editor-state.spec.ts": "7a71fbf4b44f53109713b296cd24b16112f593bcc687ba21f2ed206da6c7a71e",
+    "tests/e2e/catalog-unsaved.spec.ts": "ab1218af779cf7b49dc413318df9219d33187b34324d8a014f1bc0f09aa879e0",
+    "docs/operations/product-editor-state.md": "d0f4a0bd75064a341dadda58f0d91541c301471ca0ee5170d3b7ef7053802e86"
+  },
+  "localLogs": {
+    "browser": {
+      "path": "/tmp/pos-product-editor-browser.log",
+      "sha256": "6fface0892417b010844f4cbbde017372e2bd7218e495b1a8ae939b5f9d6674c"
+    },
+    "unit": {
+      "path": "/tmp/pos-product-editor-unit.log",
+      "sha256": "377b7ac9174585f98c7695a8812e281ecaefe91ac3ec24969c312bbcaeb16864"
+    },
+    "build": {
+      "path": "/tmp/pos-product-editor-build.log",
+      "sha256": "00ced074bc242074f7c6b7865fc35c13310376e218a09f905f1e6ed7095bf28e"
+    },
+    "typecheck": {
+      "path": "/tmp/pos-product-editor-typecheck.log",
+      "sha256": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39"
+    },
+    "lint": {
+      "path": "/tmp/pos-product-editor-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "security": {
+      "path": "/tmp/pos-product-editor-security.log",
+      "sha256": "cfbaf7a1787c374e199f745573a92f72335b7abbcc2a17fd3a0168cda0fd6408"
+    }
+  },
+  "coverageInventory": "tasks/evidence/ux-editor-state-inventory-20261011.json"
+}

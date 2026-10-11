@@ -116,7 +116,8 @@ class ApiClient {
         const errorMsg =
           data?.error?.message || data?.message || `Xatolik: ${response.statusText}`;
         const error = new ApiError(errorMsg);
-        error.code = data?.error?.code;
+        error.code = typeof data?.error?.code === 'string' && data.error.code
+          ? data.error.code : 'INTERNAL_ERROR';
         error.status = response.status;
         error.details = data?.error?.details;
         error.requestId=data.requestId??response.headers.get('x-request-id')??undefined;
@@ -128,7 +129,7 @@ class ApiClient {
       return data;
     } catch (err: unknown) {
       // If error is network or JSON parsing error
-      if (!(err instanceof ApiError) || !err.code) {
+      if (!(err instanceof ApiError)) {
         const guide=errorGuidance('NETWORK_ERROR');const error=new ApiError(guide.message+' '+guide.nextAction);error.code='NETWORK_ERROR';error.nextAction=guide.nextAction;throw error;
       }
       throw err;
@@ -478,13 +479,13 @@ class ApiClient {
 
     get: (id: string) => this.request<Customer>(`/customers/${id}`),
 
-    create: (data: Partial<Customer>) =>
+    create: (data: Partial<Omit<Customer,'creditLimit'>> & {creditLimit?:string|number}) =>
       this.request<Customer>('/customers', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    update: (id: string, data: Partial<Customer>) =>
+    update: (id: string, data: Partial<Omit<Customer,'creditLimit'>> & {creditLimit?:string|number}) =>
       this.request<Customer>(`/customers/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),

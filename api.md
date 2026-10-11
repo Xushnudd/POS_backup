@@ -1329,3 +1329,9 @@ qabul qilinmaydi; autentifikatsiya natijasini yangi login orqali tekshirish kera
 ### Qoldiqning savdosiz davri
 
 GET `/inventory/balances` optional `inactiveDays=1..3650`: musbat joriy qoldiq va shu filial/product uchun N×24soatda completed/partially_returned/returned savdo yo‘q. Draft aktivlik emas; returned original savdo aktivlik hisoblanadi. NULL yoki future completion timestamp bilan savdosizlik xulosasi qilinmaydi. Root meta `{observedAt,inactiveSince,inactiveDays,definition}`; CSV shu filtr va oyna metadata bilan to‘liq mos qatorlarni eksport qiladi. Bu stock age/expiry/FEFO emas. UI30/60/90 tanlovi; contract `docs/operations/inventory-inactivity.md`.
+
+### To‘liq hisobot CSV/XLSX/PDF eksporti
+
+`POST /api/jobs` owner: `{operationId:UUID,type:"report_export",report:{report,format:"csv"|"xlsx"|"pdf",filters:{}},reason}`. `report` va filtr allowlisti `src/lib/report-exports.ts`da: 18 mavjud hisobot/catalog query. `organizationId`, pagination, token va noma’lum filtrlar rad etiladi; organization server kontekstidan olinadi. `storeId`/`filter` jobning tashqi darajasida ushbu turga berilmaydi. Worker source generation/live owner session, filterdagi resurs egaligi, original-key/lease/audit fencingni tekshiradi. Dataset UI sahifasi bilan cheklanmaydi: 10000 natija/16MiB; overflow qisman faylsiz.
+
+`GET /api/jobs/{id}/export` mavjud scoped, audited, bounded download. CSV `text/csv`, XLSX `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`; pul/miqdor plain string, formula obyektlari yo‘q. `pdf` — original rejaning browser print-to-PDF variantida `text/html`, `.print.html`: barcha qatorli escaped/script-free hujjatni ochib Ctrl+P → PDF sifatida saqlash. Avtomatik server PDF yoki real printer integratsiyasi emas. Artifact 24 soat, expiry410; immutable hash/metadata saqlanadi. [Foydalanish va chegaralar](docs/operations/report-exports.md).

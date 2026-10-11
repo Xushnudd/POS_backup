@@ -1,0 +1,121 @@
+{
+  "date": "2026-10-11",
+  "task": "DATA-01.10",
+  "status": "done",
+  "originalDoneBaseline": 159,
+  "originalDoneAdded": 1,
+  "originalDoneTotal": 160,
+  "originalTotal": 259,
+  "latestTarget": 160,
+  "head": "9f5a43258c7980a565dd27dc10d42688bd5e7ab4",
+  "uncommittedChanges": true,
+  "drill": {
+    "status": "passed",
+    "environment": "isolated synthetic legacy dataset; actual pg_dump/pg_restore clone; no production or staging deployment",
+    "migrations": 128,
+    "legacy": {
+      "preserved": true,
+      "tables": 25,
+      "rows": 4040,
+      "changes": []
+    },
+    "ledger": {
+      "cashNet": "1001",
+      "saleValue": "1003.99",
+      "creditValue": "2",
+      "openingCash": "50",
+      "stockByUnit": {
+        "kg": "12.345",
+        "dona": "5"
+      },
+      "cashManagementNet": "13",
+      "closedExpectedCash": "1064"
+    },
+    "ledgerPreserved": true,
+    "repeatExpanded": {
+      "preserved": true,
+      "tables": 113,
+      "rows": 4067,
+      "changes": []
+    },
+    "clonePreserved": true,
+    "sourceUnchanged": true,
+    "rollbackRestored": true,
+    "sameCountChangeRejected": true,
+    "ledgerMismatchRejected": true,
+    "freshInstall": true,
+    "validatedConstraints": true,
+    "privateBackupsRemovedOnExit": true
+  },
+  "previousApp": {
+    "source": "97ded93d1c62c4a4180607d6686bf82395701ee2",
+    "compile": "passed",
+    "saleAmount": "1.01",
+    "payments": 1,
+    "movements": 1,
+    "balance": "1",
+    "replay": "passed",
+    "environment": "isolated pos_test, own synthetic fixture removed"
+  },
+  "checks": {
+    "opsPassed": 15,
+    "opsFailed": 0,
+    "newOpsCases": 6,
+    "unitPassedFiles": 34,
+    "unitFailed": 0,
+    "nextWebpackBuild": "passed",
+    "typecheck": "passed",
+    "eslint": "passed changed scripts",
+    "syntax": "node --check and bash -n passed",
+    "diffCheck": "passed",
+    "security": {
+      "scanned": 849,
+      "findings": [],
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    }
+  },
+  "commands": [
+    "bash scripts/ops/test-migration-dataset.sh",
+    "npm run test:ops",
+    "npm test",
+    "npm run build -- --webpack",
+    "npm run typecheck",
+    "npx eslint scripts/ops/migration-dataset.mjs scripts/ops/migration-dataset.test.mjs",
+    "npm run security:scan"
+  ],
+  "contract": [
+    "Original column/key/types, counts and canonical table SHA256 preserved through actual old-dataset dump/restore and all migrations",
+    "COPY streamed; exact Decimal normalized in PostgreSQL; no JS numeric financial conversion",
+    "Legacy stock/receipt/payment/return/shift/tenant invariants and discount/debt/barcode/unit/received-transfer backfills",
+    "Idempotent deploy: entire expanded schema dataset unchanged on repeated migration",
+    "Fresh install and NOT VALID validation rehearsed on disposable clones",
+    "Offline pre-upgrade backup restore and previous committed application compatible with additive schema",
+    "Same-count changed data and stock mismatch fail closed; no financial repair",
+    "Read-only query, credential-safe errors, private 0600 artifact, no overwrite/final symlink"
+  ],
+  "limitations": [
+    "Source is explicitly synthetic historical schema fixture; not an actual customer backup or staging acceptance",
+    "No real production deployment or new vendor-specific integration",
+    "CLI ledger profile is initial legacy import; later business/schema transformations need an explicit new review and expected-result tests",
+    "Backup rollback rehearsal cannot substitute for provider/offline review after real economic writes",
+    "FIX-01.07/DATA-01.04/OPS/staging/pilot and other original tasks remain unchanged"
+  ],
+  "sourceSha256": {
+    "scripts/ops/migration-dataset.mjs": "bd9423f032439cc6e1153a9067fd17e004b9d0ff1af12e8ae9422eb2cc31675b",
+    "scripts/ops/migration-dataset.test.mjs": "f24346631af39b677e1e6d77b39038ad72e632eabc38621273019ecac95d8db7",
+    "scripts/ops/migration-reconcile.sql": "4c0f5de32af644b17c46f176b982cdcfe7031ce9625c3ed4a6de53d6046d6905",
+    "scripts/ops/migration-legacy-fixture.sql": "e367c33be9e258fa8cb9c0bd4b76acf243a4b95c6a95a1b2d036fd539c250d98",
+    "scripts/ops/test-migration-dataset.sh": "2b0fa2ba7b7613b95eef79289f56823b243cf6a53f030da241e9abd08388e5c7",
+    "docs/operations/migration-dataset-readiness.md": "ebcf0518f961249a4bdda4e87464bfa09dc779856ca7922092a80ffbad3355b3"
+  },
+  "logSha256": {
+    "drill": "ed8f5cb904e0fd120f73687f62a3321dbaae568a868a280d7b8f05c78f98a491",
+    "previousApp": "6744bc64f0aa41ce1934596d6ebe92eb943cae355265aa3983fc1f0dd32ff9b0",
+    "ops": "52e74ae67c3bc5083aa47a0e28de55483663ef45933f5da85e2aab124fde8895",
+    "unit": "544b4fe43561f1091e3b27d5a23a66e32f7d7407cf0ee3cf933dfc49a2faa3e3",
+    "build": "8d96bf0db5f2518c40f27aa72600a1fe282390d104bedddee7833c8e3e9c5f37",
+    "typecheck": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "eslint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "security": "f769c29e4c71f641d16f516fcb29a14567e3fccd53a0c12428a5acd606131219"
+  }
+}

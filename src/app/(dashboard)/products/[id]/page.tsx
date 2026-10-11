@@ -1,7 +1,7 @@
 'use client';
 import ProductBarcodes from '@/components/catalog/ProductBarcodes';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -17,10 +17,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+
+const emptyForm={name:'',sku:'',barcode:'',categoryId:'',unit:'dona',costPrice:'',salePrice:'',minStock:''};
 
 export default function ProductDetailPage() {
-  const params = useParams();
-  const id = params?.id as string;
+  const {id}=useParams<{id:string}>();
+  const {organization,user,role}=useAuth();
+  return organization&&user?<ProductEditor key={[organization.id,user.id,role,id].join(':')} id={id}/>:null;
+}
+
+function ProductEditor({id}:{id:string}) {
   const router = useRouter();
   const { organization, role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
@@ -30,34 +37,34 @@ export default function ProductDetailPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    sku: '',
-    barcode: '',
-    categoryId: '',
-    unit: 'dona',
-    costPrice: '',
-    salePrice: '',
-    minStock: '',
-  });
+  const [saved,setSaved]=useState(false);
+  const flight=useRef(false);
+  const [loadError,setLoadError]=useState('');
+  const [revision,setRevision]=useState(0);
+  const [barcodeRevision,setBarcodeRevision]=useState(0);
+  const [formData,setFormData]=useState(emptyForm);
+  const [baseline,setBaseline]=useState(emptyForm);
+  const [barcodeState,setBarcodeState]=useState({dirty:false,busy:false});
+  const dirty=!!product&&Object.keys(formData).some(key=>formData[key as keyof typeof formData]!==baseline[key as keyof typeof baseline]);
+  const confirmDiscard=useUnsavedChanges(role!=='cashier'&&(dirty||barcodeState.dirty),isSaving||barcodeState.busy);
 
   useEffect(() => {
     if (!id) return;
     let isCancelled = false;
 
-    Promise.all([
+    void Promise.resolve().then(()=>{if(isCancelled)return;setIsLoading(true);setLoadError('');return Promise.all([
       role!=='cashier'?api.units.list():Promise.resolve({data:[]}),
       api.products.get(id),
       organization?.id ? api.categories.list(organization.id) : Promise.resolve({ data: [] }),
-    ])
-      .then(([unitRes, prodRes, catRes]) => {
+    ]);})
+      .then((responses) => {
+        if (isCancelled||!responses) return;
+        const [unitRes,prodRes,catRes]=responses;
         setUnits(unitRes.data??[]);
-        if (isCancelled) return;
         if (prodRes.data) {
           const p = prodRes.data;
           setProduct(p);
-          setFormData({
+          const loaded={
             name: p.name,
             sku: p.sku,
             barcode: p.barcode,
@@ -66,11 +73,12 @@ export default function ProductDetailPage() {
             costPrice: String(p.costPrice),
             salePrice: String(p.salePrice),
             minStock: String(p.minStock),
-          });
+          };
+          setFormData(loaded);setBaseline(loaded);
         }
         if (catRes.data) setCategories(catRes.data);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {if(!isCancelled)setLoadError(err instanceof Error?err.message:'Mahsulot yuklanmadi');})
       .finally(() => {
         if (!isCancelled) setIsLoading(false);
       });
@@ -78,46 +86,51 @@ export default function ProductDetailPage() {
     return () => {
       isCancelled = true;
     };
-  }, [id, organization, role]);
+  }, [id, organization, role,revision]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product) return;
+    if (!product||flight.current||barcodeState.busy) return;
 
-    if (!formData.costPrice || Number(formData.costPrice) < 0 || !formData.salePrice || Number(formData.salePrice) < 0) {
-      notifyError('Tannarx va sotuv narxi manfiy bo‘lmagan bo‘lishi kerak');
+    if (!/^\d+(?:\.\d{1,6})?$/.test(formData.costPrice.trim()) || !/^\d+(?:\.\d{1,2})?$/.test(formData.salePrice.trim()) || !/^\d+(?:\.\d{1,6})?$/.test(formData.minStock.trim()||'0')) {
+      notifyError('Narx/qoldiq manfiy bo‘lmasin: sotuv narxi ko‘pi bilan 2, tannarx va qoldiq 6 kasr xonali bo‘lsin');
       return;
     }
 
-    setIsSaving(true);
+    flight.current=true;setIsSaving(true);
     try {
-      await api.products.update(product.id, {
+      const response=await api.products.update(product.id, {
         name: formData.name.trim(),
         sku: formData.sku.trim(),
         barcode: formData.barcode.trim(),
         categoryId: formData.categoryId || undefined,
         unit: formData.unit,
-        costPrice: Number(formData.costPrice),
-        salePrice: Number(formData.salePrice),
-        minStock: parseFloat(formData.minStock) || 0,
+        costPrice: formData.costPrice.trim(),
+        salePrice: formData.salePrice.trim(),
+        minStock: formData.minStock.trim()||'0',
       });
+      if(response.data)setProduct(response.data);
+      setBaseline({...formData});setBarcodeRevision(n=>n+1);setSaved(true);
       notifySuccess('Mahsulot muvaffaqiyatli saqlandi');
-      router.push('/products');
+      if(!barcodeState.dirty)router.push('/products');
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
     } finally {
-      setIsSaving(false);
+      flight.current=false;setIsSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!product || !confirm('Ushbu mahsulotni o\'chirmoqchimisiz?')) return;
+    if (!product||flight.current||!confirmDiscard()||!confirm('Ushbu mahsulotni o\'chirmoqchimisiz?')) return;
+    flight.current=true;setIsSaving(true);
     try {
       await api.products.delete(product.id);
       notifySuccess('Mahsulot o\'chirildi');
       router.push('/products');
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'O\'chirishda xatolik');
+    } finally {
+      flight.current=false;setIsSaving(false);
     }
   };
 
@@ -132,7 +145,7 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="p-8 text-center">
-        <p className="text-gray-500 mb-4">Mahsulot topilmadi</p>
+        {loadError?<><p role="alert" className="mb-4">{loadError}</p><Button onClick={()=>setRevision(n=>n+1)}>Qayta yuklash</Button></>:<p className="text-gray-500 mb-4">Mahsulot topilmadi</p>}
         <Link href="/products">
           <Button variant="outline">Mahsulotlarga qaytish</Button>
         </Link>
@@ -147,7 +160,7 @@ export default function ProductDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/products">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Mahsulotlarga qaytish">
               <FontAwesomeIcon icon={faArrowLeft} />
             </Button>
           </Link>
@@ -158,15 +171,19 @@ export default function ProductDetailPage() {
           variant="danger"
           size="sm"
           onClick={handleDelete}
+          disabled={isSaving||barcodeState.busy}
           leftIcon={<FontAwesomeIcon icon={faTrash} />}
         >
           O&apos;chirish
         </Button>
       </div>
 
-      <ProductBarcodes key={product.barcode} productId={product.id}/>
+      <ProductBarcodes key={product.id} productId={product.id} disabled={isSaving} revision={barcodeRevision} onEditStateChange={setBarcodeState}/>
       <Card title="Mahsulot ma'lumotlarini tahrirlash">
         <form onSubmit={handleSave} className="space-y-4">
+          {dirty&&<p role="status">Saqlanmagan mahsulot o‘zgarishlari bor.</p>}
+          {!dirty&&saved&&<p role="status">Mahsulotning asosiy ma’lumotlari saqlandi.</p>}
+          <fieldset disabled={isSaving||barcodeState.busy} className="space-y-4">
           <Input
             label="Mahsulot nomi *"
             value={formData.name}
@@ -190,6 +207,7 @@ export default function ProductDetailPage() {
                 required
               />
               <CameraBarcodeScanner
+                disabled={isSaving||barcodeState.busy}
                 onDetected={(barcode) => setFormData((current) => ({ ...current, barcode }))}
                 className="absolute right-1 top-7 p-2"
               />
@@ -229,10 +247,12 @@ export default function ProductDetailPage() {
             <Input
               label="Minimal qoldiq"
               type="number"
+              min="0" step="0.000001"
               value={formData.minStock}
               onChange={(e) => setFormData({ ...formData, minStock: e.target.value })}
             />
           </div>
+          </fieldset>
 
           <div className="pt-4 flex justify-end gap-3">
             <Link href="/products">
@@ -244,6 +264,7 @@ export default function ProductDetailPage() {
               type="submit"
               variant="primary"
               isLoading={isSaving}
+              disabled={barcodeState.busy}
               leftIcon={<FontAwesomeIcon icon={faSave} />}
               className="font-bold"
             >

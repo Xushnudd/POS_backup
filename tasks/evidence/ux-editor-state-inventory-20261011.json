@@ -1,0 +1,466 @@
+{
+  "date": "2026-10-11",
+  "task": "UX-01.05",
+  "acceptance": false,
+  "pageCount": 57,
+  "directGuardPages": 7,
+  "notes": "This is a source inventory, not proof that every candidate is editable or unsafe. Read-only/search pages need no mutation draft guard. Child editors are not fully detected. Original task remains open.",
+  "pages": [
+    {
+      "file": "src/app/(dashboard)/archive/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/audit/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/billing/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/customers/[id]/history/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/customers/[id]/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/customers/duplicates/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/customers/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/dashboard/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/drafts/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/finance/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/help/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/incidents/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/inventory/counts/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/inventory/dispositions/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/inventory/locations/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/inventory/movements/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/inventory/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/inventory/transfers/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/jobs/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/onboarding/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/platform/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/pos/offline/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/pos/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/[id]/compliance/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/[id]/media/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/[id]/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/[id]/units/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/[id]/variants/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/brands/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/categories/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/import/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/prices/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/products/units/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/replenishment/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/reports/breakdowns/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/reports/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/reports/purchases/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/reports/reconciliation/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/reports/supplier-balances/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/roles/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/sales/[id]/exchange/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/sales/[id]/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/sales/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/security/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/settings/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/settings/prices/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/settings/support/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/settings/taxes/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": true,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/shifts/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/suppliers/[id]/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/suppliers/page.tsx",
+      "hasDirectPageGuard": true,
+      "hasNativeForm": true,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/support/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/sync-review/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/tickets/[id]/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/tickets/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": false,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    },
+    {
+      "file": "src/app/(dashboard)/training/page.tsx",
+      "hasDirectPageGuard": false,
+      "hasNativeForm": false,
+      "usesDurableMutation": false,
+      "hasInputOrSelect": true,
+      "review": "source inventory only; child forms, search-only fields and operational recovery need manual review"
+    }
+  ]
+}

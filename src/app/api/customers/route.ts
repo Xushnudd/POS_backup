@@ -1,16 +1,17 @@
-import {customerPhoneSchema,normalizeCustomerPhone,assertCustomerPhone} from '@/server/customers/identity'
+import {queryCustomers} from '@/server/exports/queries/customers'
+import {customerPhoneSchema,assertCustomerPhone} from '@/server/customers/identity'
 import {amountSchema} from '@/server/sales/service'
 import {assertLiveContext} from '@/server/operations'
-import { activeStatus } from '@/server/catalog/status'
-import { csv, numeric, EXPORT_CAP } from '@/server/exports/csv'
-import { consumeLimit } from '@/server/auth/rate-limit'
-import { Prisma } from '@prisma/client'
-import { AccessError } from '@/server/auth/policy'
-import { scopedPrisma } from '@/server/auth/scoped-prisma'
-import { withApi } from '@/server/api'
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, getRequestToken } from '@/lib/auth'
-import { z } from 'zod'
+
+
+
+import {Prisma} from '@prisma/client'
+import {AccessError} from '@/server/auth/policy'
+import {scopedPrisma} from '@/server/auth/scoped-prisma'
+import {withApi} from '@/server/api'
+import {NextRequest,NextResponse} from 'next/server'
+import {verifyToken,getRequestToken} from '@/lib/auth'
+import {z} from 'zod'
 
 const createCustomerSchema = z.object({
   organizationId: z.string().uuid(),
@@ -21,91 +22,10 @@ const createCustomerSchema = z.object({
   creditLimit: amountSchema.default(0),
 })
 
-async function handleGET(request: NextRequest) {
-  try {
-    const token = getRequestToken(request)
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
-        { status: 401 }
-      )
-    }
-
-    const payload = await verifyToken(token)
-    if (!payload) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
-        { status: 401 }
-      )
-    }
-    const db = scopedPrisma(payload)
-
-    const { searchParams } = new URL(request.url)
-    const organizationId = searchParams.get('organizationId')
-    const search = searchParams.get('search')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const skip = (page - 1) * limit
-
-    if (!organizationId) {
-      return NextResponse.json(
-        { success: false, error: { code: 'MISSING_PARAM', message: 'Organization ID talab qilinadi' } },
-        { status: 400 }
-      )
-    }
-
-    const where: Prisma.CustomerWhereInput = {
-      organizationId,
-      ...activeStatus(searchParams, payload),
-    }
-
-    if (search) {
-      where.OR = [
-        { fullName: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: normalizeCustomerPhone(search)??search, mode: 'insensitive' } },
-        ...(normalizeCustomerPhone(search)?[{canonicalPhone:{contains:normalizeCustomerPhone(search)!}}]:[]),
-      ]
-    }
-
-    if(searchParams.get('format')==='csv'){
-      if(payload.role!=='owner')throw new AccessError(403,'FORBIDDEN')
-      await consumeLimit('customers.export',payload.organizationId+':'+payload.userId,10,60000)
-      const data=await db.$transaction(async tx=>{
-      await assertLiveContext(tx,payload)
-        const total=await tx.customer.count({where})
-        if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
-        const rows=await tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],select:{id:true,fullName:true,phone:true,address:true,creditLimit:true}})
-        const debts=await tx.debtEntry.groupBy({by:['customerId'],where:{customerId:{in:rows.map(row=>row.id)}},_sum:{amount:true}})
-        const balances=new Map(debts.map(row=>[row.customerId,row._sum.amount??new Prisma.Decimal(0)]))
-        return {filename:'customers-'+payload.organizationId+'.csv',content:csv([['ID','Mijoz','Telefon','Manzil','Nasiya limiti','Joriy ledger qoldig‘i'],...rows.map(row=>[row.id,row.fullName,row.phone,row.address,numeric(row.creditLimit),numeric(balances.get(row.id)??0)])])}
-      },{isolationLevel:'RepeatableRead'})
-      return NextResponse.json({success:true,data})
-    }
-
-    const [customers, total] = await db.$transaction(async tx=>{
-      await assertLiveContext(tx,payload)
-      const rows=await tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],skip,take:limit})
-      return [rows,await tx.customer.count({where})] as const
-    },{isolationLevel:'RepeatableRead'})
-
-    return NextResponse.json({
-      success: true,
-      data: customers,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    })
-
-  } catch (error) {
-    if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
-  }
+async function handleGET(request:NextRequest) {
+ const context=await verifyToken(getRequestToken(request)??'')
+ if(!context)throw new AccessError(401,'UNAUTHORIZED')
+ return queryCustomers(context,request)
 }
 
 async function handlePOST(request: NextRequest) {

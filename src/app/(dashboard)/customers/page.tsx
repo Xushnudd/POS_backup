@@ -2,6 +2,7 @@
 
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -24,7 +25,8 @@ import {
   faEdit,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function CustomersPage() {
+export default function CustomersPage(){const {organization,user,role}=useAuth();return organization&&user&&role?<Customers key={[organization.id,user.id,role].join(':')}/>:null;}
+function Customers() {
   const { organization,role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -43,6 +45,10 @@ export default function CustomersPage() {
     creditLimit: '0',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [originalForm,setOriginalForm]=useState(formData);
+  const dirty=isCustomerModalOpen&&(Object.keys(formData) as (keyof typeof formData)[]).some(key=>formData[key]!==originalForm[key]);
+  const confirmDiscard=useUnsavedChanges(dirty,isSaving);
+  const closeEditor=()=>{if(confirmDiscard())setIsCustomerModalOpen(false);};
 
   const loadCustomers = useCallback(async () => {
     if (!organization?.id) return;
@@ -83,6 +89,8 @@ export default function CustomersPage() {
   }, [loadCustomers]);
 
   const openCreateModal = () => {
+    if(!confirmDiscard())return;
+    setOriginalForm({fullName:'',phone:'',address:'',note:'',creditLimit:'1000000'});
     setEditingCustomer(null);
     setFormData({
       fullName: '',
@@ -95,6 +103,8 @@ export default function CustomersPage() {
   };
 
   const openEditModal = (c: Customer) => {
+    if(!confirmDiscard())return;
+    setOriginalForm({fullName:c.fullName,phone:c.phone,address:c.address||'',note:c.note||'',creditLimit:String(c.creditLimit||0)});
     setEditingCustomer(c);
     setFormData({
       fullName: c.fullName,
@@ -108,7 +118,7 @@ export default function CustomersPage() {
 
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id) return;
+    if (!organization?.id||isSaving) return;
 
     if (!formData.fullName || !formData.phone) {
       notifyError('Ism va telefon raqamini kiriting');
@@ -123,7 +133,7 @@ export default function CustomersPage() {
         phone: formData.phone.trim(),
         address: formData.address.trim() || undefined,
         note: formData.note.trim() || undefined,
-        creditLimit: parseFloat(formData.creditLimit) || 0,
+        creditLimit: formData.creditLimit.trim()||'0',
       };
 
       if (editingCustomer) {
@@ -261,14 +271,16 @@ export default function CustomersPage() {
       {/* Customer Form Modal */}
       <Modal
         isOpen={isCustomerModalOpen}
-        onClose={() => setIsCustomerModalOpen(false)}
+        onClose={closeEditor}
         title={editingCustomer ? 'Mijozni tahrirlash' : 'Yangi mijoz qo\'shish'}
         size="md"
       >
         <form onSubmit={handleSaveCustomer} className="space-y-4">
+          {dirty&&<p role="status">Saqlanmagan mijoz o‘zgarishlari bor.</p>}
           <Input
             label="Mijoz to'liq ismi *"
             placeholder="Jamshid Ergashev"
+            disabled={isSaving}
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             required
@@ -278,6 +290,7 @@ export default function CustomersPage() {
             label="Telefon raqami *"
             type="tel"
             placeholder="901234567"
+            disabled={isSaving}
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             leftIcon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
@@ -287,6 +300,7 @@ export default function CustomersPage() {
           <Input
             label="Manzil"
             placeholder="Toshkent sh., Yunusobod tumani"
+            disabled={isSaving}
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
           />
@@ -295,8 +309,9 @@ export default function CustomersPage() {
             label="Maksimal nasiya / kredit limiti (so'm)"
             type="number"
             min="0"
-            step="100000"
+            step="0.01"
             placeholder="1000000"
+            disabled={isSaving}
             value={formData.creditLimit}
             onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
             helperText="Mijozga berilishi mumkin bo'lgan maksimal qarz miqdori"
@@ -305,6 +320,7 @@ export default function CustomersPage() {
           <Input
             label="Izoh (ixtiyoriy)"
             placeholder="Mijoz haqida qo'shimcha eslatma"
+            disabled={isSaving}
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
           />
@@ -313,7 +329,7 @@ export default function CustomersPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsCustomerModalOpen(false)}
+              onClick={closeEditor}
               disabled={isSaving}
             >
               Bekor qilish

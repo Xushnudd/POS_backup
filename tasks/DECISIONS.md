@@ -526,3 +526,44 @@ Restore target offline qoladi; gate sweepdan oldin alohida commit qilinadi. Eski
 Mavjud Prisma/PG, reviewed tenant export va Node crypto ishlatiladi; yangi kutubxona yoki provider protokoli yo‘q. Recovered isolated copy va target exact migration/checksum bilan tekshiriladi; unfinished migration rad. RepeatableRead READ ONLY snapshots ketma-ket; private0600 exclusive artifact row key/digest/FK va current-only preservationni bildiradi. Portable export credential/security omissions saqlanadi. CLI database nomlari explicit confirmation, operator-owned0700 katalog va mustaqil case SHA binding talab qiladi.
 
 OPS-03.05 planning mezoni real disposable pg_dump/restore clone hamda foreign tenant hash invarianti bilan qabul qilindi. Apply/import, credential restore, shared user/role rollback yoki moliyaviy journal overwrite qo‘shilmaydi. Kelajakdagi correction mavjud audited posting/reversal contractlari bilan operator review va target drain/recheckdan keyin; haqiqiy production recovery alohida vakolat va tashqi dalil talab qiladi.
+
+## ADR-073 — Restored provider intent lookup va ichki ledger qabul chegarasi (2026-10-11)
+
+Restore source offline va workers drained bo‘lishi shart. Pending auth checkpoint claim/transport/settlementni bloklaydi; review eski queued intentga submit huquqini qaytarmaydi. Mavjud original ID lookup, not_found manual review, old running lease fencing qayta ishlatiladi. SQL126 transition,127 zero-submit restore counter proof,128 fixed-schema/search_path helper additive; applied fayllar rewrite qilinmagan. Normal post-checkpoint yangi intent submit oqimi sinovda saqlangan. Registry bo‘sh, vendor API taxmin qilinmagan. OPS-03.06 tashqi orphan/terminal/offline acceptance tugamasdan done emas.
+
+RELEASE-01.03 individual mezoni ichki cross-ledger/report coherence; dependency talqin qoidasidagi ishlatilgan core invariantlar isolated production business services bilan tekshirildi. Shu individual mezon done; real PILOT va qolgan release bandlari yoki production approvalni almashtirmaydi. Combined scenario hamda68financial regression dalili release-ledger-20261011.json. Kichik guard, SQL correction yoki test original+20 hisobiga alohida qo‘shilmaydi.
+
+
+## ADR-074 — Saqlanmagan katalog tahriri va sessiya almashtirish (2026-10-11)
+
+Mavjud React hook/native browser eventlari ishlatiladi; yangi kutubxona, router patch yoki brauzerga forma payloadini saqlash yo‘q. Dirty/saving page guard kategoriya, birlik, brend, mijoz va yetkazib beruvchi uchun scoped editorlarda qo‘llanadi. Logout va biznes almashtirish server sessiyasiga tegishdan oldin cancellationni tekshiradi; muvaffaqiyatli switch commit eventi keyingi reload tasdig‘ini takrorlamaydi. Mijoz kredit limiti decimal satr bilan yuboriladi. Kod bo‘lmagan HTTP xatosi transport xatosiga aylantirilmaydi; status/requestId saqlanadi.
+
+34 unit fayli,3 browser va build/typecheck/lint/835-source scanner PASS. Dalil: catalog-unsaved-20261011.json. UX-01.05 butun sahifalar/retry/back-forward mezonlari tugamagani sababli in_progress; original done159 o‘zgarmadi. Qo‘shimcha core ishlari original+20 hisobiga sun’iy ravishda qo‘shilmaydi.
+
+
+## ADR-075 — Product draft va kechikkan query javobi (2026-10-11)
+
+Mavjud React state/ref, shared unsaved hook va scoped editor kalitlari ishlatiladi. ProductBarcodes dirty/busy state callback orqali parent page guardga qo‘shiladi; main product saved bo‘lishi boshqa barcode draftni bekor qilishga vakolat bermaydi. Asosiy save barcode dirty bo‘lsa shu sahifada qoladi. API schema va SQL unchanged; cost/minStock6 va price2 decimal string. Product/category/barcode flight latch synchronous event retrylarni cheklaydi. Katalog list generation latest-query-only qoidasi bilan stale result/error/loadingni rad etadi; credential yoki forma payloadi browser storagega yangi yozilmaydi.
+
+34 unit,12 browser va build/typecheck/lint/scanner838 PASS. UX-01.05 partial acceptance, original done159/target179/0of20. Boshqa editor/nav/recovery coverage tugamaguncha original task yopilmaydi. `product-editor-state-20261011.json` qabul dalili; `ux-editor-state-inventory-20261011.json` faqat source inventory.
+
+## ADR-076 — Mustaqil rol va profil request recovery (2026-10-11)
+
+Bitta shared pending ref o‘rniga ikki mustaqil immutable snapshot ishlatiladi. Unknown response original path/method/body/keyni qulflaydi; known validation/revision conflict editable draftni saqlaydi. Native confirm helper har bir forma resetini faqat tegishli draft bilan tekshiradi; umumiy page guard ikkala draft va pending amalni hisobga oladi. Backend siyosati unchanged: unexpired MFA proof faqat exact session/action/key/hash replay uchun qayta ishlatiladi. Browser test takroriy dialogni kutish o‘rniga real bound replay va DBda bitta posting/auditni tekshiradi.
+
+21 browser,34 unit, build/type/lint/scan PASS. Komponent-memory recovery reloadga chidamli emas; UX-01.05 partial, original done159/0of20 unchanged. Yangi dependency, migration, vendor API yoki production deployment yo‘q.
+
+
+## ADR-077 — Original dataset migratsiya darvozasi va rollback rehearsal (2026-10-11)
+
+Mavjud PostgreSQL/Prisma/Node yetarli: source offline, read-only baseline, actual private dump/restore clone, additive migrate, legacy source-backed backfill, original projection va ledger compare, repeated expanded snapshot, clone constraint validation, fresh install va previous app compatible rollback. Native COPY oqimi row payloadni client dataset arrayga yig‘maydi; Decimal PostgreSQLda normalize qilinadi, JS Number emas. No-PK jadval canonical record bo‘yicha saralanadi. Yangi ustunlar original hashni o‘zgartirmaydi; original column/type/key yoki encoding/collation farqi failclosed. Private artifact/no-overwrite; native SQL/credential errors logga uzatilmaydi.
+
+Sourcega avtomatik migrate/import/repair/down migration yo‘q. Pre-upgrade backup restore faqat offline cloned environmentda; post-upgrade provider/offline iqtisodiy amallarni review qilmasdan live restore mumkin emas. Synthetic fixture ochiq belgilangan, actual customer/staging acceptance uydirilmagan. DATA-01.10 individual script/reja + clone/fresh/rollback qabul mezoni done; tashqi rollout gate va boshqa original scope bandlari ochiq. Original done160/259, latest target160 achieved. Qabul: migration-dataset-20261011.json va migration-dataset-readiness.md.
+
+## ADR-078 — Explicit tenant roots va native FK edge defense (2026-10-11)
+
+113 Prisma model bitta reviewed root/global classification oladi; unknown/global scoped ORM operatsiyasi implicit tashkilot scope olmaydi. Parent root branch/cashier scope’ni uzatadi, scoped insert root yoki authorized parentni talab qiladi. Native SQL129/131/132 barcha97tenant table FK-edge/immutable owner defense beradi; Organization root identity immutable. Native composite tenant FK mavjud bo‘lsa qo‘shimcha lookup shart emas; boshqa FKlar current final row bo‘yicha deferred tekshiriladi, narrow key-share lock bilan. RLS va yangi texnologiya kiritilmadi. Legacy set-based preflight invalid data’ni o‘zgartirmaydi. Acceptance fresh/actual synthetic dump clone/rollback va full324/focused16; real rollout OPS/pilotga tegishli.
+
+## ADR-079 — Shared full-report worker eksporti va native browser PDF (2026-10-11)
+
+18 mavjud filtered query response/calculationni saqlagan holda server service’ga ajratildi; HTTP authentication route wrapperda, worker esa immutable source generationdan live context oladi. Arbitrary URL yoki browser secret payloadga olinmaydi. Original background worker CSV/XLSX/PDF-ready artifactni scoped hash/audit/expiry contractida yaratadi. Exact XLSX cells plain string; PDF originalPLAN1dagi user browser print-to-PDF orqali, server Chromium production dependency qo‘shilmaydi.1001filtered row actual29-page PDF va uch-browser UI acceptance PASS. Automatic printer/Click/fiscal integratsiya yoki mavjud bo‘lmagan expiry/serial hisobotni bu vazifaga qo‘shib fake done yaratilmadi. Report overflow10000result/16MiBda partial faylsiz.

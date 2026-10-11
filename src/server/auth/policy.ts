@@ -1,3 +1,4 @@
+import { TENANT_DIRECT_MODELS, TENANT_PARENT_SCOPES } from './tenant-models'
 import type { TokenPayload } from '@/lib/auth'
 import { routePermissionRoles, type BusinessRole } from './route-permissions'
 
@@ -31,7 +32,12 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
     case 'ProviderIntent': case 'ReceiptCostPlan': case 'StockLocation': case 'StockReservation': case 'LocationBalance': case 'ReservationItem': case 'PurchaseOrder': case 'SupplierInvoice': case 'SupplierPayment':
     case 'FinancialAccount': case 'ReturnDispositionEntry': case 'TransferDispositionEntry': case 'DamageLocation': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
     case 'StockCount': case 'StockDocument': case 'InventoryMovement': case 'Payment': return { organizationId: org, ...storeRelation }
-    default: return { organizationId: org }
+    default: {
+      const parent = TENANT_PARENT_SCOPES[model]
+      if (parent) return { [parent[1]]: tenantScope(parent[0], context) }
+      if ((TENANT_DIRECT_MODELS as readonly string[]).includes(model)) return { organizationId: org }
+      throw new AccessError(403, 'UNSCOPED_MODEL', 'Bu model alohida vakolat tekshiruvini talab qiladi')
+    }
   }
 }
 export function assertRoutePermission(path: string, method: string, role: string) {

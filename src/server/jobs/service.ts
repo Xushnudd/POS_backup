@@ -7,10 +7,11 @@ import {AccessError} from '../auth/policy'
 import {assertLiveContext,audit,runOperation} from '../operations'
 import {scanOrganization} from '../monitoring/service'
 import {catalogExport,exportFilter} from './catalog-export'
+import {reportExport,reportExportSchema} from './report-export'
 import {tenantExport} from './tenant-export'
-export const jobSchema=z.object({operationId:z.string().uuid(),type:z.enum(['reconciliation','catalog_export','tenant_export']),filter:exportFilter.optional(),storeId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000)}).strict().refine(v=>v.type==='catalog_export'?!v.storeId:v.type==='tenant_export'?!v.storeId&&!v.filter:!v.filter,'Export faqat katalog filtri, reconciliation faqat filial oladi')
+export const jobSchema=z.object({operationId:z.string().uuid(),type:z.enum(['reconciliation','catalog_export','tenant_export','report_export']),filter:exportFilter.optional(),report:reportExportSchema.optional(),storeId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000)}).strict().refine(v=>v.type==='report_export'?!!v.report&&!v.storeId&&!v.filter:!v.report&&(v.type==='catalog_export'?!v.storeId:v.type==='tenant_export'?!v.storeId&&!v.filter:!v.filter),'Export faqat katalog filtri, reconciliation faqat filial oladi')
 export const retryJobSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000)}).strict()
-const payloadSchema=z.object({storeId:z.string().uuid().optional(),filter:exportFilter.optional()}).strict()
+const payloadSchema=z.object({storeId:z.string().uuid().optional(),filter:exportFilter.optional(),report:reportExportSchema.optional()}).strict()
 async function passwordSession(tx:Prisma.TransactionClient,ctx:TokenPayload){if(!await tx.session.findFirst({where:{id:ctx.sessionId,organizationId:ctx.organizationId,userId:ctx.userId,authenticationMethod:'password'}}))throw new AccessError(403,'PASSWORD_SESSION_REQUIRED')}
 function owner(ctx:TokenPayload){if(ctx.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED')}
 async function event(tx:Prisma.TransactionClient,job:Pick<BackgroundJob,'id'|'attempts'|'generation'>,kind:string,code?:string){await tx.jobEvent.create({data:{jobId:job.id,event:kind,attempt:job.attempts,generation:job.generation,code}})}
@@ -20,14 +21,14 @@ export async function enqueueJob(ctx:TokenPayload,input:z.infer<typeof jobSchema
  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'jobs:'+ctx.organizationId},0))::text`
  if(input.storeId&&!await tx.store.findFirst({where:{id:input.storeId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(404,'STORE_NOT_FOUND')
  if(await tx.backgroundJob.count({where:{organizationId:ctx.organizationId,state:{in:['queued','running']}}})>=20)throw new AccessError(429,'JOB_LIMIT')
- const job=await tx.backgroundJob.create({data:{organizationId:ctx.organizationId,type:input.type,payload:input.type==='catalog_export'?{filter:input.filter??{active:'all'}}:input.storeId?{storeId:input.storeId}:{},expiresAt:new Date(Date.now()+3600000)}})
+ const job=await tx.backgroundJob.create({data:{organizationId:ctx.organizationId,type:input.type,payload:input.type==='report_export'?{report:input.report!}:input.type==='catalog_export'?{filter:input.filter??{active:'all'}}:input.storeId?{storeId:input.storeId}:{},expiresAt:new Date(Date.now()+3600000)}})
  await authorize(tx,ctx,job,input.reason);await event(tx,job,'queued');await audit(tx,ctx,'BackgroundJob',job.id,'job_queued',{type:job.type,storeId:input.storeId,reason:input.reason});return publicJob(job)
  },async tx=>{if(input.type==='tenant_export')await passwordSession(tx,ctx)})}
 export async function retryJob(ctx:TokenPayload,id:string,input:z.infer<typeof retryJobSchema>){owner(ctx);return runOperation(ctx,'job.retry',input.operationId,{id,...input},async tx=>{
  await tx.$queryRaw`SELECT id FROM "BackgroundJob" WHERE id=${id} AND "organizationId"=${ctx.organizationId} FOR UPDATE`
  const job=await tx.backgroundJob.findFirst({where:{id,organizationId:ctx.organizationId}});if(!job)throw new AccessError(404,'NOT_FOUND')
  if(job.state!=='dead'||job.generation>=9)throw new AccessError(409,'JOB_NOT_RETRYABLE')
- const payload=payloadSchema.parse(job.payload);if(payload.storeId&&!await tx.store.findFirst({where:{id:payload.storeId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(404,'STORE_NOT_FOUND')
+ const payload=payloadSchema.parse(job.payload);if(job.type==='report_export'?!payload.report||!!payload.filter||!!payload.storeId:!!payload.report)throw new AccessError(400,'UNSUPPORTED_JOB');if(payload.storeId&&!await tx.store.findFirst({where:{id:payload.storeId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(404,'STORE_NOT_FOUND')
  const next={...job,generation:job.generation+1};await authorize(tx,ctx,next,input.reason)
  const updated=await tx.backgroundJob.update({where:{id},data:{generation:next.generation,state:'queued',maxAttempts:job.attempts+3,nextRunAt:new Date(),expiresAt:new Date(Date.now()+3600000),lastError:null,result:Prisma.DbNull,updatedAt:new Date()}})
  await event(tx,updated,'manual_retry');await audit(tx,ctx,'BackgroundJob',id,'job_retried',{generation:updated.generation,reason:input.reason,previousError:job.lastError});return publicJob(updated)
@@ -37,7 +38,7 @@ export async function jobEvents(ctx:TokenPayload,id:string){owner(ctx);return pr
 async function liveAuthorization(tx:Prisma.TransactionClient,job:BackgroundJob,lock=false){
  const rows=await tx.$queryRaw<{valid:boolean}[]>(Prisma.sql`SELECT TRUE AS valid FROM "JobAuthorization" a JOIN "Session" s ON s.id=a."sessionId" JOIN "User" u ON u.id=a."userId" JOIN "OrganizationUser" m ON m."userId"=a."userId" AND m."organizationId"=a."organizationId" WHERE a."jobId"=${job.id} AND a.generation=${job.generation} AND a."organizationId"=${job.organizationId} AND s."organizationId"=a."organizationId" AND s."userId"=a."userId" AND s."revokedAt" IS NULL AND s."expiresAt">clock_timestamp() AND s."idleExpiresAt">clock_timestamp() AND (${job.type}<>'tenant_export' OR s."authenticationMethod"='password') AND m.role='owner' AND m."isActive" AND u."isActive" ${lock?Prisma.sql`FOR SHARE OF s,m,u`:Prisma.empty}`)
  if(!rows[0]?.valid)throw new AccessError(403,'AUTHORIZATION_CHANGED')
- const payload=payloadSchema.parse(job.payload);if(payload.storeId&&!await tx.store.findFirst({where:{id:payload.storeId,organizationId:job.organizationId,isActive:true}}))throw new AccessError(403,'AUTHORIZATION_CHANGED');return payload
+ const payload=payloadSchema.parse(job.payload);if(job.type==='report_export'?!payload.report||!!payload.filter||!!payload.storeId:!!payload.report)throw new AccessError(400,'UNSUPPORTED_JOB');if(payload.storeId&&!await tx.store.findFirst({where:{id:payload.storeId,organizationId:job.organizationId,isActive:true}}))throw new AccessError(403,'AUTHORIZATION_CHANGED');return payload
 }
 export async function recoverJobs(){return prisma.$transaction(async tx=>{
  const rows=await tx.$queryRaw<BackgroundJob[]>`SELECT * FROM "BackgroundJob" WHERE (state='running' AND "leaseUntil"<=NOW()) OR (state='queued' AND "expiresAt"<=NOW()) ORDER BY "createdAt",id FOR UPDATE SKIP LOCKED LIMIT 25`
@@ -58,8 +59,11 @@ export async function executeJob(job:BackgroundJob){let active=true,inFlight:Pro
   const source=await tx.backgroundJob.findFirst({where:{id:job.id,state:'running',generation:job.generation,leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}}});if(!source)throw new AccessError(409,'JOB_LEASE_LOST')
   const payload=await liveAuthorization(tx,source);let result:Prisma.InputJsonObject;
   if(source.type==='reconciliation')result=await scanOrganization(tx,source.organizationId,payload.storeId?[payload.storeId]:undefined)
-  else if(source.type==='catalog_export'||source.type==='tenant_export'){
-   const exported=source.type==='tenant_export'?await tenantExport(source.organizationId):await catalogExport(source.organizationId,payload.filter??{active:'all'});
+  else if(source.type==='catalog_export'||source.type==='tenant_export'||source.type==='report_export'){
+   const authorization=source.type==='report_export'?await tx.jobAuthorization.findUniqueOrThrow({where:{jobId_generation:{jobId:source.id,generation:source.generation}}}):null;
+   const membership=authorization?await tx.organizationUser.findUniqueOrThrow({where:{organizationId_userId:{organizationId:source.organizationId,userId:authorization.userId}},include:{userStores:true}}):null;
+   const context=authorization&&membership?{userId:authorization.userId,organizationId:source.organizationId,organizationUserId:membership.id,role:membership.role,storeIds:membership.userStores.map(row=>row.storeId),sessionId:authorization.sessionId}:null;
+   const exported=source.type==='report_export'&&context&&payload.report?await reportExport(context,payload.report):source.type==='tenant_export'?await tenantExport(source.organizationId):await catalogExport(source.organizationId,payload.filter??{active:'all'});
    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'exports:'+source.organizationId},0))::text`;
    const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});if((used._sum.size??0)+exported.size>32*1024*1024)throw new AccessError(413,'EXPORT_QUOTA');
    const {data,...meta}=exported;await tx.jobExport.create({data:{jobId:source.id,organizationId:source.organizationId,data,...meta,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}});result={...meta,downloadPath:'/api/jobs/'+source.id+'/export'};

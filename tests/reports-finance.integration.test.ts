@@ -1179,3 +1179,31 @@ test('Inactive stock report uses positive branch stock and completed-sale activi
  const hiddenResult=await balances(req('/inventory/balances?inactiveDays=30&storeId='+hidden.id,admin.cookie),undefined);assert.equal(hiddenResult.status,404)
  for(const value of ['0','-1','1.5','3651','NaN','Infinity',''])assert.equal((await balances(req('/inventory/balances?inactiveDays='+value,f.cookie),undefined)).status,400)
 })
+
+test('Release ledger acceptance: purchase, split cash/credit sale, partial return, debt collection and closed shift reconcile with no unexplained difference',async()=>{
+ const f=await fixture(0,500),finance=await import('@/server/finance/accounts'),purchases=await import('@/server/purchases/suppliers'),orders=await import('@/server/purchases/orders'),collections=await import('@/server/payments/collections')
+ const cash=await finance.createAccount(f.context,finance.accountSchema.parse({operationId:randomUUID(),storeId:f.store.id,registerId:f.register.id,name:'Release ledger till',kind:'cash',reason:'Verified synthetic opening cash'}))
+ const supplier=await prisma.supplier.create({data:{organizationId:f.org.id,name:'Release ledger supplier'}})
+ const order=await orders.createPurchaseOrder(f.context,orders.orderSchema.parse({operationId:randomUUID(),storeId:f.store.id,supplierId:supplier.id,referenceNo:'RELEASE-ORDER',reason:'Cross ledger actual receipt scenario',items:[{productId:f.product.id,quantity:'4',unitCost:'50'}]}))
+ const receipt=await orders.receivePurchaseOrder(f.context,order.id,orders.receiptSchema.parse({operationId:randomUUID(),referenceNo:'RELEASE-RECEIPT',reason:'Four units received',items:[{orderItemId:order.items[0].id,quantity:'4'}]}))
+ assert.equal(receipt.invoice.amount.toString(),'200')
+ const payment=purchases.supplierPaymentSchema.parse({operationId:randomUUID(),supplierId:supplier.id,accountId:cash.id,shiftId:f.shift.id,amount:'200',reason:'Verified supplier cash payment',allocations:[{invoiceId:receipt.invoice.id,amount:'200'}]})
+ await purchases.paySupplier(f.context,payment);await purchases.paySupplier(f.context,payment)
+ const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Release ledger customer',phone:randomUUID(),creditLimit:1000}})
+ const sale=await createDraft(f.context,{...f.draft,customerId:customer.id,items:[{productId:f.product.id,quantity:3,discountAmount:0}]},randomUUID()),saleKey=randomUUID(),tenders={payments:[{paymentType:'cash' as const,amount:90},{paymentType:'credit' as const,amount:210}]}
+ await completeSale(f.context,sale.id,tenders,saleKey);await completeSale(f.context,sale.id,tenders,saleKey)
+ const refund=returnSchema.parse({operationId:randomUUID(),shiftId:f.shift.id,reason:'One original sellable unit returned',items:[{saleItemId:sale.items[0].id,quantity:1,disposition:'sellable'}]})
+ const returned=await returnSale(f.context,sale.id,refund);await returnSale(f.context,sale.id,refund)
+ assert.equal(returned.settlement.cash.toString(),'30');assert.equal(returned.settlement.debt.toString(),'70')
+ const collect=collections.collectionSchema.parse({operationId:randomUUID(),organizationId:f.org.id,storeId:f.store.id,shiftId:f.shift.id,customerId:customer.id,paymentType:'cash',amount:'140'})
+ await collections.collectDebt(f.context,collect);await collections.collectDebt(f.context,collect)
+ const debt=await prisma.debtEntry.aggregate({where:{organizationId:f.org.id,customerId:customer.id},_sum:{amount:true}});assert.equal(debt._sum.amount?.toString(),'0')
+ const supplierBalance=await prisma.$transaction(tx=>purchases.supplierBalances(tx,f.context,supplier.id));assert.equal(supplierBalance.unpaid.toString(),'0');assert.equal(supplierBalance.paid.toString(),'200');assert.equal(supplierBalance.advance.toString(),'0')
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toString(),'2')
+ const cashBook=await prisma.shift.findUniqueOrThrow({where:{id:f.shift.id},include:{payments:true,cashMovements:true}});const beforeClose=shiftCashSummary(cashBook.openingCash,cashBook.payments,cashBook.cashMovements);assert.equal(beforeClose.expectedCash.toString(),'500')
+ const close=await closeShift(f.context,f.shift.id,{countedCash:500});assert.equal(close.expectedCash?.toString(),'500');assert.equal(close.cashDifference?.toString(),'0')
+ assert.equal((await finance.listAccounts(f.context)).find(account=>account.id===cash.id)?.balance.toString(),'500')
+ const {GET:breakdowns}=await import('@/app/api/reports/breakdowns/route')
+ for(const dimension of ['product','category','cashier','store','payment']){const response=await breakdowns(req('/reports/breakdowns?dimension='+dimension+'&storeId='+f.store.id,f.cookie),undefined);assert.equal(response.status,200);const body=await response.json();assert.equal(body.summary.netSales,'200');if(dimension!=='payment'){assert.equal(body.summary.cogs,'100');assert.equal(body.summary.grossProfit,'100')}}
+ for(const kind of ['inventory','sales','returns','shifts']){const response=await reconciliation(req('/reports/reconciliation?kind='+kind+'&storeId='+f.store.id,f.cookie),undefined);assert.equal(response.status,200);const body=await response.json();assert.deepEqual(body.data,[]);assert.equal(body.pagination.total,0)}
+})

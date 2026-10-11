@@ -1148,3 +1148,8 @@ Egasi `/jobs` orqali barcha filiallarning reviewed biznes JSON eksportini oldind
 ### Bitta tashkilot uchun recovery rejasi
 
 `npm run worker:tenant-recovery-plan` offline recovered copy va current targetni read-only snapshotlarda solishtiradi. Private0600 reja missing/changed/current-only yozuvlar va FKlarni review uchun chiqaradi; avtomatik import, overwrite yoki delete qilmaydi. Operator parametrlari, cheklovlar va isolated qabul [tenant recovery qo‘llanmasida](docs/operations/tenant-recovery.md). Haqiqiy production recovery alohida operator ruxsati va tekshiruvini talab qiladi.
+
+
+MVP schemasidan migratsiya uchun read-only baseline/ledger CLI va takrorlanadigan dump/restore/backfill/fresh/rollback rehearsal [migration dataset qo‘llanmasida](docs/operations/migration-dataset-readiness.md). `bash scripts/ops/test-migration-dataset.sh` faqat vaqtinchalik isolated bazalarni ishlatadi. Real customer/staging/production migration va uning tasdig‘i alohida rollout darvozasi.
+
+Tenant modellarning scope/insert/native FK guardlari: [tenant model contract](docs/operations/tenant-model-scope.md). To‘liq filtrlangan CSV/XLSX va browser print-to-PDF eksportini `/jobs` orqali navbatga qo‘yish: [hisobot eksporti](docs/operations/report-exports.md). Real staging/production/pilot va vendor integratsiyalari ushbu lokal qabuldan alohida.

@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-11",
+  "task": "OPS-03.06",
+  "status": "core_guard_accepted_original_still_in_progress",
+  "originalDoneAdded": 0,
+  "migrations": 128,
+  "head": "9f5a43258c7980a565dd27dc10d42688bd5e7ab4",
+  "worktree": "additional uncommitted changes; no agent commit created",
+  "checks": {
+    "providerAuthRestoreTenantRecoveryIntegration": "13/13",
+    "unitFiles": "33/33",
+    "workerBuild": "PASS",
+    "webpackBuild": "PASS",
+    "typecheck": "PASS",
+    "focusedLint": "PASS",
+    "freshAndSyntheticLegacyMigrations": "PASS",
+    "secretScan": {
+      "files": 830,
+      "findings": 0
+    }
+  },
+  "invariants": [
+    "Actual pg_dump/pg_restore clone of queued and running intents; quarantine blocks claims/transport",
+    "Reviewed restored queued request performs original-ID lookup with submitAttempts0",
+    "Old running submit claim cannot invoke transport after restore; lease recovery performs lookup",
+    "not_found becomes manual review, never a second execute",
+    "Restored execute calls0, lookup calls2, one test domain confirmation; stale reply cannot repeat finalization",
+    "New post-restore intent retains normal submit flow",
+    "Original source DB queued/running rows unchanged; cloned economic counts unchanged before fresh-intent compatibility scenario"
+  ],
+  "externalPending": [
+    "Real authoritative provider state for operations absent from recovered DB",
+    "Real provider reconciliation of terminal records",
+    "Offline browser queue and real sale/remote settlement acceptance",
+    "No vendor implementation or production deployment performed"
+  ],
+  "sourceSHA256": {
+    "src/server/integrations/outbox.ts": "c2106bb37d8affe977c92351df5910c26ac4c1b995a349e6ace3a45cab7158f9",
+    "src/app/api/health/ready/route.ts": "af19ba9adbc195937078ede11e3df92395873db838c2330daebbd6f6cb66a33d",
+    "prisma/migrations/202610110126_provider_restore_lookup/migration.sql": "35a4333325e755731e530a7c6a782db7805af998078b90c4a63a4202777fb083",
+    "prisma/migrations/202610110127_provider_restore_counter_proof/migration.sql": "0fb4c2b1da58d1e7e05b60737686dd931fb4f152cb5a57c692b29a9a6b2ffdcf",
+    "prisma/migrations/202610110128_provider_restore_function_scope/migration.sql": "108d48c335dd4604326ae4c5730fe4cad409241f3eae0e0b08c9baea16a2898e",
+    "tests/provider-outbox.integration.test.ts": "b03c659df7d67364e8521e5432bd0533665b9c29e88290e023e646fd1578b5d1",
+    "tests/fixtures/provider-restored-worker.ts": "632865cf01b085a3637f3b87544f4a0857a0995face17baa547889fe376a161b",
+    "scripts/ops/test-migrations.sh": "bafc8147d565b0460cbd384558e6d355f5885a5b7bb11af303b385060af2ae90",
+    "docs/operations/provider-outbox.md": "2339e0b73fe425da89e06e4a56a5c1312aa5f9646cafba32f99c4b603319e42f"
+  },
+  "logSHA256": {
+    "/tmp/pos-provider-restore-integration.log": "ddc6f7e45e439e7d5932e63603114bc0dc521268134a987a2566a24a61b598af",
+    "/tmp/pos-provider-restore-fresh-legacy.log": "2500bc25b4be6cb5b47efe4220d9723da739784a3d5198883d3c368f28cc58c3",
+    "/tmp/pos-provider-restore-unit.log": "fecc9987b81e67f6d3e075574936836bf85bb747191b82eee9cd6d586fe688a1",
+    "/tmp/pos-provider-restore-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-provider-restore-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-provider-restore-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-provider-restore-build.log": "2cf04e22f245672c2f0411c705ce879d6587c671d94ca058867bd65984e3a8dd",
+    "/tmp/pos-provider-restore-security.log": "bd3fe0d879487bdf942652992b2d66c160d75513708d0568387c9572bd1a2406"
+  }
+}

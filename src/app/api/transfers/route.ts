@@ -1,16 +1,17 @@
-import { transferFilters } from '@/server/inventory/list-filters'
+import {queryTransfers} from '@/server/exports/queries/transfers'
+
 import {assertLiveContext} from '@/server/operations'
-import { csv, numeric } from '@/server/exports/csv'
-import { paging, exporting, exportCap, pagination } from '@/server/catalog/queries'
-import { quantitySchema } from '@/server/sales/service'
-import { nonnegativeQuantitySchema } from '@/server/catalog/service'
-import { Prisma } from '@prisma/client'
-import { AccessError } from '@/server/auth/policy'
-import { scopedPrisma } from '@/server/auth/scoped-prisma'
-import { withApi } from '@/server/api'
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, getRequestToken } from '@/lib/auth'
-import { z } from 'zod'
+
+
+import {quantitySchema} from '@/server/sales/service'
+import {nonnegativeQuantitySchema} from '@/server/catalog/service'
+
+import {AccessError} from '@/server/auth/policy'
+import {scopedPrisma} from '@/server/auth/scoped-prisma'
+import {withApi} from '@/server/api'
+import {NextRequest,NextResponse} from 'next/server'
+import {verifyToken,getRequestToken} from '@/lib/auth'
+import {z} from 'zod'
 
 const createTransferSchema = z.object({
   organizationId: z.string().uuid(),
@@ -24,58 +25,10 @@ const createTransferSchema = z.object({
   })).min(1).max(500),
 })
 
-async function handleGET(request: NextRequest) {
-  try {
-    const token = getRequestToken(request)
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
-        { status: 401 }
-      )
-    }
-
-    const payload = await verifyToken(token)
-    if (!payload) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
-        { status: 401 }
-      )
-    }
-    const db = scopedPrisma(payload)
-
-    const { searchParams } = new URL(request.url)
-    const organizationId = searchParams.get('organizationId')
-    if (!organizationId) {
-      return NextResponse.json(
-        { success: false, error: { code: 'MISSING_PARAM', message: 'Organization ID talab qilinadi' } },
-        { status: 400 }
-      )
-    }
-
-    const organization=await db.organization.findUniqueOrThrow({where:{id:payload.organizationId},select:{timezone:true}})
-    const where:Prisma.StockTransferWhereInput={organizationId,...transferFilters(searchParams,organization.timezone)}
-    const {page,limit,skip}=paging(searchParams)
-    const isExport=await exporting(searchParams,payload,'transfer.export')
-    const result=await db.$transaction(async tx=>{
-      await assertLiveContext(tx,payload)
-      const total=await tx.stockTransfer.count({where})
-      if(isExport){exportCap(total);const lines=await tx.stockTransferItem.count({where:{stockTransfer:where}}),empty=await tx.stockTransfer.count({where:{...where,items:{none:{}}}});exportCap(lines+empty)}
-      const rows=await tx.stockTransfer.findMany({where,include:{fromStore:true,toStore:true,items:{include:{product:true,dispositions:true},orderBy:{id:'asc'}}},orderBy:[{createdAt:'desc'},{id:'asc'}],...(!isExport?{skip,take:limit}:{})})
-      if(isExport)return {success:true,data:{filename:'transfers-'+payload.organizationId+'.csv',content:csv([['ID','Yaratilgan (UTC)','Jo‘natilgan (UTC)','Qabul yopilgan (UTC)','Jo‘natuvchi','Qabul qiluvchi','Holat','Mahsulot (joriy)','Birlik (joriy)','Rejalangan miqdor','Qabul miqdori','Manbaga qaytarilgan','Ajratilmagan miqdor','Birlik tannarxi','Izoh','Brak','Tasdiqlangan kamomad'],...rows.flatMap(row=>{
-        const prefix=[row.id,row.createdAt.toISOString(),row.sentAt?.toISOString(),row.receivedAt?.toISOString(),row.fromStore.name,row.toStore.name,row.status]
-        return row.items.length?row.items.map(item=>[...prefix,item.product.name,item.product.unit,numeric(item.quantity,6),numeric(item.receivedQuantity,6),numeric(item.returnedQuantity,6),numeric(item.quantity.sub(item.receivedQuantity).sub(item.returnedQuantity).sub(item.damagedQuantity).sub(item.shortageQuantity),6),numeric(item.unitCost,6),row.note,numeric(item.damagedQuantity,6),numeric(item.shortageQuantity,6)]):[[...prefix,'','','','','','','',row.note,'','']]
-      })])}}
-      return {success:true,data:rows,pagination:pagination(page,limit,total)}
-    },{isolationLevel:'RepeatableRead'})
-    return NextResponse.json(result)
-
-  } catch (error) {
-    if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
-  }
+async function handleGET(request:NextRequest) {
+ const context=await verifyToken(getRequestToken(request)??'')
+ if(!context)throw new AccessError(401,'UNAUTHORIZED')
+ return queryTransfers(context,request)
 }
 
 async function handlePOST(request: NextRequest) {

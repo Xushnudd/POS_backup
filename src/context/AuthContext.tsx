@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import {confirmPageNavigation} from '@/lib/page-navigation';
 import { clearScope, deviceId } from '@/lib/offline';
 import { AuthData, AuthUser, Organization, Role } from '@/types';
 
@@ -129,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    if(!confirmPageNavigation())return;
     if (organization?.id && user?.id) await clearScope({organizationId:organization.id,userId:user.id,deviceId:deviceId()});
     await api.auth.logout();
     clearAuthData();

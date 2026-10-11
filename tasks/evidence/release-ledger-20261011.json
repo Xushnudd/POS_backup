@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-11",
+  "task": "RELEASE-01.03",
+  "status": "done_internal_cross_ledger_criterion_only",
+  "originalDone": 159,
+  "batchBaseline": 158,
+  "batchDone": 1,
+  "batchTarget": 178,
+  "head": "9f5a43258c7980a565dd27dc10d42688bd5e7ab4",
+  "worktree": "additional uncommitted changes; no agent commit created",
+  "checks": {
+    "crossLedgerScenario": "1/1",
+    "financialIntegration": "68/68",
+    "unitFiles": "33/33",
+    "focusedLint": "PASS",
+    "typecheck": "PASS"
+  },
+  "fixture": {
+    "environment": "local isolated PostgreSQL synthetic fixtures, production business service functions",
+    "openingCash": "500",
+    "purchase": "4 units × 50 = 200, supplier fully paid cash",
+    "sale": "3 units × 100 = 300; cash90/credit210",
+    "return": "1 original sellable unit, cash30/debt70",
+    "debtCollection": "140 cash",
+    "closingCash": "500",
+    "stock": "2",
+    "customerDebt": "0",
+    "supplierDebt": "0",
+    "netSales": "200",
+    "cogs": "100",
+    "grossProfit": "100",
+    "unexplainedInventorySalesReturnsShiftDiscrepancies": 0,
+    "originalKeyReplays": "supplier payment, completion, return and collection preserve a single economic result"
+  },
+  "notPerformed": [
+    "Real pilot or production acceptance",
+    "Real provider/fiscal/hardware integration",
+    "Entire RELEASE-01 approval"
+  ],
+  "dependencyInterpretation": "PLAN1 permits only used contracts/invariants for dependencies. This criterion is internal return/debt/purchase/shift ledger and report coherence. Real PILOT and other RELEASE prerequisites remain open.",
+  "sourceSHA256": {
+    "tests/reports-finance.integration.test.ts": "594732efb452b2d7bcba5c19d8ebe34e7b714efbd79fb7d46333208a2fc45735"
+  },
+  "logSHA256": {
+    "/tmp/pos-release-ledger-focused.log": "8d557c45f4a6c0e7dff191c20a0a0317d8da4ee16212dd27296c6332474e5408",
+    "/tmp/pos-release-ledger-finance.log": "caae5a074c3596051d8930ffe48dfdbab141f60ff635c11d4a2cc005deaf967a",
+    "/tmp/pos-release-ledger-unit.log": "b9a17bb5e60ede12befe5fa076a7c1a7789d95224b710d81055ce3aae229b4f5",
+    "/tmp/pos-release-ledger-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-release-ledger-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39"
+  }
+}

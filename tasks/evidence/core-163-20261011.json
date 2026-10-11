@@ -1,0 +1,239 @@
+{
+  "date": "2026-10-11",
+  "originalPlan": {
+    "total": 259,
+    "baselineDone": 160,
+    "targetDone": 163,
+    "actualDone": 163,
+    "completedOriginalIds": [
+      "FIX-01.07",
+      "DATA-01.04",
+      "REP-01.09"
+    ],
+    "subtasksCounted": false
+  },
+  "source": {
+    "head": "9f5a43258c7980a565dd27dc10d42688bd5e7ab4",
+    "worktree": true,
+    "commitCreated": false,
+    "sha256": {
+      "prisma/migrations/202610110129_tenant_relation_guards/migration.sql": "9d1b01307a5b8e5df622913b40d4ba3bca385fddd2b0c84b78173ad06cbeb372",
+      "prisma/migrations/202610110130_report_export_jobs/migration.sql": "67c9d2a72f03064c02cb60bcabdf747470cf874108f287ee45bea8924c089e8c",
+      "prisma/migrations/202610110131_organization_edge_deferral/migration.sql": "e0ac0fad75eef931626ee0e2ee21a8e11a8eb6c38908d6fc083d678b38b1d9f8",
+      "prisma/migrations/202610110132_tenant_guard_native_keys/migration.sql": "5153b2a33f67244aa1dccc7b4dbb91a2d4b261adc9bd7fa252d2942b3d2aca85",
+      "scripts/ops/tenant-catalog-acceptance.sql": "2d17bbb8440108feb512bae6b50281c6da9003a7671fde0ffe0e42dcbf3e61b5",
+      "scripts/ops/test-migration-dataset.sh": "113958d830b1850f0b8f709b2e8d024a2040a853ee35fe51c33c7b2170a50841",
+      "src/app/(dashboard)/jobs/page.tsx": "7440b8cb3402b6174cd59fce0f0f5d201ddbeaa2842018f89c61d84100fb734a",
+      "src/app/api/health/ready/route.ts": "2a4233c742b5fe0ce9d7fdc1fb7260c3c246041c7ca4548dcbe1e249c7b65f5a",
+      "src/components/forms/ReportExportFields.tsx": "74fb1803f6c69d25aa94f0075381032da179c9e35e544370812c694e42d16c45",
+      "src/lib/report-exports.ts": "f1557b6f5019f68ec0e10d4f7f963178035bf9a11444c765b6ffe61d8070977e",
+      "src/server/api.ts": "2cf0c58be20838e4091be8a26457baf5bc5c4549fea1bb32ce09b1f8a604aa84",
+      "src/server/auth/policy.ts": "f6015be40765574a00176c6e78bfc0cf1343d040565ea66925e4dbcf21fcb1b0",
+      "src/server/auth/scoped-prisma.ts": "349f6df7e37b1e7e1c5418ba4d220e68da91f7b5bd27d09c9f0c30e001a6660c",
+      "src/server/auth/tenant-models.ts": "546c387f089978fa4784b33f559fadaa5e1f569eaf512d667b3701d646f02ace",
+      "src/server/auth/tenant-write.ts": "314ae91d7afc925bd040e7472c3b5ba3eaf805141d41cbf39d569ae1b1c78b50",
+      "src/server/exports/csv.ts": "8490128ea747fbb251d3b15aef3822d0b70d90d9db890a228c4c8116c8ab58b6",
+      "src/server/exports/cursor.ts": "6bb459b6b53d755e3cdf23544bbf9103d847af8e96e0ff81d6fad5b80d939afc",
+      "src/server/exports/queries/audit.ts": "2d9c5318032e5df8ea73e1a4c7c66ad2fb4f54944b2f660072cb09d94b7ffc30",
+      "src/server/exports/queries/categories.ts": "b7da24e91607c5a735e555c5773e7d7cc64cd3c452061170a14e1c46a6c040ff",
+      "src/server/exports/queries/customers.ts": "ac012440809a2570c74b59e24fdddab8eaf3fa5802ac59e75e207a4869271650",
+      "src/server/exports/queries/inventory-balances.ts": "f43446ed8a3d68ea61bdbc2fa6f0e35be1e82db75dbfd9d6abd37e9637d29b3c",
+      "src/server/exports/queries/inventory-dispositions.ts": "cd5f93f2e9a796cd740a9a6e00af6f9feb2ef7ba8ac9d2c497adbd633b0b90a8",
+      "src/server/exports/queries/inventory-movements.ts": "123d39c6f677a14cc71b014875b543db099d46e26b449dbc2c0d6545a9dddb7e",
+      "src/server/exports/queries/products-prices.ts": "1b73f9c8a107e49dc288d0c2ed5a4f64df0b6522a21b59e858d6e99cf89fb9fb",
+      "src/server/exports/queries/products.ts": "b56ac3e01a6fd3239c44e1886c963f824a87c6cebd5f37c3f72b44ba2bae7e7f",
+      "src/server/exports/queries/reports-breakdowns.ts": "48931d41652e2451b53ab35e27827480feaff3690ff322f7eb05021d1724afd0",
+      "src/server/exports/queries/reports-products.ts": "29cedc8b0eb4028754174f394d688eb33ae71d18292c296a43af6e67c91dcd67",
+      "src/server/exports/queries/reports-purchases.ts": "592688e9eeb0b2665f40926521aa396e96da20ac49876a992bb50399399b4ca3",
+      "src/server/exports/queries/reports-sales.ts": "81aa40e3769a8170fbd2f5eb501e32c125d2d8e548b93b2505ba0dc3fece1441",
+      "src/server/exports/queries/reports-supplier-balances.ts": "3fc1f511749b4b4d64a7cbb3057861e35a4711980525eff8147ce3c3b690f7bb",
+      "src/server/exports/queries/shifts.ts": "af0ef2ad55971393ced9470f16c9420e147aacf6385e76e1f308086fcc7f2313",
+      "src/server/exports/queries/stock-documents.ts": "79915ec20674a54408b766076d62ca730dafb918f7b0e07f547719ec160088c9",
+      "src/server/exports/queries/suppliers.ts": "0b654d25a7ca1ead31a16bcde932f73b5220f130013100c91d0cd7bc062bc7cd",
+      "src/server/exports/queries/transfers.ts": "bffc01a73b47b7918417d224e25f46fae554b260a270a61eb38adf96450f6eca",
+      "src/server/exports/queries/units.ts": "85e4b8114c3485ef6912131d9a7508deb4d450b34644ea8558acd2e22b814d8b",
+      "src/server/exports/report-formats.ts": "11d0ea79299c88da5307ab890ec0922c2f8ade3eab4aaef850170e6d1a8e36ef",
+      "src/server/exports/sales-report.ts": "1fd53050ad0357b17d4effd9676293ad0315ff8c3799ae98946a03a84dbba0ff",
+      "src/server/exports/xlsx.ts": "0e8618c993510de8008fabdf2c852327638e3bcaf7de61ee9a2daa37ac6a9af1",
+      "src/server/jobs/report-export.ts": "ca08473b6d7d5076755349b63a66509a0d2387792d91867275ab047631da5e6c",
+      "src/server/jobs/report-queries.ts": "834f2b26310bf684cc459a7330d8f1e9cf8af4ad9a229f41efea15d941ad66d4",
+      "src/server/jobs/service.ts": "da6f1558cfd8e2b83d9215636338606acd089c205452614da490c820c78e2b97",
+      "tests/e2e/report-export.spec.ts": "f305cb258d4e5eb0d3ed2d6977bd86c6afd591ff2be2a7786ac598e9789632ea",
+      "tests/report-export.integration.test.ts": "123db753a8a815c088dbf6af9f145f667b521cd0c92045a8613a8aba7df8ab8a",
+      "tests/report-formats.unit.test.ts": "472383618ce25e5591f939227c9191e7835c503fda651765a629072d02b50e49",
+      "tests/tenant-models.integration.test.ts": "5109ad8fc40a6c5b813e9e0eabd5faf92acd9861c97c7ae2fbe067b70eed4eac",
+      "tests/tenant-models.unit.test.ts": "a0f9cc8be88f4fd182874fd6f1abb2b2b0a95cd05603e2fc164eeb874442f0d7",
+      "src/app/api/reports/sales/route.ts": "bd6966d6c35c7143486ec347d4238c14c9d1dd555c93c30acdc9b9e12c6454bc",
+      "src/app/api/reports/products/route.ts": "a1beeb7a8dc7b0a910161bdaccfc8c9f6ef64f2513d70af4f8b8fb8bb95e8852",
+      "src/app/api/reports/purchases/route.ts": "d82f25b0c2a10ab448a2002247d7dd631c4777c3bc12356041d6c40a1b4ed81a",
+      "src/app/api/reports/breakdowns/route.ts": "f235254a36644c7383b0d464093f177ea13687040e119284b418de93927bef15",
+      "src/app/api/reports/supplier-balances/route.ts": "e2264c4889373f3ad83b186b6dc9c4fa403b0ab57ff0a022c31e9007b65d6adc",
+      "src/app/api/inventory/balances/route.ts": "b01154bf134ba4972c0669d6701c08f05cf985ba3285eaf9e6fb956a3771776a",
+      "src/app/api/inventory/movements/route.ts": "431d86e48059c8ec6c869ebb23ee0602310bb81a0c5bb055d8a025a98b4e39e0",
+      "src/app/api/inventory/dispositions/route.ts": "2478e480ed1865c70168442b476c50b0cbf640db3498f78c5cf99d27f2c126df",
+      "src/app/api/products/route.ts": "b706247423065fe5b7f39d318aea5503ca687cb72c9295424452fb61df2304e9",
+      "src/app/api/categories/route.ts": "8e59c8229a200507c14e1eab855187bf2fff9e358635fc71134a6ecb1ca8c1ab",
+      "src/app/api/units/route.ts": "967c46ecf61198c902bfbf96e347829957bc443d02db02a0d0f66285ead1a98b",
+      "src/app/api/customers/route.ts": "8aa8f283f015c0b70cbfde0578f6222bf7034b2cea792b21423456573b34231e",
+      "src/app/api/suppliers/route.ts": "d83cbf9c8a861ce9b7205347b65e1059535c9041ae8e9c95e6bb7d63cd6255bc",
+      "src/app/api/shifts/route.ts": "fe117c950204a1420f4b844263e3db627d1f80feb0fccf2c2918da0fdddd992d",
+      "src/app/api/stock-documents/route.ts": "f40e3ab47399e8a2d00ea9297a71f1cd1e9ca977ce8de47a2069abef34125345",
+      "src/app/api/transfers/route.ts": "0510d5d83354a8b9f12324a8a6841a222605ae1dd1dbe753fd3bf9a26f820661",
+      "src/app/api/audit/route.ts": "872c8f16251c597b398a20f67f6e088fa7b47456c665f251e2ba9e89245be827",
+      "src/app/api/products/prices/route.ts": "4ec0f55909a39ae546e13feee8354f39fae0e2aba5b4f2884a709ffc91d6345f"
+    }
+  },
+  "tenant": {
+    "models": 113,
+    "direct": 70,
+    "parent": 27,
+    "shared": 15,
+    "root": "Organization",
+    "tenantEdgeGuardTables": 97,
+    "organizationIdentityGuard": true,
+    "nativeSqlFkInventory": true,
+    "rlsAdded": false
+  },
+  "migration": {
+    "count": 132,
+    "environment": "isolated synthetic legacy; actual pg_dump/pg_restore clone; no real customer or staging deployment",
+    "originalTables": 25,
+    "originalRows": 4040,
+    "expandedTables": 113,
+    "expandedRows": 4067,
+    "hashAndLedgerPreserved": true,
+    "duplicateLegacyPreflightRejected": true,
+    "freshInstall": true,
+    "repeatDeploy": true,
+    "rollbackBackupRestore": true,
+    "temporaryDatabasesRemoved": true
+  },
+  "exports": {
+    "sharedQueryCount": 18,
+    "formats": [
+      "csv",
+      "xlsx",
+      "browser_print_to_pdf"
+    ],
+    "automatedServerPdf": false,
+    "filteredSaleRows": 1001,
+    "exactTotal": "1011.01",
+    "maxResultRows": 10000,
+    "maxArtifactBytes": 16777216,
+    "expiryHours": 24,
+    "csvXlsxPdfComplete": true,
+    "liveSourceAndDownloadAuthorization": true,
+    "immutableArtifactAndAuditRollback": true,
+    "malformedPayloadNoFallback": true,
+    "browser": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ]
+  },
+  "pdfQa": {
+    "producer": "actual Chromium native PDF",
+    "pages": 29,
+    "uniqueReceiptCount": 1001,
+    "allExpectedReceiptsPresent": true,
+    "repeatedHeaders": true,
+    "firstAndSecondPagesRenderedAndViewed": true,
+    "pdfPath": "/tmp/pos-report-1001.pdf",
+    "sha256": "5969675f41b587969875b524f7fa45f724ad94ef0b4956a7738174c3ae949608",
+    "size": 239732
+  },
+  "checks": {
+    "fullIntegration": {
+      "status": "passed",
+      "path": "/tmp/pos-163-full-final.log",
+      "count": 324,
+      "sha256": "060ae4392a0bcfa0a2eb2ed03e7430f1d3bc0c3ddef4bca76ea210a6fc2c8284"
+    },
+    "focusedIntegration": {
+      "status": "passed",
+      "path": "/tmp/pos-163-focused-accepted.log",
+      "count": 16,
+      "sha256": "23ee0dcaa898bb5b007b1ba1dfce1c8b2bfa38e00e581136196d2caee37aafe9"
+    },
+    "unit": {
+      "status": "passed",
+      "path": "/tmp/pos-163-unit-accepted.log",
+      "count": 86,
+      "sha256": "ef84c7b588f2a1e2ac32d3f8a2ea96c7806a39717e00f1f1a8b87583a177f00f",
+      "files": 36
+    },
+    "ops": {
+      "status": "passed",
+      "path": "/tmp/pos-163-ops-final.log",
+      "count": 15,
+      "sha256": "e7e90cf8665667eeed012f4164d6167e0fd5a6a0606a44feeef422667b83f4d6"
+    },
+    "browser": {
+      "status": "passed",
+      "path": "/tmp/pos-163-e2e-final.log",
+      "count": 9,
+      "sha256": "6441118e45ca90680f9bf22ef8cd795fc041556b48275aa15685a2757c618840"
+    },
+    "build": {
+      "status": "passed",
+      "path": "/tmp/pos-163-build-accepted.log",
+      "count": null,
+      "sha256": "c29b91925db6603642b58ebf49364e3b83b00c9740e6e525f0d81de794d1a596"
+    },
+    "workerBuild": {
+      "status": "passed",
+      "path": "/tmp/pos-163-worker-accepted.log",
+      "count": null,
+      "sha256": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355"
+    },
+    "dataset": {
+      "status": "passed",
+      "path": "/tmp/pos-163-dataset-final.log",
+      "count": null,
+      "sha256": "6d402edbf18b4afad87612826f71b5b8b73d05aef1adcc344a99db093bab502d"
+    },
+    "pdf": {
+      "status": "passed",
+      "path": "/tmp/pos-163-pdf-qa.log",
+      "count": null,
+      "sha256": "bc809cf269f8562bef41a33dcbe9bcdddbb1481a3f0d547bb9e0b8a8c537742a"
+    },
+    "pdfInfo": {
+      "status": "passed",
+      "path": "/tmp/pos-163-pdf-info.log",
+      "count": null,
+      "sha256": "213cd30bb3c29ed945c95debbc4f2aa247e43a37863e31bc526c520eb37da3fd"
+    },
+    "typecheck": {
+      "status": "passed",
+      "path": "/tmp/pos-163-type-accepted.log",
+      "sha256": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39"
+    },
+    "lint": {
+      "status": "passed",
+      "path": "/tmp/pos-163-lint-accepted.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "securityScanner": {
+      "status": "passed",
+      "path": "/tmp/pos-163-security-accepted.log",
+      "sha256": "a7210d5e19e6c16b31654bdd6dac7351b4726220c646ee4a3a42ed5d64ea67d6"
+    }
+  },
+  "scope": {
+    "externalVendorImplementation": false,
+    "productionDeployment": false,
+    "realStagingProductionPilotAcceptance": false,
+    "remainingExternalTasksUnchanged": true
+  },
+  "reproduction": {
+    "database": "isolated 127.0.0.1:55439/pos_test only",
+    "migrations": "bash scripts/ops/test-migration-dataset.sh",
+    "core": "npm run test:integration",
+    "unit": "npm test",
+    "ops": "npm run test:ops",
+    "focused": "node --require ./scripts/test-resolver.cjs --test --test-concurrency=1 .test-build/tests/tenant-models.integration.test.js .test-build/tests/report-export.integration.test.js .test-build/tests/jobs.integration.test.js .test-build/tests/job-export.integration.test.js",
+    "browser": "npm run test:e2e -- tests/e2e/report-export.spec.ts tests/e2e/core.spec.ts --grep \"catalog management|frozen report|Owner queues\"",
+    "pdf": "Accepted report-export fixture writes /tmp/pos-report-pdf-qa.html; render via existing development Playwright Chromium page.setContent + page.pdf(preferCSSPageSize:true); pdftotext confirms all1001 ROW-* and1011.01; pdftoppm page1/page2 visual inspection."
+  }
+}
