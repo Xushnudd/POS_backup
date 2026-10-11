@@ -3,7 +3,8 @@ import type { TokenPayload } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '../auth/policy'
 import { assertLiveContext, audit } from '../operations'
-export const memberSchema=z.object({role:z.enum(['owner','admin','cashier']).optional(),isActive:z.boolean().optional(),storeIds:z.array(z.string().uuid()).max(100).optional(),action:z.enum(['archive','restore']).optional()}).strict().refine(input=>!input.action || (input.role===undefined&&input.isActive===undefined&&input.storeIds===undefined),{message:'Arxivlash/tiklash alohida amal bo‘lishi kerak'})
+import {activeMembershipWhere} from '../auth/custom-role-policy'
+export const memberSchema=z.object({role:z.enum(['owner','admin','cashier']).optional(),customRoleId:z.string().uuid().nullable().optional(),isActive:z.boolean().optional(),storeIds:z.array(z.string().uuid()).max(100).optional(),action:z.enum(['archive','restore']).optional()}).strict().refine(input=>!input.action || (input.role===undefined&&input.customRoleId===undefined&&input.isActive===undefined&&input.storeIds===undefined),{message:'Arxivlash/tiklash alohida amal bo‘lishi kerak'})
 export async function updateMember(context:TokenPayload,id:string,input:z.infer<typeof memberSchema>) {
  if (context.role!=='owner') throw new AccessError(403,'FORBIDDEN')
  return prisma.$transaction(async tx=>{
@@ -11,9 +12,19 @@ export async function updateMember(context:TokenPayload,id:string,input:z.infer<
   await assertLiveContext(tx,context)
   const member=await tx.organizationUser.findFirst({where:{id,organizationId:context.organizationId}})
   if (!member) throw new AccessError(404,'NOT_FOUND')
+  let nextRole=input.role??member.role
+  let customRoleId=input.customRoleId!==undefined?input.customRoleId:(input.role!==undefined&&input.role!==member.role?null:member.customRoleId)
+  if(input.customRoleId){
+   const profile=await tx.customRole.findFirst({where:{id:input.customRoleId,organizationId:context.organizationId,isActive:true}})
+   if(!profile)throw new AccessError(404,'NOT_FOUND')
+   if(input.role&&input.role!==profile.baseRole)throw new AccessError(400,'ROLE_BASE_MISMATCH')
+   nextRole=profile.baseRole
+  }
+  if(nextRole==='owner')customRoleId=null
+  if(customRoleId&&input.isActive===true&&!await tx.customRole.findFirst({where:{id:customRoleId,organizationId:context.organizationId,isActive:true,baseRole:nextRole}}))throw new AccessError(409,'ROLE_INACTIVE','Avval faol rolni biriktiring')
   if(member.archivedAt&&!input.action)throw new AccessError(409,'MEMBER_ARCHIVED','Avval xodimni arxivdan tiklang')
   if(input.action==='restore'&&!member.archivedAt)throw new AccessError(409,'NOT_ARCHIVED','Xodim arxivda emas')
-  if (member.isActive && member.role==='owner' && (input.action==='archive' || input.isActive===false || (input.role && input.role!=='owner'))) {
+  if (member.isActive && member.role==='owner' && (input.action==='archive' || input.isActive===false || nextRole!=='owner')) {
    const owners=await tx.organizationUser.count({where:{organizationId:context.organizationId,role:'owner',isActive:true}})
    if (owners<=1) throw new AccessError(409,'LAST_OWNER','Oxirgi egani bloklash yoki vakolatini olish mumkin emas')
   }
@@ -23,9 +34,9 @@ export async function updateMember(context:TokenPayload,id:string,input:z.infer<
    await tx.userStore.deleteMany({where:{organizationUserId:id}})
    await tx.userStore.createMany({data:[...new Set(input.storeIds)].map(storeId=>({storeId,organizationUserId:id}))})
   }
-  const result=await tx.organizationUser.update({where:{id},data:{role:input.role,isActive:input.action?false:input.isActive,...(input.action==='archive'?{archivedAt:member.archivedAt??new Date()}:input.action==='restore'?{archivedAt:null}:{})},select:{id:true,role:true,isActive:true,archivedAt:true,user:{select:{id:true,fullName:true,phone:true,email:true}},userStores:{include:{store:true}}}})
+  const result=await tx.organizationUser.update({where:{id},data:{role:nextRole,customRoleId,isActive:input.action?false:input.isActive,...(input.action==='archive'?{archivedAt:member.archivedAt??new Date()}:input.action==='restore'?{archivedAt:null}:{})},select:{id:true,role:true,customRoleId:true,isActive:true,archivedAt:true,user:{select:{id:true,fullName:true,phone:true,email:true}},userStores:{include:{store:true}}}})
   await tx.session.updateMany({where:{userId:member.userId,organizationId:context.organizationId,revokedAt:null},data:{revokedAt:new Date()}})
-  await audit(tx,context,'OrganizationUser',id,input.action==='archive'?'membership_archived':input.action==='restore'?'membership_restored':'membership_updated',{role:result.role,isActive:result.isActive,archivedAt:result.archivedAt?.toISOString()??null,storeIds:input.storeIds})
+  await audit(tx,context,'OrganizationUser',id,input.action==='archive'?'membership_archived':input.action==='restore'?'membership_restored':'membership_updated',{role:result.role,customRoleId:result.customRoleId,isActive:result.isActive,archivedAt:result.archivedAt?.toISOString()??null,storeIds:input.storeIds})
   return result
  })
 }
@@ -34,7 +45,7 @@ export async function transferOwnership(context:TokenPayload,targetId:string) {
  return prisma.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
   await assertLiveContext(tx,context)
-  const target=await tx.organizationUser.findFirst({where:{id:targetId,organizationId:context.organizationId,isActive:true,user:{isActive:true}}})
+  const target=await tx.organizationUser.findFirst({where:{id:targetId,organizationId:context.organizationId,...activeMembershipWhere,user:{isActive:true}}})
   if(!target||target.userId===context.userId)throw new AccessError(400,'INVALID_TARGET')
   await tx.ownershipTransfer.updateMany({where:{organizationId:context.organizationId,state:'pending',expiresAt:{lte:new Date()}},data:{state:'expired'}})
   const pending=await tx.ownershipTransfer.findFirst({where:{organizationId:context.organizationId,state:'pending'}})
@@ -63,7 +74,7 @@ export async function respondOwnership(context:TokenPayload,id:string,action:'ac
   }
   const from=await tx.organizationUser.findFirst({where:{id:request.fromMembershipId,organizationId:context.organizationId,isActive:true,role:'owner',user:{isActive:true}}})
   if(!from)throw new AccessError(409,'OWNER_CHANGED')
-  await tx.organizationUser.update({where:{id:request.toMembershipId},data:{role:'owner'}})
+  await tx.organizationUser.update({where:{id:request.toMembershipId},data:{role:'owner',customRoleId:null}})
   await tx.organizationUser.update({where:{id:from.id},data:{role:'admin'}})
   await tx.session.updateMany({where:{organizationId:context.organizationId,userId:{in:[context.userId,from.userId]},revokedAt:null},data:{revokedAt:new Date()}})
   const accepted=await tx.ownershipTransfer.update({where:{id},data:{state:'accepted',acceptedAt:new Date()}})

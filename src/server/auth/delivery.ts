@@ -1,4 +1,5 @@
 import { AccessError } from './policy'
+import { totpAvailable } from './totp-availability'
 
 export type AuthenticationPurpose='verify_phone'|'verify_email'|'password_reset'|'step_up'
 export type AuthenticationMessage={purpose:AuthenticationPurpose;destination:string;secret:string;expiresAt:Date}
@@ -12,6 +13,6 @@ export function authenticationDelivery(channel:'sms'|'email',injected?:Authentic
  if(!provider||provider.channel!==channel||provider.mode==='mock'&&process.env.NODE_ENV==='production')throw new AccessError(503,'AUTH_DELIVERY_UNAVAILABLE','Tasdiqlash xizmati hali sozlanmagan')
  return provider
 }
-export function authenticationDeliveryStatus(){return {sms:providers.some(p=>p.channel==='sms'&&p.mode==='real'),email:providers.some(p=>p.channel==='email'&&p.mode==='real'),totp:false}}
+export function authenticationDeliveryStatus(){return {sms:providers.some(p=>p.channel==='sms'&&p.mode==='real'),email:providers.some(p=>p.channel==='email'&&p.mode==='real'),totp:totpAvailable()}}
 // TOTP/WebAuthn must be backed by an audited implementation, never home-grown crypto.
 export interface AuthenticatorProvider {readonly kind:'totp'|'webauthn';verify(input:{userId:string;challengeId:string;response:string}):Promise<boolean>}

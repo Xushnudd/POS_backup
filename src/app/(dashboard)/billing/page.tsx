@@ -6,6 +6,7 @@ import DurableMutation from '@/components/forms/DurableMutation'
 import Invoices from '@/components/billing/Invoices'
 import Costs from '@/components/billing/Costs'
 import Retention from '@/components/billing/Retention'
+import Closure from '@/components/billing/Closure'
 type Version = { id:string; code: string; name: string; version: number; monthlyPrice: string; currency: string; branchLimit: number; registerLimit: number; staffLimit: number; trialDays: number; graceDays: number }
 type Status = { state: string; newSalesAllowed: boolean; businessWritesAllowed:boolean; canManagePlans: boolean; plans: { code: string; currentVersion: Version }[];
   usage: { branches: number; registers: number; staff: number }; subscription: { trialEndsAt: string; paidThrough: string | null; cancelAtPeriodEnd:boolean; planVersion: Version } | null; graceEndsAt?: string }
@@ -58,5 +59,6 @@ function Billing({organizationId}:{organizationId:string}) {
     </section>}
     {data?.canManagePlans&&<Costs organizationId={organizationId}/>}
     {data&&(role==='owner'||data.canManagePlans)&&<Retention/>}
+    {data&&role==='owner'&&organizationId&&<Closure key={organizationId} organizationId={organizationId}/>}
   </div>
 }

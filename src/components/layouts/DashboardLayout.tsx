@@ -9,10 +9,11 @@ import DeploymentNotice from '@/components/operations/DeploymentNotice';
 import BillingNotice from '@/components/operations/BillingNotice';
 import OperationalAlerts from '@/components/operations/OperationalAlerts';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import CriticalStepUp from '@/components/security/CriticalStepUp';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user, organization } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
+      <CriticalStepUp key={`${user?.id}:${organization?.id}`}/>
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-60 bg-white text-blue-900 p-3">Asosiy mazmunga o‘tish</a>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

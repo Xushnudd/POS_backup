@@ -1,5 +1,10 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ TOTP_UNAVAILABLE:{message:'Authenticator hozir mavjud emas.',nextAction:'Ulanish yoqilguncha kuting; xavfsizlik holatini qayta tekshiring.'},
+ TOTP_CODE_INVALID:{message:'Authenticator kodi noto‘g‘ri, ishlatilgan yoki ulash muddati tugagan.',nextAction:'Keyingi yangi kodni kiriting. Holatni tekshiring; kodni yordam xizmatiga yubormang.'},
+ TOTP_RECOVERY_INVALID:{message:'Zaxira kod noto‘g‘ri, ishlatilgan yoki muddati tugagan.',nextAction:'Amaldagi boshqa zaxira kodni ishlating. Kodlarni hech kimga yubormang.'},
+ TOTP_ALREADY_ENABLED:{message:'Authenticator allaqachon ulangan.',nextAction:'Joriy holatni tekshiring. Almashtirish uchun zaxira kod bilan eski ulanishni bekor qiling.'},
+ TOTP_SECRET_INVALID:{message:'Authenticator ulanishini o‘qib bo‘lmadi.',nextAction:'Joriy parol va zaxira kod bilan tiklashni tekshiring; maxfiy kalitlarni yubormang.'},
  AUTH_DELIVERY_UNAVAILABLE:{message:'SMS/e-mail tasdiqlash xizmati hali sozlanmagan.',nextAction:'Administrator real provayderni sozlamaguncha bu funksiya mavjud emas. Akkaunt avtomatik tasdiqlanmaydi.'},
  AUTH_CHALLENGE_INVALID:{message:'Kod yoki token noto‘g‘ri, ishlatilgan yoki muddati tugagan.',nextAction:'Yangi tasdiqni so‘rang; qayta yuborish muddatini kuting. Kodni yordam xizmatiga yubormang.'},
  STEP_UP_REQUIRED:{message:'Shu amal uchun ikkinchi faktor tasdig‘i kerak.',nextAction:'Aynan shu amal va sessiya uchun yangi tasdiqni oling.'},
@@ -10,6 +15,11 @@ const guidance:Record<string,ErrorGuidance>={
  INVALID_TICKET_TRANSITION:{message:'Murojaat holatlari orasida bunday o‘tish mumkin emas.',nextAction:'Yakunlangan murojaatni avval qayta oching yoki yechilgan murojaatni yoping.'},
  PLAN_LIMIT_REACHED:{message:'Tarif limiti tugagan.',nextAction:'Tarifni yangilang. Mavjud yozuvlar saqlanadi; arxivlash limitni oshirmaydi.'},
  SUBSCRIPTION_EXPIRED:{message:'Obuna muddati tugagan.',nextAction:'Obunani yangilang. Yangi biznes amallari cheklangan; mavjud ma’lumotlarni ko‘rish va eksport qilish mumkin.'},
+ ORGANIZATION_CLOSING:{message:'Tashkilotni yopish so‘rovi faol.',nextAction:'Ko‘rish va eksport ochiq. Egasi bekor qilish muddati ichida Tarif sahifasidan so‘rovni bekor qilishi mumkin.'},
+ CLOSURE_EXPORT_REQUIRED:{message:'Yuklab olingan biznes eksporti kerak.',nextAction:'Fon ishlari sahifasida biznes eksportini tayyorlang, faylni yuklab oling va job IDni yopish paneliga kiriting.'},
+ CLOSURE_ACTIVE_WORK:{message:'Ochiq biznes amallari mavjud.',nextAction:'Avval smena, draft savdo va offline/tashqi amallarni hal qiling; keyin original yopish kaliti bilan qayta tekshiring.'},
+ CLOSURE_CANCELLATION_EXPIRED:{message:'Bekor qilish muddati tugagan.',nextAction:'Vakolatli administrator bilan retention ko‘rib chiqish jarayonini kelishing. Ma’lumotlar avtomatik o‘chirilmaydi.'},
+ REAUTHENTICATION_FAILED:{message:'Joriy parol tasdiqlanmadi.',nextAction:'Joriy parolni qayta kiriting. Saqlangan amal kaliti va ma’lumotlari o‘zgarmaydi.'},
  BILLING_PLAN_CHANGED:{message:'Tarif narxi yoki limiti o‘zgargan.',nextAction:'Tarif sahifasini yangilang, joriy versiyani ko‘rib qayta tasdiqlang.'},
  BILLING_INVOICE_OPEN:{message:'To‘lanmagan invoice mavjud.',nextAction:'Original invoiceni tekshiring yoki to‘lanmagan bo‘lsa uni bekor qiling.'},
  BILLING_INVOICE_FINAL:{message:'Invoice allaqachon yakunlangan.',nextAction:'Original invoice va to‘lov tarixini tekshiring. Takror to‘lamang.'},

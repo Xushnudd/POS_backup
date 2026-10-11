@@ -7,6 +7,7 @@ import { verifyPassword } from '@/lib/auth'
 import { z } from 'zod'
 import {loginClientHash,recordLogin} from '@/server/security/service'
 import { createSession, sessionHash, setSessionCookie } from '@/server/auth/session'
+import {activeMembershipWhere} from '@/server/auth/custom-role-policy'
 
 const loginSchema = z.object({
   phone: z.string().min(9),
@@ -26,7 +27,7 @@ async function handlePOST(request: NextRequest) {
       where: { phone: validatedData.phone },
       include: {
         organizationUsers: {
-          where: { isActive: true },
+          where: activeMembershipWhere,
           include: {
             organization: true,
           }
@@ -78,14 +79,14 @@ async function handlePOST(request: NextRequest) {
       await tx.$queryRaw`SELECT id FROM "User" WHERE id=${user.id} FOR UPDATE`
       const current=await tx.user.findUniqueOrThrow({where:{id:user.id}})
       if(!current.isActive||current.passwordHash!==user.passwordHash)throw new AccessError(409,'LOGIN_CHANGED','Hisob o‘zgardi; qayta kiring')
-      const membership=await tx.organizationUser.findFirst({where:{id:firstOrgUser.id,userId:user.id,isActive:true,role:{in:['owner','admin','cashier']}}})
+      const membership=await tx.organizationUser.findFirst({where:{id:firstOrgUser.id,userId:user.id,...activeMembershipWhere,role:{in:['owner','admin','cashier']}},include:{customRole:true}})
       if(!membership)throw new AccessError(403,'NO_ORGANIZATION')
       const token=await createSession(tx,user.id,membership.organizationId)
       const session=await tx.session.findUniqueOrThrow({where:{tokenHash:sessionHash(token)},select:{id:true}})
       await recordLogin(tx,{userId:user.id,organizationId:membership.organizationId,success:true,sessionId:session.id,clientHash:loginClientHash(request.headers.get('user-agent'),validatedData.deviceId)})
       await tx.user.update({where:{id:user.id},data:{lastLoginAt:new Date()}})
       await clearLimit('login-account',validatedData.phone,tx)
-      return {token,role:membership.role}
+      return {token,role:membership.role,customRole:membership.customRole?{id:membership.customRole.id,name:membership.customRole.name,revision:membership.customRole.revision,permissions:membership.customRole.permissions}:undefined}
     })
 
     const response = NextResponse.json({
@@ -98,6 +99,7 @@ async function handlePOST(request: NextRequest) {
           phone: user.phone,
           email: user.email,
           organizationUserId: firstOrgUser.id,
+          ...(authenticated.customRole?{customRole:authenticated.customRole}:{}),
         },
         organization: firstOrgUser.organization,
         role: authenticated.role,

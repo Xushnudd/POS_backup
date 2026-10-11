@@ -2,7 +2,7 @@
 
 ADR-062: amaldagi trial yoki paidThrough sanasining keyingisidan tarif versiyasidagi graceDays qo‘llanadi. Grace tugagan aniq vaqtdan boshlab yangi biznes amallari rad etiladi. Legacy enrollment yo‘q tashkilotlar alohida ko‘chirilmaguncha avtomatik bloklanmaydi. Yangi foydalanuvchi/tashkilot yaratish bir martalik trialning mavjud qoidalarini saqlaydi; tashkilot identifikatori almashib trialni reset qilish qo‘shilmagan.
 
-`GET /api/billing` yangi `businessWritesAllowed` flagini beradi; `newSalesAllowed` eski contract uchun saqlanadi. Trial/active/grace true, expired false, legacy_unmanaged true. `/billing` read-only haqida aniq tushuntiradi. SUBSCRIPTION_EXPIRED HTTP409: yangi savdo, kirim, qaytarish, payment/stock/journal va biznes sozlamalarini o‘zgartirish taqiqlanadi; ko‘rish va eksport qoladi.
+`GET /api/billing` yangi `businessWritesAllowed` flagini beradi; `newSalesAllowed` eski contract uchun saqlanadi. Trial/active/grace va legacy_unmanagedda true faqat faol closure so‘rovi yo‘q bo‘lsa; expired yoki closure faol bo‘lsa false. closureBlocksBusinessWrites alohida flag. Obuna yangilanishi closure blokini olib tashlamaydi. `/billing` read-only haqida aniq tushuntiradi. SUBSCRIPTION_EXPIRED HTTP409: yangi savdo, kirim, qaytarish, payment/stock/journal va biznes sozlamalarini o‘zgartirish taqiqlanadi; ko‘rish va eksport qoladi.
 
 ## Ikki qatlam
 

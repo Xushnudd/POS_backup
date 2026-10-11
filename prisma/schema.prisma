@@ -10,6 +10,9 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+ customRoles CustomRole[]
+ closureRevision Int @default(0)
+ closureRequests OrganizationClosure[]
  supportTickets SupportTicket[]
  integrationCosts IntegrationCost[]
  billingInvoices BillingInvoice[]
@@ -76,6 +79,9 @@ model Organization {
 }
 
 model User {
+ createdCustomRoles CustomRole[] @relation("CustomRoleCreator")
+ totpFactors TotpFactor[]
+ totpProofs TotpProof[]
  requestedSupportTickets SupportTicket[] @relation("SupportTicketRequester")
  assignedSupportTickets SupportTicket[] @relation("SupportTicketAssignee")
  supportTicketEvents SupportTicketEvent[]
@@ -127,6 +133,8 @@ model User {
 }
 
 model OrganizationUser {
+  customRoleId   String?
+  customRole     CustomRole? @relation(fields:[customRoleId,organizationId],references:[id,organizationId],onDelete:NoAction,onUpdate:NoAction,map:"custom_role_tenant_fk")
   pinHash String?
   id             String   @id @default(uuid())
   organizationId String
@@ -142,6 +150,26 @@ model OrganizationUser {
   shifts         Shift[]
   
   @@unique([organizationId, userId])
+  @@index([customRoleId])
+}
+
+model CustomRole {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ baseRole String
+ permissions String[]
+ revision Int @default(1)
+ isActive Boolean @default(true)
+ createdBy String
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ creator User @relation("CustomRoleCreator",fields:[createdBy],references:[id],onDelete:Restrict)
+ members OrganizationUser[]
+ @@unique([id,organizationId])
+ @@unique([organizationId,name])
+ @@index([organizationId,isActive])
 }
 
 model Store {
@@ -2002,6 +2030,7 @@ model SupportTicketEvent {
 }
 
 model RetentionPolicyVersion {
+ closureRequests OrganizationClosure[]
  id String @id @default(uuid())
  version Int @unique
  expiredSubscriptionDays Int
@@ -2019,4 +2048,67 @@ model RetentionPolicy {
  key String @id
  currentVersionId String
  currentVersion RetentionPolicyVersion @relation(fields:[currentVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+
+model OrganizationClosure {
+ id String @id @default(uuid())
+ organizationId String
+ policyVersionId String
+ requestedBy String
+ requestedAt DateTime @default(now())
+ cancellationDays Int
+ cancellationEndsAt DateTime
+ exportJobId String
+ exportSha256 String
+ reason String
+ cancelledAt DateTime?
+ cancelledBy String?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ policy RetentionPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([organizationId,requestedAt,id])
+}
+
+model TotpFactor {
+ id String @id @default(uuid())
+ userId String
+ sessionId String
+ passwordDigest String
+ sealedSecret String?
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ confirmedAt DateTime?
+ revokedAt DateTime?
+ lastCounter BigInt?
+ attempts Int @default(0)
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ proofs TotpProof[]
+ recoveryCodes TotpRecoveryCode[]
+ @@index([userId,createdAt])
+}
+model TotpProof {
+ id String @id @default(uuid())
+ userId String
+ factorId String
+ sessionId String
+ action String
+ operationKey String
+ payloadHash String
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ approvedOperationAt DateTime?
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@index([userId,sessionId,action,operationKey])
+}
+
+model TotpRecoveryCode {
+ id String @id @default(uuid())
+ factorId String
+ secretHash String @unique
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ usedAt DateTime?
+ factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@index([factorId])
 }

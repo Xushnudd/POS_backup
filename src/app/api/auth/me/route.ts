@@ -69,6 +69,7 @@ async function handleGET(request: NextRequest) {
           phone: user.phone,
           email: user.email,
           organizationUserId: orgUser.id,
+          ...(payload.customRole?{customRole:payload.customRole}:{}),
         },
         organization: {
           id: orgUser.organization.id,

@@ -21,7 +21,7 @@ test('Owner sees safe planning data; admin/cashier do not inherit platform autho
  await prisma.session.update({where:{id:owner.session.id},data:{idleExpiresAt:idleExpiry}})
  const response=await GET(request(owner),undefined);assert.equal(response.status,200);const status=(await response.json()).data
  assert.equal((await prisma.session.findUniqueOrThrow({where:{id:owner.session.id}})).idleExpiresAt.getTime(),idleExpiry.getTime())
- assert.equal(status.canManage,false);assert.equal(status.automaticDeletionEnabled,false);assert.equal(status.closureAvailable,false);assert.equal(status.legalPolicyStatus,'review_required');assert.equal(status.plannedReviewAt,null)
+ assert.equal(status.canManage,false);assert.equal(status.automaticDeletionEnabled,false);assert.equal(status.closureAvailable,true);assert.equal(status.legalPolicyStatus,'review_required');assert.equal(status.plannedReviewAt,null)
  assert.ok(!('createdBy' in status.policy));assert.ok(!('reason' in status.policy))
  for(const f of [businessAdmin,cashier])assert.equal((await GET(request(f),undefined)).status,403)
  const input={...fields(original),expectedVersionId:original.id,operationId:randomUUID(),reason:'Unauthorized retention change'}

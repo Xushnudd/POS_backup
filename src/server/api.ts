@@ -9,19 +9,22 @@ import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getRequestToken, verifySession } from './auth/session'
 import { AccessError, assertRoutePermission, tenantScope } from './auth/policy'
+import {assertCustomRoutePermission} from './auth/custom-role-policy'
 import type { TokenPayload } from '@/lib/auth'
 import { apiMetrics } from './monitoring/metrics'
 import { billingDatabaseError } from './billing/errors'
-import { sanitizeResponse } from './auth/response'
+import { sanitizeResponse, sanitizeTotpPresentation } from './auth/response'
 import { consumeRequestBudget,consumePublicRequestBudget,requestBudgetSetting } from './auth/request-budget'
 
 const refs: Record<string, string> = {
+  customRoleId:'CustomRole',
   reservationId:'StockReservation',locationId:'StockLocation',fromLocationId:'StockLocation',toLocationId:'StockLocation',orderItemId:'PurchaseOrderItem',stockDocumentId:'StockDocument',storeId:'Store', fromStoreId:'Store', toStoreId:'Store', registerId:'Register', shiftId:'Shift',
   invoiceId:'SupplierInvoice',expenseCategoryId:'ExpenseCategory',accountId:'FinancialAccount',fromAccountId:'FinancialAccount',toAccountId:'FinancialAccount',
   taxProfileId:'TaxProfile',brandId:'Brand',parentId:'Category',productId:'Product', categoryId:'Category', customerId:'Customer', supplierId:'Supplier',
   targetMembershipId:'OrganizationUser',organizationUserId:'OrganizationUser', cashierId:'User',
 }
 const pathModels: Record<string, string> = {
+  roles:'CustomRole',
   brands:'Brand',taxes:'TaxProfile',files:'FileAsset','supplier-invoices':'SupplierInvoice','purchase-orders':'PurchaseOrder','supplier-payments':'SupplierPayment',organizations:'Organization', stores:'Store', registers:'Register', products:'Product', categories:'Category',
   customers:'Customer', suppliers:'Supplier', sales:'Sale', shifts:'Shift', transfers:'StockTransfer', 'stock-documents':'StockDocument', 'stock-counts':'StockCount',
 }
@@ -77,7 +80,7 @@ async function boundedBody(request: NextRequest): Promise<string> {
     reader.releaseLock()
   }
 }
-export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean; binary?: boolean; touchSession?:boolean } = {}) {
+export function withApi<C>(handler: (request: NextRequest, context: C) => Promise<Response>, options: { public?: boolean; validateBodyReferences?: boolean; binary?: boolean; touchSession?:boolean; totpPresentation?:'enrollment'|'recoveryCodes' } = {}) {
   return async (request: NextRequest, routeContext: C): Promise<Response> => {
     const requestId = randomUUID()
     return requestTrace.run({requestId},async()=>{
@@ -110,6 +113,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         if (!context) throw new AccessError(401,'UNAUTHORIZED','Avtorizatsiya talab qilinadi')
         requestTrace.getStore()!.organizationId=context.organizationId
         assertRoutePermission(path, request.method, context.role)
+        assertCustomRoutePermission(context,path,request.method)
         // Shared across replicas, scoped to tenant + actor, before reference scans,
         // parsing/import workers and business handlers. Specific budgets still apply.
         await consumeRequestBudget(context,request.method)
@@ -143,7 +147,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       if(data.error){const guide=errorGuidance(data.error.code,data.error.message);data.error={...data.error,...guide};data.requestId=requestId}
       apiMetrics.record(context?.organizationId,result.status,Date.now()-started)
       logEvent('api_response',{status:result.status,durationMs:Date.now()-started,...(data.error?.code?{code:data.error.code}:{})})
-      const response = NextResponse.json(sanitizeResponse(data, context?.role), { status: result.status, headers: result.headers })
+      const response = NextResponse.json(sanitizeTotpPresentation(data, context?.role, path, request.method, result.ok ? options.totpPresentation : undefined), { status: result.status, headers: result.headers })
       response.headers.set('X-Request-Id', requestId)
       response.headers.set('Cache-Control','private, no-store')
       response.headers.set('X-Content-Type-Options','nosniff')

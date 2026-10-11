@@ -1,4 +1,5 @@
 import {errorGuidance} from './error-guidance';
+import {requestStepUp, stepUpBinding} from './step-up';
 import {
   ApiResponse,
   SalesReportSummary,
@@ -86,7 +87,8 @@ class ApiClient {
 
   async request<T, Summary = SalesReportSummary>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    stepUpAttempted = false
   ): Promise<ApiResponse<T, Summary>> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -105,6 +107,12 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok || data.success === false) {
+        const binding = stepUpBinding(data?.error?.details);
+        // Retry the original serialized body and operation key exactly once.
+        // Stream bodies cannot be replayed safely. Auth endpoints never recurse.
+        if (!stepUpAttempted && data?.error?.code === 'STEP_UP_REQUIRED' && binding && typeof options.body === 'string' && !endpoint.startsWith('/auth/') && await requestStepUp(binding)) {
+          return this.request<T, Summary>(endpoint, options, true);
+        }
         const errorMsg =
           data?.error?.message || data?.message || `Xatolik: ${response.statusText}`;
         const error = new ApiError(errorMsg);
@@ -600,7 +608,7 @@ class ApiClient {
 
     revokeInvitation: (id:string,invitationId:string) => this.request(`/organizations/${id}/invitations/${invitationId}`,{method:'DELETE',body:'{}'}),
     createInvitation: (id:string,data:{phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken:string}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify(data)}),
-    updateMember: (id:string,memberId:string,data:{role?:string;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify(data)}),
+    updateMember: (id:string,memberId:string,data:{role?:string;customRoleId?:string|null;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify(data)}),
     users: (id: string) => this.request<OrganizationMember[]>(`/organizations/${id}/users`),
 
     addUser: (

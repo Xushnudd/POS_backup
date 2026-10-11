@@ -23,7 +23,7 @@ export async function retentionStatus(context:TokenPayload){
   const [{now}]=await tx.$queryRaw<{now:Date}[]>`SELECT NOW() AS now`
   const version=pointer.currentVersion
   const {createdBy,reason,...publicVersion}=version;void createdBy;void reason
-  return {policy:publicVersion,canManage,now,...retentionSchedule(now,subscription?{trialEndsAt:subscription.trialEndsAt,paidThrough:subscription.paidThrough,graceDays:subscription.planVersion.graceDays}:null,version),automaticDeletionEnabled:false,legalPolicyStatus:'review_required',closureAvailable:false}
+  return {policy:publicVersion,canManage,now,...retentionSchedule(now,subscription?{trialEndsAt:subscription.trialEndsAt,paidThrough:subscription.paidThrough,graceDays:subscription.planVersion.graceDays}:null,version),automaticDeletionEnabled:false,legalPolicyStatus:'review_required',closureAvailable:context.role==='owner'}
  },{isolationLevel:'RepeatableRead'})
 }
 export async function publishRetentionPolicy(context:TokenPayload,input:z.input<typeof retentionPolicySchema>){

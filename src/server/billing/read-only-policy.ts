@@ -1,5 +1,6 @@
 // Subscription read-only applies to business data; these exceptions preserve recovery/security.
 export const READ_ONLY_BUSINESS_MODELS = [
+  "CustomRole",
   "Organization",
   "OrganizationUser",
   "Store",
@@ -76,12 +77,16 @@ export const READ_ONLY_BUSINESS_MODELS = [
   "CustomerAdvanceRefund"
 ] as const
 export const READ_ONLY_EXEMPT_MODELS = [
+  "OrganizationClosure",
   "PlatformOperator",
   "SupportGrant",
   "Session",
   "RateLimit",
   "Invitation",
   "AuthChallenge",
+  "TotpFactor",
+  "TotpProof",
+  "TotpRecoveryCode",
   "VerifiedContact",
   "JobExport",
   "BackgroundJob",
@@ -109,6 +114,8 @@ export const READ_ONLY_EXEMPT_MODELS = [
   "IntegrationCost"
 ] as const
 export const READ_ONLY_OPERATION_EXCEPTIONS = [
+  "retention.closure.request",
+  "retention.closure.cancel",
   "billing.plan.publish",
   "billing.plan.assign",
   "billing.invoice.create",

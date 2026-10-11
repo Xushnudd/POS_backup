@@ -1,5 +1,7 @@
 // Reviewed schema coverage: new models require an explicit export decision.
 export const DIRECT_MODELS = [
+  "CustomRole",
+  "OrganizationClosure",
   "OrganizationUser",
   "Store",
   "ReceiptCostPlan",
@@ -92,6 +94,9 @@ export const OMITTED_MODELS: Readonly<Record<string,string>> = {
   "RateLimit": "Operational admission counters",
   "Invitation": "Invitation credentials",
   "AuthChallenge": "Authentication secrets",
+  "TotpFactor": "Authenticator credentials",
+  "TotpProof": "Authenticator action proofs",
+  "TotpRecoveryCode": "Authenticator recovery credentials",
   "VerifiedContact": "Authentication proofs",
   "JobExport": "Temporary generated artifacts",
   "BackgroundJob": "Worker operational state",
@@ -109,9 +114,10 @@ export const OMITTED_MODELS: Readonly<Record<string,string>> = {
 }
 export const SPECIAL_MODELS = ['Organization','User','BillingPlanVersion','SupportPolicyVersion'] as const
 export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
+ Organization:['closureRevision'],
  BillingPlanVersion:['createdBy'], SupportPolicyVersion:['createdBy','reason'],
  OrganizationUser:['pinHash'], User:['passwordHash'], OfflineCashLease:['payload','signature','publicKey','settlementProof','cancellationProof'],
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = '57ec786484794f0571b0b982a9843f3668f120f9f719d64f276f0ec499107615'
+export const REVIEWED_SCHEMA_SHA256 = "78eeaf653857bd3a107d1ce9127669168c6c66daa22ff3ff3bf9d1c7c8ffb3af"

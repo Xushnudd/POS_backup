@@ -3,6 +3,20 @@
 // New route/method pairs must be reviewed here; unknown routes fail closed.
 export type BusinessRole = 'owner' | 'admin' | 'cashier'
 export const ROUTE_PERMISSIONS: Readonly<Record<string, readonly BusinessRole[]>> = {
+  "GET /api/roles": ["owner"],
+  "POST /api/roles": ["owner"],
+  "PUT /api/roles/[id]": ["owner"],
+  "POST /api/platform/overview": ["owner", "admin"],
+  "GET /api/auth/totp": ["owner", "admin", "cashier"],
+  "POST /api/auth/totp/enroll": ["owner", "admin", "cashier"],
+  "POST /api/auth/totp/confirm": ["owner", "admin", "cashier"],
+  "POST /api/auth/totp/proof": ["owner", "admin", "cashier"],
+  "POST /api/auth/totp/recover": ["owner", "admin", "cashier"],
+  "POST /api/auth/totp/rotate": ["owner", "admin", "cashier"],
+
+  "GET /api/billing/closure": ["owner"],
+  "POST /api/billing/closure": ["owner"],
+  "PATCH /api/billing/closure": ["owner"],
   "GET /api/billing/retention": ["owner", "admin"],
   "POST /api/billing/retention": ["owner", "admin"],
   "GET /api/audit": ["owner", "admin"],

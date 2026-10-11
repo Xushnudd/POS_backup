@@ -46,6 +46,7 @@ async function handleGET(
         organizationId: id,
       },
       include: {
+        customRole:{select:{name:true,isActive:true}},
         user: {select:staffSelect},
         userStores: {
           include: {
@@ -67,6 +68,9 @@ async function handleGET(
           isActive: ou.user.isActive,
         },
         role: ou.role,
+        customRoleId:ou.customRoleId,
+        customRoleName:ou.customRole?.name??null,
+        customRoleActive:ou.customRole?.isActive??null,
         isActive: ou.isActive,
         archivedAt: ou.archivedAt,
         stores: ou.userStores.map(us => ({

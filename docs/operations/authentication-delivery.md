@@ -13,7 +13,9 @@ SmsProvider/EmailProvider ichki AuthenticationMessage contractini oladi:
 purpose, destination, secret va expiresAt. Bu vendor endpoint, protokol yoki
 request/response taxmini emas. Production binding faqat rasmiy hujjat va
 tasdiqlangan provayder bilan keyinchalik qo‘shiladi. AuthenticatorProvider
-TOTP/WebAuthn uchun kelajak chegarasi; o‘z TOTP algoritmi yoki fake factor yo‘q.
+WebAuthn uchun kelajak chegarasi; TOTP uchun OTPAuth9.5.2 maintained core/API/UI
+opt-in yo‘li mavjud (`docs/operations/totp-core.md`). O‘z TOTP algoritmi yoki fake
+factor yo‘q; mustaqil security audit da’vo qilinmaydi.
 
 `AUTH_CHALLENGE_SECRET`: alohida32bayt random,64hex, private environment/secret
 managerda. Hech qanday default qiymat yo‘q. OTP6raqam crypto.randomInt; hash
@@ -70,8 +72,10 @@ original retry tekshirildi.
 
 Bu hozircha tayyor primitive. Barcha xavfli business/platform endpointlar uchun
 MFA policy va client challenge flow hali global ulanmagan; SEC-02.06 done emas.
-Real OTP transport, audited TOTP binding va production MFA enforcement qabul
-qilinmaguncha tizimni MFA bilan to‘liq himoyalangan deb ko‘rsatmang.
+Real OTP transport va global critical-action/platform MFA enforcement qabul
+qilinmaguncha tizimni MFA bilan to‘liq himoyalangan deb ko‘rsatmang. TOTP
+enrollment/recovery/rotation opt-in yo‘li va general step-up bridge alohida
+qabul qilingan; default rollout o‘chiq.
 
 106–107 additive migratsiyalar: immutable source, attempt/one-use proof guard,
 encrypted queue, VerifiedContact source va logical historical session identity.

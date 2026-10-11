@@ -38,6 +38,7 @@ export interface Register {
 }
 
 export interface AuthUser {
+  customRole?:{id:string;name:string;revision:number;permissions:string[]};
   id: string;
   fullName: string;
   phone: string;
@@ -410,6 +411,7 @@ export interface ApiResponse<T = unknown, Summary = SalesReportSummary> {
 }
 
 export interface OrganizationMember {
+ customRoleId?:string|null;customRoleName?:string|null;customRoleActive?:boolean|null;
  id: string; role: Role; isActive: boolean;
  archivedAt: string | null;
  user: User; stores?: Store[];

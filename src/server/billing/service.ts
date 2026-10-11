@@ -49,8 +49,10 @@ export async function billingStatus(context: TokenPayload) {
     const usage = { branches: await tx.store.count({ where: { organizationId: context.organizationId } }),
       registers: await tx.register.count({ where: { store: { organizationId: context.organizationId } } }),
       staff: await tx.organizationUser.count({ where: { organizationId: context.organizationId } }) }
-    if (!subscription) return { state: 'legacy_unmanaged', newSalesAllowed: true, businessWritesAllowed: true, subscription: null, plans, usage, now, canManagePlans }
-    return { ...subscriptionPhase(now, { ...subscription, graceDays: subscription.planVersion.graceDays }), subscription: {...subscription,planVersion:publicVersion(subscription.planVersion)}, plans, usage, now, canManagePlans }
+    const closureBlocksBusinessWrites=Boolean(await tx.organizationClosure.findFirst({where:{organizationId:context.organizationId,cancelledAt:null},select:{id:true}}))
+    if (!subscription) return { state: 'legacy_unmanaged', newSalesAllowed: !closureBlocksBusinessWrites, businessWritesAllowed: !closureBlocksBusinessWrites, closureBlocksBusinessWrites, subscription: null, plans, usage, now, canManagePlans }
+    const phase=subscriptionPhase(now, { ...subscription, graceDays: subscription.planVersion.graceDays })
+    return { ...phase,newSalesAllowed:phase.newSalesAllowed&&!closureBlocksBusinessWrites,businessWritesAllowed:phase.businessWritesAllowed&&!closureBlocksBusinessWrites,closureBlocksBusinessWrites, subscription: {...subscription,planVersion:publicVersion(subscription.planVersion)}, plans, usage, now, canManagePlans }
   }, { isolationLevel: 'RepeatableRead' })
 }
 export const assignPlanSchema = z.object({ operationId: z.string().uuid(), targetOrganizationId: z.string().uuid(),

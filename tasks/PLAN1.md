@@ -766,6 +766,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
+  **Joriy holat (2026-10-10): in_progress.** OTPAuth9.5.2 maintained TOTP, SQL119–121, enrollment/confirmation/action-bound proof, hashed recovery/rotation, HTTP/UI va general step-up bridge tayyor. Standart featureflag o‘chiq; global critical/platform enforcement va encryption key rotation qoladi. Core original done sifatida sanalmaydi. Contract: `docs/operations/totp-core.md`; qabul: `tasks/evidence/totp-core-20261010.json`, `tasks/evidence/totp-recovery-20261010.json`.
+
 - [x] **SEC-02.07** — API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish.
 
   **Texnologiya:** Prisma select, TypeScript DTO, log redaction.
@@ -4282,7 +4284,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
 #### BIZ-02 — platforma boshqaruvi va support [P1]
 
-- [ ] **BIZ-02.01** — Tashkilotlar, tarif, xizmat holati, integratsiyalar va hodisalar uchun platforma admin paneli.
+- [x] **BIZ-02.01** — Tashkilotlar, tarif, xizmat holati, integratsiyalar va hodisalar uchun platforma admin paneli.
 
   **Texnologiya:** Next.js admin routes, React, Prisma, separate platform permissions.
 
@@ -4295,6 +4297,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Admin tashkilot/tarif/health/integration/incidentni ko‘radi; oddiy tenant user platformaga kira olmaydi.
+
+  **Qabul:** `done`, 2026-10-11. Majburiy action-bound MFA bilan platforma overview/panel, live mustaqil operator vakolati, tenant/tarif/xizmat/incident metadata va rost integration-boundary holatlari. Oddiy owner deny, revoke deny, safe DTO/audit/no-store va pagination tekshirildi. Real deploy/vendor/hardware alohida tashqi bandlarda. Contract: `docs/operations/platform-admin.md`; dalil: `tasks/evidence/platform-admin-20261011.json`.
 
   **Dalil:** `BIZ-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -4382,7 +4386,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
 - [ ] **BIZ-02.07** — Xizmatdan chiqishda to‘liq ma’lumot eksporti va saqlash/o‘chirish tartibi.
 
-  **Joriy holat (2026-10-10): in_progress.** ADR-062 asosida migration110, DBda immutable retention versiyalari, platform-admin tahriri, owner uchun xavfsiz ko‘rish, haqiqiy obuna sanasidan review muddatini hisoblash, transaction/audit/idempotency va lost-ACK UI tayyor. Bir xil versiyaga sakkiz parallel tahrirdan faqat bittasi qabul qilinadi. Bu sozlamalar o‘chirishni boshlamaydi. Migration111–112 bilan mavjud fon navbatida barcha filiallarning reviewed biznes JSON eksporti, manifest/row counts/hashlar, credential omissions va bounded artifact core qo‘shildi; qabul dalili `tasks/evidence/tenant-export-20261010.json`. Migration113–116 bilan obuna read-only SQL/operation guardlari, original committed replay, wall-clock expiry rollback, subscription snapshot lock, billing/export/auth/support recovery va tor manual expiry/draft tombstone istisnolari qo‘shildi; dalil `tasks/evidence/subscription-readonly-20261010.json`. Owner reauthentication bilan yopish/bekor qilish va closure lifecycle hali bajarilishi kerak. Huquqiy toifalar va irreversible deletion `blocked_external`; band `done` emas. Contract: `docs/operations/retention-policy.md`; dalil: `tasks/evidence/retention-policy-20261010.json`.
+  **Joriy holat (2026-10-10): in_progress.** ADR-062 asosida migration110, DBda immutable retention versiyalari, platform-admin tahriri, owner uchun xavfsiz ko‘rish, haqiqiy obuna sanasidan review muddatini hisoblash, transaction/audit/idempotency va lost-ACK UI tayyor. Bir xil versiyaga sakkiz parallel tahrirdan faqat bittasi qabul qilinadi. Bu sozlamalar o‘chirishni boshlamaydi. Migration111–112 bilan mavjud fon navbatida barcha filiallarning reviewed biznes JSON eksporti, manifest/row counts/hashlar, credential omissions va bounded artifact core qo‘shildi; qabul dalili `tasks/evidence/tenant-export-20261010.json`. Migration113–116 bilan obuna read-only SQL/operation guardlari, original committed replay, wall-clock expiry rollback, subscription snapshot lock, billing/export/auth/support recovery va tor manual expiry/draft tombstone istisnolari qo‘shildi; dalil `tasks/evidence/subscription-readonly-20261010.json`. Migration117–118 bilan owner/password reauthentication, downloaded-export prerequisite, immutable closure/cancel snapshot, DB tuple fence va API/UI core qo‘shildi; qabul dalillari EXECUTION_STATUSda. Closure review deletion emas. Katta eksport arxitekturasi va yakuniy huquqiy toifalar qoladi. Huquqiy toifalar va irreversible deletion `blocked_external`; band `done` emas. Contract: `docs/operations/retention-policy.md`; dalil: `tasks/evidence/retention-policy-20261010.json`.
 
   **Texnologiya:** Node worker export/retention, T03 ExcelJS, Prisma audit.
 

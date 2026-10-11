@@ -14,7 +14,11 @@ export const GET=withApi(async(request:NextRequest)=>{
  if(q.has('view')&&!summary)throw new AccessError(400,'INVALID_VIEW')
   if((page-1)*limit>2147483647)throw new AccessError(400,'INVALID_PAGINATION')
   for(const field of ['entityType','action'])if((q.get(field)?.length??0)>100)throw new AccessError(400,'INVALID_FILTER')
-  for(const field of ['entityId','actorId'])if(q.has(field)&&!/^[0-9a-f-]{36}$/i.test(q.get(field)??''))throw new AccessError(400,'INVALID_ID')
+  // Version/configuration resources also use non-UUID identifiers. Exact,
+  // bounded matching remains parameterized and organization-scoped.
+  const entityId=q.get('entityId')
+  if(entityId!==null&&(!entityId.trim()||entityId.length>200||/[\u0000-\u001f\u007f]/.test(entityId)))throw new AccessError(400,'INVALID_ID')
+  if(q.has('actorId')&&!/^[0-9a-f-]{36}$/i.test(q.get('actorId')??''))throw new AccessError(400,'INVALID_ID')
   const organization=await prisma.organization.findUniqueOrThrow({where:{id:context.organizationId},select:{timezone:true}})
   const range=dateRange(q.get('from'),q.get('to'),organization.timezone)
   const where={organizationId:context.organizationId,...(q.get('entityId')&&{entityId:q.get('entityId')!}),...(q.get('entityType')&&{entityType:q.get('entityType')!}),...(q.get('action')&&{action:q.get('action')!}),...(q.get('actorId')&&{actorId:q.get('actorId')!}),...(Object.keys(range).length&&{createdAt:range})}

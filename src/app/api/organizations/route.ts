@@ -6,6 +6,7 @@ import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
+import {activeMembershipWhere} from '@/server/auth/custom-role-policy'
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2),
@@ -39,7 +40,7 @@ async function handleGET(request: NextRequest) {
     const organizationUsers = await prisma.organizationUser.findMany({
       where: {
         userId: payload.userId,
-        isActive: true,
+        ...activeMembershipWhere,
       },
       include: {
         organization: true,

@@ -1,0 +1,136 @@
+{
+  "task": "BIZ-02.07",
+  "date": "2026-10-10",
+  "status": "in_progress",
+  "acceptedScope": "Owner/password reauthenticated organization closure/cancellation core",
+  "head": "d8edf567e12ba7ca5a19cd9368b43bd28045a1c4",
+  "version": "HEAD plus reviewed working tree; no AI commit",
+  "sourceSha256": {
+    "prisma/schema.prisma": "21937cf6d16ab780b904dbda3928ca10367ee747f1da6479fd8b427a64c417c4",
+    "prisma/migrations/202610100117_organization_closure/migration.sql": "c94039576790c28d114ca494789ab67b151f4207bdccd38eff657c949c5a463b",
+    "prisma/migrations/202610100118_closure_source_guards/migration.sql": "418d951e4b059ed6ad0a7b1eb29974344778d0f2f32cd0e7aa35f60d453bcf36",
+    "src/server/retention/closure.ts": "3afef51bad5e63da9448e9a61d44fa58bf0008ce35d412f9c29d70856221598a",
+    "src/server/retention/closure-phase.ts": "a0188152f13ad7a3638d4635b3a7e9db2a059d67289264dec785ed6e5e7976e1",
+    "src/server/retention/service.ts": "86c9c108205d470f5d8a08df14343134885bd568f5bda4684dccf5edbc38a9c7",
+    "src/server/billing/service.ts": "75628ca8100cb04521b6eb5a707796bf53a21c016cee96c2f648644e840ac44a",
+    "src/server/billing/errors.ts": "bf4585dd209fd8323b5f9f6e44dfc6434778cec257bbe61f4e20a13e004f04df",
+    "src/server/billing/read-only-policy.ts": "fe25f001680e1984ce2dd197123da340a726dce0f3c8738192797a216474c596",
+    "src/server/jobs/tenant-export-contract.ts": "3abc1f9fdfb84fe95ed48f76dd3eba2c09638b620a2047c40cfc2fd483fa7ea2",
+    "src/server/auth/route-permissions.ts": "3efa5db19def615c53873ebcbc46882596a9069571e76ce730a62f80a6f1ad53",
+    "src/app/api/billing/closure/route.ts": "e978ecd66e0e102fa307228d9ce8c452e0f45e79fbb35dcf8867f2c3ca32e93e",
+    "src/app/api/health/ready/route.ts": "598c0d3d8afbcc06a06c0fc4332a9ad0313e0ef67153763bb5b51aaa53e6d50b",
+    "src/components/billing/Closure.tsx": "c84aca314e71aafa20c238ef1fe4365dcf4ed516c07e75ae943dbdb608b7c22d",
+    "src/components/billing/Retention.tsx": "833e7bb17cc0bd5004a23c7562457e17c92a2dd0f8b805ddf27f534481ce4d79",
+    "src/app/(dashboard)/billing/page.tsx": "a172c8d64a884f07a779b8ff84493d26ef99f01d7aa00b133df86d5eee8882ac",
+    "src/lib/error-guidance.ts": "51160be5e6e09a10f8c21856c39899471d97460f746defa00ee5a1076d1b7a41",
+    "tests/organization-closure.integration.test.ts": "3e41ecff8c7126c9dbf30a568eb27c0b588013e9aa475c56b49f685fb7f55842",
+    "tests/closure-phase.unit.test.ts": "eda2d9d188e5240981d7b5f3c27d770060bb6d02af6784180cdf777b29df9fba",
+    "tests/retention-policy.integration.test.ts": "5ff7c31cfc6c058bec3602dd9aa12e6ea83aa6f5c74bb828312700bdfd7908ab",
+    "tests/e2e/organization-closure.spec.ts": "330ae31973ca170a6115ab200738585210db280bad8af2c45028cc3a8d5114cb",
+    "scripts/ops/test-migrations.sh": "77a8a0b13cae3a6b325a602643f001752f7e3427ef1b194bd18c6ac0526f1e64",
+    "docs/operations/closure-lifecycle.md": "e8b449238555fce2331ae628069a74eca375d1f2146ea21224a55ceb04a822d8",
+    "docs/operations/retention-policy.md": "790d3d6694e0b3fbdca7a4377d48d9b9582e035236edfbcd8638e3146acb4997",
+    "docs/operations/subscription-read-only.md": "14c50b35e1a5bd677be475e911e319186a0ec7fb01efe17a4e8437c965674ca5",
+    "api.md": "f202cc2ed5b1337f07dce334727c5a773880aa8b954fb56776e10d42f3c10a87",
+    "tasks/PLAN1.md": "8f53bd17c9f9aea7a2a2bebb98ad90b33dfe50e32882ef432dcb7fe2e2de445f",
+    "tasks/DECISIONS.md": "d2919e9012abfc971d8904217e157059d81669090795cd597c9483255414a8e5",
+    "tasks/EXECUTION_STATUS.md": "2c4787008c07957a28cf683918897245832e4aa2afa62bdf3b20e3f039731048"
+  },
+  "gates": [
+    {
+      "name": "full_integration_pre_get_fix",
+      "path": "/tmp/pos-closure-full.log",
+      "sha256": "485723743c104c60809edcfa8af322e41b4bfa028b51dc616a76d0ba90ba8a7a",
+      "result": "275/275; before4 new closure cases and GET lock correction"
+    },
+    {
+      "name": "final_focused",
+      "path": "/tmp/pos-closure-focused-get-fix.log",
+      "sha256": "31c8accbe032ee93fae16fcfe730ab311c8d03978c78a6b2daf660929f58f152",
+      "result": "26/26; closure10/read-only7/retention5/export4"
+    },
+    {
+      "name": "final_unit",
+      "path": "/tmp/pos-closure-unit-get-fix.log",
+      "sha256": "a8518a1c205300664d498a954b048354c8ce9570b6198f8f9982b316ce0058cd",
+      "result": "69/69"
+    },
+    {
+      "name": "final_browser",
+      "path": "/tmp/pos-closure-browser-accepted.log",
+      "sha256": "6ac1f23e759abba4f85e1916fd963e9481ade40a1d52de1452533cef1df5011b",
+      "result": "9/9; production HTTPS Chromium/Firefox/WebKit"
+    },
+    {
+      "name": "final_build",
+      "path": "/tmp/pos-closure-build-get-fix.log",
+      "sha256": "09bf771aba03a174279888c11065229d693402cbdaedff183f30620acdf3688d",
+      "result": "PASS webpack"
+    },
+    {
+      "name": "final_lint",
+      "path": "/tmp/pos-closure-lint-get-fix.log",
+      "sha256": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+      "result": "PASS"
+    },
+    {
+      "name": "browser_test_lint",
+      "path": "/tmp/pos-closure-browser-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result": "PASS"
+    },
+    {
+      "name": "worker_build",
+      "path": "/tmp/pos-closure-worker-final.log",
+      "sha256": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+      "result": "PASS"
+    },
+    {
+      "name": "typecheck",
+      "path": "/tmp/pos-closure-type.log",
+      "sha256": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+      "result": "PASS; final webpack also checked final types"
+    },
+    {
+      "name": "fresh_legacy_migrations",
+      "path": "/tmp/pos-closure-migrations.log",
+      "sha256": "e945d8ac3a7b6bd0d72a06a28d16dd202d008a53de6309e216088ba4525a9a27",
+      "result": "PASS118; isolated disposable databases"
+    }
+  ],
+  "scenarios": [
+    "actual downloaded scoped export required",
+    "current password and live owner on new work/replay",
+    "secret excluded from operation and browser persistence",
+    "duplicate/competing keys one closure",
+    "root/direct/exception business writes blocked",
+    "stale Serializable snapshot fenced",
+    "immutable history and tenant revision",
+    "expired window uses DB wall clock and no deletion",
+    "late audit rollback all rows/revision/operation",
+    "open shift preserved on rejected closure",
+    "foreign export and non-owner denied",
+    "cancel leaves expired subscription read-only",
+    "reauth rate5/15min",
+    "8 parallel no-touch HTTP reads coexist with session touches",
+    "lost ACK reload uses original public intent/key and fresh password across3 browsers"
+  ],
+  "knownCorrectedFailures": [
+    "Initial extra expired-subscription fixture attempted forbidden trial reset; changed to isolated legacy enrollment, production guard retained",
+    "Initial browser6/9: readonly GET session row locks conflicted with session touches; mutation locks retained and GET lock removed",
+    "Second browser6/9: test observed original current row before replay ACK finished; test now waits for storage clear"
+  ],
+  "remaining": [
+    "export beyond reviewed16MiB/100000-row bounds",
+    "final legal retention categories/legal holds",
+    "irreversible deletion blocked_external"
+  ],
+  "originalDone": 154,
+  "newRequestBaseline": 154,
+  "newRequestTarget": 174,
+  "newOriginalDone": 0,
+  "automaticDeletionEnabled": false,
+  "productionDatabaseChanged": false,
+  "deployed": false,
+  "realVendorIntegrationImplemented": false
+}

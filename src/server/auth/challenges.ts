@@ -8,6 +8,8 @@ import { consumeLimit } from './rate-limit'
 import { authenticationDelivery, authenticationDeliveryStatus, type AuthenticationDelivery } from './delivery'
 import { assertLiveContext, audit } from '../operations'
 import { newPasswordSchema } from './password-policy'
+import { totpAvailable } from './totp-availability'
+import { assertTotpStepUp } from './totp-service'
 
 type Dependencies={delivery?:AuthenticationDelivery;secret?:string;ttlMs?:number}
 const contactHash=(value:string)=>createHash('sha256').update(value).digest('hex')
@@ -96,7 +98,10 @@ export async function assertStepUp(tx:Prisma.TransactionClient,context:TokenPayl
  await assertLiveContext(tx,context)
  const [{now}]=await tx.$queryRaw<{now:Date}[]>`SELECT clock_timestamp() AT TIME ZONE 'UTC' AS now`
  const proof=await tx.authChallenge.findFirst({where:{userId:context.userId,sessionId:context.sessionId,kind:'step_up',action,operationKey,payloadHash:hash,usedAt:{not:null},failedAt:null,expiresAt:{gt:now},...(process.env.NODE_ENV==='production'?{providerMode:'real'}:{})}})
- if(!proof)throw new AccessError(403,'STEP_UP_REQUIRED','Shu amal uchun ikkinchi faktor tasdig‘i kerak')
+ if(!proof){
+  if(totpAvailable())return assertTotpStepUp(tx,context,action,operationKey,hash)
+  throw new AccessError(403,'STEP_UP_REQUIRED','Shu amal uchun ikkinchi faktor tasdig‘i kerak')
+ }
  if(!proof.approvedOperationAt)await tx.authChallenge.update({where:{id:proof.id},data:{approvedOperationAt:now}})
  // Only the identical action/key/hash/session can replay this consumed proof.
 }
