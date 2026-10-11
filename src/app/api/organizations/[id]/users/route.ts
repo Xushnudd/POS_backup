@@ -1,5 +1,9 @@
 import {billingDatabaseError} from '@/server/billing/errors'
-import {assertLiveContext} from '@/server/operations'
+import {assertLiveContext,runOperation} from '@/server/operations'
+import {assertCriticalAction} from '@/server/auth/critical-actions'
+import {payloadHash} from '@/server/operations'
+import {credentialBinding} from '@/server/auth/credential-binding'
+import type {Prisma} from '@prisma/client'
 import { newPasswordSchema } from '@/server/auth/password-policy'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
@@ -10,13 +14,14 @@ import { verifyToken, getRequestToken, hashPassword } from '@/lib/auth'
 import { z } from 'zod'
 
 const createUserSchema = z.object({
-  fullName: z.string().min(2),
-  phone: z.string().min(9),
+  operationId:z.string().uuid().optional(),
+  fullName: z.string().min(2).max(200),
+  phone: z.string().min(9).max(64),
   email: z.string().email().optional(),
   password: newPasswordSchema,
   role: z.enum(['owner', 'admin', 'cashier']),
-  storeIds: z.array(z.string()).optional(),
-})
+  storeIds: z.array(z.string().max(200)).max(100).optional(),
+}).strict()
 
 async function handleGET(
   request: NextRequest,
@@ -115,16 +120,22 @@ async function handlePOST(
     const body = await request.json()
     const validatedData = createUserSchema.parse(body)
 
-    if (await prisma.user.findUnique({where:{phone:validatedData.phone}})) throw new AccessError(409,'INVITATION_REQUIRED','Mavjud hisobga taklif yuborish kerak')
-    const passwordHash = await hashPassword(validatedData.password)
-    const organizationUser = await prisma.$transaction(async tx => {
+    if(payload.role!=='owner')throw new AccessError(403,'FORBIDDEN')
+    if(process.env.AUTH_CRITICAL_MFA_REQUIRED==='true'&&!validatedData.operationId)throw new AccessError(400,'OPERATION_ID_REQUIRED')
+    const {password,...metadata}=validatedData
+    const binding={organizationId:id,...metadata,credentialProof:credentialBinding(password)}
+    const work=async(tx:Prisma.TransactionClient)=>{
       await assertLiveContext(tx,payload)
+      if(!validatedData.operationId)await assertCriticalAction(tx,payload,'users.member.create',payload.organizationUserId,payloadHash(binding))
+      if(await tx.user.findUnique({where:{phone:validatedData.phone}}))throw new AccessError(409,'INVITATION_REQUIRED','Mavjud hisobga taklif yuborish kerak')
+      const passwordHash=await hashPassword(password)
       const user = await tx.user.create({data:{fullName:validatedData.fullName,phone:validatedData.phone,email:validatedData.email,passwordHash}})
       const member = await tx.organizationUser.create({data:{organizationId:id,userId:user.id,role:validatedData.role}})
       if (validatedData.storeIds?.length) await tx.userStore.createMany({data:[...new Set(validatedData.storeIds)].map(storeId=>({organizationUserId:member.id,storeId}))})
       await tx.auditLog.create({data:{organizationId:id,actorId:payload.userId,entityType:'OrganizationUser',entityId:member.id,action:'staff_created'}})
       return {...member,user:{id:user.id,fullName:user.fullName,phone:user.phone,email:user.email}}
-    })
+    }
+    const organizationUser=validatedData.operationId?await runOperation(payload,'users.member.create',validatedData.operationId,binding,work):await prisma.$transaction(work)
 
     return NextResponse.json({
       success: true,

@@ -46,6 +46,24 @@ test('Production config requires a HTTPS origin and PostgreSQL connection withou
  assert.throws(()=>validateProductionEnvironment({NODE_ENV:'production',DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid',AUTH_CHALLENGE_SECRET:'weak'}))
 })
 
+test('Production MFA configuration rejects impossible rollout and malformed overlap without exposing keys',async()=>{
+ const {validateProductionEnvironment}=await import('@/server/config')
+ const base={NODE_ENV:'production' as const,DATABASE_URL:'postgresql://user:password@db/database',APP_ORIGIN:'https://pos.example.invalid'}
+ const enabled={...base,AUTH_TOTP_ENABLED:'true',AUTH_CRITICAL_MFA_REQUIRED:'true',AUTH_CHALLENGE_SECRET:'a'.repeat(64)}
+ assert.doesNotThrow(()=>validateProductionEnvironment(enabled))
+ for(const configuration of [
+  {...enabled,AUTH_CHALLENGE_SECRET:undefined},
+  {...enabled,AUTH_TOTP_ENABLED:'false'},
+  {...enabled,AUTH_CRITICAL_MFA_REQUIRED:'yes'},
+  {...enabled,AUTH_TOTP_PREVIOUS_SECRETS:'b'.repeat(64)+', '+'c'.repeat(64)},
+  {...enabled,AUTH_TOTP_PREVIOUS_SECRETS:['b','c','d'].map(x=>x.repeat(64)).join(',')},
+  {...enabled,AUTH_TOTP_PREVIOUS_SECRETS:'A'.repeat(64)},
+ ]) assert.throws(()=>validateProductionEnvironment(configuration),error=>{
+  assert.ok(error instanceof Error);assert.ok(!error.message.includes('a'.repeat(64)));assert.ok(!error.message.includes('postgresql:'));return true
+ })
+ assert.doesNotThrow(()=>validateProductionEnvironment({...enabled,AUTH_TOTP_PREVIOUS_SECRETS:'b'.repeat(64)}))
+})
+
 test('CSV text keeps delimiters and quotes in one cell and neutralizes spreadsheet formulas',async()=>{
  const {csvText}=await import('@/server/customers/export')
  assert.equal(csvText('a,b\n"quoted"'),'"a,b\n""quoted"""')

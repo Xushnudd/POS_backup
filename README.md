@@ -1144,3 +1144,7 @@ Boshqariladigan yangilash uchun [maintenance qo‘llanmasi](docs/operations/main
 ### Tashkilot biznes ma’lumotlarini eksport qilish
 
 Egasi `/jobs` orqali barcha filiallarning reviewed biznes JSON eksportini oldindan ko‘rib, navbatga qo‘yishi mumkin. Manifest qatorlar soni va SHA256larni beradi; credential/internal proof toifalari ochiq chiqarib tashlangan. Mavjud worker kerak;100000qator/16MiB limit,24soat yuklab olish muddati. Bu database backup yoki tashkilotni yopish amali emas. [Eksport contracti](docs/operations/tenant-export.md).
+
+### Bitta tashkilot uchun recovery rejasi
+
+`npm run worker:tenant-recovery-plan` offline recovered copy va current targetni read-only snapshotlarda solishtiradi. Private0600 reja missing/changed/current-only yozuvlar va FKlarni review uchun chiqaradi; avtomatik import, overwrite yoki delete qilmaydi. Operator parametrlari, cheklovlar va isolated qabul [tenant recovery qo‘llanmasida](docs/operations/tenant-recovery.md). Haqiqiy production recovery alohida operator ruxsati va tekshiruvini talab qiladi.

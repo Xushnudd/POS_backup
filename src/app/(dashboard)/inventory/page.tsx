@@ -40,11 +40,12 @@ export default function InventoryPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [inactiveDays,setInactiveDays]=useState('');
   const [lowStockOnly, setLowStockOnly] = useState<boolean>(false);
 
   const [listError,setListError]=useState(''),[pages,setPages]=useState(0);
   const [draftFilters,setDraftFilters]=useState({search:'',from:'',to:'',documentType:'',status:'',supplierId:''}),[filters,setFilters]=useState<Record<string,string>>({});
-  const listScope=JSON.stringify([organization?.id,activeStore?.id,activeTab,lowStockOnly,filters]);
+  const listScope=JSON.stringify([organization?.id,activeStore?.id,activeTab,lowStockOnly,inactiveDays,filters]);
   const [listPage,setListPage]=useState({scope:'',page:1});
   const page=listPage.scope===listScope?listPage.page:1;
   const requestSequence=useRef({value:0});
@@ -73,7 +74,7 @@ export default function InventoryPage() {
         const res = await api.inventory.balances({
           organizationId: organization.id,
           storeId: activeStore?.id,
-          lowStock: lowStockOnly || undefined,search:filters.search,page,limit:20,
+          lowStock: lowStockOnly || undefined,inactiveDays:inactiveDays?Number(inactiveDays):undefined,search:filters.search,page,limit:20,
         });
         if(sequence===requestSequence.current.value){setBalances(res.data??[]);setPages(res.pagination?.totalPages??0);}
       } else {
@@ -88,7 +89,7 @@ export default function InventoryPage() {
     } finally {
       if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization, activeStore, activeTab, lowStockOnly, filters, page]);
+  }, [organization, activeStore, activeTab, lowStockOnly, inactiveDays, filters, page]);
 
   useEffect(() => {
     const requests=requestSequence.current;let cancelled=false;void Promise.resolve().then(()=>{if(!cancelled)return loadData();});
@@ -272,12 +273,13 @@ export default function InventoryPage() {
         )}
       </div>
 
+      {activeTab==='balances'&&<div className="max-w-md space-y-1"><Select label="Filialda yakunlangan savdosiz qoldiq" value={inactiveDays} onChange={event=>setInactiveDays(event.target.value)} options={[{value:'',label:'Barcha qoldiqlar'},{value:'30',label:'Oxirgi 30 kun savdo yo‘q'},{value:'60',label:'Oxirgi 60 kun savdo yo‘q'},{value:'90',label:'Oxirgi 90 kun savdo yo‘q'}]}/><p className="text-xs text-gray-600">Faqat musbat joriy qoldiq. Bu omborda turish yoshi emas; qaytarilgan savdo ham savdo harakati hisoblanadi.</p></div>}
       <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();setFilters(Object.fromEntries(Object.entries(draftFilters).filter(([,value])=>value.trim()).map(([key,value])=>[key,value.trim()])));}}>
         <Input label={activeTab==='balances'?'Mahsulot, SKU yoki barkod':'Hujjat raqamini qidirish'} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
         {activeTab==='documents'&&<><Input label="Hujjat davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Hujjat davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label="Hujjat turi filtri" value={draftFilters.documentType} options={[{value:'',label:'Barchasi'},{value:'purchase',label:'Xarid'},{value:'opening',label:'Boshlang‘ich qoldiq'},{value:'adjustment',label:'Tuzatish'},{value:'reversal',label:'Qarshi hujjat'},{value:'transfer_out',label:'Transfer chiqimi'},{value:'transfer_in',label:'Transfer kirimi'},{value:'return_in',label:'Qaytarish kirimi'}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label="Hujjat holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'confirmed',label:'Tasdiqlangan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label="Supplier ID filtri" value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
         <Button type="submit" disabled={isLoading}>Filtrlash</Button>
       </form>
-      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{})}:filters)}}/>}
+      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
       {listError&&<p role="alert" className="text-red-700">{listError}</p>}
       <Pagination page={page} pages={pages} busy={isLoading} onPage={value=>setListPage({scope:listScope,page:value})} retry={()=>{void loadData();}}/>
 

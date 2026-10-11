@@ -26,7 +26,7 @@ test('Owner explicitly creates and assigns observer profile; actual staff admiss
   expect((await context.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}})).ok()).toBe(true)
   const signed=(await(await context.request.get('/api/auth/me')).json()).data
   expect(signed.user.customRole.name).toBe('Kuzatuvchi')
-  expect((await context.request.get('/api/products')).status()).toBe(200)
+  expect((await context.request.get('/api/products?organizationId='+me.organization.id)).status()).toBe(200)
   expect((await context.request.post('/api/products',{headers:{Origin:'https://localhost:3100'},data:{}})).status()).toBe(403)
   await page.getByRole('button',{name:'Tahrirlash',exact:true}).click()
   await page.getByLabel('GET /api/products',{exact:true}).uncheck()
@@ -35,6 +35,6 @@ test('Owner explicitly creates and assigns observer profile; actual staff admiss
   await expect(page.getByText('Rol saqlandi. Vakolat o‘zgargan xodimlar qayta kirishi kerak.',{exact:true})).toBeVisible()
   expect((await context.request.get('/api/auth/me')).status()).toBe(401)
   expect((await context.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}})).ok()).toBe(true)
-  expect((await context.request.get('/api/products')).status()).toBe(403)
+  expect((await context.request.get('/api/products?organizationId='+me.organization.id)).status()).toBe(403)
  }finally{await context.close()}
 })

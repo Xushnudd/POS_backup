@@ -32,7 +32,8 @@ if [[ "$restore_file" == *.bundle-v1.dump.gpg ]]; then
  node "$(dirname "$0")/backup-manifest.mjs" verify "$restore_workdir/manifest.json" "$restore_workdir/database.dump"
 fi
 pg_restore --dbname="$PGDATABASE" --exit-on-error --single-transaction --no-owner --no-acl "$restore_workdir/database.dump"
+psql -X -v ON_ERROR_STOP=1 < "$(dirname "$0")/auth-restore-quarantine.sql"
 if [[ "$restore_file" == *.bundle-v1.dump.gpg ]]; then
  node "$(dirname "$0")/backup-manifest.mjs" export "$restore_workdir/manifest.json" "$restore_workdir/database.dump"
 fi
-printf 'Restored into confirmed empty database: %s\n' "$restore_database"
+printf 'Restored into confirmed empty database (authentication quarantined; operator review required): %s\n' "$restore_database"

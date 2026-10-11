@@ -47,9 +47,9 @@ export async function resolveIncident(context:TokenPayload,id:string,input:{oper
   return result
  })
 }
-export async function incidentList(context:TokenPayload,page:number,state:string){
+export async function incidentList(context:TokenPayload,page:number,state:string,limit=20){
  const scope=incidentScope(context)
- return prisma.$transaction(async tx=>{await assertLiveContext(tx,context);const where={...scope,state};return {rows:await tx.incident.findMany({where,orderBy:[{lastSeenAt:'desc'},{id:'asc'}],skip:(page-1)*20,take:20}),total:await tx.incident.count({where})}}, {isolationLevel:'RepeatableRead'})
+ return prisma.$transaction(async tx=>{await assertLiveContext(tx,context);const where={...scope,state};return {rows:await tx.incident.findMany({where,orderBy:[{lastSeenAt:'desc'},{id:'asc'}],skip:(page-1)*limit,take:limit}),total:await tx.incident.count({where})}}, {isolationLevel:'RepeatableRead'})
 }
 export async function setThreshold(context:TokenPayload,input:{storeId:string;productId:string;minimum:string|number;maximum:string|number;operationId:string}){
  incidentScope(context)

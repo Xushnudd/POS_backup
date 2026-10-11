@@ -97,6 +97,8 @@ export const OMITTED_MODELS: Readonly<Record<string,string>> = {
   "TotpFactor": "Authenticator credentials",
   "TotpProof": "Authenticator action proofs",
   "TotpRecoveryCode": "Authenticator recovery credentials",
+  "AuthRestoreCheckpoint": "Operator authentication restore/review provenance",
+  "TotpKeyRotation": "Operator credential-key rotation history",
   "VerifiedContact": "Authentication proofs",
   "JobExport": "Temporary generated artifacts",
   "BackgroundJob": "Worker operational state",
@@ -120,4 +122,4 @@ export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = "78eeaf653857bd3a107d1ce9127669168c6c66daa22ff3ff3bf9d1c7c8ffb3af"
+export const REVIEWED_SCHEMA_SHA256 = "459e1c9a74d75ccc8dce7d75153cb6652837d7efd43d8dabd908dff29541a393"

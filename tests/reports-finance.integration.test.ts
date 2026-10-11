@@ -1124,3 +1124,58 @@ test('Internal reconciliation worker explicitly isolates tenant/store scope and 
  const own=await prisma.$transaction(tx=>scanOrganization(tx,a.org.id));assert.equal(own.inventory,1);const records=await prisma.incident.findMany({where:{organizationId:a.org.id}});assert.ok(records.length>0);assert.ok(records.every(x=>x.storeId===a.store.id));assert.equal(await prisma.incident.count({where:{organizationId:b.org.id}}),0);
  const other=await prisma.$transaction(tx=>scanOrganization(tx,b.org.id));assert.equal(other.inventory,1);await assert.rejects(()=>scan({...a.context,role:'cashier'},randomUUID()),{code:'FORBIDDEN'});assert.deepEqual(await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]),before);
 });
+
+
+test('Replenishment and incident pages reject unbounded pagination and keep explicit branch filters scoped',async()=>{
+ const f=await fixture(0),foreign=await fixture(0),cashier=await actor(f.org.id,f.store.id,'cashier'),admin=await actor(f.org.id,f.store.id,'admin')
+ const hidden=await prisma.store.create({data:{organizationId:f.org.id,name:'Hidden branch'}})
+ const {GET:replenishment}=await import('@/app/api/reports/replenishment/route')
+ const {GET:incidents}=await import('@/app/api/incidents/route')
+ for(const query of ['page=0','page=-1','page=1.5','page=NaN','page=999999999999','limit=0','limit=-1','limit=201','limit=Infinity']){
+  assert.equal((await replenishment(req('/reports/replenishment?'+query,f.cookie),undefined)).status,400,query)
+  assert.equal((await incidents(req('/incidents?'+query,f.cookie),undefined)).status,400,query)
+ }
+ const response=await replenishment(req('/reports/replenishment?storeId='+f.store.id+'&limit=1',admin.cookie),undefined)
+ assert.equal(response.status,200);const body=await response.json();assert.equal(body.pagination.total,1);assert.equal(body.data[0].storeId,f.store.id);assert.equal(body.data[0].quantity,'0')
+ for(const storeId of [foreign.store.id,hidden.id])assert.equal((await replenishment(req('/reports/replenishment?storeId='+storeId,admin.cookie),undefined)).status,404)
+ assert.equal((await replenishment(req('/reports/replenishment?storeId=invalid',f.cookie),undefined)).status,400)
+ assert.equal((await replenishment(req('/reports/replenishment',cashier.cookie),undefined)).status,403)
+ const owner=await replenishment(req('/reports/replenishment?storeId='+hidden.id,f.cookie),undefined);assert.equal(owner.status,200);assert.ok((await owner.json()).data.every((row:{storeId:string})=>row.storeId===hidden.id))
+ await prisma.incident.createMany({data:[
+  {organizationId:f.org.id,storeId:f.store.id,kind:'inventory',entityKey:randomUUID(),evidence:{synthetic:true}},
+  {organizationId:f.org.id,storeId:f.store.id,kind:'inventory',entityKey:randomUUID(),evidence:{synthetic:true}},
+  {organizationId:f.org.id,storeId:hidden.id,kind:'inventory',entityKey:randomUUID(),evidence:{synthetic:true}},
+ ]})
+ const firstPage=await incidents(req('/incidents?page=1&limit=1',admin.cookie),undefined),secondPage=await incidents(req('/incidents?page=2&limit=1',admin.cookie),undefined)
+ assert.equal(firstPage.status,200);assert.equal(secondPage.status,200)
+ const firstBody=await firstPage.json(),secondBody=await secondPage.json()
+ assert.deepEqual(firstBody.pagination,{page:1,limit:1,total:2,totalPages:2});assert.equal(firstBody.data.length,1);assert.equal(secondBody.data.length,1);assert.notEqual(firstBody.data[0].id,secondBody.data[0].id)
+ await prisma.session.update({where:{id:admin.context.sessionId},data:{revokedAt:new Date()}})
+ assert.equal((await replenishment(req('/reports/replenishment?storeId='+f.store.id,admin.cookie),undefined)).status,401)
+ assert.equal((await incidents(req('/incidents',admin.cookie),undefined)).status,401)
+})
+
+
+test('Inactive stock report uses positive branch stock and completed-sale activity, keeps draft/other-branch activity separate and exports all filtered rows',async()=>{
+ const f=await fixture(10),foreign=await fixture(10),admin=await actor(f.org.id,f.store.id,'admin')
+ const {GET:balances}=await import('@/app/api/inventory/balances/route')
+ const product=async(name:string,quantity:number)=>{const value=await prisma.product.create({data:{organizationId:f.org.id,name,sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:'0.123456'}});await prisma.inventoryBalance.create({data:{storeId:f.store.id,productId:value.id,quantity}});return value}
+ const never=await product('=Never sold',2),recent=await product('Recent returned activity',3),zero=await product('Zero stock',0)
+ await posted(f,new Date(Date.now()-31*86400000))
+ const recentSale=await posted({...f,product:recent},new Date(Date.now()-86400000))
+ await prisma.payment.create({data:{organizationId:f.org.id,storeId:f.store.id,shiftId:f.shift.id,saleId:recentSale.id,paymentType:'cash',direction:'in',amount:20,receivedBy:f.user.id}})
+ await returnSale(f.context,recentSale.id,returnSchema.parse({operationId:randomUUID(),shiftId:f.shift.id,reason:'Actual full return stays sales activity',items:[{saleItemId:recentSale.items[0].id,quantity:2}]}))
+ await createDraft(f.context,{...f.draft,items:[{productId:never.id,quantity:1,discountAmount:0}]},randomUUID())
+ const hidden=await prisma.store.create({data:{organizationId:f.org.id,name:'Other branch'}}),register=await prisma.register.create({data:{storeId:hidden.id,name:'Other till',code:randomUUID()}}),shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:f.member.id,openingCash:0}})
+ await prisma.inventoryBalance.create({data:{storeId:hidden.id,productId:never.id,quantity:4}})
+ await posted({...f,store:hidden,register,shift,product:never},new Date())
+ const result=await balances(req('/inventory/balances?inactiveDays=30&storeId='+f.store.id+'&limit=1',admin.cookie),undefined)
+ assert.equal(result.status,200);const body=await result.json();assert.equal(body.pagination.total,2);assert.equal(body.data.length,1);assert.equal(body.meta.inactiveDays,30);assert.equal(new Date(body.meta.observedAt).getTime()-new Date(body.meta.inactiveSince).getTime(),30*86400000)
+ const all=await balances(req('/inventory/balances?inactiveDays=30&storeId='+f.store.id,f.cookie),undefined),rows=(await all.json()).data
+ assert.deepEqual(new Set(rows.map((row:{productId:string})=>row.productId)),new Set([f.product.id,never.id]));assert.ok(!rows.some((row:{productId:string})=>[recent.id,zero.id,foreign.product.id].includes(row.productId)))
+ const csv=await balances(req('/inventory/balances?inactiveDays=30&storeId='+f.store.id+'&format=csv&limit=1&page=2',f.cookie),undefined);assert.equal(csv.status,200);const content=(await csv.json()).data.content;assert.match(content,/'=Never sold/);assert.match(content,/Frozen/);assert.doesNotMatch(content,/Recent returned activity|Zero stock/)
+ const ordinary=await balances(req('/inventory/balances?storeId='+f.store.id,f.cookie),undefined),ordinaryBody=await ordinary.json();assert.equal(ordinaryBody.pagination.total,4);assert.equal(ordinaryBody.meta.definition,'current_stock_snapshot')
+ const sixty=await balances(req('/inventory/balances?inactiveDays=60&storeId='+f.store.id,f.cookie),undefined);assert.deepEqual((await sixty.json()).data.map((row:{productId:string})=>row.productId),[never.id])
+ const hiddenResult=await balances(req('/inventory/balances?inactiveDays=30&storeId='+hidden.id,admin.cookie),undefined);assert.equal(hiddenResult.status,404)
+ for(const value of ['0','-1','1.5','3651','NaN','Infinity',''])assert.equal((await balances(req('/inventory/balances?inactiveDays='+value,f.cookie),undefined)).status,400)
+})

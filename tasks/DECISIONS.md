@@ -507,3 +507,22 @@ Hashed recovery10×128bit/365day, fresh password+new TOTP rotation, current pass
 ## ADR-069 — Muhim operationlar uchun opt-in markaziy MFA (2026-10-11)
 
 Mavjud runOperation authorization bosqichi va action/key/hash/session-bound proof ishlatiladi. AUTH_CRITICAL_MFA_REQUIRED availabilitydan mustaqil: TOTP outage talabni chetlab o‘tmaydi; noto‘g‘ri konfiguratsiya fail-closed. 12 reviewed kritik operation turi, asl javob replays ham tekshiriladi, platform vakolati alohida saqlanadi. Default false bilan mavjud biznes oqimlari saqlanadi; production rollout hali amalga oshirilmagan. Dashboard React modal + mavjud API client; credential memory-only, original serialized body/key bir marta retry, cancel/timeout/unmount/account switch xavfsiz bekor qilish. Yangi kutubxona/vendor yoki schema yo‘q. Barcha dangerous mutationlar to‘liq inventory qilinmaguncha SEC-02.06 done qilinmaydi. Contract: docs/operations/totp-core.md.
+
+## ADR-070 — Maxsus rollar mavjud asosiy rolni cheklaydi (2026-10-11)
+
+USR-01.06 uchun alohida RBAC SaaS qo‘shilmaydi. PostgreSQL CustomRole tashkilotga tegishli, owner tomonidan boshqariladi; asosiy rol admin yoki cashier. Profil faqat reviewed route/method admission xaritasidagi asosiy rolga ruxsat etilgan subsetni beradi. Shaxsiy account/auth va tashkilot tanlash saqlanadi; tenant/branch/resource/approval va mustaqil platform/support DAL nazorati davom etadi. Owner profil orqali yaratilmaydi. Omborchi, Buxgalter, Kuzatuvchi — owner uchun aniq, tahrirlanadigan namunalar; mavjud xodimlar o‘zgarmaydi.
+
+Profil tahriri expectedRevision + original operation identity bilan; source/base-role/author immutable. Vakolat yoki faol holat o‘zgarishi barcha tegishli sessiyalarni SQL orqali bekor qiladi; har requestda yangi profil o‘qiladi, eski kontekst ID/revision tekshiruvidan o‘tmaydi. Profilni olib tashlash asosiy rol huquqlarini qaytarishi UI da ochiq aytiladi. Nofaol profil tarixda qoladi; yangi login/switch rad etiladi. Source, audit va session revoke bir tranzaksiyada; read-only/closure guard mavjud. Bu yangi field-level permission siyosati emas: owner admin endpoint ko‘rinadigan maydonlarini ongli ravishda tanlaydi.
+
+API/UI contract va operator ko‘rsatmasi: `docs/operations/custom-roles.md`. Qabul dalili yakuniy regressiyadan keyin yoziladi; ADR mavjudligi vazifani o‘zi done qilmaydi.
+
+## ADR-071 — Restore authentication quarantine va tashqi deployment chegarasi (2026-10-11)
+
+Restore target offline qoladi; gate sweepdan oldin alohida commit qilinadi. Eski session/TOTP/challenge/invitation revocation va operatorning password/PIN/access reconciliation dalilidan keyingina bir martalik review mumkin. Eski backupdagi vakolatlar avtomatik tasdiqlanmaydi. Foydalanuvchi real staging/production, TLS/domen, off-site monitoring/backup va pilot hali tayyor emasligini tasdiqladi: core texnik tayyorgarlik davom etadi, real qabul blocked_external, production deployment uchun alohida tasdiq kerak.
+
+
+## ADR-072 — Tenant recovery readonly reja chegarasi (2026-10-11)
+
+Mavjud Prisma/PG, reviewed tenant export va Node crypto ishlatiladi; yangi kutubxona yoki provider protokoli yo‘q. Recovered isolated copy va target exact migration/checksum bilan tekshiriladi; unfinished migration rad. RepeatableRead READ ONLY snapshots ketma-ket; private0600 exclusive artifact row key/digest/FK va current-only preservationni bildiradi. Portable export credential/security omissions saqlanadi. CLI database nomlari explicit confirmation, operator-owned0700 katalog va mustaqil case SHA binding talab qiladi.
+
+OPS-03.05 planning mezoni real disposable pg_dump/restore clone hamda foreign tenant hash invarianti bilan qabul qilindi. Apply/import, credential restore, shared user/role rollback yoki moliyaviy journal overwrite qo‘shilmaydi. Kelajakdagi correction mavjud audited posting/reversal contractlari bilan operator review va target drain/recheckdan keyin; haqiqiy production recovery alohida vakolat va tashqi dalil talab qiladi.

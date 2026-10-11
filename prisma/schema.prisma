@@ -2084,6 +2084,7 @@ model TotpFactor {
  user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  proofs TotpProof[]
  recoveryCodes TotpRecoveryCode[]
+ keyRotations TotpKeyRotation[]
  @@index([userId,createdAt])
 }
 model TotpProof {
@@ -2111,4 +2112,29 @@ model TotpRecoveryCode {
  usedAt DateTime?
  factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
  @@index([factorId])
+}
+
+model TotpKeyRotation {
+ id String @id @default(uuid())
+ factorId String
+ batchId String
+ actorId String
+ reason String
+ oldEnvelopeHash String
+ newEnvelopeHash String
+ targetKeyFingerprint String
+ createdAt DateTime @default(now())
+ factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@unique([factorId,oldEnvelopeHash])
+ @@unique([batchId,factorId])
+ @@index([batchId])
+}
+
+// Operator-only restore quarantine and immutable review provenance.
+model AuthRestoreCheckpoint {
+ id String @id @default(uuid())
+ createdAt DateTime @default(now())
+ reviewedAt DateTime?
+ reviewer String?
+ reviewEvidence String?
 }

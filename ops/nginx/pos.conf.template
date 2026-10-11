@@ -1,0 +1,48 @@
+# Template only: replace every __...__ token before nginx -t.
+# Included inside nginx http {}. Host-local proxy -> loopback app only.
+# No access log: URL/query can contain sensitive recovery references.
+server {
+    listen 80 default_server;
+    server_name _;
+    access_log off;
+    return 444;
+}
+server {
+    listen 80;
+    server_name __APP_HOST__;
+    access_log off;
+    return 308 https://__APP_HOST__$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name __APP_HOST__;
+    ssl_certificate __CERTIFICATE_ABSOLUTE_PATH__;
+    ssl_certificate_key __PRIVATE_KEY_ABSOLUTE_PATH__;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_tickets off;
+    access_log off;
+    # Raw nginx error logs may contain paths/IPs: private access and retention.
+    client_max_body_size 12m;
+    client_header_timeout 10s;
+    client_body_timeout 10s;
+    send_timeout 60s;
+    if ($host != __APP_HOST__) { return 444; }
+    location / {
+        proxy_pass http://127.0.0.1:__APP_PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Host __APP_HOST__;
+        proxy_set_header X-Forwarded-Host __APP_HOST__;
+        proxy_set_header X-Forwarded-Proto https;
+        # Replace, never append untrusted incoming forwarding headers.
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Connection "";
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_buffering off;
+        proxy_cache off;
+        # Never automatically retry writes on an alternate upstream.
+        proxy_next_upstream off;
+    }
+}

@@ -146,6 +146,12 @@ SQL
 )
 [[ "$restored_advance" == '13.25:9.99:1.25:-1.25:2.01' ]]
 printf 'PASS: original advance, allocation/debt source, unused refund and exact 9.99 balance recovered\n'
+# Restore intentionally retains quarantine until nonsecret operator review.
+restore_pending=$(docker exec -i pos-plan-test-db psql -U pos_test -d "$restore_db" -At -c 'SELECT count(*) FROM "AuthRestoreCheckpoint" WHERE "reviewedAt" IS NULL')
+[[ "$restore_pending" == 1 ]]
+restore_live_sessions=$(docker exec -i pos-plan-test-db psql -U pos_test -d "$restore_db" -At -c 'SELECT count(*) FROM "Session" WHERE "revokedAt" IS NULL')
+[[ "$restore_live_sessions" == 0 ]]
+AUTH_RESTORE_REVIEWER='Isolated restore operator' AUTH_RESTORE_REVIEW_EVIDENCE='Synthetic fixture has no reusable password/PIN and only reviewed fixture owner access' AUTH_RESTORE_CREDENTIALS_RECONCILED=yes AUTH_RESTORE_ACCESS_RECONCILED=yes scripts/ops/review-restored-auth.sh
 node node_modules/typescript/bin/tsc -p tsconfig.test.json
 DATABASE_URL="$RESTORE_DATABASE_URL" RESTORE_FIXTURE_ID="$fixture_id" node --require ./scripts/test-resolver.cjs scripts/ops/verify-restored-app.mjs
 restore_elapsed=$(($(date +%s)-restore_started))

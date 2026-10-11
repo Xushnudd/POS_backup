@@ -10,6 +10,9 @@ export const CRITICAL_ACTIONS = [
   'billing.payment.confirm', 'billing.subscription.cancel', 'offline-cash.policy',
   'billing.cost.record', 'billing.cost.cancel', 'support.policy.publish', 'support.grant',
   'users.role.create', 'users.role.update',
+  'users.member.update', 'users.ownership.request', 'users.ownership.accept', 'users.ownership.cancel',
+  'users.member.create', 'users.invitation.create',
+  'auth.password.change',
 ] as const
 export async function assertCriticalAction(tx: Prisma.TransactionClient, context: TokenPayload, action: string, operationKey: string, hash: string) {
   if (!(CRITICAL_ACTIONS as readonly string[]).includes(action)) return

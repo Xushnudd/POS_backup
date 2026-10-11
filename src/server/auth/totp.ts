@@ -38,7 +38,7 @@ export function sealTotpSecret(secret: string, userId: string, factorId: string)
   const ciphertext = Buffer.concat([cipher.update(secret, 'utf8'), cipher.final()])
   return ['v1', iv.toString('base64url'), cipher.getAuthTag().toString('base64url'), ciphertext.toString('base64url')].join('.')
 }
-export function unsealTotpSecret(value: string, userId: string, factorId: string) {
+function openTotpSecret(value: string, userId: string, factorId: string) {
   const configuration = totpKeyConfiguration()
   if (!configuration) throw new AccessError(503, 'TOTP_UNAVAILABLE')
   // A bounded deployment-only overlap permits rolling key replacement. Never
@@ -49,15 +49,22 @@ export function unsealTotpSecret(value: string, userId: string, factorId: string
     if (parts.length !== 4 || parts[0] !== 'v1' || parts.slice(1).some(part => !/^[A-Za-z0-9_-]+$/.test(part))) throw new Error('Invalid envelope')
     const [, iv, tag, ciphertext] = parts.map((part, index) => index ? Buffer.from(part, 'base64url') : Buffer.alloc(0))
     if (iv.length !== 12 || tag.length !== 16 || ciphertext.length !== 32) throw new Error('Invalid envelope')
-    for (const candidate of keys) {
+    for (const [keyIndex, candidate] of keys.entries()) {
       try {
         const decipher = createDecipheriv('aes-256-gcm', candidate, iv)
         decipher.setAAD(binding(userId, factorId)); decipher.setAuthTag(tag)
         const secret = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8')
         instance(secret)
-        return secret
+        return {secret, keyIndex}
       } catch { /* Try only the bounded, explicitly configured overlap keys. */ }
     }
     throw new Error('Invalid envelope')
   } catch { throw new AccessError(409, 'TOTP_SECRET_INVALID') }
+}
+
+export function unsealTotpSecret(value: string, userId: string, factorId: string) {
+  return openTotpSecret(value,userId,factorId).secret
+}
+export function isTotpEnvelopeCurrent(value: string, userId: string, factorId: string) {
+  return openTotpSecret(value,userId,factorId).keyIndex===0
 }

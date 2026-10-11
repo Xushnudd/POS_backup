@@ -5,7 +5,11 @@ import {api} from '@/lib/api'
 import {STEP_UP_EVENT, type StepUpRequest} from '@/lib/step-up'
 import {useAuth} from '@/context/AuthContext'
 const actionNames: Record<string,string> = {
+  'auth.password.change':'Parolni almashtirish',
   'users.role.create':'Maxsus rol yaratish', 'users.role.update':'Maxsus rol vakolatlarini o‘zgartirish',
+  'users.member.update':'Xodim vakolati yoki holatini o‘zgartirish',
+  'users.member.create':'Yangi xodimga vakolat berish', 'users.invitation.create':'Xodimni vakolat bilan taklif qilish',
+  'users.ownership.request':'Egalikni topshirish so‘rovi', 'users.ownership.accept':'Egalikni qabul qilish', 'users.ownership.cancel':'Egalik so‘rovini bekor qilish',
   'platform.overview':'Platforma boshqaruv panelini ko‘rish',
   'retention.closure.request':'Tashkilotni yopish so‘rovi', 'retention.closure.cancel':'Yopish so‘rovini bekor qilish',
   'retention.policy.publish':'Ma’lumotlarni saqlash siyosatini o‘zgartirish', 'billing.plan.publish':'Tarifni o‘zgartirish',
@@ -51,7 +55,7 @@ export default function CriticalStepUp() {
     } catch (failure) {if (pending.current === request) setError(failure instanceof Error ? failure.message : 'Tasdiqlash amalga oshmadi')}
     finally {setCode(''); busy.current = false; setSaving(false)}
   }
-  return <Modal isOpen={binding !== null} onClose={close} title="Muhim amalni tasdiqlash" size="sm">
+  return <Modal layer="critical" isOpen={binding !== null} onClose={close} title="Muhim amalni tasdiqlash" size="sm">
     <p className="mb-3">Authenticator ilovasidagi kodni kiriting. Tasdiq faqat shu amal va joriy sessiya uchun ishlaydi.</p>
     <p className="mb-3">Amal: {binding ? actionNames[binding.action] ?? 'Muhim amal' : ''}</p>
     <p className="mb-3">Authenticator ulanmagan bo‘lsa, amalni bekor qilib xavfsizlik sahifasida ulang.</p>

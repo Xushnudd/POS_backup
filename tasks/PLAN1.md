@@ -750,7 +750,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **SEC-02.06** — Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq.
+- [x] **SEC-02.06** — Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq.
 
   **Texnologiya:** Mavjud sessiya + OTP challenge, PostgreSQL approval.
 
@@ -766,7 +766,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `SEC-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-  **Joriy holat (2026-10-10): in_progress.** OTPAuth9.5.2 maintained TOTP, SQL119–121, enrollment/confirmation/action-bound proof, hashed recovery/rotation, HTTP/UI va general step-up bridge tayyor. Standart featureflag o‘chiq; global critical/platform enforcement va encryption key rotation qoladi. Core original done sifatida sanalmaydi. Contract: `docs/operations/totp-core.md`; qabul: `tasks/evidence/totp-core-20261010.json`, `tasks/evidence/totp-recovery-20261010.json`.
+  **Joriy holat (2026-10-11): done (core qabul).** OTPAuth9.5.2, SQL119–125, 21 action uchun sessiya/amal/payloadga bog‘langan bir martalik MFA, recovery, operator rekey va restore quarantine qabuldan o‘tdi. 313/313 full integration, 35/35 focused, yakuniy restore CLI 2/2, 33 unit fayl, uch brauzerda 15/15; production build/worker/lint/typecheck va fresh/legacy migration PASS. Dalil: `tasks/evidence/critical-mfa-restore-20261011.json`; inventory: `docs/operations/critical-action-inventory.md`. Standart rollout flag o‘chiq; haqiqiy production rollout va operatorning credential/access reconciliation tasdig‘i alohida tashqi ish. SMS/e-mail provider integratsiyasi bundan done hisoblanmaydi.
 
 - [x] **SEC-02.07** — API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish.
 
@@ -914,7 +914,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Qabul (2026-10-08):** `done`. Individual dalil EXECUTION_STATUS.md dagi “PWA va manager tasdig‘i” protokolida.
 
-- [ ] **USR-01.06** — Kelgusida omborchi/buxgalter/kuzatuvchi roli va moslashtiriladigan vakolatlar.
+- [x] **USR-01.06** — Kelgusida omborchi/buxgalter/kuzatuvchi roli va moslashtiriladigan vakolatlar.
 
   **Texnologiya:** PostgreSQL role/permission tables va TypeScript policies.
 
@@ -929,6 +929,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Omborchi/buxgalter/kuzatuvchi matritsasi implementatsiya qilingan; allow/deny va role edit testlari bor.
 
   **Dalil:** `USR-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-11): done.** Owner boshqaradigan admin/cashier subset matritsasi, Omborchi/Buxgalter/Kuzatuvchi namunasi, API/UI, scoped revision va sessiya revocation; allow/deny, tenant/branch, replay/concurrency, rollback va read-only qabul. Dalil: `evidence/custom-roles-20261011.json`; qo‘llanma `../docs/operations/custom-roles.md`.
 
 ### 5. Savdo, qaytarish va narxlar
 
@@ -2458,6 +2460,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
+  **Joriy holat (2026-10-11): in_progress.** Qoldiq qiymati/jurnal/kam qoldiq va filialdagi N×24soat completed-sale inactivity tahlili API/UI/CSVda qabuldan o‘tdi (30/60/90 UI,1–3650 API). Omborda turish yoshi emas. Finance67/focused1/unit33/browser3, production build PASS. `tasks/evidence/inactive-stock-20261011.json`; `docs/operations/inventory-inactivity.md`. Partiya/yaroqlilik muddati INV-02.06 va expiry report ochiq; original done hisoblanmaydi.
+
 - [x] **REP-01.08** — P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti.
 
   **Texnologiya:** Prisma report queries, shared Decimal definitions.
@@ -3841,7 +3845,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-03.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-03.05** — Tashkilotga tegishli yozuvni tiklashda boshqa tashkilot ma’lumotiga ta’sirni tekshirish.
+- [x] **OPS-03.05** — Tashkilotga tegishli yozuvni tiklashda boshqa tashkilot ma’lumotiga ta’sirni tekshirish.
 
   **Texnologiya:** Isolated PostgreSQL recovery copy va tenant-scoped import.
 
@@ -3854,6 +3858,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Tenant restore isolated cloneda rejalangan; boshqa tenant snapshot/hashlari o‘zgarmaydi.
+
+  **Qabul (2026-10-11):** `done` — isolated recovered clone bilan read-only reja, boshqa tenant business snapshot/hashlari teng. Apply/import yoki real production recovery bajarilmagan. [Qabul dalili](evidence/tenant-recovery-20261011.json), [operator tartibi](../docs/operations/tenant-recovery.md).
 
   **Dalil:** `OPS-03.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

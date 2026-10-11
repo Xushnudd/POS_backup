@@ -16,6 +16,9 @@ const me=require('../../.test-build/src/app/api/auth/me/route.js');
 const token=randomBytes(32).toString('base64url');
 let session;
 try {
+  assert.equal((await prisma.session.findUniqueOrThrow({where:{id:fixture}})).revokedAt instanceof Date,true);
+  assert.equal(await prisma.authRestoreCheckpoint.count({where:{reviewedAt:null}}),0);
+  assert.equal(await prisma.authRestoreCheckpoint.count({where:{reviewedAt:{not:null}}}),1);
   const before=await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]);
   session=await prisma.session.create({data:{organizationId:fixture,userId:fixture,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});
   const request=path=>new NextRequest('http://localhost:3000/api/'+path,{headers:{cookie:'pos_session='+token}});

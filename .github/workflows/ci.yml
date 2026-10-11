@@ -5,7 +5,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:15-alpine
@@ -35,7 +35,10 @@ jobs:
       - run: npm run typecheck
       - run: npm run worker:build
       - run: npm test
+      - run: npm run test:ops
       - run: npm run test:integration
+        env:
+          POS_TEST_PSQL_CONTAINER: ${{ job.services.postgres.id }}
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
       - run: npx playwright install --with-deps chromium firefox webkit

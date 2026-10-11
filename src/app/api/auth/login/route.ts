@@ -7,6 +7,7 @@ import { verifyPassword } from '@/lib/auth'
 import { z } from 'zod'
 import {loginClientHash,recordLogin} from '@/server/security/service'
 import { createSession, sessionHash, setSessionCookie } from '@/server/auth/session'
+import {assertAuthenticationRestoreReady} from '@/server/auth/restore-state'
 import {activeMembershipWhere} from '@/server/auth/custom-role-policy'
 
 const loginSchema = z.object({
@@ -20,6 +21,7 @@ async function handlePOST(request: NextRequest) {
     const body = await request.json()
     const validatedData = loginSchema.parse(body)
 
+    await assertAuthenticationRestoreReady()
     await consumeLimit('login-account',validatedData.phone)
     if (process.env.TRUST_PROXY_IP === 'true') await consumeLimit('login-ip',request.headers.get('x-real-ip')??'unknown',30)
     // Find user by phone

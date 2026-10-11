@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import type { NextRequest, NextResponse } from 'next/server'
 import {activeMembershipWhere} from './custom-role-policy'
 import {AccessError} from './policy'
+import {authenticationRestoreReady,assertAuthenticationRestoreReady} from './restore-state'
 
 export const SESSION_COOKIE = 'pos_session'
 const ABSOLUTE_MS = 24 * 60 * 60 * 1000
@@ -11,6 +12,7 @@ const IDLE_MS = 8 * 60 * 60 * 1000
 export const sessionHash = (token: string) => createHash('sha256').update(token).digest('hex')
 
 export async function createSession(tx: Prisma.TransactionClient, userId: string, organizationId: string, options?:{pinStoreId:string}) {
+  await assertAuthenticationRestoreReady(tx)
   if(!await tx.organizationUser.findFirst({where:{userId,organizationId,...activeMembershipWhere,user:{isActive:true}}}))throw new AccessError(403,'NO_ORGANIZATION')
   const token = randomBytes(32).toString('base64url')
   const now = Date.now()
@@ -32,6 +34,7 @@ export function getRequestToken(request: NextRequest) {
 }
 export async function verifySession(token: string, options?:{touch?:boolean}) {
   if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return null
+  if(!await authenticationRestoreReady())return null
   const now = new Date()
   const session = await prisma.session.findUnique({ where: { tokenHash: sessionHash(token) }, include: { user: true } })
   if (!session || session.revokedAt || !session.user.isActive || session.expiresAt <= now || session.idleExpiresAt <= now) return null

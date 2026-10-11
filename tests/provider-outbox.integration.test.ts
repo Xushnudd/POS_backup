@@ -2,7 +2,7 @@ import { test, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { readFileSync, rmSync } from 'node:fs'
+import { readFileSync, rmSync, mkdtempSync, openSync, closeSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { NextRequest } from 'next/server'
@@ -229,4 +229,34 @@ test('Actual worker process crash after remote commit restarts with lookup and o
     const row = await prisma.providerOutbox.findUniqueOrThrow({ where: { intentId: intent.id } })
     assert.equal(row.submitAttempts, 1); assert.equal(row.lookupAttempts, 1)
   } finally { rmSync(path, { force: true }) }
+})
+
+
+test('Actual backup restore fences queued and old running provider submissions; only original-ID lookup can settle once',async()=>{
+ const queuedFixture=await fixture(),runningFixture=await fixture()
+ const queued=await enqueue(queuedFixture,'restore-test'),running=await enqueue(runningFixture,'restore-test')
+ const binding=adapter(async()=>({state:'unknown'}),async()=>({state:'unknown'}))
+ const oldClaim=await claimProviderIntent(registry(binding,'restore-test'));assert.ok(oldClaim);assert.ok([queued.id,running.id].includes(oldClaim.intentId))
+ // The oldest due row is the first enqueue. Keep the other row queued and refer
+ // to the actual claimed ID; no assumption about transaction timestamp ordering.
+ const runningId=oldClaim.intentId,queuedId=runningId===queued.id?running.id:queued.id
+ const container=process.env.POS_TEST_PSQL_CONTAINER??'pos-plan-test-db'
+ if(!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$/.test(container))throw new Error('Isolated PostgreSQL container only')
+ const database='pos_provider_restore_'+randomUUID().replaceAll('-',''),directory=mkdtempSync(join(tmpdir(),'pos-provider-restore-'))
+ const url=new URL(connection);url.pathname='/'+database
+ let created=false
+ const docker=(args:string[],input?:Buffer)=>execFileSync('docker',['exec','-i',container,...args],{input,stdio:['pipe','pipe','pipe']})
+ try{
+  const dumpPath=join(directory,'isolated.dump'),output=openSync(dumpPath,'wx',0o600)
+  try{execFileSync('docker',['exec','-i',container,'pg_dump','-U','pos_test','-d','pos_test','--format=custom','--no-owner','--no-acl'],{stdio:['pipe',output,'pipe']})}finally{closeSync(output)}
+  docker(['createdb','-U','pos_test',database]);created=true
+  const input=openSync(dumpPath,'r')
+  try{execFileSync('docker',['exec','-i',container,'pg_restore','-U','pos_test','-d',database,'--exit-on-error','--single-transaction','--no-owner','--no-acl'],{stdio:[input,'pipe','pipe']})}finally{closeSync(input)}
+  docker(['psql','-X','-U','pos_test','-d',database,'-v','ON_ERROR_STOP=1'],readFileSync('scripts/ops/auth-restore-quarantine.sql'))
+  const claimFile=join(directory,'claim.json');writeFileSync(claimFile,JSON.stringify(oldClaim),{mode:0o600,flag:'wx'})
+  const result=execFileSync(process.execPath,['--require','./scripts/test-resolver.cjs','.test-build/tests/fixtures/provider-restored-worker.js'],{env:{...process.env,DATABASE_URL:url.toString(),POS_PROVIDER_RESTORE_QUEUED:queuedId,POS_PROVIDER_RESTORE_RUNNING:runningId,POS_PROVIDER_RESTORE_CLAIM_FILE:claimFile},encoding:'utf8',stdio:['pipe','pipe','pipe']})
+  assert.deepEqual(JSON.parse(result),{status:'passed',executeCalls:0,lookupCalls:2,domainFinalizations:1,economicCountsUnchanged:true})
+  assert.equal((await prisma.providerOutbox.findUniqueOrThrow({where:{intentId:queuedId}})).state,'queued')
+  assert.equal((await prisma.providerOutbox.findUniqueOrThrow({where:{intentId:runningId}})).state,'running')
+ }finally{if(created)docker(['dropdb','-U','pos_test',database]);rmSync(directory,{recursive:true,force:true})}
 })

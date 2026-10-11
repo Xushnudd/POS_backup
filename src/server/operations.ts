@@ -24,7 +24,7 @@ export async function assertLiveContext(tx:Pick<Prisma.TransactionClient,'$query
     JOIN "OrganizationUser" m ON m."userId"=s."userId" AND m."organizationId"=s."organizationId"
     LEFT JOIN "CustomRole" cr ON cr.id=m."customRoleId" AND cr."organizationId"=m."organizationId"
     WHERE s.id=${context.sessionId} AND s."userId"=${context.userId} AND s."organizationId"=${context.organizationId}
-      AND m.id=${context.organizationUserId} AND s."revokedAt" IS NULL AND s."expiresAt">NOW() AND s."idleExpiresAt">NOW() AND u."isActive" AND m."isActive"
+      AND auth_restore_ready() AND m.id=${context.organizationUserId} AND s."revokedAt" IS NULL AND s."expiresAt">NOW() AND s."idleExpiresAt">NOW() AND u."isActive" AND m."isActive"
       AND (m."customRoleId" IS NULL OR (cr."isActive" AND cr."baseRole"=m.role))`;
   const active=rows[0];
   if(!active||active.role!==context.role||active.customRoleId!==(context.customRole?.id??null)||active.customRoleRevision!==(context.customRole?.revision??null)||(context.role!=='owner'&&context.storeIds.some(id=>!active.storeIds.includes(id))))throw new AccessError(401,'SESSION_CHANGED','Sessiya yoki vakolat o‘zgardi; qayta kiring');

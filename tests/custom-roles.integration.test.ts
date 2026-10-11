@@ -9,6 +9,7 @@ import {createCustomRole,updateCustomRole,listCustomRoles} from '@/server/users/
 import {updateMember} from '@/server/users/service'
 import {assertLiveContext} from '@/server/operations'
 import {withApi} from '@/server/api'
+import {GET as storeGET} from '@/app/api/stores/[id]/route'
 const connection=new URL(process.env.DATABASE_URL??'')
 if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw new Error('Isolated DB only')
 const organizations:string[]=[],users:string[]=[]
@@ -27,6 +28,16 @@ async function fixture(legacy=false){
 }
 const command=(name='Kuzatuvchi')=>({operationId:randomUUID(),name,baseRole:'admin' as const,permissions:['GET /api/products'],reason:'Owner reviewed explicit permissions'})
 const revision=(row:{revision:number;name:string;permissions:string[];isActive:boolean},extra:object={})=>({operationId:randomUUID(),expectedRevision:row.revision,name:row.name,permissions:row.permissions,isActive:row.isActive,reason:'Owner reviewed role change',...extra})
+test('An allowed custom route cannot bypass assigned-branch boundaries',async()=>{
+ const f=await fixture(),row=await createCustomRole(f.ctx,{...command(),permissions:['GET /api/stores/[id]']})
+ const assigned=await prisma.store.create({data:{organizationId:f.org.id,name:'Assigned branch'}}),unassigned=await prisma.store.create({data:{organizationId:f.org.id,name:'Unassigned branch'}})
+ await updateMember(f.ctx,f.staff.membership.id,{customRoleId:row.id,storeIds:[assigned.id]})
+ const token=await prisma.$transaction(tx=>createSession(tx,f.staff.user.id,f.org.id))
+ const request=(id:string)=>new NextRequest('http://localhost/api/stores/'+id,{headers:{cookie:`pos_session=${token}`}})
+ assert.equal((await storeGET(request(assigned.id),{params:Promise.resolve({id:assigned.id})})).status,200)
+ assert.equal((await storeGET(request(unassigned.id),{params:Promise.resolve({id:unassigned.id})})).status,404)
+ assert.deepEqual((await verifySession(token))?.storeIds,[assigned.id])
+})
 test('Owner creates tenant-local profiles, exact replay is stable and profiles cannot elevate owner/cashier privileges',async()=>{
  const f=await fixture(),input=command(),row=await createCustomRole(f.ctx,input)
  assert.equal((await createCustomRole(f.ctx,input)).id,row.id)

@@ -18,7 +18,10 @@
     "prebuild": "node scripts/build-offline.cjs",
     "worker:jobs": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/jobs.js",
     "security:scan": "node scripts/security/scan.mjs",
-    "security:scan:test": "node --test scripts/security/scan.test.mjs"
+    "security:scan:test": "node --test scripts/security/scan.test.mjs",
+    "worker:totp-rekey": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/totp-rekey.js",
+    "test:ops": "node --test --test-isolation=none scripts/ops/*.test.mjs",
+    "worker:tenant-recovery-plan": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/tenant-recovery-plan.js"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",

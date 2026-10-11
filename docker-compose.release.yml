@@ -1,0 +1,22 @@
+# Use with base compose and maintenance overlay; never deploy automatically.
+name: ${COMPOSE_PROJECT_NAME:?A separate environment project is required}
+x-release-auth: &release-auth
+  AUTH_CHALLENGE_SECRET: ${AUTH_CHALLENGE_SECRET:?A private environment-specific 64hex key is required}
+  AUTH_TOTP_ENABLED: "true"
+  AUTH_CRITICAL_MFA_REQUIRED: "true"
+services:
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Explicit environment database required}
+      POSTGRES_USER: ${POSTGRES_USER:?Explicit environment database user required}
+  app:
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth
+  jobs:
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth
+  reconciliation:
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth
+  migrate:
+    image: ${POS_IMAGE:?Immutable approved image required}

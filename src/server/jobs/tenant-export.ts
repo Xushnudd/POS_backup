@@ -1,4 +1,6 @@
 import {createHash} from 'node:crypto'
+import {readdirSync,readFileSync} from 'node:fs'
+import {join} from 'node:path'
 import {Prisma,type PrismaClient} from '@prisma/client'
 import {prisma} from '@/lib/prisma'
 import {AccessError} from '../auth/policy'
@@ -26,9 +28,17 @@ function serialize(_key:string,value:unknown):unknown{
  if(value&&typeof value==='object'&&'type' in value&&value.type==='Buffer'&&'data' in value&&Array.isArray(value.data))return {encoding:'base64',data:Buffer.from(value.data).toString('base64')}
  return value
 }
-export async function tenantExport(organizationId:string,db:Pick<PrismaClient,'$transaction'>=prisma){
+export async function tenantExport(organizationId:string,db:Pick<PrismaClient,'$transaction'>=prisma,options:{readOnly?:boolean}={}){
  assertExportCoverage()
  return db.$transaction(async tx=>{
+  if(options.readOnly){
+   await tx.$executeRaw`SET TRANSACTION READ ONLY`
+   const directory=join(process.cwd(),'prisma/migrations')
+   const expected=readdirSync(directory,{withFileTypes:true}).filter(entry=>entry.isDirectory()).map(entry=>({name:entry.name,checksum:createHash('sha256').update(readFileSync(join(directory,entry.name,'migration.sql'))).digest('hex')})).sort((a,b)=>a.name<b.name?-1:1)
+   const applied=await tx.$queryRaw<{name:string;checksum:string}[]>`SELECT migration_name AS name,checksum FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL ORDER BY migration_name`
+   const pending=await tx.$queryRaw<{count:bigint}[]>`SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NULL AND rolled_back_at IS NULL`
+   if(pending[0].count!==BigInt(0)||expected.length===0||expected.length!==applied.length||expected.some((migration,index)=>migration.name!==applied[index].name||migration.checksum!==applied[index].checksum))throw new AccessError(503,'RECOVERY_SCHEMA_UNREVIEWED')
+  }
   const [snapshot]=await tx.$queryRaw<{asOf:Date}[]>`SELECT transaction_timestamp() AS "asOf"`
   const datasets: {model:string;rows:number;sha256:string}[]=[],chunks:Buffer[]=[]
   let bytes=0,rowCount=0

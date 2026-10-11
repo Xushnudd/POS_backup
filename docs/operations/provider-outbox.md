@@ -25,3 +25,9 @@ Manual review paytida SQL bilan status/proofni o‘zgartirmang va yangi kalit bi
 ## Migratsiya va tiklash
 
 098–099 additive migratsiyalar; qo‘llangan fayllar tahrirlanmaydi. Readiness ushbu migratsiyalarni talab qiladi. Backup intent/outbox/events/Operationni birga saqlashi kerak. Restore eski snapshotga remote business natijasini qaytarmaydi: maintenance ostida tiklab, orphan/unknown holatlar bo‘yicha authoritative lookup/reconciliation bajarilmaguncha provider bindingni yoqmang. Restart testi remote-side test proofdan keyingi process exit va boshqa processdagi lookupni tekshiradi; real vendor sandbox/pilot qabulini almashtirmaydi.
+
+### Restore uchun majburiy lookup (126)
+
+`AuthRestoreCheckpoint` pending bo‘lsa claim, transport va lokal settlement bloklanadi. Reviewdan keyin ham checkpoint sanasidan oldin yaratilgan intentlar qayta submit qilinmaydi: queued→running lookup transition SQL bilan ruxsat etiladi, submit attempt o‘smaydi va original intent UUID lookup qilinadi. SQL orqali eski queued intentni submitga claim qilish rad. Oldin olingan submit claim ham restore tarixidan keyin transportga yuborilmaydi; lease expiry orqali lookupga qaytadi. Oddiy yangi intentlar oldingi submit oqimini saqlaydi.
+
+Lookup `not_found` bo‘lsa manual review; shu javob charge qilishga ruxsat bermaydi. Kelajakdagi haqiqiy adapter source backupda umuman yo‘q remote operatsiyalarni ham authoritative reconcile qilishi kerak. Ichki tarixdagi confirmed/failed yozuvlarni ham real provider bilan solishtirish operator vazifasi; bu kod mavjud bo‘lmagan vendor query/list API yaratmaydi. Offline qurilmadagi browser queue backup tarkibi deb hisoblanmaydi. OPS-03.06ning to‘liq tashqi qabuli ushbu guarddan alohida.

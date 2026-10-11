@@ -1,15 +1,23 @@
 import { z } from 'zod'
+import type {Prisma} from '@prisma/client'
 import type { TokenPayload } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '../auth/policy'
-import { assertLiveContext, audit } from '../operations'
+import { assertLiveContext, audit, runOperation, payloadHash } from '../operations'
+import {assertCriticalAction} from '../auth/critical-actions'
 import {activeMembershipWhere} from '../auth/custom-role-policy'
-export const memberSchema=z.object({role:z.enum(['owner','admin','cashier']).optional(),customRoleId:z.string().uuid().nullable().optional(),isActive:z.boolean().optional(),storeIds:z.array(z.string().uuid()).max(100).optional(),action:z.enum(['archive','restore']).optional()}).strict().refine(input=>!input.action || (input.role===undefined&&input.customRoleId===undefined&&input.isActive===undefined&&input.storeIds===undefined),{message:'Arxivlash/tiklash alohida amal bo‘lishi kerak'})
+export const memberSchema=z.object({operationId:z.string().uuid().optional(),role:z.enum(['owner','admin','cashier']).optional(),customRoleId:z.string().uuid().nullable().optional(),isActive:z.boolean().optional(),storeIds:z.array(z.string().uuid()).max(100).optional(),action:z.enum(['archive','restore']).optional()}).strict().refine(input=>!input.action || (input.role===undefined&&input.customRoleId===undefined&&input.isActive===undefined&&input.storeIds===undefined),{message:'Arxivlash/tiklash alohida amal bo‘lishi kerak'})
+async function criticalMutation(tx:Prisma.TransactionClient,context:TokenPayload,action:string,operationId:string|undefined,payload:unknown){
+ if(process.env.AUTH_CRITICAL_MFA_REQUIRED==='true'&&!operationId)throw new AccessError(400,'OPERATION_ID_REQUIRED','MFA uchun yagona amal identifikatori talab qilinadi')
+ await assertCriticalAction(tx,context,action,operationId??context.organizationUserId,payloadHash(payload))
+}
 export async function updateMember(context:TokenPayload,id:string,input:z.infer<typeof memberSchema>) {
  if (context.role!=='owner') throw new AccessError(403,'FORBIDDEN')
- return prisma.$transaction(async tx=>{
+ input=memberSchema.parse(input)
+ const work=async(tx:Prisma.TransactionClient)=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
   await assertLiveContext(tx,context)
+  if(!input.operationId)await criticalMutation(tx,context,'users.member.update',undefined,{id,...input})
   const member=await tx.organizationUser.findFirst({where:{id,organizationId:context.organizationId}})
   if (!member) throw new AccessError(404,'NOT_FOUND')
   let nextRole=input.role??member.role
@@ -38,15 +46,18 @@ export async function updateMember(context:TokenPayload,id:string,input:z.infer<
   await tx.session.updateMany({where:{userId:member.userId,organizationId:context.organizationId,revokedAt:null},data:{revokedAt:new Date()}})
   await audit(tx,context,'OrganizationUser',id,input.action==='archive'?'membership_archived':input.action==='restore'?'membership_restored':'membership_updated',{role:result.role,customRoleId:result.customRoleId,isActive:result.isActive,archivedAt:result.archivedAt?.toISOString()??null,storeIds:input.storeIds})
   return result
- })
+ }
+ return input.operationId?runOperation(context,'users.member.update',input.operationId,{id,...input},work):prisma.$transaction(work)
 }
-export async function transferOwnership(context:TokenPayload,targetId:string) {
+export async function transferOwnership(context:TokenPayload,targetId:string,operationId?:string) {
  if(context.role!=='owner')throw new AccessError(403,'FORBIDDEN')
+ if(operationId)z.string().uuid().parse(operationId)
  return prisma.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
   await assertLiveContext(tx,context)
   const target=await tx.organizationUser.findFirst({where:{id:targetId,organizationId:context.organizationId,...activeMembershipWhere,user:{isActive:true}}})
   if(!target||target.userId===context.userId)throw new AccessError(400,'INVALID_TARGET')
+  await criticalMutation(tx,context,'users.ownership.request',operationId,{targetId,operationId})
   await tx.ownershipTransfer.updateMany({where:{organizationId:context.organizationId,state:'pending',expiresAt:{lte:new Date()}},data:{state:'expired'}})
   const pending=await tx.ownershipTransfer.findFirst({where:{organizationId:context.organizationId,state:'pending'}})
   if(pending){
@@ -58,13 +69,15 @@ export async function transferOwnership(context:TokenPayload,targetId:string) {
   return request
  })
 }
-export async function respondOwnership(context:TokenPayload,id:string,action:'accept'|'cancel'){
+export async function respondOwnership(context:TokenPayload,id:string,action:'accept'|'cancel',operationId?:string){
+ if(operationId)z.string().uuid().parse(operationId)
  return prisma.$transaction(async tx=>{
   await tx.$queryRaw`SELECT id FROM "Organization" WHERE id=${context.organizationId} FOR UPDATE`
   await assertLiveContext(tx,context)
   const request=await tx.ownershipTransfer.findFirst({where:{id,organizationId:context.organizationId}})
   if(!request||![request.fromMembershipId,request.toMembershipId].includes(context.organizationUserId))throw new AccessError(404,'NOT_FOUND')
   if(action==='accept'&&request.toMembershipId!==context.organizationUserId)throw new AccessError(403,'RECIPIENT_REQUIRED')
+  await criticalMutation(tx,context,'users.ownership.'+action,operationId,{id,action,operationId})
   if(request.state===(action==='accept'?'accepted':'cancelled'))return {request,token:null}
   if(request.state!=='pending'||request.expiresAt<=new Date())throw new AccessError(409,'TRANSFER_EXPIRED')
   if(action==='cancel'){

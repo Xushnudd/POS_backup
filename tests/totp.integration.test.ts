@@ -18,6 +18,11 @@ import {CRITICAL_ACTIONS} from '@/server/auth/critical-actions'
 import {assignPlan} from '@/server/billing/service'
 import {platformOverview,platformOverviewSchema} from '@/server/platform/overview'
 import {POST as platformOverviewPOST} from '@/app/api/platform/overview/route'
+import {updateMember,transferOwnership,respondOwnership} from '@/server/users/service'
+import {createSession} from '@/server/auth/session'
+import {createInvitation} from '@/server/users/invitations'
+import {POST as createStaffPOST} from '@/app/api/organizations/[id]/users/route'
+import {POST as changePasswordPOST} from '@/app/api/auth/change-password/route'
 import { beginTotpEnrollment, confirmTotpEnrollment, createTotpProof, assertTotpStepUp, recoverTotpFactor, rotateTotpRecoveryCodes, totpStatus } from '@/server/auth/totp-service'
 const connection = new URL(process.env.DATABASE_URL ?? '')
 if (connection.hostname !== '127.0.0.1' || connection.port !== '55439' || connection.pathname !== '/pos_test') throw new Error('Isolated DB only')
@@ -365,4 +370,148 @@ test('Invalid rotation configuration makes HTTP enrollment unavailable without p
   if (previous === undefined) delete process.env.AUTH_TOTP_PREVIOUS_SECRETS; else process.env.AUTH_TOTP_PREVIOUS_SECRETS = previous
   if (origin === undefined) delete process.env.APP_ORIGIN; else process.env.APP_ORIGIN = origin
  }
+})
+test('Member permissions require exact MFA and an operation key; approved replay does not log out a newly signed-in target',async()=>{
+ const f=await enrolled(),previous=process.env.AUTH_CRITICAL_MFA_REQUIRED,flag=process.env.AUTH_TOTP_ENABLED
+ const target=await prisma.user.create({data:{fullName:'MFA staff',phone:randomUUID(),passwordHash:await hashPassword(password)}});users.push(target.id)
+ const member=await prisma.organizationUser.create({data:{organizationId:f.org.id,userId:target.id,role:'admin'}})
+ const oldToken=await prisma.$transaction(tx=>createSession(tx,target.id,f.org.id)),input={operationId:randomUUID(),role:'cashier' as const}
+ try{
+  process.env.AUTH_CRITICAL_MFA_REQUIRED='true';process.env.AUTH_TOTP_ENABLED='true'
+  await assert.rejects(updateMember(f.ctx,member.id,{role:'cashier'}),{code:'OPERATION_ID_REQUIRED'})
+  await assert.rejects(updateMember(f.ctx,member.id,input),{code:'STEP_UP_REQUIRED'})
+  assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:member.id}})).role,'admin')
+  assert.ok(await verifySession(oldToken))
+  await createTotpProof(f.ctx,{code:f.totp.generate(),action:'users.member.update',operationKey:input.operationId,payloadHash:payloadHash({id:member.id,...input})})
+  assert.equal((await updateMember(f.ctx,member.id,input)).role,'cashier')
+  assert.equal(await verifySession(oldToken),null)
+  const newToken=await prisma.$transaction(tx=>createSession(tx,target.id,f.org.id))
+  assert.equal((await updateMember(f.ctx,member.id,input)).role,'cashier');assert.ok(await verifySession(newToken))
+  await assert.rejects(updateMember(f.ctx,member.id,{...input,role:'owner'}),{code:'STEP_UP_REQUIRED'})
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,type:'users.member.update'}}),1)
+  assert.equal(await prisma.auditLog.count({where:{organizationId:f.org.id,entityId:member.id,action:'membership_updated'}}),1)
+ }finally{if(previous===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=previous;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag}
+})
+test('Ownership request audit fault rolls back MFA approval; both parties require independent proof and accepted session token is never stored',async()=>{
+ const f=await enrolled(),previous=process.env.AUTH_CRITICAL_MFA_REQUIRED,flag=process.env.AUTH_TOTP_ENABLED
+ const target=await prisma.user.create({data:{fullName:'MFA recipient',phone:randomUUID(),passwordHash:await hashPassword(password)}});users.push(target.id)
+ const member=await prisma.organizationUser.create({data:{organizationId:f.org.id,userId:target.id,role:'admin'}})
+ const targetToken=await prisma.$transaction(tx=>createSession(tx,target.id,f.org.id)),recipient=(await verifySession(targetToken))!
+ const enrollment=await beginTotpEnrollment(recipient,{password}),totp=URI.parse(enrollment.provisioningUri) as TOTP
+ await confirmTotpEnrollment(recipient,{factorId:enrollment.factorId,code:totp.generate({timestamp:Date.now()-30000})})
+ const key=randomUUID(),trigger='ownership_mfa_'+randomUUID().replaceAll('-','')
+ try{
+  process.env.AUTH_CRITICAL_MFA_REQUIRED='true';process.env.AUTH_TOTP_ENABLED='true'
+  await assert.rejects(transferOwnership(f.ctx,member.id,key),{code:'STEP_UP_REQUIRED'})
+  await createTotpProof(f.ctx,{code:f.totp.generate(),action:'users.ownership.request',operationKey:key,payloadHash:payloadHash({targetId:member.id,operationId:key})})
+  try{
+   await prisma.$executeRawUnsafe(`CREATE FUNCTION ${trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Isolated ownership audit failure'; END $$`)
+   await prisma.$executeRawUnsafe(`CREATE TRIGGER ${trigger} BEFORE INSERT ON "AuditLog" FOR EACH ROW WHEN (NEW."organizationId"='${f.org.id}' AND NEW.action='ownership_requested') EXECUTE FUNCTION ${trigger}()`)
+   await assert.rejects(transferOwnership(f.ctx,member.id,key))
+   assert.equal(await prisma.ownershipTransfer.count({where:{organizationId:f.org.id}}),0)
+   assert.equal((await prisma.totpProof.findFirstOrThrow({where:{userId:f.user.id,operationKey:key}})).approvedOperationAt,null)
+  }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS ${trigger} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION IF EXISTS ${trigger}()`)}
+  const request=await transferOwnership(f.ctx,member.id,key)
+  assert.equal((await transferOwnership(f.ctx,member.id,key)).id,request.id)
+  const acceptKey=randomUUID()
+  await assert.rejects(respondOwnership(recipient,request.id,'accept',acceptKey),{code:'STEP_UP_REQUIRED'})
+  assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:member.id}})).role,'admin')
+  await createTotpProof(recipient,{code:totp.generate(),action:'users.ownership.accept',operationKey:acceptKey,payloadHash:payloadHash({id:request.id,action:'accept',operationId:acceptKey})})
+  const result=await respondOwnership(recipient,request.id,'accept',acceptKey)
+  assert.equal(result.request.state,'accepted');assert.ok(result.token);assert.equal((await verifySession(result.token!))?.role,'owner')
+  assert.equal(await verifySession(targetToken),null);assert.equal(await verifySession(f.token),null)
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id}}),0)
+  assert.ok(!JSON.stringify(await prisma.auditLog.findMany({where:{organizationId:f.org.id}})).includes(result.token!))
+ }finally{if(previous===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=previous;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag}
+})
+test('Ownership cancellation requires its own action/hash proof and leaves original owner roles unchanged',async()=>{
+ const f=await enrolled(),previous=process.env.AUTH_CRITICAL_MFA_REQUIRED,flag=process.env.AUTH_TOTP_ENABLED
+ const target=await prisma.user.create({data:{fullName:'MFA cancelled recipient',phone:randomUUID(),passwordHash:await hashPassword(password)}});users.push(target.id)
+ const member=await prisma.organizationUser.create({data:{organizationId:f.org.id,userId:target.id,role:'admin'}})
+ try{
+  process.env.AUTH_CRITICAL_MFA_REQUIRED='false'
+  const request=await transferOwnership(f.ctx,member.id),key=randomUUID()
+  process.env.AUTH_CRITICAL_MFA_REQUIRED='true';process.env.AUTH_TOTP_ENABLED='true'
+  await assert.rejects(respondOwnership(f.ctx,request.id,'cancel',key),{code:'STEP_UP_REQUIRED'})
+  await createTotpProof(f.ctx,{code:f.totp.generate(),action:'users.ownership.cancel',operationKey:key,payloadHash:payloadHash({id:request.id,action:'cancel',operationId:key})})
+  const result=await respondOwnership(f.ctx,request.id,'cancel',key)
+  assert.equal(result.request.state,'cancelled');assert.equal(result.token,null)
+  assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:member.id}})).role,'admin')
+  assert.equal((await prisma.organizationUser.findUniqueOrThrow({where:{id:f.ctx.organizationUserId}})).role,'owner')
+ }finally{if(previous===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=previous;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag}
+})
+
+test('Invitation grant requires bound MFA; concurrent replay never persists or reissues the bearer token',async()=>{
+ const f=await enrolled(),old=process.env.AUTH_CRITICAL_MFA_REQUIRED,flag=process.env.AUTH_TOTP_ENABLED
+ const store=await prisma.store.create({data:{organizationId:f.org.id,name:'Invitation MFA'}})
+ const input={operationId:randomUUID(),phone:'+998'+String(Date.now()),role:'admin' as const,storeIds:[store.id]}
+ try{
+  process.env.AUTH_CRITICAL_MFA_REQUIRED='true';process.env.AUTH_TOTP_ENABLED='true'
+  await assert.rejects(createInvitation(f.ctx,input),{code:'STEP_UP_REQUIRED'})
+  assert.equal(await prisma.invitation.count({where:{organizationId:f.org.id}}),0)
+  await createTotpProof(f.ctx,{code:f.totp.generate(),action:'users.invitation.create',operationKey:input.operationId,payloadHash:payloadHash(input)})
+  const results=await Promise.all([createInvitation(f.ctx,input),createInvitation(f.ctx,input)])
+  assert.equal(results[0].id,results[1].id)
+  const tokens=results.filter(row=>row.invitationToken)
+  assert.equal(tokens.length,1)
+  const token=tokens[0].invitationToken
+  assert.equal((await prisma.invitation.findUniqueOrThrow({where:{id:results[0].id}})).tokenHash,sessionHash(token))
+  const replay=await createInvitation(f.ctx,input)
+  assert.equal(replay.invitationToken,'');assert.equal(replay.invitationTokenUnavailable,true)
+  assert.equal(await prisma.invitation.count({where:{organizationId:f.org.id}}),1)
+  const operations=await prisma.operation.findMany({where:{organizationId:f.org.id}})
+  assert.equal(operations.length,1)
+  assert.ok(!JSON.stringify(operations).includes(token))
+  assert.ok(!JSON.stringify(await prisma.auditLog.findMany({where:{organizationId:f.org.id}})).includes(token))
+  await assert.rejects(createInvitation(f.ctx,{...input,role:'cashier'}),{code:'STEP_UP_REQUIRED'})
+ }finally{if(old===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=old;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag}
+})
+
+test('HTTP staff creation binds the password privately and replays exactly one safe member result',async()=>{
+ const f=await enrolled(),old=process.env.AUTH_CRITICAL_MFA_REQUIRED,flag=process.env.AUTH_TOTP_ENABLED,origin=process.env.APP_ORIGIN
+ const input={operationId:randomUUID(),fullName:'Bound staff',phone:'+998'+String(Date.now()),password:'staff-test-password',role:'admin'}
+ const send=(body:unknown)=>createStaffPOST(new NextRequest('http://localhost:3000/api/organizations/'+f.org.id+'/users',{method:'POST',headers:{cookie:'pos_session='+f.token,origin:'http://localhost:3000','content-type':'application/json'},body:JSON.stringify(body)}),{params:Promise.resolve({id:f.org.id})})
+ try{
+  delete process.env.APP_ORIGIN;process.env.AUTH_CRITICAL_MFA_REQUIRED='true';process.env.AUTH_TOTP_ENABLED='true'
+  const denied=await send(input);assert.equal(denied.status,403)
+  const failure=(await denied.json()).error;assert.equal(failure.code,'STEP_UP_REQUIRED')
+  assert.equal(await prisma.user.count({where:{phone:input.phone}}),0)
+  await createTotpProof(f.ctx,{code:f.totp.generate(),...failure.details})
+  const response=await send(input);assert.equal(response.status,200)
+  const first=(await response.json()).data;users.push(first.user.id)
+  assert.equal(first.user.passwordHash,undefined)
+  const replay=await send(input);assert.equal(replay.status,200);assert.equal((await replay.json()).data.id,first.id)
+  assert.equal(await prisma.user.count({where:{phone:input.phone}}),1)
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,type:'users.member.create'}}),1)
+  const saved=JSON.stringify(await prisma.operation.findMany({where:{organizationId:f.org.id}}))
+  assert.ok(!saved.includes(input.password));assert.ok(!saved.includes('passwordHash'))
+  const changed=await send({...input,password:'different-test-password'});assert.equal(changed.status,403);assert.equal((await changed.json()).error.code,'STEP_UP_REQUIRED')
+ }finally{if(old===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=old;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag;if(origin===undefined)delete process.env.APP_ORIGIN;else process.env.APP_ORIGIN=origin}
+})
+
+test('Owner password change requires a bound second factor and atomically invalidates all sessions without storing credentials',async()=>{
+ const f=await enrolled(),old=process.env.AUTH_CRITICAL_MFA_REQUIRED,flag=process.env.AUTH_TOTP_ENABLED,origin=process.env.APP_ORIGIN
+ const input={operationId:randomUUID(),currentPassword:password,newPassword:'mfa-new-password'}
+ const send=(body:unknown)=>changePasswordPOST(new NextRequest('http://localhost:3000/api/auth/change-password',{method:'POST',headers:{cookie:'pos_session='+f.token,origin:'http://localhost:3000','content-type':'application/json'},body:JSON.stringify(body)}),undefined)
+ try{
+  delete process.env.APP_ORIGIN;process.env.AUTH_CRITICAL_MFA_REQUIRED='true';process.env.AUTH_TOTP_ENABLED='true'
+  const denied=await send(input);assert.equal(denied.status,403);const error=(await denied.json()).error;assert.equal(error.code,'STEP_UP_REQUIRED')
+  assert.ok(await verifySession(f.token));assert.ok(await bcrypt.compare(password,(await prisma.user.findUniqueOrThrow({where:{id:f.user.id}})).passwordHash))
+  await createTotpProof(f.ctx,{code:f.totp.generate(),...error.details})
+  const fault='password_mfa_'+randomUUID().replaceAll('-','')
+  try{
+   await prisma.$executeRawUnsafe(`CREATE FUNCTION ${fault}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'isolated password audit failure'; END $$`)
+   await prisma.$executeRawUnsafe(`CREATE TRIGGER ${fault} BEFORE INSERT ON "AuditLog" FOR EACH ROW WHEN (NEW."organizationId"='${f.org.id}' AND NEW.action='password_changed') EXECUTE FUNCTION ${fault}()`)
+   assert.equal((await send(input)).status,500)
+   assert.ok(await verifySession(f.token))
+   assert.ok(await bcrypt.compare(password,(await prisma.user.findUniqueOrThrow({where:{id:f.user.id}})).passwordHash))
+   assert.equal((await prisma.totpProof.findFirstOrThrow({where:{userId:f.user.id,operationKey:input.operationId}})).approvedOperationAt,null)
+  }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER IF EXISTS ${fault} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION IF EXISTS ${fault}()`)}
+  const changed=await send(input);assert.equal(changed.status,200)
+  assert.equal(await verifySession(f.token),null)
+  assert.ok(await bcrypt.compare(input.newPassword,(await prisma.user.findUniqueOrThrow({where:{id:f.user.id}})).passwordHash))
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id}}),0)
+  assert.ok(!JSON.stringify(await prisma.auditLog.findMany({where:{organizationId:f.org.id}})).includes(input.newPassword))
+  assert.equal((await send(input)).status,401)
+ }finally{if(old===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=old;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag;if(origin===undefined)delete process.env.APP_ORIGIN;else process.env.APP_ORIGIN=origin}
 })

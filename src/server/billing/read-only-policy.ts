@@ -87,6 +87,8 @@ export const READ_ONLY_EXEMPT_MODELS = [
   "TotpFactor",
   "TotpProof",
   "TotpRecoveryCode",
+  "AuthRestoreCheckpoint",
+  "TotpKeyRotation", // Operator-only credential re-encryption provenance.
   "VerifiedContact",
   "JobExport",
   "BackgroundJob",

@@ -1,7 +1,6 @@
 # TOTP core va qabul chegarasi
 
-2026-10-10. SEC-02.06 hali `in_progress`. HTTP va `/security` UI ulash/recovery/rotation oqimlariga ulangan, lekin global
-MFA enforcement hali yo‘q. `AUTH_TOTP_ENABLED=true` va private64hex kalit bo‘lsagina
+2026-10-11. SEC-02.06 core qabuli `done`. HTTP va `/security` UI ulash/recovery/rotation oqimlariga ulangan. Quyidagi 21 action uchun markaziy MFA siyosati bor; joriy xavfli amallar inventorysi va restore quarantine qabuli tekshirildi. `AUTH_TOTP_ENABLED=true` va private64hex kalit bo‘lsagina
 availability true; standart holat o‘chiq. Mavjud login va biznes amallari shu
 bosqichda majburiy MFAga o‘tkazilmaydi.
 
@@ -19,8 +18,8 @@ Maintained kutubxona tanlangani mustaqil security auditdan o‘tganlik da’vosi
   Counter bir xil yoki kichik bo‘lsa kod qayta qabul qilinmaydi. Kod URL/logda yo‘q.
 - Secret AES-256-GCM bilan shifrlanadi. `AUTH_CHALLENGE_SECRET`dan alohida HKDF
   purpose key; user/factor ID AADga bog‘langan. Default kalit yo‘q. Kalit yo‘q503;
-  buzilgan yoki boshqa actor ciphertext409. Kalitni almashtirish eski ciphertextni
-  ochmaydi; bu hali key rotation workflow emas.
+  buzilgan yoki boshqa actor ciphertext409. Kalitni overlap konfiguratsiyasiz almashtirish eski ciphertextni
+  ochmaydi. SQL123 va operator CLI workflow quyida alohida ko‘rsatilgan.
 - `beginTotpEnrollment`: live password session va fresh current password;
   user keyin session row lock. Rate5/15min. Pending enrollment10min, yangi
   enrollment oldingi pendingni revoke qiladi. Enabled factor ustiga yozilmaydi.
@@ -59,12 +58,12 @@ Maintained kutubxona tanlangani mustaqil security auditdan o‘tganlik da’vosi
   Authentication recovery read-only organizationda ham ochiq bo‘lishi uchun
   read-only model classificationda exempt. Bu business-write vakolati emas.
 
-## SEC-02.06 done uchun hali talab qilinadigan ishlar
+## Core qabul va tashqi rollout chegarasi
 
-Encrypted key rotation; owner/platform operatorning muhim
-amallariga reviewed global policy va UI step-up; normal login/session lifecycle
-bilan global recovery policy; full integration va critical-operation step-up
-uch browser qabul.
+Restore quarantine va joriy mutation inventory izolatsiyalangan qabuldan o‘tdi.
+Haqiqiy hosting rollout va operator credential/access review alohida. Operator
+rekey va 21 action MFA core allaqachon amalga oshirilgan; production rollout
+va tiklangan bazani ochish hali alohida tekshiruv talab qiladi.
 SMS/e-mail vendor integratsiyasi alohida blocked_external bo‘lib qoladi.
 
 121 migratsiya faqat isolated pos_test va fresh/legacy fixturesda tekshiriladi.
@@ -101,7 +100,7 @@ Umumiy `assertStepUp` helper opt-in TOTP proofni ham qabul qiladi.
 `runOperation` authorize callback bilan audit-fault rollbackda business row,
 proof approval va Operation birga rollback; original key bilan retry/replay
 bittagina natija beradi. Bu barcha critical business/platform yo‘llarida
-authorize callback global majburiy bo‘lgan degani emas; SEC-02.06 hali ochiq.
+authorize callback global majburiy bo‘lgan degani emas; bu tarixiy checkpointda SEC-02.06 hali ochiq edi.
 
 Recovery outage exception: private encryption key/feature flag yo‘q bo‘lsa ham
 avval ulangan faktor GET metadata/recoveryAvailable beradi. Recover seedni
@@ -128,10 +127,56 @@ Overlap konfiguratsiyasi noto‘g‘ri bo‘lsa, status `available:false`, yangi
 
 `AUTH_CRITICAL_MFA_REQUIRED` deployment sozlamasi: yo‘q yoki `false` — mavjud oqim; `true` — quyidagi operatsiyalarga MFA talab qilinadi. Boshqa qiymat kritik amalda 503 qaytaradi. Talab TOTP mavjudligidan mustaqil: kalit/featureflag o‘chishi ikkinchi faktor talabini olib tashlamaydi. Standart konfiguratsiya mavjud tashkilotlarni birdan bloklamaslik uchun false. Production rolloutdan oldin tegishli owner/operator faktorlarini ulash, recovery kodlarni xavfsiz saqlash va stagingda tasdiqlangan oqimni tekshirish zarur.
 
-Hozir nazorat qilinadigan operation turlari: `retention.closure.request`, `retention.closure.cancel`, `retention.policy.publish`, `billing.plan.publish`, `billing.plan.assign`, `billing.payment.confirm`, `billing.subscription.cancel`, `offline-cash.policy`, `billing.cost.record`, `billing.cost.cancel`, `support.policy.publish`, `support.grant`. Bu ro‘yxat qolgan barcha mutatsiyalar MFA bilan yopilgan degani emas; ownership/rol o‘zgarishi kabi runOperationdan tashqaridagi yo‘llar alohida ko‘rib chiqilishi kerak. Oddiy savdo har qatorida TOTP so‘ralmaydi.
+Hozir nazorat qilinadigan operation turlari: `retention.closure.request`, `retention.closure.cancel`, `retention.policy.publish`, `billing.plan.publish`, `billing.plan.assign`, `billing.payment.confirm`, `billing.subscription.cancel`, `offline-cash.policy`, `billing.cost.record`, `billing.cost.cancel`, `support.policy.publish`, `support.grant`, `users.role.create`, `users.role.update`, `users.member.create`, `users.member.update`, `users.invitation.create`, `users.ownership.request`, `users.ownership.accept`, `users.ownership.cancel`, `auth.password.change` (owner/admin). Jami 21 action. Bu ro‘yxat barcha mutatsiyalar MFA bilan yopilgan degani emas; restore va boshqa xavfli yo‘llarning inventarizatsiyasi hali ochiq. Oddiy savdo har qatorida TOTP so‘ralmaydi.
 
 Server live context va qo‘shimcha platforma vakolatini tekshirganidan so‘ng, work yoki old result replaydan oldin action/key/hash-bound step-upni tekshiradi. STEP_UP_REQUIRED javobining details maydoni faqat action, operationKey va kanonik payloadHashni beradi; credential yoki biznes request body berilmaydi. Proof approval va biznes yozuvi bitta transactionda; keyingi xato ikkisini ham rollback qiladi. MFA platforma rolini bermaydi; ruxsat bekor qilinsa replay rad etiladi.
 
 Dashboard modal kodni faqat React memoryda ushlab turadi; /auth/totp/proof muvaffaqiyatli bo‘lsa asl serialized request body/key aynan saqlanib bir marta qayta yuboriladi. Auth requestlar qayta challenge qilinmaydi, stream body qayta yuborilmaydi. Cancel, besh daqiqalik timeout, dashboard unmount yoki user/organization almashishi pending requestni bekor qiladi. Parallel ikkinchi dialog rad etiladi. Har bir urinishdan keyin input kodi tozalanadi. Proof/business request server tomonidan sessiya va scope bo‘yicha qayta tekshiriladi.
 
-Bu o‘zgarish rolloutni avtomatik yoqmaydi. Butun critical-action inventory, operator re-encryption va restoredan keyingi credential invalidation yakuniy qabulda ochiq; SEC-02.06 to‘liq done deb belgilanmagan.
+Bu o‘zgarish rolloutni avtomatik yoqmaydi. Bu tarixiy checkpointda critical-action inventory va restore qabuli ochiq edi; operator re-encryption SQL123/CLI bilan tekshirildi; shu checkpointda SEC-02.06 done belgilanmagan edi.
+
+
+## Operator key rotation core (2026-10-11)
+SQL123 sealedSecret-only audited rotation, current/previous key tekshiruvi, authenticator/counter/recovery saqlanishi, default counts-only check va valid maintenance bilan apply: [operator yo‘riqnomasi](totp-key-rotation.md). 38 focused PostgreSQL/API/CLI regression va uch browser TOTP/critical oqimlari tekshirildi. Real kalit almashtirish yoki deployment amalga oshirilmagan.
+
+## Xodim va egalik grantlari (2026-10-11)
+
+MFA siyosati yoqilganda xodim yaratish/o‘zgartirish, taklif yaratish va egalik
+so‘rovini boshlash/qabul qilish/bekor qilish UUID `operationId` talab qiladi.
+Proof aynan action, sessiya, operationId va payloadga bog‘lanadi. Huquq,
+active membership va tashkilot chegarasi proofdan mustaqil tekshiriladi.
+
+Yangi xodim paroli payload tasdig‘iga private HMAC orqali kiradi: mavjud
+`AUTH_CHALLENGE_SECRET`, aks holda kamida 32 bayt `JWT_SECRET`. Productionda
+ikkalasi ham yaroqsiz bo‘lsa 503; development random process key productionda
+ishlatilmaydi. Klasterda kalitlar bir xil bo‘lishi kerak. Kalit aylantirilganda
+eski pending payload tasdig‘i yaroqsiz bo‘ladi; yangi operation va fresh MFA
+kerak. Parol/hash operation result va auditga yozilmaydi.
+
+Taklif tokeni faqat commit qilgan chaqiruvda bir marta qaytadi. Bir xil
+operationId replay yoki parallel yutqazgan so‘rov metadata va
+`invitationTokenUnavailable: true`, bo‘sh `invitationToken` oladi. Tokenni
+Operationdan qaytarib olish yo‘q: metadata ID orqali eski taklif bekor qilinib
+yangisi chiqariladi. Avtomatik yangi UUID bilan takrorlab qo‘shish yo‘q.
+
+Egalikni qabul qilish yangi sessiya tokeni chiqaradi; ushbu amalning javobi
+Operationga saqlanmaydi. Har ikki tomon mustaqil proof beradi; audit xatosi
+role/session/proof approval yozuvlarini atomik rollback qiladi. Xodim o‘zgarishi
+replayida yangi kirgan target sessiyalari yana bekor qilinmaydi.
+
+MFA dialogi ustuvor qatlamda ochiladi. Quyi forma inert, faqat yuqori dialog
+Escape va fokusga javob beradi; quyi forma ochiq qolsa body scroll lock saqlanadi.
+
+
+## Restore yakuniy qabul oqimi
+
+SQL124–125, `AuthRestoreCheckpoint`, session SQL guard va app gate qo‘shildi.
+Shifrlangan restore avval karantin gate commit, keyin session/factor/challenge/
+invitation sweep bajaradi. Operator credential/access reconciliation attestatsiyasi
+va immutable review bo‘lmaguncha eski/yangi login va readiness yopiq.
+[Restore contract](auth-restore-quarantine.md) va
+[xavfli amallar inventari](critical-action-inventory.md) qabul chegaralarini beradi.
+Owner/admin password change ham action-bound private HMAC MFAga ulandi;
+parol o‘zgarishi, PIN/session revoke va approval/audit atomik.
+
+Yakuniy core qabul: `tasks/evidence/critical-mfa-restore-20261011.json`, SQL125, 21 action. Real production rollout ushbu dalilga kirmaydi.

@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma'
 import { hashPassword, type TokenPayload } from '@/lib/auth'
 import { AccessError } from '../auth/policy'
 import { sessionHash } from '../auth/session'
-import { audit } from '../operations'
+import { audit,runOperation,payloadHash } from '../operations'
+import {assertCriticalAction} from '../auth/critical-actions'
 
-export const invitationSchema=z.object({phone:z.string().min(9).max(64),role:z.enum(['admin','cashier']),storeIds:z.array(z.string().uuid()).min(1).max(100)})
+export const invitationSchema=z.object({operationId:z.string().uuid().optional(),phone:z.string().min(9).max(64),role:z.enum(['admin','cashier']),storeIds:z.array(z.string().uuid()).min(1).max(100)}).strict()
 export const acceptInvitationSchema=z.object({token:z.string().regex(/^[A-Za-z0-9_-]{43}$/),fullName:z.string().min(2).max(200).optional(),password:newPasswordSchema.optional()})
 async function requireOwner(tx: Prisma.TransactionClient,context:TokenPayload) {
  const member=await tx.organizationUser.findFirst({where:{id:context.organizationUserId,userId:context.userId,organizationId:context.organizationId,role:'owner',isActive:true,user:{isActive:true}}})
@@ -16,17 +17,28 @@ async function requireOwner(tx: Prisma.TransactionClient,context:TokenPayload) {
  if (context.role!=='owner' || !member || !session) throw new AccessError(403,'FORBIDDEN')
 }
 export async function createInvitation(context:TokenPayload,input:z.infer<typeof invitationSchema>) {
- const token=randomBytes(32).toString('base64url')
- return prisma.$transaction(async tx=>{
+ input=invitationSchema.parse(input)
+ if(context.role!=='owner')throw new AccessError(403,'FORBIDDEN')
+ if(process.env.AUTH_CRITICAL_MFA_REQUIRED==='true'&&!input.operationId)throw new AccessError(400,'OPERATION_ID_REQUIRED')
+ let issued:{id:string;token:string}|undefined
+ const work=async(tx:Prisma.TransactionClient)=>{
   await requireOwner(tx,context)
+  if(!input.operationId)await assertCriticalAction(tx,context,'users.invitation.create',context.organizationUserId,payloadHash(input))
   const storeIds=[...new Set(input.storeIds)]
   if (await tx.store.count({where:{id:{in:storeIds},organizationId:context.organizationId,isActive:true}})!==storeIds.length) throw new AccessError(404,'STORE_NOT_FOUND')
   const existing=await tx.organizationUser.findFirst({where:{organizationId:context.organizationId,user:{phone:input.phone}}})
   if (existing) throw new AccessError(409,'MEMBER_EXISTS','Mavjud a’zoning vakolatini xodimlar ro‘yxatida o‘zgartiring')
+  const token=randomBytes(32).toString('base64url')
   const invitation=await tx.invitation.create({data:{organizationId:context.organizationId,phone:input.phone,role:input.role,storeIds,tokenHash:sessionHash(token),invitedBy:context.userId,expiresAt:new Date(Date.now()+72*3600000)}})
   await audit(tx,context,'Invitation',invitation.id,'invited',{role:input.role,storeIds})
-  return {id:invitation.id,expiresAt:invitation.expiresAt,invitationToken:token}
- })
+  issued={id:invitation.id,token}
+  return {id:invitation.id,expiresAt:invitation.expiresAt,invitationTokenUnavailable:true}
+ }
+ const result=input.operationId?await runOperation(context,'users.invitation.create',input.operationId,input,work):await prisma.$transaction(work)
+ // Only the callback that committed this exact source may present its token.
+ // Replay/competing winner returns metadata and never a stored capability.
+ const token=issued?.id===result.id?issued.token:''
+ return {...result,invitationToken:token,invitationTokenUnavailable:!token}
 }
 export async function revokeInvitation(context:TokenPayload,id:string) {
  return prisma.$transaction(async tx=>{

@@ -953,8 +953,8 @@ Aging yangi hujjatlarning original dueAtidan qolgan summani oladi. Eski nonsale 
 ## Core monitoring, recovery va sync review (2026-10-06)
 
 - GET `/operations/overview`: role home, scoped server draft/open shift/pending-close/incident/conflict counts. Cashierga owner incident summasi berilmaydi; fiscal status faqat `not_configured` boundary.
-- GET `/incidents?page=1&state=open|resolved`: owner/admin assigned-store20-row pagination. POST `{operationId}` reconciliationni idempotent ishga tushiradi. POST `/incidents/:id` `{operationId,reason}` — manager, live scope; discrepancy qolgan bo‘lsa409 `DISCREPANCY_REMAINS`; yo‘q bo‘lsa resolution actor/time/reason+audit. Scanner iqtisodiy historyni o‘zgartirmaydi. Evidence numeric qiymatlari Decimal string.
-- POST `/inventory/thresholds`: `{storeId,productId,minimum,maximum,operationId}` manager, NUMERIC20,6, min≥0/max≥min, FK/tenant guard. GET `/reports/replenishment?page&limit`: active scoped branches/products; zero/missing balances, minimum fallback Product.minStock, maximum mavjud bo‘lsa max−current; sahifalangan exact string natija. Purchase/stock reservation yaratilmaydi.
+- GET `/incidents?page=1&limit=20&state=open|resolved`: owner/admin assigned-store pagination; default20, limit1–200, positive integer page, bounded offset. Invalid pagination400. POST `{operationId}` reconciliationni idempotent ishga tushiradi. POST `/incidents/:id` `{operationId,reason}` — manager, live scope; discrepancy qolgan bo‘lsa409 `DISCREPANCY_REMAINS`; yo‘q bo‘lsa resolution actor/time/reason+audit. Scanner iqtisodiy historyni o‘zgartirmaydi. Evidence numeric qiymatlari Decimal string.
+- POST `/inventory/thresholds`: `{storeId,productId,minimum,maximum,operationId}` manager, NUMERIC20,6, min≥0/max≥min, FK/tenant guard. GET `/reports/replenishment?page&limit&storeId`: active scoped branches/products; optional UUID branch must be current-tenant/assigned (otherwise404), invalid pagination400, limit1–200/default20; zero/missing balances, minimum fallback Product.minStock, maximum mavjud bo‘lsa max−current; sahifalangan exact string natija. Purchase/stock reservation yaratilmaydi.
 - POST `/sync`: mavjud command contract. Nonretryable reject server `SyncReview`ga source payload/hash/actor/key/code va audit bilan saqlanadi; failed command `conflict` hamda reviewId qaytaradi. `INTERNAL_ERROR/CONCURRENT_CONFLICT` pending bo‘lib qoladi. API validation/tenant guarddagi to‘liq batch reject iqtisodiy success deb belgilanmaydi; local source saqlanadi.
 - GET `/sync/reviews?page`: owner organization scope yoki cashier own actor. Adminga unrestricted raw payload list berilmaydi. POST `/sync/reviews/:id` `{operationId,reason}` owner yoki explicit source branchga vakolatli manager; original operation terminal record yoki original draft authorized void proof talab qiladi. Noma’lum natija409 `RESULT_UNKNOWN`; yangi business operation yuborilmaydi. Resolved review immutable; payload update DBda rad. Original result hash va reviewed hash turli bo‘lsa ikkisi ham dalilda qoladi, yangi payload posted deb ko‘rsatilmaydi. Terminal manager proof own local conflictga `rejected` acknowledgement sifatida yoziladi; server source/audit saqlanadi.
 - GET `/sales?organizationId&status=draft&page&limit`, GET `/sales/:id` existing scoped server drafts. UI boshqa qurilmada ayni cashier+register+active shift draftini explicit ochadi, complete ayni Sale/idempotent keyga. Local-only draft server ro‘yxatida bor deb ko‘rsatilmaydi; posted sale PUT rad.
@@ -1296,3 +1296,36 @@ Body: `{operationId: UUID, page?: integer(1..10000), search?: string(max100)}`. 
 Owner: `GET /api/roles?page=1&search=...` — 20 tadan ro‘yxat, jami, template va asosiy rolga mos vakolat katalogi. `POST /api/roles`: `{operationId, name, baseRole: "admin"|"cashier", permissions: string[], reason}`. `PUT /api/roles/:id`: `{operationId, expectedRevision, name, permissions, isActive, reason}`; baseRole o‘zgarmaydi. Stale revision `409 ROLE_REVISION_CHANGED`, yuqori vakolat `400 INVALID_ROLE_PERMISSION`; default unknown endpoint deny. Critical MFA yoqilganida action `users.role.create/update` bilan aniq payload/key tasdiqlanadi. Javob private/no-store.
 
 `PUT /api/organizations/:orgId/users/:membershipId` qo‘shimcha `customRoleId: UUID|null` qabul qiladi; owner-only, tenant tekshiruvi, oxirgi owner himoyasi va sessiya revocation. `null` asosiy rolning to‘liq huquqlarini tiklaydi. Login/me DTO maxsus profil bo‘lsa `user.customRole={id,name,revision,permissions}` beradi; eski xodimlar shakli saqlanadi. [Boshqaruv yo‘riqnomasi](docs/operations/custom-roles.md).
+
+### Xodim grantlari uchun MFA va operationId
+
+`AUTH_CRITICAL_MFA_REQUIRED=true` bo‘lganda staff create/update, invitation create,
+ownership request/accept/cancel so‘rovlariga UUID `operationId` yuboriladi.
+`STEP_UP_REQUIRED` tafsilotidagi action/operationKey/payloadHash bo‘yicha
+`POST /api/auth/totp/proof` orqali tasdiq olinib aynan o‘sha body qayta yuboriladi.
+Proof vakolat yoki tenant scope tekshiruvini almashtirmaydi.
+Invitation create bir martalik tokenni faqat original commit javobida beradi;
+replay `invitationToken: ''`, `invitationTokenUnavailable: true` va oldingi IDni
+qaytaradi. Yo‘qolgan havolani qayta olish uchun eski taklifni bekor qilish va
+fresh operation bilan yangi taklif yaratish kerak. Parol, passwordHash yoki
+raw invitation/session token Operation/auditga yozilmaydi.
+
+### Tiklangan authentication holati
+
+Operator restore’dan keyin `AuthRestoreCheckpoint` pending bo‘lsa eski cookie
+valid sessiya bermaydi, password login `503 AUTH_RESTORE_REVIEW_REQUIRED`,
+readiness `503 unavailable` qaytaradi. Target operator review bo‘lmaguncha
+production trafficga ulanmaydi. Review HTTP endpoint orqali bajarilmaydi;
+`scripts/ops/review-restored-auth.sh` uchun manual credential/access reconciliation
+va nonsecret evidence kerak. Eski faktor, sessiya va takliflar qayta yoqilmaydi.
+
+`POST /api/auth/change-password` UUID `operationId`ni qabul qiladi. Owner/admin
+uchun MFA policy yoqilganda exact action `auth.password.change` talabi qo‘llanadi.
+Yangi parol private HMAC bilan payloadga bog‘lanadi, plaintext saqlanmaydi.
+Success barcha sessiya/PINlarni bekor qiladi va cookie’ni o‘chiradi; yangi
+parol bilan qayta login kerak. Javob lost ACK bo‘lsa eski sessiya bilan replay
+qabul qilinmaydi; autentifikatsiya natijasini yangi login orqali tekshirish kerak.
+
+### Qoldiqning savdosiz davri
+
+GET `/inventory/balances` optional `inactiveDays=1..3650`: musbat joriy qoldiq va shu filial/product uchun N×24soatda completed/partially_returned/returned savdo yo‘q. Draft aktivlik emas; returned original savdo aktivlik hisoblanadi. NULL yoki future completion timestamp bilan savdosizlik xulosasi qilinmaydi. Root meta `{observedAt,inactiveSince,inactiveDays,definition}`; CSV shu filtr va oyna metadata bilan to‘liq mos qatorlarni eksport qiladi. Bu stock age/expiry/FEFO emas. UI30/60/90 tanlovi; contract `docs/operations/inventory-inactivity.md`.

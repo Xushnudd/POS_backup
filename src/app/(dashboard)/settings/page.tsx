@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -78,6 +78,9 @@ export default function SettingsPage() {
   const [editingMember,setEditingMember]=useState<SettingsUser|null>(null);
   const [memberRole,setMemberRole]=useState<'owner'|'admin'|'cashier'>('cashier');
   const [memberStores,setMemberStores]=useState<string[]>([]);
+  const userFlight=useRef(false);
+  const userMutation=useRef<{signature:string;operationId:string}|null>(null);
+  const memberMutation=useRef<{signature:string;operationId:string}|null>(null);
 
   // Initialize org form
   useEffect(() => {
@@ -190,16 +193,21 @@ export default function SettingsPage() {
   // Create organization user (cashier/admin)
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id) return;
-
+    if (!organization?.id||userFlight.current) return;
+    userFlight.current=true;
+    const signature=JSON.stringify({organizationId:organization.id,userMode,userName,userPhone,userPassword,userRole,userStoreIds});
+    if(userMutation.current?.signature!==signature)userMutation.current={signature,operationId:crypto.randomUUID()};
+    const operationId=userMutation.current.operationId;
     setIsSavingUser(true);
     try {
       if (userMode==='invite') {
-        const result=await api.organizations.createInvitation(organization.id,{phone:userPhone.trim(),role:userRole,storeIds:userStoreIds});
+        const result=await api.organizations.createInvitation(organization.id,{operationId,phone:userPhone.trim(),role:userRole,storeIds:userStoreIds});
         if (!result.data) throw new Error('Taklif yaratilmadi');
         setInvitationId(result.data.id);
+        if(!result.data.invitationToken){setInvitationLink('');throw new Error('Taklif allaqachon yaratilgan; bir martalik havola qayta berilmaydi. Taklifni bekor qilib, yangisini yarating.');}
         setInvitationLink(`${window.location.origin}/invite#${result.data.invitationToken}`);
       } else await api.organizations.addUser(organization.id, {
+        operationId,
         fullName: userName.trim(),
         phone: userPhone.trim(),
         password: userPassword,
@@ -207,6 +215,7 @@ export default function SettingsPage() {
         storeIds: userStoreIds.length > 0 ? userStoreIds : undefined,
       });
 
+      userMutation.current=null;
       notifySuccess(userMode==='invite'?'Taklif yaratildi; havolani xodimga xavfsiz ulashing':'Xodim muvaffaqiyatli qo‘shildi');
       setIsUserModalOpen(false);
       setUserName('');
@@ -217,6 +226,7 @@ export default function SettingsPage() {
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Foydalanuvchi qo\'shishda xatolik');
     } finally {
+      userFlight.current=false;
       setIsSavingUser(false);
     }
   };
@@ -584,18 +594,21 @@ export default function SettingsPage() {
         </form>
       </Modal>
 
-      {invitationLink && <Card title="Bir martalik taklif havolasi">
+      {invitationId && <Card title="Bir martalik taklif havolasi">
         <p className="text-sm mb-2">Havola 72 soat amal qiladi. Uni faqat tegishli xodimga ulashing; umumiy chatga qo‘ymang.</p>
-        <Input label="Taklif havolasi" value={invitationLink} readOnly />
-        <div className="flex gap-2 mt-2"><Button onClick={()=>setInvitationLink('')}>Yopish</Button>
-        <Button onClick={async()=>{if (!organization?.id) return;try{await api.organizations.revokeInvitation(organization.id,invitationId);setInvitationLink('');notifySuccess('Taklif bekor qilindi');}catch(error){notifyError(error instanceof Error?error.message:'Taklif bekor qilinmadi');}}}>Taklifni bekor qilish</Button></div>
+        {invitationLink?<Input label="Taklif havolasi" value={invitationLink} readOnly />:<p>Havola faqat bir marta beriladi. Bekor qilib yangi taklif yarating.</p>}
+        <div className="flex gap-2 mt-2"><Button disabled={!invitationLink} onClick={()=>setInvitationLink('')}>Havolani yashirish</Button>
+        <Button onClick={async()=>{if (!organization?.id) return;try{await api.organizations.revokeInvitation(organization.id,invitationId);setInvitationLink('');setInvitationId('');userMutation.current=null;notifySuccess('Taklif bekor qilindi');}catch(error){notifyError(error instanceof Error?error.message:'Taklif bekor qilinmadi');}}}>Taklifni bekor qilish</Button></div>
       </Card>}
       <Modal isOpen={Boolean(editingMember)} onClose={()=>setEditingMember(null)} title="Xodim vakolatlari" size="md">
         <form className="space-y-4" onSubmit={async event=>{
-          event.preventDefault();if (!organization?.id || !editingMember) return;
+          event.preventDefault();if (!organization?.id || !editingMember||userFlight.current) return;
+          userFlight.current=true;
+          const signature=JSON.stringify({organizationId:organization.id,id:editingMember.id,memberRole,memberStores});
+          if(memberMutation.current?.signature!==signature)memberMutation.current={signature,operationId:crypto.randomUUID()};
           setIsSavingUser(true);
-          try {await api.organizations.updateMember(organization.id,editingMember.id,{role:memberRole,storeIds:memberStores});setEditingMember(null);await loadUsers();notifySuccess('Vakolat yangilandi; xodim qayta kirishi kerak');}
-          catch(error){notifyError(error instanceof Error?error.message:'Vakolat o‘zgarmadi');}finally{setIsSavingUser(false);}
+          try {await api.organizations.updateMember(organization.id,editingMember.id,{operationId:memberMutation.current.operationId,role:memberRole,storeIds:memberStores});memberMutation.current=null;setEditingMember(null);await loadUsers();notifySuccess('Vakolat yangilandi; xodim qayta kirishi kerak');}
+          catch(error){notifyError(error instanceof Error?error.message:'Vakolat o‘zgarmadi');}finally{userFlight.current=false;setIsSavingUser(false);}
         }}>
           <Select label="Rol" value={memberRole} onChange={e=>setMemberRole(e.target.value as typeof memberRole)} options={[{value:'owner',label:'Egasi'},{value:'admin',label:'Administrator'},{value:'cashier',label:'Kassir'}]} />
           <fieldset><legend className="text-sm font-semibold">Filiallar</legend>{stores.map(store=><label key={store.id} className="flex gap-2 py-1"><input type="checkbox" checked={memberStores.includes(store.id)} onChange={e=>setMemberStores(old=>e.target.checked?[...old,store.id]:old.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset>

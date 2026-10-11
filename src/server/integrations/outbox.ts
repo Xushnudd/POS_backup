@@ -8,6 +8,7 @@ import { assertLiveContext, audit, payloadHash, runOperation } from '../operatio
 import { deploymentState } from '../deployment/state'
 import { IntegrationUnavailable } from './contracts'
 import { decimal } from '../sales/calculations'
+import { authenticationRestoreReady } from '../auth/restore-state'
 
 export const providerRequestSchema = z.object({
   businessType: z.enum(['sale', 'sale_return', 'receipt']), businessId: z.string().uuid(),
@@ -145,15 +146,19 @@ export async function claimProviderIntent(registry: ProviderRegistry): Promise<C
   if (!registry.size || (await deploymentState()).maintenance) return null
   const keys = [...registry.keys()]
   return prisma.$transaction(async tx => {
+    if (!await authenticationRestoreReady(tx)) return null
     const rows = await tx.$queryRaw<ProviderOutbox[]>(Prisma.sql`SELECT b.* FROM "ProviderOutbox" b JOIN "ProviderIntent" p ON p.id=b."intentId"
       WHERE b.state IN ('queued','unknown') AND b."nextRunAt"<=NOW() AND (p.provider||':'||p.capability) IN (${Prisma.join(keys)})
       AND ((b.mode='submit' AND b."submitAttempts"=0) OR (b.mode='lookup' AND b."lookupAttempts"<32))
       ORDER BY b."nextRunAt",b."intentId" FOR UPDATE OF b SKIP LOCKED LIMIT 1`)
     if (!rows[0]) return null
     const row = rows[0]
+    const [recovery] = await tx.$queryRaw<{restored:boolean}[]>`SELECT EXISTS(SELECT 1 FROM "ProviderIntent" p JOIN "AuthRestoreCheckpoint" c ON p."createdAt"<=c."createdAt" WHERE p.id=${row.intentId}) AS restored`
+    const lookup = row.mode === 'lookup' || recovery.restored
     const updated = await tx.providerOutbox.update({ where: { intentId: row.intentId }, data: { state: 'running', leaseToken: randomUUID(),
       leaseUntil: new Date(Date.now() + 30_000), generation: { increment: 1 }, updatedAt: new Date(),
-      ...(row.mode === 'submit' ? { submitAttempts: { increment: 1 } } : { lookupAttempts: { increment: 1 } }),
+      mode: lookup ? 'lookup' : 'submit',
+      ...(lookup ? { lookupAttempts: { increment: 1 } } : { submitAttempts: { increment: 1 } }),
     }, include: { intent: true } })
     await event(tx, updated, 'claimed')
     return updated
@@ -172,6 +177,7 @@ async function boundedCall(call: (signal: AbortSignal) => Promise<ProviderOutcom
 
 async function finishClaim(claim: Claim, binding: ProviderBinding, result: ProviderOutcome) {
   return prisma.$transaction(async tx => {
+    if (!await authenticationRestoreReady(tx)) return { applied: false, state: 'restore_review' }
     await tx.$queryRaw`SELECT "intentId" FROM "ProviderOutbox" WHERE "intentId"=${claim.intentId} FOR UPDATE`
     const row = await tx.providerOutbox.findUniqueOrThrow({ where: { intentId: claim.intentId } })
     if (row.state !== 'running' || row.leaseToken !== claim.leaseToken || row.generation !== claim.generation || !row.leaseUntil || row.leaseUntil.getTime() <= Date.now())
@@ -214,10 +220,15 @@ export async function executeProviderClaim(claim: Claim, registry: ProviderRegis
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) throw new Error('INVALID_PROVIDER_TIMEOUT')
   const binding = registry.get(bindingKey(claim.intent.provider, claim.intent.capability))
   if (!binding) return { applied: false, state: 'unconfigured' }
+  if (!await authenticationRestoreReady()) return { applied: false, state: 'restore_review' }
   // Check fencing immediately before transport. Recovery never requeues submit.
   const current = await prisma.providerOutbox.findUnique({ where: { intentId: claim.intentId } })
   if (!current || current.state !== 'running' || current.leaseToken !== claim.leaseToken || current.generation !== claim.generation || !current.leaseUntil || current.leaseUntil.getTime() <= Date.now())
     return { applied: false, state: 'lease_lost' }
+  if (claim.mode === 'submit') {
+    const [recovery] = await prisma.$queryRaw<{restored:boolean}[]>`SELECT EXISTS(SELECT 1 FROM "AuthRestoreCheckpoint" WHERE "createdAt">=${claim.intent.createdAt}) AS restored`
+    if (recovery.restored) return { applied: false, state: 'restore_lookup_required' }
+  }
   const identity: ProviderIdentity = { operationId: claim.intentId, organizationId: claim.intent.organizationId,
     provider: claim.intent.provider, capability: claim.intent.capability, ...(current.externalId ? { externalId: current.externalId } : {}) }
   let outcome: ProviderOutcome

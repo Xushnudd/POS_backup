@@ -1,8 +1,10 @@
 # Bajarish statusi
 
-Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
+Sana: 2026-10-11. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
-## Checkpoint
+Joriy original done: **158**. Eng so‘nggi +20 so‘rov baseline158, target178: **0/20**, 20 band ochiq. Oldingi baseline157 hisob tarixiy checkpointda saqlangan. Core tayyorgarlik tashqi qabul o‘rnida sanalmaydi.
+
+## Boshlang‘ich checkpoint (tarixiy)
 
 - Boshlang‘ich Git holati toza.
 - Node 24.18.0, Prisma 5.22 mavjud.
@@ -36,12 +38,12 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | SEC-01.05 | CORE-1 | done | Kassir boshqa kassir smenasida ruxsatsiz savdo qilmasligi; tannarx va foydani vakolatsiz ko‘rmasligi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | SEC-01.06 | CORE-1 | done | Ruxsatlar bekor bo‘lganda eski sessiya ham bu amallarni bajara olmasligi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | SEC-01.07 | CORE-1 | done | Admin panel va yordam xizmati kirishlarini ham shu nazoratga olish. | Owner consent + live operator/session/branch/scope/expiry/revoke; migration062; full158/158, focused2/2, browser9/9 | Regression; real operator provisioning/deploy alohida |
-| SEC-02.01 | CORE-1 | in_progress | HTTPS; productionda kuchli kalit majburiy, standart kalit bilan ishga tushmaslik. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | TLS hosting, reset/import limits, fayl/CSV himoyasi va security-event UI |
+| SEC-02.01 | CORE-1 | blocked_external | HTTPS; productionda kuchli kalit majburiy, standart kalit bilan ishga tushmaslik. | HTTPS origin startup validation, cookie, DB login limit, bounded JSON, requestId | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | SEC-02.02 | CORE-1 | done | Brauzer uchun xavfsiz sessiya yechimi: HttpOnly/Secure cookie, muddat, serverda bekor qilish; cookie ishlatilsa CSRF himoyasi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | SEC-02.03 | CORE-1 | blocked_external | Chiqish, barcha qurilmalardan chiqish, parol almashtirish va parol tiklash. | Existing logout/change-password; secure hashed reset token, encrypted delivery queue, expiry/one-use/rate controls, atomic password/session/PIN revocation, recovery UI; authentication-delivery.md | SMS/e-mail vendor unselected; production reset delivery unavailable, not counted done |
 | SEC-02.04 | CORE-1 | blocked_external | Telefon/e-mail tasdiqlash, bir martalik kod muddati va urinishlar chegarasi. | Provider interfaces; HMAC OTP, AES-GCM queue, current-contact proof, expiry/5 attempts/resend limits, failclosed delivery, test-only mock | Owner deferred real SMS/e-mail; no production mock verification; not counted done |
 | SEC-02.05 | CORE-1 | done | Kirish, tiklash, import va qimmat so‘rovlarda tezlik/hajm cheklovlari. | Shared org+actor API budget, public auth admission/IP spoof protection; specific login/reset/import/report/export budgets;1MiB/stream deadline and bounded parser;243 handler429 inventory; full250/final focused6/unit24/browser9 PASS | Application admission accepted; real hosting/TCP/WAF deployment remains under OPS tasks |
-| SEC-02.06 | CORE-1 | in_progress | Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq. | Session/action/key/payload-bound single-use step-up primitive, transaction rollback/replay tests; replaceable authenticator interface | OTPAuth9.5.2 TOTP core/API/UI, SQL119–121, one-use hashed recovery/rotation, general step-up bridge tayyor; global critical/platform enforcement va key rotation ochiq; not counted done |
+| SEC-02.06 | CORE-1 | done | Owner, platforma admini va muhim amallar uchun ikki bosqichli tasdiq. | 21 action MFA; SQL119–125, recovery/rekey/restore quarantine; full313, focused35, CLI2, unit33, browser15 PASS; critical-mfa-restore-20261011.json | Core qabul; real hosting rollout va restore credential/access operator reconciliation alohida tashqi ish |
 | SEC-02.07 | CORE-1 | done | API javobi va loglardan parol xeshi, token, maxfiy kalit va keraksiz shaxsiy maydonlarni chiqarish. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | SEC-02.08 | CORE-1 | done | XSS, fayl yuklash, zararli CSV va noto‘g‘ri parametrlar himoyasi. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | SEC-02.09 | CORE-1 | done | Own-account90kun security/session history, suspicious login inbox, audited bounded retry va passive no-touch polling. | ADR052;191full+6focused PG,40unit,86migrations/restore,6browser realworker; qabul quyida | Regression; production jobs worker operator tomonidan ishga tushiriladi |
@@ -50,7 +52,7 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | USR-01.03 | CORE-1 | done | Bir foydalanuvchining bir nechta biznesi orasida vakolat bilan almashish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | USR-01.04 | CORE-1 | done | Tez kassir almashish uchun PIN; PIN yuqori vakolat o‘rnini bosmasligi. | 2026-10-08 cashier PIN protokoli; migration056 + integration/browser | Regressiyani saqlash |
 | USR-01.05 | CORE-1 | done | Qaytarish, narx o‘zgartirish, katta chegirma va inventar farqiga manager tasdig‘i. | 2026-10-08: PWA/manager protokoli, versioned service/unit/integration/E2E | Regressiyani saqlash |
-| USR-01.06 | CORE-1 | todo | Kelgusida omborchi/buxgalter/kuzatuvchi roli va moslashtiriladigan vakolatlar. | — | — |
+| USR-01.06 | CORE-1 | done | Owner boshqaradigan admin/cashier subset profillari; Omborchi/Buxgalter/Kuzatuvchi namunasi. | SQL122, allow/deny/branch/revision/session/rollback; full302, unit33files, browser3, fresh/legacy/build/worker/lint | Keyingi MFA inventory va operator rekey SEC-02.06 doirasida alohida |
 | POS-01.01 | CORE-1 | done | Narx, tannarx, birlik, kassir va vakolatlarni serverda ishonchli manbadan olish. | 2026-10-06: qabul mezoni va regressiya o‘tdi; quyidagi “Yana 10 ta PLAN1 bandi” dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | POS-01.02 | CORE-1 | done | Bo‘sh savat, manfiy/yaroqsiz son, ortiqcha chegirma va noto‘g‘ri IDlarni rad etish. | 2026-10-06: qabul mezoni va regressiya o‘tdi; quyidagi “Yana 10 ta PLAN1 bandi” dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | POS-01.03 | CORE-1 | done | Savdo, to‘lov, ombor va auditni bitta nazorat qilinadigan amalda yakunlash. | 2026-10-06: qabul mezoni va regressiya o‘tdi; quyidagi “Yana 10 ta PLAN1 bandi” dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -137,7 +139,7 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | REP-01.04 | CORE-1 | done | P0: sotuv, refund, nasiya va haqiqiy pul tushumi bir-biridan ajratilishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.05 | CORE-1 | done | P0: tannarx har qator `miqdor × tarixiy tannarx`dan hisoblanishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | REP-01.06 | CORE-1 | done | P1: savdo, mahsulot, kategoriya, kassir, filial va to‘lov turi kesimidagi tahlil. | Yangi +20 checkpoint: 125 PG + final focused report test;3 HTTPS browsers; five exact reconciled dimensions; quyidagi protokol | Regressiyani saqlash; boshqa +20 bandlari ochiq |
-| REP-01.07 | CORE-1 | in_progress | P1: qoldiq qiymati, ombor harakati, kam qoldiq, yaroqlilik va sekin sotiladigan tovarlar. | Scoped movement journal; balance single-snapshot paging/search/lowStock and exact full CSV valuation/shortage | Expiry and slow-moving products analysis remain |
+| REP-01.07 | CORE-1 | in_progress | P1: qoldiq qiymati, ombor harakati, kam qoldiq, yaroqlilik va sekin sotiladigan tovarlar. | Scoped balance/movement/low-stock; branch inactiveDays rolling30/60/90 API/UI/full CSV; finance67/focused1/unit33/browser3 PASS; inactive-stock-20261011.json | Partiya/yaroqlilik INV-02.06 va expiry report ochiq; original done emas |
 | REP-01.08 | CORE-1 | done | P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti. | Supplier balance/aging + existing customer due/shift/purchase; cross-report exact fixture; bounded full CSV + 3 browsers | — |
 | REP-01.09 | CORE-1 | in_progress | P1: to‘liq filtrlangan CSV/XLSX/PDF eksport; katta eksportni fon ishida bajarish. | Full filtered sales/returns, products, categories, units, barcodes, supplier contact/history, stock documents/transfers/balances, movements, shifts and minimal audit CSV; repeatable-read/Decimal/scope,10000 cap, bounded actor budgets, browser downloads | XLSX/PDF and background large exports remain |
 | REP-01.10 | CORE-1 | done | P1: jadvaldagi umumiy son, eksport va dashboard bir davr uchun mos kelishi. | 2026-10-06: quyidagi “Yana 15 ta PLAN1 bandi” test/versiya dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
@@ -199,27 +201,27 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | DATA-01.08 | CORE-1 | done | Standart xato formati, so‘rov identifikatori, pagination/hajm cheklovi va API shartnomasi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | DATA-01.09 | CORE-1 | done | Fayllar uchun vakolatli saqlash, yuklash cheklovi va o‘chirish siyosati. | 2026-10-08 protected files/katalog/CSP protokoli; migration052..055, versioned tests | Regressiyani saqlash |
 | DATA-01.10 | CORE-1 | in_progress | Migratsiya, ma’lumot ko‘chirish va mavjud hisobni tekshirish uchun skript/reja. | Foundation–006 migration, tenant FK/trigger, isolated PostgreSQL tests | Real eski data clone preflight/backfill va fresh-db qayta qabul sinovi |
-| OPS-01.01 | CORE-1 | in_progress | Development, staging va production alohida baza/kalit bilan. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-01.01 | CORE-1 | blocked_external | Development, staging va production alohida baza/kalit bilan. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-01.02 | CORE-1 | done | Builddan `db push`ni chiqarish; versiyalangan migratsiyani alohida chiqarish bosqichida bajarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
-| OPS-01.03 | CORE-1 | in_progress | Yangi/avvalgi ilova bilan mos migratsiya, ma’lumot backfilli va qaytish rejasi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
-| OPS-01.04 | CORE-1 | in_progress | CI: lint → turlar → test → build → staging → qabul tekshiruvi → production. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
-| OPS-01.05 | CORE-1 | in_progress | Image versiyasi, minimal vakolatli jarayon, xavfsiz secret saqlash va kalit aylantirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
-| OPS-01.06 | CORE-1 | in_progress | TLS, domen, firewall; bazani umumiy internetga ochmaslik. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-01.03 | CORE-1 | blocked_external | Yangi/avvalgi ilova bilan mos migratsiya, ma’lumot backfilli va qaytish rejasi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| OPS-01.04 | CORE-1 | blocked_external | CI: lint → turlar → test → build → staging → qabul tekshiruvi → production. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| OPS-01.05 | CORE-1 | blocked_external | Image versiyasi, minimal vakolatli jarayon, xavfsiz secret saqlash va kalit aylantirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| OPS-01.06 | CORE-1 | blocked_external | TLS, domen, firewall; bazani umumiy internetga ochmaslik. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-01.07 | CORE-1 | done | Health/readiness endpoint, nazoratli restart, ulanish pooli va graceful shutdown. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
 | OPS-01.08 | CORE-1 | done | Yangilash vaqtida savdoni yo‘qotmaslik; texnik xizmat oynasi va xabar berish. | Operator atomic flag, durable admission/committed replay, readiness/worker drain, notice/native deploymentId; saved basket/pending original-key three-browser recovery | Real host routing/operator release discipline separately required; non-durable metadata CRUD not blanket-blocked |
 | OPS-02.01 | CORE-1 | done | Tuzilgan loglar, request ID, tashkilot ID; maxfiy/shaxsiy ma’lumotlarni niqoblash. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
-| OPS-02.02 | CORE-1 | in_progress | API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi. | Scoped bounded API metrics, DB/queue/lease alerts, independent uptime and disk probe scripts, local tests; monitoring.md | Actual offsite monitoring/oncall installation and vendor telemetry pending; not counted done |
+| OPS-02.02 | CORE-1 | blocked_external | API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi. | Scoped bounded API metrics, DB/queue/lease alerts, independent uptime and disk probe scripts, local tests; monitoring.md | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-02.03 | CORE-1 | done | Savdo/to‘lov/qoldiq solishtirish farqi uchun biznes ogohlantirishlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | OPS-02.04 | CORE-1 | done | Navbatdagi ishlarni takrorlash va yechilmagan ishlar ro‘yxati. | ADR051;183full+5focused PG,84migrations/restore,40unit,6browser realworker; qabul quyida | Lease/authorization/history/retry regressiyasini saqlash |
-| OPS-02.05 | CORE-1 | todo | Xatoni mas’ul xodimga yuborish va eskalatsiya; kim javob berishi aniq bo‘lishi. | — | — |
+| OPS-02.05 | CORE-1 | blocked_external | Xatoni mas’ul xodimga yuborish va eskalatsiya; kim javob berishi aniq bo‘lishi. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-02.06 | CORE-1 | todo | Status sahifasi, hodisa jurnali va jiddiy hodisadan keyingi tahlil. | — | — |
-| OPS-03.01 | CORE-1 | in_progress | Shifrlangan avtomatik backup; bazaning asosiy serveridan boshqa saqlash joyi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-03.01 | CORE-1 | blocked_external | Shifrlangan avtomatik backup; bazaning asosiy serveridan boshqa saqlash joyi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-03.02 | CORE-1 | done | Baza bilan birga mahsulot rasmlari, hujjatlar va zarur konfiguratsiya zaxirasi. | 2026-10-08: soliq/refund/scope/backup yakuniy protokoli; versioned source va avtomatik sinovlar | Regressiyani saqlash; hosting/vendor integratsiyalari alohida |
-| OPS-03.03 | CORE-1 | in_progress | Nuqtaga tiklash imkoniyati, backup muddati va kirish vakolati. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-03.03 | CORE-1 | blocked_external | Nuqtaga tiklash imkoniyati, backup muddati va kirish vakolati. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-03.04 | CORE-1 | done | Alohida muhitga amaliy tiklash sinovi; faqat “backup olindi” xabari yetarli emas. | Joriy plus-20-b individual qabul: 117 PG,27 unit, browser regressiya va restore/restart/worker artefaktlari | Regressiyani saqlash; tashqi integratsiya/hosting alohida ochiq |
-| OPS-03.05 | CORE-1 | in_progress | Tashkilotga tegishli yozuvni tiklashda boshqa tashkilot ma’lumotiga ta’sirni tekshirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
+| OPS-03.05 | CORE-1 | done | Offline recovered clone→read-only tenant comparison; missing/changed/current-only digests, FK review, private exclusive0600 artifact | 5/5 recovery+export PG;33 unit files;build/worker/types/lint PASS; tenant-recovery-20261011.json | Planning criterion accepted; no automatic import/delete/overwrite or real production recovery |
 | OPS-03.06 | CORE-1 | in_progress | Tiklashdan keyin provider, offline navbat va savdo holatlarini solishtirish. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Docker image actual build; staging/TLS/off-site scheduler/PITR/on-call; real data restore rehearsal |
-| OPS-04.01 | CORE-1 | todo | Pilotdan katalog, savdo hajmi, kassalar va parallel so‘rovlar profilini olish. | — | — |
+| OPS-04.01 | CORE-1 | blocked_external | Pilotdan katalog, savdo hajmi, kassalar va parallel so‘rovlar profilini olish. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-04.02 | CORE-1 | done | Reproducible isolated generator:50000 products,1000000 draft sale lines,20 active tills. | Fresh seed exit0; tasks/evidence/volume-dataset-20261009.json; source/version quyida | Real pilot profili alohida |
 | OPS-04.03 | CORE-1 | done | Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi. | — | — |
 | OPS-04.04 | CORE-1 | done | N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker. | 50000-row profile: 206 queries, EXPLAIN comparison; snapshot/cursor worker, immutable scoped artifact; full202/focused9/browser6, migrations93/restore | Catalogue CSV only; REP-01.09 and OPS-04.06 separately pending |
@@ -254,21 +256,21 @@ Sana: 2026-10-09. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 | LEG-01.04 | CORE-1 | blocked_external | Qonun talab qiladigan moliyaviy yozuvlarni saqlash bilan shaxsiy ma’lumotni o‘chirish talabini moslashtirish. | — | — |
 | LEG-01.05 | CORE-1 | blocked_external | Elektron chek, xizmat eslatmasi va reklama roziligini alohida qayd etish. | — | — |
 | LEG-01.06 | CORE-1 | blocked_external | Integratsiya, xosting va aloqa provayderlariga uzatiladigan ma’lumotlarni hujjatlashtirish. | — | — |
-| PILOT-01.01 | CORE-1 | blocked_external | Kamida uchta biznesda kelishilgan savdo hajmi va qurilmalar bilan sinash. | — | — |
-| PILOT-01.02 | CORE-1 | blocked_external | Kamida ikki hafta odatiy savdo; oy/davr yopilishi ssenariysini ham alohida tekshirish. | — | — |
-| PILOT-01.03 | CORE-1 | blocked_external | Har kuni savdo, pul, qarz, qoldiq va fiskal/to‘lov natijalarini solishtirish. | — | — |
-| PILOT-01.04 | CORE-1 | blocked_external | Qaytarish, nasiya undirish, transfer, internet/printer uzilishi real yoki boshqariladigan sinovda bajarilishi. | — | — |
-| PILOT-01.05 | CORE-1 | blocked_external | Kassir va egasi fikri, yordam murojaatlari va sarflangan vaqtni qayd qilish. | — | — |
-| PILOT-01.06 | CORE-1 | blocked_external | Ma’lumot yo‘qolishi, ruxsatsiz kirish va hal qilinmagan pul farqi bo‘lmasligi. | — | — |
+| PILOT-01.01 | CORE-1 | blocked_external | Kamida uchta biznesda kelishilgan savdo hajmi va qurilmalar bilan sinash. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| PILOT-01.02 | CORE-1 | blocked_external | Kamida ikki hafta odatiy savdo; oy/davr yopilishi ssenariysini ham alohida tekshirish. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| PILOT-01.03 | CORE-1 | blocked_external | Har kuni savdo, pul, qarz, qoldiq va fiskal/to‘lov natijalarini solishtirish. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| PILOT-01.04 | CORE-1 | blocked_external | Qaytarish, nasiya undirish, transfer, internet/printer uzilishi real yoki boshqariladigan sinovda bajarilishi. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| PILOT-01.05 | CORE-1 | blocked_external | Kassir va egasi fikri, yordam murojaatlari va sarflangan vaqtni qayd qilish. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| PILOT-01.06 | CORE-1 | blocked_external | Ma’lumot yo‘qolishi, ruxsatsiz kirish va hal qilinmagan pul farqi bo‘lmasligi. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | RELEASE-01.01 | CORE-1 | todo | Chiqarish doirasidagi barcha P0 va zarur P1 vazifalar yopilgan. | — | — |
 | RELEASE-01.02 | CORE-1 | todo | Muhim hisob/ruxsat ssenariylari avtomatik va amaliy sinovdan o‘tgan. | — | — |
 | RELEASE-01.03 | CORE-1 | todo | Qaytarish, nasiya, xarid va smena hisoblari bir-biriga mos. | — | — |
 | RELEASE-01.04 | CORE-1 | todo | Fiscal/markirovka talabi tegishli mijozlar uchun bajarilgan. | — | — |
 | RELEASE-01.05 | CORE-1 | todo | Tanlangan qurilmalar sinovdan o‘tgan va moslik ro‘yxati e’lon qilingan. | — | — |
-| RELEASE-01.06 | CORE-1 | todo | Real backup tiklash, migratsiya va qaytish mashqi muvaffaqiyatli. | — | — |
-| RELEASE-01.07 | CORE-1 | todo | Kuzatish, ogohlantirish va javobgar yordam xodimi mavjud. | — | — |
+| RELEASE-01.06 | CORE-1 | blocked_external | Real backup tiklash, migratsiya va qaytish mashqi muvaffaqiyatli. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+| RELEASE-01.07 | CORE-1 | blocked_external | Kuzatish, ogohlantirish va javobgar yordam xodimi mavjud. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | RELEASE-01.08 | CORE-1 | todo | Yuklama natijalari va xizmat ko‘rsatish maqsadlari hujjatlashtirilgan. | — | — |
-| RELEASE-01.09 | CORE-1 | todo | Import, boshlang‘ich hisob, trening va onboarding qo‘llanmasi tayyor. | — | — |
+| RELEASE-01.09 | CORE-1 | blocked_external | Import, boshlang‘ich hisob, trening va onboarding qo‘llanmasi tayyor. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | RELEASE-01.10 | CORE-1 | todo | Xizmat shartlari, maxfiylik, tarif va eksport/o‘chirish siyosati tayyor. | — | — |
 | RELEASE-01.11 | CORE-1 | todo | Pilotta ochiq kritik yoki yuqori darajadagi xatolar qolmagan. | — | — |
 | RELEASE-01.12 | CORE-1 | todo | Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi. | — | — |
@@ -1983,3 +1985,110 @@ Final full PostgreSQL296/296 PASS,36538ms focused29/29 PASS,32 unit test fayli P
 SEC-02.06 markaziy12operation MFA va dashboard proof/retry oqimi endi bor; flag defaultfalse, outage/invalidconfig failclosed, proof platformpriv bermaydi, late rollback/replay tekshirildi. Global barcha dangerous mutation inventory, kalit operator rotation va restore credential invalidation ochiq; SEC hali done emas.
 
 Boshlanish154 original done; hozir155; ushbu+20 **1/20**; target174 hali bajarilmadi. Core subtasklar alohida original band sifatida hisoblanmadi. Live biznes DB, productionsecret, deploy, vendor/hardware va AI commit o‘zgarishi yo‘q.
+
+
+### +20 bosqich — ikkinchi original band qabul qilindi (2026-10-11)
+
+USR-01.06 done. SQL122 CustomRole tenant composite FK, owner source/base-role/revision immutability, soft inactive history, read-only/closure va session-revocation trigger. Mavjud owner/admin/cashier saqlanadi; maxsus profil faqat asosiy rolga ruxsat etilgan reviewed endpoint subsetni ochadi. Owner egani profil orqali bermaydi; oxirgi owner himoyasi saqlangan. Shaxsiy auth va organization switch saqlanadi, branch/resource/extra platform approval davom etadi. Nofaol profil yangi sessiyani rad qiladi; rol o‘zgarsa eski session/context rad. Admin endpoint maydonlari field-level siyosat bilan cheklanayotgani da’vo qilinmaydi.
+
+Owner `/roles` sahifasida 20lik qidiruv/page, aniq namunalar, permission editor, reason/expectedRevision/immutable baseRole va xodimga assignment bor. Mavjud xodimlarga avtomatik profil yo‘q; profilni olib tashlash huquq kengayishi ekanligi ko‘rsatiladi. Original-key create/update replay, concurrent edit one winner, late audit fault → role/session/Operation rollback, own/foreign tenant, assigned/unassigned branch, owner/cashier escalation deny va subscription read-only tekshirildi.
+
+Qabul: final full PostgreSQL302/302 PASS (385660ms), unit33/33 test fayli PASS; oldingi focused20/20 va final full ichida role6/6 PASS. Chromium/Firefox/WebKit owner-create/assign→staff allow/deny→edit→logout/new-permission 3/3 PASS (10.3s). Production webpack, typecheck, worker, targeted lint, fresh/legacy122 migration acceptance, secret scan781source0findings va diff check PASS. Browser topgan create-body isActive ortiqcha maydoni va select accessible nomi tuzatildi; testdagi products organizationId majburiy filtri qo‘shildi. Birinchi role HTTP testi JSON sarlavhasini qo‘shib to‘g‘rilandi; expired fixture yangi14daytrialdan alohida eski tashkilot sifatida yaratiladi. Production guardlar yumshatilmadi.
+
+Dalil `tasks/evidence/custom-roles-20261011.json`, contract `docs/operations/custom-roles.md`, ADR070. HEAD97ded93d1c62c4a4180607d6686bf82395701ee2 + source-hashlangan ishchi daraxt; AI commit yoki deploy yo‘q. Baseline154; original done156; joriy +20 **2/20**, target174 hali bajarilmagan. SEC-02.06 yangi profile create/edit ham markaziy MFA ro‘yxatiga kiritildi, jami14 type; ownership/member mutation inventory, operator rekey va restore credentials qabul ochiq.
+
+
+### SEC-02.06 operator re-encryption core qabul (2026-10-11)
+
+SQL123 immutable TotpKeyRotation provenance bilan sealedSecret-only transitionga ruxsat beradi; old/new envelope SHA256, target key fingerprint, actor/batch/reason; hech qanday plaintext key/ciphertext auditga yozilmaydi. Operator CLI no HTTP, inherited env, exact DB confirmation, active platform grant, default counts-only check, valid explicit maintenance apply. 100lik cursor va per-factor transaction/target+operator User locks, no counter/code/factor identity change. Interrupted/concurrent rerun already-current envelopega qayta yozmaydi. Old key yo‘q yoki audit fault bo‘lsa ciphertext saqlanadi/rollback, unauthorized actor yozmaydi.
+
+Qabul: focused38/38 (32387ms), unit33test fayli PASS, uch browser TOTP+critical9/9 (22.5s), fresh/legacy123, webpack, worker, targeted lint, source scan787files0findings, diff check PASS. Yangi auth operational model uchun export omission va read-only exemption aniq ko‘rib chiqildi,112-model schema hash yangilandi. Birinchi unit inventory yangi modelni tasniflash talabini to‘g‘ri topdi; exemption/omission bilan qayta33/33 o‘tdi. CLI test unconfirmed DB/no maintenance rad, real test-DB apply→independent check0pending/0failedni tekshiradi. Full schema123 suite qayta bajarilgani da’vo qilinmaydi; oldingi schema122 full302 alohida qabul.
+
+Dalil `tasks/evidence/totp-operator-rekey-20261011.json`, operator contract `docs/operations/totp-key-rotation.md`. SEC-02.06 in_progress: qolgan permissions/ownership critical inventory va restored credential invalidation qabul ochiq. Original done156, +20 **2/20**; yangi original band sifatida sanalmadi. Real .env/key/provider/hardware/deploy va AI commit yo‘q.
+
+### SEC-02.06 xodim/egalik MFA core — 2026-10-11
+
+Markaziy siyosat 20 actionga kengaydi: yangi xodim, member update, taklif create,
+egalik request/accept/cancel ham UUID operation va exact session/action/payload
+proof talab qiladi. Grant, session revoke va audit rollback atomik. Staff create
+parolni private HMAC bilan bog‘laydi; raw parol/hash Operation resultga kirmaydi.
+Invitation parallel replay bitta manba yaratadi, token faqat original commitda
+beriladi; replay metadata orqali bekor qilib qayta chiqariladi. Egalik accept
+session tokeni saqlangan operation natijasiga yozilmaydi.
+
+Nested MFA dialog priority/inert/focus/Escape/scroll lock tuzatildi. Settings
+va role assignment bir xil failed intent uchun operation UUIDni saqlaydi.
+Focused 28/28, unit 33/33 test files, Chromium/Firefox/WebKit 9/9, production
+webpack build, typecheck, full lint va secret scan789/zero o'tdi. To‘liq
+integratsiya 311/311 o‘tdi. Dalil: `tasks/evidence/permission-grant-mfa-20261011.json`;
+source va test log SHA256 bilan qabul qilindi.
+
+SEC-02.06 hali in_progress: restored credential invalidation va qolgan xavfli
+mutation inventory/qabul ochiq. Original done156, +20 hisob2/20 saqlanadi;
+ushbu core bosqichni qo‘shimcha original done sifatida sanamadik. Tashqi
+provider/hardware adapterlar, real .env/kalitlar, deploy va AI commit yo‘q.
+
+### SEC-02.06 yakuniy core qabul — 2026-10-11
+
+Yangi +20 so‘rov baseline156, target176. SEC-02.06 original done157, ushbu so‘rov **1/20**; 19 band qolgan. Ichki test yoki subtask alohida original vazifa sifatida sanalmadi.
+
+Restore ikki transaction bilan ishlaydi: avval authentication quarantine commit, so‘ng eski session/factor/challenge/invitation revocation. Sweep xatosida gate yopiq qolishi va retry tekshirildi. Review eski credentiallar tugatilmaguncha DB guard orqali rad; owner/admin password change aniq payload MFA va audit fault rollback bilan tekshirildi. Password/PIN hamda access reconciliation operatorning mustaqil dalili bilan bajariladi; tiklangan tarixdagi eski vakolatni kod avtomatik to‘g‘ri deb qabul qilmaydi.
+
+Dalil `tasks/evidence/critical-mfa-restore-20261011.json`: full313/313 (keyingi qo‘shimcha restore failure testdan oldingi snapshot), focused35/35, oxirgi CLI2/2, unit33, Chromium/Firefox/WebKit15/15, webpack/worker/typecheck/lint, fresh/legacy125, encrypted fixture backup/restore PASS. Haqiqiy production qabul yoki deployment yo‘q. Onboarding qo‘llanmasi `docs/operations/onboarding-guide.md` tayyor; real pilot talab qiladigan RELEASE-01.09 done emas.
+
+### Tashqi muhitlar bo‘yicha foydalanuvchi qarori — 2026-10-11
+
+Real staging/production serverlari, domen/TLS, off-site backup, monitoring provayderi va pilot tashkilotlar tasdiqlanmagan. Ularga bog‘liq yakuniy qabul `blocked_external`; texnik tayyorgarlik va izolatsiyalangan test alohida yoziladi. Docker/env ajratilishi, TLS konfiguratsiyasi, backup/restore/monitoring va deployment/rollback yo‘riqnomalari davom ettiriladi. Foydalanuvchining alohida tasdig‘isiz haqiqiy production deployment bajarilmaydi. Uydirma manzil, pilot yoki tashqi qabul dalili yaratilmaydi.
+
+### Deployment texnik tayyorgarligi — 2026-10-11
+
+Base Compose runtime auth/MFA/old-key/IP trust/API budgetni app, jobs va reconciliationga uzatadi. Release overlay majburiy TOTP/MFA va nonempty auth key; alohida staging/production project/database namunalari. Private0600/no-symlink uch-env checker bir xil DB/parol/active+overlap key, >2 old key, invalid MFA/loopback/immutable image konfiguratsiyasini rad etadi. DNS alias va haqiqiy host/network/secret-store izolatsiyasi operator tomonidan tekshiriladi.
+
+`docs/operations/deployment-readiness.md`: deployment/rollback, TLS nginx template, restore quarantine, readiness/pilot checklist; `ops/systemd/`: encrypted backup va readiness/disk timers. Units o‘rnatilmagan, nginx actual syntax/TLS/host qabul hali tashqi. Off-site nusxa adapteri, SLA yoki avtomatik delete taxmin qilinmadi.
+
+Qabul: environment checker6/6, barcha profillar bilan synthetic Compose render, missing-key rad, ESLint/diff PASS. Render secretlar faqat subprocess xotirasida; haqiqiy `.env` ochilmadi va konteyner ishga tushirilmadi. Dalil `tasks/evidence/deployment-preparation-20261011.json`. Original done157, joriy so‘rov1/20 saqlanadi: tashqi acceptance kerak bo‘lgan OPS/PILOT/RELEASE bandlari faqat config/hujjat bilan done qilinmadi.
+
+Production startup invalid MFA flag, missing enabled key, required-MFA/TOTP mismatch, malformed/>2/duplicate overlap keyni safe error bilan rad etadi. Legacy defaultfalse yoqilmagan funksiyalarni o‘zgartirmaydi; release overlay ikkala flagni true beradi. CIga `npm run test:ops` qo‘shildi; restore CLI integration service konteynerini `POS_TEST_PSQL_CONTAINER` orqali tanlaydi (mahalliy default isolated konteyner). Yakuniy portable restore2/2, ops8/8, unit33fayl va focused lint/worker PASS; actual CI run emas.
+
+Yakuniy deployment-prep qayta qabul: URL-encoded bir xil DB target ham rad; isolation7/7, ops9/9, unit33fayl, portable restore2/2, production webpack/worker/typecheck/focused ESLint PASS. Read-only secret scan815fayl/0findings (git history/images/credential store scopega kirmaydi). Bu image build yoki haqiqiy deployment emas. Dalilning current source/log SHA256lari yangilandi. Original157, so‘rov1/20; qolgan19 avtomatik yopilmadi.
+
+### Hisobot/hodisalar pagination va filial scope regressiyasi — 2026-10-11
+
+Replenishment va incidents umumiy `paging` validatoriga ulandi: positive safe integer page, limit1–200, offset≤2147483647, invalid400. Replenishment optionalUUID storeIdni shu transactiondagi live context va tenant/assigned filial bilan tekshiradi; foreign/hidden404, invalidUUID400. Rows va total bir xil filial filter/snapshotda. Incidents limit haqiqiy take/offset va javob paginationiga tatbiq qilinadi, default20 saqlanadi.
+
+Qabul: reports-finance66/66; keyingi qo‘shimcha assertions bilan focused1/1 (admin limit1 ikki alohida sahifa, total2, hidden incident tashqarida, revoked cookie401), unit33fayl, focused lint/diff PASS. Dalil `tasks/evidence/report-pagination-20261011.json`. Database migration, vendor adapter yoki haqiqiy deploy yo‘q. REP-01.07 hali expiry/slow-moving sabab in_progress; ushbu fix alohida original band hisoblanmadi. Original157, joriy +20 1/20 saqlanadi.
+
+Ushbu checkpointning yakuniy typecheck va worker build tekshiruvi ham PASS; log hashlar report-pagination daliliga qo‘shildi.
+
+### REP-01.07 savdosiz qoldiq core qabuli — 2026-10-11
+
+Mavjud balances APIga inactiveDays1–3650 filtri; UI30/60/90 tanlovi va aynan shu CSV filter qo‘shildi. Musbat joriy qoldiq, branch/product bo‘yicha completed/partially_returned/returned aktivlik, N×24soat rolling oyna. Draft/held aktivlik emas; 31kun oldingi sale30kunlik oynadan tashqarida: mahsulot natijaga kiradi;60kunlik oynada esa shu sale aktivlik bo‘lib mahsulot natijadan chiqadi. NULL/future completion timestamp konservativ ravishda savdosizlikdan chiqariladi. Bu physical stock age, reservation available, tarixiy stock rekonstruksiyasi yoki FEFO emas; yangi kirim hali sotilmagan mahsulot ham chiqishi mumkin.
+
+Counts, rows va CSV bir xil RepeatableRead scope/filter; normal balans ro‘yxati unchanged, default meta current_stock_snapshot. Qoldiq/tannarx Decimal string, CSV formula escape va10000cap saqlangan. Read-only report: posting, migratsiya yoki vendor integration yo‘q. Contract `docs/operations/inventory-inactivity.md`.
+
+Qabul: finance67/67 (yakuniy metadata label/60kun assertdan oldingi snapshot), oxirgi focused1/1 metadata+30/60oyna, unit33file, Chromium/Firefox/WebKit3/3 UI/CSV, production webpack/worker PASS; dalil `tasks/evidence/inactive-stock-20261011.json`. UI request sequence/filial scope/filter reset saqlandi. REP-01.07 hali expiry qismi uchun in_progress; original157, joriy +20 1/20 o‘zgarmadi. Haqiqiy production deployment/pilot yo‘q.
+
+Yakuniy typecheck/lint/diff PASS; read-only secret scan819fayl/0findings. Scope working-tree source; credential store/history/images ochilmadi. Log SHA256lar inactive-stock daliliga kiritildi.
+
+### Yangi +20 original vazifa so‘rovi — 2026-10-11
+
+Baseline157, target177; oldingi 1/20 hisob tarixiy checkpoint bo‘lib qoldi. Faqat yangi original checkbox done hisoblanadi. Tasdiqlanmagan vendor, hosting, huquqiy yoki pilot qabul blocked_external; core tayyorgarlik original qabul talabini almashtirmaydi. Tenant isolated recovery plan OPS-03.05 birinchi ishlanadigan band.
+
+
+## OPS-03.05 — isolated tenant recovery rejasining qabuli (2026-10-11)
+
+Yangi +20 hisob **1/20**, jami original **158**, target177. OPS-03.05ning mavjud mezoni isolated cloneda rejalash va boshqa tenant hashlarini saqlash; avtomatik restore/apply yoki production recovery deb talqin qilinmaydi.
+
+- Kirish: faqat local disposable PostgreSQL; ikki tashkilot, shared user, original product va source-only category. Haqiqiy pg_dump→yangi pg_restore clone→auth quarantine.
+- Kutilgan/haqiqiy: ikkala snapshot READ ONLY; missing/changed/current-only va FKlar ajraladi, target edit/yangi yozuv saqlanadi, foreign tenant portable-business manifest hashlar oldin/keyin teng. Secret/security datasetlar chiqarilmaydi.
+- Migration checksum tampering hamda unfinished migration rad. Wrong DB confirmation/same DB/missing tenant/existing output/unsafe parent rad; private0600 output va stdout SHA binding tekshirildi. Source/target snapshotlar ketma-ket, atomic distributed snapshot emas.
+- Qabul: recovery+tenant-export integration **5/5**, unit **33/33 files**, worker/webpack build, typecheck, focused lint va diff-check PASS. Testlar faqat isolated bazada; clone/private dump va scoped fixtures cleanup. Yangi schema migration yo‘q.
+- Versiya: HEAD97ded93d1c62c4a4180607d6686bf82395701ee2 + uncommitted worktree; source/log SHA256lar `tasks/evidence/tenant-recovery-20261011.json`da. Full integration suite yoki real server/pilot shu checkpointda bajarildi deb da’vo qilinmaydi.
+- Operator qo‘llanmasi: `docs/operations/tenant-recovery.md`; CLI `npm run worker:tenant-recovery-plan`. Reja private casega hash bilan bog‘lanadi, public download emas. Missing tenant raw import, credential/permission rollback, financial journal overwrite, vendor status inference yo‘q.
+
+Qolgan19 bandning barchasi tashqi to‘siq emas: INV-01.07, INV-02.06/07, PUR-01.05, REP-01.07/09 va UX-01.02/03/05 kabi core ishlar ochiq. Server/provayder/pilotga bog‘liq qabul bandlari foydalanuvchi tasdiqlaguncha `blocked_external`; kichik test/subtask alohida original done hisoblanmaydi.
+
+
+## Navbatdagi +20 so‘rov — baseline158 (2026-10-11)
+
+Target178, hozir0/20. OPS-03.06 core ichida restored provider outboxning eski queued submitni qayta bajarish xavfi tekshirilyapti; real providerda DBdan tashqari qolgan amallarni solishtirish tashqi adapter/dalilga bog‘liq. Original done hisobiga test yoki subtask qo‘shilmaydi.

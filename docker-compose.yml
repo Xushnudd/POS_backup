@@ -1,3 +1,17 @@
+x-runtime-environment: &runtime-environment
+  DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be supplied securely}
+  APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN must be the public HTTPS origin}
+  NODE_ENV: production
+  AUTH_TOTP_ENABLED: ${AUTH_TOTP_ENABLED:-false}
+  AUTH_CRITICAL_MFA_REQUIRED: ${AUTH_CRITICAL_MFA_REQUIRED:-false}
+  AUTH_CHALLENGE_SECRET: ${AUTH_CHALLENGE_SECRET:-}
+  AUTH_TOTP_PREVIOUS_SECRETS: ${AUTH_TOTP_PREVIOUS_SECRETS:-}
+  TRUST_PROXY_IP: ${TRUST_PROXY_IP:-}
+  API_READS_PER_MINUTE: ${API_READS_PER_MINUTE:-600}
+  API_WRITES_PER_MINUTE: ${API_WRITES_PER_MINUTE:-300}
+  API_PUBLIC_WRITES_PER_MINUTE: ${API_PUBLIC_WRITES_PER_MINUTE:-1200}
+  API_BODY_TIMEOUT_MS: ${API_BODY_TIMEOUT_MS:-10000}
+
 x-app-build: &app-build
   context: .
   args:
@@ -37,9 +51,7 @@ services:
     ports:
       - "${POS_BIND_ADDRESS:-127.0.0.1}:${POS_PORT:-3000}:3000"
     environment:
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be supplied securely}
-      APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN must be the public HTTPS origin}
-      NODE_ENV: production
+      <<: *runtime-environment
       PORT: 3000
       HOSTNAME: "0.0.0.0"
     init: true
@@ -63,9 +75,7 @@ services:
     init: true
     stop_grace_period: 35s
     environment:
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must point to the internal db service}
-      APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN must be the public HTTPS origin}
-      NODE_ENV: production
+      <<: *runtime-environment
       RECONCILE_INTERVAL_MS: ${RECONCILE_INTERVAL_MS:-300000}
     depends_on:
       db:
@@ -80,9 +90,7 @@ services:
     init: true
     stop_grace_period: 35s
     environment:
-      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must point to the internal db service}
-      APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN must be the public HTTPS origin}
-      NODE_ENV: production
+      <<: *runtime-environment
     depends_on:
       db:
         condition: service_healthy

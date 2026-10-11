@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-11",
+  "task": "OPS-03.05",
+  "status": "done_planning_criterion_only",
+  "originalDone": 158,
+  "batchBaseline": 157,
+  "batchTarget": 177,
+  "batchDone": 1,
+  "checks": {
+    "recoveryAndTenantExportIntegration": "5/5",
+    "unitFiles": "33/33",
+    "workerBuild": "PASS",
+    "productionWebpackBuild": "PASS",
+    "typecheck": "PASS",
+    "focusedLint": "PASS",
+    "diffCheck": "PASS",
+    "secretScan": {
+      "files": 824,
+      "findings": 0
+    }
+  },
+  "scope": "Synthetic fixtures in local isolated PostgreSQL, actual disposable pg_dump/pg_restore clone and auth quarantine; readonly portable business comparison only",
+  "invariants": [
+    "Both snapshot transactions verified READ ONLY by SHOW transaction_read_only",
+    "Foreign tenant manifest hashes unchanged, including shared-identity fixture",
+    "Current edits/current-only rows preserved; missing records are review candidates",
+    "Migration checksum mismatch and unfinished migration rejected",
+    "Wrong confirmation, same database, missing tenant, unsafe output parent and existing output rejected",
+    "Private0600 exclusive artifact SHA matches safe stdout digest"
+  ],
+  "notPerformed": [
+    "Automatic import/apply/delete/overwrite",
+    "Real production recovery or deployment",
+    "Real tenant/operator approval",
+    "External provider status query",
+    "Full integration suite at this checkpoint"
+  ],
+  "head": "97ded93d1c62c4a4180607d6686bf82395701ee2",
+  "worktree": "uncommitted; no commit created",
+  "sourceSHA256": {
+    "src/server/jobs/tenant-recovery.ts": "c7e3f2416b045716a835cc39cd7ac85e59d21e885325531c8bc07ff0ba32aad7",
+    "src/server/jobs/tenant-export.ts": "916cf6cfcb8eca1159ff8d7819af9e28741cd3d49ade174906c3d226f93b77c8",
+    "scripts/workers/tenant-recovery-plan.ts": "61c463adfb603e521067f90fdcde3fa01656ef0932ee43b46a2b372ff8650b55",
+    "tests/tenant-recovery.integration.test.ts": "f42ebc170122e3751fb85a303f0c2ba6b9cb70dc16349d726a025a54be73c96d",
+    "docs/operations/tenant-recovery.md": "83c07b32229546f0dcc7d4b4c6a10bcec4f5b15b895ba071f8dc30510783fe9c",
+    "package.json": "cffd39dd55e6ab62fb51a723ace6695bc5dffea377497ad8b258ad7688f9e4fe",
+    "README.md": "db457ffbaabdf0a53531588d4816b345929c15157ac924822ba98b1767a17928"
+  },
+  "logSHA256": {
+    "/tmp/pos-tenant-recovery-unit.log": "2673e92a8a7e32b63d2a027509abc3ce18097c4794a794180b4e5428ab18a40d",
+    "/tmp/pos-tenant-recovery-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-tenant-recovery-integration-accepted.log": "c21e1722dc924ad6a0e1edd1ffdbc8af85a4cc2079a570b746f376b503aebb2d",
+    "/tmp/pos-tenant-recovery-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-tenant-recovery-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-tenant-recovery-build.log": "9f2fba600c243f886017bbdf7d5c4c4c25b901144edd225073e2560840aee423",
+    "/tmp/pos-tenant-recovery-security.log": "13dc7fdee2f5ac9876750eb6cdc4d41e3bd32801dfa5e715abe331e1658c521d"
+  }
+}

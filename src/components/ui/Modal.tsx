@@ -11,6 +11,14 @@ export interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  layer?: 'normal'|'critical';
+}
+const dialogStack:HTMLDivElement[]=[];
+let previousOverflow='';
+const activeDialog=()=>dialogStack.findLast(dialog=>dialog.dataset.modalLayer==='critical')??dialogStack.at(-1);
+function refreshDialogs(){
+ const top=activeDialog();
+ for(const dialog of dialogStack){dialog.inert=dialog!==top;dialog.setAttribute('aria-modal',String(dialog===top));}
 }
 
 const sizeClasses = {
@@ -29,6 +37,7 @@ export default function Modal({
   children,
   footer,
   size = 'md',
+  layer = 'normal',
 }: ModalProps) {
   const dialogRef=useRef<HTMLDivElement>(null);
   const restoreFrame=useRef<number|null>(null);
@@ -37,9 +46,14 @@ export default function Modal({
     if(!isOpen)return;
     if(restoreFrame.current!==null){cancelAnimationFrame(restoreFrame.current);restoreFrame.current=null;}
     const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const dialog=dialogRef.current;
+    if(dialog){
+      if(!dialogStack.length)previousOverflow=document.body.style.overflow;
+      dialogStack.push(dialog);refreshDialogs();document.body.style.overflow='hidden';
+    }
     const previousId=previous?.id,focusKey=previous?.dataset.focusKey;
     const selectable=()=>Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')??[]).filter(element=>element.getClientRects().length>0);
-    (selectable()[0]??dialogRef.current)?.focus();
+    if(activeDialog()===dialog)(selectable()[0]??dialogRef.current)?.focus();
     const trap=(event:KeyboardEvent)=>{
       if(event.key!=='Tab')return;
       const elements=selectable(),first=elements[0],last=elements.at(-1);
@@ -47,23 +61,25 @@ export default function Modal({
       if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
     };
-    const dialog=dialogRef.current;dialog?.addEventListener('keydown',trap);
+    dialog?.addEventListener('keydown',trap);
     return ()=>{
       dialog?.removeEventListener('keydown',trap);
+      if(dialog){const index=dialogStack.indexOf(dialog);if(index>=0)dialogStack.splice(index,1);refreshDialogs();}
+      if(!dialogStack.length)document.body.style.overflow=previousOverflow;
       // A catalog refresh may replace the original element while the dialog is open.
       // Find its stable replacement after the closing commit; respect another modal.
       restoreFrame.current=requestAnimationFrame(()=>{
         restoreFrame.current=null;
-        const activeDialog=document.querySelector('[role="dialog"][aria-modal="true"]');
+        const active=activeDialog();
         const target=previous?.isConnected?previous:focusKey?document.querySelector<HTMLElement>(`[data-focus-key="${CSS.escape(focusKey)}"]`):previousId?document.getElementById(previousId):null;
-        if(target&&(!activeDialog||activeDialog.contains(target)))target.focus();
+        if(target&&(!active||active.contains(target)))target.focus();
       });
     };
-  },[isOpen]);
+  },[isOpen,layer]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && activeDialog()===dialogRef.current) {
         onClose();
       }
     };
@@ -71,28 +87,17 @@ export default function Modal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div style={{zIndex:layer==='critical'?70:50}} className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         className="fixed inset-0"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={title?titleId:undefined} tabIndex={-1}
+      <div ref={dialogRef} data-modal-layer={layer} role="dialog" aria-modal="true" aria-labelledby={title?titleId:undefined} tabIndex={-1}
         className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden z-10 animate-in zoom-in-95 duration-150`}
       >
         {title && (

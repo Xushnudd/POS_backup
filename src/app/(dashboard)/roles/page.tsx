@@ -38,6 +38,12 @@ function RolesPanel({organizationId}:{organizationId:string}){
   await api.request(id?`/roles/${id}`:'/roles',{method:id?'PUT':'POST',body:JSON.stringify({...body,operationId:pending.current.id})})
   pending.current=null;setEditor(null);setMessage('Rol saqlandi. Vakolat o‘zgargan xodimlar qayta kirishi kerak.');await load(data?.page??1)
  }
+ async function assign(){
+  const signature=JSON.stringify({memberId,customRoleId:profileId||null})
+  if(pending.current?.signature!==signature)pending.current={signature,id:crypto.randomUUID()}
+  await api.organizations.updateMember(organizationId,memberId,{customRoleId:profileId||null,operationId:pending.current.id})
+  pending.current=null;setMessage('Profil biriktirildi; xodim qayta kirishi kerak.');await load(data?.page??1)
+ }
  return <div className="space-y-5"><h1 className="text-2xl font-bold">Rollar va vakolatlar</h1>
   <p>Maxsus rol asosiy admin yoki kassir huquqlarini cheklaydi. Filial chegaralari va qo‘shimcha tasdiqlar saqlanadi. Shaxsiy xavfsizlik va tashkilotni almashtirish imkoniyatlari saqlanadi.</p>
   <p>Namunalar hech kimga avtomatik biriktirilmaydi. O‘qish vakolati asosiy rolga ko‘rinadigan ma’lumotlarni ham ochishi mumkin; xodimga berishdan oldin tekshiring.</p>
@@ -48,16 +54,16 @@ function RolesPanel({organizationId}:{organizationId:string}){
    <div className="flex gap-3"><button disabled={busy||data.page===1} onClick={()=>void perform(()=>load(data.page-1))}>Oldingi</button><span>Sahifa {data.page}; jami {data.total}</span><button disabled={busy||data.page*20>=data.total} onClick={()=>void perform(()=>load(data.page+1))}>Keyingi</button></div>
    {editor&&<form onSubmit={event=>{event.preventDefault();void perform(save)}} className="border rounded p-4 space-y-3"><h2 className="font-semibold">{editor.id?'Rolni tahrirlash':'Rol yaratish'}</h2>
     <label className="block">Nom<input required minLength={2} maxLength={80} disabled={busy} value={editor.name} onChange={event=>setEditor({...editor,name:event.target.value})} className="block border p-2"/></label>
-    <label className="block">Asosiy rol<select disabled={busy||!!editor.id} value={editor.baseRole} onChange={event=>setEditor({...editor,baseRole:event.target.value as Base,permissions:[]})}><option value="admin">Admin</option><option value="cashier">Kassir</option></select></label>
+    <label className="block">Asosiy rol<select aria-label="Asosiy rol" disabled={busy||!!editor.id} value={editor.baseRole} onChange={event=>setEditor({...editor,baseRole:event.target.value as Base,permissions:[]})}><option value="admin">Admin</option><option value="cashier">Kassir</option></select></label>
     <p>GET — ko‘rish; POST — yaratish yoki tasdiqlash; PUT/PATCH — o‘zgartirish; DELETE — olib tashlash. Har bir tanlov faqat ko‘rsatilgan amalni ochadi.</p>
     <fieldset disabled={busy} className="max-h-80 overflow-auto"><legend>Vakolatlar ({editor.permissions.length})</legend>{data.catalog.filter(item=>item.baseRoles.includes(editor.baseRole)).map(item=><label key={item.key} className="block"><input type="checkbox" checked={editor.permissions.includes(item.key)} onChange={event=>setEditor({...editor,permissions:event.target.checked?[...editor.permissions,item.key]:editor.permissions.filter(key=>key!==item.key)})}/><span className="ml-2">{item.key}</span></label>)}</fieldset>
     {editor.id&&<label className="block"><input type="checkbox" disabled={busy} checked={editor.isActive} onChange={event=>setEditor({...editor,isActive:event.target.checked})}/> Faol. O‘chirilsa shu profil xodimlari tizimga kira olmaydi.</label>}
     <label className="block">Sabab<textarea required minLength={3} maxLength={2000} disabled={busy} value={editor.reason} onChange={event=>setEditor({...editor,reason:event.target.value})} className="block border p-2"/></label>
     <p>Vakolat yoki faol holat o‘zgarsa barcha biriktirilgan sessiyalar bekor qilinadi. Eskirgan versiya avtomatik ustidan yozilmaydi.</p><button disabled={busy}>Saqlash</button><button type="button" disabled={busy} onClick={()=>setEditor(null)} className="ml-3">Bekor qilish</button>
    </form>}
-   <form onSubmit={event=>{event.preventDefault();void perform(async()=>{await api.organizations.updateMember(organizationId,memberId,{customRoleId:profileId||null});setMessage('Profil biriktirildi; xodim qayta kirishi kerak.');await load(data.page)})}} className="border rounded p-4 space-y-3"><h2 className="font-semibold">Xodimga biriktirish</h2>
-    <label className="block">Xodim<select required disabled={busy} value={memberId} onChange={event=>setMemberId(event.target.value)}><option value="">Tanlang</option>{members.filter(member=>member.isActive&&!member.archivedAt&&member.role!=='owner').map(member=><option key={member.id} value={member.id}>{member.user.fullName} — {member.customRoleName??member.role}</option>)}</select></label>
-    <label className="block">Ushbu sahifadagi profil<select disabled={busy} value={profileId} onChange={event=>setProfileId(event.target.value)}><option value="">Maxsus profilni olib tashlash</option>{data.rows.filter(row=>row.isActive).map(row=><option key={row.id} value={row.id}>{row.name}</option>)}</select></label><p>Profilni olib tashlash asosiy rolning to‘liq huquqlarini qaytaradi. Filial biriktirishlari o‘zgarmaydi. Boshqa sahifadagi profil uchun ro‘yxatdan qidiring.</p><button disabled={busy||!memberId}>Biriktirishni saqlash</button>
+   <form onSubmit={event=>{event.preventDefault();void perform(assign)}} className="border rounded p-4 space-y-3"><h2 className="font-semibold">Xodimga biriktirish</h2>
+    <label className="block">Xodim<select aria-label="Xodim" required disabled={busy} value={memberId} onChange={event=>setMemberId(event.target.value)}><option value="">Tanlang</option>{members.filter(member=>member.isActive&&!member.archivedAt&&member.role!=='owner').map(member=><option key={member.id} value={member.id}>{member.user.fullName} — {member.customRoleName??member.role}</option>)}</select></label>
+    <label className="block">Ushbu sahifadagi profil<select aria-label="Ushbu sahifadagi profil" disabled={busy} value={profileId} onChange={event=>setProfileId(event.target.value)}><option value="">Maxsus profilni olib tashlash</option>{data.rows.filter(row=>row.isActive).map(row=><option key={row.id} value={row.id}>{row.name}</option>)}</select></label><p>Profilni olib tashlash asosiy rolning to‘liq huquqlarini qaytaradi. Filial biriktirishlari o‘zgarmaydi. Boshqa sahifadagi profil uchun ro‘yxatdan qidiring.</p><button disabled={busy||!memberId}>Biriktirishni saqlash</button>
    </form>
   </>}
  </div>

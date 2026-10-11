@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
-import { TOTP } from 'otpauth'
+import { TOTP, URI } from 'otpauth'
 import { randomUUID } from 'node:crypto'
 const connection=new URL(process.env.DATABASE_URL??'')
 if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw new Error('Isolated test DB required')
@@ -62,4 +62,55 @@ test('Lost confirmation ACK recovers actual enabled status without retrieving or
  expect(await db.totpRecoveryCode.count({where:{factor:{userId:me.user.id},usedAt:null}})).toBe(10)
  const stored=await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}));expect(stored.includes(secret)).toBe(false)
  await page.unroute('**/api/auth/totp/confirm')
+})
+
+test('Nested staff MFA traps focus above the form; Escape cancels only proof and retry creates one member',async({page})=>{
+ const response=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Nested MFA owner',phone:'nested-'+randomUUID(),password,organizationName:'Nested MFA business'}});expect(response.ok()).toBe(true)
+ const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const enrollment=await page.request.post('/api/auth/totp/enroll',{headers:{Origin:'https://localhost:3100'},data:{password}});expect(enrollment.ok()).toBe(true)
+ const source=(await enrollment.json()).data,totp=URI.parse(source.provisioningUri) as TOTP
+ const confirmed=await page.request.post('/api/auth/totp/confirm',{headers:{Origin:'https://localhost:3100'},data:{factorId:source.factorId,code:totp.generate({timestamp:Date.now()-30000})}});expect(confirmed.ok()).toBe(true)
+ await page.goto('/settings');await page.getByRole('button',{name:'Xodimlar (Foydalanuvchilar)',exact:true}).click()
+ await page.getByRole('button',{name:/Yangi xodim/}).click()
+ const form=page.locator('[role="dialog"][data-modal-layer="normal"]')
+ const phone='nested-staff-'+randomUUID()
+ await form.getByLabel("Xodim to'liq ismi *",{exact:true}).fill('Nested staff')
+ await form.getByLabel('Telefon raqam *',{exact:true}).fill(phone)
+ await form.getByLabel('Parol (kamida 8 ta belgi) *',{exact:true}).fill('nested-staff-password')
+ await form.getByRole('button',{name:"Qo'shish",exact:true}).click()
+ const proof=page.getByRole('dialog',{name:'Muhim amalni tasdiqlash',exact:true})
+ await expect(proof).toBeVisible();await expect(form).toHaveAttribute('inert','');await expect(form).toHaveAttribute('aria-modal','false')
+ await page.keyboard.press('Escape');await expect(proof).toHaveCount(0);await expect(form).toBeVisible();await expect(form).toHaveAttribute('aria-modal','true')
+ expect(await page.evaluate(()=>document.body.style.overflow)).toBe('hidden');expect(await db.user.count({where:{phone}})).toBe(0)
+ await form.getByRole('button',{name:"Qo'shish",exact:true}).click();await expect(proof).toBeVisible()
+ await proof.getByLabel('Muhim amal uchun Authenticator kodi',{exact:true}).fill(totp.generate())
+ await proof.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+ await expect(form).toHaveCount(0);await expect(proof).toHaveCount(0)
+ const staff=await db.user.findUniqueOrThrow({where:{phone}});users.push(staff.id)
+ expect(await db.organizationUser.count({where:{organizationId:me.organization.id,userId:staff.id}})).toBe(1)
+ expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden')
+ expect(JSON.stringify(await db.operation.findMany({where:{organizationId:me.organization.id,type:'users.member.create'}}))).not.toContain('nested-staff-password')
+})
+
+test('Owner password form requires MFA then signs out and accepts only the new password',async({page})=>{
+ const phone='password-mfa-'+randomUUID(),newPassword='browser-new-password'
+ const response=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Password MFA owner',phone,password,organizationName:'Password MFA business'}});expect(response.ok()).toBe(true)
+ const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const enrollment=await page.request.post('/api/auth/totp/enroll',{headers:{Origin:'https://localhost:3100'},data:{password}});expect(enrollment.ok()).toBe(true)
+ const source=(await enrollment.json()).data,totp=URI.parse(source.provisioningUri) as TOTP
+ expect((await page.request.post('/api/auth/totp/confirm',{headers:{Origin:'https://localhost:3100'},data:{factorId:source.factorId,code:totp.generate({timestamp:Date.now()-30000})}})).ok()).toBe(true)
+ await page.goto('/security')
+ await page.getByLabel('Joriy parol',{exact:true}).fill(password)
+ await page.getByLabel('Yangi parol',{exact:true}).fill(newPassword)
+ await page.getByLabel('Yangi parolni tasdiqlash',{exact:true}).fill(newPassword)
+ await page.getByRole('button',{name:'Parolni yangilash',exact:true}).click()
+ const proof=page.getByRole('dialog',{name:'Muhim amalni tasdiqlash',exact:true});await expect(proof).toBeVisible()
+ expect(await db.session.count({where:{userId:me.user.id,revokedAt:null}})).toBe(1)
+ await proof.getByLabel('Muhim amal uchun Authenticator kodi',{exact:true}).fill(totp.generate())
+ await proof.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+ await expect(page).toHaveURL(/\/login$/)
+ expect(await db.session.count({where:{userId:me.user.id,revokedAt:null}})).toBe(0)
+ expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password}})).status()).toBe(401)
+ expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:newPassword}})).ok()).toBe(true)
+ expect(JSON.stringify(await db.auditLog.findMany({where:{organizationId:me.organization.id}}))).not.toContain(newPassword)
 })

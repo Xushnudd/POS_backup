@@ -110,7 +110,7 @@ class ApiClient {
         const binding = stepUpBinding(data?.error?.details);
         // Retry the original serialized body and operation key exactly once.
         // Stream bodies cannot be replayed safely. Auth endpoints never recurse.
-        if (!stepUpAttempted && data?.error?.code === 'STEP_UP_REQUIRED' && binding && typeof options.body === 'string' && !endpoint.startsWith('/auth/') && await requestStepUp(binding)) {
+        if (!stepUpAttempted && data?.error?.code === 'STEP_UP_REQUIRED' && binding && typeof options.body === 'string' && (endpoint === '/auth/change-password' || !endpoint.startsWith('/auth/')) && await requestStepUp(binding)) {
           return this.request<T, Summary>(endpoint, options, true);
         }
         const errorMsg =
@@ -164,7 +164,7 @@ class ApiClient {
     acceptInvitation: (data:{token:string;fullName?:string;password?:string}) => this.request<{organizationId:string;membershipId:string}>('/auth/invitations/accept',{method:'POST',body:JSON.stringify(data)}),
     logout: () => this.request('/auth/logout', { method: 'POST', body: '{}' }),
     logoutAll: () => this.request('/auth/logout-all', { method: 'POST', body: '{}' }),
-    changePassword:(currentPassword:string,newPassword:string)=>this.request('/auth/change-password',{method:'POST',body:JSON.stringify({currentPassword,newPassword})}),
+    changePassword:(currentPassword:string,newPassword:string)=>this.request('/auth/change-password',{method:'POST',body:JSON.stringify({operationId:crypto.randomUUID(),currentPassword,newPassword})}),
     me: () => this.request<AuthData>('/auth/me'),
   };
 
@@ -175,8 +175,8 @@ class ApiClient {
   };
   ownership = {
     list: () => this.request<Array<{id:string;incoming:boolean;expiresAt:string}>>('/ownership-transfers'),
-    request: (organizationId:string,targetMembershipId:string) => this.request(`/organizations/${organizationId}/transfer-ownership`,{method:'POST',body:JSON.stringify({targetMembershipId})}),
-    respond: (id:string,action:'accept'|'cancel') => this.request(`/ownership-transfers/${id}`,{method:'POST',body:JSON.stringify({action})}),
+    request: (organizationId:string,targetMembershipId:string,operationId=crypto.randomUUID()) => this.request(`/organizations/${organizationId}/transfer-ownership`,{method:'POST',body:JSON.stringify({targetMembershipId,operationId})}),
+    respond: (id:string,action:'accept'|'cancel',operationId=crypto.randomUUID()) => this.request(`/ownership-transfers/${id}`,{method:'POST',body:JSON.stringify({action,operationId})}),
   };
   barcodes = {
     generate: (id:string,operationId:string) => this.request<ProductBarcode>(`/products/${id}/barcodes/generate`,{method:'POST',body:JSON.stringify({operationId})}),
@@ -349,7 +349,7 @@ class ApiClient {
 
   // Inventory
   inventory = {
-    balances: (params: { organizationId: string; storeId?: string; lowStock?: boolean;search?:string;categoryId?:string;page?:number;limit?:number }) => {
+    balances: (params: { organizationId: string; storeId?: string; lowStock?: boolean;inactiveDays?:number;search?:string;categoryId?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
@@ -607,13 +607,14 @@ class ApiClient {
       }),
 
     revokeInvitation: (id:string,invitationId:string) => this.request(`/organizations/${id}/invitations/${invitationId}`,{method:'DELETE',body:'{}'}),
-    createInvitation: (id:string,data:{phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken:string}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify(data)}),
-    updateMember: (id:string,memberId:string,data:{role?:string;customRoleId?:string|null;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify(data)}),
+    createInvitation: (id:string,data:{operationId?:string;phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken?:string;invitationTokenUnavailable?:boolean}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()})}),
+    updateMember: (id:string,memberId:string,data:{operationId?:string;role?:string;customRoleId?:string|null;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()})}),
     users: (id: string) => this.request<OrganizationMember[]>(`/organizations/${id}/users`),
 
     addUser: (
       id: string,
       data: {
+        operationId?:string;
         fullName: string;
         phone: string;
         password: string;
@@ -624,7 +625,7 @@ class ApiClient {
     ) =>
       this.request(`/organizations/${id}/users`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()}),
       }),
   };
 }
