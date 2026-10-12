@@ -5,7 +5,7 @@ export type {StepUpRequest}
 export function stepUpBinding(value: unknown): StepUpBinding | null {
   if (!value || typeof value !== 'object') return null
   const row = value as Record<string, unknown>
-  if (typeof row.action !== 'string' || !/^[a-z][a-z0-9_.]{2,80}$/.test(row.action) || typeof row.operationKey !== 'string' || !/^[0-9a-f-]{36}$/i.test(row.operationKey) || typeof row.payloadHash !== 'string' || !/^[0-9a-f]{64}$/.test(row.payloadHash)) return null
+  if (typeof row.action !== 'string' || !/^[a-z][a-z0-9_.-]{2,80}(?![\s\S])/.test(row.action) || typeof row.operationKey !== 'string' || !/^[0-9a-f-]{36}$/i.test(row.operationKey) || typeof row.payloadHash !== 'string' || !/^[0-9a-f]{64}$/.test(row.payloadHash)) return null
   return {action: row.action, operationKey: row.operationKey, payloadHash: row.payloadHash}
 }
 export function requestStepUp(binding: StepUpBinding): Promise<boolean> {

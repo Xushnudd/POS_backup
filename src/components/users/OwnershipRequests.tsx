@@ -1,10 +1,45 @@
- 'use client';
-import {useEffect,useState} from 'react';
+'use client';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {api} from '@/lib/api';
+import {useAuth} from '@/context/AuthContext';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {confirmPageNavigation,commitPageNavigation} from '@/lib/page-navigation';
 import Button from '@/components/ui/Button';
+type RequestRow={id:string;incoming:boolean;expiresAt:string};
 export default function OwnershipRequests({organizationId}:{organizationId?:string}){
- const [rows,setRows]=useState<Array<{id:string;incoming:boolean;expiresAt:string}>>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false);
- useEffect(()=>{let cancelled=false;const load=()=>api.ownership.list().then(result=>{if(!cancelled)setRows(result.data??[]);}).catch(()=>undefined);void load();const timer=setInterval(()=>void load(),30000);return()=>{cancelled=true;clearInterval(timer);};},[organizationId]);
- if(!rows.length)return null;
- return <div className="text-xs">{error&&<p role="alert">{error}</p>}{rows.map(row=><div key={row.id}>Egalikni topshirish so‘rovi ({new Date(row.expiresAt).toLocaleString('uz-UZ')}) {row.incoming&&<Button size="sm" disabled={busy} onClick={async()=>{if(!window.confirm('Biznes egaligini qabul qilasizmi? Joriy egasi administrator bo‘ladi.'))return;setBusy(true);try{await api.ownership.respond(row.id,'accept');window.location.assign(new URL('/pos',window.location.origin).toString());}catch(error){setError(error instanceof Error?error.message:'So‘rov bajarilmadi');setBusy(false);}}}>Qabul qilish</Button>} <Button size="sm" disabled={busy} onClick={async()=>{setBusy(true);try{await api.ownership.respond(row.id,'cancel');setRows(rows=>rows.filter(x=>x.id!==row.id));}catch(error){setError(error instanceof Error?error.message:'So‘rov bekor qilinmadi');}finally{setBusy(false);}}}>Bekor qilish</Button></div>)}</div>;
+ const {organization,user,role}=useAuth();
+ return organization&&user?<RequestControls key={[organization.id,user.id,role,organizationId].join(':')}/>:null;
+}
+function RequestControls(){
+ const [rows,setRows]=useState<RequestRow[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
+ const live=useRef(true),flight=useRef(false),readSequence=useRef(0);
+ useUnsavedChanges(false,busy);
+ const load=useCallback(async()=>{
+  const sequence=++readSequence.current;
+  if(live.current)setLoading(true);
+  try{const result=await api.ownership.list();if(live.current&&sequence===readSequence.current){setRows(result.data??[]);setError('');}}
+  catch(cause){if(live.current&&sequence===readSequence.current)setError(cause instanceof Error?cause.message:'Egalik so‘rovlari yuklanmadi');}
+  finally{if(live.current&&sequence===readSequence.current)setLoading(false);}
+ },[]);
+ useEffect(()=>{live.current=true;void Promise.resolve().then(()=>{if(live.current)return load();});const timer=setInterval(()=>{if(!flight.current)void load();},30000);return()=>{live.current=false;clearInterval(timer);};},[load]);
+ async function respond(row:RequestRow,action:'accept'|'cancel'){
+  if(flight.current)return;
+  if(action==='accept'&&(!confirmPageNavigation()||!window.confirm('Biznes egaligini qabul qilasizmi? Joriy egasi administrator bo‘ladi.')))return;
+  flight.current=true;setBusy(true);setError('');
+  try{
+   await api.ownership.respond(row.id,action);
+   if(live.current){
+    if(action==='accept'){commitPageNavigation();window.location.assign(new URL('/pos',window.location.origin).toString());}
+    else{setRows(previous=>previous.filter(item=>item.id!==row.id));}
+   }
+  }catch(cause){if(live.current)setError(cause instanceof Error?cause.message:'Egalik amali tasdiqlanmadi; holatni qayta tekshiring');}
+  finally{flight.current=false;if(live.current)setBusy(false);}
+ }
+ if(!rows.length&&!error)return null;
+ return <section aria-label="Egalik so‘rovlari" className="text-xs space-y-2">
+  {error&&<p role="alert">{error} <Button size="sm" disabled={busy||loading} onClick={()=>void load()}>Egalik so‘rovlarini qayta tekshirish</Button></p>}
+  {busy&&<p role="status">Egalik amali uchun server tasdig‘i kutilmoqda…</p>}
+  {loading&&<p role="status">Egalik so‘rovlari yuklanmoqda…</p>}
+  {rows.map(row=><div key={row.id}>Egalikni topshirish so‘rovi ({new Date(row.expiresAt).toLocaleString('uz-UZ')}) {row.incoming&&<Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'accept')}>Qabul qilish</Button>} <Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'cancel')}>Bekor qilish</Button></div>)}
+ </section>;
 }

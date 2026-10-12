@@ -1335,3 +1335,37 @@ GET `/inventory/balances` optional `inactiveDays=1..3650`: musbat joriy qoldiq v
 `POST /api/jobs` owner: `{operationId:UUID,type:"report_export",report:{report,format:"csv"|"xlsx"|"pdf",filters:{}},reason}`. `report` va filtr allowlisti `src/lib/report-exports.ts`da: 18 mavjud hisobot/catalog query. `organizationId`, pagination, token va noma’lum filtrlar rad etiladi; organization server kontekstidan olinadi. `storeId`/`filter` jobning tashqi darajasida ushbu turga berilmaydi. Worker source generation/live owner session, filterdagi resurs egaligi, original-key/lease/audit fencingni tekshiradi. Dataset UI sahifasi bilan cheklanmaydi: 10000 natija/16MiB; overflow qisman faylsiz.
 
 `GET /api/jobs/{id}/export` mavjud scoped, audited, bounded download. CSV `text/csv`, XLSX `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`; pul/miqdor plain string, formula obyektlari yo‘q. `pdf` — original rejaning browser print-to-PDF variantida `text/html`, `.print.html`: barcha qatorli escaped/script-free hujjatni ochib Ctrl+P → PDF sifatida saqlash. Avtomatik server PDF yoki real printer integratsiyasi emas. Artifact 24 soat, expiry410; immutable hash/metadata saqlanadi. [Foydalanish va chegaralar](docs/operations/report-exports.md).
+
+### Ombor / transfer qoralamasini original kalit bilan yaratish
+
+`POST /api/stock-documents` va `POST /api/transfers` body ichida ixtiyoriy
+`operationId` (UUID) qabul qiladi. Kalit yuborilganda bir tashkilot va amal turi
+ichida original body hashiga bog‘lanadi. Parallel yoki javobi yo‘qolgan so‘rovni
+shu kalit va shu body bilan takror yuborish bitta hujjat natijasini qaytaradi;
+yangi hujjat, audit yoki stock posting yaratmaydi. Bu endpointlar faqat qoralama
+yaratadi; qoldiqni o‘zgartirish avvalgi confirm/send amali orqali bajariladi.
+
+Shu kalit bilan body o‘zgartirilsa `409 OPERATION_PAYLOAD_CONFLICT` qaytadi.
+Replay ham joriy session, rol, maxsus permission va tenant/filial reference
+tekshiruvlaridan o‘tadi. Kalitni boshqa actor ishlatishi taqiqlanadi. Legacy
+kalitsiz chaqiruvlar avvalgi contract bilan ishlaydi; ularga yangi original-key
+recovery kafolati berilmaydi. Inventory va transfer yaratish formalarida reviewed immutable body va original
+operationId IndexedDBga HTTPdan oldin saqlanadi. Unknown ACKda maydonlar
+qulflanadi; reload’dan keyin sahifadagi saqlangan amalni tekshirish orqali
+original so‘rov takror yuboriladi. Quantity/unitCost matn sifatida saqlanadi;
+ular brauzerda floating-point songa aylantirilmaydi. Qolgan UX-01.05 editor
+va recovery qamrovi hali ochiq.
+
+### Smena ochilishining lokal unknown-result recovery oqimi
+
+`POST /api/shifts` mavjud mandatory `operationId` contractini saqlaydi. POS
+formasi openingCash (decimal string), registerId, organizationUserId,
+handoverFromId (tanlansa) va note qiymatlarini oldindan ko‘rsatadi; tasdiqdan
+keyin original body HTTPdan oldin lokal actor/org/device scopega saqlanadi.
+Javob noaniq bo‘lsa maydonlar qulflanadi. Reload’dan keyingi saqlangan amal
+replayi yangi smena yoki boshlang‘ich pulni takror yaratmaydi.
+
+Server ACKidagi open Shift joriy kassa va membershipga mos bo‘lsa UI contextga
+qo‘llanadi; avval boshlangan GET yangi snapshotni bekor qila olmaydi. Handover
+metadata GET ishlamasa yangi smena tasdiqlash mavjud emas, readonly retry bor.
+Bu oqim real cash drawer yoki boshqa hardware integratsiyasi emas.

@@ -3,6 +3,7 @@ import {catalogKey,minimalCatalog,usableCatalog,type CachedCatalog,type CatalogS
 import type {Product} from '@/types';
 export type OfflineScope={organizationId:string;userId:string;deviceId:string}
 export type PendingOperation={id:string;scope:OfflineScope;type:'sale.create'|'sale.complete'|'sale.return'|'debt.collect'|'debt.document'|'shift.correct'|'shift.cash'|'catalog.prices'|'finance.action';payload:Record<string,unknown>;state:'pending'|'synced'|'conflict'|'cancelled'|'rejected';createdAt:string;result?:unknown;code?:string}
+export const LOCAL_OPERATIONS_CHANGED='pos:local-operations-changed'
 const database='shuni-pos-local-v1'
 function open():Promise<IDBDatabase> {
  return new Promise((resolve,reject)=>{
@@ -45,7 +46,7 @@ async function mutateOperation<T>(id:string,change:(old:PendingOperation|undefin
  return new Promise((resolve,reject)=>{
   const tx=db.transaction('operations','readwrite'),store=tx.objectStore('operations'),query=store.get(id);let result:T;let failure:unknown
   query.onsuccess=()=>{try{const changed=change(query.result);result=changed.result;if(changed.record)store.put(changed.record)}catch(error){failure=error;tx.abort()}}
-  tx.oncomplete=()=>{db.close();resolve(result)}
+  tx.oncomplete=()=>{db.close();if(typeof window!=='undefined')window.dispatchEvent(new Event(LOCAL_OPERATIONS_CHANGED));resolve(result)}
   tx.onabort=tx.onerror=()=>{db.close();reject(failure??tx.error??new Error('Local operation failed'))}
  })
 }

@@ -1,0 +1,43 @@
+{
+  "runId": "21b7f176-43d3-4063-b129-d619a81d2af8",
+  "mode": "smoke",
+  "startedAt": "2026-10-11T18:13:40.714Z",
+  "profile": {
+    "synthetic": true,
+    "normalRegisters": 20,
+    "stressConcurrentCheckouts": 40,
+    "waveIntervalMs": 30000,
+    "normalStressMinutes": null,
+    "normalSoakMinutes": null,
+    "referencePeak": "20 simultaneous checkouts every 30 seconds; PLAN1 synthetic profile, not measured pilot demand",
+    "database": "isolated pos_test on loopback:55439; shared historical test dataset",
+    "transport": "private loopback HTTP; HTTPS origin/cookie policy retained, no external traffic"
+  },
+  "hardware": {
+    "platform": "linux",
+    "kernel": "7.2.8-200.fc44.x86_64",
+    "node": "v24.18.0",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "memoryBytes": 33467367424
+  },
+  "phases": [],
+  "samples": [],
+  "restarts": [],
+  "requests": {
+    "successful": 0,
+    "retryable": 0,
+    "networkUnknown": 0,
+    "byStatus": {}
+  },
+  "accepted": false,
+  "fixture": {
+    "organizationId": "9668b9e6-308b-410f-88b4-f3f0106fe283",
+    "registers": 20,
+    "initialStockPerProduct": 100000
+  },
+  "failure": {
+    "message": "Readiness timeout",
+    "at": "2026-10-11T18:14:11.180Z"
+  }
+}

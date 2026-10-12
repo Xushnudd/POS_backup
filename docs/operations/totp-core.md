@@ -180,3 +180,9 @@ Owner/admin password change ham action-bound private HMAC MFAga ulandi;
 parol o‘zgarishi, PIN/session revoke va approval/audit atomik.
 
 Yakuniy core qabul: `tasks/evidence/critical-mfa-restore-20261011.json`, SQL125, 21 action. Real production rollout ushbu dalilga kirmaydi.
+
+## Action nomlari va SQL133
+
+Mavjud `offline-cash.policy` original amal nomini saqlaydi. Brauzer bindingi, server proof schema va native CHECK lowercase harf bilan boshlangan3–81belgili `[a-z0-9_.-]` nomni qabul qiladi; newline, yo‘l, query va script belgilarini qabul qilmaydi. Biror nomni yuborish o‘zi shu amalga vakolat bermaydi. Action, original kalit, payload hash, sessiya va factor identity tekshiruvlari majburiy.
+
+SQL133ni yangi appdan oldin migrate deploy bilan qo‘llang. Yangi cheklov avval existing proof yozuvlariga validate bo‘ladi, eski check bir transactionda olib tashlanadi. Proof tarixini rename/delete/backfill qilmang. Oldingi app hali defisli proof yaratmaydi, qolgan eski nomlar expanded constraintga mos. SQL133ning fresh install va synthetic dump/restore sinovi real staging/production qabulini almashtirmaydi.

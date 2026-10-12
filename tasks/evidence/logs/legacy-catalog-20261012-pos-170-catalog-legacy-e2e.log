@@ -1,0 +1,25 @@
+[WebServer] (node:691859) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:692118) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (7.2s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (2.4s)
+  ✓   3 [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state (943ms)
+  ✓   4 [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state (895ms)
+(node:692884) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (9.6s)
+  ✓   6 [firefox] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.1s)
+  ✓   7 [firefox] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state (1.4s)
+  ✓   8 [firefox] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state (1.5s)
+(node:694273) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (8.3s)
+  ✓  10 [webkit] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.4s)
+  ✓  11 [webkit] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state (1.8s)
+  ✓  12 [webkit] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state (1.9s)
+
+  12 passed (46.2s)

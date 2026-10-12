@@ -136,3 +136,21 @@ test('Acknowledged role save remains saved when only the following list refresh 
  await page.unroute('**/api/roles?**');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
  await expect(page.getByText(/Acknowledged refresh profile — Admin/)).toBeVisible();
 });
+
+test('Failed role metadata refresh retains raw editor but blocks new role writes',async({page})=>{
+ const identity=await owner(page)
+ await profile(identity.organization.id,identity.user.id,'Existing role metadata')
+ await page.goto('/roles');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click()
+ await page.getByRole('button',{name:'Yangi rol',exact:true}).click()
+ await page.getByLabel('Nom',{exact:true}).fill('Independent role draft')
+ await page.getByLabel('Sabab',{exact:true}).fill('Keep until read succeeds')
+ await page.route('**/api/roles?*',route=>route.abort('failed'))
+ await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click()
+ await expect(page.getByRole('alert').filter({hasText:'Oxirgi ro‘yxat va draftlar saqlangan'})).toBeVisible()
+ await expect(page.getByLabel('Nom',{exact:true})).toHaveValue('Independent role draft')
+ await expect(page.getByRole('button',{name:'Saqlash',exact:true})).toBeDisabled()
+ expect(await db.customRole.count({where:{organizationId:identity.organization.id}})).toBe(1)
+ await page.unroute('**/api/roles?*');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click()
+ await expect(page.getByRole('button',{name:'Saqlash',exact:true})).toBeEnabled()
+ await expect(page.getByLabel('Nom',{exact:true})).toHaveValue('Independent role draft')
+})

@@ -1,0 +1,26 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/price-editor-state.spec.ts tests/e2e/core.spec.ts --grep price and customer group drafts|Price tier UI recovers|Customer identity UI normalizes
+
+[WebServer] (node:163999) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:164036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:1092:5 › Price tier UI recovers one scheduled rule, requires POS price review and keeps original receipt after archive (7.6s)
+  ✓  2 [chromium] › tests/e2e/core.spec.ts:1098:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (2.9s)
+  ✓  3 [chromium] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (2.5s)
+(node:164526) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/core.spec.ts:1092:5 › Price tier UI recovers one scheduled rule, requires POS price review and keeps original receipt after archive (8.1s)
+  ✓  5 [firefox] › tests/e2e/core.spec.ts:1098:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (4.6s)
+  ✓  6 [firefox] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (3.1s)
+(node:165613) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [webkit] › tests/e2e/core.spec.ts:1092:5 › Price tier UI recovers one scheduled rule, requires POS price review and keeps original receipt after archive (8.3s)
+  ✓  8 [webkit] › tests/e2e/core.spec.ts:1098:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (4.3s)
+  ✓  9 [webkit] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (3.4s)
+
+  9 passed (48.5s)

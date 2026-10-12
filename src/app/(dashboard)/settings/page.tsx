@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -47,6 +48,8 @@ export default function SettingsPage() {
   const [receiptFooter, setReceiptFooter] = useState('');
   const [allowNegativeStock, setAllowNegativeStock] = useState(false);
   const [isSavingOrg, setIsSavingOrg] = useState(false);
+  const [orgInitialized,setOrgInitialized]=useState('');
+  const [orgBaseline,setOrgBaseline]=useState('');
 
   // Users state
   const [users, setUsers] = useState<SettingsUser[]>([]);
@@ -79,21 +82,34 @@ export default function SettingsPage() {
   const [memberRole,setMemberRole]=useState<'owner'|'admin'|'cashier'>('cashier');
   const [memberStores,setMemberStores]=useState<string[]>([]);
   const userFlight=useRef(false);
+  const savingFlights=useRef({organization:false,store:false,register:false});
   const userMutation=useRef<{signature:string;operationId:string}|null>(null);
   const memberMutation=useRef<{signature:string;operationId:string}|null>(null);
 
+  const orgDirty=role==='owner'&&orgInitialized===organization?.id&&JSON.stringify([orgName,orgPhone,orgTin,receiptFooter,allowNegativeStock])!==orgBaseline;
+  useUnsavedChanges(orgDirty,isSavingOrg);
+  const storeDirty=isStoreModalOpen&&Boolean(storeName||storeAddress||storePhone);
+  const closeStore=useUnsavedChanges(storeDirty,isSavingStore);
+  const registerDirty=isRegisterModalOpen&&Boolean(registerName||registerCode);
+  const closeRegister=useUnsavedChanges(registerDirty,isSavingRegister);
+  const memberDirty=Boolean(editingMember&&(memberRole!==editingMember.role||JSON.stringify([...memberStores].sort())!==JSON.stringify((editingMember.stores?.map(store=>store.id)??[]).sort())));
+  const userDirty=isUserModalOpen&&Boolean(userName||userPhone||userPassword||userRole!=='cashier'||userMode!=='direct'||userStoreIds.length);
+  const closeUser=useUnsavedChanges(userDirty||memberDirty,isSavingUser);
+
   // Initialize org form
   useEffect(() => {
-    if (organization) {
+    if (organization && !(orgInitialized===organization.id&&orgDirty)) {
       void Promise.resolve().then(() => {
         setOrgName(organization.name || '');
         setOrgPhone(organization.phone || '');
         setOrgTin(organization.tin || '');
         setReceiptFooter(organization.receiptFooter || '');
         setAllowNegativeStock(organization.allowNegativeStock || false);
+        setOrgBaseline(JSON.stringify([organization.name||'',organization.phone||'',organization.tin||'',organization.receiptFooter||'',Boolean(organization.allowNegativeStock)]));
+        setOrgInitialized(organization.id);
       });
     }
-  }, [organization]);
+  }, [organization,orgInitialized,orgDirty]);
 
   // Load org users
   const loadUsers = useCallback(async () => {
@@ -118,8 +134,9 @@ export default function SettingsPage() {
   // Save organization settings
   const handleSaveOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id) return;
+    if (!organization?.id||savingFlights.current.organization) return;
 
+    savingFlights.current.organization=true;
     setIsSavingOrg(true);
     try {
       await api.organizations.update(organization.id, {
@@ -130,11 +147,13 @@ export default function SettingsPage() {
         allowNegativeStock,
       });
 
+      setOrgBaseline(JSON.stringify([orgName,orgPhone,orgTin,receiptFooter,allowNegativeStock]));
       notifySuccess('Tashkilot sozlamalari muvaffaqiyatli saqlandi');
       await refreshUser();
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Sozlamalarni saqlashda xatolik');
     } finally {
+      savingFlights.current.organization=false;
       setIsSavingOrg(false);
     }
   };
@@ -142,8 +161,9 @@ export default function SettingsPage() {
   // Create store
   const handleCreateStore = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organization?.id) return;
+    if (!organization?.id||savingFlights.current.store) return;
 
+    savingFlights.current.store=true;
     setIsSavingStore(true);
     try {
       await api.stores.create({
@@ -162,6 +182,7 @@ export default function SettingsPage() {
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Do\'kon yaratishda xatolik');
     } finally {
+      savingFlights.current.store=false;
       setIsSavingStore(false);
     }
   };
@@ -171,6 +192,7 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!registerStoreId) return;
 
+    savingFlights.current.register=true;
     setIsSavingRegister(true);
     try {
       await api.stores.createRegister(registerStoreId, {
@@ -186,6 +208,7 @@ export default function SettingsPage() {
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Kassa yaratishda xatolik');
     } finally {
+      savingFlights.current.register=false;
       setIsSavingRegister(false);
     }
   };
@@ -269,7 +292,7 @@ export default function SettingsPage() {
       {/* Tab 1: Organization Settings */}
       {activeTab === 'organization' && (
         <Card title="Asosiy tashkilot ma'lumotlari">
-          <form onSubmit={handleSaveOrganization} className="space-y-4 max-w-xl">
+          <form onSubmit={handleSaveOrganization} className="space-y-4 max-w-xl"><fieldset disabled={isSavingOrg} className="space-y-4">
             <Input
               label="Tashkilot / Biznes nomi *"
               value={orgName}
@@ -332,7 +355,7 @@ export default function SettingsPage() {
                 O&apos;zgarishlarni saqlash
               </Button>
             </div>
-          </form>
+          </fieldset></form>
         </Card>
       )}
 
@@ -415,6 +438,7 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {(orgDirty||storeDirty||registerDirty||userDirty||memberDirty)&&<p role="status">Saqlanmagan sozlama o‘zgarishlari bor.</p>}
       {/* Tab 3: Users */}
       {activeTab === 'users' && (
         <Card
@@ -511,11 +535,11 @@ export default function SettingsPage() {
       {/* Store Modal */}
       <Modal
         isOpen={isStoreModalOpen}
-        onClose={() => setIsStoreModalOpen(false)}
+        onClose={() => {if(closeStore())setIsStoreModalOpen(false)}}
         title="Yangi do'kon yaratish"
         size="md"
       >
-        <form onSubmit={handleCreateStore} className="space-y-4">
+        <form onSubmit={handleCreateStore} className="space-y-4"><fieldset disabled={isSavingStore} className="space-y-4">
           <Input
             label="Do'kon nomi *"
             placeholder="Filial 2 (Chilonzor)"
@@ -539,7 +563,7 @@ export default function SettingsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsStoreModalOpen(false)}
+              onClick={() => {if(closeStore())setIsStoreModalOpen(false)}}
               disabled={isSavingStore}
             >
               Bekor qilish
@@ -548,17 +572,17 @@ export default function SettingsPage() {
               Yaratish
             </Button>
           </div>
-        </form>
+        </fieldset></form>
       </Modal>
 
       {/* Register Modal */}
       <Modal
         isOpen={isRegisterModalOpen}
-        onClose={() => setIsRegisterModalOpen(false)}
+        onClose={() => {if(closeRegister())setIsRegisterModalOpen(false)}}
         title="Yangi kassa terminali"
         size="md"
       >
-        <form onSubmit={handleCreateRegister} className="space-y-4">
+        <form onSubmit={handleCreateRegister} className="space-y-4"><fieldset disabled={isSavingRegister} className="space-y-4">
           <Input
             label="Kassa nomi *"
             placeholder="Kassa 1"
@@ -577,7 +601,7 @@ export default function SettingsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsRegisterModalOpen(false)}
+              onClick={() => {if(closeRegister())setIsRegisterModalOpen(false)}}
               disabled={isSavingRegister}
             >
               Bekor qilish
@@ -591,7 +615,7 @@ export default function SettingsPage() {
               Qo&apos;shish
             </Button>
           </div>
-        </form>
+        </fieldset></form>
       </Modal>
 
       {invitationId && <Card title="Bir martalik taklif havolasi">
@@ -600,7 +624,7 @@ export default function SettingsPage() {
         <div className="flex gap-2 mt-2"><Button disabled={!invitationLink} onClick={()=>setInvitationLink('')}>Havolani yashirish</Button>
         <Button onClick={async()=>{if (!organization?.id) return;try{await api.organizations.revokeInvitation(organization.id,invitationId);setInvitationLink('');setInvitationId('');userMutation.current=null;notifySuccess('Taklif bekor qilindi');}catch(error){notifyError(error instanceof Error?error.message:'Taklif bekor qilinmadi');}}}>Taklifni bekor qilish</Button></div>
       </Card>}
-      <Modal isOpen={Boolean(editingMember)} onClose={()=>setEditingMember(null)} title="Xodim vakolatlari" size="md">
+      <Modal isOpen={Boolean(editingMember)} onClose={()=>{if(closeUser())setEditingMember(null)}} title="Xodim vakolatlari" size="md">
         <form className="space-y-4" onSubmit={async event=>{
           event.preventDefault();if (!organization?.id || !editingMember||userFlight.current) return;
           userFlight.current=true;
@@ -610,19 +634,20 @@ export default function SettingsPage() {
           try {await api.organizations.updateMember(organization.id,editingMember.id,{operationId:memberMutation.current.operationId,role:memberRole,storeIds:memberStores});memberMutation.current=null;setEditingMember(null);await loadUsers();notifySuccess('Vakolat yangilandi; xodim qayta kirishi kerak');}
           catch(error){notifyError(error instanceof Error?error.message:'Vakolat o‘zgarmadi');}finally{userFlight.current=false;setIsSavingUser(false);}
         }}>
+          <fieldset disabled={isSavingUser} className="space-y-4">
           <Select label="Rol" value={memberRole} onChange={e=>setMemberRole(e.target.value as typeof memberRole)} options={[{value:'owner',label:'Egasi'},{value:'admin',label:'Administrator'},{value:'cashier',label:'Kassir'}]} />
           <fieldset><legend className="text-sm font-semibold">Filiallar</legend>{stores.map(store=><label key={store.id} className="flex gap-2 py-1"><input type="checkbox" checked={memberStores.includes(store.id)} onChange={e=>setMemberStores(old=>e.target.checked?[...old,store.id]:old.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset>
           <Button type="submit" isLoading={isSavingUser}>Saqlash</Button>
-        </form>
+        </fieldset></form>
       </Modal>
       {/* User Modal */}
       <Modal
         isOpen={isUserModalOpen}
-        onClose={() => setIsUserModalOpen(false)}
+        onClose={() => {if(closeUser())setIsUserModalOpen(false)}}
         title="Yangi xodim qo'shish"
         size="md"
       >
-        <form onSubmit={handleCreateUser} className="space-y-4">
+        <form onSubmit={handleCreateUser} className="space-y-4"><fieldset disabled={isSavingUser} className="space-y-4">
           <Select label="Qo‘shish usuli" value={userMode} onChange={e=>setUserMode(e.target.value as 'direct'|'invite')} options={[{value:'direct',label:'Yangi hisob yaratish'},{value:'invite',label:'Bir martalik taklif havolasi'}]} />
           {userMode==='direct' && <Input
             label="Xodim to'liq ismi *"
@@ -661,7 +686,7 @@ export default function SettingsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsUserModalOpen(false)}
+              onClick={() => {if(closeUser())setIsUserModalOpen(false)}}
               disabled={isSavingUser}
             >
               Bekor qilish
@@ -670,7 +695,7 @@ export default function SettingsPage() {
               Qo&apos;shish
             </Button>
           </div>
-        </form>
+        </fieldset></form>
       </Modal>
     </div>
   );

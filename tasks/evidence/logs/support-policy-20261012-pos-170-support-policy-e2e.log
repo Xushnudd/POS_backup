@@ -1,0 +1,132 @@
+[WebServer] (node:660526) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:660569) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 [chromium] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (1.2s)
+(node:661144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   2 [chromium] › tests/e2e/support-policy-state.spec.ts:24:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (1.1s)
+  ✓   3 [chromium] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.2s)
+  ✓   4 [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.1s)
+(node:661459) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   5 [firefox] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (1.4s)
+(node:661783) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [firefox] › tests/e2e/support-policy-state.spec.ts:24:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (1.5s)
+  ✓   7 [firefox] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.7s)
+  ✓   8 [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.6s)
+(node:662312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   9 [webkit] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (1.5s)
+(node:662493) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [webkit] › tests/e2e/support-policy-state.spec.ts:24:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (1.7s)
+  ✓  11 [webkit] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.9s)
+  ✓  12 [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.9s)
+
+
+  1) [chromium] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      14 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+      15 |  await page.getByRole('link',{name:'POS Kassa',exact:true}).click();await expect(page).toHaveURL(/\/tickets$/);expect(prompts).toBe(1)
+    > 16 |  const published=await page.request.post('/api/support/policy',{headers,data:{operationId:randomUUID(),timezone:initial.timezone,weekdays:initial.weekdays,opensMinute:initial.opensMinute,closesMinute:initial.closesMinute,firstResponseMinutes:initial.firstResponseMinutes,escalationMinutes:initial.escalationMinutes,reason:'Independent actual version'}});expect(published.ok()).toBe(true)
+         |                                                                                                                                                                                                                                                                                                                                                                                          ^
+      17 |  await page.getByRole('button',{name:'Murojaatlar va tartibni yangilash',exact:true}).click();await expect(form.getByRole('button',{name:'Joriy ish tartibini draftga olish',exact:true})).toBeVisible();await expect(opening).toHaveValue('bad-one');await expect(form.getByLabel('Sabab',{exact:true})).toHaveValue('Unpublished raw draft')
+      18 |  await opening.fill('bad-two');const ticket=page.locator('section[aria-label="Yangi murojaat"]');await ticket.getByLabel('Mavzu',{exact:true}).fill('Independent ticket title')
+      19 |  await page.route('**/api/support/policy',async route=>{if(route.request().method()==='GET')await route.abort('failed');else await route.continue()});await page.getByRole('button',{name:'Murojaatlar va tartibni yangilash',exact:true}).click();await expect(page.getByRole('button',{name:'Qayta urinish',exact:true})).toBeVisible();await expect(opening).toHaveValue('bad-two');await expect(form.getByRole('button',{name:'Support tartibini saqlash: oldindan ko‘rish',exact:true})).toBeDisabled()
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:16:378
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-chromium/error-context.md
+
+    Error Context: test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      14 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+      15 |  await page.getByRole('link',{name:'POS Kassa',exact:true}).click();await expect(page).toHaveURL(/\/tickets$/);expect(prompts).toBe(1)
+    > 16 |  const published=await page.request.post('/api/support/policy',{headers,data:{operationId:randomUUID(),timezone:initial.timezone,weekdays:initial.weekdays,opensMinute:initial.opensMinute,closesMinute:initial.closesMinute,firstResponseMinutes:initial.firstResponseMinutes,escalationMinutes:initial.escalationMinutes,reason:'Independent actual version'}});expect(published.ok()).toBe(true)
+         |                                                                                                                                                                                                                                                                                                                                                                                          ^
+      17 |  await page.getByRole('button',{name:'Murojaatlar va tartibni yangilash',exact:true}).click();await expect(form.getByRole('button',{name:'Joriy ish tartibini draftga olish',exact:true})).toBeVisible();await expect(opening).toHaveValue('bad-one');await expect(form.getByLabel('Sabab',{exact:true})).toHaveValue('Unpublished raw draft')
+      18 |  await opening.fill('bad-two');const ticket=page.locator('section[aria-label="Yangi murojaat"]');await ticket.getByLabel('Mavzu',{exact:true}).fill('Independent ticket title')
+      19 |  await page.route('**/api/support/policy',async route=>{if(route.request().method()==='GET')await route.abort('failed');else await route.continue()});await page.getByRole('button',{name:'Murojaatlar va tartibni yangilash',exact:true}).click();await expect(page.getByRole('button',{name:'Qayta urinish',exact:true})).toBeVisible();await expect(opening).toHaveValue('bad-two');await expect(form.getByRole('button',{name:'Support tartibini saqlash: oldindan ko‘rish',exact:true})).toBeDisabled()
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:16:378
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-firefox/error-context.md
+
+    Error Context: test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      14 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+      15 |  await page.getByRole('link',{name:'POS Kassa',exact:true}).click();await expect(page).toHaveURL(/\/tickets$/);expect(prompts).toBe(1)
+    > 16 |  const published=await page.request.post('/api/support/policy',{headers,data:{operationId:randomUUID(),timezone:initial.timezone,weekdays:initial.weekdays,opensMinute:initial.opensMinute,closesMinute:initial.closesMinute,firstResponseMinutes:initial.firstResponseMinutes,escalationMinutes:initial.escalationMinutes,reason:'Independent actual version'}});expect(published.ok()).toBe(true)
+         |                                                                                                                                                                                                                                                                                                                                                                                          ^
+      17 |  await page.getByRole('button',{name:'Murojaatlar va tartibni yangilash',exact:true}).click();await expect(form.getByRole('button',{name:'Joriy ish tartibini draftga olish',exact:true})).toBeVisible();await expect(opening).toHaveValue('bad-one');await expect(form.getByLabel('Sabab',{exact:true})).toHaveValue('Unpublished raw draft')
+      18 |  await opening.fill('bad-two');const ticket=page.locator('section[aria-label="Yangi murojaat"]');await ticket.getByLabel('Mavzu',{exact:true}).fill('Independent ticket title')
+      19 |  await page.route('**/api/support/policy',async route=>{if(route.request().method()==='GET')await route.abort('failed');else await route.continue()});await page.getByRole('button',{name:'Murojaatlar va tartibni yangilash',exact:true}).click();await expect(page.getByRole('button',{name:'Qayta urinish',exact:true})).toBeVisible();await expect(opening).toHaveValue('bad-two');await expect(form.getByRole('button',{name:'Support tartibini saqlash: oldindan ko‘rish',exact:true})).toBeDisabled()
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:16:378
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-webkit/error-context.md
+
+    Error Context: test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/support-policy-state-raw-s-cefeb-icy-version-and-failed-read-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read 
+    [firefox] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read 
+    [webkit] › tests/e2e/support-policy-state.spec.ts:10:5 › raw support hours and separate ticket draft survive a newer policy version and failed read 
+  9 passed (25.7s)

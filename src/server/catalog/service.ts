@@ -5,8 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { AccessError } from '../auth/policy'
 import { assertLiveContext, audit } from '../operations'
 import { decimal } from '../sales/calculations'
-export const signedQuantitySchema=z.union([z.number().finite(),z.string().regex(/^-?\d+(\.\d{1,6})?$/)]).refine(value=>decimal(value).abs().lt('100000000000000') && !decimal(value).isZero() && decimal(value).decimalPlaces()<=6)
-export const nonnegativeQuantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(value=>decimal(value).gte(0) && decimal(value).decimalPlaces()<=6 && decimal(value).lt('100000000000000'))
+export const signedQuantitySchema=z.union([z.number().finite(),z.string().regex(/^-?\d+(\.\d{1,6})?$/)]).refine(value=>(typeof value==='number'?Number.isFinite(value):/^-?\d+(\.\d{1,6})?$/.test(value)) && decimal(value).abs().lt('100000000000000') && !decimal(value).isZero() && decimal(value).decimalPlaces()<=6)
+export const nonnegativeQuantitySchema=z.union([z.number().finite(),z.string().regex(/^\d+(\.\d{1,6})?$/)]).refine(value=>(typeof value==='number'?Number.isFinite(value):/^\d+(\.\d{1,6})?$/.test(value)) && decimal(value).gte(0) && decimal(value).decimalPlaces()<=6 && decimal(value).lt('100000000000000'))
 export const unitSchema=z.object({code:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/),name:z.string().trim().min(1).max(100),precision:z.number().int().min(0).max(6)})
 export const updateUnitSchema=unitSchema.omit({code:true}).partial().extend({isActive:z.boolean().optional()})
 export const barcodeSchema=z.object({value:z.string().trim().min(2).max(200)})

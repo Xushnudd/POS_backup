@@ -6,6 +6,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {confirmPageNavigation} from '@/lib/page-navigation';
 import { Product, StockTransfer } from '@/types';
 import { formatDate } from '@/lib/format';
 import Pagination from '@/components/ui/Pagination';
@@ -18,6 +20,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import TransferReceipt,{remainingTransfer} from '@/components/inventory/TransferReceipt';
+import DurableMutation from '@/components/forms/DurableMutation';
 import PendingActions from '@/components/forms/PendingActions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -47,8 +50,11 @@ export default function StockTransfersPage() {
   const [fromStoreId, setFromStoreId] = useState('');
   const [toStoreId, setToStoreId] = useState('');
   const [note, setNote] = useState('');
-  const [items, setItems] = useState<{ productId: string; quantity: number; unitCost: number }[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [items, setItems] = useState<{ productId: string; quantity: string; unitCost: string }[]>([]);
+
+  const [draftBaseline,setDraftBaseline]=useState('');
+  const draftDirty=isModalOpen&&JSON.stringify([fromStoreId,toStoreId,note,items])!==draftBaseline;
+  useUnsavedChanges(draftDirty);
   const [receiving,setReceiving]=useState<StockTransfer|null>(null),[receiptRevision,setReceiptRevision]=useState(0);
 
   const loadTransfers = useCallback(async () => {
@@ -83,11 +89,9 @@ export default function StockTransfersPage() {
     setFromStoreId(stores[0]?.id || '');
     setToStoreId(stores[1]?.id || '');
     setNote('');
-    setItems(
-      products.length > 0
-        ? [{ productId: products[0].id, quantity: 1, unitCost: Number(products[0].costPrice) || 0 }]
-        : []
-    );
+    const initialItems=products.length>0?[{productId:products[0].id,quantity:'1',unitCost:String(products[0].costPrice??'0')}]:[];
+    setItems(initialItems);
+    setDraftBaseline(JSON.stringify([stores[0]?.id||'',stores[1]?.id||'','',initialItems]));
     setIsModalOpen(true);
   };
 
@@ -95,46 +99,12 @@ export default function StockTransfersPage() {
     if (products.length === 0) return;
     setItems([
       ...items,
-      { productId: products[0].id, quantity: 1, unitCost: Number(products[0].costPrice) || 0 },
+      { productId: products[0].id, quantity: '1', unitCost: String(products[0].costPrice??'0') },
     ]);
   };
 
   const handleRemoveItem = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
-  };
-
-  const handleCreateTransfer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!organization?.id) return;
-
-    if (fromStoreId === toStoreId) {
-      notifyError('Jo\'natuvchi va qabul qiluvchi do\'kon bir xil bo\'lishi mumkin emas');
-      return;
-    }
-
-    if (items.length === 0) {
-      notifyError('Kamida bitta mahsulot qo\'shing');
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await api.transfers.create({
-        organizationId: organization.id,
-        fromStoreId,
-        toStoreId,
-        note: note.trim() || undefined,
-        items,
-      });
-
-      notifySuccess('Transfer muvaffaqiyatli yaratildi');
-      setIsModalOpen(false);
-      loadTransfers();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Transferni yaratishda xatolik');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const returnIntents=useRef<Record<string,{operationId:string;reason:string}>>({});
@@ -171,7 +141,7 @@ export default function StockTransfersPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <PendingActions prefix="/transfers/" returnPath="/inventory/transfers" revision={receiptRevision} onDone={()=>{setReceiptRevision(value=>value+1);void loadTransfers()}}/>
+      <PendingActions prefix="/transfers" returnPath="/inventory/transfers" revision={receiptRevision} onDone={()=>{setReceiptRevision(value=>value+1);void loadTransfers()}}/>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link href="/inventory">
@@ -296,16 +266,16 @@ export default function StockTransfersPage() {
           </div>
         )}
       </Card>
-      <Modal isOpen={!!receiving} onClose={()=>{setReceiving(null);setReceiptRevision(value=>value+1)}} title="Transferni qisman qabul qilish" size="lg">{receiving&&<TransferReceipt key={receiving.id} id={receiving.id} items={receiving.items} onDone={()=>{setReceiving(null);setReceiptRevision(value=>value+1);notifySuccess('Qabul qayd etildi; yo‘ldagi qoldiq yangilandi');void loadTransfers()}}/>}</Modal>
+      <Modal isOpen={!!receiving} onClose={()=>{if(!confirmPageNavigation())return;setReceiving(null);setReceiptRevision(value=>value+1)}} title="Transferni qisman qabul qilish" size="lg">{receiving&&<TransferReceipt key={receiving.id} id={receiving.id} items={receiving.items} onDone={()=>{setReceiving(null);setReceiptRevision(value=>value+1);notifySuccess('Qabul qayd etildi; yo‘ldagi qoldiq yangilandi');void loadTransfers()}}/>}</Modal>
 
       {/* Transfer Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {if(confirmPageNavigation())setIsModalOpen(false)}}
         title="Yangi do'konlararo transfer"
         size="lg"
       >
-        <form onSubmit={handleCreateTransfer} className="space-y-4">
+        <DurableMutation path="/transfers" returnPath="/inventory/transfers" label="Transferni yaratish" body={{organizationId:organization?.id,fromStoreId,toStoreId,note:note.trim()||undefined,items}} review={[`Yo‘nalish: ${stores.find(store=>store.id===fromStoreId)?.name??''} → ${stores.find(store=>store.id===toStoreId)?.name??''}`,`Izoh: ${note}`,...items.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity}; asosiy birlik tannarxi: ${item.unitCost}`)]} onDone={()=>{notifySuccess('Transfer qoralamasi yaratildi');setIsModalOpen(false);setReceiptRevision(value=>value+1);void loadTransfers()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Qaysi do'kondan (Chiqim) *"
@@ -372,7 +342,7 @@ export default function StockTransfersPage() {
                       value={item.quantity}
                       onChange={(e) => {
                         const updated = [...items];
-                        updated[idx].quantity = parseFloat(e.target.value) || 1;
+                        updated[idx].quantity = e.target.value;
                         setItems(updated);
                       }}
                       className="w-full text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg p-2 text-center focus:outline-hidden"
@@ -395,16 +365,13 @@ export default function StockTransfersPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsModalOpen(false)}
-              disabled={isSaving}
+              onClick={() => {if(confirmPageNavigation())setIsModalOpen(false)}}
             >
               Bekor qilish
             </Button>
-            <Button type="submit" variant="primary" isLoading={isSaving} className="font-bold">
-              Yaratish
-            </Button>
+
           </div>
-        </form>
+        </DurableMutation>
       </Modal>
     </div>
   );

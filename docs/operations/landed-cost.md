@@ -55,8 +55,8 @@ quantity, unitCost, unit va optional vazn kelajakdagi hujjat snapshotiga tegishl
 3. Stock va sotilgan qism uchun alohida value/cost-correction jurnalini qurish,
    rounding residualni ham shu hisobda saqlash kerak. Hozirgi moving-average
    arxitekturasida tarixiy kirimdan aynan qaysi dona sotilganini taxmin qilish
-   mumkin emas; tasdiqlangan attribution siyosati va uning original snapshoti
-   talab qilinadi.
+   mumkin emas; ADR-081da tasdiqlangan moving-average tarixini qayta hisoblash siyosati
+   va uning original snapshoti talab qilinadi; posting hali implementatsiya qilinmagan.
 4. Original SaleItem yoki return tannarxi tarixini qayta yozmasdan correctionning
    foyda, valuation va qaytarish hisobotlariga ta’sirini ko‘rsatish kerak.
 5. Serializability, product lock tartibi, original-key replay, parallel posting,
@@ -175,3 +175,48 @@ qayta ishlatilishi mumkin; bekor qilingan expense esa qayta tanlanmaydi.
 Yangi statuslar keyingi additive migration va value-journal gate’lari orqali
 kiritiladi. Qo‘llash UI, actual capitalization/COGS correction va reporting
 hali ochiq; hozirgi UI faqat read-only preview qiladi.
+
+
+## Saqlangan taqsimot tarixi va bekor qilish ekrani
+
+Supplier → xarid buyurtmasi → original qabul ostida saqlangan taqsimotlar 20
+qatorlik sahifalarda ko‘rsatiladi. Summa, usul, holat, yaratish sababi/sanasi va
+bekor qilish sababi/sanasi saqlangan hujjatdan olinadi. GET xatosida eski qatorlar
+faol amallar bilan ko‘rsatilmaydi; qayta yuklash mavjud, so‘rov 15 soniyada tugaydi.
+
+Tayyor taqsimotni bekor qilish avval sabab va amalni ko‘rib tasdiqlashni talab
+qiladi. Mavjud DurableMutation original payload va operationIdni tenant/user/device
+chegarasidagi IndexedDBga yozadi. Server bekor qilib, HTTP javobi yo‘qolsa, reload
+qilingan sahifada cancelled holat ko‘rinsa ham original amalni qayta tekshirish
+saqlanadi. Bekor qilingan hujjatdan yangi bekor qilish amali yaratilmaydi.
+Mavjud supplier returnPath orqali umumiy pending-amal recovery ham ishlaydi.
+
+Bu ekran yangi allocation yaratish yoki tannarxga qo‘llash imkoniyati emas.
+Tayyorlash API mavjud; tayyorlash formasi, moving-average correction posting/jurnal,
+hisobotlar va to‘liq PUR-01.05 qabuli hali ochiq.
+
+## Moving-average replay hisoblash chegarasi (2026-10-12)
+
+`src/server/inventory/cost-replay.ts` tasdiqlangan ADR-081 siyosati uchun sof hisoblash modulidir. U hali posting endpointiga ulanmagan va `ReceiptCostPlan`ning `prepared` holati kapitalizatsiya qilinganini anglatmaydi.
+
+Kirish: bitta mahsulotning isbotlangan tartibdagi receipt/issue/return hodisalari. Har bir hodisa noyob ID va musbat, qat’iy oshuvchi sequencega ega bo‘ladi. Timestamp yoki UUID sortidan haqiqiy operatsiya tartibini taxmin qilish mumkin emas. Return oldingi issue IDga bog‘lanadi; jami qaytarish original miqdordan oshmaydi. Qo‘shimcha receipt xarajati butun summada beriladi; olti xonagacha yumaloqlangan birlik tannarxiga yashirilmaydi.
+
+Hisobda Prisma Decimalning 60 raqam aniqligidagi nusxasi ishlatiladi. Har bir receipt va sellable returndan keyin amaldagi olti xonali moving average qayta hisoblanadi. Issue shu vaqtdagi tannarxdan, return esa bog‘langan issuen­ing replay tannarxidan foydalanadi. Yakunda `receiptValue = inventoryValue + cogsValue + roundingValue` tengligi tekshiriladi. Yumaloqlash farqi alohida qaytariladi.
+
+Sinov misoli: 10 dona × 10 kirim, 4 dona savdo, 6 dona × 20 yangi kirim, 6 dona savdo va birinchi savdodan 1 dona qaytarish. Birinchi kirimga kechikkan 20 xarajat qo‘shilganda COGS 120dan 132ga o‘zgaradi. Qolgan 7 donaning qiymati 107.999997, rounding qoldig‘i 0.000003 bo‘ladi. Original kirim va savdo snapshotlari o‘zgarmaydi.
+
+Modul manfiy tarixni, tartib buzilishini, takror IDni va bog‘lanmagan/ortiqcha returnni rad etadi. Transfer, supplier return, count/adjustment, damaged return va oldingi katalog cost override uchun tekshirilgan valuation adapterlari hamda manfiy qoldiq correction siyosati hali zarur. DBdagi eski `occurredAt` yozuvlaridan yo‘qolgan tartibni uydirib backfill qilish taqiqlanadi. Posting uchun yana authoritative sequence, transaction locks, immutable correction journal, original operation replay, audit va hisobot integratsiyasi talab qilinadi. Shu sabab PUR-01.05 va INV-01.07 ochiq qoladi.
+
+`planReceiptCostCorrection` bir receiptga qo‘shimcha xarajat uchun oldingi va yangi replay farqlarini hisoblaydi. Yuqoridagi misolda alohida COGS yozuvlari birinchi sale uchun +8, keyingi sale uchun +6 va bog‘langan return uchun −2; qolgan stock correction +7.999999 va rounding correction +0.000001. Jami aynan 20. To‘liq sotilgan receipt xarajati COGSga tushadi, qolmagan zaxira qiymati oshirilmaydi. Bular posting rejasi natijalari; DB jurnaliga yozilgan natija deb hisoblanmaydi.
+
+## Isbotlangan kelajakdagi tartib va boshlang‘ich chegara
+
+SQL134–137 `InventoryValuationSequence` va `InventoryValuationEvent` jadvallarini kiritadi. Bu original InventoryMovementni almashtirmaydi: mavjud yozuvlar o‘zgarmaydi va ularga sequence backfill qilinmaydi. Har bir keyingi original movement va Product.costPrice o‘zgarishi bitta per-product counter bilan transaction ichida qayd etiladi. Rollback counter va eventni ham qaytaradi; original operation replay yangi movement yoki event yaratmaydi. Timestamp faqat ko‘rsatish uchun, costing tartibi sequence orqali olinadi.
+
+Birinchi capture paytida mavjud eski movement soni, boshlang‘ich quantity va unit cost snapshoti olinadi. Oldingi capture davridan kelgan, boshlang‘ich snapshoti yo‘q state NULLligicha qoladi; bugungi balance bilan taxminiy backfill qilinmaydi. Jurnal bo‘lmasa ham mavjud qoldiq nol bo‘lmasa, to‘liq tarix deb olinmaydi. `readProductValuationHistory` ownerning tirik sessiyasini tekshiradi va avtomatik replay uchun nol-qoldiq chegara, eski movementlarning yo‘qligi hamda contiguous sequence talab qiladi. Ma’lumot yetishmasa `COST_HISTORY_INCOMPLETE`/`COST_HISTORY_ORDER_INVALID` bilan rad etadi. Bu eski ma’lumotlar uchun tasdiqlangan reconciliation kerakligini anglatadi, ma’lumotni o‘chirishni emas.
+
+Tartib va eventni generic tenant inserts yoki top-level ORM/raw DB write orqali yasash rad etiladi. Native capture guard original movement snapshotini tekshiradi; journal UPDATE/DELETE bilan almashtirilmaydi. Boshlang‘ich snapshot va sequence identity o‘zgarmaydi. Native capture original Product/InventoryMovementning mavjud biznes-write tekshiruvlarini meros qiladi; alohida public write endpointi yo‘q. Global product tarixi filiallararo ma’lumotni o‘z ichiga olgani uchun owner-only. Oddiy admin/kassirga ochilmaydi. Cost change eventida actorni taxmin qilib yozilmaydi: original owner/API audit va hujjatning mavjud tasdiq tarixi alohida qoladi.
+
+Owner tenant eksportiga ikkala dataset ham kiritilgan, BigInt string bo‘lib chiqariladi; recovery rejasida FKlar schema metadata orqali ko‘rinadi. Bular portable archive, SQL restore buyrug‘i emas. `bash scripts/ops/test-valuation-migrations.sh` dedicated `pos-plan-test-db`da vaqtinchalik bazalar bilan137 fresh migration, synthetic133 dump upgrade/repeat, eski movement hash o‘zgarmasligi, no fake legacy order, native forge rejection va haqiqiy valuation dump/restore hashini tekshiradi. Haqiqiy customer/staging/production qabuli emas.
+
+SQL137 counter bor holatda PK lookupdan foydalanadi; boshlang‘ich legacy/balance scan faqat birinchi captureda. Testlar: actual receipt cost/movement bir transactionda; parallel branch writes; original replay; rollback; readonly generic insert; eski unjournaled stock; owner-only read; exact tenant export. Hozircha bu capture/read/calculation core hisoblanadi. Expense-to-receipt posting, harakat turlari adapterlari va immutable stock/COGS correction journals tugamaguncha PUR-01.05 `done` emas.

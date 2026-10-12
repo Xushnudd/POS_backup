@@ -1,0 +1,16 @@
+{
+  "runId": "a8f60bd1-48a8-486f-a264-e877ef61f242",
+  "at": "2026-10-11T19:34:04.118Z",
+  "readOnly": true,
+  "consistentSnapshot": true,
+  "scope": "own synthetic fixture only; not final task acceptance",
+  "result": {
+    "sales": "3180",
+    "payments": "3180",
+    "items": "3180",
+    "movements": "3180",
+    "cash": "3211.80",
+    "delta": "-3180.000000",
+    "stock": "1996820.000000"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "status": "in_progress",
+  "changes": [
+    "Auth forms synchronous flight guard and fieldsets freeze inputs until ACK",
+    "Dirty/busy navigation admission for four credential/recovery forms without credential persistence",
+    "Login navigates from actual AuthData role ACK; malformed login/register data fail closed",
+    "Recovery request edited identifier/channel invalidates queued status"
+  ],
+  "checks": {
+    "build": "pass",
+    "typecheck": "pass",
+    "changedLint": "pass",
+    "browser": {
+      "passed": 15,
+      "failed": 0,
+      "seconds": 18.1,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    }
+  },
+  "scenarios": [
+    "Each form cancels dirty navigation and retains entered fields",
+    "Two same-tick native requestSubmit calls create one actual request",
+    "Held real failure prevents navigation without a second prompt and freezes inputs",
+    "Actual login failure, duplicate registration, provider unavailable and invalid reset token preserve drafts",
+    "Successful login works despite unavailable subsequent auth/me lookup"
+  ],
+  "limits": [
+    "No real SMS/e-mail provider configured, no successful production reset claim",
+    "No full UX-01.05 parent acceptance yet"
+  ],
+  "sha256": {
+    "src/app/(auth)/login/page.tsx": "40199a157bfb7b1312d9e78af971e2e2f7882c590138132973be16df64675b4d",
+    "src/app/(auth)/register/page.tsx": "a62c0443912651e7a5964263939c16e28136ca6879b25c13b9c70586493e1604",
+    "src/app/(auth)/forgot-password/page.tsx": "40a59f0b026711e7d0baaaf405b16c454440a0353e62b7623250710173597462",
+    "src/app/(auth)/reset-password/page.tsx": "4e14502b0797c83112838f898c22561c3427117e8f757f275675fe5ac9c3efa0",
+    "src/context/AuthContext.tsx": "88dd9992287afc8da15c4656f3195d8d686c61535a22703497337d203c479dd7",
+    "tests/e2e/auth-form-state.spec.ts": "f337d570cefc47850745705fc68a91085350aefdfd21e390b4288555a9154e9a",
+    "/tmp/pos-170-auth-form-build.log": "ead3c89c0e5aef5903af567b88e3bea4b1417d15c11b1d082fe5ebbf577df290",
+    "/tmp/pos-170-auth-form-type-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-170-auth-form-lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-170-auth-form-browser.log": "7cd2a6d4f0af8b4ad2a7da438e9c3d0351dfa21b367c3a573689dcf9b31e17e4"
+  }
+}

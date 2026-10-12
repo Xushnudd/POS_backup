@@ -1,0 +1,123 @@
+{
+  "task": "PUR-01.05",
+  "date": "2026-10-12",
+  "status": "in_progress",
+  "originalDone": {
+    "baseline": 164,
+    "current": 164,
+    "total": 259,
+    "delta": 0
+  },
+  "version": {
+    "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+    "dirtyWorkingTree": true,
+    "agentCommit": false
+  },
+  "scope": [
+    "paginated receipt allocation history with abort/live guard and timeout/retry",
+    "prepared plan cancellation preview and original-payload/key IndexedDB recovery",
+    "terminal rows suppress new mutations while retaining committed lost-ACK recovery",
+    "user-approved moving-average policy ADR-081, posting not implemented"
+  ],
+  "acceptance": {
+    "unit": {
+      "pass": 86,
+      "fail": 0
+    },
+    "focusedDatabase": {
+      "pass": 5,
+      "fail": 0
+    },
+    "browser": {
+      "pass": 6,
+      "fail": 0,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "scenarios": [
+        "receipt preview/cancel and committed-lost-ACK reload replay",
+        "existing partial purchase receipt unknown-result recovery"
+      ]
+    },
+    "invariants": {
+      "cancelRequests": 2,
+      "identicalOperationId": true,
+      "cancelledAuditRows": 1,
+      "stockQuantity": "3",
+      "productCost": "2",
+      "manualBankBalance": "8",
+      "balanceChangedByCancellation": false
+    },
+    "build": "PASS",
+    "typecheck": "PASS",
+    "eslint": "PASS",
+    "diffCheck": "PASS",
+    "fullIntegrationRerun": false,
+    "securityScan": {
+      "scanned": 902,
+      "findings": 0,
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    }
+  },
+  "database": "isolated 127.0.0.1:55439/pos_test only",
+  "migrationChanged": false,
+  "realDeployment": false,
+  "vendorIntegration": false,
+  "testEnvironment": {
+    "existingContainerRestarted": "pos-plan-test-db",
+    "browserPath": "/tmp/pos-playwright-browsers",
+    "webkitLibraries": "Official archive.ubuntu.com libicu74_74.2-1ubuntu3.1 and libjpeg-turbo8_2.1.5-2ubuntu2 extracted only into /tmp, including browser own sys/lib; no host package install"
+  },
+  "remaining": [
+    "prepare allocation UI",
+    "moving-average replay and immutable inventory/COGS correction journals",
+    "apply/reversal and reporting",
+    "backup fixture and full original task acceptance"
+  ],
+  "sources": {
+    "src/components/suppliers/ReceiptCostHistory.tsx": "fb5dc5e5b6514727c2be209d8f493cbb1fe533c284983b3dd50175d5b0b4a3f6",
+    "src/components/suppliers/PurchaseOrders.tsx": "b1a384756b14f804e137f253c4f0dc2f68aad424e15836d67dd2a0fa3ab9ad3f",
+    "src/components/forms/DurableMutation.tsx": "524a88b5978d434bf64479bb7e8f22dcc8c34156059ac34d255dc8865417fd7f",
+    "tests/e2e/core.spec.ts": "47609c1b569904ee4df4073c377e0ca923bba7f3823f0888c3a8fd45a1186f84",
+    "tasks/PLAN1.md": "e9c0625bc8d2a26b394fe2eabb6e4eedfe1e5f7263c30476a0099b3e6f5c9044",
+    "tasks/EXECUTION_STATUS.md": "f62bf734e85971227524883043a414e770e495b4040c0ad30e942f82603fb9eb",
+    "tasks/DECISIONS.md": "1dd1ba431e15c5e272c5495ce76a11721f1ee480a1fa0ea5aa423370b3c439ab",
+    "docs/operations/landed-cost.md": "a1a44772812a457f615d609e32a9312ab6cb18d5dc761bed76be1655cb3ef177"
+  },
+  "logs": {
+    "unit": {
+      "path": "/tmp/pos-cost-history-unit.log",
+      "sha256": "64b46469f857f2d812c34a72e3456da890eb943f66c86e6d416e9ae68777fa1d"
+    },
+    "integration": {
+      "path": "/tmp/pos-cost-history-integration.log",
+      "sha256": "338c58cdecf4ee4f1f72e43733ff570a520a6831b8dcd15c002d38e322a0b8c3"
+    },
+    "browser-final": {
+      "path": "/tmp/pos-cost-history-browser-final.log",
+      "sha256": "0fd1c4353e793a822419b66fc2d953304eb688330b4142f05640db30c73392c1"
+    },
+    "build": {
+      "path": "/tmp/pos-cost-history-build.log",
+      "sha256": "a56327adb3301aedabb5819ad2599ba732cc83187b1fe49c207e7018b89f9f83"
+    },
+    "type": {
+      "path": "/tmp/pos-cost-history-type.log",
+      "sha256": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39"
+    },
+    "lint": {
+      "path": "/tmp/pos-cost-history-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "security": {
+      "path": "/tmp/pos-cost-history-security.log",
+      "sha256": "f6931a3a1de12abe3bf2b44a8c359d541fe648529a9a68e548b0c6105e56d272"
+    },
+    "security-final": {
+      "path": "/tmp/pos-cost-history-security-final.log",
+      "sha256": "bb7e4e09fffeb30265a7ae9fec31210b3c916f3abc37a93321edba1a8402b296"
+    }
+  }
+}

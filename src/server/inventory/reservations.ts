@@ -7,7 +7,7 @@ import {assertLiveContext,audit,runOperation} from '../operations'
 import {validateUnitQuantity} from '../catalog/service'
 import {decimal,DecimalInput} from '../sales/calculations'
 
-const quantity=z.string().regex(/^\d+(\.\d{1,6})?$/).refine(v=>decimal(v).gt(0)&&decimal(v).lt('100000000000000'))
+const quantity=z.string().regex(/^\d+(\.\d{1,6})?$/).pipe(z.string().refine(v=>decimal(v).gt(0)&&decimal(v).lt('100000000000000')))
 const reason=z.string().trim().min(3).max(2000)
 export const locationSchema=z.object({operationId:z.string().uuid(),storeId:z.string().uuid(),name:z.string().trim().min(2).max(100)}).strict()
 export const relocationSchema=z.object({operationId:z.string().uuid(),storeId:z.string().uuid(),productId:z.string().uuid(),fromLocationId:z.string().uuid().nullable(),toLocationId:z.string().uuid().nullable(),quantity,reason}).strict().refine(v=>v.fromLocationId!==v.toLocationId)

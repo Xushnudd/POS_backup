@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "original_done": 164,
+  "original_total": 259,
+  "target": 170,
+  "original_delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "scope": [
+    "Shared endpoint command identity prevents unrelated job/onboarding pending operation capture",
+    "Original ACK preserves independent report filter and customer merge draft",
+    "Onboarding own reason cleanup and pending step recovery",
+    "Brand existing server-idempotent POST/PUT direct editor recovery; status ACK does not clear name draft",
+    "Branch initial load no longer remounts jobs editor",
+    "Actual enrolled TOTP proof in onboarding cashier creation fixture"
+  ],
+  "checks": {
+    "browser": {
+      "passed": 27,
+      "failed": 0,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "duration": "2.3m",
+      "log": "tasks/evidence/logs/shared-command-20261012-pos-170-shared-brands-corrective-e2e.log"
+    },
+    "previous_browser": {
+      "passed": 11,
+      "failed": 13,
+      "duration": "12.0m",
+      "log": "tasks/evidence/logs/shared-command-20261012-pos-170-shared-editors-e2e.log",
+      "corrected": "Initial store hydration remounted jobs editor and erased selected command/reason. Onboarding cashier creation fixture lacked operationId/real MFA proof."
+    },
+    "unit": {
+      "passed": 105,
+      "failed": 0,
+      "command": "node --require ./scripts/test-resolver.cjs --test --test-isolation=none .test-build/tests/*.unit.test.js"
+    },
+    "typecheck": "PASS",
+    "changed_lint": "PASS",
+    "build": {
+      "result": "PASS",
+      "bundler": "webpack",
+      "command": "node -e \"process.execArgv.length=0;process.argv=[process.execPath,'next','build','--webpack'];require('./node_modules/next/dist/bin/next')\"",
+      "note": "Direct tool session 48347 exit0, compiled/typechecked/generated164pages. Turbopack local worker EPERM attempts retained; no build configuration changed."
+    },
+    "manual_regression": {
+      "passed": 9,
+      "failed": 0,
+      "duration": "26.4s",
+      "cases": [
+        "Existing catalogue tree/brand/image",
+        "Existing lost CSV import ACK and exact Excel",
+        "Existing real exchange return/replacement/cash"
+      ],
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "log": "tasks/evidence/logs/shared-command-20261012-manual-regression.log"
+    }
+  },
+  "logs": [
+    "tasks/evidence/logs/shared-command-20261012-pos-170-shared-editors-e2e.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-shared-brands-corrective-e2e.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-brand-direct-unit.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-brand-final-type.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-brands-lint.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-shared-editors-corrective-lint.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-shared-editors-corrective-build.log",
+    "tasks/evidence/logs/shared-command-20261012-pos-170-shared-editors-webpack-build.log",
+    "tasks/evidence/logs/shared-command-20261012-manual-regression.log"
+  ],
+  "source_sha256": {
+    "src/components/forms/DurableMutation.tsx": "132822d9fa7cf87af104219241fbd867e14606cc960e60dc57f745b33950a15b",
+    "src/lib/durable-identity.ts": "cd4b6af82397738a2f6bd830d210beb6bba89565a6f04136a1f2299ccd84d2d3",
+    "src/lib/durable-request.ts": "e4107f21817d1b4194726f94df0da476d07ff87d24746e86aeca130c3b27daaa",
+    "src/app/(dashboard)/onboarding/page.tsx": "d54be517d85ba6c827c7710bb242191f9cf81dd87ea973fea124aefe42a78406",
+    "src/app/(dashboard)/jobs/page.tsx": "6f9137898b896b62e19599a6f58e563833ec21d0d0a453f98c0a3f3db60d4f9f",
+    "src/components/forms/ReportExportFields.tsx": "0b459f15b23a068d194fde6180a13d780fddf3ff1f4591771f2088924d9376af",
+    "src/app/(dashboard)/customers/[id]/history/page.tsx": "736cf6278fda40ed440f1554e8929e4b82adbe65fa1438e33a53e12f96883b81",
+    "src/app/(dashboard)/products/brands/page.tsx": "821b3d3cf949ef156c6bdf8812af0bdca1acf63780232e87e3229ca480b3141e",
+    "tests/e2e/shared-command-state.spec.ts": "e7bf0a73c207261e2f167c737a002896b731234080416fb4e806a911b967f383",
+    "tests/e2e/customer-merge-state.spec.ts": "011df35178cab68ead9113abd7b748b4a7886d753d96242b69e8dd5fa58efca7",
+    "tests/e2e/brand-editor-state.spec.ts": "e53715aa531e8baa4de9c87400fbac6da120fd2932fa8c69859118abcebb64fa",
+    "tests/e2e/core.spec.ts": "1138255a9deb890253c5839a0c3745bf946b3932b04e3ae5675f06106ac77e50",
+    "tests/e2e/report-export.spec.ts": "c39e59b712f8fdeddba536595f31962e152ca0f97f6055703696505cc0d8a1c6"
+  },
+  "limits": [
+    "This acceptance is a UX sub-scope; original UX-01.05 remains open.",
+    "No real vendor, hardware, external delivery or production deployment.",
+    "Isolated synthetic local PostgreSQL only.",
+    "No source commit created."
+  ]
+}

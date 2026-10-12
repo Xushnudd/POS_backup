@@ -12,8 +12,9 @@ test('Owner queues full filtered XLSX/PDF documents through UI, actual worker pu
  const identity=(await registered.json()).data;orgs.push(identity.organization.id);users.push(identity.user.id)
  for(let start=0;start<1001;start+=100)await db.product.createMany({data:Array.from({length:Math.min(100,1001-start)},(_,n)=>({organizationId:identity.organization.id,name:'REPORT-'+String(start+n).padStart(4,'0'),sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'1.01',costPrice:'12.345678'}))})
  await db.product.create({data:{organizationId:identity.organization.id,name:'EXCLUDED-PRODUCT',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:9,costPrice:9}})
- await page.goto('/jobs');await page.getByLabel('Fon ishining turi').selectOption('report_export');await page.getByLabel('Eksport hisoboti').selectOption('products');await page.getByLabel('Qidiruv',{exact:true}).fill('REPORT-');await page.getByLabel('Fon ishini tasdiqlash sababi').fill('Full filtered report browser acceptance')
+ await page.goto('/jobs');await page.getByLabel('Fon ishining turi').selectOption('report_export');
  for(const format of ['xlsx','pdf']){
+  await page.getByLabel('Eksport hisoboti').selectOption('products');await page.getByLabel('Qidiruv',{exact:true}).fill('REPORT-');await page.getByLabel('Fon ishini tasdiqlash sababi').fill('Full filtered report browser acceptance')
   await page.getByLabel('Hisobot fayli formati').selectOption(format)
   await page.getByRole('button',{name:'Hisobot eksportini navbatga qo‘yish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
   await expect.poll(()=>db.backgroundJob.count({where:{organizationId:identity.organization.id,type:'report_export'}})).toBe(format==='xlsx'?1:2)

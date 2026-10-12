@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {commitPageNavigation} from '@/lib/page-navigation';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -32,9 +34,13 @@ export default function RegisterPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const flight=useRef(false);
+  const dirty=Boolean(fullName||phone||email||password||organizationName||tin);
+  useUnsavedChanges(dirty,isLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(flight.current)return;
     setErrorMessage('');
 
     if (!fullName || fullName.trim().length < 2) {
@@ -57,6 +63,7 @@ export default function RegisterPage() {
       return;
     }
 
+    flight.current=true;
     setIsLoading(true);
     try {
       await register({
@@ -69,12 +76,13 @@ export default function RegisterPage() {
       });
 
       notifySuccess('Muvaffaqiyatli ro\'yxatdan o\'tdingiz! Tizim sozlandi.');
-      router.push('/dashboard');
+      setPassword('');commitPageNavigation();router.push('/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Ro\'yxatdan o\'tishda xatolik yuz berdi';
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
+      flight.current=false;
       setIsLoading(false);
     }
   };
@@ -101,12 +109,14 @@ export default function RegisterPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-gray-100">
           {errorMessage && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {errorMessage}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {isLoading&&<p role="status">Server tasdig‘i kutilmoqda…</p>}
+          {!isLoading&&dirty&&<p role="status">Saqlanmagan forma ma’lumotlari bor.</p>}
+          <form onSubmit={handleSubmit} className="space-y-4"><fieldset disabled={isLoading} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Ism va Familiya"
@@ -180,7 +190,7 @@ export default function RegisterPage() {
                 Hisob yaratish va Boshlash
               </Button>
             </div>
-          </form>
+          </fieldset></form>
 
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-600">

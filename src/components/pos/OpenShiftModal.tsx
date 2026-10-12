@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import DurableMutation from '@/components/forms/DurableMutation';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {confirmPageNavigation} from '@/lib/page-navigation';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -8,6 +11,7 @@ import Select from '@/components/ui/Select';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
+import type {Shift} from '@/types';
 import { api } from '@/lib/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
@@ -24,57 +28,41 @@ export default function OpenShiftModal({
   onSuccess,
 }: OpenShiftModalProps) {
   const { user } = useAuth();
-  const { activeStore, activeRegister, setActiveRegister, refreshShift } = useOrganization();
+  const { activeStore, activeRegister, setActiveRegister, applyOpenedShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
   const [openingCash, setOpeningCash] = useState<string>('0');
   const [handover,setHandover]=useState<{id:string;countedCash:string}|null>(null),[acceptHandover,setAcceptHandover]=useState(false);
-  useEffect(()=>{let cancelled=false;void Promise.resolve().then(async()=>{setHandover(null);setAcceptHandover(false);if(!isOpen||!activeRegister)return;try{const response=await api.shifts.handover(activeRegister.id);if(!cancelled)setHandover(response.data??null);}catch(error){if(!cancelled)notifyError(error instanceof Error?error.message:'Oldingi smena tekshirilmadi');}});return()=>{cancelled=true;};},[isOpen,activeRegister,notifyError]);
-  const [note, setNote] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const attempt = useRef<string | null>(null);
-  const registers = activeStore?.registers || [];
-
-  const handleOpenShift = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeRegister?.id) {
-      notifyError('Iltimos, kassa terminalini tanlang');
-      return;
-    }
-    if (!user?.organizationUserId) {
-      notifyError('Tashkilot foydalanuvchisi ma\'lumotlari topilmadi');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      attempt.current ??= crypto.randomUUID();
-      await api.shifts.open({
-        operationId: attempt.current,
-        registerId: activeRegister.id,
-        organizationUserId: user.organizationUserId,
-        openingCash: acceptHandover&&handover?handover.countedCash:openingCash,
-        ...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),
-        note: note.trim() || undefined,
-      });
-
-      attempt.current = null;
-      notifySuccess('Smena muvaffaqiyatli ochildi!');
-      await refreshShift();
-      onClose();
-      onSuccess?.();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Smenani ochishda xatolik yuz berdi');
-    } finally {
-      setIsLoading(false);
-    }
+  const [handoverState,setHandoverState]=useState<'loading'|'ready'|'failed'>('loading');
+  const [handoverError,setHandoverError]=useState(''),[handoverRevision,setHandoverRevision]=useState(0);
+  const [note,setNote]=useState('');
+  const registerId=activeRegister?.id;
+  useUnsavedChanges(isOpen&&Boolean(openingCash!=='0'||note||acceptHandover));
+  useEffect(()=>{
+    let cancelled=false;
+    void Promise.resolve().then(async()=>{
+      if(cancelled)return;
+      setHandover(null);setAcceptHandover(false);setHandoverState('loading');setHandoverError('');
+      if(!isOpen||!registerId)return;
+      try{const response=await api.shifts.handover(registerId);if(!cancelled){setHandover(response.data??null);setHandoverState('ready');}}
+      catch(error){if(!cancelled){setHandoverError(error instanceof Error?error.message:'Oldingi smena tekshirilmadi');setHandoverState('failed');}}
+    });
+    return()=>{cancelled=true;};
+  },[isOpen,registerId,handoverRevision]);
+  const registers=activeStore?.registers||[];
+  const finish=()=>{setOpeningCash('0');setNote('');setAcceptHandover(false);onClose();};
+  const close=()=>{if(confirmPageNavigation())finish();};
+  const saved=(result?:unknown)=>{
+    const shift=result as Shift|undefined;
+    if(!shift||!applyOpenedShift(shift)){notifyError('Smena ochildi, lekin kassa yoki foydalanuvchi konteksti o‘zgardi. Holatni qayta tekshiring.');finish();return;}
+    notifySuccess('Smena muvaffaqiyatli ochildi!');finish();
+    try{onSuccess?.();}catch{notifyError('Smena ochildi; keyingi ekran yangilanmadi.');}
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={close}
       title={
         <div className="flex items-center gap-2 text-emerald-700">
           <FontAwesomeIcon icon={faClock} />
@@ -83,7 +71,10 @@ export default function OpenShiftModal({
       }
       size="md"
     >
-      <form onSubmit={handleOpenShift} className="space-y-4">
+      {handoverState==='loading'&&<p role="status">Oldingi smena tekshirilmoqda…</p>}
+      {handoverState==='failed'&&<p role="alert">{handoverError} <button type="button" className="underline" onClick={()=>setHandoverRevision(value=>value+1)}>Oldingi smenani qayta tekshirish</button></p>}
+      <DurableMutation path="/shifts" returnPath="/pos" label="Smenani ochish" allowNew={handoverState==='ready'&&Boolean(registerId&&user?.organizationUserId)} body={{registerId,organizationUserId:user?.organizationUserId,openingCash:acceptHandover&&handover?handover.countedCash:openingCash,...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),note:note.trim()||undefined}} review={[`Kassa: ${activeRegister?.name??''}`,`Boshlang‘ich naqd: ${acceptHandover&&handover?handover.countedCash:openingCash}`,`Izoh: ${note}`,...(acceptHandover&&handover?[`Qabul qilinadigan smena: ${handover.id}`]:[])]} onDone={saved}>
+      <fieldset disabled={handoverState!=='ready'} className="space-y-4">
         <p className="text-sm text-gray-600">
           Kassada savdo qilish uchun smena ochishingiz zarur. Boshlang&apos;ich naqd pul qoldig&apos;ini kiriting:
         </p>
@@ -94,7 +85,7 @@ export default function OpenShiftModal({
             value={activeRegister?.id || ''}
             onChange={(e) => {
               const selected = registers.find((r) => r.id === e.target.value);
-              if (selected) setActiveRegister(selected);
+              if(selected&&selected.id!==registerId&&confirmPageNavigation()){setOpeningCash('0');setNote('');setActiveRegister(selected);}
             }}
             options={registers.map((r) => ({ value: r.id, label: `${r.name} (${r.code})` }))}
           />
@@ -106,7 +97,7 @@ export default function OpenShiftModal({
           type="number"
           min="0"
           step="0.01"
-          disabled={acceptHandover||isLoading}
+          disabled={acceptHandover}
           value={openingCash}
           onChange={(e) => setOpeningCash(e.target.value)}
           leftIcon={<FontAwesomeIcon icon={faMoneyBillWave} className="text-xs" />}
@@ -122,19 +113,12 @@ export default function OpenShiftModal({
         />
 
         <div className="pt-2 flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={close}>
             Bekor qilish
           </Button>
-          <Button
-            type="submit"
-            variant="success"
-            isLoading={isLoading}
-            className="font-bold"
-          >
-            Smenani ochish
-          </Button>
+
         </div>
-      </form>
+      </fieldset></DurableMutation>
     </Modal>
   );
 }

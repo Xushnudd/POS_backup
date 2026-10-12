@@ -10,6 +10,9 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+ valuationSequences InventoryValuationSequence[]
+ valuationEvents InventoryValuationEvent[]
+
  customRoles CustomRole[]
  closureRevision Int @default(0)
  closureRequests OrganizationClosure[]
@@ -79,6 +82,8 @@ model Organization {
 }
 
 model User {
+ valuationEvents InventoryValuationEvent[] @relation("ValuationEventActor")
+
  createdCustomRoles CustomRole[] @relation("CustomRoleCreator")
  totpFactors TotpFactor[]
  totpProofs TotpProof[]
@@ -173,6 +178,8 @@ model CustomRole {
 }
 
 model Store {
+ valuationEvents InventoryValuationEvent[]
+
  providerIntents ProviderIntent[]
  receiptCostPlans ReceiptCostPlan[]
   exchanges SaleExchange[]
@@ -283,6 +290,9 @@ model Category {
 }
 
 model Product {
+ valuationSequence InventoryValuationSequence?
+ valuationEvents InventoryValuationEvent[]
+
   unitConversions ProductUnitConversion[]
   mxik String?
   mxikSource String?
@@ -429,6 +439,8 @@ model StockDocumentItem {
 }
 
 model InventoryMovement {
+ valuationEvent InventoryValuationEvent?
+
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
@@ -2137,4 +2149,44 @@ model AuthRestoreCheckpoint {
  reviewedAt DateTime?
  reviewer String?
  reviewEvidence String?
+}
+
+// Future-only valuation order. Existing movement timestamps are not backfilled
+// into a fabricated sequence; legacyMovementCount records that limitation.
+model InventoryValuationSequence {
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ productId String @id
+ organizationId String
+ lastSequence BigInt @default(0)
+ legacyMovementCount BigInt
+ baselineQuantity Decimal? @db.Decimal(20,6)
+ baselineUnitCost Decimal? @db.Decimal(20,6)
+ initializedAt DateTime @default(now())
+ @@index([organizationId])
+}
+model InventoryValuationEvent {
+ product Product @relation(fields:[productId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store? @relation(fields:[storeId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ movement InventoryMovement? @relation(fields:[movementId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ actor User? @relation("ValuationEventActor",fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ storeId String?
+ movementId String? @unique
+ sequence BigInt
+ transactionId BigInt
+ kind String
+ quantityDelta Decimal? @db.Decimal(20,6)
+ unitCost Decimal? @db.Decimal(20,6)
+ beforeUnitCost Decimal? @db.Decimal(20,6)
+ afterUnitCost Decimal? @db.Decimal(20,6)
+ actorId String?
+ sourceType String?
+ sourceId String?
+ createdAt DateTime @default(now())
+ @@unique([productId,sequence])
+ @@index([organizationId,productId,sequence])
 }

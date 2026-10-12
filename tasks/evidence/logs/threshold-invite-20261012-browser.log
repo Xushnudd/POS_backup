@@ -1,0 +1,26 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test threshold-recovery.spec.ts auth-form-state.spec.ts core.spec.ts --grep stock threshold preserves|invalid invitation preserves|Owner sees durable inventory alert
+
+[WebServer] (node:43246) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:43672) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (780ms)
+  ✓  2 [chromium] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.0s)
+  ✓  3 [chromium] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting (1.7s)
+(node:43996) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (1.5s)
+  ✓  5 [firefox] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (2.8s)
+  ✓  6 [firefox] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting (1.7s)
+(node:44514) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [webkit] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (1.2s)
+  ✓  8 [webkit] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.1s)
+  ✓  9 [webkit] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting (2.1s)
+
+  9 passed (22.1s)

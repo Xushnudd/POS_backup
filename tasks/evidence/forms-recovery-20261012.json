@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 33,
+      "failed": 0,
+      "duration": "1.4m",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "cases": [
+        "auth forms dirty/busy/same-tick submit and real failure",
+        "login role from actual ACK",
+        "landed preview failure/retry and independent order draft",
+        "shift correction original-key replay and same-tick submit",
+        "supplier ledger independent invoice draft and metadata failure/retry gate",
+        "purchase two receipts and original lost ACK",
+        "supplier return dirty/changed-kind rejection, busy frozen preview, same-tick duplicate, failed preview, original credit replay",
+        "closure downloaded export, actual strict TOTP, lost ACK replay, fresh-proof cancellation"
+      ]
+    },
+    "unit": {
+      "passed": 94,
+      "failed": 0,
+      "note": "Escalated local Node runner verified cases; sandbox run only reported38 file results, not claimed94 cases."
+    },
+    "build": "pass",
+    "typecheck": "pass",
+    "changedLint": "pass"
+  },
+  "logs": {
+    "browser": "tasks/evidence/logs/forms-20261012-browser.log",
+    "unit": "tasks/evidence/logs/forms-20261012-unit.log",
+    "build": "tasks/evidence/logs/forms-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/forms-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/forms-20261012-lint.log"
+  },
+  "limits": [
+    "Original UX-01.05 still needs full editor coverage, not counted done",
+    "OwnershipRequests current source only previously accepted Business-switch regression, not included in33 current cases",
+    "Replenishment/invite edits made after this browser bundle and not included in this acceptance",
+    "No real vendor/server/pilot production claim"
+  ],
+  "sha256": {
+    "src/components/suppliers/SupplierCredits.tsx": "1a66abbd1ae5ed7722998e70e2754b4bad22e450644e3c1e54cdfebd53bcf94f",
+    "src/components/suppliers/SupplierLedger.tsx": "b03d529c7f12a9a328c2f180569f4c1d465d771d27e61665d95f19de9bf2e792",
+    "src/components/suppliers/PurchaseOrders.tsx": "aa5425f905a2751a949a5ce04eb0d23d528ad48d11eb1dc6d2d0d99a0154c36b",
+    "src/components/suppliers/LandedCostPreview.tsx": "6501671c869569ca393a9118820adff8c57d195bd383af43346d2618c62827a3",
+    "src/components/billing/Closure.tsx": "0015dcab93aa0fe0235beb193a262ddb5024ec215761c236bfaef37d2ed194c7",
+    "src/components/forms/DurableMutation.tsx": "da17f333b9fda47063ed5099c2406169977005e455a908c64a23b57d0255b4b4",
+    "src/components/users/OwnershipRequests.tsx": "364c5b9a54b730df51a0fae7bd84a4a786e167095a7b9d10d64c98cb59e7650a",
+    "src/components/finance/ShiftCorrections.tsx": "dbc12c79de8e134dc9036dd783329b58870163299cc5e1132322804e25aad7d3",
+    "tests/e2e/core.spec.ts": "7eebe93bb05f3a827c1630cfcd9d8b5ecbc7a068159092669e2439e83d8f2f9c",
+    "tests/e2e/organization-closure.spec.ts": "de7cb1d32ecf553014aef5fb6a1fb640bbe7defd0fdc001da08882458f6ea816",
+    "tasks/evidence/logs/forms-20261012-browser.log": "a9ddb0c38606baff8ae886ade8047f6e2da859ddd3559fa9d73a57623a142858",
+    "tasks/evidence/logs/forms-20261012-unit.log": "eafb45a546ab71c4db080a9d8ffb4c4337062a1ee2d808aee9e6a1e346602179",
+    "tasks/evidence/logs/forms-20261012-build.log": "2f22f24c3b15968c402104b51af31b8b2e761916f91919caf9dc95bfd54b5bc2",
+    "tasks/evidence/logs/forms-20261012-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "tasks/evidence/logs/forms-20261012-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

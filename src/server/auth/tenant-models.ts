@@ -10,6 +10,8 @@ export const TENANT_DIRECT_MODELS = [
   "Supplier",
   "StockDocument",
   "InventoryMovement",
+  "InventoryValuationSequence",
+  "InventoryValuationEvent",
   "StockTransfer",
   "TransferDispositionEntry",
   "SupportGrant",

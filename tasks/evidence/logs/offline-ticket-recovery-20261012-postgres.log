@@ -1,0 +1,54 @@
+✔ Central critical-action policy fails closed before writes/replay even when authenticator availability is off (365.030365ms)
+✔ Central MFA binds critical execution and replay to the approved payload and preserves late failure rollback (614.065854ms)
+✔ A valid MFA proof never grants platform privileges; revoked platform access denies a stored-result replay (538.987987ms)
+{"requestId":"9817d599-1036-4349-9efd-da44a5ebdd0f","organizationId":"3a6ab774-c1de-45ce-9ff6-9a7613513843","status":200,"durationMs":67,"event":"api_response"}
+✔ Platform overview requires independent live admin and MFA, paginates safe tenant metadata and audits reads without storing cross-tenant results (995.774379ms)
+✔ TOTP enrollment requires live session and fresh password; secrets never enter audit (709.112745ms)
+✔ Five incorrect enrollment attempts commit and revoke the pending secret; foreign identity cannot confirm (784.912902ms)
+✔ Concurrent TOTP validation accepts one proof; action/key/hash/session binding and counter replay are enforced (1024.635993ms)
+✔ Late audit failure rolls back enrollment confirmation and consumed counter/proof together (549.259524ms)
+✔ An actual cashier PIN session cannot enroll a factor, and a second password session cannot confirm the first enrollment (963.711389ms)
+✔ Revoking a factor invalidates unconsumed proofs in both service and direct DB approval (496.75647ms)
+✔ Recovery codes are hashed, own-account and one-use; recovery revokes the factor and all password/PIN sessions (1652.191217ms)
+✔ Recovery audit failure rolls back code consumption, factor revocation and all-session logout (968.986379ms)
+✔ Recovery rotation requires a fresh TOTP counter and password, replaces old codes, and status exposes only safe metadata (1666.075557ms)
+✔ Rotation audit failure preserves original backup codes and the unused TOTP counter (948.168436ms)
+✔ After a password change, a new password session plus backup code can recover exactly once under concurrency (950.424554ms)
+{"requestId":"45da074e-27c2-448c-91f4-560756557560","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":6,"event":"api_response"}
+{"requestId":"8f502758-2f3b-452b-9951-2d5e01f1341c","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":503,"code":"TOTP_UNAVAILABLE","durationMs":6,"event":"api_error"}
+{"requestId":"17faf4e0-eedb-459f-84cf-a4f947d0a837","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+{"requestId":"73c3b074-dc6d-4179-a47d-5390d45bb96b","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":287,"event":"api_response"}
+{"requestId":"d61623fa-cc66-4731-868e-0c6fd21370b6","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"94304fd7-2d57-4354-8d16-919d3bf3152f","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":8,"event":"api_response"}
+{"requestId":"ddc379bf-3872-4a17-bb30-3b9ad77c6ee2","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"a10d5318-ba7e-4315-aad6-c3fbbc63133d","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":37,"event":"api_response"}
+{"requestId":"e8453aa4-ccab-422a-a33b-e2d29ee04e15","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":503,"code":"TOTP_UNAVAILABLE","durationMs":13,"event":"api_error"}
+{"requestId":"c6f1bcdb-742d-4e1c-9802-fd17b849830d","organizationId":"3e221d50-a36e-4ce8-a4d6-ecbe0c7a87a5","status":200,"durationMs":262,"event":"api_response"}
+✔ HTTP TOTP is opt-in, scoped, no-store and presents only one-time provisioning/recovery DTOs (1003.33756ms)
+{"requestId":"544f1cb9-47cf-4250-9cd1-1625fb20e977","organizationId":"70bd22c6-693f-4a8a-9a5c-55a53e001787","status":200,"durationMs":7,"event":"api_response"}
+{"requestId":"fd42255b-b472-46c6-bd25-de0a896c0b56","organizationId":"70bd22c6-693f-4a8a-9a5c-55a53e001787","status":503,"code":"TOTP_UNAVAILABLE","durationMs":5,"event":"api_error"}
+✔ Invalid rotation configuration makes HTTP enrollment unavailable without persisting a factor (254.753282ms)
+✔ Member permissions require exact MFA and an operation key; approved replay does not log out a newly signed-in target (774.184764ms)
+✔ Ownership request audit fault rolls back MFA approval; both parties require independent proof and accepted session token is never stored (1183.926388ms)
+✔ Ownership cancellation requires its own action/hash proof and leaves original owner roles unchanged (775.761231ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Invitation grant requires bound MFA; concurrent replay never persists or reissues the bearer token (669.364149ms)
+{"requestId":"b5d43c24-2196-4041-a437-a4cc951c7a38","organizationId":"130a5da8-a586-4f6e-a42c-5b0de97b562b","operationId":"9280d399-01b6-4eda-bae3-606adb008a17","status":403,"code":"STEP_UP_REQUIRED","durationMs":25,"event":"api_error"}
+{"requestId":"8d273a9f-057d-498b-9e4b-fda632636b09","organizationId":"130a5da8-a586-4f6e-a42c-5b0de97b562b","operationId":"9280d399-01b6-4eda-bae3-606adb008a17","status":200,"durationMs":256,"event":"api_response"}
+{"requestId":"878bafed-f1f4-4aa0-add5-eaada259f596","organizationId":"130a5da8-a586-4f6e-a42c-5b0de97b562b","operationId":"9280d399-01b6-4eda-bae3-606adb008a17","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"18ddf253-2fbb-453e-bb77-d287a0ccf74c","organizationId":"130a5da8-a586-4f6e-a42c-5b0de97b562b","operationId":"9280d399-01b6-4eda-bae3-606adb008a17","status":403,"code":"STEP_UP_REQUIRED","durationMs":16,"event":"api_error"}
+✔ HTTP staff creation binds the password privately and replays exactly one safe member result (810.011992ms)
+{"requestId":"318faa52-93e4-432e-a596-2117a2169bd6","organizationId":"fc77b97b-c9b4-4ddd-b66d-00c86f9c3091","status":403,"code":"STEP_UP_REQUIRED","durationMs":472,"event":"api_error"}
+{"requestId":"73396fbb-cf37-4366-acd1-a7547cf2285e","organizationId":"fc77b97b-c9b4-4ddd-b66d-00c86f9c3091","status":500,"code":"INTERNAL_ERROR","durationMs":464,"event":"api_error"}
+{"requestId":"561ae311-669f-4206-a75f-2f855510604c","organizationId":"fc77b97b-c9b4-4ddd-b66d-00c86f9c3091","status":200,"durationMs":464,"event":"api_response"}
+{"requestId":"9b686703-90c9-46b4-9627-7c695b6f34f9","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Owner password change requires a bound second factor and atomically invalidates all sessions without storing credentials (2583.593836ms)
+✔ Hyphenated offline policy proof binds the actual operation key and rejects a changed payload and action (529.367478ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22432.376119

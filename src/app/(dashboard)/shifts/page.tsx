@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api, ApiError } from '@/lib/api';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { acknowledge, deviceId, enqueue, pendingOperations } from '@/lib/offline';
 import { Shift } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
@@ -55,6 +56,11 @@ export default function ShiftsPage() {
   const [countedCash, setCountedCash] = useState('');
   const [closeNote, setCloseNote] = useState('');
   const [isClosingShift, setIsClosingShift] = useState(false);
+  const cashDirty=isCashMoveModalOpen&&!cashUnknown&&Boolean(movementAmount||movementReason);
+  const closeCashEditor=useUnsavedChanges(cashDirty,isProcessingMove);
+  const shiftCloseDirty=isCloseModalOpen&&Boolean(countedCash||closeNote);
+  const closeShiftEditor=useUnsavedChanges(shiftCloseDirty,isClosingShift);
+
 
   const loadHistory = useCallback(async () => {
     setIsLoadingHistory(true);
@@ -385,7 +391,7 @@ export default function ShiftsPage() {
       {/* Cash Movement Modal */}
       <Modal
         isOpen={isCashMoveModalOpen}
-        onClose={() => setIsCashMoveModalOpen(false)}
+        onClose={() => {if(closeCashEditor())setIsCashMoveModalOpen(false)}}
         title={movementType === 'cash_in' ? 'Naqd pul kiritish' : 'Naqd pul olish'}
         size="md"
       >
@@ -422,7 +428,7 @@ export default function ShiftsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsCashMoveModalOpen(false)}
+              onClick={() => {if(closeCashEditor())setIsCashMoveModalOpen(false)}}
               disabled={isProcessingMove}
             >
               Bekor qilish
@@ -443,7 +449,7 @@ export default function ShiftsPage() {
       {/* Close Shift Modal */}
       <Modal
         isOpen={isCloseModalOpen}
-        onClose={() => setIsCloseModalOpen(false)}
+        onClose={() => {if(closeShiftEditor())setIsCloseModalOpen(false)}}
         title="Smenani yakunlash va yopish"
         size="md"
       >
@@ -477,7 +483,7 @@ export default function ShiftsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsCloseModalOpen(false)}
+              onClick={() => {if(closeShiftEditor())setIsCloseModalOpen(false)}}
               disabled={isClosingShift}
             >
               Bekor qilish

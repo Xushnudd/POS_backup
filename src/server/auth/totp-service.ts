@@ -14,7 +14,7 @@ const recoveryHash = (factorId: string, code: string) => digest('pos-totp-recove
 const password = z.string().min(1).max(72).refine(value => Buffer.byteLength(value,'utf8') <= 72, 'Parol UTF-8 bo‘yicha 72 baytdan oshmasin')
 export const totpEnrollmentSchema = z.object({ password }).strict()
 export const totpConfirmationSchema = z.object({ factorId: z.string().uuid(), code: z.string().regex(/^\d{6}$/) }).strict()
-export const totpProofSchema = z.object({ code: z.string().regex(/^\d{6}$/), action: z.string().regex(/^[a-z][a-z0-9_.]{2,80}$/), operationKey: z.string().uuid(), payloadHash: z.string().regex(/^[0-9a-f]{64}$/) }).strict()
+export const totpProofSchema = z.object({ code: z.string().regex(/^\d{6}$/), action: z.string().regex(/^[a-z][a-z0-9_.-]{2,80}(?![\s\S])/), operationKey: z.string().uuid(), payloadHash: z.string().regex(/^[0-9a-f]{64}$/) }).strict()
 export const totpRecoverySchema = z.object({ password, factorId: z.string().uuid(), recoveryCode: z.string().regex(/^[0-9a-f]{32}$/) }).strict()
 export const totpRotationSchema = z.object({ password, code: z.string().regex(/^\d{6}$/) }).strict()
 async function issueRecoveryCodes(tx: Prisma.TransactionClient, factorId: string, now: Date) {

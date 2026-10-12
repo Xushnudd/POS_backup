@@ -35,3 +35,11 @@ test('Insert roots are explicit, nested organization connects cannot bypass scop
  assert.throws(()=>tenantInsertReference('SaleItem',{sale:{create:{}}},context),{code:'TENANT_SCOPE_REQUIRED'})
  assert.throws(()=>tenantInsertReference('User',{},context),{code:'UNSCOPED_MODEL'})
 })
+test('Global product valuation order is owner-only and cannot be forged through generic tenant inserts',async()=>{
+ const {tenantInsertReference}=await import('@/server/auth/tenant-write')
+ for(const model of ['InventoryValuationSequence','InventoryValuationEvent']){
+  assert.throws(()=>tenantScope(model,context),{code:'OWNER_REQUIRED'})
+  assert.deepEqual(tenantScope(model,{...context,role:'owner'}),{organizationId:'tenant-a'})
+  assert.throws(()=>tenantInsertReference(model,{organizationId:'tenant-a'},{...context,role:'owner'}),{code:'VALUATION_JOURNAL_READ_ONLY'})
+ }
+})

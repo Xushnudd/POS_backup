@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges'
+import {commitPageNavigation} from '@/lib/page-navigation'
 import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { deviceId, pendingOperations } from '@/lib/offline'
@@ -10,6 +12,7 @@ export default function Totp(){
  const {user,organization,refreshUser}=useAuth(),router=useRouter()
  const [status,setStatus]=useState<Status|null>(null),[setup,setSetup]=useState<Enrollment|null>(null),[backups,setBackups]=useState<string[]>([])
  const [password,setPassword]=useState(''),[code,setCode]=useState(''),[recoveryCode,setRecoveryCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[version,setVersion]=useState(0)
+ useUnsavedChanges(Boolean(password||code||recoveryCode||setup||backups.length),busy,'Authenticatorning saqlanmagan maydonlari yoki faqat shu oynada ko‘rinadigan kalit/kodlari bor. Chiqishni tasdiqlaysizmi?')
  const busyRef=useRef(false)
  useEffect(()=>{let live=true;void api.request<Status>('/auth/totp').then(result=>{if(live){setStatus(result.data??null);if(result.data?.enabled)setSetup(null)}}).catch(e=>{if(live)setError(e instanceof Error?e.message:'Authenticator holati yuklanmadi')});return()=>{live=false}},[version])
  const perform=async(action:()=>Promise<void>)=>{if(busyRef.current)return;busyRef.current=true;setBusy(true);setError('');try{await action()}catch(e){setError(e instanceof Error?e.message:'Natija noaniq. Holatni qayta tekshiring.')}finally{setPassword('');setCode('');setRecoveryCode('');setBusy(false);busyRef.current=false}}
@@ -20,7 +23,7 @@ export default function Totp(){
   if(!user||!organization||!status?.factorId)return
   if((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length)throw new Error('Sinxronlanmagan amallar bor; avval ularning natijasini tekshiring')
   await api.request('/auth/totp/recover',{method:'POST',body:JSON.stringify({password,factorId:status.factorId,recoveryCode})})
-  setSetup(null);setBackups([]);await refreshUser();router.replace('/login')
+  setSetup(null);setBackups([]);commitPageNavigation();await refreshUser();router.replace('/login')
  })
  const seed=(()=>{try{return setup?new URL(setup.provisioningUri).searchParams.get('secret'):null}catch{return null}})()
  return <section aria-label="Authenticator" className="space-y-3 rounded border p-4"><h2>Authenticator</h2>

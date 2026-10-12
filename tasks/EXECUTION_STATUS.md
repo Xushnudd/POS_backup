@@ -1,8 +1,8 @@
 # Bajarish statusi
 
-Sana: 2026-10-11. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
+Sana: 2026-10-12. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
-Joriy original done: **163/259**. Eng so‘nggi so‘rov baseline160, target163: **3/3** — FIX-01.07, DATA-01.04, REP-01.09. Oldingi +20 baseline159/target179 hisobiga jami4/20 qo‘shildi; subtasklar sanalmadi. Core tayyorgarlik tashqi qabul o‘rnida sanalmaydi.
+Joriy original done: **165/259**. Faol so‘rov baseline164, target170: **1/6** — UX-01.05 yakuniy qabuldan o‘tdi; faqat to‘liq original bandlar sanaladi. Oldingi baseline163, target164: **1/1** — OPS-04.06 yuklama/tiklanish qabuli tugadi. Oldingi baseline160/target163: 3/3 — FIX-01.07, DATA-01.04, REP-01.09. Oldingi +20 baseline159/target179 hisobiga jami5/20 qo‘shildi; subtasklar sanalmadi. Core tayyorgarlik tashqi qabul o‘rnida sanalmaydi.
 
 Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sanaladi. Alohida core subtask, yangi ID, migration, test yoki qisman qabul +20 hisobini oshirmaydi. Bandning to‘liq qabul mezoni bajarilgandagina uning original checkboxi va statusi `done`ga o‘tadi; tashqi resurs talab qiladigan qabul mezoni chetlab o‘tilmaydi.
 
@@ -101,13 +101,13 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
 | INV-02.03 | CORE-1 | done | Farq hujjati, qayta sanash va tasdiqlovchi. | Append-only rounds/actor/time; nonzero requires recount; idempotent linked adjustment+journal+manager reason/audit; terminal history guards; browser approval | — |
 | INV-02.04 | CORE-1 | done | Minimal/maksimal qoldiq, tugayotgan mahsulot va qayta buyurtma tavsiyasi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | INV-02.05 | CORE-1 | done | Ombor manzili/zonasi, brak va rezerv qoldiq kerak bo‘lsa alohida yuritish. | 2026-10-09: zona/rezerv qabul protokoli, 074/075 va versioned tests | Regressiyani saqlash |
-| INV-02.06 | CORE-1 | todo | Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1. | — | — |
+| INV-02.06 | CORE-1 | in_progress | Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1. | 2026-10-12: pure exact FEFO/calendar/organization-day/expiry classification;6 unit cases PASS. No inventory posting yet | Batch schema, authoritative balances/reservations, all stock writers, expiry worker/API/UI/report and full acceptance remain |
 | INV-02.07 | CORE-1 | todo | Seriya raqami/kafolat — elektronika segmentida P1. | — | — |
 | PUR-01.01 | CORE-1 | done | Yetkazib beruvchi kartasi, kontaktlar, rekvizitlar, shartlar va tarix. | Migration032 +042..044; scoped card/receipt/price/payment history; validation/archive/restore; supplier acceptance below | — |
 | PUR-01.02 | CORE-1 | done | Buyurtma → qisman/to‘liq qabul → xarid hisoboti → to‘lov zanjiri. | Original Order/Receipt/Stock/Invoice/Allocation FK; atomic partial receipt; races/rollback/3 browsers; migrations045..048 | — |
 | PUR-01.03 | CORE-1 | done | Original-bound supplier return/price credit, stock/payable/advance atomic. | Quyidagi PUR-01.03 qabul protokoli:135 integration,27 unit,9 browser,fresh/legacy49 | Regressiyani saqlash; actual cash refund va landed cost alohida |
 | PUR-01.04 | CORE-1 | done | Yetkazib beruvchi qarzi, oldindan to‘lov va qisman to‘lash. | Immutable invoice/payment/allocation; cash/bank proof; replay/race/audit rollback; API+three browsers | — |
-| PUR-01.05 | CORE-1 | in_progress | Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati. | 2026-10-09: exact BigInt allocation; Receipt-backed preview API/UI; durable prepared/cancelled expense-linked immutable plan, 096–097 source/reversal/unique guards, exact source amount and audit rollback; 75 focused financial cases/5 final plan cases PASS | Apply inventory value/COGS corrections and reporting, apply/cancel UI recovery, backup fixture acceptance remain |
+| PUR-01.05 | CORE-1 | in_progress | Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati. | 2026-10-09: exact BigInt allocation; Receipt-backed preview API/UI; durable prepared/cancelled expense-linked immutable plan, 096–097 source/reversal/unique guards, exact source amount and audit rollback; 75 focused financial cases/5 final plan cases PASS | ADR081 moving-average policy approved; history/cancel UI lost-ACK reload accepted (DB5/unit86/browser6). Prepare/apply UI, inventory/COGS correction journals/reporting and backup acceptance remain |
 | PUR-01.06 | CORE-1 | done | Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.01 | CORE-1 | done | Nasiya uchun mijoz, vakolat va limitni serverda majburiy tekshirish. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
 | CRM-01.02 | CORE-1 | done | Qarz yozuvini haqiqiy pul to‘lovidan ajratish: nasiya naqd tushum deb olinmasligi. | +50 checkpoint2; reports/purchases API/UI, historical cost SQL; 92 PG / 17 unit / 6 HTTPS browser, ADR018 | Regressiya va jonli vakolat himoyasini saqlash |
@@ -188,7 +188,7 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
 | UX-01.02 | CORE-1 | todo | O‘zbek lotin va rus tili; barcha ishchi matnlarni yagona tarjima tizimiga olish. | — | — |
 | UX-01.03 | CORE-1 | todo | Bir xil jadval/formalar, qidiruv, filtr, saralash, sahifalash va bo‘sh holatlar. | — | — |
 | UX-01.04 | CORE-1 | done | Xatolarni odam tushunadigan qilib yozish; foydalanuvchi keyin nima qilishi ko‘rsatilishi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
-| UX-01.05 | CORE-1 | in_progress | Loading, qayta urinish, saqlanmagan o‘zgarishlar va amaliy holatning aniq belgisi. | Besh scoped forma + product list/detail/modal/barcode guard;34 unit,12 browser, build/typecheck/lint/scanner838 PASS; product-editor-state-20261011.json. Qisman qabul, done emas. | Qolgan tahrirlanuvchi sahifalar, barcha navigation yo‘llari va retry holatlarini qabul qilish |
+| UX-01.05 | CORE-1 | done | Loading/retry/dirty/pending/saved va shared navigation guardlari; immutable request recovery, own ACK cleanup va read/write holatlari alohida. | ux-final-20261012.json;111 unit;latest30 + billing/role/barcode30 uch-browser, build/type/lint/scan PASS; old evidence links retained | Yangi editorlarda shu contract va regressiyalarni saqlash; hardware/vendor/pilot qabulini ushbu bandga qo‘shmaslik |
 | UX-01.06 | CORE-1 | done | Klaviatura bilan boshqarish, kontrast, label va fokus; kassa uchun katta o‘qiladigan matn. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | UX-01.07 | CORE-1 | done | Rolga mos boshlang‘ich ekran va muhim ogohlantirishlar. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | UX-01.08 | CORE-1 | done | Qisqa video/yo‘riqnoma, demo ma’lumotlar, yangi kassirni o‘rgatish. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
@@ -228,7 +228,7 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
 | OPS-04.03 | CORE-1 | done | Namuna yuklamada qidiruv p95 ≤ 500 ms, ichki savdo yakunlash p95 ≤ 2 s; provider vaqti alohida o‘lchanadi. | — | — |
 | OPS-04.04 | CORE-1 | done | N+1 so‘rovlarni kamaytirish, indekslar, cheklangan pagination va katta eksport uchun worker. | 50000-row profile: 206 queries, EXPLAIN comparison; snapshot/cursor worker, immutable scoped artifact; full202/focused9/browser6, migrations93/restore | Catalogue CSV only; REP-01.09 and OPS-04.06 separately pending |
 | OPS-04.05 | CORE-1 | done | Hisob/ruxsat ma’lumotini eskirgan keshdan olish xavfini boshqarish. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
-| OPS-04.06 | CORE-1 | todo | Stress, uzoq davomli yuklama va tiklanish sinovlari. | — | — |
+| OPS-04.06 | CORE-1 | done | 20 terminalda40 parallel stress900623ms; normal20 checkout soak7200023ms; actual SIGKILL/SIGTERM restart + original-key replay. | 5540sale/item/payment/movement, cash5595.40, duplicate/loss0;86unit/15ops; core-164-20261012.json | Synthetic local one-owner profile; contention/rate-limit recorded; real pilot/SLO remains external |
 | QA-01.01 | CORE-1 | done | Pul/chegirma/soliq/tannarx/nasiya formulalari uchun birlik testlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | QA-01.02 | CORE-1 | done | Haqiqiy PostgreSQL bilan savdo, qoldiq, qaytarish va migratsiya integratsion testlari. | 2026-10-06: qabul mezoni va regressiya o‘tdi; quyidagi “Yana 10 ta PLAN1 bandi” dalili | Qabul qilingan; keyingi o‘zgarishlarda regressiyani saqlash |
 | QA-01.03 | CORE-1 | done | Kassirning boshidan oxirigacha jarayonlari uchun brauzer testlari. | +10 checkpoint: individual expected/actual, source SHA256,101 PG +18 unit +27 browser +28 migration/restore | Qabul qilingan; regression va documented integration/legacy boundaries saqlansin |
@@ -2162,3 +2162,219 @@ PDF original rejadagi **user print-to-PDF** varianti: `.print.html`ni ochib Ctrl
 **Tekshiruvlar:** full integration **324/324** `/tmp/pos-163-full-final.log`; oxirgi PDF header/strict worker payload/concurrency o‘zgarishlari bilan focused **16/16** `/tmp/pos-163-focused-accepted.log`; unit **86/86 (36 files)** `/tmp/pos-163-unit-accepted.log`; ops **15/15** `/tmp/pos-163-ops-final.log`;132migration actual legacy dump clone/fresh/redeploy/rollback `/tmp/pos-163-dataset-final.log`. Build/worker/typecheck/lint/scanner acceptance loglari evidence JSONda. Production HTTPS Chromium/Firefox/WebKit **9/9** `/tmp/pos-163-e2e-final.log`: old catalog/supplier/stock CSV, shift/frozen report va yangi worker-backed export/download. Testlar serial isolated DBda, browser vaqtida build/worker artefaktlari o‘zgartirilmadi. Dastlabki319-case run11failed edi: keraksiz Organization deferred event va hali qo‘llanmagan yangi migrationlar; final324 va focused16 qayta qabul PASS, eski run success deb sanalmadi.
 
 **Chegara:** real server/domain/TLS/offsite monitoring/pilot, provider/hardware/SMS/e-mail va real production deployment bajarilmadi. Ularning bandlari avvalgi `blocked_external`/partial holatida. Bu uch bandning implementatsiya va lokal acceptance mezoni yopildi; real rollout/pilot qabulini almashtirmaydi. `UX-01.05`, `INV-02.06`, `REP-01.07`, `BIZ-02.07` kabi ochiq original bandlar saqlanadi.
+
+## Original 163→164 — OPS-04.06 yuklama va tiklanish qabuli (2026-10-12)
+
+Original PLAN1 **OPS-04.06** to‘liq qabul qilindi: baseline163 →164, joriy so‘rov1/1. Yangi skript, helper, namuna yoki subtask alohida done sifatida sanalmadi. Sana Asia/Tashkent; raw UTC sinov stress18:18:10→18:33:10, soak18:33:11→20:33:11 2026-10-11, yakuniy mahalliy sana2026-10-12.
+
+**Kirish/profil:** isolated127.0.0.1:55439/pos_test; i7-12700F,20 logicalCPU,33467367424byte RAM, Linux7.2.8-200.fc44, Node24.18.0. Bitta sintetik owner,20 terminal/open shift/product; har mahsulot100000dona boshlang‘ich fixture, sale1.01/cost0.123456. Reference peak20 concurrent checkout/30s, stress40 concurrent (20terminal×2), normal20. Closed-loop/backpressure; bu real pilot peak yoki40 real kassa emas. Shared old DB dataset test konteksti, shu tenantning50k/1m fixturei deb ko‘rsatilmagan.
+
+**Kutilgan/haqiqiy:** stress kamida15min →900623ms,19wave/760completed; normal kamida2h →7200023ms,239wave/4780completed. Har command create/complete + original completion-key replay. Jami5540completedSale=SaleItem=Payment=saleInventoryMovement; exact cash5595.40,20individual stock/journal check PASS; duplicate0/missing command0. Oraliq bir SQL snapshot:3180sale/payment/item/movement, cash3211.80, delta−3180, remainingstock1996820. SIGKILL va SIGTERMdan keyin original draft/completion qayta olindi, taxminan630/661ms; SIGTERM outcome143, timeout/fallbackSIGKILL yo‘q (exit0 deb yozilmadi). Main/observer exit0, own organization/sale/payment/movement teardown0; active132migration o‘zgarmagan.
+
+**Trend/bottleneck:** stress RSS297.21→355.63MiB; restarted soak RSS173.23→333.52, max334.82MiB; ikkinchi yarim davr326.72–334.82MiB. Pool11 (app10+harness1), observer o‘z connectionini chiqaradi;4932active-phase samples, maxactive10/lockWaiting9. Har wave own BackgroundJob navbati bo‘sh: worker throughputi da’vo qilinmaydi. Shared DB1719205223→1756495207byte, shared filesystem free614010331136→612070715392byte; global foydalanishning barchasi shu testga yuklanmaydi. Shared DB deadlock counter3 bo‘lib o‘zgarmadi.
+
+16624HTTP200,1785controlled409,308rate429, networkUnknown0; retry budget tugamadi. Request-level p95 stress673.38ms/soak363.70ms, p99751.48/431.11ms; backoff kutishi bu per-request latencyga kirmaydi. One-owner/paired-product contention va actor admission limit stress effective throughputini chekladi:40concurrency 2× achieved-throughput kafolati emas. SQLning aniq root cause’i alohida trace qilinmagan;20 alohida kassir/pilot profiling va tasdiqlangan real SLO uchun tashqi qabul ochiq. Xotira davr oxirida tekislandi, bundan muddatsiz leak yo‘qligi xulosasi chiqarilmaydi.
+
+**Buyruqlar/dalillar:** `node scripts/ops/test-soak.mjs` real to‘liq davomiylik, `observe-soak.mjs` read-only1SQL/s (19:10:40UTCdan boshlangani aniq; oldingi davr kuzatildi deyilmaydi), `verify-soak-live.mjs` single-snapshot. `npm test` escalated86/86 (sandbox file-only36 hisob yakuniy individual test dalili emas), `npm run test:ops`15/15, focused ESLint/syntax/diff/secret scan PASS. Standalone oldingi accepted build ishlatildi;57previous-checkpoint application/schema SHA o‘zgarmagan; bundle/source/log SHA `tasks/evidence/core-164-20261012.json`da. No commit, no migration, no real deployment/vendor/hardware call. Reproduction: `docs/operations/stress-soak.md`; raw `soak-a8f60bd1-48a8-486f-a264-e877ef61f242.json`, `soak-observer-...json`, `soak-live-...json`. Smoke artefaktlar acceptedfalse; dastlabki cap/readiness xatolari yakuniy qabul deb sanalmagan.
+
+
+### PUR-01.05 — taqsimot tarixi va durable bekor qilish (2026-10-12)
+
+Original done **164/259**, delta0; PUR-01.05 in_progress, checkbox ochiq. Foydalanuvchi kech kelgan xarajat uchun moving-average tarixini qayta hisoblash, inventory value/COGSga alohida correction jurnali va eski hujjatlar immutability siyosatini tasdiqladi (ADR-081). Bu hisob postingi hali yozilmagan; mustaqil tayyor/cancelled hujjat recovery UI qabul qilindi.
+
+Supplier buyurtmasining har original qabuli ostida 20 qatorlik scoped tarix, summa/usul/sabab/sanalar, prepared/cancelled holatlar, loading/error/retry va 15s timeout bor. Eski so‘rov abort/live fence bilan keyingi tanlovga javob yozmaydi. Bekor qilish mavjud DurableMutation orqali oldindan ko‘rish/tasdiqlash va IndexedDB original payload/key ishlatadi. Optional allowNew defaulttrue mavjud oqimlarni saqlaydi; cancelled holatda yangi amal yashiriladi, oldingi lost-ACK amal recovery uchun ko‘rinadi.
+
+**Qabul:** unit86/86, focused landed-cost DB5/5, production build/typecheck/focused ESLint/diff PASS, security scanner901files0findings. Chromium/Firefox/WebKit6/6: serverda bekor qilish commit, HTTP javobini uzish, reload, cancelled hujjatdan original-key replay, ikki requestda bir xil operationId va bitta cancelled audit; stock3/cost2, bankledger8 (original20−expense12) o‘zgarmagan. Mavjud ikki-qisman xarid qabuli unknown-result recovery regressiyasi ham uch-browserda o‘tdi. To‘liq324 integration bu UI o‘zgarishi uchun qayta ishga tushirilmagan.
+
+Dastlab DB container to‘xtagan va /tmp browserlar yo‘q edi: mavjud isolated pos-plan-test-db ishga tushirildi, Playwright test browserlari /tmpga qayta yuklandi. WebKit uchun rasmiy Ubuntu libicu74/libjpeg-turbo8 faqat /tmp runtimega extract qilindi; Fedora system paketlari/production dependency o‘zgarmadi. Browser testidagi commitdan oldingi assertion race expect.poll bilan tuzatildi; yakuniy6/6 boshqa qabul talablarini yumshatmadi.
+
+Dalil: `tasks/evidence/receipt-cost-history-20261012.json`; loglar `/tmp/pos-cost-history-{unit,integration,browser-final,build,type,lint,security}.log`. Versiya HEAD18fd83eba30be24af77f72e270d61a35eed08aec + dirty working tree, AI commit yaratmadi. Schema/migration o‘zgarmadi; real biznes DB/deployment/vendor integratsiyasi yo‘q. Prepared allocation yaratish formasi, moving-average correction apply/jurnal/report va backup fixture original bandda ochiq.
+
+
+### Faol target170 — UX-01.05 va INV-02.06 mustaqil core ishlari (2026-10-12)
+
+Baseline164, current164, target170: **0/6**, goal faol. Alohida implementatsiya yoki testlar original done sifatida sanalmadi.
+
+**UX-01.05:** bir nechta editor uchun flag-only umumiy navigation admission: bitta discard qarori, busy amal chiqishni bloklaydi, unregister stale blockerlarni chiqaradi. Anchor/context change/native unload va installed Chromium/Firefox/WebKitdagi cancelable same-document Navigation API Back/Forward boundary mavjud. Native yangi document unload avvalgi browser himoyasida. Admission hech qanday field/credentialni storagega yozmaydi. DurableMutation input change capture bilan avtomatik yuklangan contextni dirty deb ko‘rsatmaydi; saving/dirty/saved holati, IndexedDB original pending recovery saqlanadi. Moliya formalarining list revision keylari olib tashlandi: bir amal natijasidagi GET boshqa editorning saqlanmagan draft belgisini yo‘qotmaydi.
+
+Moliya, ombor hujjati/transfer, inventarizatsiya miqdori, narxlar batchi, parol, organization/store/register/member modallari, smena naqd/yopish va qarz undirish guardlari kengaytirildi. Inventory/transfer create boshlang‘ich prefill snapshotiga taqqoslanadi; modal close haqiqiy tahrir yoki busyda himoyalangan. Next16.3.8 o‘rnatilgan error.md bo‘yicha **retry**, loading.md bo‘yicha segment fallback qo‘shildi. Error sahifasi payload/stackni ko‘rsatmaydi, render retry iqtisodiy POST yaratmaydi.
+
+**Qabul:** final UI build, typecheck, worker build, focused lint/diff;94/94 unit (88existing/navigation+6FEFO). UI matrix27da24passed/3boundary test selector fail: Next route announcer ham alert ekanligi sabab test section alertga toraytirildi; unchanged bundle bilan boundary3/3 alohida qayta qabul qilindi. Bu bitta run27/27 degan da’vo emas. Independent finance scenario uch-browserda clean navigation0prompt, ikki draftning bitta qarori, Back denial, busy navigation deny, actual bank document1, server saved va boshqa unposted category draft guardi saqlanishini tekshiradi. Existing debt/cashier shortage/price/finance/receipt/transfer/purchase original-key recovery oqimlari24case davomida o‘tdi.
+
+UX-01.05 original ochiq: credential/PIN/TOTP/contact/critical-step-up va auth formalarining to‘liq guard tekshiruvi, tashqarida joylashgan/conditional DurableMutation inputlari, qolgan editable/navigation pathsning coverage inventorysi va yakuniy full acceptance qoladi. Qisman qabul barcha57dashboard route tugadi degani emas.
+
+**INV-02.06:** batch-selection.ts faqat sof hisob, hech qayerda stock postingga ulanmagan. Strict UUID/decimal/date va duplicate validation, max10000candidate, stable FEFO expiry→received-day→ID; expired/future-received/required-but-undated batch exclusion; insufficient valid stockda partial result yo‘q; quantity20,6 chegarasidagi micro-unit aniq. Expiry kuni tashkilot timezoneidagi oxirgi yaroqli kun; alert cutoff inclusive va konfiguratsiya parametri0–3650days. Unknown expiry required rejimda yaroqli deb olinmaydi; nonperishable optional expiry faqat caller explicitfalse berganda. Bu interface ham prod config yoki yaratilgan partiya dalili emas. Caller haqiqiy tenant/store available qtyni, rezerv/quarantine exclusionsni va transaction lock/postingni ta’minlashi kerak.
+
+FEFO6unit: fractional split/order/no mutation, expired/unknown/future/insufficient, date/leap/duplicate/precision/range, Asia/Tashkent midnight/inclusive alert, max six-place quantity, maximum calendar known-before-unknown. Schema/migration, inventory ledger, alert worker yoki expiry report o‘zgarmadi. INV-02.06 in_progress; REP-01.07 hali open. Hech bir tashqi provider/hardware yoki real deployment qo‘shilmadi. Dalil: `tasks/evidence/target170-core-20261012.json`.
+
+### Target170 — credential va pending-submit regressiyasi (2026-10-12)
+
+Original hisob **164/259**, target170 uchun **0/6**. UX-01.05 va INV-02.06 original checkboxlari ochiq; yangi helper, forma yoki test done soniga qo‘shilmadi. Goal faol.
+
+PIN, Authenticator va aloqa tasdiqlash formalarining dirty/busy guardlari umumiy registryga ulandi. TOTP setup va faqat bir marta ko‘rinadigan recovery kodlari oynadan chiqishda himoyalanadi; hech qanday credential registry yoki browser storagega ko‘chirilmaydi. Server tasdiqlagan PIN switch/TOTP recovery old sessionni saqlab qoluvchi ikkinchi unload promptni chetlash uchun navigation commit eventini yuboradi. Critical-step-up kod/busy guardi mavjud; bekor qilishning avvalgi xavfsiz callback oqimi saqlanadi. PIN submit synchronous flight bilan himoyalanadi va credential inputlar busy vaqtida disabled. Contact channelni almashtirish dirty kodni tasdiqsiz yo‘qotmaydi; provayder sozlanmagan holat avvalgidek fail-closed.
+
+Organization/store/register settings va stock/transfer create formalarida disabled fieldset hamda synchronous flight guard qo‘shildi. Xodimning faqat filial tanlovi ham dirty hisoblanadi. Boshqa sozlama kontekstni refresh qilganda tashkilotning dirty drafti qayta initialize qilinmaydi; acknowledged save baseline va keyingi canonical refreshga ajratildi. Bular unknown-result yoki reload recovery barcha metadata CRUDlarda hal qilingan degani emas.
+
+**Joriy source qabuli:** production webpack build, typecheck, worker build, changed-file ESLint va diff-check exit0. Unit **94/94**. Chromium/Firefox/WebKit **36/36**: katalog discard, mahsulot delayed-save, rol revision-conflict, narx, moliya, qarz, shortage/handover, purchase receipt, transfer receipt, umumiy finance Back/busy guard va boundary retry. Xavfsizlik **18/18**: billing critical MFA, TOTP enrollment/rotation/all-session recovery, lost confirmation ACK, nested modal cancellation/one staff, password change va security multi-editor/saving admission. Scanner908 source/findings0; env/credentials, history va container images tekshirilmagan. DB faqat izolatsiyalangan127.0.0.1:55439/pos_test; production deployment yo‘q.
+
+Oldingi27-case urinishda faqat boundary testining ikki alertga tushgan selektori3browserda yiqilgan; selector aniq section alertga tuzatildi. Joriy36-case run boundaryni ham to‘liq qayta qabul qildi. Dastlab sandbox build --showConfig parse xatosi berdi; ruxsat etilgan lokal worker build qayta exit0 tugadi. Oldingi muvaffaqiyatsiz tekshiruvlar muvaffaqiyatli deb yozilmadi.
+
+**UX-01.05 qolganlar:** conditional DurableMutationdan tashqaridagi maydonlar, barcha57dashboard va auth editorlarining semantik inventorysi, stock/transfer draft yaratishda original operation key va unknown-ACK recovery (hozir API operationId olmaydi), OpenShiftModal original immutable request/reload recovery, count-start selection hamda barcha context/reset yo‘llarining acceptance. INV-02.06 FEFO faqat sof hisob: schema, tenant guards, batch ledger, barcha stock writerlar, reservation/concurrency va expiry worker/report hali yozilmagan. Tashqi integratsiyalar va real muhitlarga tegilmadi. Dalil: `tasks/evidence/target170-core-20261012.json`.
+
+### Target170 — stock/transfer draft API idempotency (2026-10-12)
+
+Original done164/259; delta0. Ombor va transfer create endpointlari optional UUID operationId bilan mavjud runOperation transaction/actor/hash/live-context/billing admissionini ishlatadi. Qoralama va audit bir transactionda saqlanadi; kalitsiz legacy chaqiruvlar saqlandi. Native stock postingga tegilmadi. Transferning legacy scoped transactioni saqlanadi; type boundary cast query extensionni runtime’da olib tashlamaydi. Joriy API permission va tenant reference tekshiruvlari replaydan oldin ham ishlaydi.
+
+2/2 PostgreSQL API sinovi: har ikki tur parallel create + original lost-ACK replayda bitta ID/hujjat/audit/operation; 6-decimal cost saqlanadi; payload o‘zgarsa409; rol cashierga o‘zgargach403; movement0. Test compile, typecheck va changed-file lint exit0. Frontend hali operationId yubormaydi; durable modal recovery va PendingActions stock-documents allowlist qolgan. UX-01.05 done deb belgilanmadi. api.md contract yangilandi. Dalil: tasks/evidence/draft-idempotency-20261012.json.
+
+Joriy draft API production webpack build ham exit0 tugadi. Original hisob o‘zgarmadi.
+
+### Target170 — ombor/transfer durable yaratish UI (2026-10-12)
+
+Original done **164/259**, delta0. Original UX-01.05 hali in_progress. Yangi API transaction qabulidan keyin ikkala forma DurableMutation reviewed snapshotga ulandi: HTTPdan oldin actor/org/device scopega original UUID/body/review IndexedDB orqali saqlanadi; unknown ACKda yangi amal o‘rniga original replay; reload recovery PendingActionsda ko‘rinadi. /stock-documents allowlist qo‘shildi; /transfers prefix base create va avvalgi receipt/correctionlarni shu returnPathda qamraydi. Replay busy bo‘lganda umumiy navigation registry chiqishni bloklaydi. Modal close aggregate admissiondan o‘tadi. Miqdor/tannarx inputlari raw string bilan yuradi; Number/parseFloat coercion olib tashlandi. Typed API create contracti optional operationId va number|string miqdor/tannarxni qo‘llaydi; eski chaqiruvlar saqlanadi.
+
+**Qabul:** stock/transfer lost-ACK + reload **6/6** (uch browser): original body/id aynan saqlangan, bir hujjat/audit/operation, movement0, miqdor2.000001 va tannarx99999999999999.123456 aynan saqlanadi; busy input/nav bloklangan. Avvalgi landed-cost preview va partial transfer receipt recovery **6/6** regressiya. Typecheck, changed-file ESLint, webpack production build va diff-check exit0. Builddan keyingi API o‘zgarishi faqat TS annotation; runtime o‘zgarmadi. DB izolatsiyalangan pos_test. Schema/migration/real provider/hardware/production deployment o‘zgarmadi.
+
+**Sinovdagi xatolar:** dastlab stock test modal overlay orqasidagi anchorni fizika orqali bosib timeoutga tushdi; eventni capture handlerga yuborish bilan guard tekshirildi. Transfer fixture yangi filial uchun UserStore biriktirishini qoldirgan: stores GET200, ammo ataylab scoped ro‘yxatda yangi filial yo‘q edi. Mavjud permissionni bo‘shatmasdan fixture association va readiness kutishi tuzatildi. Birinchi6fail va keyingi3pass/3fail final6/6 deb ko‘rsatilmadi; yakuniy run alohida logda.
+
+**Originalni yopish uchun qolgan:** OpenShiftModal immutable pending request/reload recovery; stock count-start tanlovi va synchronous flight; qolgan credential/auth va editable57route semantik coverage, conditional/outside DurableMutation inputlari, programmatic context/reset/retry acceptance. INV-02.06 sof FEFO hisobidan tashqari ledger/schema/writer/worker/report ochiq. Dalil: tasks/evidence/draft-ui-recovery-20261012.json.
+
+### Target170 — smena ochish durable recovery va confirmed snapshot (2026-10-12)
+
+Original done **164/259**, target170 delta0. UX-01.05 original ochiq. OpenShiftModal openingCash/note/handover/register/membership reviewed snapshoti HTTPdan oldin org/user/device IndexedDB scopega saqlanadi. Unknown ACKda yangi UUID/body yaratmasdan original replay; reload recovery POS sahifasida PendingActions orqali. Handover GET loading/failed/ready, fail-closed yangi amal va retry mavjud. Dirty/busy aggregate close/nav guardlari ishlaydi; actor/org/role o‘zgarsa modal instance yangilanadi. /shifts recovery path allowlist va aniq known SHIFT_ALREADY_OPEN/INVALID_HANDOVER/HANDOVER_ALREADY_ACCEPTED rejections qo‘shildi; unknown retrydagi eski kalit o‘chirilmaydi.
+
+**Muhim race tuzatishi:** smena ochilganidan keyin modalni close qilib, keyin GET kutish F9ga yana ochish oynasini ko‘rsatgan. Endi OrganizationContext.applyOpenedShift faqat server qaytargan open snapshot, joriy register va organizationUserId mos bo‘lsa qo‘llaydi; oldingi shiftRequest versionini invalidatsiya qiladi. Bu optimistic cash/shift creation emas: native transaction ACKdan keyingi server natijasi. POSning keraksiz keyingi refresh callbacki olib tashlandi. Oldingi empty GET yakunlansa ham yangi confirmed snapshot yo‘qolmaydi.
+
+**Qabul:** handover GET abort→retry, frozen cash/note, Escape/nav busy block, POST serverda commit→ACK abort→reload original body/id replay; bitta Shift, bitta shift.open Operation, bitta opened audit, openingCash12345.67 va sale0. Qo‘shimcha actual old empty GET captured/held→shift ACK→late empty GET released→F9 modal yo‘q ssenariysi. Uch browser: joriy matrix21pass (jumladan bu6case),3Business-switch fixture/MFA failure; corrected strict-MFA Business switch **3/3**. Natijalar ikki alohida run; bitta24/24 run deb yozilmaydi. Ushbu24scenariy qamrovida naqd sale/basket restore, mixed callbacks, catalog/terminal business scope, price/stock conflict, cashier shortage/handover, mobile controls va held draft regressiyalari bor.
+
+Dastlabki18-case regressiya6fail/12pass: F9 state race, second-store UserStore fixture yo‘q va majburiy MFA tasdig‘i yo‘q. Product race tuzatildi; fixture branch association qo‘shildi; testlar security flaglarini o‘chirish o‘rniga haqiqiy enroll/confirm va action-bound proofni bajaradi. Business-switch archive/restore/activate/ownership/request/accept uchun actual yangi TOTP counter kutiladi; factor.lastCounter reset, fake clock yoki proof bypass yo‘q. Corrected3browser4.6min.
+
+Unit94/94; typecheck, changed-file ESLint, final webpack build va diff-check exit0. Schema/migration/server posting/vendor/hardware/real production deployment o‘zgarmadi. Faqat izolatsiyalangan127.0.0.1:55439/pos_test fixturelari. Originalni yopish uchun count-start/record/decision immutable durable request va reload recovery, PendingActions actor scope remount, all editor/auth/conditional-input/context/reset/retry semantic coverage qolgan. Dalil: tasks/evidence/shift-opening-recovery-20261012.json.
+
+## UX-01.05 — inventarizatsiya durable recovery (2026-10-12)
+
+Sanash start/reading/submit/approve/cancel original manzil, body va UUID bilan actor/org/device scope ichida POSTdan avval IndexedDBga saqlanadi. Lost ACK va reload original requestni qayta yuboradi; birinchi aniq business rad javobi forma ustida tuzatish imkonini beradi, noaniq retry kalitini saqlaydi. ACKdan keyin sanashning joriy server holati qayta olinadi. Saqlanmagan readings submit bilan yo‘qolmaydi; reading ACK boshqa sabab draftini tozalamaydi. PendingActions org/user/role almashganda remount bo‘ladi.
+
+Qabul: webpack build/typecheck PASS. Birinchi browser run12 PASS/3 FAIL: test alert locator Next route announcerga ham mos keldi; locator tuzatildi, app o‘zgarmadi. Corrective run sanash3/3 PASS (Chromium/Firefox/WebKit,13.4s). Original start/read/approval lost-ACK replay, bitta count/freeze/reading/adjustment/audit, exact5.000001 va recount talabi tekshirildi. Dalil: `tasks/evidence/count-recovery-20261012.json`. UX-01.05 hali in_progress; barcha editor qamrovi va explicit actor-switch pending ssenariysi qolgan. Original done164/259, target170 uchun0/6.
+
+## UX-01.05 — auth va recovery formalarining amaliy holati (2026-10-12)
+
+Login/register/forgot/reset formalariga sinxron flight guard, busy fieldset va umumiy dirty/busy navigation admission qo‘shildi. Credential/token/identifierlar persistencega yozilmaydi. Login haqiqiy AuthData role ACK bilan yo‘nalishni tanlaydi; keyingi /auth/me GET muvaffaqiyatsizligi kirish ACKni xato deb ko‘rsatmaydi. Login/register bo‘sh success payloadni qabul qilmaydi. Recovery identifier/channel tahriri eski queued belgisini bekor qiladi.
+
+Qabul:15/15 browser (Chromium/Firefox/WebKit,18.1s), build/type/changed lint PASS. Har bir formada dirty chiqishni rad etish, bir tickdagi ikki submitdan bitta real POST, ushlangan real error vaqtida input/navigation bloklash va xatodan keyin draftni saqlash tekshirildi. Real login xatosi, duplicate register, vendor-unavailable reset request va invalid reset token ishlatildi; production mock yuborish yo‘q. Dalil: `tasks/evidence/auth-form-state-20261012.json`. Original done164/259; UX-01.05 to‘liq qamrovi hali tugamagan.
+
+## UX-01.05 — mustaqil supplier draftlari va recovery formalarining qabuli (2026-10-12)
+
+Supplier ledger/order formalarining umumiy revision kalitlari olib tashlandi: bitta muvaffaqiyatli hujjat faqat o‘z maydonlarini tozalaydi. GET xatosi draft komponentini unmount qilmaydi. DurableMutation `canSubmit` yangi amalni metadata yetarli bo‘lmaganda bloklaydi; pending original replay mavjud. Landed-cost preview dirty/busy guard oldindan hisoblashni hujjat deb ko‘rsatmaydi. Supplier credit preview sinxron flight bilan ikki submitni bloklaydi, maydonlarni muzlatadi, xatoda miqdor/sababni saqlaydi va original invoice/kind almashtirishda discard tasdig‘ini oladi. Closure va shift correction dirty/busy/flight belgilariga ega; server ACKdan keyingi GET xatosi yozuvni saqlanmagan deb ko‘rsatmaydi.
+
+Hozirgi build qabuli:33/33 browser (Chromium/Firefox/WebKit,1.4m),94/94 unit case, webpack build/type/changed lint PASS. Auth, preview, invoice/payment/advance, purchase receipt, supplier return, shift correction va downloaded-export closure lost-ACK/fresh-TOTP ssenariylari tekshirildi. Dalil va saqlangan loglar: `tasks/evidence/forms-recovery-20261012.json`. Dastlabki closure testlari strict MFA fixture yo‘qligi, so‘ng ACKdan oldin mavjud faol-so‘rov belgisiga tayanish sabab muvaffaqiyatsiz bo‘lgan; fixture va ACK kutish tuzatilib, hozirgi33 run to‘liq o‘tdi. Runtime vaqtincha qayta tiklandi: browserlar va rasmiy Ubuntu WebKit libs faqat/tmp ichida, host paketlari o‘zgarmadi.
+
+Bundan keyingi replenishment/invite o‘zgarishlari ushbu33 testga kirmaydi; ular alohida tekshiriladi. Barcha editor qamrovi hali ochiq. Original done164/259; target170 uchun0/6.
+
+## UX-01.05 — qoldiq chegaralari va taklif formasi (2026-10-12)
+
+Replenishment original threshold body/operationIdni POSTdan avval scoped IndexedDBga saqlaydi, server ACK yo‘qolsa reload orqali original amal tiklanadi. Filiallar yuklanmaganda yangi sozlash yopiq; qayta yuklash mavjud. Actor/org/role remount bilan scope ajratiladi. Taklif formasi credential draftni xatoda saqlaydi, busy/dirty chiqishni va bir tickda ikki submitni bloklaydi; haqiqiy success payload tekshiriladi, qabuldan keyin parol/ism/token tozalanadi.
+
+9/9 uch-browser (22.1s), build/type/lint PASS. Threshold exact3.000001/10.000001, original replay, bitta operation/audit va stock movement0; invalid invitation haqiqiy rad javobi bilan sinovdan o‘tdi. Dalil: `tasks/evidence/threshold-invite-20261012.json`. Bu qabuldan keyingi Incidents rewrite ushbu9 testga kirmaydi. Original UX-01.05 in_progress va done164/259 saqlanadi.
+
+## UX-01.05 — incident, sync, support, soliq va mahsulot editorlari (2026-10-12)
+
+Original hisob **164/259**, target170 uchun **0/6**. UX-01.05 `in_progress`; yangi yordamchi test yoki tuzatish alohida original done sifatida hisoblanmadi.
+
+Incident scan/resolve va sync review original UUID/body bilan durable recoveryga ulandi. Balans/pul avtomatik tuzatilmaydi; hali mavjud tafovut yoki noma’lum original natija yopilmaydi. ACK keyinroq yozilgan mustaqil sababni o‘chirmaydi. Support ruxsatlari metadata GET xatosida draft va oldingi ro‘yxatni saqlaydi, yangi amal fail-closed; revoke draft uchun dirty guard va mos original-body ACKdan keyingi tozalash mavjud. Soliq profilini arxivlash/tiklash asl `PUT` usuli bilan saqlanadi; boshqa ixtiyoriy PUT/DELETE/PATCH recovery rad etiladi. Soliq stavkasi, profil va birlik/tasnif editorlari loading/dirty/retry holatida draftni saqlaydi. Boshqa yozuv tanlash discard admissiondan o‘tadi.
+
+Sinov aniqlagan haqiqiy xatolar ham tuzatildi: umumiy recovery paneli ACKidan keyin editor eski pending holatda qolishi; noto‘g‘ri Decimal matni sabab validationning500 bo‘lishi. IndexedDB transaction commit xabarnomasi ikkala komponentning o‘z scoped manbasini qayta o‘qitadi; xabarnomada payload/credential uzatilmaydi. Birlik, soliq, narx va qoldiq formatlari arifmetikadan oldin tekshiriladi; aniqlik/limitlar o‘zgarmadi.
+
+Qabul: **99/99 unit**, **13/13 izolyatsiyalangan PostgreSQL**, build/type/changed lint PASS. Uch brauzerda **30 alohida ssenariy qabul qilindi**: yakuniy27 run24 PASS/3 FAIL (yangi editor testining umumiy alert lokatori); app o‘zgarmasdan aniq locator va yangi sessiya yuklanishini kutish bilan corrective6/6 PASS (19.3s). Bu6 ichida qayta tekshirilgan editor3 va yangi tenant-scope3 mavjud. Oldingi strict-MFA fixture, ortiqcha replay proof, stale pending, validation500 va locator xatolari loglari ham saqlandi; birinchi urinishlarning barchasi o‘tgan deb ko‘rsatilmaydi. Dalil: `tasks/evidence/editor-recovery-20261012.json`; amaliy ishlash: `docs/operations/durable-forms.md`.
+
+Qolgan UX qamrovi: conditional/outside-input narx/guruh, offline ruxsat/settlement, exchange, media/import, location/reservation editorlarini tekshirish; mustaqil draftlarni ACKdan keyin saqlash va scope o‘zgarishidagi holatni yakuniy audit qilish. PUR-01.05 actual moving-average replay/correction posting, INV-02.06 batch posting, INV-02.07 serial/warranty, INV-01.07 negative valuation va REP-01.07 expiry hali shu qabul bilan yopilmadi. Tashqi resurslar/integratsiyalar yoki production sinovi yakunlangan deb da’vo qilinmaydi.
+
+## UX-01.05 — narx/guruh editorlarining mustaqil draft qabuli (2026-10-12)
+
+Narx qoidasi, guruh yaratish va mijozni guruhga biriktirish inputlari o‘z DurableMutation komponentining ichiga olindi; conditional unmount va boshqa forma ACKidan draftni yo‘qotish bartaraf etildi. Metadata GET xatosida oldingi ro‘yxat/draft saqlanadi, yangi amal retrygacha bloklanadi. Qidiruv hamda guruh sahifalashi boshqa editorning original tanlovini o‘chirmaydi; ko‘rinmay qolgan joriy tanlov uchun aniq option saqlanadi. Editor organization/user/role/faol filial bilan remount qilinadi. Archive reason original-body bilan mos bo‘lsa ACKdan keyin tozalanadi.
+
+Qabul: mavjud narx/chek recovery va mijoz/group/merge regressionlari bilan9/9 uch-browser PASS (48.5s). Tanlangan mijoz/guruhning yangi qidiruv/sahifadagi fallback ko‘rinishi ham tekshirilgan yakuniy draft test3/3 PASS (13.2s); shu3 qayta run yakuniy test manbasi barcha brauzerlarda ishlatilishini tasdiqlaydi. Build/type/lint PASS. Dalil: `tasks/evidence/price-editor-state-20261012.json`. Original UX-01.05 ochiq, hisob164/259 va target170 delta0.
+
+## UX-01.05 — almashtirish preview/posting va yangi draft himoyasi (2026-10-12)
+
+Almashtirishda preview synchronous flight bilan bir martalik; asli hisoblanayotgan snapshotning inputlari va navigation bloklanadi. Noto‘g‘ri return quantity endi boshqa valid qatorlar orasidan yashirin tashlab ketilmaydi. Read loading/error/retry va dirty draft holatlari ko‘rsatiladi; read retry draftni tozalamaydi. Tender DurableMutation ichida; optional `onSavingChange` qolgan tashqi inputlarni posting paytida muzlatadi. Paneldagi original replay ACKi keyin yozilgan yangi draftni saqlaydi; matched own ACK faqat o‘z original command/tenderiga mos draftni tozalaydi.
+
+Qabul:9/9 uch-browser PASS (30.4s), build/type/lint PASS. Held real preview errorga ikki clickdan bitta POST va economic writes0; real exchange committed/lost-ACK original replayda bitta exchange/return/operation; exact naqd farq-2.99 va yangi sababning saqlanishi. Existing exact+2.02 exchange va narx/guruh mustaqil draft regressioni ham o‘tdi. Dalil: `tasks/evidence/exchange-editor-state-20261012.json`. Original done164/259; UX-01.05 ochiq, target170 delta0.
+
+## UX-01.05 — variantning raw belgi drafti va metadata xatosi (2026-10-12)
+
+Variant qiymati hali kiritilmagan belgi nomi, shuningdek yangi bo‘sh belgi qo‘shilishi ham dirty guard bilan himoyalanadi; filtered POST body bunday draftni yashirmaydi. List GET xatosi oldingi variantlar ro‘yxatini tozalamaydi. Own create ACK faqat o‘z draftini tozalaydi; keyingi metadata GET xatosi saqlashni yolg‘ondan failed deb ko‘rsatmaydi va retrygacha yangi variant yaratilmaydi.
+
+Qabul:6/6 uch-browser PASS (13.7s), build/type/lint PASS. Option-only/add-only navigation rad, ikki clickdan bitta variant, metadata fail/retry va stock movement0; existing original-key lost-ACK recovery ham o‘tdi. Dalil: `tasks/evidence/variant-editor-state-20261012.json`. Original done164/259, UX-01.05 ochiq, target170 delta0.
+
+## UX-01.05 — katalog metama’lumotlari va rasm o‘chirish recovery (2026-10-12)
+
+Tavsif/brend/soliq drafti chiqishdan himoyalandi, saqlash vaqtida maydonlar muzlatildi va bir tickdagi ikki click bitta PUT yuboradi. Read xatosida mustaqil draft va oxirgi ma’lumot saqlanadi. Serverdagi mavjud file.delete original kalitli DELETE recoveryga ulandi; allowlist faqat UUIDli /files/{id} uchun kengaydi. Metadata legacy PUT server-idempotent deb ko‘rsatilmaydi.
+
+Qabul:6/6 uch-browser PASS (18.8s),100/100 unit PASS,build/type/lint PASS. Lost DELETE ACK original body/key bilan qayta tekshirilib bitta file_deleted audit yozildi; yangi tavsif drafti saqlandi, stock movement0. Dalil:tasks/evidence/media-editor-state-20261012.json. Original UX-01.05 ochiq,164/259,target170 delta0.
+
+## UX-01.05 — import fayli va mustaqil yangi draft (2026-10-12)
+
+Previewgacha tanlangan fayl ham dirty guardga kirdi. Faylni almashtirish explicit tasdiq oladi; posting vaqtida fayl/preview muzlatiladi. Original importni panel orqali tiklash yangi fayl/previewni o‘chirmaydi; own ACK faqat mos fayl/sababni tozalaydi.
+
+Qabul:6/6 uch-browser PASS (17.9s),build/type/lint PASS. Dastlab3/6 existing broad status locator sababli rad bo‘ldi; locator actual import xabariga aniqlashtirildi. Original-key replay bitta import, yangi fayldan product0 va exact Excel qiymatlari tekshirildi. Dalil:tasks/evidence/import-editor-state-20261012.json. Original164/259,UX-01.05 ochiq,target170 delta0.
+
+## UX-01.05 — mustaqil ombor/offline/ticket draftlari va haqiqiy MFA (2026-10-12)
+
+Zona yaratish/ko‘chirish/rezervlash/bo‘shatish draftlari ajratildi. Qidiruv/sahifa tanlangan SKU yoki qoralamani yo‘qotmaydi; read xatosi formani unmount qilmaydi. Readiness refresh/search/page berilgan zahoti yopiladi; debounce oralig‘ida eski tasdiq faol qolmaydi. Offline unlock, policy, cancellation va settlement raw draftlari dirty/busy guardga kirdi; matching own ACK faqat o‘z guruhini tozalaydi. Ticket read xatosida draft saqlanadi; textarea aria-label barqaror. PendingActions original body/pathni qaytarib matching-only cleanupni qo‘llaydi.
+
+Actual offline-cash.policy kritik nomidagi defis client/server/native checkda rad etilayotgani topildi. ADR082/SQL133 nomlarni bir xil bounded formatga moslashtirdi; tirik sessiya, exact action/key/hash va bir martalik TOTP counter talablari o‘zgarmadi. Tarixiy SQL119 o‘zgartirilmadi.
+
+Yakuniy bir xil buildda30/30 uch-browser PASS (1.5m),101/101 unit,24/24 PostgreSQL TOTP,133migration fresh/actual synthetic dump-restore/repeat/validated native constraints PASS;build/worker/type/lint PASS. Avvalgi race/label/native-check fail loglari yashirilmadi. Dalil:tasks/evidence/offline-ticket-recovery-20261012.json. Bu umumiy UX-01.05ning qolgan editor qamrovini yopmaydi: original done164/259,target170 delta0. Production deploy va vendor/hardware ishlari bajarilmadi.
+
+## UX-01.05 — shared command va brend recovery (2026-10-12)
+
+/jobs type va /onboarding step discriminantlari original pending komandalarni mustaqil formalardan ajratdi. Onboardingda partial sabab guardga kirdi va mos ACK o‘z sababini tozalaydi. Fon ishini qayta urinish o‘z sababiga ega; report own ACK o‘z konfiguratsiyasini tozalaydi, eski katalog ACK mustaqil report filterini saqlaydi. Mijoz merge tanlovi nomi qidiruv/read xatosida saqlanadi. Brend POST/UUID PUT mavjud server idempotency bilan original kalitli recoveryga ulandi; nom va holat draftlari mustaqil.
+
+Dastlabki24browser tekshiruv11PASS/13FAIL: store birinchi yuklanishi jobs editorni remount qilib draftni yo‘qotardi; onboarding testining xodim yaratishi yangi operationId/actualMFA talabiga mos emasdi. Tuzatishdan keyin bir xil Webpack buildda27/27 Chromium/Firefox/WebKit PASS(2.3m),105/105 unit,typecheck/changedlint PASS. Turbopack lokal CSS worker EPERM sabab ishlamadi; installed Next CLI Webpack varianti actual compiled/typechecked/generated164pages va exit0 bilan tugadi. Deployment yoki build config o‘zgarmadi.
+
+Dalil:tasks/evidence/shared-command-recovery-20261012.json. Original done164/259,UX-01.05 ochiq,target170 delta0.
+
+Shared DurableMutation o‘zgarishidan keyingi mavjud katalog/brend/rasm, CSV import va real return/replacement exchange regressiyalari ham ayni buildda9/9 uch-browser PASS(26.4s). Dalil shared-command-recovery fayliga qo‘shildi; original hisob o‘zgarmadi.
+
+## UX-01.05 — support tartibi va mas’ul tanlovi (2026-10-12)
+
+Yangi support policy GET versioni local raw draftni remount orqali o‘chirmaydi. Xato vaqt matni ham dirty guardga kiradi; latest policy draftga explicit discard admission bilan olinadi. Own publication ACK o‘z sababini tozalaydi, mustaqil yangi ticket mavzusini saqlaydi. Platform mas’ullari GET xatosida eski selection/message saqlanadi va assignment bloklanadi; readonly refresh muvaffaqiyatidan keyin qayta faollashadi.
+
+Yakuniy bir xil buildda12/12 uch-browser PASS(1.2m),Webpack build/type/changedlint PASS. Birinchi fixture policy publication uchun real MFA proofni yetkazmagan; corrective fixture cleanup esa immutable policy tarixini o‘chirishga uringan va native invariant rad etgan. Har ikki fail log saqlandi. Yakuniy fixture actual enrolled TOTPdan foydalanadi va synthetic immutable historyni faqat izolatsiyalangan pos_testda saqlaydi; invariant chetlab o‘tilmadi.
+
+Dalil:tasks/evidence/support-policy-recovery-20261012.json. Original done164/259,UX-01.05 ochiq,target170 delta0.
+
+## UX-01.05 — kategoriya va birlik legacy ACK holati (2026-10-12)
+
+Kategoriya/birlikning mavjud legacy create/update oqimlariga synchronous flight, saved/failed/unknown belgisi va live callback guard qo‘shildi. Read xatosi draft/eski ro‘yxatni saqlaydi; retrygacha yangi mutatsiya rad etiladi. Own write ACK draftni tozalaydi va keyingi GET xatosidan mustaqil saqlandi belgisini qoldiradi. Bu endpointlar server operation-key idempotencyga ega deb ko‘rsatilmaydi, noma’lum yozuv avtomatik takrorlanmaydi.
+
+Qabul:12/12 uch-browser PASS(46.2s),Webpack build/type/changedlint PASS. Bir tickdagi ikki click bitta yangi yozuv, held ACKda input/nav freeze, read fail/retry draft retention va post-ACK read failureda truthful saved state; mavjud katalog/supplier history/inventory export hamda brand/image regressiyalari ham o‘tdi. Dalil:tasks/evidence/legacy-catalog-recovery-20261012.json. Original done164/259,UX-01.05 ochiq,target170 delta0.
+
+## UX-01.05 — mijoz/supplier kontaktlari va verification core holati (2026-10-12)
+
+Mijoz/supplier legacy formalarida synchronous flight va write ACKdan mustaqil read error ko‘rinadi. Mijoz qidiruvining eski javobi yangi ro‘yxatni bosmaydi. Debt GET xatosi nol deb ko‘rsatilmaydi; unknown qarzga undirish tugmasi berilmaydi. Contact verification read failda oldingi holat/kod draftini saqlaydi, yangi amallar retrygacha bloklanadi; real provider yo‘qligida avtomatik yoki mock verification bo‘lmaydi.
+
+Qabul:21/21 uch-browser PASS(1.1m),Webpack build/type/changedlint PASS. Actual opening debt7.25 → failed GET unknown → retry7.25; held create double-clickda customer/supplier1tadan; post-ACK read failureda saved saqlangan; unconfigured delivery challenge0/verifiedContact0. Mavjud catalogue unsaved/decimal/context, catalogue/supplier history/export va customer identity/merge/refund regressiyalari ham o‘tdi.
+
+Dalil:tasks/evidence/contact-editor-recovery-20261012.json. Original done164/259,UX-01.05 ochiq,target170 delta0.
+
+## UX-01.05 — credential/session ACK va read xatosi (2026-10-12)
+
+Parol almashtirish/logout-all va sessiya revoke synchronous flight bilan moslashtirildi. Account write ACKdan keyingi profile GET xatosi tasdiqlangan natijani failed qilmaydi; secret maydonlar xotiradan tozalanadi va login sahifasiga o‘tiladi. Revoke ACK o‘z statusini keyingi read xatosidan mustaqil ko‘rsatadi.
+
+Qabul:12/12 uch-browser PASS(32.9s),Webpack build/type/changedlint PASS. Actual enrolled TOTP, original hash/key bilan proof retry, same-tick ikki clickdan bitta successful password/logout yozuvi; yangi parol bilan real login, eski parol401, eski sessiya0; localStorage/auditda test paroli yo‘q. Mavjud shared security guard/enrollment va password MFA regressiyalari ham o‘tdi.
+
+Dalil:tasks/evidence/security-ack-recovery-20261012.json. Original done164/259,UX-01.05 ochiq,target170 delta0.
+
+## UX-01.05 yakuniy qabul 20261012
+
+Original PLAN1 bandi yakunlandi: hisob164 → **165/259**, faol target170ga **1/6**. Subtask va sof cost-replay hisoblash moduli alohida original done sifatida sanalmadi.
+
+Kirish: izolatsiyalangan `pos_test`, haqiqiy actor/session/permission va kerakli amallarda enroll qilingan TOTP; uch brauzer. API GETni uzish, actual POST server ACKsini yo‘qotish, same-tick double click, reload, dirty navigation/discard, original body/key replay, boshqa command/draft va closed invoice holatlari tekshirildi. Kutilgan natija: metadata xatosi draftni o‘chirmaydi va yangi amalni bloklaydi; unknown financial natija original key bilan qayta tekshiriladi; dublikat iqtisodiy yozuv yaratilmaydi; boshqa draft tozalanmaydi; server ACKdan keyingi GET xatosi write xatosi bo‘lib ko‘rsatilmaydi. Haqiqiy natijalar shu invariantlarga mos.
+
+Yakuniy umumiy DurableMutation o‘zgarishidan keyin30/30 browser(2.9m); billing/role/barcode qabuli30/30(1.6m); numeric preview qo‘shimcha6/6; actual cost/retention MFA12/12.111/111 unit, TypeScript, ESLint, Next16 Webpack production build PASS. Source scanner1051/findings0; credential stores ochilmadi, git history/image scan emas. Oldingi target170 UX qabul artefaktlari yakuniy evidence faylida bog‘langan. Initial browser failures (9/12 va27/30) ham saqlangan: error text assertion va takroriy read error xabari tuzatildi. Dalil: `tasks/evidence/ux-final-20261012.json`, manba SHA256 va Git HEAD18fd83e, ishchi daraxtda; avtomatik commit yo‘q.
+
+Billing: per-invoice bank/cancel reason va proof; cost cancellation sababi per-record; read retry draftni saqlaydi. Retention expectedVersionId draft bilan qoladi, yangi GET avtomatik rebase emas. Platform plan raw numeric input va review mos. PendingActions exact/discriminant selectors original commandni topadi. Role, barcode metadata failclosed; legacy endpointsda mavjud bo‘lmagan idempotency kafolati berilmadi. Yangi klassik formalar `useAcknowledgedMutation`ning flight/saved/unknown contractidan foydalanadi. Parol/sessiya ACKdan keyin login o‘tishi profile read xatosiga bog‘lanmaydi.
+
+PUR-01.05 core davom etmoqda: `replayMovingAverage` va `planReceiptCostCorrection` sof calculation chegarasi5 yangi unit ssenariysi bilan tekshirildi. Historical sequence, transaction/DB immutable value journals, transfer/adjustment/negative valuation adapterlari va posting/report qabulisiz bu original band yopilmaydi. Manfiy tarix yoki taxminiy order rad etiladi; eski hujjatlar o‘zgartirilmadi. Real vendor/hardware, staging/production/pilot bandlari oldingi external qarorlarga muvofiq ochiq.

@@ -1,0 +1,26 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/exchange-editor-state.spec.ts tests/e2e/price-editor-state.spec.ts tests/e2e/core.spec.ts --grep exchange preview freezes|price and customer group drafts|Exchange UI reviews
+
+[WebServer] (node:182134) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:182214) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:1172:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.3s)
+  ✓  2 [chromium] › tests/e2e/exchange-editor-state.spec.ts:8:5 › exchange preview freezes its snapshot, rejects malformed return lines and preserves a newer draft after original lost-ACK recovery (1.9s)
+  ✓  3 [chromium] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (3.9s)
+(node:182624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/core.spec.ts:1172:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.8s)
+  ✓  5 [firefox] › tests/e2e/exchange-editor-state.spec.ts:8:5 › exchange preview freezes its snapshot, rejects malformed return lines and preserves a newer draft after original lost-ACK recovery (2.7s)
+  ✓  6 [firefox] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (3.1s)
+(node:183200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [webkit] › tests/e2e/core.spec.ts:1172:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.8s)
+  ✓  8 [webkit] › tests/e2e/exchange-editor-state.spec.ts:8:5 › exchange preview freezes its snapshot, rejects malformed return lines and preserves a newer draft after original lost-ACK recovery (2.8s)
+  ✓  9 [webkit] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (3.6s)
+
+  9 passed (30.4s)

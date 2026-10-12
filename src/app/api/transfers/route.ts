@@ -1,6 +1,7 @@
+import type {Prisma} from '@prisma/client'
 import {queryTransfers} from '@/server/exports/queries/transfers'
 
-import {assertLiveContext} from '@/server/operations'
+import {assertLiveContext,runOperation} from '@/server/operations'
 
 
 import {quantitySchema} from '@/server/sales/service'
@@ -14,6 +15,7 @@ import {verifyToken,getRequestToken} from '@/lib/auth'
 import {z} from 'zod'
 
 const createTransferSchema = z.object({
+  operationId: z.string().uuid().optional(),
   organizationId: z.string().uuid(),
   fromStoreId: z.string().uuid(),
   toStoreId: z.string().uuid(),
@@ -60,7 +62,7 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
-    const transfer = await db.$transaction(async tx => {
+    const create = async (tx:Prisma.TransactionClient) => {
       await assertLiveContext(tx,payload)
       const result = await tx.stockTransfer.create({
       data: {
@@ -81,7 +83,10 @@ async function handlePOST(request: NextRequest) {
     })
       await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"StockTransfer",entityId:result.id,action:"create"}})
       return result
-    })
+    }
+    const transfer = validatedData.operationId
+      ? await runOperation(payload,'stock.transfer.draft',validatedData.operationId,validatedData,create)
+      : await db.$transaction(tx => create(tx as unknown as Prisma.TransactionClient))
 
     return NextResponse.json({
       success: true,

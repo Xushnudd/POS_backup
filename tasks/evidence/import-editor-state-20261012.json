@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "checks": {
+    "browser": {
+      "passed": 6,
+      "failed": 0,
+      "seconds": 17.9,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "initialBrowser": {
+      "passed": 3,
+      "failed": 3,
+      "reason": "Existing broad status locator matched multiple global banners; scoped to actual acknowledged import message"
+    },
+    "build": "pass",
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "behavior": [
+    "Selected file guarded before preview; deliberate file replacement confirmation",
+    "Original import recovery does not clear independent current file/preview",
+    "Own ACK resets only matching file/reason; posting freezes file and preview controls",
+    "Existing original-key reload recovery and exact Excel export regression retained"
+  ],
+  "limits": [
+    "Original UX parent remains open; no additional original done"
+  ],
+  "logs": {
+    "browser": "tasks/evidence/logs/import-editor-state-20261012-browser.log",
+    "initialBrowser": "tasks/evidence/logs/import-editor-state-20261012-initialBrowser.log",
+    "build": "tasks/evidence/logs/import-editor-state-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/import-editor-state-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/import-editor-state-20261012-lint.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/products/import/page.tsx": "a78c2687cee413243a908d49104aa8505367d8f84d793e2cf9c40e569f95394c",
+    "tests/e2e/import-editor-state.spec.ts": "85ee220ff97a590b6d4d2c8e20e0a6ae50e719debd51d0205e567e73d48e7bb8"
+  }
+}

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {commitPageNavigation} from '@/lib/page-navigation';
 import { useRouter } from 'next/navigation';
-import {api} from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import Input from '@/components/ui/Input';
@@ -20,9 +21,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const flight=useRef(false);
+  const dirty=Boolean(phone||password);
+  useUnsavedChanges(dirty,isLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(flight.current)return;
     setErrorMessage('');
 
     if (!phone || phone.trim().length < 9) {
@@ -35,16 +40,18 @@ export default function LoginPage() {
       return;
     }
 
+    flight.current=true;
     setIsLoading(true);
     try {
-      await login(phone.trim(), password);
+      const authenticated=await login(phone.trim(), password);
       notifySuccess('Tizimga muvaffaqiyatli kirdingiz!');
-      const current=await api.auth.me();router.push(current.data?.role==='cashier'?'/pos':'/dashboard');
+      setPhone('');setPassword('');commitPageNavigation();router.push(authenticated.role==='cashier'?'/pos':'/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Kirishda xatolik yuz berdi';
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
+      flight.current=false;
       setIsLoading(false);
     }
   };
@@ -71,12 +78,14 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-gray-100">
           {errorMessage && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
               {errorMessage}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {isLoading&&<p role="status">Server tasdig‘i kutilmoqda…</p>}
+          {!isLoading&&dirty&&<p role="status">Saqlanmagan forma ma’lumotlari bor.</p>}
+          <form onSubmit={handleSubmit} className="space-y-5"><fieldset disabled={isLoading} className="space-y-5">
             <Input
               label="Telefon raqam"
               type="tel"
@@ -109,7 +118,7 @@ export default function LoginPage() {
             >
               Kirish
             </Button>
-          </form>
+          </fieldset></form>
 
           <Link href="/forgot-password" className="mt-4 block text-sm text-blue-600 underline">Parolni unutdingizmi?</Link>
 

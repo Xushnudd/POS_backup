@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-12",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "worktree": true,
+  "sourceSha256": {
+    "src/app/api/stock-documents/route.ts": "aab43423634ac3f06a168813d2a919e6d5b060e7bfcd7c2001233972f40852d6",
+    "src/app/api/transfers/route.ts": "8e7328b2a03011e84be9c8d154cca54de54c7db0af5eaa9c9e18ffa79dfa4555",
+    "tests/draft-idempotency.integration.test.ts": "ddaf46910344b5a5908a370f99f9ed34b09689b1952f040add649979f994841c",
+    "api.md": "05fe1cfb9bc89f74bfed9e4afeff4d26d9ccef5ea361c5bdef9a99dbf98fa509",
+    "tasks/EXECUTION_STATUS.md": "c7c9c40819b445ec5c3c8bff2d77be0a526cffc75af7b8de4558e1f8e1669897"
+  },
+  "checks": {
+    "integrationPassed": 2,
+    "compile": "pass",
+    "typecheck": "pass",
+    "lint": "pass",
+    "webpackBuild": "pass"
+  },
+  "scope": {
+    "isolatedDatabase": "127.0.0.1:55439/pos_test",
+    "schemaChanged": false,
+    "stockPostingChanged": false,
+    "legacyWithoutKeyPreserved": true,
+    "frontendConnected": false,
+    "productionDeployment": false
+  },
+  "remaining": [
+    "frontend durable immutable request and reload recovery",
+    "stock-documents PendingActions allowlist",
+    "browser lost-ACK acceptance",
+    "all UX-01.05 remaining editor coverage"
+  ],
+  "logSha256": {
+    "/tmp/pos-170-draft-integration.log": "4976ce1831b768a18711bfdb16a9ed08baee47d274e00eee8eef26aee8135789",
+    "/tmp/pos-170-draft-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-170-draft-type.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-170-draft-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-170-draft-build.log": "d09b24d294a9adc665358b4c9b0d60b75296c9bbebe2f40a527cd955baa9f600"
+  }
+}

@@ -77,6 +77,10 @@ export const READ_ONLY_BUSINESS_MODELS = [
   "CustomerAdvanceRefund"
 ] as const
 export const READ_ONLY_EXEMPT_MODELS = [
+  // Trigger-only derivatives: original Product/InventoryMovement admission
+  // remains authoritative, including explicitly permitted recovery postings.
+  "InventoryValuationSequence",
+  "InventoryValuationEvent",
   "OrganizationClosure",
   "PlatformOperator",
   "SupportGrant",

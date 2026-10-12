@@ -2,16 +2,41 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {api} from '@/lib/api';
 import {useAuth} from '@/context/AuthContext';
-import Button from '@/components/ui/Button';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import DurableMutation from '@/components/forms/DurableMutation';
+import PendingActions from '@/components/forms/PendingActions';
 import Input from '@/components/ui/Input';
 import Pagination from '@/components/ui/Pagination';
 const kindNames:Record<string,string>={inventory:'Ombor qoldig‘i',sales:'Savdo va to‘lov',returns:'Qaytarish',shifts:'Smena hisobi'};
 const evidenceNames:Record<string,string>={productName:'Mahsulot',expected:'Kutilgan',actual:'Haqiqiy',difference:'Farq',itemAmount:'Qatorlar summasi',paymentAmount:'To‘lovlar summasi',receiptNo:'Chek',returnReceiptNo:'Qaytarish cheki'};
 type Incident={id:string;kind:string;severity:string;state:string;evidence:Record<string,string>;resolutionReason?:string;lastSeenAt:string};
-export default function Incidents(){
- const {role,organization}=useAuth();const [rows,setRows]=useState<Incident[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(0),[state,setState]=useState('open'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[reason,setReason]=useState('');const attempt=useRef<string|null>(null);
- const load=useCallback(async()=>{if(!organization?.id)return;setBusy(true);setError('');try{const result=await api.request<Incident[]>(`/incidents?page=${page}&state=${state}`);setRows(result.data??[]);setPages(result.pagination?.totalPages??0);}catch(e){setError(e instanceof Error?e.message:'Yuklanmadi');}finally{setBusy(false);}},[page,state,organization?.id]);
- useEffect(()=>{if(role&&role!=='cashier')void Promise.resolve().then(load);},[load,role]);
+export default function Incidents(){const {role,organization,user}=useAuth();return organization&&user?<IncidentControls key={[organization.id,user.id,role].join(':')}/>:null;}
+function IncidentControls(){
+ const {role}=useAuth();const [rows,setRows]=useState<Incident[]>([]),[page,setPage]=useState(1),[pages,setPages]=useState(0),[state,setState]=useState('open'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[reason,setReason]=useState(''),[revision,setRevision]=useState(0);
+ const live=useRef(true),sequence=useRef(0);
+ useUnsavedChanges(Boolean(reason));
+ const load=useCallback(async()=>{
+  const request=++sequence.current;if(live.current){setBusy(true);setError('');}
+  try{const result=await api.request<Incident[]>(`/incidents?page=${page}&state=${state}`);if(live.current&&request===sequence.current){setRows(result.data??[]);setPages(result.pagination?.totalPages??0);}}
+  catch(cause){if(live.current&&request===sequence.current)setError(cause instanceof Error?cause.message:'Tafovutlar yuklanmadi');}
+  finally{if(live.current&&request===sequence.current)setBusy(false);}
+ },[page,state]);
+ useEffect(()=>{live.current=true;return()=>{live.current=false;};},[]);
+ useEffect(()=>{if(role&&role!=='cashier')void Promise.resolve().then(()=>{if(live.current)return load();});},[load,role,revision]);
+ const refresh=()=>setRevision(value=>value+1);
+ const resolved=(_result?:unknown,original?:Record<string,unknown>)=>{const savedReason=original?.reason;if(typeof savedReason==='string')setReason(current=>current===savedReason?'':current);refresh();};
  if(role==='cashier')return <p role="alert">Bu hisobot rahbarlar uchun. Kassada savdo holatini tekshiring.</p>;
- return <div className="space-y-4"><h1 className="text-2xl font-bold">Hisob tafovutlari</h1><p>Mas’ul: biznes egasi va tegishli filial rahbari. Savdo/to‘lov, ombor jurnali, qaytarish va smena mosligi tekshiriladi. Balans avtomatik tuzatilmaydi. Farq bor ekan incidentni yopib bo‘lmaydi.</p><Button disabled={busy} onClick={async()=>{setBusy(true);try{attempt.current??=crypto.randomUUID();await api.request('/incidents',{method:'POST',body:JSON.stringify({operationId:attempt.current})});attempt.current=null;await load();}catch(e){setError(e instanceof Error?e.message:'Tekshirish tugamadi');}finally{setBusy(false);}}}>Hisoblarni solishtirish</Button><label>Holat<select value={state} onChange={e=>{setState(e.target.value);setPage(1);}}><option value="open">Ochiq</option><option value="resolved">Yopilgan</option></select></label><Input label="Yopish sababi" value={reason} maxLength={1000} onChange={e=>setReason(e.target.value)}/>{busy&&<p role="status">Tekshirilmoqda...</p>}{error&&<p role="alert">{error}</p>}{!busy&&!error&&!rows.length&&<p>Ushbu holatda tafovut yo‘q. Tekshiruv vaqti serverdagi oxirgi yurishga bog‘liq.</p>}{rows.map(row=><article key={row.id} className="border p-4 bg-white rounded"><h2>{kindNames[row.kind]??row.kind} · {row.severity==='critical'?'Jiddiy':'Ogohlantirish'} · {row.state==='open'?'Ochiq':'Yopilgan'}</h2><p>Oxirgi aniqlanish: {row.lastSeenAt}</p><dl>{Object.entries(row.evidence).filter(([key])=>key in evidenceNames).map(([key,value])=><div key={key}><dt className="font-semibold inline">{evidenceNames[key]}: </dt><dd className="inline">{String(value)}</dd></div>)}</dl>{row.resolutionReason&&<p>{row.resolutionReason}</p>}{row.state==='open'&&<Button disabled={busy||reason.trim().length<3} onClick={async()=>{try{await api.request('/incidents/'+row.id,{method:'POST',body:JSON.stringify({operationId:crypto.randomUUID(),reason})});await load();}catch(e){setError(e instanceof Error?e.message:'Yopilmadi');}}}>Tuzatilganini tekshirib yopish</Button>}</article>)}<Pagination page={page} pages={pages} busy={busy} onPage={setPage} retry={load}/></div>;
+ return <div className="space-y-4"><h1 className="text-2xl font-bold">Hisob tafovutlari</h1>
+  <p>Mas’ul: biznes egasi va tegishli filial rahbari. Savdo/to‘lov, ombor jurnali, qaytarish va smena mosligi tekshiriladi. Balans avtomatik tuzatilmaydi. Farq bor ekan incidentni yopib bo‘lmaydi.</p>
+  <PendingActions prefix="/incidents" returnPath="/incidents" revision={revision} onDone={refresh}/>
+  <DurableMutation path="/incidents" returnPath="/incidents" body={{}} label="Hisoblarni solishtirish" review={['Faqat tafovutlar va tekshiruv jurnali yoziladi. Savdo, pul yoki ombor balansi o‘zgarmaydi.']} onDone={refresh}/>
+  <label>Holat<select value={state} onChange={event=>{setState(event.target.value);setPage(1);}}><option value="open">Ochiq</option><option value="resolved">Yopilgan</option></select></label>
+  <Input label="Yopish sababi" value={reason} maxLength={1000} onChange={event=>setReason(event.target.value)}/>
+  {reason&&<p role="status">Saqlanmagan tafovut yopish sababi bor.</p>}{busy&&<p role="status">Tafovutlar yuklanmoqda…</p>}{error&&<p role="alert">{error} {rows.length>0&&'Oxirgi yuklangan ro‘yxat ko‘rsatilmoqda.'}</p>}
+  {!busy&&!error&&!rows.length&&<p>Ushbu holatda tafovut yo‘q. Tekshiruv vaqti serverdagi oxirgi yurishga bog‘liq.</p>}
+  {rows.map(row=><article key={row.id} className="border p-4 bg-white rounded"><h2>{kindNames[row.kind]??row.kind} · {row.severity==='critical'?'Jiddiy':'Ogohlantirish'} · {row.state==='open'?'Ochiq':'Yopilgan'}</h2><p>Oxirgi aniqlanish: {row.lastSeenAt}</p>
+   <dl>{Object.entries(row.evidence).filter(([key])=>key in evidenceNames).map(([key,value])=><div key={key}><dt className="font-semibold inline">{evidenceNames[key]}: </dt><dd className="inline">{String(value)}</dd></div>)}</dl>{row.resolutionReason&&<p>{row.resolutionReason}</p>}
+   <DurableMutation path={'/incidents/'+row.id} returnPath="/incidents" allowNew={row.state==='open'} canSubmit={!busy&&!error&&reason.trim().length>=3} body={{reason}} label="Tuzatilganini tekshirib yopish" review={[kindNames[row.kind]??row.kind,'Incident: '+row.id,reason,'Server farq yo‘qligini tasdiqlamaguncha incident yopilmaydi; balans tuzatilmaydi.']} onDone={resolved}/>
+  </article>)}<Pagination page={page} pages={pages} busy={busy} onPage={setPage} retry={refresh}/>
+ </div>;
 }

@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "done",
+  "original_done": 165,
+  "original_total": 259,
+  "baseline": 164,
+  "target": 170,
+  "original_delta": 1,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "working_tree": true,
+  "checks": {
+    "latest_browser": {
+      "passed": 30,
+      "failed": 0,
+      "duration": "2.9m",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "scenarios": [
+        "Invoice read failure and closed-invoice original cancel replay",
+        "Independent platform plan/retention drafts and numeric review",
+        "Actual cost ACK loss, single record, cancellation retaining separate quote",
+        "Brand name versus status original recovery",
+        "Customer merge draft/read recovery",
+        "Exchange frozen preview and original recovery",
+        "Actual worker full 1001-row XLSX/PDF export",
+        "Real MFA retention ACK recovery and restore via new immutable version",
+        "Onboarding command discriminator",
+        "Catalog job ACK preserving independent report draft"
+      ]
+    },
+    "earlier_billing_roles_barcodes": {
+      "passed": 30,
+      "failed": 0,
+      "duration": "1.6m"
+    },
+    "numeric_review_browser": {
+      "passed": 6,
+      "failed": 0
+    },
+    "cost_retention_browser": {
+      "passed": 12,
+      "failed": 0,
+      "duration": "3.0m"
+    },
+    "unit": {
+      "passed": 111,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "webpack_build": "PASS",
+    "source_scan": {
+      "scanned": 1051,
+      "findings": 0
+    }
+  },
+  "logs": {
+    "browser": "tasks/evidence/logs/ux-final-20261012-browser.log",
+    "billing_role_barcode_browser": "tasks/evidence/logs/ux-final-20261012-billing_role_barcode_browser.log",
+    "review_browser": "tasks/evidence/logs/ux-final-20261012-review_browser.log",
+    "cost_retention_browser": "tasks/evidence/logs/ux-final-20261012-cost_retention_browser.log",
+    "unit": "tasks/evidence/logs/ux-final-20261012-unit.log",
+    "typecheck": "tasks/evidence/logs/ux-final-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/ux-final-20261012-lint.log",
+    "build": "tasks/evidence/logs/ux-final-20261012-build.log",
+    "scan": "tasks/evidence/logs/ux-final-20261012-scan.log",
+    "failed_first_browser": "tasks/evidence/logs/ux-final-20261012-failed_first_browser.log",
+    "failed_corrective_browser": "tasks/evidence/logs/ux-final-20261012-failed_corrective_browser.log"
+  },
+  "prior_evidence": [
+    "tasks/evidence/forms-recovery-20261012.json",
+    "tasks/evidence/threshold-invite-20261012.json",
+    "tasks/evidence/editor-recovery-20261012.json",
+    "tasks/evidence/price-editor-state-20261012.json",
+    "tasks/evidence/exchange-editor-state-20261012.json",
+    "tasks/evidence/variant-editor-state-20261012.json",
+    "tasks/evidence/media-editor-state-20261012.json",
+    "tasks/evidence/import-editor-state-20261012.json",
+    "tasks/evidence/offline-ticket-recovery-20261012.json",
+    "tasks/evidence/shared-command-recovery-20261012.json",
+    "tasks/evidence/support-policy-recovery-20261012.json",
+    "tasks/evidence/legacy-catalog-recovery-20261012.json",
+    "tasks/evidence/contact-editor-recovery-20261012.json",
+    "tasks/evidence/security-ack-recovery-20261012.json"
+  ],
+  "source_sha256": {
+    "src/components/forms/DurableMutation.tsx": "3769bf944ea7b7ac8b74f5881ffe798c598598829a0bb48bcb51193cfcde89f7",
+    "src/components/forms/PendingActions.tsx": "cbfbb368e23fd30683dcf2f9eaf57effa154fba31e81ef47eb44a68ff76769e1",
+    "src/lib/durable-identity.ts": "39a2046cd1a09b081a0f29bb18677f4f174c842bc22e41d80af170bc483ebebb",
+    "src/app/(dashboard)/billing/page.tsx": "fbf56f8034b768a0fda55dceb4595c330e8a98c927448643a047e8198df26aae",
+    "src/components/billing/Invoices.tsx": "63ec01d5d6b7a574d034d46c36db708d5c1d8d15493e5b2a7912009418b9fa3d",
+    "src/components/billing/Costs.tsx": "3bd118743363b0c6e82bb316ba43b195c873705803434974c524ad0722faedc9",
+    "src/components/billing/Retention.tsx": "830766da1c9686c50d8de657bb4703442868b32ab4d7a4c671256f4703810445",
+    "src/app/(dashboard)/roles/page.tsx": "db3d14147389928d2f8ca3e157232856ea8aaa57130653b8f192500e3921e6fe",
+    "src/components/catalog/ProductBarcodes.tsx": "29dc4ca744b29434b54e6f8c887ea8af309737d6299a847969d7a8c1b5b8da33",
+    "src/server/inventory/cost-replay.ts": "4d70c88bc72815b36d5da2cd78373b9128bcdb6ed99c079f86b5a3c3c2f6174a",
+    "tests/cost-replay.unit.test.ts": "f5eb09ebff5c03beffe87badebb3aa6615ece7a36f1570f838dbd1c721b4884a",
+    "tests/e2e/billing-editor-state.spec.ts": "bec64e1d13d2149fc1d3a6f6578a547b13e0016689febb8b7c147a895b1892c0",
+    "tests/e2e/retention.spec.ts": "6850ba1c0979405b24c40ed6084ee8676308ebc2c82bb9c4313fd23656500170",
+    "tests/e2e/roles-state.spec.ts": "d34f874025705d0cee2689c7b954101705f39c2cddf0eb2c49d94af8584f5699",
+    "tests/e2e/product-editor-state.spec.ts": "2d96ce377b09ffb4b8a0b9e24585f63a2f80f5630ebf80ce4c415ce984fc1bf0"
+  },
+  "limits": [
+    "Synthetic isolated PostgreSQL only; no real production deployment/pilot/vendor/hardware acceptance",
+    "Legacy non-idempotent endpoints use synchronous flight and explicit unknown status, not fabricated server replay guarantees",
+    "Original PUR-01.05 and INV-01.07 remain open: pure replay calculations do not constitute journal posting",
+    "Initial failed browser runs are retained; accepted reruns and source versions recorded separately"
+  ]
+}

@@ -10,6 +10,9 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
   const stores = context.role === 'owner' ? { organizationId: org } : { organizationId: org, id: { in: context.storeIds } }
   const storeRelation = { store: stores }
   switch (model) {
+    case 'InventoryValuationSequence': case 'InventoryValuationEvent':
+      if(context.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED','Tashkilot bo‘yicha tannarx tarixi faqat egasiga ochiq');
+      return {organizationId:org}
     case 'Organization': return { id: org }
     case 'User': return { organizationUsers: { some: { organizationId: org, isActive: true } } }
     case 'Store': return stores

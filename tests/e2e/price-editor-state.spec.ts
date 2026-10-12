@@ -1,0 +1,35 @@
+import {test,expect} from '@playwright/test'
+import {PrismaClient} from '@prisma/client'
+import {randomUUID} from 'node:crypto'
+const connection=new URL(process.env.DATABASE_URL??'')
+if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw Error('Isolated DB required')
+const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect()})
+test('price and customer group drafts remain independent across ACK, metadata failure, search and pagination',async({page})=>{
+ const headers={Origin:'https://localhost:3100'}
+ expect((await page.request.post('/api/auth/register',{headers,data:{fullName:'Price editor owner',phone:'price-editor-'+randomUUID(),password:'test-only-password',organizationName:'Price editor state'}})).ok()).toBe(true)
+ const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ const product=await db.product.create({data:{organizationId:me.organization.id,name:'Independent rule draft',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'1',costPrice:'1'}}),customer=await db.customer.create({data:{organizationId:me.organization.id,fullName:'Original selected customer',phone:randomUUID(),creditLimit:0}})
+ await db.customerGroup.createMany({data:Array.from({length:60},(_,index)=>({organizationId:me.organization.id,name:'Group '+String(index).padStart(2,'0')}))})
+ const originalGroup=await db.customerGroup.findFirstOrThrow({where:{organizationId:me.organization.id,name:'Group 00'}})
+ await page.goto('/settings/prices')
+ await page.getByLabel('Narx mahsuloti',{exact:true}).selectOption(product.id);await page.getByLabel('Daraja birlik narxi',{exact:true}).fill('12.34');await page.getByLabel('Narx qoidasi sababi',{exact:true}).fill('Independent price draft')
+ await page.getByLabel('Guruhga o‘tkaziladigan mijoz',{exact:true}).selectOption(customer.id);await page.getByLabel('Mijozning yangi guruhi',{exact:true}).selectOption(originalGroup.id);await page.getByLabel('Guruh o‘zgarishi sababi',{exact:true}).fill('Independent assignment draft')
+ await page.getByLabel('Yangi mijoz guruhi',{exact:true}).fill('A')
+ let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+ await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/settings\/prices$/);expect(prompts).toBe(1)
+ await page.getByLabel('Yangi mijoz guruhi',{exact:true}).fill('Created independently')
+ await page.route('**/api/customer-groups?*',route=>route.abort('failed'))
+ await page.getByRole('button',{name:'Guruh yaratish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click()})
+ await expect(page.getByLabel('Yangi mijoz guruhi',{exact:true})).toHaveValue('');await expect(page.locator('p[role="alert"]')).toContainText('Oxirgi yuklangan')
+ await expect(page.getByLabel('Daraja birlik narxi',{exact:true})).toHaveValue('12.34');await expect(page.getByLabel('Guruh o‘zgarishi sababi',{exact:true})).toHaveValue('Independent assignment draft')
+ await expect(page.getByRole('button',{name:'Narx qoidasini yozish: oldindan ko‘rish',exact:true})).toBeDisabled()
+ await page.unroute('**/api/customer-groups?*');await page.getByRole('button',{name:'Qayta yuklash',exact:true}).first().click();await expect(page.getByRole('button',{name:'Narx qoidasini yozish: oldindan ko‘rish',exact:true})).toBeEnabled()
+ await page.getByLabel('Narx uchun mijoz qidirish',{exact:true}).fill('No matching buyer')
+ await expect(page.getByLabel('Guruhga o‘tkaziladigan mijoz',{exact:true})).toContainText('Tanlangan mijoz');await expect(page.getByLabel('Guruhga o‘tkaziladigan mijoz',{exact:true})).toHaveValue(customer.id);await expect(page.getByLabel('Guruhga o‘tkaziladigan mijoz',{exact:true})).toBeEnabled()
+ await page.getByRole('button',{name:'Keyingi',exact:true}).first().click();await expect(page.getByText('Mijoz guruhlari sahifasi 2;', {exact:false})).toBeVisible();await expect(page.getByLabel('Mijozning yangi guruhi',{exact:true})).toContainText('Tanlangan guruh');await expect(page.getByLabel('Mijozning yangi guruhi',{exact:true})).toHaveValue(originalGroup.id)
+ await expect(page.getByLabel('Narx qoidasi sababi',{exact:true})).toHaveValue('Independent price draft');await expect(page.getByLabel('Guruh o‘zgarishi sababi',{exact:true})).toHaveValue('Independent assignment draft')
+ expect(await db.customerGroup.count({where:{organizationId:me.organization.id,name:'Created independently'}})).toBe(1)
+ expect(await db.priceRule.count({where:{organizationId:me.organization.id}})).toBe(0)
+ expect((await db.customer.findUniqueOrThrow({where:{id:customer.id}})).groupId).toBeNull()
+})

@@ -1,0 +1,23 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/media-editor-state.spec.ts tests/e2e/core.spec.ts --grep catalog draft survives|brand.*image|protected.*image|catalog.*media
+
+[WebServer] (node:216980) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:217059) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:1008:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (2.8s)
+  ✓  2 [chromium] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (1.5s)
+(node:217327) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/core.spec.ts:1008:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (2.8s)
+  ✓  4 [firefox] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (2.0s)
+(node:217808) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/core.spec.ts:1008:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.3s)
+  ✓  6 [webkit] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (2.5s)
+
+  6 passed (18.8s)

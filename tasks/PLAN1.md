@@ -1766,6 +1766,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
+  **Joriy holat (2026-10-12): in_progress.** Sof FEFO/expiry/business-day hisoblash moduli va6 unit gate tayyor; caller-authoritative stock/reservation/transaction, batch schema/journal, all writer coverage va alert/API/UI hali ochiq. Hech qanday stock posting yozilmadi. Original done emas; dalil `tasks/evidence/target170-core-20261012.json`.
+
 - [ ] **INV-02.07** — Seriya raqami/kafolat — elektronika segmentida P1.
 
   **Texnologiya:** Prisma SerialNumber/Warranty, PostgreSQL unique.
@@ -1863,6 +1865,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Landed cost allocation jami xarajatga teng; last-line rounding va nol denominator testlari bor.
 
   **Dalil:** `PUR-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Joriy holat (2026-10-12): in_progress.** ADR-081: foydalanuvchi moving-average tarixini qayta hisoblash va eski hujjatlarni o‘zgartirmasdan inventory/COGS correction jurnalini tasdiqladi. Saqlangan prepared/cancelled taqsimot tarixi, pagination/retry va bekor qilishning IndexedDB original-key lost-ACK/reload recovery UI tugadi; focused DB5, unit86, uch-browser6, build/type/lint PASS. Dalil: `tasks/evidence/receipt-cost-history-20261012.json`. Tayyorlash formasi, correction posting/jurnal/hisobotlar va to‘liq qabul ochiq; checkbox o‘zgarmaydi.
 
 - [x] **PUR-01.06** — Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil.
 
@@ -3250,7 +3254,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `UX-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **UX-01.05** — Loading, qayta urinish, saqlanmagan o‘zgarishlar va amaliy holatning aniq belgisi.
+- [x] **UX-01.05** — Loading, qayta urinish, saqlanmagan o‘zgarishlar va amaliy holatning aniq belgisi.
 
   **Texnologiya:** React state machine/useReducer, Next.js loading/error boundaries.
 
@@ -3263,6 +3267,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Loading/retry/dirty/pending/saved belgisi haqiqiy holatga mos; double submit dublikat yaratmaydi.
+
+  **Qabul:** `done`, 2026-10-12. [Yakuniy input, kutilgan/haqiqiy natija va versiya](EXECUTION_STATUS.md#ux-0105-yakuniy-qabul-20261012). Dalil: `tasks/evidence/ux-final-20261012.json`.
 
   **Dalil:** `UX-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3973,7 +3979,7 @@ Boshlang‘ich muhandislik maqsadlari: oylik mavjudlik **99,9%**, backupdagi rux
 
   **Dalil:** `OPS-04.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-04.06** — Stress, uzoq davomli yuklama va tiklanish sinovlari.
+- [x] **OPS-04.06** — Stress, uzoq davomli yuklama va tiklanish sinovlari.
 
   **Texnologiya:** Node load harness, Docker restart/network scenarios, PostgreSQL stats.
 
@@ -3988,6 +3994,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Peakning 2× stressi 15min va normal load 2h soak; restartdan keyin data-loss/duplicate yo‘q, bottleneck qaydi bor.
+
+  **Qabul:** `done`, 2026-10-12 (Asia/Tashkent). [15min stress, 2h soak, restart va ledger dalillari](EXECUTION_STATUS.md#original-163164--ops-0406-yuklama-va-tiklanish-qabuli-2026-10-12). Mahalliy sintetik profil; haqiqiy pilot/SLO/deployment qabuli emas.
 
   **Dalil:** `OPS-04.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

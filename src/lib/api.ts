@@ -403,13 +403,14 @@ class ApiClient {
     get: (id: string) => this.request<StockDocument>(`/stock-documents/${id}`),
 
     create: (data: {
+      operationId?: string;
       organizationId: string;
       storeId: string;
       supplierId?: string;
       documentType: string;
       documentNo: string;
       note?: string;
-      items: { productId: string; quantity: number; unitCost: number; note?: string }[];
+      items: { productId: string; quantity: number|string; unitCost: number|string; tradeUnit?:string; note?: string }[];
     }) =>
       this.request<StockDocument>('/stock-documents', {
         method: 'POST',
@@ -438,11 +439,12 @@ class ApiClient {
     },
 
     create: (data: {
+      operationId?: string;
       organizationId: string;
       fromStoreId: string;
       toStoreId: string;
       note?: string;
-      items: { productId: string; quantity: number; unitCost: number }[];
+      items: { productId: string; quantity: number|string; unitCost: number|string }[];
     }) =>
       this.request<StockTransfer>('/transfers', {
         method: 'POST',

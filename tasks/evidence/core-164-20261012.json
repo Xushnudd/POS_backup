@@ -1,0 +1,288 @@
+{
+  "date": "2026-10-12",
+  "timezone": "Asia/Tashkent",
+  "originalPlan": {
+    "total": 259,
+    "baselineDone": 163,
+    "done": 164,
+    "delta": 1,
+    "completed": [
+      "OPS-04.06"
+    ],
+    "checkboxStatusMatch": true
+  },
+  "source": {
+    "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+    "worktree": true,
+    "commitCreated": false,
+    "sha256": {
+      "scripts/ops/test-soak.mjs": "af8b31c0037414a77df6bde865edb18c30c3ddc887638fa86853c743fcc9d273",
+      "scripts/ops/observe-soak.mjs": "df1a73d8bc5313f700db836b3e402b3f6d4f513f55f4fdb0ee8e64378a2b0715",
+      "scripts/ops/verify-soak-live.mjs": "1d7602da079956b8f76ae192cbfafebcb0ad8032c4bc1e9e256ebd434ebc678b",
+      "docs/operations/stress-soak.md": "9cd94f2c9653dfc4e2904d01514b87d115e8ef6459f4b42636dc24c2f4ca6402",
+      "README.md": "a84e847344eda04ba7b12372a31f0210490ac239e482780d89b12642a9b86435",
+      "tasks/PLAN1.md": "376ed2d74881bad2d1c9708a8323004effc42707c2c97602b336e1585e7043fd",
+      "tasks/EXECUTION_STATUS.md": "ae83e9248d887206e63c5487d6a97f8de7530fe38ce128df7702920e98ce8042",
+      "tasks/DECISIONS.md": "d950271a891431a4f3979218d42c0b4a925480f54991431e48a6ffc0eae1246f",
+      "package.json": "cffd39dd55e6ab62fb51a723ace6695bc5dffea377497ad8b258ad7688f9e4fe",
+      "package-lock.json": "ea4283833a90780665ecbe752c306315ca73140564729d75f5f8d95b6510fb9a",
+      "prisma/schema.prisma": "133a94b492c7c9858c57c46c56c73d2ab1c630fb22fd73a755aa68bd6dbde008",
+      ".next/standalone/server.js": "5d1258714683b90e87c729268625861a0bcbe469830ad917a91e3ef2a6fae6e9",
+      ".next/standalone/.next/server/app/api/sales/route.js": "d6e1544ec8df080f813fc807bd0ca56c8fcc51da389157e944d4e269c1ff8e49",
+      ".next/standalone/.next/server/app/api/sales/[id]/complete/route.js": "7e52d3bfa2e48a1a3b76fff15c4495c8279d416ad689762125baff43668b5c7a",
+      "tasks/evidence/soak-a8f60bd1-48a8-486f-a264-e877ef61f242.json": "69098cb4dc2243d18762e8e753760fc314996b4b3e4e512d21eeb57827d23c93",
+      "tasks/evidence/soak-observer-a8f60bd1-48a8-486f-a264-e877ef61f242.json": "4e1b5131b4721929cb1389469a85a350427853c68d449c6005a52971c22ceab9",
+      "tasks/evidence/soak-live-a8f60bd1-48a8-486f-a264-e877ef61f242.json": "e3e8d6046f41298e6311ffaa36bc5a804872919d8874063da2449325d99c2e72"
+    },
+    "previousAcceptedApplicationSchemaSha": {
+      "prisma/migrations/202610110129_tenant_relation_guards/migration.sql": "9d1b01307a5b8e5df622913b40d4ba3bca385fddd2b0c84b78173ad06cbeb372",
+      "prisma/migrations/202610110130_report_export_jobs/migration.sql": "67c9d2a72f03064c02cb60bcabdf747470cf874108f287ee45bea8924c089e8c",
+      "prisma/migrations/202610110131_organization_edge_deferral/migration.sql": "e0ac0fad75eef931626ee0e2ee21a8e11a8eb6c38908d6fc083d678b38b1d9f8",
+      "prisma/migrations/202610110132_tenant_guard_native_keys/migration.sql": "5153b2a33f67244aa1dccc7b4dbb91a2d4b261adc9bd7fa252d2942b3d2aca85",
+      "src/app/(dashboard)/jobs/page.tsx": "7440b8cb3402b6174cd59fce0f0f5d201ddbeaa2842018f89c61d84100fb734a",
+      "src/app/api/health/ready/route.ts": "2a4233c742b5fe0ce9d7fdc1fb7260c3c246041c7ca4548dcbe1e249c7b65f5a",
+      "src/components/forms/ReportExportFields.tsx": "74fb1803f6c69d25aa94f0075381032da179c9e35e544370812c694e42d16c45",
+      "src/lib/report-exports.ts": "f1557b6f5019f68ec0e10d4f7f963178035bf9a11444c765b6ffe61d8070977e",
+      "src/server/api.ts": "2cf0c58be20838e4091be8a26457baf5bc5c4549fea1bb32ce09b1f8a604aa84",
+      "src/server/auth/policy.ts": "f6015be40765574a00176c6e78bfc0cf1343d040565ea66925e4dbcf21fcb1b0",
+      "src/server/auth/scoped-prisma.ts": "349f6df7e37b1e7e1c5418ba4d220e68da91f7b5bd27d09c9f0c30e001a6660c",
+      "src/server/auth/tenant-models.ts": "546c387f089978fa4784b33f559fadaa5e1f569eaf512d667b3701d646f02ace",
+      "src/server/auth/tenant-write.ts": "314ae91d7afc925bd040e7472c3b5ba3eaf805141d41cbf39d569ae1b1c78b50",
+      "src/server/exports/csv.ts": "8490128ea747fbb251d3b15aef3822d0b70d90d9db890a228c4c8116c8ab58b6",
+      "src/server/exports/cursor.ts": "6bb459b6b53d755e3cdf23544bbf9103d847af8e96e0ff81d6fad5b80d939afc",
+      "src/server/exports/queries/audit.ts": "2d9c5318032e5df8ea73e1a4c7c66ad2fb4f54944b2f660072cb09d94b7ffc30",
+      "src/server/exports/queries/categories.ts": "b7da24e91607c5a735e555c5773e7d7cc64cd3c452061170a14e1c46a6c040ff",
+      "src/server/exports/queries/customers.ts": "ac012440809a2570c74b59e24fdddab8eaf3fa5802ac59e75e207a4869271650",
+      "src/server/exports/queries/inventory-balances.ts": "f43446ed8a3d68ea61bdbc2fa6f0e35be1e82db75dbfd9d6abd37e9637d29b3c",
+      "src/server/exports/queries/inventory-dispositions.ts": "cd5f93f2e9a796cd740a9a6e00af6f9feb2ef7ba8ac9d2c497adbd633b0b90a8",
+      "src/server/exports/queries/inventory-movements.ts": "123d39c6f677a14cc71b014875b543db099d46e26b449dbc2c0d6545a9dddb7e",
+      "src/server/exports/queries/products-prices.ts": "1b73f9c8a107e49dc288d0c2ed5a4f64df0b6522a21b59e858d6e99cf89fb9fb",
+      "src/server/exports/queries/products.ts": "b56ac3e01a6fd3239c44e1886c963f824a87c6cebd5f37c3f72b44ba2bae7e7f",
+      "src/server/exports/queries/reports-breakdowns.ts": "48931d41652e2451b53ab35e27827480feaff3690ff322f7eb05021d1724afd0",
+      "src/server/exports/queries/reports-products.ts": "29cedc8b0eb4028754174f394d688eb33ae71d18292c296a43af6e67c91dcd67",
+      "src/server/exports/queries/reports-purchases.ts": "592688e9eeb0b2665f40926521aa396e96da20ac49876a992bb50399399b4ca3",
+      "src/server/exports/queries/reports-sales.ts": "81aa40e3769a8170fbd2f5eb501e32c125d2d8e548b93b2505ba0dc3fece1441",
+      "src/server/exports/queries/reports-supplier-balances.ts": "3fc1f511749b4b4d64a7cbb3057861e35a4711980525eff8147ce3c3b690f7bb",
+      "src/server/exports/queries/shifts.ts": "af0ef2ad55971393ced9470f16c9420e147aacf6385e76e1f308086fcc7f2313",
+      "src/server/exports/queries/stock-documents.ts": "79915ec20674a54408b766076d62ca730dafb918f7b0e07f547719ec160088c9",
+      "src/server/exports/queries/suppliers.ts": "0b654d25a7ca1ead31a16bcde932f73b5220f130013100c91d0cd7bc062bc7cd",
+      "src/server/exports/queries/transfers.ts": "bffc01a73b47b7918417d224e25f46fae554b260a270a61eb38adf96450f6eca",
+      "src/server/exports/queries/units.ts": "85e4b8114c3485ef6912131d9a7508deb4d450b34644ea8558acd2e22b814d8b",
+      "src/server/exports/report-formats.ts": "11d0ea79299c88da5307ab890ec0922c2f8ade3eab4aaef850170e6d1a8e36ef",
+      "src/server/exports/sales-report.ts": "1fd53050ad0357b17d4effd9676293ad0315ff8c3799ae98946a03a84dbba0ff",
+      "src/server/exports/xlsx.ts": "0e8618c993510de8008fabdf2c852327638e3bcaf7de61ee9a2daa37ac6a9af1",
+      "src/server/jobs/report-export.ts": "ca08473b6d7d5076755349b63a66509a0d2387792d91867275ab047631da5e6c",
+      "src/server/jobs/report-queries.ts": "834f2b26310bf684cc459a7330d8f1e9cf8af4ad9a229f41efea15d941ad66d4",
+      "src/server/jobs/service.ts": "da6f1558cfd8e2b83d9215636338606acd089c205452614da490c820c78e2b97",
+      "src/app/api/reports/sales/route.ts": "bd6966d6c35c7143486ec347d4238c14c9d1dd555c93c30acdc9b9e12c6454bc",
+      "src/app/api/reports/products/route.ts": "a1beeb7a8dc7b0a910161bdaccfc8c9f6ef64f2513d70af4f8b8fb8bb95e8852",
+      "src/app/api/reports/purchases/route.ts": "d82f25b0c2a10ab448a2002247d7dd631c4777c3bc12356041d6c40a1b4ed81a",
+      "src/app/api/reports/breakdowns/route.ts": "f235254a36644c7383b0d464093f177ea13687040e119284b418de93927bef15",
+      "src/app/api/reports/supplier-balances/route.ts": "e2264c4889373f3ad83b186b6dc9c4fa403b0ab57ff0a022c31e9007b65d6adc",
+      "src/app/api/inventory/balances/route.ts": "b01154bf134ba4972c0669d6701c08f05cf985ba3285eaf9e6fb956a3771776a",
+      "src/app/api/inventory/movements/route.ts": "431d86e48059c8ec6c869ebb23ee0602310bb81a0c5bb055d8a025a98b4e39e0",
+      "src/app/api/inventory/dispositions/route.ts": "2478e480ed1865c70168442b476c50b0cbf640db3498f78c5cf99d27f2c126df",
+      "src/app/api/products/route.ts": "b706247423065fe5b7f39d318aea5503ca687cb72c9295424452fb61df2304e9",
+      "src/app/api/categories/route.ts": "8e59c8229a200507c14e1eab855187bf2fff9e358635fc71134a6ecb1ca8c1ab",
+      "src/app/api/units/route.ts": "967c46ecf61198c902bfbf96e347829957bc443d02db02a0d0f66285ead1a98b",
+      "src/app/api/customers/route.ts": "8aa8f283f015c0b70cbfde0578f6222bf7034b2cea792b21423456573b34231e",
+      "src/app/api/suppliers/route.ts": "d83cbf9c8a861ce9b7205347b65e1059535c9041ae8e9c95e6bb7d63cd6255bc",
+      "src/app/api/shifts/route.ts": "fe117c950204a1420f4b844263e3db627d1f80feb0fccf2c2918da0fdddd992d",
+      "src/app/api/stock-documents/route.ts": "f40e3ab47399e8a2d00ea9297a71f1cd1e9ca977ce8de47a2069abef34125345",
+      "src/app/api/transfers/route.ts": "0510d5d83354a8b9f12324a8a6841a222605ae1dd1dbe753fd3bf9a26f820661",
+      "src/app/api/audit/route.ts": "872c8f16251c597b398a20f67f6e088fa7b47456c665f251e2ba9e89245be827",
+      "src/app/api/products/prices/route.ts": "4ec0f55909a39ae546e13feee8354f39fae0e2aba5b4f2884a709ffc91d6345f"
+    },
+    "unchangedApplicationSchemaFiles": 57,
+    "appRebuildDuringLoad": false
+  },
+  "acceptance": {
+    "accepted": true,
+    "runId": "a8f60bd1-48a8-486f-a264-e877ef61f242",
+    "hardware": {
+      "platform": "linux",
+      "kernel": "7.2.8-200.fc44.x86_64",
+      "node": "v24.18.0",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+      "logicalCpus": 20,
+      "memoryBytes": 33467367424
+    },
+    "profile": {
+      "synthetic": true,
+      "normalRegisters": 20,
+      "stressConcurrentCheckouts": 40,
+      "waveIntervalMs": 30000,
+      "normalStressMinutes": 15,
+      "normalSoakMinutes": 120,
+      "referencePeak": "20 simultaneous checkouts every 30 seconds; PLAN1 synthetic profile, not measured pilot demand",
+      "database": "isolated pos_test on loopback:55439; shared historical test dataset",
+      "transport": "private loopback HTTP; HTTPS origin/cookie policy retained, no external traffic"
+    },
+    "phases": [
+      {
+        "name": "stress",
+        "concurrentCheckouts": 40,
+        "startAt": "2026-10-11T18:18:10.112Z",
+        "endedAt": "2026-10-11T18:33:10.735Z",
+        "durationMs": 900623.04683,
+        "requestedDurationMs": 900000,
+        "waves": 19,
+        "requests": 3546,
+        "p50Ms": 313.90323099994566,
+        "p95Ms": 673.379198999959,
+        "p99Ms": 751.4789020000001,
+        "maxMs": 1105.951044
+      },
+      {
+        "name": "soak",
+        "concurrentCheckouts": 20,
+        "startAt": "2026-10-11T18:33:11.367Z",
+        "endedAt": "2026-10-11T20:33:11.390Z",
+        "durationMs": 7200023.133129,
+        "requestedDurationMs": 7200000,
+        "waves": 239,
+        "requests": 15167,
+        "p50Ms": 167.24789300002158,
+        "p95Ms": 363.69716900005005,
+        "p99Ms": 431.10719700017944,
+        "maxMs": 675.9649499999359
+      }
+    ],
+    "restarts": [
+      {
+        "signal": "SIGKILL",
+        "outcome": {
+          "code": null,
+          "signal": "SIGKILL"
+        },
+        "recoveryMs": 629.7555880000582,
+        "replayedSaleId": "52a4e0ce-638f-464d-a108-735c708dbae2"
+      },
+      {
+        "signal": "SIGTERM",
+        "outcome": {
+          "code": 143,
+          "signal": null
+        },
+        "recoveryMs": 660.5974179999903,
+        "replayedSaleId": "92a4e71d-c8a4-4887-adc3-3387496fff30"
+      }
+    ],
+    "invariants": {
+      "completedSales": 5540,
+      "saleItems": 5540,
+      "payments": 5540,
+      "saleMovements": 5540,
+      "cashAmount": "5595.40",
+      "duplicates": 0,
+      "missingCommands": 0,
+      "stockChecks": 20
+    },
+    "requests": {
+      "successful": 16624,
+      "retryable": 2093,
+      "networkUnknown": 0,
+      "byStatus": {
+        "200": 16624,
+        "409": 1785,
+        "429": 308
+      }
+    },
+    "mainExit": 0,
+    "observerExit": 0,
+    "teardown": {
+      "organization": 0,
+      "sales": 0,
+      "payments": 0,
+      "movements": 0,
+      "appliedMigrations": 132
+    }
+  },
+  "resources": {
+    "mainWaveSamples": 258,
+    "soakRssFirstMiB": 173.23046875,
+    "soakRssLastMiB": 333.515625,
+    "soakRssPeakMiB": 334.81640625,
+    "secondHalfRssRangeMiB": [
+      326.71875,
+      334.81640625
+    ],
+    "poolRange": [
+      11,
+      11
+    ],
+    "sharedDatabaseSizeBytes": [
+      "1719205223",
+      "1756495207"
+    ],
+    "sharedFilesystemFreeBytes": [
+      614010331136,
+      612070715392
+    ],
+    "sharedDbDeadlockCounter": [
+      "3",
+      "3"
+    ],
+    "ownBackgroundJobQueueEmpty": true,
+    "observer": {
+      "startedAt": "2026-10-11T19:10:40.481Z",
+      "endedAt": "2026-10-11T20:33:12.536Z",
+      "samples": 4932,
+      "maxActive": 10,
+      "maxLockWaiting": 9,
+      "maxPoolTotal": 11,
+      "readOnly": true,
+      "sqlPerSecond": 1,
+      "coverageBeforeStartedAtClaimed": false
+    }
+  },
+  "checks": {
+    "unit": {
+      "passed": 86,
+      "failed": 0,
+      "execution": "escalated individual cases; sandbox file-only36 not final case evidence"
+    },
+    "ops": {
+      "passed": 15,
+      "failed": 0
+    },
+    "lint": "pass",
+    "syntax": "pass",
+    "diff": "pass",
+    "logSha256": {
+      "/tmp/pos-164-soak-full.log": "9a18b865684d2b5a28876d6236f6ce5a6d50a9e7af9d16e7c04c0fc1c73eebfb",
+      "/tmp/pos-164-soak-smoke-final.log": "5150ca4e580627518cc383b8aa5dae1aecf107387cefe6962bf435da32de3dc5",
+      "/tmp/pos-164-observer.log": "ec7db3f09b2b732dc20402130d6fb2fde40010459f2ca84434bb1c9fef215694",
+      "/tmp/pos-164-live-check.log": "8a132787228fd19c47681ea72406c17f03c03e8bea147798aee1148cf0a0c531",
+      "/tmp/pos-164-teardown.log": "7329363acb6c4529600ea529785306826098dce11fa37d29f950720f80d7568a",
+      "/tmp/pos-164-unit-accepted.log": "0b650dc7c88a2a42dcc364f1293ddbe0eb4203d09d1a3d735abe2a9530620ff7",
+      "/tmp/pos-164-ops.log": "9fe05dcd248f127e27031c9916085a9b45802f92109f638de35701c8f52efb1b",
+      "/tmp/pos-164-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/tmp/pos-164-security-final.log": "cd6571bb8b7f707574d19f7fb7b3f397e6a7095d714753979494acacbed7b730"
+    },
+    "security": {
+      "scanned": 900,
+      "findings": 0,
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    }
+  },
+  "scope": {
+    "syntheticLocalOnly": true,
+    "oneOwner20Terminals": true,
+    "normalConcurrent": 20,
+    "stressConcurrent": 40,
+    "realPilotPeakConfirmed": false,
+    "realProductionDeployment": false,
+    "vendorHardwareCalls": false,
+    "queueWorkerThroughputClaimed": false,
+    "unboundedMemoryLeakAbsenceClaimed": false,
+    "bottleneck": "Controlled concurrency409 + actor-rate429 and observed lock waiting reduce effective closed-loop stress throughput. SQL root cause not traced. No rate-limit bypass. Request latency excludes backoff waits."
+  },
+  "reproduction": {
+    "full": "node scripts/ops/test-soak.mjs",
+    "observer": "node scripts/ops/observe-soak.mjs tasks/evidence/soak-a8f60bd1-48a8-486f-a264-e877ef61f242.json",
+    "live": "node scripts/ops/verify-soak-live.mjs tasks/evidence/soak-a8f60bd1-48a8-486f-a264-e877ef61f242.json",
+    "database": "isolated local pos_test only",
+    "guide": "docs/operations/stress-soak.md"
+  }
+}

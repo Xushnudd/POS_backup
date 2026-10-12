@@ -1,0 +1,38 @@
+{
+  "runId": "1035b13e-2b20-4b29-b4c8-a75e7f65ffdb",
+  "mode": "smoke",
+  "startedAt": "2026-10-11T18:13:04.633Z",
+  "profile": {
+    "synthetic": true,
+    "normalRegisters": 20,
+    "stressRegisters": 40,
+    "waveIntervalMs": 30000,
+    "normalStressMinutes": null,
+    "normalSoakMinutes": null,
+    "referencePeak": "20 simultaneous checkouts every 30 seconds; PLAN1 synthetic profile, not measured pilot demand",
+    "database": "isolated pos_test on loopback:55439; shared historical test dataset",
+    "transport": "private loopback HTTP; HTTPS origin/cookie policy retained, no external traffic"
+  },
+  "hardware": {
+    "platform": "linux",
+    "kernel": "7.2.8-200.fc44.x86_64",
+    "node": "v24.18.0",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "memoryBytes": 33467367424
+  },
+  "phases": [],
+  "samples": [],
+  "restarts": [],
+  "requests": {
+    "successful": 0,
+    "retryable": 0,
+    "networkUnknown": 0,
+    "byStatus": {}
+  },
+  "accepted": false,
+  "failure": {
+    "message": "\nInvalid `prisma.register.create()` invocation:\n\n\nError occurred during query execution:\nConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: \"P0001\", message: \"PLAN_LIMIT_REACHED\", severity: \"ERROR\", detail: None, column: None, hint: None }), transient: false })",
+    "at": "2026-10-11T18:13:05.214Z"
+  }
+}

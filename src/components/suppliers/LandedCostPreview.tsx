@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { api } from '@/lib/api';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
@@ -21,6 +22,7 @@ export default function LandedCostPreview({ documentId, documentNo, items, origi
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  useUnsavedChanges(Boolean(amount||method!=='value'||Object.values(weights).some(value=>value)),busy);
   const mounted = useRef(true), pending = useRef(false);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const invalidate = () => { setResult(null); setError(''); };
@@ -62,6 +64,8 @@ export default function LandedCostPreview({ documentId, documentNo, items, origi
         onChange={event => { invalidate(); setWeights(previous => ({ ...previous, [item.id]: event.target.value })); }} />)}
       <Button type="submit" isLoading={busy}>{busy ? 'Hisoblanmoqda' : error ? 'Qayta hisoblash' : 'Taqsimotni hisoblash'}</Button>
     </form>
+    {busy&&<p role="status">Taqsimot hisoblanmoqda…</p>}
+    {!busy&&(amount||method!=='value'||Object.values(weights).some(value=>value))&&<p role="status">Taqsimot formasi saqlanmagan; oldindan hisoblash hujjat yaratmaydi.</p>}
     {error && <p role="alert">{error}</p>}
     {result && <div role="status" className="overflow-x-auto">
       <p>Hisoblandi. Jami xarajat: {result.amount}. Moliyaviy hujjat yaratilmagan.</p>

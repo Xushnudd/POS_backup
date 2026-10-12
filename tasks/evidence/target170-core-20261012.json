@@ -1,0 +1,140 @@
+{
+  "date": "2026-10-12",
+  "timezone": "Asia/Tashkent",
+  "originalPlan": {
+    "total": 259,
+    "baselineDone": 164,
+    "done": 164,
+    "target": 170,
+    "delta": 0,
+    "completed": [],
+    "checkboxStatusMatch": true,
+    "status": "in_progress"
+  },
+  "source": {
+    "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+    "worktree": true,
+    "commitCreated": false,
+    "sha256": {
+      "src/hooks/useUnsavedChanges.ts": "da2dc3ed940af43ea10c7dff633fe450f52eb6824dfa6f3944f184faba09c18d",
+      "src/lib/navigation-guards.ts": "4105df3071de84fd34876a3c3f0441a77793dfe2aa3675aa2207d47c1882060e",
+      "src/lib/page-navigation.ts": "dc4db81b12529a0750154c0a78b1c5801dda04413a7667e5da760dc8811e8ad3",
+      "src/components/forms/DurableMutation.tsx": "76100680cc420bac38975043f0f496e5f75ea755f58da3231cb594ae9d735320",
+      "src/server/inventory/batch-selection.ts": "509922be2ac85ce62a106fbb628755b092c9bf8b7de424b4b13169edc03bfdc5",
+      "tests/navigation-guards.unit.test.ts": "ca9364e149f62f5c7f9cd06f1d5ed70a82e2f63010fcbf4649618633015873f8",
+      "tests/batch-selection.unit.test.ts": "face391945bd5f434309ff2d6f0fe4ae791d57448dcc2bebb9a8956faa2b8d8e",
+      "tests/e2e/core.spec.ts": "167af98867b4ce175a347f61bdd6004827efef0bba3a9651c4655d40a8f263ee",
+      "tests/e2e/totp.spec.ts": "957041e2104d152c1af4f7cec8f0df9df5577dc3aa8c86d7908cf537e1589865",
+      "prisma/schema.prisma": "133a94b492c7c9858c57c46c56c73d2ab1c630fb22fd73a755aa68bd6dbde008",
+      "tasks/PLAN1.md": "952313851a8f6b9c4bbfc5668503d417fe52f242363475f722379774f17c9577",
+      "tasks/EXECUTION_STATUS.md": "09ef951e3e9460d9243588abce6e4f520bb612485d45ef48b250a0b5489cf546",
+      "tasks/DECISIONS.md": "1dd1ba431e15c5e272c5495ce76a11721f1ee480a1fa0ea5aa423370b3c439ab",
+      ".next/standalone/server.js": "5d1258714683b90e87c729268625861a0bcbe469830ad917a91e3ef2a6fae6e9",
+      "src/components/security/CashierPin.tsx": "65884df9f7e584dee58a467fbddc0162d25b19c994a0f6453379517e1fdc80fc",
+      "src/components/security/ContactVerification.tsx": "0c5c0dd0af53919c7f52418cc6566a7d0b827efb280aca00c564c4f59947b1f0",
+      "src/components/security/CriticalStepUp.tsx": "7093324b3c22c26a6018fda7c1f4e73221b7f38e27f9df5cb3f1e9202f7cc1de",
+      "src/components/security/Totp.tsx": "0c418e0ea0295e8742c1738eeff784cd98ab2b4c6ed51fb1b81110e1f44b5d4a",
+      "src/app/(dashboard)/settings/page.tsx": "d98a047b3736bfe95e8bb2697726c37ae4313147cccbe436e4bfabd2487389fe",
+      "src/app/(dashboard)/inventory/page.tsx": "65bc91c4616ac5a569934467277378c246885c9bd64e62ea426616203293ea85",
+      "src/app/(dashboard)/inventory/counts/page.tsx": "b32e72bf63f7947da729a75822e9ff928459e2a29decd39f8e5a0729122972a6",
+      "src/app/(dashboard)/inventory/transfers/page.tsx": "517ed9c416bd2583be1232b0f808b5f6a250e81ce3e6ad4fd4c5fdfc47f0662d",
+      "src/app/(dashboard)/finance/page.tsx": "f9f32a8daa54438a2f85b0a5be7076877a3abc4a4d9e53333bf267ba35bf59ca",
+      "src/app/(dashboard)/products/prices/page.tsx": "7f36dfd9174a6eec4d1507cbc4f6b3fb5a444e6190175a5201eef86a68fe0ff0",
+      "src/app/(dashboard)/security/page.tsx": "63d09ac2bfac003db62f5fba9c01e28c49e01d66f381502805791f1046bf80a6",
+      "src/app/(dashboard)/shifts/page.tsx": "a29efff66ffac432db3bf089b5d8be197f25752b2608643618427bab572f68e2",
+      "src/app/(dashboard)/customers/[id]/page.tsx": "63a494118b575a14cba882d2af8552b7d5d7635637ef6cf98f6ad0f15d2ca33d",
+      "src/app/(dashboard)/loading.tsx": "df31f43326560168a3c2dc18d8567967ee921b48a022ae73a8428fb8610d6c6f",
+      "src/app/(dashboard)/error.tsx": "4712315469b3e49ee2085b6c88f4fee6361b1dcf33bd2ad6825f8013f0c27fab"
+    }
+  },
+  "checks": {
+    "unit": {
+      "passed": 94,
+      "failed": 0
+    },
+    "coreBrowser": {
+      "passed": 36,
+      "failed": 0,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "securityBrowser": {
+      "passed": 18,
+      "failed": 0,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "build": "pass webpack",
+    "typecheck": "pass",
+    "workerBuild": "pass",
+    "changedFileLint": "pass",
+    "diffCheck": "pass",
+    "secretScan": {
+      "scanned": 908,
+      "findings": 0,
+      "excluded": [
+        "credential stores",
+        "git history",
+        "container images"
+      ]
+    },
+    "logs": {
+      "/tmp/pos-170-unit-current.log": "472cd4aaeae369de88a3514e5a3cd83d2ef08efbb3f1789b0b86d59255e57c99",
+      "/tmp/pos-170-browser-current.log": "9766d03ccba84200da0c1c59ea52fae52a723449b75fe218d728e16a155ebc88",
+      "/tmp/pos-170-security-browser.log": "c932b19c9c46b6cba86cbc5350b749f295c8b2aca7e206404997d085e62d155a",
+      "/tmp/pos-170-build-security.log": "79519aa9a4ca44fc06ed238bbdd25d9d57c073ad2edef161d2dd5976bf72e0e3",
+      "/tmp/pos-170-type-security-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+      "/tmp/pos-170-worker-current.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+      "/tmp/pos-170-lint-current.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/tmp/pos-170-security-current.log": "ddffacfac3f0b360eae79386bcbf09db592bac6f5a74c533c7e402e4118778ab"
+    }
+  },
+  "priorFailures": [
+    {
+      "check": "prior27-case browser matrix",
+      "passed": 24,
+      "failed": 3,
+      "reason": "boundary alert selector matched Next route announcer too",
+      "resolution": "exact section selector; corrected3/3 and current36/36 passed"
+    },
+    {
+      "check": "sandbox build",
+      "reason": "TypeScript showConfig parse error",
+      "resolution": "authorized local build worker run exit0"
+    }
+  ],
+  "scope": {
+    "database": "isolated 127.0.0.1:55439/pos_test",
+    "schemaChanges": false,
+    "migrations": 132,
+    "productionDeployment": false,
+    "realVendorHardwareDelivery": false
+  },
+  "remaining": {
+    "UX-01.05": [
+      "all editor semantic coverage",
+      "outside or conditional DurableMutation inputs",
+      "original-key stock/transfer draft create and unknown ACK recovery",
+      "OpenShift immutable original payload and reload recovery",
+      "count start selection and context/reset paths"
+    ],
+    "INV-02.06": [
+      "batch schema and native tenant guards",
+      "batch ledger and all stock writers",
+      "reserve/quarantine/concurrency consistency",
+      "expiry alerts and report"
+    ]
+  },
+  "notes": [
+    "Navigation registry stores flags only, no credentials",
+    "FEFO is a pure function not wired into posting",
+    "Partial checks are not original done tasks",
+    "Temporary logs may be unavailable later; hashes preserve the checkpoint identity"
+  ]
+}

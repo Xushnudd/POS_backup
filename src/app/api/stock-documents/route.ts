@@ -1,6 +1,6 @@
 import {queryStockDocuments} from '@/server/exports/queries/stock-documents'
 import {prisma} from '@/lib/prisma'
-import {assertLiveContext} from '@/server/operations'
+import {assertLiveContext,runOperation} from '@/server/operations'
 import {resolveConversion} from '@/server/catalog/conversions'
 
 
@@ -15,6 +15,7 @@ import {verifyToken,getRequestToken} from '@/lib/auth'
 import {z} from 'zod'
 
 const createStockDocumentSchema = z.object({
+  operationId: z.string().uuid().optional(),
   organizationId: z.string().uuid(),
   storeId: z.string().uuid(),
   supplierId: z.string().uuid().optional(),
@@ -56,9 +57,9 @@ async function handlePOST(request: NextRequest) {
 
     const body = await request.json()
     const validatedData = createStockDocumentSchema.parse(body)
-    const { items, ...documentData } = validatedData
+    const { items, operationId, ...documentData } = validatedData
 
-    const document = await prisma.$transaction(async tx => {
+    const create = async (tx:Prisma.TransactionClient) => {
       await assertLiveContext(tx,payload)
       const prepared=[];
       for(const item of items){const product=await tx.product.findFirst({where:{id:item.productId,organizationId:payload.organizationId}});if(!product)throw new AccessError(404,'PRODUCT_NOT_FOUND');const converted=await resolveConversion(tx,payload.organizationId,product,item.quantity,item.tradeUnit);const {tradeUnit:ignored,...row}=item;void ignored;prepared.push({...row,quantity:converted.quantity,conversionSnapshot:converted.snapshot??Prisma.DbNull})}
@@ -80,7 +81,10 @@ async function handlePOST(request: NextRequest) {
     })
       await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"StockDocument",entityId:result.id,action:"create"}})
       return result
-    })
+    }
+    const document = operationId
+      ? await runOperation(payload,'stock.document.draft',operationId,validatedData,create)
+      : await prisma.$transaction(create)
 
     return NextResponse.json({
       success: true,

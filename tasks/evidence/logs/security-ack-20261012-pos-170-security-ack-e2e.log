@@ -1,0 +1,25 @@
+[WebServer] (node:732532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:732571) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/security-ack-state.spec.ts:11:5 › password ACK and one critical command survive failed profile read without storing credentials (3.5s)
+  ✓   2 [chromium] › tests/e2e/security-ack-state.spec.ts:20:5 › all-session logout admits one request and still leaves security after profile read failure (722ms)
+  ✓   3 [chromium] › tests/e2e/totp.spec.ts:95:5 › Owner password form requires MFA then signs out and accepts only the new password (3.1s)
+  ✓   4 [chromium] › tests/e2e/totp.spec.ts:118:5 › Security editors share one discard decision and pending enrollment freezes credentials and navigation (1.2s)
+(node:733363) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/security-ack-state.spec.ts:11:5 › password ACK and one critical command survive failed profile read without storing credentials (4.0s)
+  ✓   6 [firefox] › tests/e2e/security-ack-state.spec.ts:20:5 › all-session logout admits one request and still leaves security after profile read failure (888ms)
+  ✓   7 [firefox] › tests/e2e/totp.spec.ts:95:5 › Owner password form requires MFA then signs out and accepts only the new password (3.9s)
+  ✓   8 [firefox] › tests/e2e/totp.spec.ts:118:5 › Security editors share one discard decision and pending enrollment freezes credentials and navigation (1.5s)
+(node:734398) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/security-ack-state.spec.ts:11:5 › password ACK and one critical command survive failed profile read without storing credentials (4.1s)
+  ✓  10 [webkit] › tests/e2e/security-ack-state.spec.ts:20:5 › all-session logout admits one request and still leaves security after profile read failure (1.3s)
+  ✓  11 [webkit] › tests/e2e/totp.spec.ts:95:5 › Owner password form requires MFA then signs out and accepts only the new password (3.8s)
+  ✓  12 [webkit] › tests/e2e/totp.spec.ts:118:5 › Security editors share one discard decision and pending enrollment freezes credentials and navigation (1.9s)
+
+  12 passed (32.9s)

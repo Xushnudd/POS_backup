@@ -7,7 +7,7 @@ import {assertLiveContext,audit,runOperation} from '../operations'
 import {decimal} from '../sales/calculations'
 import {validateUnitQuantity} from './service'
 import {convertQuantity,type ConversionSnapshot} from './conversion-math'
-export const conversionSchema=z.object({operationId:z.string().uuid(),tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/),ratio:z.string().regex(/^\d+(\.\d{1,6})?$/).refine(v=>decimal(v).gt(0)&&decimal(v).lt('100000000')),isActive:z.boolean(),reason:z.string().trim().min(3).max(2000)}).strict()
+export const conversionSchema=z.object({operationId:z.string().uuid(),tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/),ratio:z.string().regex(/^\d+(\.\d{1,6})?$/).pipe(z.string().refine(v=>decimal(v).gt(0)&&decimal(v).lt('100000000'))),isActive:z.boolean(),reason:z.string().trim().min(3).max(2000)}).strict()
 export async function listConversions(ctx:TokenPayload,productId:string){return prisma.$transaction(async tx=>{await assertLiveContext(tx,ctx);const product=await tx.product.findFirst({where:{id:productId,organizationId:ctx.organizationId},select:{id:true,unit:true}});if(!product)throw new AccessError(404,'NOT_FOUND');return {product,conversions:await tx.productUnitConversion.findMany({where:{productId,organizationId:ctx.organizationId},orderBy:{tradeUnit:'asc'}})}})}
 export async function setConversion(ctx:TokenPayload,productId:string,input:z.infer<typeof conversionSchema>){if(ctx.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED');return runOperation(ctx,'catalog.conversion',input.operationId,{productId,...input},async tx=>{
  await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${productId} AND "organizationId"=${ctx.organizationId} FOR UPDATE`;

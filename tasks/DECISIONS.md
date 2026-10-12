@@ -567,3 +567,22 @@ Sourcega avtomatik migrate/import/repair/down migration yo‘q. Pre-upgrade back
 ## ADR-079 — Shared full-report worker eksporti va native browser PDF (2026-10-11)
 
 18 mavjud filtered query response/calculationni saqlagan holda server service’ga ajratildi; HTTP authentication route wrapperda, worker esa immutable source generationdan live context oladi. Arbitrary URL yoki browser secret payloadga olinmaydi. Original background worker CSV/XLSX/PDF-ready artifactni scoped hash/audit/expiry contractida yaratadi. Exact XLSX cells plain string; PDF originalPLAN1dagi user browser print-to-PDF orqali, server Chromium production dependency qo‘shilmaydi.1001filtered row actual29-page PDF va uch-browser UI acceptance PASS. Automatic printer/Click/fiscal integratsiya yoki mavjud bo‘lmagan expiry/serial hisobotni bu vazifaga qo‘shib fake done yaratilmadi. Report overflow10000result/16MiBda partial faylsiz.
+
+## ADR-080 — Sintetik stress/soak va haqiqiy restart qabul chegarasi (2026-10-12)
+
+Original OPS-04.06 Node/Prisma/PostgreSQL/standalone stack bilan bajariladi; yangi dependency/provayder yo‘q. Production manzilni qabul qilmaydigan harness20terminal/bittaowner,40parallel stress15min va20parallel normal2hni real davomiylikda bajaradi; original-key replay, SIGKILL/SIGTERM va individual stock/exact cash invariants majburiy. Smoke qabul emas. Closed-loop target interval30s; backpressure/retry achievable throughputni kamaytirishi alohida qayd qilinadi, rate limitni chetlab o‘tilmaydi.
+
+Read-only observer active requests paytidagi pool/lock/RSSni o‘z haqiqiy coverage timestampidan o‘lchaydi; one-snapshot ledger helper final qabulni almashtirmaydi. Shared DB/disk statistikasi barcha foydalanish shu runniki degan xulosani bermaydi. Lokal texnik qabul OPS-04.06ni yopadi; haqiqiy pilot peak,20mustaqilcashier/SLO, staging/production, TLS, tashqi monitoring/provider/hardware qabulini yopmaydi. Boshqa original bandlar holati va259band hisob qoidasi saqlanadi.
+
+
+## ADR-081 — Kech kelgan xarajat uchun moving-average correction siyosati (2026-10-12)
+
+Foydalanuvchi PUR-01.05 uchun moving-average tarixini qayta hisoblash, qolgan zaxira qiymati va sotilgan qism tannarxini alohida tuzatish jurnaliga yozish, eski hujjatlarni o‘zgartirmaslik variantini tasdiqladi. ReceiptCostPlan prepared/cancelled jurnali kapitalizatsiya emas. Original kirimdan aynan qaysi fizik dona sotilganini taxminiy FIFO bilan bog‘lashga ushbu qaror ruxsat bermaydi. Hisob serverdagi haqiqiy harakatlar va mavjud moving-average qoidalarini qayta ijro qilishi kerak; yetishmayotgan yoki qarama-qarshi tarixda posting xavfsiz rad etilishi kerak.
+
+Qo‘llash hali implementatsiya qilinmagan. Keyingi qabulda ko‘p filialdagi global product cost, transfer/in-transit, sale/return, stock reversal, adjustment, kech va takror xarajat, yaxlitlash qoldig‘i, tarixdagi manfiy qoldiq, parallel writer va original-key replay alohida tekshiriladi. Tuzatish miqdori inventory valuation/COGS/return hisobotlarida bir marta hisoblanishi kerak; mavjud cash expense qayta to‘lanmaydi. Bu qaror hisoblash siyosatini tanlaydi, production qabul dalili o‘rnini bosmaydi.
+
+## ADR-082 — Mavjud MFA action nomlari uchun bir xil cheklov (2026-10-12)
+
+`offline-cash.policy` mavjud kritik amal bo‘lsa-da, brauzer binding validator, TOTP proof schema va SQL119 native check defisni rad etgan. Action nomini almashtirish eski original-key/hash/session identityni buzishi mumkin. Shu sabab action nomi saqlanadi; lowercase harf bilan boshlanadigan3–81belgili harf/raqam/underscore/nuqta/defis nomiga uch qatlam bir xil ruxsat beradi. Yo‘l, query, whitespace, newline va script sintaksisi rad. Bu nom validatsiyasi vakolat bermaydi: kritik registry, tirik sessiya, user/factor, original action/key/payload hash va bir martalik counter shartlari o‘zgarmaydi.
+
+SQL133 yangi native checkni avval NOT VALID yaratib, mavjud yozuvlarga VALIDATE qiladi, so‘ng eski checkni shu transactionda olib tashlaydi. Eski proof va approved operation yozuvlari o‘zgarmaydi. Migration appdan oldin qo‘llanadi; eski app qo‘shimcha ruxsat etilgan nomni hali tushunmaydi, ammo mavjud nomlar va yozuvlar mos. Down migration yoki proof tarixini o‘chirish rollback talabi emas. Qabul faqat izolatsiyalangan lokal bazada; production deploy qilinmagan.

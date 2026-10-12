@@ -15,12 +15,13 @@ interface OrganizationContextType {
   setActiveRegister: (register: Register) => void;
   refreshStores: () => Promise<void>;
   refreshShift: () => Promise<void>;
+  applyOpenedShift: (shift:Shift) => boolean;
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
-  const { organization, isAuthenticated } = useAuth();
+  const { organization, user, isAuthenticated } = useAuth();
   const storeRequest=useRef(0),shiftRequest=useRef(0),loadedOrganization=useRef<string|undefined>(undefined);
   const [stores, setStores] = useState<Store[]>([]);
   const [activeStore, setActiveStoreState] = useState<Store | null>(null);
@@ -136,6 +137,13 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     }
   }, [activeRegister, isAuthenticated]);
 
+  // A completed opening response is authoritative, not an optimistic balance.
+  // Invalidate older reads so they cannot erase the confirmed shift snapshot.
+  const applyOpenedShift=useCallback((shift:Shift)=>{
+    if(!isAuthenticated||shift.status!=='open'||shift.registerId!==activeRegister?.id||shift.organizationUserId!==user?.organizationUserId)return false;
+    shiftRequest.current++;setActiveShift(shift);return true;
+  },[isAuthenticated,activeRegister?.id,user?.organizationUserId]);
+
   const invalidateStores=useCallback(()=>{storeRequest.current++;shiftRequest.current++;},[]);
   const invalidateShift=useCallback(()=>{shiftRequest.current++;},[]);
   useEffect(() => {
@@ -160,6 +168,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         setActiveRegister,
         refreshStores,
         refreshShift,
+        applyOpenedShift,
       }}
     >
       {children}

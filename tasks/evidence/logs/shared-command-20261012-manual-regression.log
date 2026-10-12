@@ -1,0 +1,40 @@
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:644411) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (2.9s)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/core.spec.ts:1157:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (1.9s)
+  ✓  3 [chromium] › tests/e2e/core.spec.ts:1173:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.0s)
+(node:645148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.2s)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [firefox] › tests/e2e/core.spec.ts:1157:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.2s)
+  ✓  6 [firefox] › tests/e2e/core.spec.ts:1173:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.2s)
+(node:645686) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [webkit] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.2s)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:644374) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  8 [webkit] › tests/e2e/core.spec.ts:1157:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.6s)
+  ✓  9 [webkit] › tests/e2e/core.spec.ts:1173:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.7s)
+
+  9 passed (26.4s)

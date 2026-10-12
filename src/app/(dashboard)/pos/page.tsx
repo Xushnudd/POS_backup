@@ -1,5 +1,6 @@
 'use client';
 
+import PendingActions from '@/components/forms/PendingActions';
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -460,6 +461,7 @@ export default function PosPage() {
 
   return (
     <div data-testid="pos-touch" className="min-h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-5rem)] flex flex-col gap-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11">
+      <PendingActions prefix="/shifts" returnPath="/pos" revision={Number(isOpenShiftModalOpen)} onDone={()=>{void refreshShift().catch(()=>notifyError('Smena natijasi tasdiqlandi; joriy holat yuklanmadi.'))}}/>
       <div role="status" className={connection.state==='online'?'text-green-700':'bg-amber-50 text-amber-900 p-3'}>
         <span>{connection.state==='online'?'Server bilan aloqa bor':connection.state==='checking'?'Server aloqasi tekshirilmoqda':'Server bilan aloqa yo‘q. Savat lokal saqlanadi; savdo yakunlanmaydi.'}</span>
         <Button variant="outline" onClick={connection.recheck}>Aloqani tekshirish</Button>
@@ -552,10 +554,9 @@ export default function PosPage() {
         </div>}
       </Modal>
       {/* Modals */}
-      <OpenShiftModal
+      <OpenShiftModal key={[organization?.id,user?.id,role].join(':')}
         isOpen={isOpenShiftModalOpen}
         onClose={() => setIsOpenShiftModalOpen(false)}
-        onSuccess={refreshShift}
       />
 
       <PaymentModal

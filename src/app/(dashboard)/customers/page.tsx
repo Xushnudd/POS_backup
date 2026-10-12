@@ -3,7 +3,8 @@
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
-import React, { useState, useEffect, useCallback } from 'react';
+import {useAcknowledgedMutation} from '@/hooks/useAcknowledgedMutation';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { fixed } from '@/lib/money';
@@ -30,7 +31,7 @@ function Customers() {
   const { organization,role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<(Customer&{debtUnavailable?:boolean})[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,7 +45,10 @@ function Customers() {
     note: '',
     creditLimit: '0',
   });
-  const [isSaving, setIsSaving] = useState(false);
+  const [readError,setReadError]=useState(''),[debtError,setDebtError]=useState('');
+  const readRequest=useRef(0);
+  const mutation=useAcknowledgedMutation(!isLoading&&!readError),isSaving=mutation.saving;
+  useEffect(()=>()=>{readRequest.current++;},[]);
   const [originalForm,setOriginalForm]=useState(formData);
   const dirty=isCustomerModalOpen&&(Object.keys(formData) as (keyof typeof formData)[]).some(key=>formData[key]!==originalForm[key]);
   const confirmDiscard=useUnsavedChanges(dirty,isSaving);
@@ -52,7 +56,7 @@ function Customers() {
 
   const loadCustomers = useCallback(async () => {
     if (!organization?.id) return;
-    setIsLoading(true);
+    const request=++readRequest.current;setIsLoading(true);
     try {
       const res = await api.customers.list({
         organizationId: organization.id,
@@ -60,27 +64,26 @@ function Customers() {
         limit: 100,
       });
 
+      if(!res.data)throw new Error('Mijozlar natijasi mavjud emas');
       if (res.data) {
         // Also load debts for each customer
         const customersWithDebt = await Promise.all(
           res.data.map(async (c) => {
             try {
               const debtRes = await api.customers.getDebt(c.id);
-              return {
-                ...c,
-                debt: String(debtRes.data?.totalDebt ?? '0'),
-              };
+              if(debtRes.data?.totalDebt===undefined)throw new Error('Qarz natijasi mavjud emas');
+              const debt=String(debtRes.data.totalDebt);fixed(debt);return {...c,debt,debtUnavailable:false};
             } catch {
-              return c;
+              return {...c,debtUnavailable:true};
             }
           })
         );
-        setCustomers(customersWithDebt);
+        if(request===readRequest.current){setCustomers(customersWithDebt);setReadError('');setDebtError(customersWithDebt.some(row=>row.debtUnavailable)?'Ba’zi mijozlarning qarzi yuklanmadi; noma’lum qiymat nol deb ko‘rsatilmaydi.':'');}
       }
     } catch (err: unknown) {
-      console.error('Error loading customers:', err);
+      if(request===readRequest.current)setReadError(err instanceof Error?err.message:'Mijozlar yuklanmadi');
     } finally {
-      setIsLoading(false);
+      if(request===readRequest.current)setIsLoading(false);
     }
   }, [organization, searchQuery]);
 
@@ -125,8 +128,7 @@ function Customers() {
       return;
     }
 
-    setIsSaving(true);
-    try {
+    await mutation.execute(async()=>{
       const payload = {
         organizationId: organization.id,
         fullName: formData.fullName.trim(),
@@ -144,17 +146,12 @@ function Customers() {
         notifySuccess('Yangi mijoz muvaffaqiyatli qo\'shildi');
       }
 
-      setIsCustomerModalOpen(false);
-      loadCustomers();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Mijozni saqlashda xatolik');
-    } finally {
-      setIsSaving(false);
-    }
+    },()=>{setIsCustomerModalOpen(false);void loadCustomers();});
   };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {(readError||debtError)&&<p role="alert">{readError||debtError}. Oxirgi ro‘yxat va draft saqlangan.</p>}<Button disabled={isLoading||isSaving} onClick={()=>void loadCustomers()}>Mijozlarni qayta yuklash</Button>{mutation.error&&<p role="alert">{mutation.error}</p>}{isSaving&&<p role="status">Server tasdig‘i kutilmoqda…</p>}{mutation.state==='saved'&&<p role="status">Mijoz serverda saqlandi.</p>}
       {role==='owner'&&<Link href="/customers/duplicates" className="text-blue-700 underline">Legacy telefon dublikatlarini tekshirish</Link>}
       {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{})}} label="Mijozlarni CSV yuklash"/>}
       {/* Top Header */}
@@ -170,6 +167,7 @@ function Customers() {
 
         <Button
           variant="primary"
+          disabled={isLoading||isSaving||!!readError}
           onClick={openCreateModal}
           leftIcon={<FontAwesomeIcon icon={faUserPlus} />}
           className="font-bold shadow-md shadow-blue-500/20"
@@ -185,7 +183,8 @@ function Customers() {
             type="text"
             placeholder="Mijoz ismi yoki telefon raqami bo'yicha qidirish..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            disabled={isSaving||isLoading||!!readError}
+            onChange={(e) => {setIsLoading(true);setSearchQuery(e.target.value);}}
             className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-hidden focus:border-blue-500"
           />
           <FontAwesomeIcon
@@ -224,7 +223,7 @@ function Customers() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {customers.map((c) => {
-                  const hasDebt = fixed(c.debt ?? '0') > BigInt(0);
+                  const hasDebt = !c.debtUnavailable&&fixed(c.debt ?? '0') > BigInt(0);
                   return (
                     <tr key={c.id} className="hover:bg-gray-50/70 transition">
                       <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link><br/><Link className="text-blue-700 underline" href={`/customers/${c.id}/history`}>Xarid tarixi va merge</Link></td>
@@ -236,12 +235,12 @@ function Customers() {
                         {formatMoney(c.creditLimit)}
                       </td>
                       <td className="py-3.5 px-4 text-right">
-                        {hasDebt ? (
+                        {c.debtUnavailable?<span>Qarz yuklanmadi</span>:hasDebt ? (
                           <span className="font-black text-red-600">
                             {formatMoney(c.debt)}
                           </span>
                         ) : (
-                          <span className="text-gray-400">0 so&apos;m</span>
+                          <span className="text-gray-400">{fixed(c.debt??'0')<BigInt(0)?'Avans (net qoldiq): '+formatMoney(c.debt):"0 so‘m"}</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right space-x-1">
@@ -253,6 +252,7 @@ function Customers() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          disabled={isSaving||isLoading||!!readError}
                           onClick={() => openEditModal(c)}
                           leftIcon={<FontAwesomeIcon icon={faEdit} />}
                         >
@@ -275,12 +275,12 @@ function Customers() {
         title={editingCustomer ? 'Mijozni tahrirlash' : 'Yangi mijoz qo\'shish'}
         size="md"
       >
-        <form onSubmit={handleSaveCustomer} className="space-y-4">
+        <form onChangeCapture={mutation.edited} onSubmit={handleSaveCustomer} className="space-y-4">
           {dirty&&<p role="status">Saqlanmagan mijoz o‘zgarishlari bor.</p>}
           <Input
             label="Mijoz to'liq ismi *"
             placeholder="Jamshid Ergashev"
-            disabled={isSaving}
+            disabled={isSaving||isLoading||!!readError}
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             required
@@ -290,7 +290,7 @@ function Customers() {
             label="Telefon raqami *"
             type="tel"
             placeholder="901234567"
-            disabled={isSaving}
+            disabled={isSaving||isLoading||!!readError}
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             leftIcon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
@@ -300,7 +300,7 @@ function Customers() {
           <Input
             label="Manzil"
             placeholder="Toshkent sh., Yunusobod tumani"
-            disabled={isSaving}
+            disabled={isSaving||isLoading||!!readError}
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
           />
@@ -311,7 +311,7 @@ function Customers() {
             min="0"
             step="0.01"
             placeholder="1000000"
-            disabled={isSaving}
+            disabled={isSaving||isLoading||!!readError}
             value={formData.creditLimit}
             onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
             helperText="Mijozga berilishi mumkin bo'lgan maksimal qarz miqdori"
@@ -320,7 +320,7 @@ function Customers() {
           <Input
             label="Izoh (ixtiyoriy)"
             placeholder="Mijoz haqida qo'shimcha eslatma"
-            disabled={isSaving}
+            disabled={isSaving||isLoading||!!readError}
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
           />
@@ -330,11 +330,11 @@ function Customers() {
               type="button"
               variant="outline"
               onClick={closeEditor}
-              disabled={isSaving}
+              disabled={isSaving||isLoading||!!readError}
             >
               Bekor qilish
             </Button>
-            <Button type="submit" variant="primary" isLoading={isSaving} className="font-bold">
+            <Button type="submit" variant="primary" isLoading={isSaving} disabled={isSaving||isLoading||!!readError} className="font-bold">
               {editingCustomer ? 'Saqlash' : 'Qo\'shish'}
             </Button>
           </div>

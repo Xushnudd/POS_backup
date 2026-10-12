@@ -1,5 +1,6 @@
 'use client'
 import {useEffect, useRef, useState} from 'react'
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges'
 import Modal from '@/components/ui/Modal'
 import {api} from '@/lib/api'
 import {STEP_UP_EVENT, type StepUpRequest} from '@/lib/step-up'
@@ -24,6 +25,7 @@ export default function CriticalStepUp() {
   const pending = useRef<StepUpRequest | null>(null), busy = useRef(false)
   const [binding, setBinding] = useState<StepUpRequest | null>(null)
   const [code, setCode] = useState(''), [error, setError] = useState(''), [saving, setSaving] = useState(false)
+  useUnsavedChanges(Boolean(binding&&code),saving)
   useEffect(() => {
     const receive = (event: Event) => {
       const request = (event as CustomEvent<StepUpRequest>).detail

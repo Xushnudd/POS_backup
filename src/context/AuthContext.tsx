@@ -14,7 +14,7 @@ interface AuthContextType {
   role: Role | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (phone: string, password: string) => Promise<void>;
+  login: (phone: string, password: string) => Promise<AuthData>;
   register: (data: {
     fullName: string;
     phone: string;
@@ -102,9 +102,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const res = await api.auth.login({ phone, password, deviceId:deviceId() });
-      if (res.data) {
-        setAuthData(res.data);
-      }
+      if (!res.data)throw new Error('Server autentifikatsiya natijasini qaytarmadi');
+      setAuthData(res.data);
+      return res.data;
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const res = await api.auth.register(data);
-      if (res.data) {
-        setAuthData(res.data);
-      }
+      if (!res.data)throw new Error('Server ro‘yxatdan o‘tish natijasini qaytarmadi');
+      setAuthData(res.data);
     } finally {
       setIsLoading(false);
     }

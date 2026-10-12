@@ -114,3 +114,33 @@ test('Owner password form requires MFA then signs out and accepts only the new p
  expect((await page.request.post('/api/auth/login',{headers:{Origin:'https://localhost:3100'},data:{phone,password:newPassword}})).ok()).toBe(true)
  expect(JSON.stringify(await db.auditLog.findMany({where:{organizationId:me.organization.id}}))).not.toContain(newPassword)
 })
+
+test('Security editors share one discard decision and pending enrollment freezes credentials and navigation',async({page})=>{
+ const response=await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Guard security owner',phone:'security-guard-'+randomUUID(),password,organizationName:'Guard security business'}})
+ expect(response.ok()).toBe(true)
+ const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
+ await page.goto('/security')
+ const section=page.getByRole('region',{name:'Authenticator',exact:true})
+ await expect(section.getByText('Authenticator ulanmagan',{exact:true})).toBeVisible()
+ await section.getByLabel('Authenticator uchun joriy parol',{exact:true}).fill(password)
+ await page.getByLabel('Almashish PIN',{exact:true}).fill('123456')
+ let prompts=0
+ page.on('dialog',async dialog=>{prompts++;await dialog.dismiss()})
+ const dashboard=page.locator('a[href="/dashboard"]').first()
+ await dashboard.click();expect(prompts).toBe(1);await expect(page).toHaveURL(/\/security$/)
+ await expect(section.getByLabel('Authenticator uchun joriy parol',{exact:true})).toHaveValue(password)
+ let entered!:()=>void,release!:()=>void
+ const started=new Promise<void>(resolve=>{entered=resolve}),gate=new Promise<void>(resolve=>{release=resolve})
+ await page.route('**/api/auth/totp/enroll',async route=>{entered();await gate;await route.continue()})
+ try{
+  await section.getByRole('button',{name:'Authenticator ulash',exact:true}).click();await started
+  await expect(section.getByLabel('Authenticator uchun joriy parol',{exact:true})).toBeDisabled()
+  await dashboard.click();expect(prompts).toBe(1);await expect(page).toHaveURL(/\/security$/)
+ }finally{release()}
+ const key=section.getByLabel('Authenticator ulash kaliti',{exact:true});await expect(key).toBeVisible()
+ const secret=(await key.textContent())!
+ const stored=await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}))
+ expect(stored.includes(secret)).toBe(false);expect(stored.includes(password)).toBe(false)
+ await dashboard.click();expect(prompts).toBe(2);await expect(key).toBeVisible()
+ expect(await db.totpFactor.count({where:{userId:me.user.id,confirmedAt:{not:null}}})).toBe(0)
+})

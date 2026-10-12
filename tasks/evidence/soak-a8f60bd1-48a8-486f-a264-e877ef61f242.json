@@ -1,0 +1,5005 @@
+{
+  "runId": "a8f60bd1-48a8-486f-a264-e877ef61f242",
+  "mode": "acceptance",
+  "startedAt": "2026-10-11T18:18:08.957Z",
+  "profile": {
+    "synthetic": true,
+    "normalRegisters": 20,
+    "stressConcurrentCheckouts": 40,
+    "waveIntervalMs": 30000,
+    "normalStressMinutes": 15,
+    "normalSoakMinutes": 120,
+    "referencePeak": "20 simultaneous checkouts every 30 seconds; PLAN1 synthetic profile, not measured pilot demand",
+    "database": "isolated pos_test on loopback:55439; shared historical test dataset",
+    "transport": "private loopback HTTP; HTTPS origin/cookie policy retained, no external traffic"
+  },
+  "hardware": {
+    "platform": "linux",
+    "kernel": "7.2.8-200.fc44.x86_64",
+    "node": "v24.18.0",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "memoryBytes": 33467367424
+  },
+  "phases": [
+    {
+      "name": "stress",
+      "concurrentCheckouts": 40,
+      "startAt": "2026-10-11T18:18:10.112Z",
+      "endedAt": "2026-10-11T18:33:10.735Z",
+      "durationMs": 900623.04683,
+      "requestedDurationMs": 900000,
+      "waves": 19,
+      "requests": 3546,
+      "p50Ms": 313.90323099994566,
+      "p95Ms": 673.379198999959,
+      "p99Ms": 751.4789020000001,
+      "maxMs": 1105.951044
+    },
+    {
+      "name": "soak",
+      "concurrentCheckouts": 20,
+      "startAt": "2026-10-11T18:33:11.367Z",
+      "endedAt": "2026-10-11T20:33:11.390Z",
+      "durationMs": 7200023.133129,
+      "requestedDurationMs": 7200000,
+      "waves": 239,
+      "requests": 15167,
+      "p50Ms": 167.24789300002158,
+      "p95Ms": 363.69716900005005,
+      "p99Ms": 431.10719700017944,
+      "maxMs": 675.9649499999359
+    }
+  ],
+  "samples": [
+    {
+      "at": "2026-10-11T18:18:15.052Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 311648256,
+      "virtualBytes": 3590479872,
+      "cpuUserTicks": 666,
+      "cpuSystemTicks": 102,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614010331136,
+      "database": {
+        "bytes": "1719205223",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:19:45.969Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 187248640,
+      "virtualBytes": 3440308224,
+      "cpuUserTicks": 1234,
+      "cpuSystemTicks": 167,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614007713792,
+      "database": {
+        "bytes": "1718803815",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:19:50.712Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 274296832,
+      "virtualBytes": 3579305984,
+      "cpuUserTicks": 1792,
+      "cpuSystemTicks": 232,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614007713792,
+      "database": {
+        "bytes": "1718836583",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:21:22.704Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 245678080,
+      "virtualBytes": 3502497792,
+      "cpuUserTicks": 2488,
+      "cpuSystemTicks": 325,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614029029376,
+      "database": {
+        "bytes": "1719172455",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:21:27.455Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 315736064,
+      "virtualBytes": 3584458752,
+      "cpuUserTicks": 3133,
+      "cpuSystemTicks": 404,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614020956160,
+      "database": {
+        "bytes": "1719696743",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:22:57.704Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 328224768,
+      "virtualBytes": 3590180864,
+      "cpuUserTicks": 3737,
+      "cpuSystemTicks": 486,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614017802240,
+      "database": {
+        "bytes": "1719999847",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:24:03.679Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 345387008,
+      "virtualBytes": 3606433792,
+      "cpuUserTicks": 4303,
+      "cpuSystemTicks": 562,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614016282624,
+      "database": {
+        "bytes": "1720261991",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:24:08.348Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 351211520,
+      "virtualBytes": 3609579520,
+      "cpuUserTicks": 4900,
+      "cpuSystemTicks": 638,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614016282624,
+      "database": {
+        "bytes": "1720622439",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:25:38.855Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 354009088,
+      "virtualBytes": 3609579520,
+      "cpuUserTicks": 5549,
+      "cpuSystemTicks": 729,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614033035264,
+      "database": {
+        "bytes": "1721146727",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:25:43.454Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 354844672,
+      "virtualBytes": 3609841664,
+      "cpuUserTicks": 6091,
+      "cpuSystemTicks": 801,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614033035264,
+      "database": {
+        "bytes": "1721245031",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:27:13.793Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 355659776,
+      "virtualBytes": 3609841664,
+      "cpuUserTicks": 6643,
+      "cpuSystemTicks": 870,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614026133504,
+      "database": {
+        "bytes": "1721523559",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:27:18.773Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 360996864,
+      "virtualBytes": 3614560256,
+      "cpuUserTicks": 7235,
+      "cpuSystemTicks": 953,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614026133504,
+      "database": {
+        "bytes": "1721990503",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:28:50.368Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 366731264,
+      "virtualBytes": 3617443840,
+      "cpuUserTicks": 7854,
+      "cpuSystemTicks": 1032,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614019391488,
+      "database": {
+        "bytes": "1722383719",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:29:56.490Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 367263744,
+      "virtualBytes": 3617443840,
+      "cpuUserTicks": 8460,
+      "cpuSystemTicks": 1112,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614012555264,
+      "database": {
+        "bytes": "1722883431",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:30:01.125Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 368627712,
+      "virtualBytes": 3617443840,
+      "cpuUserTicks": 9046,
+      "cpuSystemTicks": 1189,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614012555264,
+      "database": {
+        "bytes": "1723022695",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:31:31.405Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 369639424,
+      "virtualBytes": 3617443840,
+      "cpuUserTicks": 9646,
+      "cpuSystemTicks": 1269,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614028300288,
+      "database": {
+        "bytes": "1723317607",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:31:36.218Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 369876992,
+      "virtualBytes": 3617443840,
+      "cpuUserTicks": 10225,
+      "cpuSystemTicks": 1349,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614028300288,
+      "database": {
+        "bytes": "1723809127",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:33:06.275Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 371822592,
+      "virtualBytes": 3617705984,
+      "cpuUserTicks": 10803,
+      "cpuSystemTicks": 1422,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614020902912,
+      "database": {
+        "bytes": "1724112231",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:33:10.730Z",
+      "phase": "stress",
+      "pid": 1806777,
+      "rssBytes": 372908032,
+      "virtualBytes": 3617705984,
+      "cpuUserTicks": 11360,
+      "cpuSystemTicks": 1497,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614016036864,
+      "database": {
+        "bytes": "1724448103",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:34:14.577Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 181645312,
+      "virtualBytes": 3444240384,
+      "cpuUserTicks": 347,
+      "cpuSystemTicks": 40,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 613790224384,
+      "database": {
+        "bytes": "1724898663",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:34:17.451Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 232607744,
+      "virtualBytes": 3500437504,
+      "cpuUserTicks": 630,
+      "cpuSystemTicks": 73,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 613790224384,
+      "database": {
+        "bytes": "1725029735",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:34:46.486Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 234643456,
+      "virtualBytes": 3498975232,
+      "cpuUserTicks": 885,
+      "cpuSystemTicks": 102,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612872052736,
+      "database": {
+        "bytes": "1725234535",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:35:16.330Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 245563392,
+      "virtualBytes": 3498975232,
+      "cpuUserTicks": 1092,
+      "cpuSystemTicks": 126,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612739448832,
+      "database": {
+        "bytes": "1725316455",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:35:46.508Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 250552320,
+      "virtualBytes": 3499638784,
+      "cpuUserTicks": 1328,
+      "cpuSystemTicks": 160,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612704116736,
+      "database": {
+        "bytes": "1725652327",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:36:16.475Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 254709760,
+      "virtualBytes": 3499778048,
+      "cpuUserTicks": 1536,
+      "cpuSystemTicks": 180,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 611412545536,
+      "database": {
+        "bytes": "1725816167",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:36:46.713Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 257241088,
+      "virtualBytes": 3501363200,
+      "cpuUserTicks": 1790,
+      "cpuSystemTicks": 213,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076220416,
+      "database": {
+        "bytes": "1725906279",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:37:16.716Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 261836800,
+      "virtualBytes": 3503820800,
+      "cpuUserTicks": 2074,
+      "cpuSystemTicks": 247,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076265472,
+      "database": {
+        "bytes": "1726045543",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:37:47.918Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 262746112,
+      "virtualBytes": 3503820800,
+      "cpuUserTicks": 2401,
+      "cpuSystemTicks": 288,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072734720,
+      "database": {
+        "bytes": "1726250343",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:38:16.778Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 263380992,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 2631,
+      "cpuSystemTicks": 320,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071473152,
+      "database": {
+        "bytes": "1726537063",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:38:47.500Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 263548928,
+      "virtualBytes": 3504082944,
+      "cpuUserTicks": 2909,
+      "cpuSystemTicks": 353,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082364416,
+      "database": {
+        "bytes": "1726692711",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:39:17.525Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 264318976,
+      "virtualBytes": 3504082944,
+      "cpuUserTicks": 3208,
+      "cpuSystemTicks": 388,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073963520,
+      "database": {
+        "bytes": "1726799207",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:39:47.612Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 264658944,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 3485,
+      "cpuSystemTicks": 426,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612092837888,
+      "database": {
+        "bytes": "1727061351",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:40:16.618Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 264892416,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 3719,
+      "cpuSystemTicks": 452,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612093681664,
+      "database": {
+        "bytes": "1727085927",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:40:46.766Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 264982528,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 3970,
+      "cpuSystemTicks": 484,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612090015744,
+      "database": {
+        "bytes": "1727192423",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:41:16.689Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265064448,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 4207,
+      "cpuSystemTicks": 514,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612089184256,
+      "database": {
+        "bytes": "1727438183",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:41:47.749Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265146368,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 4496,
+      "cpuSystemTicks": 551,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085751808,
+      "database": {
+        "bytes": "1727479143",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:42:16.889Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265302016,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 4747,
+      "cpuSystemTicks": 581,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612084207616,
+      "database": {
+        "bytes": "1727585639",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:42:47.696Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265322496,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 4989,
+      "cpuSystemTicks": 611,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080185344,
+      "database": {
+        "bytes": "1727692135",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:43:18.384Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265637888,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 5323,
+      "cpuSystemTicks": 654,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078882816,
+      "database": {
+        "bytes": "1728052583",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:43:47.828Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265756672,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 5598,
+      "cpuSystemTicks": 689,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075986944,
+      "database": {
+        "bytes": "1728200039",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:44:17.026Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265818112,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 5865,
+      "cpuSystemTicks": 721,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075352064,
+      "database": {
+        "bytes": "1728404839",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:44:47.851Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265957376,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 6098,
+      "cpuSystemTicks": 750,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612095852544,
+      "database": {
+        "bytes": "1728609639",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:45:17.239Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 265981952,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 6397,
+      "cpuSystemTicks": 792,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082487296,
+      "database": {
+        "bytes": "1728929127",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:45:47.981Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 266162176,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 6676,
+      "cpuSystemTicks": 827,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080447488,
+      "database": {
+        "bytes": "1729224039",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:46:17.074Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 266203136,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 6940,
+      "cpuSystemTicks": 858,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078452736,
+      "database": {
+        "bytes": "1729437031",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:46:47.084Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 266276864,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 7197,
+      "cpuSystemTicks": 889,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075757568,
+      "database": {
+        "bytes": "1729674599",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:47:17.950Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 266334208,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 7459,
+      "cpuSystemTicks": 923,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072091648,
+      "database": {
+        "bytes": "1729797479",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:47:47.254Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 266375168,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 7735,
+      "cpuSystemTicks": 954,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071084032,
+      "database": {
+        "bytes": "1729920359",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:48:17.237Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 267755520,
+      "virtualBytes": 3504345088,
+      "cpuUserTicks": 8024,
+      "cpuSystemTicks": 993,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067708928,
+      "database": {
+        "bytes": "1730157927",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:48:48.459Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 267784192,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 8356,
+      "cpuSystemTicks": 1033,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612068499456,
+      "database": {
+        "bytes": "1730338151",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:49:18.062Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 267800576,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 8625,
+      "cpuSystemTicks": 1067,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086513664,
+      "database": {
+        "bytes": "1730444647",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:49:46.956Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 267816960,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 8804,
+      "cpuSystemTicks": 1087,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085538816,
+      "database": {
+        "bytes": "1730526567",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:50:17.201Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 267993088,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 9022,
+      "cpuSystemTicks": 1117,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082724864,
+      "database": {
+        "bytes": "1730624871",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:50:48.383Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268115968,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 9304,
+      "cpuSystemTicks": 1153,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082700288,
+      "database": {
+        "bytes": "1730821479",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:51:18.268Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268120064,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 9572,
+      "cpuSystemTicks": 1189,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079173632,
+      "database": {
+        "bytes": "1730993511",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:51:48.445Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268173312,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 9892,
+      "cpuSystemTicks": 1232,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077445120,
+      "database": {
+        "bytes": "1731255655",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:52:17.436Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268193792,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 10189,
+      "cpuSystemTicks": 1265,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077445120,
+      "database": {
+        "bytes": "1731525991",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:52:47.456Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268271616,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 10457,
+      "cpuSystemTicks": 1299,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075732992,
+      "database": {
+        "bytes": "1731771751",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:53:18.503Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268582912,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 10761,
+      "cpuSystemTicks": 1336,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075286528,
+      "database": {
+        "bytes": "1732091239",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:53:47.369Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268595200,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 10991,
+      "cpuSystemTicks": 1365,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073242624,
+      "database": {
+        "bytes": "1732255079",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:54:17.512Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268607488,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 11234,
+      "cpuSystemTicks": 1390,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071366656,
+      "database": {
+        "bytes": "1732459879",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:54:47.631Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 268677120,
+      "virtualBytes": 3504607232,
+      "cpuUserTicks": 11507,
+      "cpuSystemTicks": 1426,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612068790272,
+      "database": {
+        "bytes": "1732648295",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:55:17.474Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 283131904,
+      "virtualBytes": 3531870208,
+      "cpuUserTicks": 11745,
+      "cpuSystemTicks": 1457,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612068249600,
+      "database": {
+        "bytes": "1732697447",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:55:48.683Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 283152384,
+      "virtualBytes": 3531870208,
+      "cpuUserTicks": 12058,
+      "cpuSystemTicks": 1497,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067024896,
+      "database": {
+        "bytes": "1732787559",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:56:17.537Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 289968128,
+      "virtualBytes": 3574075392,
+      "cpuUserTicks": 12297,
+      "cpuSystemTicks": 1526,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612064366592,
+      "database": {
+        "bytes": "1724824935",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:56:47.731Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 314376192,
+      "virtualBytes": 3574075392,
+      "cpuUserTicks": 12599,
+      "cpuSystemTicks": 1565,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612061417472,
+      "database": {
+        "bytes": "1725005159",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:57:16.053Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 316391424,
+      "virtualBytes": 3576172544,
+      "cpuUserTicks": 12720,
+      "cpuSystemTicks": 1582,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612060930048,
+      "database": {
+        "bytes": "1725341031",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:57:46.073Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 318599168,
+      "virtualBytes": 3578793984,
+      "cpuUserTicks": 12845,
+      "cpuSystemTicks": 1599,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612057772032,
+      "database": {
+        "bytes": "1725406567",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:58:16.296Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 318894080,
+      "virtualBytes": 3578793984,
+      "cpuUserTicks": 12975,
+      "cpuSystemTicks": 1618,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612057153536,
+      "database": {
+        "bytes": "1725594983",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:58:46.085Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 319201280,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13101,
+      "cpuSystemTicks": 1634,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612055502848,
+      "database": {
+        "bytes": "1725619559",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:59:16.233Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 320278528,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13231,
+      "cpuSystemTicks": 1654,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612054847488,
+      "database": {
+        "bytes": "1725644135",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:59:46.273Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 320335872,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13369,
+      "cpuSystemTicks": 1672,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612051767296,
+      "database": {
+        "bytes": "1725767015",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:00:16.167Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 322220032,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13480,
+      "cpuSystemTicks": 1688,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612050120704,
+      "database": {
+        "bytes": "1725799783",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:00:46.280Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 322269184,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13612,
+      "cpuSystemTicks": 1704,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612050272256,
+      "database": {
+        "bytes": "1725922663",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:01:16.297Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 324583424,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13731,
+      "cpuSystemTicks": 1722,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612091977728,
+      "database": {
+        "bytes": "1726061927",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:01:46.326Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 324624384,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13863,
+      "cpuSystemTicks": 1736,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612090347520,
+      "database": {
+        "bytes": "1726233959",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:02:16.279Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325308416,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 13977,
+      "cpuSystemTicks": 1752,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087275520,
+      "database": {
+        "bytes": "1726324071",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:02:46.262Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325320704,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14087,
+      "cpuSystemTicks": 1766,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612084330496,
+      "database": {
+        "bytes": "1726496103",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:03:16.561Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325332992,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14245,
+      "cpuSystemTicks": 1786,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612083744768,
+      "database": {
+        "bytes": "1726848359",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:03:46.381Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325373952,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14378,
+      "cpuSystemTicks": 1803,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082876416,
+      "database": {
+        "bytes": "1726922087",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:04:16.392Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325378048,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14507,
+      "cpuSystemTicks": 1823,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082307072,
+      "database": {
+        "bytes": "1727110503",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:04:46.414Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325332992,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14642,
+      "cpuSystemTicks": 1842,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080529408,
+      "database": {
+        "bytes": "1727192423",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:05:16.428Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 325345280,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14772,
+      "cpuSystemTicks": 1859,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080324608,
+      "database": {
+        "bytes": "1727339879",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:05:46.456Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 330399744,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 14907,
+      "cpuSystemTicks": 1876,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078125056,
+      "database": {
+        "bytes": "1727642983",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:06:16.419Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 330629120,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 15012,
+      "cpuSystemTicks": 1891,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076703744,
+      "database": {
+        "bytes": "1727708519",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:06:46.523Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 331165696,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 15132,
+      "cpuSystemTicks": 1908,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073791488,
+      "database": {
+        "bytes": "1727765863",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:07:16.500Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 331165696,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 15243,
+      "cpuSystemTicks": 1923,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071415808,
+      "database": {
+        "bytes": "1728216423",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:07:46.529Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 331206656,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 15372,
+      "cpuSystemTicks": 1938,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069670912,
+      "database": {
+        "bytes": "1728290151",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:08:16.747Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338391040,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 15495,
+      "cpuSystemTicks": 1955,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067663872,
+      "database": {
+        "bytes": "1728429415",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:08:46.612Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338423808,
+      "virtualBytes": 3578531840,
+      "cpuUserTicks": 15631,
+      "cpuSystemTicks": 1974,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612066910208,
+      "database": {
+        "bytes": "1728535911",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:09:16.532Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338456576,
+      "virtualBytes": 3578793984,
+      "cpuUserTicks": 15719,
+      "cpuSystemTicks": 1988,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085927936,
+      "database": {
+        "bytes": "1728593255",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:09:46.657Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338628608,
+      "virtualBytes": 3578793984,
+      "cpuUserTicks": 15860,
+      "cpuSystemTicks": 2005,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612084523008,
+      "database": {
+        "bytes": "1728732519",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:10:16.634Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338112512,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 15981,
+      "cpuSystemTicks": 2023,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612084854784,
+      "database": {
+        "bytes": "1728822631",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:10:46.672Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338190336,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16093,
+      "cpuSystemTicks": 2038,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082548736,
+      "database": {
+        "bytes": "1729117543",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:11:16.669Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338231296,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16214,
+      "cpuSystemTicks": 2055,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082003968,
+      "database": {
+        "bytes": "1729240423",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:11:46.624Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338300928,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16331,
+      "cpuSystemTicks": 2070,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079124480,
+      "database": {
+        "bytes": "1729363303",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:12:16.639Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338337792,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16451,
+      "cpuSystemTicks": 2085,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078100480,
+      "database": {
+        "bytes": "1729477991",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:12:46.632Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338345984,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16560,
+      "cpuSystemTicks": 2100,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077146112,
+      "database": {
+        "bytes": "1729617255",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:13:16.894Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338374656,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16701,
+      "cpuSystemTicks": 2119,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074786816,
+      "database": {
+        "bytes": "1729846631",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:13:46.664Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338419712,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16828,
+      "cpuSystemTicks": 2136,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074549248,
+      "database": {
+        "bytes": "1729920359",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:14:16.959Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338436096,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 16970,
+      "cpuSystemTicks": 2156,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072259584,
+      "database": {
+        "bytes": "1730141543",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:14:46.666Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338436096,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17088,
+      "cpuSystemTicks": 2171,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072390656,
+      "database": {
+        "bytes": "1730256231",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:15:16.689Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338440192,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17208,
+      "cpuSystemTicks": 2189,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612070019072,
+      "database": {
+        "bytes": "1730395495",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:15:46.709Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338464768,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17341,
+      "cpuSystemTicks": 2206,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612070109184,
+      "database": {
+        "bytes": "1730575719",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:16:16.697Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338935808,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17459,
+      "cpuSystemTicks": 2222,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067631104,
+      "database": {
+        "bytes": "1730911591",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:16:46.677Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 338944000,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17581,
+      "cpuSystemTicks": 2241,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612066590720,
+      "database": {
+        "bytes": "1730985319",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:17:16.698Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339464192,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17706,
+      "cpuSystemTicks": 2257,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612063035392,
+      "database": {
+        "bytes": "1731083623",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:17:46.629Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339484672,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17808,
+      "cpuSystemTicks": 2269,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612061024256,
+      "database": {
+        "bytes": "1731140967",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:18:16.832Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339484672,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 17929,
+      "cpuSystemTicks": 2286,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612061196288,
+      "database": {
+        "bytes": "1731403111",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:18:46.730Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339509248,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18065,
+      "cpuSystemTicks": 2304,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612059189248,
+      "database": {
+        "bytes": "1731665255",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:19:16.715Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339533824,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18189,
+      "cpuSystemTicks": 2320,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081029120,
+      "database": {
+        "bytes": "1731730791",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:19:46.753Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339537920,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18319,
+      "cpuSystemTicks": 2340,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081922048,
+      "database": {
+        "bytes": "1731870055",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:20:16.683Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339546112,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18434,
+      "cpuSystemTicks": 2353,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079566848,
+      "database": {
+        "bytes": "1732017511",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:20:46.804Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339558400,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18566,
+      "cpuSystemTicks": 2371,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078612480,
+      "database": {
+        "bytes": "1732189543",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:21:16.814Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339574784,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18686,
+      "cpuSystemTicks": 2389,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077137920,
+      "database": {
+        "bytes": "1732304231",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:21:46.956Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339574784,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18826,
+      "cpuSystemTicks": 2407,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073279488,
+      "database": {
+        "bytes": "1732427111",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:22:16.879Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339574784,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 18955,
+      "cpuSystemTicks": 2426,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073279488,
+      "database": {
+        "bytes": "1732640103",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:22:46.873Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339623936,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19080,
+      "cpuSystemTicks": 2442,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071514112,
+      "database": {
+        "bytes": "1732771175",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:23:16.982Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339623936,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19186,
+      "cpuSystemTicks": 2460,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612070252544,
+      "database": {
+        "bytes": "1732967783",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:23:46.911Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339607552,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19312,
+      "cpuSystemTicks": 2476,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069167104,
+      "database": {
+        "bytes": "1733180775",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:24:16.979Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339615744,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19449,
+      "cpuSystemTicks": 2494,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069679104,
+      "database": {
+        "bytes": "1733254503",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:24:46.911Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339623936,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19562,
+      "cpuSystemTicks": 2510,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612089860096,
+      "database": {
+        "bytes": "1733385575",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:25:16.950Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339623936,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19675,
+      "cpuSystemTicks": 2526,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612090085376,
+      "database": {
+        "bytes": "1733541223",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:25:46.994Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339623936,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19798,
+      "cpuSystemTicks": 2542,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087652352,
+      "database": {
+        "bytes": "1733688679",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:26:16.969Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339628032,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 19897,
+      "cpuSystemTicks": 2556,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086571008,
+      "database": {
+        "bytes": "1733762407",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:26:47.048Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339668992,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 20040,
+      "cpuSystemTicks": 2575,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612083253248,
+      "database": {
+        "bytes": "1733844327",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:27:17.001Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339668992,
+      "virtualBytes": 3578265600,
+      "cpuUserTicks": 20158,
+      "cpuSystemTicks": 2589,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081618944,
+      "database": {
+        "bytes": "1733926247",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:27:47.044Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339693568,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 20272,
+      "cpuSystemTicks": 2606,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080615424,
+      "database": {
+        "bytes": "1734016359",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:28:17.243Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339722240,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 20391,
+      "cpuSystemTicks": 2622,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080529408,
+      "database": {
+        "bytes": "1734327655",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:28:47.156Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339738624,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 20521,
+      "cpuSystemTicks": 2638,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076920832,
+      "database": {
+        "bytes": "1734393191",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:29:17.169Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339738624,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 20635,
+      "cpuSystemTicks": 2654,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076806144,
+      "database": {
+        "bytes": "1734475111",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:29:47.250Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 339738624,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 20770,
+      "cpuSystemTicks": 2675,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074876928,
+      "database": {
+        "bytes": "1734802791",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:30:17.211Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 340234240,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 20892,
+      "cpuSystemTicks": 2690,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074086400,
+      "database": {
+        "bytes": "1734925671",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:30:47.245Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 340234240,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21016,
+      "cpuSystemTicks": 2705,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072648704,
+      "database": {
+        "bytes": "1735032167",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:31:17.289Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 341782528,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21135,
+      "cpuSystemTicks": 2722,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072665088,
+      "database": {
+        "bytes": "1735130471",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:31:47.278Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 341925888,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21265,
+      "cpuSystemTicks": 2737,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612068646912,
+      "database": {
+        "bytes": "1735220583",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:32:17.290Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 341925888,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21381,
+      "cpuSystemTicks": 2751,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067082240,
+      "database": {
+        "bytes": "1735474535",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:32:47.315Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342568960,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21513,
+      "cpuSystemTicks": 2767,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612064043008,
+      "database": {
+        "bytes": "1735744871",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:33:17.445Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342589440,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21624,
+      "cpuSystemTicks": 2785,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612062203904,
+      "database": {
+        "bytes": "1736113511",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:33:47.370Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342589440,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21749,
+      "cpuSystemTicks": 2801,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612062498816,
+      "database": {
+        "bytes": "1736334695",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:34:17.410Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342626304,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21873,
+      "cpuSystemTicks": 2819,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612060393472,
+      "database": {
+        "bytes": "1736490343",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:34:47.361Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342675456,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 21983,
+      "cpuSystemTicks": 2836,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081799168,
+      "database": {
+        "bytes": "1736613223",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:35:17.389Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342700032,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22116,
+      "cpuSystemTicks": 2851,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081676288,
+      "database": {
+        "bytes": "1736809831",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:35:47.388Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342753280,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22221,
+      "cpuSystemTicks": 2866,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079243264,
+      "database": {
+        "bytes": "1736908135",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:36:17.518Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342769664,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22343,
+      "cpuSystemTicks": 2882,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077887488,
+      "database": {
+        "bytes": "1737096551",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:36:47.489Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342777856,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22470,
+      "cpuSystemTicks": 2899,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074291200,
+      "database": {
+        "bytes": "1737244007",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:37:17.547Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342818816,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22610,
+      "cpuSystemTicks": 2918,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072452096,
+      "database": {
+        "bytes": "1737383271",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:37:47.476Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342822912,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22715,
+      "cpuSystemTicks": 2933,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072570880,
+      "database": {
+        "bytes": "1737547111",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:38:17.637Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342683648,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22821,
+      "cpuSystemTicks": 2947,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069462016,
+      "database": {
+        "bytes": "1738022247",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:38:47.600Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342827008,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 22944,
+      "cpuSystemTicks": 2966,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067803136,
+      "database": {
+        "bytes": "1738128743",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:39:17.591Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 342863872,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23068,
+      "cpuSystemTicks": 2980,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067602432,
+      "database": {
+        "bytes": "1738259815",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:39:47.599Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 343130112,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23184,
+      "cpuSystemTicks": 3000,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612065705984,
+      "database": {
+        "bytes": "1738415463",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:40:17.677Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 343130112,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23315,
+      "cpuSystemTicks": 3019,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612064866304,
+      "database": {
+        "bytes": "1738562919",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:40:47.657Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 344436736,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23425,
+      "cpuSystemTicks": 3034,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086374400,
+      "database": {
+        "bytes": "1738685799",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:41:17.745Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 344436736,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23558,
+      "cpuSystemTicks": 3051,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086439936,
+      "database": {
+        "bytes": "1738841447",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:41:47.815Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345198592,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23679,
+      "cpuSystemTicks": 3065,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082401280,
+      "database": {
+        "bytes": "1738956135",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:42:17.729Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345202688,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23798,
+      "cpuSystemTicks": 3081,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080857088,
+      "database": {
+        "bytes": "1739054439",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:42:47.758Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345235456,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 23917,
+      "cpuSystemTicks": 3097,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079759360,
+      "database": {
+        "bytes": "1739201895",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:43:17.921Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345776128,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24033,
+      "cpuSystemTicks": 3114,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078092288,
+      "database": {
+        "bytes": "1739439463",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:43:47.853Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345780224,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24128,
+      "cpuSystemTicks": 3126,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077998080,
+      "database": {
+        "bytes": "1739545959",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:44:17.861Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345796608,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24255,
+      "cpuSystemTicks": 3142,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075843584,
+      "database": {
+        "bytes": "1739775335",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:44:47.831Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345862144,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24365,
+      "cpuSystemTicks": 3159,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075212800,
+      "database": {
+        "bytes": "1739865447",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:45:17.890Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345903104,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24502,
+      "cpuSystemTicks": 3176,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075077632,
+      "database": {
+        "bytes": "1740004711",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:45:47.890Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345907200,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24640,
+      "cpuSystemTicks": 3193,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073308160,
+      "database": {
+        "bytes": "1740152167",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:46:17.879Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345907200,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24767,
+      "cpuSystemTicks": 3210,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072865792,
+      "database": {
+        "bytes": "1740299623",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:46:47.876Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345907200,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 24888,
+      "cpuSystemTicks": 3224,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069720064,
+      "database": {
+        "bytes": "1740373351",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:47:17.921Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346075136,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25013,
+      "cpuSystemTicks": 3242,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612066603008,
+      "database": {
+        "bytes": "1740594535",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:47:47.942Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346099712,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25147,
+      "cpuSystemTicks": 3262,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612064919552,
+      "database": {
+        "bytes": "1740741991",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:48:18.160Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346124288,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25284,
+      "cpuSystemTicks": 3279,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612064919552,
+      "database": {
+        "bytes": "1741069671",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:48:47.988Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346128384,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25404,
+      "cpuSystemTicks": 3295,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612063477760,
+      "database": {
+        "bytes": "1741135207",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:49:18.003Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346173440,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25516,
+      "cpuSystemTicks": 3310,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612061319168,
+      "database": {
+        "bytes": "1741446503",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:49:47.958Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346173440,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25625,
+      "cpuSystemTicks": 3328,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082864128,
+      "database": {
+        "bytes": "1741495655",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:50:18.075Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346214400,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25754,
+      "cpuSystemTicks": 3345,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082974720,
+      "database": {
+        "bytes": "1741667687",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:50:48.105Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346169344,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 25893,
+      "cpuSystemTicks": 3364,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080812032,
+      "database": {
+        "bytes": "1741757799",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:51:18.102Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346169344,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 26017,
+      "cpuSystemTicks": 3383,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079292416,
+      "database": {
+        "bytes": "1741823335",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:51:48.284Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346173440,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 26147,
+      "cpuSystemTicks": 3403,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077694976,
+      "database": {
+        "bytes": "1742011751",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:52:18.083Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348131328,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 26256,
+      "cpuSystemTicks": 3418,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074885120,
+      "database": {
+        "bytes": "1742175591",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:52:48.123Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348782592,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 26374,
+      "cpuSystemTicks": 3434,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074061824,
+      "database": {
+        "bytes": "1742314855",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:53:18.289Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348782592,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 26502,
+      "cpuSystemTicks": 3449,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071743488,
+      "database": {
+        "bytes": "1742634343",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:53:48.142Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348782592,
+      "virtualBytes": 3578527744,
+      "cpuUserTicks": 26605,
+      "cpuSystemTicks": 3464,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612070473728,
+      "database": {
+        "bytes": "1742781799",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:54:18.135Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348901376,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 26705,
+      "cpuSystemTicks": 3478,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612094255104,
+      "database": {
+        "bytes": "1742921063",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:54:48.208Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349106176,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 26830,
+      "cpuSystemTicks": 3493,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612092080128,
+      "database": {
+        "bytes": "1743060327",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:55:18.183Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349204480,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 26944,
+      "cpuSystemTicks": 3507,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612090793984,
+      "database": {
+        "bytes": "1743191399",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:55:48.255Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349220864,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27050,
+      "cpuSystemTicks": 3522,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612090716160,
+      "database": {
+        "bytes": "1743347047",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:56:18.316Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349274112,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27189,
+      "cpuSystemTicks": 3542,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612089290752,
+      "database": {
+        "bytes": "1743478119",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:56:48.215Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349392896,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27291,
+      "cpuSystemTicks": 3554,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087578624,
+      "database": {
+        "bytes": "1743633767",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:57:18.281Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349417472,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27410,
+      "cpuSystemTicks": 3569,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612084973568,
+      "database": {
+        "bytes": "1743715687",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:57:48.314Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349450240,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27533,
+      "cpuSystemTicks": 3587,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612084248576,
+      "database": {
+        "bytes": "1743822183",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:58:18.490Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349478912,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27663,
+      "cpuSystemTicks": 3605,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612083617792,
+      "database": {
+        "bytes": "1744100711",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:58:48.421Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349478912,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27792,
+      "cpuSystemTicks": 3625,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082221056,
+      "database": {
+        "bytes": "1744125287",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:59:18.414Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349466624,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 27911,
+      "cpuSystemTicks": 3641,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082212864,
+      "database": {
+        "bytes": "1744231783",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T19:59:48.418Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349466624,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28020,
+      "cpuSystemTicks": 3658,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612080025600,
+      "database": {
+        "bytes": "1744264551",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:00:18.405Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349487104,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28132,
+      "cpuSystemTicks": 3674,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078809088,
+      "database": {
+        "bytes": "1744461159",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:00:48.426Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349487104,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28243,
+      "cpuSystemTicks": 3691,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078444544,
+      "database": {
+        "bytes": "1744559463",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:01:18.466Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349499392,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28347,
+      "cpuSystemTicks": 3706,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612062285824,
+      "database": {
+        "bytes": "1744780647",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:01:48.515Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349503488,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28459,
+      "cpuSystemTicks": 3719,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612111941632,
+      "database": {
+        "bytes": "1744870759",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:02:18.572Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349511680,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28593,
+      "cpuSystemTicks": 3739,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069556224,
+      "database": {
+        "bytes": "1745075559",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:02:48.551Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349519872,
+      "virtualBytes": 3578789888,
+      "cpuUserTicks": 28705,
+      "cpuSystemTicks": 3754,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069707776,
+      "database": {
+        "bytes": "1745206631",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:03:18.778Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349802496,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 28829,
+      "cpuSystemTicks": 3771,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612066836480,
+      "database": {
+        "bytes": "1745730919",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:03:48.558Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349802496,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 28923,
+      "cpuSystemTicks": 3785,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612066344960,
+      "database": {
+        "bytes": "1745780071",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:04:18.640Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349810688,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29047,
+      "cpuSystemTicks": 3801,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612064186368,
+      "database": {
+        "bytes": "1745911143",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:04:48.686Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349831168,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29165,
+      "cpuSystemTicks": 3817,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086181888,
+      "database": {
+        "bytes": "1746001255",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:05:18.682Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349855744,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29280,
+      "cpuSystemTicks": 3833,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086235136,
+      "database": {
+        "bytes": "1746148711",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:05:48.727Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 350932992,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29400,
+      "cpuSystemTicks": 3852,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612083707904,
+      "database": {
+        "bytes": "1746328935",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:06:18.805Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 350937088,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29541,
+      "cpuSystemTicks": 3872,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082229248,
+      "database": {
+        "bytes": "1746566503",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:06:48.756Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 350937088,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29657,
+      "cpuSystemTicks": 3893,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079120384,
+      "database": {
+        "bytes": "1746582887",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:07:18.884Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 350945280,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29802,
+      "cpuSystemTicks": 3913,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077027328,
+      "database": {
+        "bytes": "1746820455",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:07:48.849Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 350978048,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 29936,
+      "cpuSystemTicks": 3932,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076380160,
+      "database": {
+        "bytes": "1746885991",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:08:19.026Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 351080448,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30067,
+      "cpuSystemTicks": 3949,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072951808,
+      "database": {
+        "bytes": "1747008871",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:08:48.942Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 351080448,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30192,
+      "cpuSystemTicks": 3969,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073119744,
+      "database": {
+        "bytes": "1747189095",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:09:19.233Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 351080448,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30307,
+      "cpuSystemTicks": 3983,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612070457344,
+      "database": {
+        "bytes": "1747246439",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:09:48.900Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 351080448,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30418,
+      "cpuSystemTicks": 3999,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069380096,
+      "database": {
+        "bytes": "1747500391",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:10:18.987Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345239552,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30542,
+      "cpuSystemTicks": 4013,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069380096,
+      "database": {
+        "bytes": "1747647847",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:10:49.009Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345354240,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30664,
+      "cpuSystemTicks": 4031,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612091277312,
+      "database": {
+        "bytes": "1747860839",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:11:19.031Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345341952,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30790,
+      "cpuSystemTicks": 4046,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612089135104,
+      "database": {
+        "bytes": "1747926375",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:11:48.976Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345341952,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 30899,
+      "cpuSystemTicks": 4062,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612086583296,
+      "database": {
+        "bytes": "1748237671",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:12:19.316Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345350144,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31045,
+      "cpuSystemTicks": 4082,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085223424,
+      "database": {
+        "bytes": "1748344167",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:12:49.180Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 345350144,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31164,
+      "cpuSystemTicks": 4097,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612083240960,
+      "database": {
+        "bytes": "1748696423",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:13:19.257Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346599424,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31285,
+      "cpuSystemTicks": 4113,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082397184,
+      "database": {
+        "bytes": "1749106023",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:13:49.139Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346607616,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31404,
+      "cpuSystemTicks": 4129,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081270784,
+      "database": {
+        "bytes": "1749269863",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:14:19.132Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346394624,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31503,
+      "cpuSystemTicks": 4142,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079144960,
+      "database": {
+        "bytes": "1749400935",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:14:49.145Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346537984,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31603,
+      "cpuSystemTicks": 4158,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079063040,
+      "database": {
+        "bytes": "1749564775",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:15:19.187Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346537984,
+      "virtualBytes": 3579052032,
+      "cpuUserTicks": 31717,
+      "cpuSystemTicks": 4173,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612077068288,
+      "database": {
+        "bytes": "1749949799",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:15:49.162Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346771456,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 31817,
+      "cpuSystemTicks": 4187,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076175360,
+      "database": {
+        "bytes": "1750080871",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:16:19.242Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 346771456,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 31930,
+      "cpuSystemTicks": 4202,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076154880,
+      "database": {
+        "bytes": "1750244711",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:16:49.216Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347783168,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32032,
+      "cpuSystemTicks": 4217,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612072140800,
+      "database": {
+        "bytes": "1750408551",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:17:19.466Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347791360,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32158,
+      "cpuSystemTicks": 4235,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612071243776,
+      "database": {
+        "bytes": "1750596967",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:17:49.386Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347803648,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32296,
+      "cpuSystemTicks": 4255,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612069023744,
+      "database": {
+        "bytes": "1750703463",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:18:19.513Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347803648,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32416,
+      "cpuSystemTicks": 4272,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612067827712,
+      "database": {
+        "bytes": "1751235943",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:18:49.442Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347803648,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32550,
+      "cpuSystemTicks": 4291,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612068249600,
+      "database": {
+        "bytes": "1751276903",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:19:19.488Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347852800,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32683,
+      "cpuSystemTicks": 4309,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612065374208,
+      "database": {
+        "bytes": "1751489895",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:19:49.398Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347852800,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32811,
+      "cpuSystemTicks": 4323,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087463936,
+      "database": {
+        "bytes": "1751637351",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:20:19.385Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347889664,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 32922,
+      "cpuSystemTicks": 4338,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087193600,
+      "database": {
+        "bytes": "1751833959",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:20:49.432Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347889664,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33033,
+      "cpuSystemTicks": 4353,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085153792,
+      "database": {
+        "bytes": "1751965031",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:21:19.510Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347897856,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33161,
+      "cpuSystemTicks": 4370,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085043200,
+      "database": {
+        "bytes": "1752153447",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:21:49.509Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347897856,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33280,
+      "cpuSystemTicks": 4386,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081045504,
+      "database": {
+        "bytes": "1752284519",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:22:19.558Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347897856,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33407,
+      "cpuSystemTicks": 4403,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078809088,
+      "database": {
+        "bytes": "1752472935",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:22:49.556Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347938816,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33537,
+      "cpuSystemTicks": 4420,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078227456,
+      "database": {
+        "bytes": "1752792423",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:23:19.779Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 347938816,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33663,
+      "cpuSystemTicks": 4440,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612075216896,
+      "database": {
+        "bytes": "1753226599",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:23:49.667Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348434432,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33807,
+      "cpuSystemTicks": 4460,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612074287104,
+      "database": {
+        "bytes": "1753283943",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:24:19.579Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348434432,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 33921,
+      "cpuSystemTicks": 4476,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073455616,
+      "database": {
+        "bytes": "1753374055",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:24:49.681Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348434432,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34037,
+      "cpuSystemTicks": 4491,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612094103552,
+      "database": {
+        "bytes": "1753529703",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:25:19.628Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348434432,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34153,
+      "cpuSystemTicks": 4509,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612094050304,
+      "database": {
+        "bytes": "1753734503",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:25:49.629Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348438528,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34266,
+      "cpuSystemTicks": 4525,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612091789312,
+      "database": {
+        "bytes": "1753890151",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:26:19.697Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348442624,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34385,
+      "cpuSystemTicks": 4541,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612090646528,
+      "database": {
+        "bytes": "1754062183",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:26:49.729Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348446720,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34510,
+      "cpuSystemTicks": 4558,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612089495552,
+      "database": {
+        "bytes": "1754242407",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:27:19.772Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348446720,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34628,
+      "cpuSystemTicks": 4575,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087902208,
+      "database": {
+        "bytes": "1754398055",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:27:49.730Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348446720,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34745,
+      "cpuSystemTicks": 4592,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612087209984,
+      "database": {
+        "bytes": "1754578279",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:28:19.958Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348446720,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34864,
+      "cpuSystemTicks": 4609,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085616640,
+      "database": {
+        "bytes": "1754963303",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:28:49.782Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348553216,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 34978,
+      "cpuSystemTicks": 4626,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612085452800,
+      "database": {
+        "bytes": "1755192679",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:29:19.808Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348553216,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35082,
+      "cpuSystemTicks": 4642,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612082896896,
+      "database": {
+        "bytes": "1755331943",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:29:49.905Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348553216,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35215,
+      "cpuSystemTicks": 4662,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612081442816,
+      "database": {
+        "bytes": "1755503975",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:30:19.910Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348573696,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35340,
+      "cpuSystemTicks": 4680,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079779840,
+      "database": {
+        "bytes": "1755676007",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:30:49.894Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 348573696,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35456,
+      "cpuSystemTicks": 4695,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612079779840,
+      "database": {
+        "bytes": "1755848039",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:31:19.964Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349196288,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35593,
+      "cpuSystemTicks": 4714,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612078510080,
+      "database": {
+        "bytes": "1756011879",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:31:49.965Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349716480,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35728,
+      "cpuSystemTicks": 4733,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612076339200,
+      "database": {
+        "bytes": "1756167527",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:32:19.978Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349716480,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35851,
+      "cpuSystemTicks": 4752,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612073037824,
+      "database": {
+        "bytes": "1756347751",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T20:32:50.001Z",
+      "phase": "soak",
+      "pid": 1830766,
+      "rssBytes": 349716480,
+      "virtualBytes": 3579285504,
+      "cpuUserTicks": 35976,
+      "cpuSystemTicks": 4768,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 612070715392,
+      "database": {
+        "bytes": "1756495207",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    }
+  ],
+  "restarts": [
+    {
+      "signal": "SIGKILL",
+      "outcome": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "recoveryMs": 629.7555880000582,
+      "replayedSaleId": "52a4e0ce-638f-464d-a108-735c708dbae2"
+    },
+    {
+      "signal": "SIGTERM",
+      "outcome": {
+        "code": 143,
+        "signal": null
+      },
+      "recoveryMs": 660.5974179999903,
+      "replayedSaleId": "92a4e71d-c8a4-4887-adc3-3387496fff30"
+    }
+  ],
+  "requests": {
+    "successful": 16624,
+    "retryable": 2093,
+    "networkUnknown": 0,
+    "byStatus": {
+      "200": 16624,
+      "409": 1785,
+      "429": 308
+    }
+  },
+  "accepted": true,
+  "fixture": {
+    "organizationId": "d96176f3-d1d7-443e-8245-9305492a0dcc",
+    "registers": 20,
+    "initialStockPerProduct": 100000
+  },
+  "invariants": {
+    "completedSales": 5540,
+    "saleItems": 5540,
+    "payments": 5540,
+    "saleMovements": 5540,
+    "cashAmount": "5595.40",
+    "duplicates": 0,
+    "missingCommands": 0,
+    "stockChecks": 20
+  },
+  "endedAt": "2026-10-11T20:33:12.164Z"
+}

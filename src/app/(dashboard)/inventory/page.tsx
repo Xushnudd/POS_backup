@@ -6,6 +6,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api, ApiError } from '@/lib/api';
+import DurableMutation from '@/components/forms/DurableMutation';
+import PendingActions from '@/components/forms/PendingActions';
+import {confirmPageNavigation} from '@/lib/page-navigation';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { InventoryBalance, Product, StockDocument, Supplier } from '@/types';
 import { formatNumber, formatDate } from '@/lib/format';
 import Pagination from '@/components/ui/Pagination';
@@ -56,13 +60,19 @@ export default function InventoryPage() {
   const [docSupplierId, setDocSupplierId] = useState<string>('');
   const [docNote, setDocNote] = useState<string>('');
   const [docItems, setDocItems] = useState<
-    { productId: string; quantity: number; unitCost: number;tradeUnit?:string }[]
+    { productId: string; quantity: string; unitCost: string;tradeUnit?:string }[]
   >([]);
-  const [isSavingDoc, setIsSavingDoc] = useState(false);
+  const [documentNo,setDocumentNo]=useState('');
+  const [draftRevision,setDraftRevision]=useState(0);
   const [reverseTarget,setReverseTarget]=useState<{id:string;operationId:string}|null>(null);
   const [reverseReason,setReverseReason]=useState('');
   const [isReversing,setIsReversing]=useState(false);
   const [reverseSubmitted,setReverseSubmitted]=useState(false);
+  const [docBaseline,setDocBaseline]=useState('');
+  const docDirty=isDocModalOpen&&JSON.stringify([docType,docSupplierId,docNote,docItems])!==docBaseline;
+  useUnsavedChanges(docDirty);
+  const closeReversal=useUnsavedChanges(Boolean(reverseTarget&&reverseReason),isReversing);
+
 
 
   const loadData = useCallback(async () => {
@@ -134,14 +144,13 @@ export default function InventoryPage() {
   };
 
   const openNewDocModal = () => {
+    setDocumentNo('DOC-'+crypto.randomUUID());
     setDocType('purchase');
     setDocSupplierId(suppliers[0]?.id || '');
     setDocNote('');
-    setDocItems(
-      products.length > 0
-        ? [{ productId: products[0].id, quantity: 10, unitCost: Number(products[0].costPrice) || 0 }]
-        : []
-    );
+    const initialItems=products.length>0?[{productId:products[0].id,quantity:'10',unitCost:String(products[0].costPrice??'0')}]:[];
+    setDocItems(initialItems);
+    setDocBaseline(JSON.stringify(['purchase',suppliers[0]?.id||'','',initialItems]));
     setIsDocModalOpen(true);
   };
 
@@ -149,7 +158,7 @@ export default function InventoryPage() {
     if (products.length === 0) return;
     setDocItems([
       ...docItems,
-      { productId: products[0].id, quantity: 1, unitCost: Number(products[0].costPrice) || 0 },
+      { productId: products[0].id, quantity: '1', unitCost: String(products[0].costPrice??'0') },
     ]);
   };
 
@@ -157,51 +166,10 @@ export default function InventoryPage() {
     setDocItems(docItems.filter((_, i) => i !== index));
   };
 
-  const handleSaveDocument = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!organization?.id || !activeStore?.id) {
-      notifyError('Do\'kon tanlanmagan');
-      return;
-    }
-    if (docItems.length === 0) {
-      notifyError('Kamida bitta mahsulot qo\'shing');
-      return;
-    }
-    if (docItems.some((item) => !item.productId || (item.quantity===0||(docType!=='adjustment'&&item.quantity<0)) || item.unitCost < 0)) {
-      notifyError('Miqdor nol bo‘lmasin; faqat tuzatishda manfiy miqdor mumkin. Tannarx manfiy bo‘lmasin');
-      return;
-    }
-
-    if(['opening','adjustment'].includes(docType)&&docNote.trim().length<3){notifyError('Boshlang‘ich qoldiq/tuzatish uchun sabab kiriting');return;}
-    setIsSavingDoc(true);
-    try {
-      await api.stockDocuments.create({
-        organizationId: organization.id,
-        storeId: activeStore.id,
-        documentType: docType,
-        documentNo: `DOC-${crypto.randomUUID()}`,
-        supplierId: docSupplierId || undefined,
-        note: docNote || undefined,
-        items: docItems.map((item) => ({
-          productId: item.productId,
-          quantity: Number(item.quantity),
-          unitCost: Number(item.unitCost) || 0,tradeUnit:item.tradeUnit,
-        })),
-      });
-
-      notifySuccess('Ombor hujjati yaratildi');
-      setIsDocModalOpen(false);
-      setActiveTab('documents');
-      loadData();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Hujjatni yaratishda xatolik');
-    } finally {
-      setIsSavingDoc(false);
-    }
-  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <PendingActions prefix="/stock-documents" returnPath="/inventory" revision={draftRevision} onDone={()=>{setDraftRevision(value=>value+1);void loadData()}}/>
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -441,7 +409,7 @@ export default function InventoryPage() {
         </Card>
       )}
 
-      <Modal isOpen={!!reverseTarget} onClose={()=>{if(!isReversing && !reverseSubmitted)setReverseTarget(null);}} title="Ombor hujjatini qaytarish">
+      <Modal isOpen={!!reverseTarget} onClose={()=>{if(!reverseSubmitted&&closeReversal())setReverseTarget(null);}} title="Ombor hujjatini qaytarish">
         <form onSubmit={handleReverseDocument} className="space-y-4">
           <p className="text-sm text-gray-600">Asl hujjat o‘zgarmaydi. Miqdorlar qarshi hujjat bilan qaytariladi; yetarli qoldiq bo‘lishi shart.</p>
           <Input label="Qaytarish sababi" value={reverseReason} onChange={event=>setReverseReason(event.target.value)} minLength={3} maxLength={2000} required disabled={reverseSubmitted}/>
@@ -452,11 +420,11 @@ export default function InventoryPage() {
       {/* New Document Modal */}
       <Modal
         isOpen={isDocModalOpen}
-        onClose={() => setIsDocModalOpen(false)}
+        onClose={() => {if(confirmPageNavigation())setIsDocModalOpen(false)}}
         title="Yangi ombor hujjati (Kirim)"
         size="xl"
       >
-        <form onSubmit={handleSaveDocument} className="space-y-4">
+        <DurableMutation path="/stock-documents" returnPath="/inventory" label="Hujjatni yaratish" body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[`Qoralama: ${documentNo}`,`Tur: ${docType}; filial: ${activeStore?.name??''}`,`Qatorlar: ${docItems.length}`,`Sabab: ${docNote}`, ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Hujjat turi"
@@ -514,7 +482,7 @@ export default function InventoryPage() {
                         const updated = [...docItems];
                         updated[idx].productId = e.target.value;updated[idx].tradeUnit=undefined;
                         if (selProd) {
-                          updated[idx].unitCost = Number(selProd.costPrice) || 0;
+                          updated[idx].unitCost = String(selProd.costPrice??'0');
                         }
                         setDocItems(updated);
                       }}
@@ -538,7 +506,7 @@ export default function InventoryPage() {
                       value={item.quantity}
                       onChange={(e) => {
                         const updated = [...docItems];
-                        updated[idx].quantity = parseFloat(e.target.value) || 0;
+                        updated[idx].quantity = e.target.value;
                         setDocItems(updated);
                       }}
                       className="w-full text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-hidden text-center"
@@ -555,7 +523,7 @@ export default function InventoryPage() {
                       value={item.unitCost}
                       onChange={(e) => {
                         const updated = [...docItems];
-                        updated[idx].unitCost = parseFloat(e.target.value) || 0;
+                        updated[idx].unitCost = e.target.value;
                         setDocItems(updated);
                       }}
                       className="w-full text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-hidden text-right"
@@ -578,21 +546,13 @@ export default function InventoryPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsDocModalOpen(false)}
-              disabled={isSavingDoc}
+              onClick={() => {if(confirmPageNavigation())setIsDocModalOpen(false)}}
             >
               Bekor qilish
             </Button>
-            <Button
-              type="submit"
-              variant="success"
-              isLoading={isSavingDoc}
-              className="font-bold"
-            >
-              Hujjatni yaratish
-            </Button>
+
           </div>
-        </form>
+        </DurableMutation>
       </Modal>
     </div>
   );

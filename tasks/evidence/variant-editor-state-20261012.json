@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 6,
+      "failed": 0,
+      "seconds": 13.7,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "build": "pass",
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "behavior": [
+    "Option-name-only and add-empty-option draft are guarded even when no option value enters POST payload",
+    "Last loaded variant rows remain on failed refresh",
+    "Own ACK resets its draft and keeps saved status even if subsequent read fails; new mutations blocked until retry",
+    "Existing original lost-ACK recovery still produces one variant and no opening stock"
+  ],
+  "limits": [
+    "Original parent open; no new original done"
+  ],
+  "logs": {
+    "browser": "tasks/evidence/logs/variant-editor-state-20261012-browser.log",
+    "build": "tasks/evidence/logs/variant-editor-state-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/variant-editor-state-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/variant-editor-state-20261012-lint.log",
+    "testLint": "tasks/evidence/logs/variant-editor-state-20261012-testLint.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/products/[id]/variants/page.tsx": "5425cd76b1347dd3c9fceaeedc0a32022307e7d1123e86069c5c3d653781f4e4",
+    "tests/e2e/variant-editor-state.spec.ts": "bdf0650a6a491cfd609a112fec2860a026b1d663eb83a90837fa8fcb5355b48d",
+    "tests/e2e/core.spec.ts": "3a22756f2d52114f54075a0bc9d8d5d8ec33d60a91ab6e86a6d915615f18de22",
+    "tasks/evidence/logs/variant-editor-state-20261012-browser.log": "a7b5fa0635d1cda48e88cf080f61795bafc5822ee40d0594dabfc7a591c9161d",
+    "tasks/evidence/logs/variant-editor-state-20261012-build.log": "6e5b098be3e8e78d69163e6290bf64700e4b9ee4ac68b58f74ac84d670f499cc",
+    "tasks/evidence/logs/variant-editor-state-20261012-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "tasks/evidence/logs/variant-editor-state-20261012-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/logs/variant-editor-state-20261012-testLint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

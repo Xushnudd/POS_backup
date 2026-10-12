@@ -11,6 +11,7 @@ import { CustomerLedger } from '@/components/customers/CustomerLedger';
 import { deviceId, pendingOperations, enqueue, acknowledge } from '@/lib/offline';
 import { fixed } from '@/lib/money';
 import { api, ApiError } from '@/lib/api';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { Customer } from '@/types';
 import { formatMoney, formatPhone } from '@/lib/format';
 import Card from '@/components/ui/Card';
@@ -52,6 +53,9 @@ export default function CustomerDetailPage() {
   const [localReady,setLocalReady]=useState(false);
   const [localError,setLocalError]=useState('');
   const [recoveryVersion,setRecoveryVersion]=useState(0);
+  const collectionDirty=isDebtModalOpen&&!hasPendingPayment&&(paymentAmount!==debt||Boolean(paymentNote||paymentReference||manualConfirmed)||paymentType!=='cash'||allocationMode!=='fifo'||allocations.length>0);
+  const closeCollection=useUnsavedChanges(collectionDirty,isProcessing);
+
   useEffect(()=>{
     if(!organization?.id||!user?.id||!id)return;
     let cancelled=false;
@@ -256,7 +260,7 @@ export default function CustomerDetailPage() {
       {/* Debt Payment Modal */}
       <Modal
         isOpen={isDebtModalOpen}
-        onClose={() => {if(!attempt.current&&!isProcessing)setIsDebtModalOpen(false);}}
+        onClose={() => {if(!attempt.current&&closeCollection())setIsDebtModalOpen(false);}}
         title="Qarzni undirish"
         size="md"
       >
@@ -292,7 +296,7 @@ export default function CustomerDetailPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsDebtModalOpen(false)}
+              onClick={() => {if(!attempt.current&&closeCollection())setIsDebtModalOpen(false)}}
               disabled={isProcessing || hasPendingPayment}
             >
               Bekor qilish

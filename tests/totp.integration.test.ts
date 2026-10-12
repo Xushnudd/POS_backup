@@ -515,3 +515,27 @@ test('Owner password change requires a bound second factor and atomically invali
   assert.equal((await send(input)).status,401)
  }finally{if(old===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=old;if(flag===undefined)delete process.env.AUTH_TOTP_ENABLED;else process.env.AUTH_TOTP_ENABLED=flag;if(origin===undefined)delete process.env.APP_ORIGIN;else process.env.APP_ORIGIN=origin}
 })
+
+test('Hyphenated offline policy proof binds the actual operation key and rejects a changed payload and action',async()=>{
+ const f=await enrolled(),old=process.env.AUTH_CRITICAL_MFA_REQUIRED
+ try{
+  process.env.AUTH_CRITICAL_MFA_REQUIRED='true'
+  const store=await prisma.store.create({data:{organizationId:f.org.id,name:'Actual offline policy branch'}})
+  const {configureOfflineCash}=await import('@/server/offline/cash')
+  const input={operationId:randomUUID(),storeId:store.id,enabled:true,maxAmount:'25',ttlSeconds:300,reason:'Approved exact offline policy'}
+  await assert.rejects(configureOfflineCash(f.ctx,input),{code:'STEP_UP_REQUIRED'})
+  const proof=await createTotpProof(f.ctx,{action:'offline-cash.policy',operationKey:input.operationId,payloadHash:payloadHash(input),code:f.totp.generate()})
+  assert.ok(proof)
+  await assert.rejects(configureOfflineCash(f.ctx,{...input,maxAmount:'26'}),{code:'STEP_UP_REQUIRED'})
+  await assert.rejects(prisma.$transaction(tx=>assertTotpStepUp(tx,f.ctx,'offline.cash.policy',input.operationId,payloadHash(input))),{code:'STEP_UP_REQUIRED'})
+  const first=await configureOfflineCash(f.ctx,input),again=await configureOfflineCash(f.ctx,input)
+  assert.equal(first.id,again.id)
+  assert.equal(await prisma.operation.count({where:{organizationId:f.org.id,type:'offline-cash.policy',key:input.operationId}}),1)
+  assert.equal(await prisma.auditLog.count({where:{organizationId:f.org.id,entityId:first.id,action:'configured'}}),1)
+  const stored=await prisma.totpProof.findFirstOrThrow({where:{userId:f.user.id,action:'offline-cash.policy'}})
+  for(const action of ['offline-cash/policy','offline-cash.policy\n','offline-cash.policy;admin','-offline-cash.policy','a'.repeat(82)]){
+   await assert.rejects(prisma.totpProof.create({data:{...stored,id:randomUUID(),operationKey:randomUUID(),action,approvedOperationAt:null}}),(error:unknown)=>error instanceof Error&&error.message.includes('TotpProof_action_name_check'))
+  }
+  assert.equal(await prisma.totpProof.count({where:{userId:f.user.id}}),1)
+ }finally{if(old===undefined)delete process.env.AUTH_CRITICAL_MFA_REQUIRED;else process.env.AUTH_CRITICAL_MFA_REQUIRED=old}
+})
