@@ -407,3 +407,12 @@ test('Application endpoints bind tenant, original receipt path, owner role, stri
  await prisma.organizationUser.update({where:{id:a.context.organizationUserId},data:{role:'admin'}})
  assert.equal((await applyPreviewRoute(request(path+'/application-preview',a.cookie,{}),params)).status,403)
 })
+test('Atomic exchange of a fee-bearing unit continues the original dated cost ledger without double freight',async()=>{
+ const {previewExchange,postExchange}=await import('@/server/returns/exchanges'),a=await appliedFixture(),register=await prisma.register.create({data:{storeId:a.store.id,name:'Freight exchange register',code:randomUUID()}}),shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:a.context.organizationUserId,openingCash:0}})
+ const draft=await createDraft(a.context,{organizationId:a.context.organizationId,storeId:a.store.id,registerId:register.id,shiftId:shift.id,items:[{productId:a.products[0].id,quantity:'1',discountAmount:0}],discountAmount:0},randomUUID()),sale=await completeSale(a.context,draft.id,{payments:[{paymentType:'cash',amount:'10'}]},randomUUID())
+ const input={originalSaleId:sale.id,shiftId:shift.id,reason:'Actual fee-bearing same-SKU exchange',items:[{saleItemId:sale.items[0].id,quantity:'1',disposition:'sellable' as const}],replacement:{discountAmount:0,items:[{productId:a.products[0].id,quantity:'1',discountAmount:0}]},creditAmount:0},review=await previewExchange(a.context,input),posted={...input,operationId:randomUUID(),confirmationHash:review.confirmationHash,cashTendered:0}
+ await postExchange(a.context,posted);await postExchange(a.context,posted)
+ const report=await prisma.$transaction(tx=>profitSummary(tx,a.context,new URLSearchParams()))
+ assert.equal(report.summary.inventoryValueVariance.toFixed(2),'0.00');assert.equal(report.summary.cogs.toFixed(2),'4.00')
+ await prisma.$transaction(tx=>readProductValuationFacts(tx,a.context,a.products[0].id))
+})

@@ -1,5 +1,6 @@
 'use client';
 
+import SerialPicker from '@/components/inventory/SerialPicker';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -60,7 +61,7 @@ export default function InventoryPage() {
   const [docSupplierId, setDocSupplierId] = useState<string>('');
   const [docNote, setDocNote] = useState<string>('');
   const [docItems, setDocItems] = useState<
-    { productId: string; quantity: string; unitCost: string;tradeUnit?:string;batchInput?:{code:string;receivedOn:string;expiresOn:string} }[]
+    { productId: string; quantity: string; unitCost: string;tradeUnit?:string;serialInput?:string[];batchInput?:{code:string;receivedOn:string;expiresOn:string} }[]
   >([]);
   const [documentNo,setDocumentNo]=useState('');
   const [draftRevision,setDraftRevision]=useState(0);
@@ -169,6 +170,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <Link href="/inventory/serials" className="text-blue-700 underline">Seriya raqamlari va kafolat</Link>
       <Link href="/inventory/batches" className="text-blue-700 underline">Partiyalar va yaroqlilik hisoboti</Link>
       <PendingActions prefix="/stock-documents" returnPath="/inventory" revision={draftRevision} onDone={()=>{setDraftRevision(value=>value+1);void loadData()}}/>
       {/* Top Header */}
@@ -483,7 +485,7 @@ export default function InventoryPage() {
                         const updated = [...docItems];
                         updated[idx].productId = e.target.value;updated[idx].tradeUnit=undefined;
                         if (selProd) {
-                          updated[idx].batchInput = undefined;
+                          updated[idx].batchInput = undefined;updated[idx].serialInput=undefined;
                           updated[idx].unitCost = String(selProd.costPrice??'0');
                         }
                         setDocItems(updated);
@@ -532,6 +534,7 @@ export default function InventoryPage() {
                     />
                   </div>
 
+                  {products.find(product=>product.id===item.productId)?.serialTracking&&(item.quantity.trim().startsWith('-')&&activeStore?<SerialPicker storeId={activeStore.id} productId={item.productId} label={'Hisobdan chiqariladigan seriallar '+(idx+1)} value={item.serialInput??[]} onChange={ids=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>:<Input label={'Hujjat seriya raqamlari '+(idx+1)} value={(item.serialInput??[]).join(', ')} onChange={event=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:event.target.value.split(/[\s,;]+/).filter(Boolean)}:r))}/>)}
                   {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label="Partiya ma’lumotlari">{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]}<input aria-label={['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
                   <button
                     type="button"

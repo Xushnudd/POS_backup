@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-13",
+  "gitHead": "3f54b1ca87f12fc43fbd1dcdafbb489248f56673",
+  "dirtyWorkspace": true,
+  "commitCreated": false,
+  "deploymentPerformed": false,
+  "scope": "Local synthetic source-backed core acceptance, not production/pilot/vendor/hardware proof",
+  "originalDoneBefore": 169,
+  "originalDoneAfter": 170,
+  "originalTotal": 259,
+  "requestedTarget": 170,
+  "completedOriginalTasks": [
+    "INV-02.07"
+  ],
+  "newOriginalDone": 1,
+  "decisions": [
+    "ADR088"
+  ],
+  "checks": {
+    "unit": {
+      "passed": 128,
+      "failed": 0
+    },
+    "postgres": {
+      "passed": 113,
+      "failed": 0,
+      "serialCases": 9,
+      "landedCostCases": 18,
+      "scope": "127.0.0.1:55439/pos_test only"
+    },
+    "browser": {
+      "passed": 9,
+      "failed": 0,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "serialPolicyServiceReturnPOS": 3,
+      "priorCostApplyReverse": 3,
+      "batchFefoCount": 3
+    },
+    "type": "PASS",
+    "lint": "PASS zero warnings",
+    "worker": "PASS",
+    "localWebpackReleaseBuild": "PASS",
+    "migration": {
+      "fresh": 166,
+      "legacyBaseline": 133,
+      "cloneUpgradeRepeat": "PASS",
+      "actualSerialWarrantyServiceAndPriorCostBatchDumpRestore": "PASS"
+    },
+    "prismaModels": 124,
+    "scanner": {
+      "scanned": 1264,
+      "findings": [],
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    }
+  },
+  "expectedActual": [
+    {
+      "scenario": "receipt/replay",
+      "expected": "two actual source units, one receipt posting; serials unique per tenant",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "sale/warranty/service/return/resale",
+      "expected": "original terms365days retained; later10day policy affects new sale only; original unit linked to both warranties",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "wrong original serial/double sale/fractional unit",
+      "expected": "rejected; no additional cash/stock/warranty",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "same serial concurrent checkout",
+      "expected": "one winner, cash10, one warranty, available stock1",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "late warranty INSERT fault",
+      "expected": "serial available, stock2, no payment/Operation; exact retry one warranty",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "damage/write-off returns",
+      "expected": "exact states damaged/retired, available stock0, cash refunds20",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "partial cross-branch transfer/replay",
+      "expected": "one selected unit arrives, other remains transit; final stock2 at destination",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "loss reversal and supplier return",
+      "expected": "original retired unit restored; other original receipt unit retired; available stock1",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "native policy/identity and role/tenant",
+      "expected": "disable/no-owner-proof updates rejected; foreign service/read rejected; cashier notes/trace absent",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "same-transaction serialized exchange",
+      "expected": "native kinds receipt/sale/return/sale ordinals1/2/3/4 even equal return/sale timestamp; two warranties; cash in20/out10",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "fee-bearing exchange",
+      "expected": "dated original cost projection preserved, cogs4.00, variance0.00; original replay one exchange",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "three-browser policy and POS recovery",
+      "expected": "MFA before policy, original policy key recovered, actual service and return; manual original status after POS lost ACK restores receipt without second sale/warranty",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "actual restore",
+      "expected": "SerialNumber/SerialEvent/Warranty/WarrantyService canonical hashes unchanged; restored sold unit history and cash10/stock1 verified",
+      "actual": "PASS; local synthetic"
+    }
+  ],
+  "limits": {
+    "serialUnitsPerSourcePosting": 500,
+    "queryPage": 50,
+    "summaryLatestEventsAndServices": 20,
+    "fullHistory": "paged original retained events/warranties/services"
+  },
+  "safeBoundaries": [
+    "Unused precision0 products only; no legacy fabricated serials",
+    "Serialized offline cash leases and aggregate quantity-only counts fail closed",
+    "Serial policy owner/MFA/native audit proof, immutable projection/events/warranty/service",
+    "SQL166 empty pre-release journal guard; no guessed historical ordinal or automatic erase",
+    "Vendor/hardware and staging/production/pilot work remains external"
+  ],
+  "failureHistory": [
+    "SQL162 syntax failed inside transaction and rolled back. Only failed/not-applied file corrected, testDB rolled-back resolve/deploy; applied migrations unchanged.",
+    "Initial expanded browser fixture omitted mandatory refund reason and was rejected. Fixture corrected.",
+    "Recovery fixture assumed automatic clearing before hydration. Final test waits for unknown-result UI, reloads, checks pending original intent and uses documented manual status recovery; actual completion key derived from sale URL, never undefined."
+  ],
+  "logs": {
+    "unit": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-unit.log",
+      "sha256": "4f47dfd7e18e3af7f46b3d950b0397326369854683b7bef4b20fec2b13eba5b1",
+      "role": "final verification"
+    },
+    "postgres": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-postgres.log",
+      "sha256": "16a64d228c40b4ea8c9c074388942eeac1db414ed397ff3d4cb60fbcc263a22b",
+      "role": "final verification"
+    },
+    "browser": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-browser.log",
+      "sha256": "db107bdbe67697a5c6f35bc6e02d6156da6afd81706ee20a7a39e785e6538ba2",
+      "role": "final verification"
+    },
+    "compile": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "type": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-type.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "lint": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "worker": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "build": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-build.log",
+      "sha256": "3a8e77599e81a3753ab68693ef717d5e51d0088c92d61e48b18b021f0b7309b7",
+      "role": "final verification"
+    },
+    "migrationRestore": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-migrationRestore.log",
+      "sha256": "ca88feb773d5f91cb14d1eeb3473cfcfe805757c293a9f71827aa4cf04753396",
+      "role": "final verification"
+    },
+    "scanner": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-scanner.log",
+      "sha256": "4a01a1320d5087311786cf7e968ea9e871523f54a0f8cdcedea61e868515cd71",
+      "role": "final verification"
+    },
+    "historicalMigrationSyntaxFailure": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-historicalMigrationSyntaxFailure.log",
+      "sha256": "313b66240f4193733a9dbc2f9e8d2de75a0753af9a8d07ade3372bffe0c9f6cb",
+      "role": "historical failed attempt, corrected and rerun"
+    },
+    "historicalBrowserMissingReason": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-historicalBrowserMissingReason.log",
+      "sha256": "46d78a7935885ecb26997c74f14d27cba2ebb1d9c92440b1dd10c06688fe8904",
+      "role": "historical failed attempt, corrected and rerun"
+    },
+    "historicalBrowserRecoveryExpectation": {
+      "path": "tasks/evidence/logs/serials-warranty-20261013-historicalBrowserRecoveryExpectation.log",
+      "sha256": "55cb59d8961f2f14f5914eb59c501254c84ef7e82abd7ea8d462f18ac3584899",
+      "role": "historical failed attempt, corrected and rerun"
+    }
+  },
+  "sourceSha256": {
+    "api.md": "7bb93daf131f664a752e40e85de566f1c916b046fb4b77faea57912160e2d0ff",
+    "docs/operations/serials-warranty.md": "fdcd20507876be550fcf168c982618b771c607aca0fdd0048a70ad17fa7c73b1",
+    "prisma/migrations/202610130160_serial_warranty_core/migration.sql": "23b54620409ac7b3ec743859663badfa713af272f0567710e95224a3958d2199",
+    "prisma/migrations/202610130161_serial_business_scope/migration.sql": "992e2a7c38e2f7f8a84c569fe519331526e08bc4735d9811ec42f1cb42f36240",
+    "prisma/migrations/202610130162_serial_current_source/migration.sql": "edd7e4b79dd22caa97d97316ed625515a0a124c704158e7d0e07aed154c30363",
+    "prisma/migrations/202610130163_serial_complete_guards/migration.sql": "23959c35c364ddf3996a5520763090fca769d6736ba556d2665d05badf1aa6b2",
+    "prisma/migrations/202610130164_serial_loss_restore/migration.sql": "5326d744d56de72712c9e6151f65a866cec94970e25bdc4cf5bb709bc6dfe2b6",
+    "prisma/migrations/202610130165_serial_projection_guards/migration.sql": "e7eee7b9d2a052606251e5bf8e1274182b9aba115b806c15a00126085a4eda26",
+    "prisma/migrations/202610130166_serial_native_order/migration.sql": "d541453ffc38ce9cc8d1d41e004519bb9f2e1486fe20b49dba80f044361208f8",
+    "prisma/schema.prisma": "70b7fb70b84e2091a53ef1a49b6bdfe893617ad3aa299868c11a22386c684f5e",
+    "scripts/ops/serial-restore-fixture.cjs": "3b7195792d6ae07b4ae2552e74368954edf40eea663ed67502496ade5da6d0bb",
+    "scripts/ops/test-valuation-migrations.sh": "14e0861d95d34f1aa3c809891f18f692ddab174d97f0a0b3891cb0a59e844a30",
+    "src/app/(dashboard)/inventory/page.tsx": "0439f4886e2d337bc6b9d1b3071a93c3b44a85a2db492f057102a1387af08641",
+    "src/app/(dashboard)/inventory/serials/page.tsx": "59a08d6a02cfb22e0ccb71bb6dcef1f2c71a437ad1d005d20618ca298668adec",
+    "src/app/(dashboard)/inventory/transfers/page.tsx": "d0fb33681a499441bcbbc7a13607f5e7b833e550db426301974a9bc3e932db46",
+    "src/app/(dashboard)/pos/page.tsx": "25b749f5fa9a1de20a763c35bb57aa41bac5b10f1d402475cb697aa8e6bf0914",
+    "src/app/(dashboard)/sales/[id]/exchange/page.tsx": "cb6aa592ec344ded11baa62d7360f8fb6335165d50e8cbba01fe9124f48879c3",
+    "src/app/(dashboard)/sales/[id]/page.tsx": "5f7562d6a9c89a0254d8a0508b67cc0b49682fd2ab89c781332a2a94647c4f74",
+    "src/app/api/inventory/serials/[id]/history/route.ts": "5570a0da1e0870ef68bb469a34a1818f1545e6b6f555dcc9ad92b0847ef554cd",
+    "src/app/api/inventory/serials/policy/route.ts": "149fd534569d5a4b6a9010882b2a244a8d22a2c35910a936026470f4b296b036",
+    "src/app/api/inventory/serials/route.ts": "ee66f22fd299f280f13e0f9b7204cb6458efede8317f4fe701b43d426f97a9dc",
+    "src/app/api/inventory/serials/service/route.ts": "303c627bb4cfa01154436946cb3dc7ffd169d729cb202c48c7149653c78a1b0c",
+    "src/app/api/stock-documents/route.ts": "55f5951624f28bd044cf76bd5ba626b19c92b771c1ec6ea41a3523033a5ca04f",
+    "src/app/api/transfers/route.ts": "7b0d7a684f1e497802ded80d32d19c5836477233f9f92455c9fb9300be6aab6a",
+    "src/components/forms/DurableMutation.tsx": "f29f9d2d2131b233de1ab6b0a689cae48b803fb06a1ba39ad5caabc27248478d",
+    "src/components/inventory/SerialHistory.tsx": "808789573d6dae1c17ae6b1d39b0c4c50676a647c470eb653781a640d9925dac",
+    "src/components/inventory/SerialPicker.tsx": "36d41a5cfad31f2205f71ebda53a3ea583e1b7d876ea3afde3f709f60868ec2d",
+    "src/components/inventory/TransferReceipt.tsx": "d52acc292b7407ab52d7eac8decf203285f8b99c1d1b6cd28f75aae0b798a6d7",
+    "src/components/pos/PaymentModal.tsx": "beeaa6e05d14b83b522382f1ca3b75895c386967b71e5598e4dfd4aa55cfd3ef",
+    "src/components/pos/ReceiptPreview.tsx": "1c26c95e536ee99b9dc9135d6ad35ee5d26546fff7ae07b566d4162536a009ea",
+    "src/components/suppliers/PurchaseOrders.tsx": "540bf7be50cf12192822a9aa23930107343f8cdd1e2f0b18a4ddfaea00fa0808",
+    "src/components/suppliers/SupplierCredits.tsx": "f8fddebe39d2964334c0bda5109e63d63077b05b93b701a3805322ba931f5d83",
+    "src/lib/api.ts": "cc2e2aecb038302c8786aef41687d686c5eb3f8f617a3d20a33961a79238b793",
+    "src/lib/durable-identity.ts": "b95541e2dfbfaa49adebb69895555ea902b34e0d0e1f5c9e88a2874fd4555120",
+    "src/lib/error-guidance.ts": "612664e84d3e383eab13218aff2c9bcc8ae55c532a23b7712c9d8ac161c1069d",
+    "src/server/auth/critical-actions.ts": "23b85bc5c1f8123b3f6f9616ced8fe987126da2384b51363898f737265de1eb5",
+    "src/server/auth/policy.ts": "e19c31ce95b3b4bc474999f1deee3bf1dabcc15beabc3df86d82713407cdf4fd",
+    "src/server/auth/route-permissions.ts": "95c71fbfc997014467c3dbd6f818c4b3836d15275d548787da709189c57968d6",
+    "src/server/auth/tenant-models.ts": "d96ef7748191a12c28a492ebf2ab0ea9340f442d49bc0d3c477a4b3963a063c4",
+    "src/server/auth/tenant-write.ts": "9a8dfc664181ae2ea9504bc7c5072746d02c0c7a04115c769a973e407945f4f6",
+    "src/server/billing/read-only-policy.ts": "4b807b301eb21c337111a94d5ec94308a98318a2df32f76d85d350bb743203b8",
+    "src/server/inventory/batches.ts": "6de5e61146dd139d74686142d2eb19192dc7136363bcb894701e35d3b8c35034",
+    "src/server/inventory/counts.ts": "38bfc1b70ac2acb1f0c4d54b3eff170444509b1f62887a09c1c2bb7742c18d2f",
+    "src/server/inventory/documents.ts": "20a8e011286ccad10f3b1f35a87c3e285b9fe86ee89f1e99865d8f41adf21acd",
+    "src/server/inventory/movements.ts": "669a06c28e48af2dac1cd6cf2da097b8fdb1985d88e53d540453511699014d5e",
+    "src/server/inventory/reservations.ts": "26813a6ea02e1fdb48b943bc871470fbd4ffeefd17887ffd59399fbc2c6499ec",
+    "src/server/inventory/serials.ts": "064a3591d2a37688cf56767540a996de1e76cb3b54e6bfa69ab9dc2cb5366b14",
+    "src/server/jobs/tenant-export-contract.ts": "2a69f1d78c61221154dff00537e435aa819648f7d17aa3f26f564235cb6ea1db",
+    "src/server/purchases/cost-continuations.ts": "829556c5eaea7811be206e0d1ebe2d6e54c2b0854e6db3a868d2838add913789",
+    "src/server/purchases/credits.ts": "77f3967a8545c06cef8fb10ec4fd7de2b5bf5208994914e2cfd5d15d90079caf",
+    "src/server/purchases/orders.ts": "02185d333af890ee7966687c014889c36574ea4a2b1e4fcb2275f5ce79c2775d",
+    "src/server/returns/exchanges.ts": "d01d07929101e28ace017bf7a240597544f5f60acd0bc454273e32248f30250f",
+    "src/server/returns/service.ts": "12640edb5ae06a685d7f7e228c57f554dcf3d7d624709db2edbd204e1bf9e856",
+    "src/server/sales/service.ts": "ea04d0ca2396c76508ee58cfb32eff4ff7adfb0205c87253db2048be51fdae6a",
+    "src/types/index.ts": "efc2a623ba587bf001e4a0423f58fbfc93404f0dd0a6d43c69c26cbdeb29f207",
+    "tasks/DECISIONS.md": "8f1169320365ca7a8328fa6056615eebb97bfb1311546aeb6350ec0a40674fe5",
+    "tasks/EXECUTION_STATUS.md": "d628a2dcf03e62d547a022f07310d9e03912eca8769ba3b4b8c36387928e0b6d",
+    "tasks/PLAN1.md": "a7ce8801a4d8068c7725e557ff741d30b0c25755580077f8e0ffc204eafe5a4a",
+    "tests/e2e/serials.spec.ts": "4e84f576325158223099ffe7c5f9d1dcdf9fe9b831ecb6b7a27b0b959a73b039",
+    "tests/landed-cost.integration.test.ts": "6d59f48b3bc921334cff6dd0fc92b0616440272d4dd03fe14750232648d346ff",
+    "tests/serials.integration.test.ts": "2cb211c7d3928ef7dfd9a2c118c48dc5155b35df482044e660760b8908f22ba5"
+  }
+}

@@ -1,3 +1,4 @@
+import {serialIdsSchema,postSerialDisposition} from './serials'
 import {batchSelectionSchema,postBatchDisposition} from './batches'
 import type {ConversionSnapshot} from '../catalog/conversion-math'
 import {assertCurrentConversion} from '../catalog/conversions'
@@ -66,7 +67,7 @@ export async function sendTransfer(context:TokenPayload,id:string) {
   return result
  })
 }
-export const receiveSchema=z.object({operationId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000).optional(),items:z.array(z.object({itemId:z.string().uuid(),quantity:nonnegativeQuantitySchema,damagedQuantity:nonnegativeQuantitySchema.optional(),shortageQuantity:nonnegativeQuantitySchema.optional(),receivedBatches:batchSelectionSchema.optional(),damagedBatches:batchSelectionSchema.optional(),shortageBatches:batchSelectionSchema.optional()}).strict()).min(1).max(500).optional()}).strict()
+export const receiveSchema=z.object({operationId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000).optional(),items:z.array(z.object({itemId:z.string().uuid(),quantity:nonnegativeQuantitySchema,damagedQuantity:nonnegativeQuantitySchema.optional(),shortageQuantity:nonnegativeQuantitySchema.optional(),receivedSerials:serialIdsSchema.optional(),damagedSerials:serialIdsSchema.optional(),shortageSerials:serialIdsSchema.optional(),receivedBatches:batchSelectionSchema.optional(),damagedBatches:batchSelectionSchema.optional(),shortageBatches:batchSelectionSchema.optional()}).strict()).min(1).max(500).optional()}).strict()
 export async function receiveTransfer(context:TokenPayload,id:string,input:z.infer<typeof receiveSchema>) {
  if(!['owner','admin'].includes(context.role))throw new AccessError(403,'MANAGER_REQUIRED');
  const key=input.operationId??id+':all'
@@ -75,7 +76,7 @@ export async function receiveTransfer(context:TokenPayload,id:string,input:z.inf
   const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
   if (doc.status!=='sent') throw new AccessError(409,'INVALID_STATUS')
-  const rows=input.items??doc.items.filter(x=>transitRemaining(x).gt(0)).map(x=>({itemId:x.id,quantity:transitRemaining(x).toString(),damagedQuantity:undefined,shortageQuantity:undefined,receivedBatches:undefined,damagedBatches:undefined,shortageBatches:undefined}))
+  const rows=input.items??doc.items.filter(x=>transitRemaining(x).gt(0)).map(x=>({itemId:x.id,quantity:transitRemaining(x).toString(),damagedQuantity:undefined,shortageQuantity:undefined,receivedSerials:undefined,damagedSerials:undefined,shortageSerials:undefined,receivedBatches:undefined,damagedBatches:undefined,shortageBatches:undefined}))
   if (new Set(rows.map(x=>x.itemId)).size!==rows.length || !rows.length) throw new AccessError(400,'INVALID_ITEMS')
   for (const row of [...rows].sort((a,b)=>a.itemId.localeCompare(b.itemId))) {
    const original=doc.items.find(x=>x.id===row.itemId)
@@ -84,8 +85,8 @@ export async function receiveTransfer(context:TokenPayload,id:string,input:z.inf
    const product=await tx.product.findFirstOrThrow({where:{id:original.productId,organizationId:context.organizationId}});
    for(const quantity of [received,damaged,shortage])if(quantity.gt(0))await validateUnitQuantity(tx,context.organizationId,product.unit,quantity);
    if(damaged.add(shortage).gt(0)&&(!input.reason||input.reason.trim().length<3))throw new AccessError(400,'REASON_REQUIRED','Brak/kamomad tasdig‘iga sabab kerak');
-   if(received.gt(0))await moveStock(tx,context,{storeId:doc.toStoreId,productId:original.productId,delta:received,unitCost:original.issueUnitCostSnapshot??original.unitCost,sourceType:'transfer_in',sourceId:key,batchSource:{sourceType:'transfer_out',sourceId:doc.id,storeId:doc.fromStoreId,selection:row.receivedBatches}});
-   for(const [disposition,quantity] of [['damaged',damaged],['shortage',shortage]] as const)if(quantity.gt(0)){const entry=await tx.transferDispositionEntry.create({data:{organizationId:context.organizationId,storeId:doc.toStoreId,productId:product.id,itemId:original.id,operationId:key,disposition,quantity,unitCost:original.issueUnitCostSnapshot??original.unitCost,productName:product.name,sku:product.sku,unit:product.unit,reason:input.reason!,actorId:context.userId}});await postBatchDisposition(tx,context,{productId:product.id,quantity,transferDispositionId:entry.id,source:{sourceType:'transfer_out',sourceId:doc.id,storeId:doc.fromStoreId,selection:disposition==='damaged'?row.damagedBatches:row.shortageBatches}})}
+   if(received.gt(0))await moveStock(tx,context,{storeId:doc.toStoreId,productId:original.productId,delta:received,unitCost:original.issueUnitCostSnapshot??original.unitCost,sourceType:'transfer_in',sourceId:key,serialSource:{ids:row.receivedSerials,originalId:doc.id},batchSource:{sourceType:'transfer_out',sourceId:doc.id,storeId:doc.fromStoreId,selection:row.receivedBatches}});
+   for(const [disposition,quantity] of [['damaged',damaged],['shortage',shortage]] as const)if(quantity.gt(0)){const entry=await tx.transferDispositionEntry.create({data:{organizationId:context.organizationId,storeId:doc.toStoreId,productId:product.id,itemId:original.id,operationId:key,disposition,quantity,unitCost:original.issueUnitCostSnapshot??original.unitCost,productName:product.name,sku:product.sku,unit:product.unit,reason:input.reason!,actorId:context.userId}});await postSerialDisposition(tx,context,{productId:product.id,storeId:doc.toStoreId,quantity,kind:disposition==='damaged'?'damaged':'retired',sourceId:key,transferDispositionId:entry.id,originalTransferId:doc.id,ids:disposition==='damaged'?row.damagedSerials:row.shortageSerials});await postBatchDisposition(tx,context,{productId:product.id,quantity,transferDispositionId:entry.id,source:{sourceType:'transfer_out',sourceId:doc.id,storeId:doc.fromStoreId,selection:disposition==='damaged'?row.damagedBatches:row.shortageBatches}})}
    await tx.stockTransferItem.update({where:{id:original.id},data:{receivedQuantity:{increment:received},damagedQuantity:{increment:damaged},shortageQuantity:{increment:shortage}}})
   }
   const remaining=await tx.stockTransferItem.findMany({where:{stockTransferId:doc.id}})
@@ -144,7 +145,7 @@ export async function cancelTransfer(context:TokenPayload,id:string,input:z.infe
  })
 }
 
-export const returnTransferSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000),items:z.array(z.object({itemId:z.string().uuid(),quantity:quantitySchema,batchSelection:batchSelectionSchema.optional()})).min(1).max(500).optional()}).strict()
+export const returnTransferSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000),items:z.array(z.object({itemId:z.string().uuid(),quantity:quantitySchema,serialIds:serialIdsSchema.optional(),batchSelection:batchSelectionSchema.optional()})).min(1).max(500).optional()}).strict()
 export async function returnTransfer(context:TokenPayload,id:string,input:z.infer<typeof returnTransferSchema>) {
  if (!['owner','admin'].includes(context.role)) throw new AccessError(403,'MANAGER_REQUIRED')
  return runOperation(context,'transfer.return',input.operationId,{id,reason:input.reason,items:input.items??'all'},async tx=>{
@@ -152,12 +153,12 @@ export async function returnTransfer(context:TokenPayload,id:string,input:z.infe
   const doc=await tx.stockTransfer.findFirst({where:{id,AND:tenantScope('StockTransfer',context)},include:{items:true}})
   if (!doc) throw new AccessError(404,'NOT_FOUND')
   if (doc.status!=='sent') throw new AccessError(409,'INVALID_STATUS')
-  const rows=input.items??doc.items.filter(x=>transitRemaining(x).gt(0)).map(x=>({itemId:x.id,quantity:transitRemaining(x).toString(),batchSelection:undefined}))
+  const rows=input.items??doc.items.filter(x=>transitRemaining(x).gt(0)).map(x=>({itemId:x.id,quantity:transitRemaining(x).toString(),serialIds:undefined,batchSelection:undefined}))
   if (!rows.length || new Set(rows.map(x=>x.itemId)).size!==rows.length) throw new AccessError(400,'INVALID_ITEMS')
   for (const row of [...rows].sort((a,b)=>a.itemId.localeCompare(b.itemId))) {
    const item=doc.items.find(x=>x.id===row.itemId)
    if(!item || decimal(row.quantity).gt(transitRemaining(item))) throw new AccessError(409,'RETURN_QUANTITY_EXCEEDED','Faqat hali qabul qilinmagan miqdorni qaytarish mumkin')
-   await moveStock(tx,context,{storeId:doc.fromStoreId,productId:item.productId,delta:row.quantity,unitCost:item.issueUnitCostSnapshot??item.unitCost,sourceType:'transfer_return',sourceId:input.operationId,batchSource:{sourceType:'transfer_out',sourceId:doc.id,storeId:doc.fromStoreId,selection:row.batchSelection}})
+   await moveStock(tx,context,{storeId:doc.fromStoreId,productId:item.productId,delta:row.quantity,unitCost:item.issueUnitCostSnapshot??item.unitCost,sourceType:'transfer_return',sourceId:input.operationId,serialSource:{ids:row.serialIds,originalId:doc.id},batchSource:{sourceType:'transfer_out',sourceId:doc.id,storeId:doc.fromStoreId,selection:row.batchSelection}})
    await tx.stockTransferItem.update({where:{id:item.id},data:{returnedQuantity:{increment:decimal(row.quantity)}}})
   }
   const remaining=await tx.stockTransferItem.findMany({where:{stockTransferId:id}})

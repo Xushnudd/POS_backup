@@ -3,6 +3,10 @@
 // New route/method pairs must be reviewed here; unknown routes fail closed.
 export type BusinessRole = 'owner' | 'admin' | 'cashier'
 export const ROUTE_PERMISSIONS: Readonly<Record<string, readonly BusinessRole[]>> = {
+  "GET /api/inventory/serials/[id]/history": ["owner","admin"],
+  "GET /api/inventory/serials": ["owner","admin","cashier"],
+  "POST /api/inventory/serials/policy": ["owner"],
+  "POST /api/inventory/serials/service": ["owner","admin"],
   "GET /api/roles": ["owner"],
   "POST /api/roles": ["owner"],
   "PUT /api/roles/[id]": ["owner"],

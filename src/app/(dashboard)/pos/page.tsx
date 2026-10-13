@@ -248,7 +248,7 @@ export default function PosPage() {
 
   // Process and complete sale
   const handleProcessPayment = async (
-    payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string
+    payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string,serialSelections?:{productId:string;ids:string[]}[]
   ) => {
     if (!organization?.id || !activeStore?.id || !activeRegister?.id || !activeShift?.id || !user?.id) {
       notifyError('Kassa yoki smena ma\'lumotlari to\'liq emas');
@@ -264,7 +264,7 @@ export default function PosPage() {
       if(!paymentQuote||paymentQuote.signature!==JSON.stringify(rawDraft))throw new Error('Savat o‘zgardi; to‘lov hisobini serverda qayta tekshiring');
       const draftPayload={...rawDraft,expectedTotalAmount:paymentQuote.totals.totalAmount,expectedTaxFingerprint:paymentQuote.taxFingerprint};
 
-      const completion={payments,...(creditDueAt?{creditDueAt}: {}),...(cashTendered!==undefined?{cashTendered}: {})};
+      const completion={payments,...(serialSelections?{serialSelections}:{}),...(creditDueAt?{creditDueAt}: {}),...(cashTendered!==undefined?{cashTendered}: {})};
       const signature = JSON.stringify(draftPayload);
       if (checkoutAttempt.current && checkoutAttempt.current.payload !== signature && checkoutAttempt.current.payload!=='resumed') {
         throw new Error('Oldingi savdo natijasini aniqlang; kutilayotgan savatni o‘zgartirish mumkin emas');
@@ -560,6 +560,8 @@ export default function PosPage() {
       />
 
       <PaymentModal
+        storeId={activeStore?.id}
+        serialItems={items.filter(item=>item.product.serialTracking).map(item=>({productId:item.product.id,name:item.product.name,quantity:String(item.quantity)}))}
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         totalAmount={Number(paymentQuote?.totals.totalAmount??totalAmount)}

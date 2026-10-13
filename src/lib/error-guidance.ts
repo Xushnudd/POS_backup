@@ -1,5 +1,13 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ SERIAL_SELECTION_REQUIRED:{message:'Original seriallar tanlanmagan yoki holati o‘zgargan.',nextAction:'Original birlik ro‘yxatini yangilang va har birlikni aniq tanlang. Pul/stock qisman yozilmaydi.'},
+ SERIAL_COUNT_MISMATCH:{message:'Seriallar soni kirim miqdoriga teng emas.',nextAction:'Har butun birlik uchun bitta noyob serial kiriting.'},
+ SERIAL_REQUIRES_UNUSED_PRODUCT:{message:'Mahsulotning oldingi tarixi mavjud.',nextAction:'Yangi alohida SKU yarating; eski qoldiqqa taxminiy serial yozilmaydi.'},
+ SERIAL_INTEGER_UNIT_REQUIRED:{message:'Serial uchun butun dona birligi talab qilinadi.',nextAction:'Precision0 birlikli va partiya nazoratisiz mahsulotni tanlang.'},
+ SERIAL_OFFLINE_CASH_UNAVAILABLE:{message:'Serial mahsulot offline sotuv uchun mavjud emas.',nextAction:'Online ulanishda original birlikni tanlab soting.'},
+ WARRANTY_ORIGINAL_SALE_REQUIRED:{message:'Original kafolatning birligi qaytarilgan yoki qayta sotilgan.',nextAction:'Shu birlikning original sale/warranty tarixini oching. Eski kafolat o‘zgartirilmaydi.'},
+ WARRANTY_SERVICE_STATE_CHANGED:{message:'Servis holati ketma-ketligi o‘zgargan.',nextAction:'Original servis jurnalini yangilang; avval yangi murojaat oching.'},
+
  COST_PREVIEW_CHANGED:{message:"Tannarx hisobi o‘zgargan.",nextAction:"Hisobni yangilang va yangi qiymatlarni qayta ko‘rib tasdiqlang."},
  COST_ALREADY_APPLIED:{message:"Ushbu xarajat allaqachon tannarxga qo‘llangan.",nextAction:"Original amal va tannarx jurnalini yangilang; xarajatni qayta qo‘llamang."},
  COST_REVERSE_REQUIRED:{message:"Taqsimot tannarxga qo‘llangan.",nextAction:"Egasi avval qo‘llash reversalini yozsin; keyin taqsimotni bekor qilish mumkin."},

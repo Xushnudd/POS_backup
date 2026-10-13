@@ -10,6 +10,11 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+ serialNumbers SerialNumber[]
+ serialEvents SerialEvent[]
+ warranties Warranty[]
+ warrantyServices WarrantyService[]
+
  costContinuations ReceiptCostContinuation[]
  costApplications ReceiptCostApplication[]
  valuationSequences InventoryValuationSequence[]
@@ -298,6 +303,15 @@ model Category {
 }
 
 model Product {
+ serialTracking Boolean @default(false)
+ warrantyDays Int @default(0)
+ warrantyTerms String @default("")
+
+ serialNumbers SerialNumber[]
+ serialEvents SerialEvent[]
+ warranties Warranty[]
+ warrantyServices WarrantyService[]
+
  costContinuations ReceiptCostContinuation[]
  batchTracking Boolean @default(false)
  expiryAlertDays Int @default(30)
@@ -435,6 +449,8 @@ model StockDocument {
 }
 
 model StockDocumentItem {
+ serialInput Json?
+
  batchInput Json?
   conversionSnapshot Json?
  supplierCreditItems SupplierCreditItem[]
@@ -507,6 +523,8 @@ model StockTransfer {
 }
 
 model StockTransferItem {
+ serialInput Json?
+
  issueUnitCostSnapshot Decimal? @db.Decimal(20,6)
   id              String   @id @default(uuid())
   stockTransferId String
@@ -2317,4 +2335,80 @@ model ReceiptCostContinuation {
  sourceAudit AuditLog? @relation(fields:[sourceAuditId],references:[id],onDelete:NoAction,onUpdate:NoAction)
  @@unique([planId,productId,transactionId])
  @@index([organizationId,productId,createdAt,id])
+}
+
+
+model SerialNumber {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ code String
+ state String @default("available")
+ storeId String
+ lastSaleItemId String?
+ lastTransferId String?
+ version Int @default(0)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ events SerialEvent[]
+ warranties Warranty[]
+ @@unique([organizationId,code])
+ @@index([organizationId,storeId,productId,state,id])
+}
+model SerialEvent {
+ id String @id @default(uuid())
+ ordinal Int @default(0)
+ organizationId String
+ productId String
+ serialId String
+ storeId String
+ kind String
+ movementId String?
+ returnDispositionId String?
+ transferDispositionId String?
+ saleItemId String?
+ sourceId String
+ actorId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ serial SerialNumber @relation(fields:[serialId],references:[id],onDelete:NoAction)
+ @@unique([movementId,serialId])
+ @@index([organizationId,serialId,createdAt,id])
+ @@unique([serialId,ordinal])
+}
+model Warranty {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ serialId String
+ saleItemId String
+ saleEventId String @unique
+ storeId String
+ startedAt DateTime
+ endsAt DateTime
+ terms String
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ serial SerialNumber @relation(fields:[serialId],references:[id],onDelete:NoAction)
+ services WarrantyService[]
+ @@unique([serialId,saleItemId])
+ @@index([organizationId,storeId,startedAt,id])
+}
+model WarrantyService {
+ id String @id @default(uuid())
+ ordinal Int @default(0)
+ organizationId String
+ productId String
+ warrantyId String
+ status String
+ note String
+ actorId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ warranty Warranty @relation(fields:[warrantyId],references:[id],onDelete:NoAction)
+ @@index([organizationId,warrantyId,createdAt,id])
+ @@unique([warrantyId,ordinal])
 }

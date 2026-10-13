@@ -16,6 +16,7 @@ export async function enableBatchTracking(context:TokenPayload,input:z.input<typ
   await tx.$queryRaw`SELECT id FROM "Product" WHERE id=${parsed.productId} AND "organizationId"=${context.organizationId} FOR UPDATE`
   const product=await tx.product.findFirst({where:{id:parsed.productId,organizationId:context.organizationId}})
   if(!product)throw new AccessError(404,'NOT_FOUND')
+  if(product.serialTracking)throw new AccessError(409,'SERIAL_INTEGER_UNIT_REQUIRED')
   if(!product.batchTracking&&(await tx.inventoryMovement.count({where:{productId:product.id}})||await tx.inventoryBalance.count({where:{productId:product.id,quantity:{not:0}}})||await tx.saleItem.count({where:{productId:product.id}})||await tx.stockTransferItem.count({where:{productId:product.id}})))throw new AccessError(409,'BATCH_REQUIRES_UNUSED_PRODUCT','Tarixi bor mahsulot uchun yangi alohida SKU yarating; partiya tarixi taxmin qilinmaydi')
   const result=await tx.product.update({where:{id:product.id},data:{batchTracking:true,expiryAlertDays:parsed.expiryAlertDays}})
   await audit(tx,context,'Product',product.id,'batch_tracking_enabled',{reason:parsed.reason,expiryAlertDays:parsed.expiryAlertDays})
@@ -203,14 +204,16 @@ export async function validateBatchReturn(tx:Prisma.TransactionClient,context:To
  }else if(available.reduce((sum,row)=>sum.add(row.quantity),decimal(0)).lt(quantity))throw new AccessError(409,'BATCH_RESTORE_QUANTITY_EXCEEDED')
 }
 type BatchSaleReader={
- product:{findMany(args:{where:{organizationId:string;id:{in:string[]}};select:{id:true;batchTracking:true}}):Promise<{id:string;batchTracking:boolean}[]>};
+ warranty:{findMany(args:{where:{organizationId:string;saleItemId:{in:string[]}};include:{serial:true}}):Promise<Prisma.WarrantyGetPayload<{include:{serial:true}}>[]>};
+ product:{findMany(args:{where:{organizationId:string;id:{in:string[]}};select:{id:true;batchTracking:true;serialTracking:true}}):Promise<{id:string;batchTracking:boolean;serialTracking:boolean}[]>};
  inventoryBatchEntry:{findMany(args:{where:{organizationId:string;movement:{sourceType:string;sourceId:string}};include:{batch:true};orderBy:{id:'asc'}}):Promise<Prisma.InventoryBatchEntryGetPayload<{include:{batch:true}}>[]>};
 }
-export async function attachSaleBatches<T extends {id:string;status:string;items:{productId:string}[]}>(tx:BatchSaleReader,context:TokenPayload,sale:T){
- const products=await tx.product.findMany({where:{organizationId:context.organizationId,id:{in:sale.items.map(item=>item.productId)}},select:{id:true,batchTracking:true}})
+export async function attachSaleBatches<T extends {id:string;status:string;items:{id:string;productId:string}[]}>(tx:BatchSaleReader,context:TokenPayload,sale:T){
+ const products=await tx.product.findMany({where:{organizationId:context.organizationId,id:{in:sale.items.map(item=>item.productId)}},select:{id:true,batchTracking:true,serialTracking:true}})
+ const warranties=await tx.warranty.findMany({where:{organizationId:context.organizationId,saleItemId:{in:sale.items.map(item=>item.id)}},include:{serial:true}})
  const flags=new Map(products.map(product=>[product.id,product.batchTracking]))
  const entries=['completed','partially_returned','returned'].includes(sale.status)?await tx.inventoryBatchEntry.findMany({where:{organizationId:context.organizationId,movement:{sourceType:'sale',sourceId:sale.id}},include:{batch:true},orderBy:{id:'asc'}}):[]
  type Allocation={batchId:string;code:string;quantity:string;expiresOn:string}
- const items=sale.items.map(item=>({...item,batchTracking:flags.get(item.productId)??false,batchAllocations:entries.filter(entry=>entry.batch.productId===item.productId).map(entry=>({batchId:entry.batchId,code:entry.batch.code,quantity:entry.quantityDelta.negated().toFixed(6),expiresOn:entry.batch.expiresOn}))})) as (T['items'][number]&{batchTracking:boolean;batchAllocations:Allocation[]})[]
+ const items=sale.items.map(item=>({...item,serialTracking:products.find(product=>product.id===item.productId)?.serialTracking??false,serialAssignments:warranties.filter(w=>w.saleItemId===item.id).map(w=>({id:w.serialId,code:w.serial.code,warrantyId:w.id,startedAt:w.startedAt,endsAt:w.endsAt,terms:w.terms})),batchTracking:flags.get(item.productId)??false,batchAllocations:entries.filter(entry=>entry.batch.productId===item.productId).map(entry=>({batchId:entry.batchId,code:entry.batch.code,quantity:entry.quantityDelta.negated().toFixed(6),expiresOn:entry.batch.expiresOn}))})) as (T['items'][number]&{batchTracking:boolean;batchAllocations:Allocation[]})[]
  return {...sale,items}
 }

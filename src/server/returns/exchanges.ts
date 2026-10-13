@@ -1,15 +1,16 @@
+import {validateSerialSale} from '../inventory/serials'
 import {Prisma} from '@prisma/client'
 import {z} from 'zod'
 import {prisma} from '@/lib/prisma'
 import type {TokenPayload} from '@/lib/auth'
 import {AccessError,tenantScope} from '../auth/policy'
 import {assertLiveContext,audit,payloadHash,runOperation} from '../operations'
-import {amountSchema,saleDraftSchema,prepareItems,createDraftTx,completeSaleTx,requireOpenShift} from '../sales/service'
+import {amountSchema,completeSchema,saleDraftSchema,prepareItems,createDraftTx,completeSaleTx,requireOpenShift} from '../sales/service'
 import {decimal} from '../sales/calculations'
 import {returnSchema,returnSaleTx} from './service'
 export const exchangePreviewSchema=z.object({originalSaleId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(3).max(2000),
  items:returnSchema.shape.items,replacement:saleDraftSchema.omit({organizationId:true,storeId:true,registerId:true,shiftId:true,cashierId:true,operationId:true}),
- creditAmount:amountSchema.default(0),creditDueAt:z.iso.datetime({offset:true}).optional()}).strict()
+ serialSelections:completeSchema.shape.serialSelections,creditAmount:amountSchema.default(0),creditDueAt:z.iso.datetime({offset:true}).optional()}).strict()
 export const exchangeSchema=exchangePreviewSchema.extend({operationId:z.string().uuid(),confirmationHash:z.string().regex(/^[a-f0-9]{64}$/),cashTendered:amountSchema.default(0)}).strict()
 type Input=z.infer<typeof exchangePreviewSchema>
 function manager(ctx:TokenPayload){if(!['owner','admin'].includes(ctx.role))throw new AccessError(403,'MANAGER_REQUIRED')}
@@ -22,6 +23,8 @@ async function quote(tx:Prisma.TransactionClient,ctx:TokenPayload,input:Input){
  const prepared=await prepareItems(tx,ctx,draft.items,draft.discountAmount,draft),credit=decimal(input.creditAmount),cash=prepared.totals.totalAmount.sub(credit)
  if(cash.lt(0))throw new AccessError(400,'EXCHANGE_CREDIT_EXCEEDED')
  if((credit.gt(0)||refund.settlement.debt.gt(0))&&(!original.customerId||draft.customerId!==original.customerId))throw new AccessError(409,'EXCHANGE_CUSTOMER_REQUIRED','Nasiya farqi original mijozning o‘z kartasida bo‘lishi kerak')
+ const returnedSerials=input.items.filter(item=>item.disposition==='sellable').flatMap(item=>item.serialIds??[])
+ for(const row of prepared.rows)await validateSerialSale(tx,ctx,row.productId,original.storeId,row.quantity,input.serialSelections?.find(s=>s.productId===row.productId)?.ids,returnedSerials)
  const proof={originalSaleId:original.id,shiftId:shift.id,refundAmount:refund.refundAmount,settlement:refund.settlement,replacementTotal:prepared.totals.totalAmount,replacementCash:cash,replacementCredit:credit,
  cashDifference:cash.sub(refund.settlement.cash),debtDifference:credit.sub(refund.settlement.debt),items:prepared.rows.map(({id,...row})=>{void id;return row}),taxFingerprint:prepared.taxFingerprint}
  const reviewProof={...proof,items:proof.items.map(row=>{const snapshot=row.priceSnapshot as Record<string,unknown>;const {asOf,...priceSnapshot}=snapshot;void asOf;return {...row,priceSnapshot}})}
@@ -40,7 +43,7 @@ export async function postExchange(ctx:TokenPayload,input:z.infer<typeof exchang
  if(q.proof.replacementCredit.gt(0))payments.push({paymentType:'credit',amount:q.proof.replacementCredit.toFixed(2)})
  // Gross cash journals offset one another. The exchange records the actual
  // physical tender/change; no invented full-sale cash tender is recorded.
- const sale=await completeSaleTx(tx,ctx,draft.id,{payments,creditDueAt:input.creditDueAt},operationId)
+ const sale=await completeSaleTx(tx,ctx,draft.id,{payments,creditDueAt:input.creditDueAt,serialSelections:input.serialSelections},operationId)
  const exchange=await tx.saleExchange.create({data:{organizationId:ctx.organizationId,storeId:q.draft.storeId,originalSaleId:input.originalSaleId,saleReturnId:returned.id,replacementSaleId:sale.id,actorId:ctx.userId,
  cashDifference:difference,debtDifference:q.proof.debtDifference,cashTendered:tender,cashChange:change,reason:input.reason,settlementSnapshot:JSON.parse(JSON.stringify(q.proof))}})
  await audit(tx,ctx,'SaleExchange',exchange.id,'sale_exchanged',{...q.proof,returnId:returned.id,replacementSaleId:sale.id,cashTendered:tender,cashChange:change,reason:input.reason})

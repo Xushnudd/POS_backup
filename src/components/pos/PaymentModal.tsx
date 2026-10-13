@@ -1,5 +1,6 @@
 'use client';
 
+import SerialPicker from '@/components/inventory/SerialPicker';
 import React, { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
@@ -21,18 +22,21 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 interface PaymentModalProps {
+  serialItems?:{productId:string;name:string;quantity:string}[];
+  storeId?:string;
   isOpen: boolean;
   onClose: () => void;
   totalAmount: number;
   taxAmount?:string;
   netAmount?:string;
   customer: Customer | null;
-  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string) => Promise<void>;
+  onProcessPayment: (payments: { paymentType: PaymentType; amount: number; referenceNo?: string }[], creditDueAt?:string, cashTendered?:string,serialSelections?:{productId:string;ids:string[]}[]) => Promise<void>;
   isLoading: boolean;
 }
 
 export default function PaymentModal({
   isOpen,
+  serialItems=[],storeId,
   onClose,
   totalAmount,taxAmount,netAmount,
   customer,
@@ -40,6 +44,7 @@ export default function PaymentModal({
   isLoading,
 }: PaymentModalProps) {
   const {organization}=useAuth();
+  const [serialChoices,setSerialChoices]=useState<Record<string,string[]>>({});
   const [creditDueDate,setCreditDueDate]=useState('');
   const { notifyError } = useNotification();
   const [activeMethod, setActiveMethod] = useState<PaymentType | 'mixed'>('cash');
@@ -54,7 +59,7 @@ export default function PaymentModal({
     if (isOpen) {
       void Promise.resolve().then(() => {
         setCashTendered(String(totalAmount));
-        setReferenceNo('');setCreditDueDate('');
+        setSerialChoices({});setReferenceNo('');setCreditDueDate('');
         setMixedCash(String(totalAmount));setMixedCard('0');setMixedCredit('0');
       });
     }
@@ -109,7 +114,8 @@ export default function PaymentModal({
       if(!validCash(cashTendered)||fixed(cashTendered)<applied){notifyError('Berilgan naqd pul naqd qismidan kam yoki format noto‘g‘ri');return;}
       tender=cashTendered;
     }
-    await onProcessPayment(payments,creditDueAt,tender);
+    if(serialItems.some(item=>(serialChoices[item.productId]?.length??0)!==Number(item.quantity))){notifyError('Har birlik uchun aniq serialni tanlang');return;}
+    await onProcessPayment(payments,creditDueAt,tender,serialItems.length?serialItems.map(item=>({productId:item.productId,ids:serialChoices[item.productId]??[]})):undefined);
   };
 
   return (
@@ -137,6 +143,7 @@ export default function PaymentModal({
       }
     >
       <div className="space-y-6">
+{storeId&&serialItems.map(item=><SerialPicker key={item.productId} storeId={storeId} productId={item.productId} label={item.name+' sotiladigan seriallar ('+item.quantity+')'} value={serialChoices[item.productId]??[]} onChange={ids=>setSerialChoices(previous=>({...previous,[item.productId]:ids}))} disabled={isLoading}/>)}
       {taxAmount!==undefined&&<p>Server hisobi: jami ichidagi soliq qismi {taxAmount}, soliqsiz {netAmount}.</p>}
         {/* Total sum display */}
         <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">

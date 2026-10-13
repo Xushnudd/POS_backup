@@ -1,3 +1,4 @@
+import {postSerialMovement,type SerialSource} from './serials'
 import {postBatchMovement,type BatchSource} from './batches'
 import {stockPosition,writeLocation} from './reservations'
 import {validateUnitQuantity} from '../catalog/service'
@@ -5,7 +6,7 @@ import { Prisma } from '@prisma/client'
 import type { TokenPayload } from '@/lib/auth'
 import { AccessError } from '../auth/policy'
 import { decimal, DecimalInput } from '../sales/calculations'
-export async function moveStock(tx: Prisma.TransactionClient, context: TokenPayload, input: {storeId:string;productId:string;delta:DecimalInput;unitCost:DecimalInput;sourceType:string;sourceId:string;allowNegative?:boolean;reservedLocationId?:string|null;batchSource?:BatchSource}) {
+export async function moveStock(tx: Prisma.TransactionClient, context: TokenPayload, input: {storeId:string;productId:string;delta:DecimalInput;unitCost:DecimalInput;sourceType:string;sourceId:string;allowNegative?:boolean;reservedLocationId?:string|null;serialSource?:SerialSource;batchSource?:BatchSource}) {
   const delta=decimal(input.delta)
   const product=await tx.product.findFirst({where:{id:input.productId,organizationId:context.organizationId}})
   const store=await tx.store.findFirst({where:{id:input.storeId,organizationId:context.organizationId}})
@@ -47,5 +48,6 @@ export async function moveStock(tx: Prisma.TransactionClient, context: TokenPayl
   if (!update.count) throw new AccessError(409,'INSUFFICIENT_STOCK',`${product.name} uchun yetarli qoldiq yo‘q`)
   const movement=await tx.inventoryMovement.create({data:{organizationId:context.organizationId,storeId:input.storeId,productId:input.productId,
     quantityDelta:delta,unitCost:decimal(input.unitCost),sourceType:input.sourceType,sourceId:input.sourceId,movementType:input.sourceType,createdBy:context.userId}})
+  await postSerialMovement(tx,context,movement,input.serialSource)
   await postBatchMovement(tx,context,movement,input.batchSource)
 }

@@ -1,3 +1,4 @@
+import {serialIdsSchema,validateSerialReturn,postSerialDisposition} from '../inventory/serials'
 import {effectiveIssueCost} from '../inventory/effective-issue-cost'
 import {batchSelectionSchema,postBatchDisposition,validateBatchReturn} from '../inventory/batches'
 import {snapshotQuantity,type ConversionSnapshot} from '../catalog/conversion-math'
@@ -18,7 +19,7 @@ import { amountSchema, quantitySchema, requireOpenShift } from '../sales/service
 
 export const returnSchema=z.object({operationId:z.string().uuid(),shiftId:z.string().uuid(),reason:z.string().trim().min(2).max(2000),
  manualNonCash:z.object({confirmed:z.literal(true),referenceNo:z.string().trim().min(3).max(200),expectedSettlement:z.object({cash:amountSchema,card:amountSchema,transfer:amountSchema,debt:amountSchema,waived:amountSchema}).strict()}).strict().optional(),
- items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/).optional(),disposition:z.enum(['sellable','damaged','write_off']).default('sellable'),batchSelection:batchSelectionSchema.optional()})).min(1).max(500)})
+ items:z.array(z.object({saleItemId:z.string().uuid(),quantity:quantitySchema,tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/).optional(),disposition:z.enum(['sellable','damaged','write_off']).default('sellable'),serialIds:serialIdsSchema.optional(),batchSelection:batchSelectionSchema.optional()})).min(1).max(500)})
 export type RefundPreview={refundAmount:Prisma.Decimal;settlement:Record<'cash'|'card'|'transfer'|'debt'|'waived',Prisma.Decimal>};
 export type PostedReturn=Prisma.SaleReturnGetPayload<{include:{items:true}}>&RefundPreview;
 export function returnSale(context:TokenPayload,saleId:string,input:z.infer<typeof returnSchema>,preview?:false):Promise<PostedReturn>;
@@ -59,6 +60,7 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
   const costApplications=new Map<string,string|null>()
   for(const row of rows){const cost=await effectiveIssueCost(tx,context.organizationId,row.saleItemId,row.unitCost);row.unitCost=cost.unitCost;costApplications.set(row.saleItemId,cost.applicationId)}
   for (const row of rows) { const unit=sale.items.find(item=>item.id===row.saleItemId)?.unit; if(unit) await validateUnitQuantity(tx,context.organizationId,unit,row.quantity) }
+  for(const row of rows)await validateSerialReturn(tx,context,row.productId,row.saleItemId,row.quantity,input.items.find(item=>item.saleItemId===row.saleItemId)?.serialIds)
   for(const row of rows)await validateBatchReturn(tx,context,row.productId,row.quantity,{sourceType:'sale',sourceId:sale.id,storeId:sale.storeId,selection:input.items.find(item=>item.saleItemId===row.saleItemId)?.batchSelection})
   const refund=rows.reduce((sum,x)=>sum.add(x.lineTotal),decimal(0))
   const totalReturned=sale.saleReturns.reduce((sum,x)=>sum.add(x.refundAmount),decimal(0))
@@ -113,6 +115,7 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
    const returnedItem=ret.items.find(item=>item.saleItemId===row.saleItemId)!;
    const location=row.disposition==='damaged'?await tx.damageLocation.upsert({where:{storeId:sale.storeId},create:{organizationId:context.organizationId,storeId:sale.storeId},update:{}}):null;
    const dispositionEntry=await tx.returnDispositionEntry.create({data:{organizationId:context.organizationId,storeId:sale.storeId,productId:row.productId,returnItemId:returnedItem.id,locationId:location?.id,disposition:row.disposition,quantity:row.quantity,unitCost:row.unitCost,productName:original.productName,sku:original.sku,unit:original.unit,actorId:context.userId}});
+   await postSerialDisposition(tx,context,{productId:row.productId,storeId:sale.storeId,quantity:row.quantity,kind:row.disposition==='damaged'?'damaged':'retired',sourceId:ret.id,saleItemId:row.saleItemId,returnDispositionId:dispositionEntry.id,ids:input.items.find(item=>item.saleItemId===row.saleItemId)?.serialIds})
    await postBatchDisposition(tx,context,{productId:row.productId,quantity:row.quantity,returnDispositionId:dispositionEntry.id,source:{sourceType:'sale',sourceId:sale.id,storeId:sale.storeId,selection:input.items.find(item=>item.saleItemId===row.saleItemId)?.batchSelection}})
   }
   if (debtReduction.gt(0) && sale.customerId) await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:sale.customerId,sourceType:'return',sourceId:ret.id,saleId:sale.id,amount:debtReduction.negated(),actorId:context.userId}})
@@ -124,7 +127,7 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
    const stock=await tx.inventoryBalance.aggregate({where:{productId:row.productId},_sum:{quantity:true}})
    const cost=weightedAverage(stock._sum.quantity??0,product.costPrice,row.quantity,row.unitCost)
    await tx.product.update({where:{id:row.productId},data:{costPrice:cost}})
-   await moveStock(tx,context,{storeId:sale.storeId,productId:row.productId,delta:row.quantity,unitCost:row.unitCost,sourceType:'return',sourceId:ret.id,batchSource:{sourceType:'sale',sourceId:sale.id,storeId:sale.storeId,selection:input.items.find(item=>item.saleItemId===row.saleItemId)?.batchSelection}})
+   await moveStock(tx,context,{storeId:sale.storeId,productId:row.productId,delta:row.quantity,unitCost:row.unitCost,sourceType:'return',sourceId:ret.id,serialSource:{ids:input.items.find(item=>item.saleItemId===row.saleItemId)?.serialIds},batchSource:{sourceType:'sale',sourceId:sale.id,storeId:sale.storeId,selection:input.items.find(item=>item.saleItemId===row.saleItemId)?.batchSelection}})
   }
   const allReturned=sale.items.every(x=>{
    const previous=x.saleReturnItems.reduce((sum,r)=>sum.add(r.quantity),decimal(0))

@@ -10,6 +10,8 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
   const stores = context.role === 'owner' ? { organizationId: org } : { organizationId: org, id: { in: context.storeIds } }
   const storeRelation = { store: stores }
   switch (model) {
+    case 'SerialNumber': case 'SerialEvent': case 'Warranty': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
+    case 'WarrantyService': return {organizationId:org,warranty:tenantScope('Warranty',context)}
     case 'InventoryBatch': return {organizationId:org}
     case 'InventoryBatchDisposition': return {organizationId:org, sourceEntry:tenantScope('InventoryBatchEntry',context)}
     case 'InventoryBatchEntry': return {organizationId:org, ...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}

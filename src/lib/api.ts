@@ -296,15 +296,15 @@ class ApiClient {
         body: JSON.stringify(data),
       }),
 
-    complete: (id: string, data: { cashTendered?:string; creditDueAt?:string; payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
+    complete: (id: string, data: { serialSelections?:{productId:string;ids:string[]}[];cashTendered?:string; creditDueAt?:string; payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
       this.request<Sale>(`/sales/${id}/complete`, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
     returnHistory: (id:string,page=1) => this.request<SaleReturnHistory[]>(`/sales/${id}/returns?page=${page}&limit=20`),
-    returnPreview: (id:string,data:{operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';batchSelection?:{entryId:string;quantity:string}[]}[]}) => this.request<{refundAmount:string;settlement:{cash:string;card:string;transfer:string;debt:string;waived:string}}>(`/sales/${id}/returns/preview`,{method:'POST',body:JSON.stringify(data)}),
-    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;manualNonCash?:{confirmed:true;referenceNo:string;expectedSettlement:{cash:string;card:string;transfer:string;debt:string;waived:string}};items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';batchSelection?:{entryId:string;quantity:string}[]}[]}) =>
+    returnPreview: (id:string,data:{operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';serialIds?:string[];batchSelection?:{entryId:string;quantity:string}[]}[]}) => this.request<{refundAmount:string;settlement:{cash:string;card:string;transfer:string;debt:string;waived:string}}>(`/sales/${id}/returns/preview`,{method:'POST',body:JSON.stringify(data)}),
+    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;manualNonCash?:{confirmed:true;referenceNo:string;expectedSettlement:{cash:string;card:string;transfer:string;debt:string;waived:string}};items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';serialIds?:string[];batchSelection?:{entryId:string;quantity:string}[]}[]}) =>
       this.request(`/sales/${id}/returns`, {method:'POST',body:JSON.stringify(data)}),
 
     void: (id: string) =>

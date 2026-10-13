@@ -4,7 +4,8 @@
 export function durableIdentity(path:string,body:unknown):string{
  if(!body||typeof body!=='object'||Array.isArray(body))return '';
  const value=body as Record<string,unknown>;
- if(path==='/inventory/batches/policy'&&typeof value.productId==='string')return 'product:'+value.productId;
+ if(path==='/inventory/serials/service'&&typeof value.warrantyId==='string')return 'warranty:'+value.warrantyId;
+ if((path==='/inventory/serials/policy'||path==='/inventory/batches/policy')&&typeof value.productId==='string')return 'product:'+value.productId;
  if(path==='/jobs'&&typeof value.type==='string')return 'type:'+value.type;
  if(path==='/onboarding'&&typeof value.step==='string')return 'step:'+value.step;
  if(path==='/billing/payments'&&typeof value.billingInvoiceId==='string')return 'invoice:'+value.billingInvoiceId;

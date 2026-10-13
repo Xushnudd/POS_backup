@@ -1,3 +1,4 @@
+import {serialCodesSchema} from '@/server/inventory/serials'
 import {batchInputSchema} from '@/server/inventory/batches'
 import {queryStockDocuments} from '@/server/exports/queries/stock-documents'
 import {prisma} from '@/lib/prisma'
@@ -25,6 +26,7 @@ const createStockDocumentSchema = z.object({
   note: z.string().trim().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
+    serialInput:serialCodesSchema.optional(),
     batchInput:batchInputSchema.optional(),
     quantity: signedQuantitySchema,
     tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/).optional(),

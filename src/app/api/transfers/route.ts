@@ -1,3 +1,4 @@
+import {serialIdsSchema} from '@/server/inventory/serials'
 import type {Prisma} from '@prisma/client'
 import {queryTransfers} from '@/server/exports/queries/transfers'
 
@@ -22,6 +23,7 @@ const createTransferSchema = z.object({
   note: z.string().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
+    serialInput:serialIdsSchema.optional(),
     quantity: quantitySchema,
     unitCost: nonnegativeQuantitySchema,
   })).min(1).max(500),

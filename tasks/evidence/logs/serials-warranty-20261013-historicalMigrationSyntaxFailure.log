@@ -1,0 +1,6 @@
+BEGIN
+ALTER TABLE
+ALTER TABLE
+ERROR:  syntax error at end of input
+LINE 30: ...LL AND NEW.kind<>CASE WHEN d.disposition='damaged' THEN 'dam...
+                                                              ^

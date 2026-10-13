@@ -1,3 +1,4 @@
+import {serialIdsSchema} from '../inventory/serials'
 import {attachSaleBatches} from '../inventory/batches'
 import {resolveConversion,assertCurrentConversion} from '../catalog/conversions'
 import type {ConversionSnapshot} from '../catalog/conversion-math'
@@ -33,7 +34,7 @@ export const saleDraftSchema=z.object({
   items:z.array(z.object({productId:z.string().uuid(),quantity:quantitySchema,tradeUnit:z.string().regex(/^[a-z][a-z0-9_-]{0,31}$/).optional(),expectedConversionRatio:z.string().regex(/^\d+(\.\d{1,6})?$/).optional(),discountAmount:amountSchema.default(0),discountPercent:amountSchema.refine(v=>decimal(v).lte(100)).optional(),expectedUnitPrice:amountSchema.optional()})).min(1).max(500),
 })
 export const paymentSchema=z.object({paymentType:z.enum(['cash','card','transfer','credit']),amount:positiveAmountSchema,referenceNo:z.string().max(200).optional()})
-export const completeSchema=z.object({reservationId:z.string().uuid().optional(),operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional(),cashTendered:amountSchema.optional()})
+export const completeSchema=z.object({serialSelections:z.array(z.object({productId:z.string().uuid(),ids:serialIdsSchema}).strict()).max(500).refine(rows=>new Set(rows.map(r=>r.productId)).size===rows.length).optional(),reservationId:z.string().uuid().optional(),operationId:z.string().uuid().optional(),payments:z.array(paymentSchema).max(10),creditDueAt:z.iso.datetime({offset:true}).optional(),cashTendered:amountSchema.optional()})
 export type DraftInput=z.infer<typeof saleDraftSchema>
 export async function prepareItems(tx:Prisma.TransactionClient,context:TokenPayload,input:DraftInput['items'],receiptDiscount:Prisma.Decimal|number|string,options:{discountPercent?:number|string;discountReason?:string|null;storeId?:string;customerId?:string|null}={}) {
   const argumentsExpected=input
@@ -108,7 +109,7 @@ export async function createDraftTx(tx:Prisma.TransactionClient,context:TokenPay
     return sale
 }
 export async function completeSale(context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string) {
-  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.reservationId?{reservationId:input.reservationId}:{}),...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},tx=>completeSaleTx(tx,context,saleId,input,key))
+  return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.serialSelections?{serialSelections:input.serialSelections}:{}),...(input.reservationId?{reservationId:input.reservationId}:{}),...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},tx=>completeSaleTx(tx,context,saleId,input,key))
 }
 export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string,allowedOfflineLeaseId?:string,ownerReviewedOffline=false) {
     await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
@@ -154,7 +155,7 @@ export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPa
       const currentTax=taxFor?.(product.taxProfileId)
       if(!ownerReviewedOffline&&(!currentTax||item.taxVersionId!==currentTax.taxVersionId||item.taxMode!==currentTax.taxMode||!item.taxRate.eq(currentTax.taxRate)))throw new AccessError(409,'TAX_CHANGED','Soliq siyosati o‘zgardi; original qoralamani tekshiring va qayta tasdiqlang')
       await tx.saleItem.update({where:{id:item.id},data:{complianceSnapshot:complianceSnapshot(product),receiptDiscount:sale.netAmount===null?allocation[item.id]:item.receiptDiscount,unitCost:ownerReviewedOffline?item.unitCost:product.costPrice}})
-      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:ownerReviewedOffline?item.unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
+      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:ownerReviewedOffline?item.unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,serialSource:{ids:input.serialSelections?.find(row=>row.productId===item.productId)?.ids},...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
     }
     for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange,...authorization},include:{items:true,payments:true}})

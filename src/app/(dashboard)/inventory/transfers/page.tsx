@@ -19,6 +19,7 @@ import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SerialPicker from '@/components/inventory/SerialPicker';
 import TransferReceipt,{remainingTransfer} from '@/components/inventory/TransferReceipt';
 import DurableMutation from '@/components/forms/DurableMutation';
 import PendingActions from '@/components/forms/PendingActions';
@@ -50,7 +51,7 @@ export default function StockTransfersPage() {
   const [fromStoreId, setFromStoreId] = useState('');
   const [toStoreId, setToStoreId] = useState('');
   const [note, setNote] = useState('');
-  const [items, setItems] = useState<{ productId: string; quantity: string; unitCost: string }[]>([]);
+  const [items, setItems] = useState<{ productId: string; quantity: string; unitCost: string;serialInput?:string[] }[]>([]);
 
   const [draftBaseline,setDraftBaseline]=useState('');
   const draftDirty=isModalOpen&&JSON.stringify([fromStoreId,toStoreId,note,items])!==draftBaseline;
@@ -266,7 +267,7 @@ export default function StockTransfersPage() {
           </div>
         )}
       </Card>
-      <Modal isOpen={!!receiving} onClose={()=>{if(!confirmPageNavigation())return;setReceiving(null);setReceiptRevision(value=>value+1)}} title="Transferni qisman qabul qilish" size="lg">{receiving&&<TransferReceipt key={receiving.id} id={receiving.id} items={receiving.items} onDone={()=>{setReceiving(null);setReceiptRevision(value=>value+1);notifySuccess('Qabul qayd etildi; yo‘ldagi qoldiq yangilandi');void loadTransfers()}}/>}</Modal>
+      <Modal isOpen={!!receiving} onClose={()=>{if(!confirmPageNavigation())return;setReceiving(null);setReceiptRevision(value=>value+1)}} title="Transferni qisman qabul qilish" size="lg">{receiving&&<TransferReceipt key={receiving.id} id={receiving.id} fromStoreId={receiving.fromStoreId} items={receiving.items} onDone={()=>{setReceiving(null);setReceiptRevision(value=>value+1);notifySuccess('Qabul qayd etildi; yo‘ldagi qoldiq yangilandi');void loadTransfers()}}/>}</Modal>
 
       {/* Transfer Modal */}
       <Modal
@@ -321,7 +322,7 @@ export default function StockTransfersPage() {
                       value={item.productId}
                       onChange={(e) => {
                         const updated = [...items];
-                        updated[idx].productId = e.target.value;
+                        updated[idx].productId = e.target.value;updated[idx].serialInput=undefined;
                         setItems(updated);
                       }}
                       className="w-full text-xs font-semibold bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-hidden"
@@ -334,6 +335,7 @@ export default function StockTransfersPage() {
                     </select>
                   </div>
 
+                  {products.find(p=>p.id===item.productId)?.serialTracking&&fromStoreId&&<SerialPicker key={fromStoreId+item.productId} storeId={fromStoreId} productId={item.productId} label={'Jo‘natiladigan seriallar '+(idx+1)} value={item.serialInput??[]} onChange={ids=>setItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>}
                   <div className="w-24">
                     <input
                       type="number"

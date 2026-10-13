@@ -76,6 +76,8 @@ export interface Category {
 }
 
 export interface Product {
+  serialTracking?:boolean;
+  serialAssignments?:{id:string;code:string;warrantyId:string;startedAt:string;endsAt:string;terms:string}[];
   batchTracking?:boolean;
   expiryAlertDays?:number;
   unitConversions?:{id:string;tradeUnit:string;baseUnit:string;ratio:string;isActive:boolean;tradePrecision?:number}[];
@@ -248,6 +250,8 @@ export type SaleStatus = 'draft' | 'completed' | 'voided' | 'partially_returned'
 export type PaymentType = 'cash' | 'card' | 'transfer' | 'credit';
 
 export interface SaleItem {
+  serialTracking?:boolean;
+  serialAssignments?:{id:string;code:string;warrantyId:string;startedAt:string;endsAt:string;terms:string}[];
   batchTracking?:boolean;
   batchAllocations?:{batchId:string;code:string;quantity:string;expiresOn:string}[];
   conversionSnapshot?:{baseUnit:string;tradeUnit:string;ratio:string;tradeQuantity:string}|null;

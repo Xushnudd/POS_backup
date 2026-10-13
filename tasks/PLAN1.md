@@ -1775,7 +1775,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Joriy holat (2026-10-12): in_progress.** Sof FEFO/expiry/business-day hisoblash moduli va6 unit gate tayyor; caller-authoritative stock/reservation/transaction, batch schema/journal, all writer coverage va alert/API/UI hali ochiq. Hech qanday stock posting yozilmadi. Original done emas; dalil `tasks/evidence/target170-core-20261012.json`.
 
-- [ ] **INV-02.07** — Seriya raqami/kafolat — elektronika segmentida P1.
+- [x] **INV-02.07** — Seriya raqami/kafolat — elektronika segmentida P1.
 
   **Texnologiya:** Prisma SerialNumber/Warranty, PostgreSQL unique.
 
@@ -1790,6 +1790,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Serial unique; sale-return-service kafolat izi original birlikka bog‘langan.
 
   **Dalil:** `INV-02.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Yakuniy holat (2026-10-13): done.** ADR088, SQL160–166: unused integer SKU owner/MFA policy; organization-unique serial, immutable native ordinal unit events, stock conservation, original receipt/sale/return/transfer/supplier/loss reversal va atomic exchange; configured sale warranty snapshot va original-unit service trace. Owner/admin paged history, cashier minimal DTO, durable policy/POS original-status recovery va branch/actor workspace reset mavjud.128unit/113PG (9serial,18landed-cost)/uch-browser9, type/lint/worker/build/scan PASS;166fresh/133upgrade/repeat va actual serial/warranty/service dump-restore PASS. Dalil `tasks/evidence/serials-warranty-20261013.json`; qo‘llanma `docs/operations/serials-warranty.md`. Original hisob169→170/259; migration/model/test/subtask sanalmadi. Serialized offline lease va aggregate quantity-only count fail-closed; aniq original unit oqimlari ishlaydi. Vendor/hardware va real production/pilot qabuli yo‘q.
 
 #### PUR-01 — xarid va ta’minot [P1]
 

@@ -5,7 +5,7 @@ import {AccessError} from '../auth/policy'
 import {AUTOMATIC_COST_PROJECTION} from '../inventory/valuation-history'
 import {readProductValuationFacts} from '../inventory/valuation-facts'
 import {calculateCostContinuations} from './cost-continuation-calculation'
-const types=new Set(['stock.confirm','stock.reverse','transfer.send','transfer.receive','transfer.return','supplier.credit','sale.return','catalog.prices','receipt.cost.apply','receipt.cost.reverse','purchase.receive','count.approve','inventory.batch.count'])
+const types=new Set(['stock.confirm','stock.reverse','transfer.send','transfer.receive','transfer.return','supplier.credit','sale.return','sale.exchange','catalog.prices','receipt.cost.apply','receipt.cost.reverse','purchase.receive','count.approve','inventory.batch.count'])
 /** Internal post-write accounting projection. The original transaction has
  * already authorized its real actor; the capability only permits reading this
  * tenant's cost sources and never returns those records to a retail client. */
@@ -17,10 +17,11 @@ export async function postCostContinuations(tx:Prisma.TransactionClient,context:
  if('key' in source&&source.type==='transfer.receive'){
   const rows=await tx.transferDispositionEntry.findMany({where:{organizationId:context.organizationId,operationId:source.key},select:{productId:true}});for(const row of rows)if(!products.includes(row.productId))products.push(row.productId)
  }
- if('key' in source&&source.type==='sale.return'){
+ if('key' in source&&['sale.return','sale.exchange'].includes(source.type)){
   const operation=await tx.operation.findUniqueOrThrow({where:{id:source.operationId}})
   const result=operation.result as Prisma.JsonObject
-  if(typeof result.id==='string'){const rows=await tx.saleReturnItem.findMany({where:{saleReturnId:result.id},select:{productId:true}});for(const row of rows)if(!products.includes(row.productId))products.push(row.productId)}
+  const returnId=source.type==='sale.exchange'?result.saleReturnId:result.id
+  if(typeof returnId==='string'){const rows=await tx.saleReturnItem.findMany({where:{saleReturnId:returnId},select:{productId:true}});for(const row of rows)if(!products.includes(row.productId))products.push(row.productId)}
  }
  if(products.length>1000)throw new AccessError(413,'COST_HISTORY_TOO_LARGE')
  let facts=0,tracked=0
