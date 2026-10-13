@@ -99,6 +99,7 @@ const navItems: NavItem[] = [
   {href:'/reports/supplier-balances',label:'Supplier qarzi hisoboti',icon:faChartLine,roles:['owner','admin']},
   {href:'/reports/breakdowns',label:'Savdo kesimlari',icon:faChartLine,roles:['owner','admin']},
   {href:'/finance',label:'Hisoblar va xarajatlar',icon:faChartLine,roles:['owner','admin']},
+  {href:'/loyalty',label:'Bonus siyosati',icon:faChartLine,roles:['owner']},
   {href:'/products/prices',label:'Narxlar tarixi',icon:faBoxesStacked,roles:['owner','admin']},
   {href:'/inventory/dispositions',label:'Brak va hisobdan chiqarish',icon:faWarehouse,roles:['owner','admin']},
   {href:'/inventory/movements',label:'Ombor jurnali',icon:faWarehouse,roles:['owner','admin']},

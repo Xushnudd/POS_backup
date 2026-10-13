@@ -10,6 +10,13 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+  loyaltyRedemptions LoyaltyRedemption[]
+  loyaltyRecoveryTransfers LoyaltyRecoveryTransfer[]
+  loyaltyLots LoyaltyPointLot[]
+  loyaltyEntries LoyaltyPointEntry[]
+  loyaltyPolicies LoyaltyPolicyVersion[]
+ reportSchedules ReportSchedule[]
+ reportScheduleRuns ReportScheduleRun[]
  serialNumbers SerialNumber[]
  serialEvents SerialEvent[]
  warranties Warranty[]
@@ -89,6 +96,8 @@ model Organization {
 }
 
 model User {
+  loyaltyRedemptions LoyaltyRedemption[]
+  publishedLoyaltyPolicies LoyaltyPolicyVersion[]
  costContinuations ReceiptCostContinuation[]
  costApplications ReceiptCostApplication[]
  valuationEvents InventoryValuationEvent[] @relation("ValuationEventActor")
@@ -147,6 +156,7 @@ model User {
 }
 
 model OrganizationUser {
+ reportScheduleGrants ReportSchedule[]
   customRoleId   String?
   customRole     CustomRole? @relation(fields:[customRoleId,organizationId],references:[id,organizationId],onDelete:NoAction,onUpdate:NoAction,map:"custom_role_tenant_fk")
   pinHash String?
@@ -371,6 +381,7 @@ model Product {
 }
 
 model Customer {
+  loyaltyLots LoyaltyPointLot[]
  advances CustomerAdvance[]
   canonicalPhone String?
   mergedIntoId String?
@@ -658,6 +669,9 @@ model ShiftCorrection {
 }
 
 model Sale {
+  loyaltyRedemptions LoyaltyRedemption[]
+  loyaltyRecoveryTransfers LoyaltyRecoveryTransfer[]
+  loyaltyLot LoyaltyPointLot?
   receiptSnapshot Json?
   originalExchanges SaleExchange[] @relation("ExchangeOriginal")
   replacementExchange SaleExchange? @relation("ExchangeReplacement")
@@ -774,6 +788,8 @@ model Payment {
 }
 
 model SaleReturn {
+  loyaltyRecoveryTransfers LoyaltyRecoveryTransfer[]
+  loyaltyEntries LoyaltyPointEntry[]
   exchange SaleExchange?
   id              String   @id @default(uuid())
   saleId          String
@@ -1720,6 +1736,54 @@ model SaleExchange {
  @@index([organizationId,storeId,createdAt])
 }
 
+// Explicit owner grant, independent of the owner's browser session lifetime.
+model ReportSchedule {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ enabled Boolean @default(false)
+ revision Int @default(1)
+ configuration Json
+ grantMembershipId String
+ timezone String
+ currency String
+ nextRunAt DateTime?
+ blockedCode String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ grant OrganizationUser @relation(fields:[grantMembershipId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ runs ReportScheduleRun[]
+ @@unique([id,organizationId])
+ @@index([enabled,nextRunAt])
+ @@index([organizationId,createdAt])
+}
+model ReportScheduleRun {
+ id String @id @default(uuid())
+ organizationId String
+ scheduleId String
+ revision Int
+ scheduledFor DateTime
+ definition Json
+ state String @default("queued")
+ attempts Int @default(0)
+ leaseToken String?
+ leaseUntil DateTime?
+ nextAttemptAt DateTime @default(now())
+ lastError String?
+ result Json?
+ size Int @default(0)
+ createdAt DateTime @default(now())
+ finishedAt DateTime?
+ expiresAt DateTime
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ schedule ReportSchedule @relation(fields:[scheduleId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ @@unique([scheduleId,revision,scheduledFor])
+ @@index([organizationId,createdAt])
+ @@index([state,nextAttemptAt])
+ @@index([expiresAt])
+}
+
 model JobExport {
  jobId String @id
  organizationId String
@@ -2411,4 +2475,101 @@ model WarrantyService {
  warranty Warranty @relation(fields:[warrantyId],references:[id],onDelete:NoAction)
  @@index([organizationId,warrantyId,createdAt,id])
  @@unique([warrantyId,ordinal])
+}
+
+model LoyaltyPolicyVersion {
+ redemptions LoyaltyRedemption[]
+ lots LoyaltyPointLot[]
+ id String @id @default(uuid())
+ organizationId String
+ revision Int
+ configuration Json
+ createdBy String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ author User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ @@unique([organizationId,revision])
+ @@index([organizationId,createdAt,id])
+}
+
+model LoyaltyPointLot {
+ recoveryOut LoyaltyRecoveryTransfer[] @relation("LoyaltyRecoveryFrom")
+ recoveryIn LoyaltyRecoveryTransfer[] @relation("LoyaltyRecoveryTo")
+ id String @id @default(uuid())
+ organizationId String
+ customerId String
+ saleId String @unique
+ policyVersionId String
+ initialPoints BigInt
+ expiresAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:NoAction)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ entries LoyaltyPointEntry[]
+ @@index([organizationId,customerId,createdAt,id])
+}
+model LoyaltyPointEntry {
+ redemptionId String?
+ transferId String?
+ id String @id @default(uuid())
+ organizationId String
+ lotId String
+ kind String
+ points BigInt
+ returnId String?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ lot LoyaltyPointLot @relation(fields:[lotId],references:[id],onDelete:NoAction)
+ saleReturn SaleReturn? @relation(fields:[returnId],references:[id],onDelete:NoAction)
+ redemption LoyaltyRedemption? @relation(fields:[redemptionId],references:[id],onDelete:NoAction)
+ transfer LoyaltyRecoveryTransfer? @relation(fields:[transferId],references:[id],onDelete:NoAction)
+ @@unique([lotId,kind,returnId])
+ @@index([organizationId,lotId,createdAt,id])
+ @@unique([lotId,kind,transferId])
+}
+
+model LoyaltyRedemption {
+ id String @id @default(uuid())
+ organizationId String
+ saleId String
+ customerId String
+ policyVersionId String
+ state String @default("prepared")
+ points BigInt
+ discountAmount Decimal @db.Decimal(14,2)
+ baseDiscountAmount Decimal @db.Decimal(14,2)
+ subtotalSnapshot Decimal @db.Decimal(14,2)
+ itemsSnapshot Json
+ originalDiscountPercent Decimal? @db.Decimal(5,2)
+ reason String
+ createdBy String
+ sessionId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ entries LoyaltyPointEntry[]
+ @@index([organizationId,saleId,createdAt,id])
+}
+
+model LoyaltyRecoveryTransfer {
+ returnId String?
+ id String @id @default(uuid())
+ organizationId String
+ fromLotId String
+ toLotId String
+ saleId String
+ points BigInt
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ fromLot LoyaltyPointLot @relation("LoyaltyRecoveryFrom",fields:[fromLotId],references:[id],onDelete:NoAction)
+ toLot LoyaltyPointLot @relation("LoyaltyRecoveryTo",fields:[toLotId],references:[id],onDelete:NoAction)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ saleReturn SaleReturn? @relation(fields:[returnId],references:[id],onDelete:NoAction)
+ entries LoyaltyPointEntry[]
+ @@index([organizationId,createdAt,id])
 }

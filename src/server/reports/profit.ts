@@ -1,9 +1,9 @@
 import {costPostingsSql} from '../purchases/cost-postings-query'
 import {Prisma} from '@prisma/client'
-import type {TokenPayload} from '@/lib/auth'
+import type {TenantScopeContext} from '../auth/policy'
 import {financialFilter} from './financial'
 import {decimal,money} from '../sales/calculations'
-export async function profitSummary(tx:Prisma.TransactionClient,ctx:TokenPayload,params:URLSearchParams){
+export async function profitSummary(tx:Prisma.TransactionClient,ctx:TenantScopeContext,params:URLSearchParams){
  const f=await financialFilter(tx,ctx,params),branches=ctx.role==='owner'?Prisma.empty:ctx.storeIds.length?Prisma.sql`AND s."storeId" IN (${Prisma.join(ctx.storeIds)})`:Prisma.sql`AND FALSE`;
  const scope=Prisma.sql`s."organizationId"=${ctx.organizationId} ${branches} ${f.storeId?Prisma.sql`AND s."storeId"=${f.storeId}`:Prisma.empty}`;
  const [sold]=await tx.$queryRaw<{revenue:Prisma.Decimal;cost:Prisma.Decimal}[]>`SELECT COALESCE(sum(COALESCE(i."taxBase",i."lineTotal"-i."receiptDiscount")),0) AS revenue,COALESCE(sum(i.quantity*i."unitCost"),0) AS cost FROM "SaleItem" i JOIN "Sale" s ON s.id=i."saleId" WHERE ${scope} AND s.status IN ('completed','partially_returned','returned') AND s."createdAt"<=${f.asOf} AND s."completedAt"<=${f.asOf} ${f.range.gte?Prisma.sql`AND s."completedAt">=${f.range.gte}`:Prisma.empty} ${f.range.lt?Prisma.sql`AND s."completedAt"<${f.range.lt}`:Prisma.empty}`;

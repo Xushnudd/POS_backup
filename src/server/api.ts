@@ -13,6 +13,7 @@ import {assertCustomRoutePermission} from './auth/custom-role-policy'
 import type { TokenPayload } from '@/lib/auth'
 import { apiMetrics } from './monitoring/metrics'
 import { billingDatabaseError } from './billing/errors'
+import {loyaltyDatabaseError} from './loyalty/errors'
 import { sanitizeResponse, sanitizeTotpPresentation } from './auth/response'
 import { consumeRequestBudget,consumePublicRequestBudget,requestBudgetSetting } from './auth/request-budget'
 
@@ -153,7 +154,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       response.headers.set('X-Content-Type-Options','nosniff')
       return response
     } catch (error) {
-      const billingError = billingDatabaseError(error)
+      const billingError = billingDatabaseError(error)??loyaltyDatabaseError(error)
       if (billingError) error = billingError
       let status = 500, code = 'INTERNAL_ERROR', message = 'Server xatosi'
       if (error instanceof AccessError) ({status,code,message} = error)

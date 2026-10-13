@@ -1,14 +1,19 @@
 'use client';
 
+import {useListQuery} from '@/hooks/useListQuery';
+import {productListSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import Pagination from '@/components/ui/Pagination';
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { Category, Product } from '@/types';
 import { formatMoney, formatNumber } from '@/lib/format';
 import { PRODUCT_UNITS } from '@/lib/constants';
+import DataTable from '@/components/ui/DataTable';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -21,7 +26,6 @@ import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
-  faSearch,
   faEdit,
   faBoxesStacked,
   faTags,
@@ -29,7 +33,7 @@ import {
 
 export default function ProductsPage() {
   const {organization,user,role}=useAuth();
-  return organization&&user?<ProductsEditor key={[organization.id,user.id,role].join(':')}/>:null;
+  return organization&&user?<Suspense fallback={<LoadingSpinner text="Mahsulotlar yuklanmoqda..."/>}><ProductsEditor key={[organization.id,user.id,role].join(':')}/></Suspense>:null;
 }
 
 function ProductsEditor() {
@@ -39,8 +43,10 @@ function ProductsEditor() {
   const [unitOptions,setUnitOptions]=useState(PRODUCT_UNITS);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const {query,params,changeQuery}=useListQuery(productListSorts,'name_asc');
+  const searchQuery=query?.search??'',selectedCategory=params.get('categoryId')??'';
+  const page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'name_asc',invalidQuery=!query;
+  const [totalPages,setTotalPages]=useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError,setLoadError]=useState('');
   const loadSequence=useRef({value:0}),flight=useRef(false),categoryFlight=useRef(false);
@@ -73,7 +79,7 @@ function ProductsEditor() {
   const closeCategory=()=>{if(confirmDiscard())setIsCategoryModalOpen(false);};
 
   const loadData = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organization?.id||invalidQuery) return;
     const sequence=++loadSequence.current.value;
     setIsLoading(true);setLoadError('');
     try {
@@ -82,14 +88,14 @@ function ProductsEditor() {
           organizationId: organization.id,
           search: searchQuery || undefined,
           categoryId: selectedCategory || undefined,
-          limit: 100,
+          page,limit,sort,
         }),
         api.categories.list(organization.id),
         role!=='cashier'?api.units.list():Promise.resolve({data:[]}),
       ]);
 
       if(sequence!==loadSequence.current.value)return;
-      if (prodsRes.data) setProducts(prodsRes.data);
+      if (prodsRes.data) {setProducts(prodsRes.data);setTotalPages(prodsRes.pagination?.totalPages??0);}
       if (catsRes.data) setCategories(catsRes.data);
       if (unitsRes.data?.length) setUnitOptions(unitsRes.data.filter(unit=>unit.isActive).map(unit=>({value:unit.code,label:unit.name})));
     } catch (err: unknown) {
@@ -97,7 +103,7 @@ function ProductsEditor() {
     } finally {
       if(sequence===loadSequence.current.value)setIsLoading(false);
     }
-  }, [organization, searchQuery, selectedCategory, role]);
+  }, [organization, searchQuery, selectedCategory, role, page, limit, sort, invalidQuery]);
 
   useEffect(() => {
     const tracker=loadSequence.current;let cancelled=false;
@@ -208,7 +214,7 @@ function ProductsEditor() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={isLoading} onClick={()=>void loadData()}>Qayta yuklash</Button></div>}
-      {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{})}} label="Katalogni CSV yuklash"/>}
+      {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{}),sort}} label="Katalogni CSV yuklash"/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -246,48 +252,21 @@ function ProductsEditor() {
 
       {/* Filter Bar */}
       <Card padding={false} className="p-4">
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="flex w-full flex-1 items-center gap-2">
-            <div className="relative min-w-0 flex-1">
-              <input
-                type="text"
-                placeholder="Nom, SKU yoki barkod bo'yicha qidirish..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-hidden focus:border-blue-500"
-              />
-              <FontAwesomeIcon
-                icon={faSearch}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
-              />
-            </div>
-
-            <CameraBarcodeScanner
-              onDetected={(barcode) => setSearchQuery(barcode)}
-              className="shrink-0 border border-gray-200 bg-gray-50 p-2.5 text-base"
-            />
-          </div>
-
-          <div className="w-full sm:w-64">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full text-xs font-semibold bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-hidden text-gray-700 cursor-pointer"
-            >
-              <option value="">Barcha kategoriyalar</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <ListFilter search={searchQuery} sort={sort} label="Mahsulot qidirish" placeholder="Nom, SKU yoki barkod bo'yicha qidirish..."
+          disabled={isSaving||isCategorySaving} onChange={changeQuery}
+          options={[{value:'name_asc',label:'Nom: A–Z'},{value:'name_desc',label:'Nom: Z–A'},{value:'price_asc',label:'Narx: kichikdan kattaga'},{value:'price_desc',label:'Narx: kattadan kichikka'},{value:'sku',label:'SKU bo‘yicha'}]}>
+          <CameraBarcodeScanner onDetected={barcode=>changeQuery({search:barcode,page:'1'})}/>
+          <Select label="Kategoriya filtri" value={selectedCategory} disabled={isSaving||isCategorySaving}
+            options={[{value:'',label:'Barcha kategoriyalar'},...categories.map(c=>({value:c.id,label:c.name}))]}
+            onChange={event=>changeQuery({categoryId:event.target.value,page:'1'})}/>
+        </ListFilter>
       </Card>
 
       {/* Products Table */}
       <Card padding={false}>
-        {isLoading ? (
+        {invalidQuery ? <div role="alert" className="p-6">URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalang.</div>
+        :loadError ? <div className="p-6">Ro‘yxat yuklanmadi. Qayta yuklash orqali urinib ko‘ring.</div>
+        :isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <LoadingSpinner size="lg" text="Mahsulotlar yuklanmoqda..." />
           </div>
@@ -301,7 +280,7 @@ function ProductsEditor() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Mahsulot</th>
@@ -357,11 +336,13 @@ function ProductsEditor() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         )}
       </Card>
 
+      {!invalidQuery&&!loadError&&<Pagination page={page} pages={totalPages} busy={isLoading||isSaving||isCategorySaving} onPage={value=>changeQuery({page:String(value)})}/>}
+      {!invalidQuery&&!isLoading&&!loadError&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
       {/* Product Form Modal */}
       <Modal
         isOpen={isProductModalOpen}

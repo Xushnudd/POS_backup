@@ -1,0 +1,106 @@
+{
+  "task": "UX-01.03",
+  "status": "in_progress",
+  "original_done": 170,
+  "original_total": 259,
+  "target": 175,
+  "accepted_new_original_tasks": 0,
+  "scope": "Five list screens only; full UX-01.03 not accepted",
+  "recorded_at_utc": "2026-10-13T15:10:35.156140+00:00",
+  "git_head": "5683904c1ef89aae03cb570cc621ed2b7e7b490f",
+  "worktree": "uncommitted source modifications; no commit/deployment created",
+  "database": "isolated localhost:55439/pos_test only; synthetic fixtures",
+  "verification": {
+    "unit": {
+      "pass": 129,
+      "fail": 0
+    },
+    "focused_suite": {
+      "pass": 17,
+      "fail": 0,
+      "query_unit_cases": 1,
+      "postgresql_cases": 16
+    },
+    "browser": {
+      "pass": 12,
+      "fail": 0,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "typecheck": "pass",
+    "test_compile": "pass",
+    "lint": "pass, zero warnings",
+    "worker_compile": "pass",
+    "webpack_production_build": "pass",
+    "source_scan": {
+      "scanned": 1297,
+      "findings": 0
+    }
+  },
+  "cases": [
+    "43-sale deterministic amount/timestamp/id sort across pages; search/status/empty/invalid/tenant isolation",
+    "43-product/customer server pages, sort and category-filtered CSV order",
+    "105-product/customer browser pages reach records beyond former 100-row truncation",
+    "URL reload/back/search/sort/filter reset match server result",
+    "500 response is error, not empty data; retry recovers",
+    "Delayed draft response does not replace current completed-filter result",
+    "Existing unsaved catalog forms/navigation/save failure regression in all three engines",
+    "Category/unit sort, page, archive state, CSV and no-parameter legacy defaults",
+    "Category/unit URL reads and filter changes preserve an independent unsaved editor; explicit cancel resets it"
+  ],
+  "historical_failures": [
+    "Initial new PG fixture omitted required Customer.phone; compile and runtime rejected it. Fixture corrected and test compile awaited before accepted rerun.",
+    "First browser assertions selected Next route announcer and application alert simultaneously; named application alerts added and accepted all-engine rerun passed."
+  ],
+  "boundaries": [
+    "Original done remains 170/259; these are partial UX-01.03 packages",
+    "Remaining list screens and full Uz/Ru workflow coverage still open",
+    "No external provider/hardware/deployment/pilot acceptance",
+    "User authorized P2 CRM-02.03/04 and REP-01.11; all business rules administrator-configured, initially disabled"
+  ],
+  "source_sha256": {
+    "src/app/(dashboard)/sales/page.tsx": "94634034caad61a37ada69a8a7f05d4404dba12db54f7a2bf0c565adcecd168c",
+    "src/app/(dashboard)/products/page.tsx": "381453f388e1fd8e53c69cb9f141586b684563390beacda5b3e689e97deb21c4",
+    "src/app/(dashboard)/customers/page.tsx": "231278b43f69d1e7de664fb4217d8953d1116eef16913a2b522a58d90065baf5",
+    "src/app/api/sales/route.ts": "679a24eab5b4b548859b9963af607ca6ad6aa916c0168f39b90cf4abd1c9b786",
+    "src/lib/api.ts": "cb5b9ce9b4cfc39a0d6040d303ac4d0474091f012ecc996090f54e4eebb3bc4d",
+    "src/lib/list-query.ts": "06aa4015925c9c7e81b16008c016999d394e1c1ac2c08a85a5a5d03f7ede41f7",
+    "src/lib/sales-list-query.ts": "208c5022de57e0bea2d52cf1050b0bef1942964e9c6df4334732ea6385a9dd9c",
+    "src/hooks/useListQuery.ts": "fa7387cf95a9fa11951047aa8849b90e9614b054a3df69f8e37a21675ca62966",
+    "src/components/ui/ListFilter.tsx": "ce2da5770eb81d8965c09ad242a8ccd060c589d50f45672a20b1c2edb68604c6",
+    "src/components/ui/DataTable.tsx": "c359411235013eb7c73287c72dff9d3bf2502cd67af46618dc2805fcac149e57",
+    "src/server/exports/queries/products.ts": "662c5ee968a0abeb151214efc7215d8bc49f5a258cdd4fc90881e4005630403c",
+    "src/server/exports/queries/customers.ts": "9f74f10f52141b9d82024778c2b0da5095cc5cf0d494561756af53bf762ddaeb",
+    "tests/sales-list-query.unit.test.ts": "d84098564c9127ac2e6b770aacd5e20f84a59fdcf8b626473c7eb1833b580285",
+    "tests/sales-list.integration.test.ts": "a039e2b2f344d1f57bfdb02c98254644f7ad6b3eb900cb2111090f838a159850",
+    "tests/e2e/sales-list.spec.ts": "506dde1b8178e5f7d9b14b52434356ca15ee6f20d5cda197b1f28cacdcecf723",
+    "src/app/(dashboard)/products/categories/page.tsx": "2225e5e5ac3fedf0c47c3f337287ab5be862e22503de2b604a0a3f0558a726d6",
+    "src/app/(dashboard)/products/units/page.tsx": "09da9b5e14593094ecfc75bf17cabe96158a2cca12b719c5299c3ac96c670f51",
+    "src/server/exports/queries/categories.ts": "954ac7a4b8986c9b8700b8dcfa032da4f815c156a42522eda48c693d95724bd0",
+    "src/server/exports/queries/units.ts": "f6b04e2a68b82a82b07da1136ba59d9d373394f789ac067a5a42412b3662da09"
+  },
+  "logs": {
+    "pg": "tasks/evidence/logs/list-query-reference-20261013-pg.log",
+    "unit": "tasks/evidence/logs/list-query-reference-20261013-unit.log",
+    "browser": "tasks/evidence/logs/list-query-reference-20261013-browser.log",
+    "build": "tasks/evidence/logs/list-query-reference-20261013-build.log",
+    "typecheck": "tasks/evidence/logs/list-query-reference-20261013-typecheck.log",
+    "test-compile": "tasks/evidence/logs/list-query-reference-20261013-test-compile.log",
+    "lint": "tasks/evidence/logs/list-query-reference-20261013-lint.log",
+    "worker": "tasks/evidence/logs/list-query-reference-20261013-worker.log",
+    "scan": "tasks/evidence/logs/list-query-reference-20261013-scan.log"
+  },
+  "commands": {
+    "compile_tests": "node node_modules/typescript/bin/tsc -p tsconfig.test.json",
+    "pg": "NODE_ENV=test AUTH_CRITICAL_MFA_REQUIRED=false node --require ./scripts/test-resolver.cjs --test --test-isolation=none .test-build/tests/sales-list-query.unit.test.js .test-build/tests/sales-list.integration.test.js .test-build/tests/catalog-purchase.integration.test.js .test-build/tests/catalog-journal.integration.test.js",
+    "browser": "POS_E2E_ALL_BROWSERS=1 node node_modules/@playwright/test/cli.js test tests/e2e/sales-list.spec.ts tests/e2e/catalog-unsaved.spec.ts",
+    "unit": "node --require ./scripts/test-resolver.cjs --test --test-isolation=none .test-build/tests/*.unit.test.js",
+    "worker": "node node_modules/typescript/bin/tsc -p tsconfig.worker.json",
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+    "build": "Next16 next build --webpack (local process.execArgv wrapper)",
+    "scan": "node scripts/security/scan.mjs"
+  }
+}

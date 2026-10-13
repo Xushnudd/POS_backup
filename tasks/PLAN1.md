@@ -2073,7 +2073,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-02.04** — P2: bonusning qaytarishda bekor bo‘lishi, muddati va suiiste’moldan himoya.
+- [x] **CRM-02.04** — P2: bonusning qaytarishda bekor bo‘lishi, muddati va suiiste’moldan himoya.
 
   **Texnologiya:** PostgreSQL original/reversal relation, SQL locks.
 
@@ -2532,7 +2532,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.10` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.11** — P2: rejalashtirilgan hisobot, filial taqqoslash, KPI va talab prognozi.
+- [x] **REP-01.11** — P2: rejalashtirilgan hisobot, filial taqqoslash, KPI va talab prognozi.
 
   **Texnologiya:** PostgreSQL scheduled jobs, Node worker, React.
 

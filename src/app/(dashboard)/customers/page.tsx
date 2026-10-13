@@ -1,16 +1,21 @@
 'use client';
 
+import {useListQuery} from '@/hooks/useListQuery';
+import {customerListSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import Pagination from '@/components/ui/Pagination';
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import {useAcknowledgedMutation} from '@/hooks/useAcknowledgedMutation';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { fixed } from '@/lib/money';
 import { api } from '@/lib/api';
 import { Customer } from '@/types';
 import { formatMoney, formatPhone } from '@/lib/format';
+import DataTable from '@/components/ui/DataTable';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -20,19 +25,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
   faUserPlus,
-  faSearch,
   faHandHoldingDollar,
   faPhone,
   faEdit,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function CustomersPage(){const {organization,user,role}=useAuth();return organization&&user&&role?<Customers key={[organization.id,user.id,role].join(':')}/>:null;}
+export default function CustomersPage(){const {organization,user,role}=useAuth();return organization&&user&&role?<Suspense fallback={<LoadingSpinner text="Mijozlar yuklanmoqda..."/>}><Customers key={[organization.id,user.id,role].join(':')}/></Suspense>:null;}
 function Customers() {
   const { organization,role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
   const [customers, setCustomers] = useState<(Customer&{debtUnavailable?:boolean})[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const {query,changeQuery}=useListQuery(customerListSorts,'name_asc');
+  const searchQuery=query?.search??'',page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'name_asc',invalidQuery=!query;
+  const [totalPages,setTotalPages]=useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   // Add / Edit Modal
@@ -46,22 +52,21 @@ function Customers() {
     creditLimit: '0',
   });
   const [readError,setReadError]=useState(''),[debtError,setDebtError]=useState('');
-  const readRequest=useRef(0);
-  const mutation=useAcknowledgedMutation(!isLoading&&!readError),isSaving=mutation.saving;
-  useEffect(()=>()=>{readRequest.current++;},[]);
+  const readRequest=useRef({value:0});
+  const mutation=useAcknowledgedMutation(!isLoading&&!readError&&!invalidQuery),isSaving=mutation.saving;
   const [originalForm,setOriginalForm]=useState(formData);
   const dirty=isCustomerModalOpen&&(Object.keys(formData) as (keyof typeof formData)[]).some(key=>formData[key]!==originalForm[key]);
   const confirmDiscard=useUnsavedChanges(dirty,isSaving);
   const closeEditor=()=>{if(confirmDiscard())setIsCustomerModalOpen(false);};
 
   const loadCustomers = useCallback(async () => {
-    if (!organization?.id) return;
-    const request=++readRequest.current;setIsLoading(true);
+    if (!organization?.id||invalidQuery) return;
+    const request=++readRequest.current.value;setIsLoading(true);
     try {
       const res = await api.customers.list({
         organizationId: organization.id,
         search: searchQuery || undefined,
-        limit: 100,
+        page,limit,sort,
       });
 
       if(!res.data)throw new Error('Mijozlar natijasi mavjud emas');
@@ -78,17 +83,19 @@ function Customers() {
             }
           })
         );
-        if(request===readRequest.current){setCustomers(customersWithDebt);setReadError('');setDebtError(customersWithDebt.some(row=>row.debtUnavailable)?'Ba’zi mijozlarning qarzi yuklanmadi; noma’lum qiymat nol deb ko‘rsatilmaydi.':'');}
+        if(request===readRequest.current.value){setCustomers(customersWithDebt);setTotalPages(res.pagination?.totalPages??0);setReadError('');setDebtError(customersWithDebt.some(row=>row.debtUnavailable)?'Ba’zi mijozlarning qarzi yuklanmadi; noma’lum qiymat nol deb ko‘rsatilmaydi.':'');}
       }
     } catch (err: unknown) {
-      if(request===readRequest.current)setReadError(err instanceof Error?err.message:'Mijozlar yuklanmadi');
+      if(request===readRequest.current.value)setReadError(err instanceof Error?err.message:'Mijozlar yuklanmadi');
     } finally {
-      if(request===readRequest.current)setIsLoading(false);
+      if(request===readRequest.current.value)setIsLoading(false);
     }
-  }, [organization, searchQuery]);
+  }, [organization, searchQuery, page, limit, sort, invalidQuery]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadCustomers);
+    const tracker=readRequest.current;let cancelled=false;
+    void Promise.resolve().then(()=>{if(!cancelled)return loadCustomers();});
+    return()=>{cancelled=true;tracker.value++;};
   }, [loadCustomers]);
 
   const openCreateModal = () => {
@@ -153,7 +160,7 @@ function Customers() {
     <div className="space-y-6 max-w-7xl mx-auto">
       {(readError||debtError)&&<p role="alert">{readError||debtError}. Oxirgi ro‘yxat va draft saqlangan.</p>}<Button disabled={isLoading||isSaving} onClick={()=>void loadCustomers()}>Mijozlarni qayta yuklash</Button>{mutation.error&&<p role="alert">{mutation.error}</p>}{isSaving&&<p role="status">Server tasdig‘i kutilmoqda…</p>}{mutation.state==='saved'&&<p role="status">Mijoz serverda saqlandi.</p>}
       {role==='owner'&&<Link href="/customers/duplicates" className="text-blue-700 underline">Legacy telefon dublikatlarini tekshirish</Link>}
-      {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{})}} label="Mijozlarni CSV yuklash"/>}
+      {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),sort}} label="Mijozlarni CSV yuklash"/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -178,25 +185,17 @@ function Customers() {
 
       {/* Search bar */}
       <Card padding={false} className="p-4">
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder="Mijoz ismi yoki telefon raqami bo'yicha qidirish..."
-            value={searchQuery}
-            disabled={isSaving||isLoading||!!readError}
-            onChange={(e) => {setIsLoading(true);setSearchQuery(e.target.value);}}
-            className="w-full text-xs bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-hidden focus:border-blue-500"
-          />
-          <FontAwesomeIcon
-            icon={faSearch}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
-          />
-        </div>
+        <ListFilter search={searchQuery} sort={sort} label="Mijoz qidirish" placeholder="Mijoz ismi yoki telefon raqami bo'yicha qidirish..."
+          disabled={isSaving} onChange={changeQuery}
+          options={[{value:'name_asc',label:'Nom: A–Z'},{value:'name_desc',label:'Nom: Z–A'},{value:'newest',label:'Yangi mijozlar avval'},{value:'oldest',label:'Eski mijozlar avval'}]}/>
+
       </Card>
 
       {/* Customers Table */}
       <Card padding={false}>
-        {isLoading ? (
+        {invalidQuery ? <div role="alert" className="p-6">URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalang.</div>
+        :readError ? <div className="p-6">Ro‘yxat yuklanmadi. Oxirgi ma’lumot asosida amal bajarmang; qayta yuklang.</div>
+        :isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <LoadingSpinner size="lg" text="Mijozlar yuklanmoqda..." />
           </div>
@@ -210,7 +209,7 @@ function Customers() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Mijoz</th>
@@ -263,11 +262,13 @@ function Customers() {
                   );
                 })}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         )}
       </Card>
 
+      {!invalidQuery&&!readError&&<Pagination page={page} pages={totalPages} busy={isLoading||isSaving} onPage={value=>changeQuery({page:String(value)})}/>}
+      {!invalidQuery&&!isLoading&&!readError&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
       {/* Customer Form Modal */}
       <Modal
         isOpen={isCustomerModalOpen}

@@ -1,5 +1,12 @@
 // Every model is explicitly classified. Shared identities/configuration require separate authorization.
 export const TENANT_DIRECT_MODELS = [
+  "LoyaltyPolicyVersion",
+  "LoyaltyPointLot",
+  "LoyaltyPointEntry",
+  "LoyaltyRedemption",
+  "LoyaltyRecoveryTransfer",
+  "ReportSchedule",
+  "ReportScheduleRun",
   "OrganizationUser",
   "CustomRole",
   "Store",

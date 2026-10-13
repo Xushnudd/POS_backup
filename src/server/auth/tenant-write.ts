@@ -4,6 +4,8 @@ import type {TokenPayload} from '@/lib/auth'
 // Top-level inserts require an explicit root. Nested relations are checked by
 // native tenant FK/constraint triggers in the same transaction.
 export function tenantInsertReference(model:string,value:unknown,context:TokenPayload):{model:string;id:string}|null{
+ if(['LoyaltyPolicyVersion','LoyaltyPointLot','LoyaltyPointEntry','LoyaltyRedemption','LoyaltyRecoveryTransfer'].includes(model))throw new AccessError(403,'LOYALTY_JOURNAL_READ_ONLY')
+ if(['ReportSchedule','ReportScheduleRun'].includes(model))throw new AccessError(403,'REPORT_JOURNAL_READ_ONLY')
  if(['SerialNumber','SerialEvent','Warranty','WarrantyService'].includes(model))throw new AccessError(403,'SERIAL_JOURNAL_READ_ONLY')
  if(['InventoryBatch','InventoryBatchEntry','InventoryBatchDisposition'].includes(model))throw new AccessError(403,'BATCH_JOURNAL_READ_ONLY','Partiya jurnali faqat stock transaction orqali yoziladi')
  if(['ReceiptCostContinuation','ReceiptCostApplication','InventoryValuationSequence','InventoryValuationEvent'].includes(model))throw new AccessError(403,'VALUATION_JOURNAL_READ_ONLY','Tannarx tartibi faqat original DB postingdan yoziladi')

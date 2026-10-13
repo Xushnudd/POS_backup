@@ -1,5 +1,10 @@
 // Subscription read-only applies to business data; these exceptions preserve recovery/security.
 export const READ_ONLY_BUSINESS_MODELS = [
+  "LoyaltyPolicyVersion",
+  "LoyaltyPointLot",
+  "LoyaltyPointEntry",
+  "LoyaltyRedemption",
+  "LoyaltyRecoveryTransfer",
   "CustomRole",
   "Organization",
   "OrganizationUser",
@@ -86,6 +91,8 @@ export const READ_ONLY_BUSINESS_MODELS = [
   "CustomerAdvanceRefund"
 ] as const
 export const READ_ONLY_EXEMPT_MODELS = [
+  "ReportSchedule", // Stop and worker metadata are allowed; native configuration admission remains writable-only.
+  "ReportScheduleRun", // Derived report/export state, not an economic document.
   // Trigger-only derivatives: original Product/InventoryMovement admission
   // remains authoritative, including explicitly permitted recovery postings.
   "InventoryValuationSequence",
@@ -129,6 +136,7 @@ export const READ_ONLY_EXEMPT_MODELS = [
   "IntegrationCost"
 ] as const
 export const READ_ONLY_OPERATION_EXCEPTIONS = [
+  "report.schedule.stop",
   "retention.closure.request",
   "retention.closure.cancel",
   "billing.plan.publish",

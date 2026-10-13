@@ -1,0 +1,179 @@
+{
+  "date": "2026-10-14",
+  "task": "CRM-02.04",
+  "scope": "Internal production-quality points core; no external delivery, hardware or deployment acceptance",
+  "originalCount": {
+    "before": 171,
+    "after": 172,
+    "target": 175
+  },
+  "version": {
+    "head": "5683904c1ef89aae03cb570cc621ed2b7e7b490f",
+    "worktree": "uncommitted; no AI commit/deploy",
+    "models": 131,
+    "migrations": 173
+  },
+  "acceptance": [
+    {
+      "input": "Actual cash sale300 / configured40 per point; replay and split original refunds",
+      "expected": "One7-point grant, original reversals−3/−2/−2; policy changes preserve original source",
+      "actual": "PASS"
+    },
+    {
+      "input": "Actual7-point discount, payment293 and three cash returns",
+      "expected": "OneFIFO debit; cash refunds97.67/97.67/97.66 total293; original7 restored without renewing expiry",
+      "actual": "PASS"
+    },
+    {
+      "input": "Independent registers and independent SKUs share7-point wallet, no discounted earning",
+      "expected": "One winner; loser payment/stock/sale/points unposted; spendable0",
+      "actual": "PASS"
+    },
+    {
+      "input": "Return spent earning; active/new credit and final return settlement",
+      "expected": "Recovery debt separate from nonnegative spendable; paired zero-sum journal clears once, later credit not recharged",
+      "actual": "PASS"
+    },
+    {
+      "input": "Full300point discount / no cash payment / full physical return",
+      "expected": "Zero fake cash rows, original300 restored, exact stock",
+      "actual": "PASS"
+    },
+    {
+      "input": "Actual expiryAt vs expiryAt−1ms in native availability function; immutable expiry update attempt",
+      "expected": "7 then0; no production clock override, no expiry rewrite",
+      "actual": "PASS"
+    },
+    {
+      "input": "Actual cashier membership/own receipt with discount limit0 then10%; foreigntenant/othercashier/missingconsent",
+      "expected": "Permission/tenant failure without mutation; authorized own receipt works; public exact string DTO no session ID",
+      "actual": "PASS"
+    },
+    {
+      "input": "Late native earn/debit/refund audit faults and original key retries",
+      "expected": "Full economic rollback and one final original effect",
+      "actual": "PASS"
+    },
+    {
+      "input": "Real owner MFA/configuration and committed lostACK/reload original recovery in3engines",
+      "expected": "One policy/quote/debit and exact wallet after refund",
+      "actual": "3/3PASS"
+    },
+    {
+      "input": "Fresh173 / synthetic133 upgrade repeat / actualpolicy-grant-debit-restore-recovery dumprestore",
+      "expected": "All original source/journal canonical hashes retained and wallet6",
+      "actual": "PASS localthrowawayonly"
+    }
+  ],
+  "validation": {
+    "core": "36/36 (10 redemption+7 grant/alias/offline/currency+2policy+7readonly+4math+6tenant/export)",
+    "financialRegression": "87/87 finance/offline/report/serial",
+    "unit": "49 isolated unit files passed",
+    "browser": "3/3passed Chromium/Firefox/WebKit",
+    "build": "PASSwebpack",
+    "type": "PASS",
+    "lint": "PASSzero warnings",
+    "worker": "PASS",
+    "restore": "PASS173fresh/133upgrade/repeat/sourcehashes",
+    "scan": {
+      "scanned": 1371,
+      "findings": [],
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    }
+  },
+  "historicalFailures": [
+    "Fixture calledtoFixed on existing runOperation JSON string refund; corrected exact string assertion.",
+    "Fixture expected cumulative cash rounding; preserved existing per-nonfinal/final remainder97.67/97.67/97.66.",
+    "HTTP fixture UUID-length bearer rejected401; corrected real32-byte token+storedsessionHash, expected404thenpassed.",
+    "NestedCJS fixture lint wrongly received TS no-require rule; existing CommonJS override widened only to scripts/**/*.cjs.",
+    "Final settlement moved after both restore and clawback via additive173; existing credit clears debt before expiry."
+  ],
+  "logs": {
+    "core_pg": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-core_pg.log",
+      "sha256": "0d635a7d6d7d48a31aacd0a544365344319695bba42a56b690379e119dfa9937"
+    },
+    "financial_regression": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-financial_regression.log",
+      "sha256": "0460da6ec25b99d2e63cf038326c68ebde170658a88eb8df0be104599b6945c9"
+    },
+    "unit": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-unit.log",
+      "sha256": "f9268c17e532fd4a4091f9939a73029bfe57a63a63570e297cac4d44502eb2fb"
+    },
+    "browser": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-browser.log",
+      "sha256": "5d2b9a1ad731950df081dc40daba7848b4d6c06032739c4dd463e1cef2f08e93"
+    },
+    "build": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-build.log",
+      "sha256": "a92d47bea8972cad45cbd9552d94f29ff5d967073372c87df0db866aac1a50a3"
+    },
+    "type": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-type.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "restore": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-restore.log",
+      "sha256": "63ee9f1e5c2951b2098e442189639c16b1bfb704931f850a9baae73f47b19d60"
+    },
+    "scan": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-scan.log",
+      "sha256": "cd63c495dff3bc987c80265c73edb8103d74f2eed421e529161c924eaaa90dfa"
+    },
+    "historical_refund_fixture_failure": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-historical_refund_fixture_failure.log",
+      "sha256": "ba1bd48f32f42fc4865c9562510a6e35969390a328641b22c2d84d3e48421ddb"
+    },
+    "historical_http_fixture_failure": {
+      "path": "tasks/evidence/logs/loyalty-points-20261014-historical_http_fixture_failure.log",
+      "sha256": "b76853790dc41d542ff99134cb664cb06791314d524e64b3f06b26a2cd15e38b"
+    }
+  },
+  "sourceHashes": {
+    "src/server/loyalty/calculations.ts": "dd436c5bdd36c5c3f60a444540a7db6ca4faad115a3b807bcaf34e55e71e955f",
+    "src/server/loyalty/policy.ts": "3102c5cbdae264f9aab5a0f544f4d2d4f6d6650d295fbe5184b6aeed4c2709eb",
+    "src/server/loyalty/lots.ts": "235388c418700b75f2cfb2dbd18a7c4842d34127ea2c61f799dbcb64ab25efee",
+    "src/server/loyalty/wallet.ts": "c1cafeb57f88c1c06503034fcd097bc32aca6c8da95f076baeed852552cf0016",
+    "src/server/loyalty/redemption.ts": "5849f6d1fe180c4f260a5d281f890096d818b40b69ca9b55db01bbbe91acea1d",
+    "src/server/loyalty/http-context.ts": "c377778683ac10147236a5c500aa6bf4eacd3a2dc60027742232160c8b155256",
+    "src/server/loyalty/errors.ts": "f0734d97ed8514b7bda3dc41b24f568ee0360ccdc38fb3ad414c326bdd20be0c",
+    "src/app/api/loyalty/policy/route.ts": "2d83c1b7f1cbc7b836ba4c904ac8d58208f320599eb5dc86935ae7e4d47d7a26",
+    "src/app/api/customers/[id]/points/route.ts": "4b96d4ff3730b3229dc079adfc4c381f7e49a22af197d5681afa3ca329dc65c0",
+    "src/app/api/sales/[id]/points/route.ts": "4ba89f0800cbda536f1f24f746b6335c464ea2ec745a9eaab2ab3cfbb8328f9c",
+    "src/app/api/sales/[id]/points/cancel/route.ts": "9bc4ffb93f26366c2c7578b8e3db147d8bdcab10369ab58772fb06822b7b691d",
+    "src/app/(dashboard)/loyalty/page.tsx": "dddfdb1cbcd867c692b117b8a60b39bedbfc31b3604664cf5e588e61405cf285",
+    "src/app/(dashboard)/sales/[id]/page.tsx": "697857df05934eff3e1d63b206cec8685057975ea1f464572c1bfabcd1524258",
+    "src/components/customers/SalePoints.tsx": "64281a3657e6f868306c713aa6364ec0dbb2c968f98e53367afadc4aa72efdd2",
+    "prisma/schema.prisma": "4a9113ea56f733fb5ee19a4ce34f2f5d6d9a57eed830fd462a0e508b676dabcf",
+    "src/server/jobs/tenant-export-contract.ts": "765851bc64d412921d9be7b890cabf29e760a896ef9e616a626f4d168d8d9509",
+    "scripts/ops/loyalty-restore-fixture.cjs": "fa0f93cfe63ba5584c5b2262ff2589fb38b7808f171988cf799dc11fabf9d7b7",
+    "scripts/ops/test-valuation-migrations.sh": "cbfbb0f10c8d0a995115184357646bcfde449e1b41363748df04e30fe1885ce4",
+    "docs/operations/loyalty-points.md": "29d567ec866b3eeaf30a00a544f81d0a5e2cadfe0ce6520c8114aa6567f7bbac",
+    "tests/loyalty-calculations.unit.test.ts": "999f261406da26ea46eb08342bac2fb0d2c2137f0f133a908d117f637d69e4ce",
+    "tests/loyalty-policy.integration.test.ts": "761f91008020f3cec7bedc25fef0dc61c29c13920ad940c613f2b5781eab95f5",
+    "tests/loyalty-journal.integration.test.ts": "90ded85324179375417e54774e0dfb414f4d618738c5ab27f7430413fc1da3e1",
+    "tests/loyalty-redemption.integration.test.ts": "3faa7b013baee648d7b97be3a1d9941b9b12e9db4c2ed9c59b47bc0c5ea90561",
+    "tests/e2e/loyalty-points.spec.ts": "3821d97955a1848653106a1a14677ae3a57e2f3708ee3c242d5bccf3d1ac925a",
+    "prisma/migrations/202610130168_loyalty_policy_versions/migration.sql": "db6627597a36bde61d0f1a5415e5af85c20373f08ebfd841a85cdff50a8d479b",
+    "prisma/migrations/202610130169_loyalty_source_journals/migration.sql": "c705450a1e48928d6fac04c04c6a74e3c8f1b7c1005141cb4eeaf9ffe8c68fc0",
+    "prisma/migrations/202610130170_loyalty_online_currency_boundary/migration.sql": "1fc8aa98ef1852e6afb5160a4c4eeb0b47faf157a47765337b5d009f4004b337",
+    "prisma/migrations/202610130171_loyalty_redemption/migration.sql": "cbfe881d9050ca1f190d45429e9323130372c1e60e189950d2b00bd76d084c2b",
+    "prisma/migrations/202610140172_loyalty_disabled_gift_rules/migration.sql": "6d6d52e92b31f1b81a3a8778fc5a4baab46485d4fe8d95b825e59eec0a95bcd8",
+    "prisma/migrations/202610140173_loyalty_return_settlement/migration.sql": "d004ec50bcf5dc6811f27f2c4cea62d5359cd3c789f848689a059ad0fd4db74c"
+  },
+  "excluded": [
+    "CRM-02.03 cards/promo/gift functionality notdone; activation unavailable until implemented",
+    "UX-01.02/03 originals stillopen",
+    "Realproduction/staging/pilot/SMS/Click/fiscal/hardware/offsite acceptance absent",
+    "Models,migrations,partialtasks do notincrement original count"
+  ]
+}

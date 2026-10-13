@@ -5,6 +5,8 @@ import { AccessError } from './policy'
 // Explicit rollout, independent of authenticator availability: a key outage
 // must never silently disable a configured authorization requirement.
 export const CRITICAL_ACTIONS = [
+  'loyalty.policy.publish',
+  'report.schedule.configure',
   'inventory.serial.policy', 'inventory.batch.policy', 'receipt.cost.apply', 'receipt.cost.reverse',
   'retention.closure.request', 'retention.closure.cancel',
   'retention.policy.publish', 'billing.plan.publish', 'billing.plan.assign',

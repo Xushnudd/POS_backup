@@ -1,3 +1,4 @@
+import {parseListQuery,productListSorts} from '@/lib/list-query'
 import {cursorExport,EXPORT_PAGE_SIZE} from '../cursor'
 import {assertLiveContext} from "@/server/operations"
 import {createHash} from "node:crypto"
@@ -19,12 +20,11 @@ export async function queryProducts(payload:TokenPayload,request:NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
-    const search = searchParams.get('search')
+    let query:ReturnType<typeof parseListQuery<typeof productListSorts[number]>>
+    try{query=parseListQuery(searchParams,productListSorts,'name_asc')}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+    const {search,page,limit,skip,sort}=query
     const categoryId = searchParams.get('categoryId')
     const barcode = searchParams.get('barcode')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const skip = (page - 1) * limit
 
     if (!organizationId) {
       return NextResponse.json(
@@ -99,6 +99,9 @@ export async function queryProducts(payload:TokenPayload,request:NextRequest) {
       where.categoryId = categoryId
     }
 
+    const orderBy:Prisma.ProductOrderByWithRelationInput[]=sort==='name_desc'?[{name:'desc'},{id:'desc'}]
+      :sort==='price_asc'?[{salePrice:'asc'},{id:'asc'}]:sort==='price_desc'?[{salePrice:'desc'},{id:'desc'}]
+      :sort==='sku'?[{sku:'asc'},{id:'asc'}]:[{name:'asc'},{id:'asc'}]
     if(searchParams.get('format')==='csv'){
       if(payload.role==='cashier')throw new AccessError(403,'FORBIDDEN')
       await consumeLimit('catalog.export',payload.organizationId+':'+payload.userId,10,60000)
@@ -106,7 +109,7 @@ export async function queryProducts(payload:TokenPayload,request:NextRequest) {
       await assertLiveContext(tx,payload)
         const total=await tx.product.count({where})
         if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
-        const rows=await cursorExport(cursor=>tx.product.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,costPrice:true,minStock:true,category:{select:{name:true}},barcodes:{select:{value:true},orderBy:{value:'asc'}}},take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})}))
+        const rows=await cursorExport(cursor=>tx.product.findMany({where,orderBy,select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,costPrice:true,minStock:true,category:{select:{name:true}},barcodes:{select:{value:true},orderBy:{value:'asc'}}},take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})}))
         return {filename:'products-'+payload.organizationId+'.csv',content:csv([['ID','Mahsulot','SKU','Asosiy barkod','Qo‘shimcha barkodlar','Birlik','Kategoriya','Sotuv narxi',...(payload.role==='owner'?['Tannarx']:[]),'Minimal qoldiq'],...rows.map(row=>[row.id,row.name,row.sku,row.barcode,row.barcodes.map(code=>code.value).join(' | '),row.unit,row.category?.name,numeric(row.salePrice),...(payload.role==='owner'?[numeric(row.costPrice,6)]:[]),numeric(row.minStock,6)])])}
       },{isolationLevel:'RepeatableRead'})
       return NextResponse.json({success:true,data})
@@ -114,7 +117,7 @@ export async function queryProducts(payload:TokenPayload,request:NextRequest) {
 
     const [products, total] = await db.$transaction(async tx=>{
       await assertLiveContext(tx,payload)
-      const rows=await tx.product.findMany({where,include:{category:true,unitConversions:{where:{isActive:true},orderBy:{tradeUnit:'asc'}}},orderBy:[{name:'asc'},{id:'asc'}],skip,take:limit})
+      const rows=await tx.product.findMany({where,include:{category:true,unitConversions:{where:{isActive:true},orderBy:{tradeUnit:'asc'}}},orderBy,skip,take:limit})
       return [rows,await tx.product.count({where})] as const
     },{isolationLevel:'RepeatableRead'})
 
@@ -124,7 +127,7 @@ export async function queryProducts(payload:TokenPayload,request:NextRequest) {
     return NextResponse.json({
       success: true,
       data: catalogData,
-      catalogLease:{version:createHash('sha256').update(JSON.stringify({organizationId:payload.organizationId,role:payload.role,search,categoryId,page,limit,products:catalogData.map(p=>({id:p.id,updatedAt:p.updatedAt,price:p.salePrice,unit:p.unit,precision:p.unitPrecision,conversions:p.unitConversions.map(row=>({unit:row.tradeUnit,ratio:row.ratio,precision:row.tradePrecision})),active:p.isActive}))})).digest('hex'),issuedAt:issuedAt.toISOString(),expiresAt:new Date(issuedAt.getTime()+CATALOG_TTL_MS).toISOString()},
+      catalogLease:{version:createHash('sha256').update(JSON.stringify({organizationId:payload.organizationId,role:payload.role,search,categoryId,page,limit,sort,products:catalogData.map(p=>({id:p.id,updatedAt:p.updatedAt,price:p.salePrice,unit:p.unit,precision:p.unitPrecision,conversions:p.unitConversions.map(row=>({unit:row.tradeUnit,ratio:row.ratio,precision:row.tradePrecision})),active:p.isActive}))})).digest('hex'),issuedAt:issuedAt.toISOString(),expiresAt:new Date(issuedAt.getTime()+CATALOG_TTL_MS).toISOString()},
       pagination: {
         page,
         limit,

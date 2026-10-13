@@ -1,5 +1,11 @@
 // Reviewed schema coverage: new models require an explicit export decision.
 export const DIRECT_MODELS = [
+  "LoyaltyPolicyVersion",
+  "LoyaltyPointLot",
+  "LoyaltyPointEntry",
+  "LoyaltyRedemption",
+  "LoyaltyRecoveryTransfer",
+  "ReportSchedule",
   "CustomRole",
   "OrganizationClosure",
   "OrganizationUser",
@@ -98,6 +104,7 @@ export const CHILD_RELATIONS: Readonly<Record<string,string>> = {
   "CustomerAdvanceRefund": "advance"
 }
 export const OMITTED_MODELS: Readonly<Record<string,string>> = {
+  "ReportScheduleRun": "Temporary derived report snapshots; original financial sources and schedule definitions are exported",
   "Operation": "Idempotency results may contain original credential responses",
   "PlatformOperator": "Platform-wide access configuration",
   "SupportGrant": "Privileged support access",
@@ -127,10 +134,11 @@ export const OMITTED_MODELS: Readonly<Record<string,string>> = {
 }
 export const SPECIAL_MODELS = ['Organization','User','BillingPlanVersion','SupportPolicyVersion'] as const
 export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
+ LoyaltyRedemption:['sessionId'],
  Organization:['closureRevision'],
  BillingPlanVersion:['createdBy'], SupportPolicyVersion:['createdBy','reason'],
  OrganizationUser:['pinHash'], User:['passwordHash'], OfflineCashLease:['payload','signature','publicKey','settlementProof','cancellationProof'],
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = "e490046ddf0f412c4593fb700e78892408fdf52b5258f651e58ae3e3a2239a83"
+export const REVIEWED_SCHEMA_SHA256 = "1132dbdf89c2a2351e7322f7aa812f04a9e9a6ed5933c1008629e1e538a4d445"

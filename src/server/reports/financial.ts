@@ -1,11 +1,10 @@
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
-import type { TokenPayload } from '@/lib/auth'
-import { AccessError, tenantScope } from '../auth/policy'
+import { AccessError, tenantScope,type TenantScopeContext } from '../auth/policy'
 import { dateRange } from './dates'
 import { reportDecimal as decimal } from './numeric'
 
-export async function financialFilter(tx:Prisma.TransactionClient,context:TokenPayload,params:URLSearchParams) {
+export async function financialFilter(tx:Prisma.TransactionClient,context:TenantScopeContext,params:URLSearchParams) {
  const org=await tx.organization.findUniqueOrThrow({where:{id:context.organizationId},select:{timezone:true,currencyCode:true}})
  const storeId=params.get('storeId')
  if(storeId&&!await tx.store.findFirst({where:{id:storeId,AND:tenantScope('Store',context)},select:{id:true}}))throw new AccessError(404,'NOT_FOUND')
@@ -19,7 +18,7 @@ export async function financialFilter(tx:Prisma.TransactionClient,context:TokenP
  return {scope,sales,returns,payments,range,asOf,storeId,meta:{asOf:asOf.toISOString(),timezone:org.timezone,currency:org.currencyCode,startDate,endDate,storeId}}
 }
 export type FinancialFilter=Awaited<ReturnType<typeof financialFilter>>
-export async function financialSummary(tx:Prisma.TransactionClient,context:TokenPayload,filter:FinancialFilter) {
+export async function financialSummary(tx:Prisma.TransactionClient,context:TenantScopeContext,filter:FinancialFilter) {
  const [total,sums,itemCount,returned]=await Promise.all([
   tx.sale.count({where:filter.sales}),tx.sale.aggregate({where:filter.sales,_sum:{totalAmount:true,discountAmount:true,taxAmount:true}}),
   tx.saleItem.count({where:{sale:filter.sales}}),tx.saleReturn.aggregate({where:filter.returns,_sum:{refundAmount:true}}),

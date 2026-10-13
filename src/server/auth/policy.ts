@@ -5,11 +5,18 @@ import { routePermissionRoles, type BusinessRole } from './route-permissions'
 export class AccessError extends Error {
   constructor(public status: number, public code: string, message = 'Bu amal uchun ruxsat yo‘q', public retryAfterSeconds?:number, public details?:unknown) { super(message) }
 }
-export function tenantScope(model: string, context: TokenPayload): Record<string, unknown> {
+// Data scoping is pure and does not authenticate. HTTP sessions and background
+// grants must be independently verified before using this scope.
+export type TenantScopeContext=Pick<TokenPayload,'organizationId'|'organizationUserId'|'userId'|'role'|'storeIds'>;
+export function tenantScope(model: string, context: TenantScopeContext): Record<string, unknown> {
   const org = context.organizationId
   const stores = context.role === 'owner' ? { organizationId: org } : { organizationId: org, id: { in: context.storeIds } }
   const storeRelation = { store: stores }
   switch (model) {
+    case 'LoyaltyRedemption': return {organizationId:org,sale:tenantScope('Sale',context)};
+    case 'LoyaltyRecoveryTransfer': case 'LoyaltyPointLot': case 'LoyaltyPointEntry': case 'LoyaltyPolicyVersion': case 'ReportSchedule': case 'ReportScheduleRun':
+      if(context.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED');
+      return {organizationId:org};
     case 'SerialNumber': case 'SerialEvent': case 'Warranty': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
     case 'WarrantyService': return {organizationId:org,warranty:tenantScope('Warranty',context)}
     case 'InventoryBatch': return {organizationId:org}

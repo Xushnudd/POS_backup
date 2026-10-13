@@ -1,0 +1,16 @@
+[WebServer] (node:899228) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:899267) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (2.7s)
+(node:899472) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [firefox] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (3.3s)
+(node:899807) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [webkit] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (6.5s)
+
+  3 passed (16.0s)

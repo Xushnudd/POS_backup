@@ -328,6 +328,7 @@ Qabul qilinadigan maydonlar: `name`, `address`, `phone`, `isActive`.
 | `organizationId` | ✓ | Tashkilot UUIDsi |
 | `search` | — | Nom, SKU yoki barkod bo‘yicha qidiruv |
 | `categoryId` | — | Kategoriya UUIDsi |
+| `sort` | — | `name_asc` (standart), `name_desc`, `price_asc`, `price_desc`, `sku` |
 | `barcode` | — | Berilsa bitta faol mahsulot qaytadi; topilmasa 404 |
 | `page` | — | Standart: 1 |
 | `limit` | — | Standart: 20 |
@@ -368,6 +369,10 @@ Majburiy: `organizationId`, `name`, `sku`, `barcode`, `salePrice`, `costPrice`. 
 ### `GET /customers`
 
 `organizationId` majburiy. Ixtiyoriy: `search` (ism/telefon), `page` (standart 1), `limit` (standart 20).
+
+`sort`: `name_asc` (standart), `name_desc`, `newest`, `oldest`. Saralash butun filtrlangan ro‘yxatga serverda qo‘llanadi; bir xil qiymatlar UUID bo‘yicha ajratiladi. `/products` va `/customers` CSV eksporti ham ayni filtr va saralashni ishlatadi, sahifalar esa eksportni cheklamaydi.
+
+Uchala ro‘yxat (`/products`, `/customers`, `/sales`) uchun `page` musbat butun son, `limit` 1–200 (standart 20), offset ko‘pi 2147483647. Noto‘g‘ri sahifa `400 INVALID_PAGINATION`; noma’lum saralash yoki 200 belgidan uzun qidiruv `400 INVALID_FILTER`. Bo‘sh natijada `data: []`, `total: 0`, `totalPages: 0` qaytadi. JSON ro‘yxat va count bitta RepeatableRead snapshotdan olinadi.
 
 ### `POST /customers`
 
@@ -539,6 +544,10 @@ Faqat ochiq smenani yopadi. Javobda `expectedCash`, `countedCash`, `cashDifferen
 ### `GET /sales`
 
 `organizationId` majburiy. Ixtiyoriy: `storeId`, `shiftId`, `status`, `page` (1), `limit` (20). Javobda mijoz, savdo qatorlari va to‘lovlar ham mavjud.
+
+`search` chek raqami yoki mijoz ismiga qaraydi. `status`: `draft`, `completed`, `voided`, `partially_returned`, `returned`; parametr berilmasa barcha vakolatdagi holatlar. `sort`: `newest` (standart), `oldest`, `amount_desc`, `amount_asc`, `receipt`. Summa database Decimal ustuni bo‘yicha saralanadi; frontend moliyaviy qiymatlarni floating-point bilan solishtirmaydi. Tenant/filial/kassir cheklovlari saralash va qidiruvda ham saqlanadi.
+
+Kategoriya va birlik ma’lumotnomalari ham sort allowlist ishlatadi: `/categories?organizationId=<UUID>&sort=order|name_asc|name_desc` (`order` standart); `/units?sort=name_asc|name_desc|code` (`name_asc` standart). `search`, `status=active|archived|all`, `page`, `limit` va CSV eksporti oldingi contractni saqlaydi. Kategoriya hech qanday page/filter/sort parametrsiz so‘ralsa oldingi barcha faol kategoriya javobi saqlanadi. Birlik GET limit berilmasa oldingi 200 defaultini saqlaydi; `/products/units` UI aniq `limit=20` yuboradi. Ixtiyoriy noma’lum sort `400 INVALID_FILTER` bilan rad etiladi; eksport tanlangan sortda butun filtrlangan ro‘yxatni oladi.
 
 ### `POST /sales`
 
@@ -1451,3 +1460,35 @@ Chegaralar:200receipt product, jami10000native fact,8MiB application snapshot; k
 - Transfer draft item `serialInput:UUID[]`; receive item `receivedSerials`, `damagedSerials`, `shortageSerials`; transit return item `serialIds`. Supplier credit goods-return item `serialIds` original receiptga bog‘lanadi. Nonserial SKUs oldingi contract bilan ishlaydi.
 
 Max500serial/source posting; serialized offline cash lease va aggregate StockCount xavfsiz rad etiladi. Native ordinal bir transactiondagi qaytarish/sale tartibini ajratadi; immutable journals va projection conservation majburiy. `SERIAL_SELECTION_REQUIRED`, `SERIAL_COUNT_MISMATCH`, `SERIAL_REQUIRES_UNUSED_PRODUCT`, `SERIAL_INTEGER_UNIT_REQUIRED`, `SERIAL_OPERATION_TOO_LARGE`, `SERIAL_OFFLINE_CASH_UNAVAILABLE`, `WARRANTY_ORIGINAL_SALE_REQUIRED`, `WARRANTY_SERVICE_STATE_CHANGED` mavjud. Unknown result uchun original key/body saqlanadi. Batafsil: `docs/operations/serials-warranty.md`. Vendor scanner/repair/hardware yoki production acceptance emas.
+
+### Rejalashtirilgan ichki hisobot — REP-01.11
+
+Barcha quyidagi route faqat faol, custom-role bo‘lmagan owner uchun. Authentication, CSRF, tenant scope va rate-limit umumiy API middleware orqali.
+
+- `GET /api/reports/plans`: tashkilotning ko‘pi20 jadvali.
+- `POST /api/reports/plans`: strict `{operationId,id?,expectedRevision,name,enabled,configuration,reason}`. Yangi jadvalda revision0; tahrirda original revision. Critical MFA `report.schedule.configure`. `enabled` aniq tanlanadi; server avtomatik yoqmaydi. HTTP admission yangi vaqtni strictly future hisoblaydi.
+- `POST /api/reports/plans/preview`: configuration body; real KPI/forecast natijasi, jadval/run yaratilmaydi.
+- `POST /api/reports/plans/:id/stop`: `{operationId,expectedRevision,reason}`; idempotent original stop. Read-onlyda ham ruxsat. Mavjud moliyaviy tarix o‘zgarmaydi.
+- `GET /api/reports/plans/:id/runs?page=1`:20row, metadata/state/error/expiry; lease nonce va snapshot baytlari DTOga kirmaydi.
+- `GET /api/reports/plans/runs/:id/export?format=json|csv|xlsx|pdf&view=kpi|forecast|backtest`: private attachment, no-store/nosniff. JSON barcha bo‘limlarni beradi; PDF format browser-print HTML. Succeeded original run va muddati tugamagan snapshot majburiy.
+
+Configuration: `{cadence:{frequency:daily|weekly|monthly,hour:0..23,minute:0..59,weekday?:0..6,day?:1..28},retentionHours:1..720,missedRunPolicy:latest_only|catch_up,report:{storeIds:UUID[],rangeDays:1..366,period:complete_days|through_now,window:rolling_days|previous_iso_week|previous_month,metrics:[saleCount|grossRevenue|refundAmount|netSales|cogs|grossProfit|grossMarginPercent|operatingExpenses|operatingProfit|averageSale],forecast?:{productIds:UUID[],config:{method:moving_average|weekday_average,windowDays:1..90,seasonalWeeks:2..12,historyDays:28..365,backtestDays:7..90,horizonDays:1..30}}}}`.
+
+Weeklyda faqat weekday, monthlyda faqat day, dailyda ikkalasi yo‘q. Calendar hafta/oy faqat complete_days. Forecast training+backtest historyga sig‘ishi kerak; selected IDs unique va tenant-scoped. Pul/miqdor DTOda exact decimal string, no undefined KPI. Baseline sifati MAE/RMSE/WAPE va zero-baseline bilan o‘lchanadi; insufficient_history prognoz bermaydi. Original scheduledFor cutoff bo‘ladi; keyin kelgan savdo kech run ichiga kirmaydi. Qo‘llanma: `docs/operations/scheduled-reports.md`.
+
+Chegaralar:20schedule/org,20pending run/org,20branch/report,20product/report,100branch-product series,4MiB snapshot, JobExport bilan32MiB private quota. `REPORT_REVISION_CHANGED`, `REPORT_SCHEDULE_LIMIT`, `REPORT_TIMEZONE_UNSUPPORTED`, `REPORT_NOT_READY`, `REPORT_EXPIRED`, `REPORT_BRANCH_LIMIT`, `REPORT_DEMAND_LIMIT`, `AUTHORIZATION_CHANGED` fail-closed. Daily/weekly/monthly Asia/Tashkent/UZS, persistent actual owner membership grant; logout grantni bekor qilmaydi, a’zolik/role/user revoke nashrni to‘sadi. Real SMS/e-mail yetkazish yo‘q.
+
+### Bonus ballari va original recovery — CRM-02.04
+
+- `GET /api/loyalty/policy`: owner, latest immutable policy yoki null.
+- `POST /api/loyalty/policy`: owner, critical MFA `loyalty.policy.publish`; strict `{operationId,expectedRevision,configuration,reason}`. Policy version stale409; original replay bir natija. Faol default stavka yo‘q. Cards/promos/gifts hali ulanmagan holatda enabledtrue rad etiladi.
+- `GET /api/customers/:id/points`: owner/admin/cashier, tenant-scoped canonical alias wallet. `{customerId,availablePoints:integer-string,recoveryDebtPoints:integer-string,asOf,redemptionPolicy:{id,enabled,redeemMoneyPerPoint,maxRedeemPercent,expiryDays,currency}|null}`. GET hech qanday settlement yozmaydi; source IDs, session va tannarx berilmaydi.
+- `GET /api/sales/:id/points`: own/assigned sale scope; active choice `{id,state,points:integer-string,discountAmount:decimal-string,policyVersionId}` yoki null.
+- `POST /api/sales/:id/points`: strict `{operationId,policyVersionId,points:positive-integer-string,customerConsent:true,reason}`. Own draft/open shift, actual wallet/policy/currency/expiry va odatiy discount permission kerak. Result `{sale,redemption}` exact public strings; yangi receipt discount serverda qayta hisoblanadi. Customer consent operator attestasiyasi, OTP identity proof emas.
+- `POST /api/sales/:id/points/cancel`: strict `{operationId,reason}`. Faqat unposted tanlov; original manual discount/percent tiklanadi. Same key cachedresult, active duplicate rad.
+
+Configuration points: `{enabled,earnMoneyPerPoint:decimal-string,redeemMoneyPerPoint:decimal-string,maxRedeemPercent:0..100 decimal-string,minEligibleNet:decimal-string,expiryDays:1..36500|null,earnOnDiscountedSales,earnOnCreditSales}`. Cards/promos/gifts qoidalari shu versioned configurationda inactive saqlanadi; ular CRM-02.03ning to‘liq qabulini anglatmaydi. Inactive gift min/max0 qoida mavjud emasligini bildiradi, faol gift summa musbat bo‘lishi kerak.
+
+Actual source trigger completed online salega bitta lot beradi. Checkout before-earn FIFO debit, stock/payment/sale/journals/audit bir transactionda. Return original value-weight cumulative ceiling earned reversal va floor redeemed-lot restoration; expiry uzaymaydi. Negative bonus recovery alohida, spendable balance≥0. Paired debt settlement next grant yoki final returnda bir marta yoziladi. Zero-cash receipt/refundda fake payment yo‘q. Signed offline v1 reward snapshot saqlamaydi, inferred award/debit yo‘q; v1 cash contract preserved.
+
+`POINTS_BALANCE_CHANGED`, `POINTS_BALANCE_EXCEEDED`, `POINTS_DISCOUNT_LIMIT`, `LOYALTY_POLICY_CHANGED`, `LOYALTY_SALE_CHANGED`, `LOYALTY_OFFLINE_UNAVAILABLE`, `LOYALTY_CURRENCY_UNSUPPORTED`, `POINT_WALLET_TOO_LARGE` fail-closed. Max100 alias/10000active-or-debtlot, no partial result. Qo‘llanma `docs/operations/loyalty-points.md`; SMS, Click, fiscal va hardware integratsiyalari yo‘q.

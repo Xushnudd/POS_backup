@@ -29,3 +29,10 @@ test('billing shared endpoints distinguish actual target entities without separa
  assert.notEqual(durableIdentity('/billing/assign',{targetOrganizationId:'one'}),durableIdentity('/billing/assign',{targetOrganizationId:'two'}))
  for(const path of ['/billing/payments','/billing/plans','/billing/assign'])assert.equal(durableIdentity(path,{}),'')
 })
+test('report plan recovery separates a new schedule from each original existing schedule, preserving edited policy identity',()=>{
+ assert.equal(durableIdentity('/reports/plans',{name:'old',configuration:{}}),'report:new')
+ assert.equal(durableIdentity('/reports/plans',{name:'new',enabled:true}),'report:new')
+ assert.equal(durableIdentity('/reports/plans',{id:'one',name:'old'}),durableIdentity('/reports/plans',{id:'one',name:'new'}))
+ assert.notEqual(durableIdentity('/reports/plans',{id:'one'}),durableIdentity('/reports/plans',{id:'two'}))
+ assert.notEqual(durableIdentity('/reports/plans',{id:'one'}),durableIdentity('/reports/plans',{}))
+})

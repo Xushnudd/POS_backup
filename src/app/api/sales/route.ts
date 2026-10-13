@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 import { createDraft, saleDraftSchema } from '@/server/sales/service'
+import {parseSalesListQuery} from '@/lib/sales-list-query'
+import {assertLiveContext} from '@/server/operations'
 
 async function handleGET(request: NextRequest) {
   try {
@@ -31,10 +33,10 @@ async function handleGET(request: NextRequest) {
     const organizationId = searchParams.get('organizationId')
     const storeId = searchParams.get('storeId')
     const shiftId = searchParams.get('shiftId')
-    const status = searchParams.get('status')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const skip = (page - 1) * limit
+    let query: ReturnType<typeof parseSalesListQuery>
+    try { query = parseSalesListQuery(searchParams) }
+    catch (error) { throw new AccessError(400, error instanceof Error ? error.message : 'INVALID_FILTER') }
+    const {status,page,limit,skip,search,sort}=query
 
     if (!organizationId) {
       return NextResponse.json(
@@ -52,9 +54,17 @@ async function handleGET(request: NextRequest) {
     if (status) where.status = status
     const customerId=searchParams.get('customerId')
     if(customerId)where.customerId=customerId
+    if(search)where.OR=[{receiptNo:{contains:search,mode:'insensitive'}},{customer:{fullName:{contains:search,mode:'insensitive'}}}]
+    const orderBy:Prisma.SaleOrderByWithRelationInput[] = sort==='oldest'
+      ? [{createdAt:'asc'},{id:'asc'}]
+      : sort==='amount_asc' ? [{totalAmount:'asc'},{id:'asc'}]
+      : sort==='amount_desc' ? [{totalAmount:'desc'},{id:'desc'}]
+      : sort==='receipt' ? [{receiptNo:'asc'},{id:'asc'}]
+      : [{createdAt:'desc'},{id:'desc'}]
 
-    const [sales, total] = await Promise.all([
-      db.sale.findMany({
+    const [sales, total] = await db.$transaction(async tx=>{
+      await assertLiveContext(tx,payload)
+      const sales=await tx.sale.findMany({
         where,
         include: {
           customer: true,
@@ -62,12 +72,12 @@ async function handleGET(request: NextRequest) {
           payments: true,
           ...(customerId?{saleReturns:{select:{id:true,refundAmount:true,returnReceiptNo:true,returnedAt:true}}}:{}),
         },
-        orderBy: [{createdAt:'desc'},{id:'desc'}],
+        orderBy,
         skip,
         take: limit,
-      }),
-      db.sale.count({ where }),
-    ])
+      })
+      return [sales,await tx.sale.count({where})] as const
+    },{isolationLevel:'RepeatableRead'})
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,15 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ POINTS_BALANCE_CHANGED:{message:'Ball qoldig‘i yoki qoida o‘zgardi.',nextAction:'Ball holatini yangilang. Yakunlanmagan tanlovni bekor qilib, qayta ko‘rib chiqing.'},
+ POINTS_BALANCE_EXCEEDED:{message:'Sarflash mumkin bo‘lgan ball yetarli emas.',nextAction:'Serverdagi walletni yangilang va qoldiqdan oshmaydigan miqdorni tanlang.'},
+ POINTS_DISCOUNT_LIMIT:{message:'Bonus chegirmasi administrator chegarasidan oshdi.',nextAction:'Kamroq ball tanlang; kassa xodimining chegirma vakolatini ham tekshiring.'},
+ LOYALTY_POLICY_CHANGED:{message:'Bonus siyosati versiyasi o‘zgardi.',nextAction:'Siyosatni yangilang va yangi qiymatlarni ko‘rib chiqing. Eski amal kalitini o‘zgartirmang.'},
+ LOYALTY_DISABLED:{message:'Bonus sarflash siyosati yoqilmagan.',nextAction:'Egasi amaldagi qoidalarni tekshirsin; bonus qiymati taxmin qilinmaydi.'},
+ LOYALTY_SALE_CHANGED:{message:'Ball tanlovi original savatga bog‘langan.',nextAction:'Savatni tahrirlashdan oldin yakunlanmagan ball tanlovini bekor qiling.'},
+ LOYALTY_REDEMPTION_EXISTS:{message:'Bu savdoda original ball tanlovi mavjud.',nextAction:'Original tanlov va pending amalni tekshiring; yangi duplicate tanlov yaratmang.'},
+ LOYALTY_OFFLINE_UNAVAILABLE:{message:'Ball sarflash onlayn tasdiqlanadi.',nextAction:'Internetni tiklang yoki yakunlanmagan ball tanlovini bekor qilib, oddiy cash oqimidan foydalaning.'},
+ LOYALTY_CURRENCY_UNSUPPORTED:{message:'Bonus qoidalari UZS uchun.',nextAction:'Tashkilot valyutasini tekshiring. Eski pul summalari avtomatik konvertatsiya qilinmaydi.'},
+ LOYALTY_FEATURE_UNAVAILABLE:{message:'Tanlangan bonus xizmati hali faol emas.',nextAction:'Faqat amalda mavjud xizmatni yoqing; karta, promo va sertifikat faollashishi alohida boshqariladi.'},
  SERIAL_SELECTION_REQUIRED:{message:'Original seriallar tanlanmagan yoki holati o‘zgargan.',nextAction:'Original birlik ro‘yxatini yangilang va har birlikni aniq tanlang. Pul/stock qisman yozilmaydi.'},
  SERIAL_COUNT_MISMATCH:{message:'Seriallar soni kirim miqdoriga teng emas.',nextAction:'Har butun birlik uchun bitta noyob serial kiriting.'},
  SERIAL_REQUIRES_UNUSED_PRODUCT:{message:'Mahsulotning oldingi tarixi mavjud.',nextAction:'Yangi alohida SKU yarating; eski qoldiqqa taxminiy serial yozilmaydi.'},

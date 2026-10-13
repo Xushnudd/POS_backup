@@ -1,6 +1,7 @@
 'use client';
 
 import SerialPicker from '@/components/inventory/SerialPicker';
+import SalePoints from '@/components/customers/SalePoints';
 import BatchRestorePicker,{type BatchChoice} from '@/components/inventory/BatchRestorePicker';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import {confirmPageNavigation} from '@/lib/page-navigation';
@@ -53,6 +54,7 @@ export default function SaleDetailPage() {
 
   const [sale, setSale] = useState<Sale | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError,setLoadError]=useState('');
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [returnVersion,setReturnVersion]=useState(0);
   useUnsavedChanges(returnOpen&&Boolean(reason||manualReference||Object.values(returnQty).some(value=>/[1-9]/.test(value))||Object.values(batchChoices).some(rows=>rows.length)||Object.values(serialChoices).some(rows=>rows.length)),returning||returnUnknown);
@@ -79,16 +81,15 @@ export default function SaleDetailPage() {
   },[id,organization?.id,user?.id]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id||!organization?.id||!user?.id) return;
     let isCancelled = false;
 
-    void api.sales
-      .get(id)
+    void Promise.resolve().then(()=>{if(isCancelled)return null;setSale(null);setIsLoading(true);setLoadError('');return api.sales.get(id);})
       .then((res) => {
-        if (!isCancelled && res.data) setSale(res.data);
+        if (!isCancelled && res?.data) setSale(res.data);
       })
       .catch((err) => {
-        console.error(err);
+        if(!isCancelled){setSale(null);setLoadError(err instanceof Error?err.message:'Savdo yuklanmadi');}
       })
       .finally(() => {
         if (!isCancelled) setIsLoading(false);
@@ -97,7 +98,7 @@ export default function SaleDetailPage() {
     return () => {
       isCancelled = true;
     };
-  }, [id]);
+  }, [id,organization?.id,user?.id,role]);
 
   const handleVoid = async () => {
     if (!sale || !confirm('Haqiqatan ham bu savdoni bekor qilmoqchimisiz?')) return;
@@ -155,6 +156,7 @@ export default function SaleDetailPage() {
     );
   }
 
+  if(loadError)return <div role="alert">{loadError}<Button onClick={()=>window.location.reload()}>Qayta yuklash</Button></div>;
   if (!sale) {
     return (
       <div className="p-8 text-center">
@@ -207,6 +209,7 @@ export default function SaleDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {sale.status==='draft'&&<Link href={'/pos?draft='+sale.id} className="text-blue-700 underline">Savdoni kassada davom ettirish</Link>}
           <Button
             variant="outline"
             onClick={() => setIsReceiptOpen(true)}
@@ -285,6 +288,7 @@ export default function SaleDetailPage() {
         </table>
       </Card>
 
+      <SalePoints sale={sale} onChanged={setSale}/>
       <ReturnHistory key={sale.id} saleId={sale.id} timezone={organization?.timezone??'Asia/Tashkent'} version={returnVersion}/>
       {role !== 'cashier' && <ExchangeHistory saleId={sale.id}/>}
       <ReceiptPreview

@@ -1,3 +1,4 @@
+import {parseListQuery,customerListSorts} from '@/lib/list-query'
 import {cursorExport,EXPORT_PAGE_SIZE} from '../cursor'
 import {normalizeCustomerPhone} from "@/server/customers/identity"
 import {assertLiveContext} from "@/server/operations"
@@ -17,10 +18,9 @@ export async function queryCustomers(payload:TokenPayload,request:NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
-    const search = searchParams.get('search')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const skip = (page - 1) * limit
+    let query:ReturnType<typeof parseListQuery<typeof customerListSorts[number]>>
+    try{query=parseListQuery(searchParams,customerListSorts,'name_asc')}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+    const {search,page,limit,skip,sort}=query
 
     if (!organizationId) {
       return NextResponse.json(
@@ -42,6 +42,9 @@ export async function queryCustomers(payload:TokenPayload,request:NextRequest) {
       ]
     }
 
+    const orderBy:Prisma.CustomerOrderByWithRelationInput[]=sort==='name_desc'?[{fullName:'desc'},{id:'desc'}]
+      :sort==='newest'?[{createdAt:'desc'},{id:'desc'}]:sort==='oldest'?[{createdAt:'asc'},{id:'asc'}]
+      :[{fullName:'asc'},{id:'asc'}]
     if(searchParams.get('format')==='csv'){
       if(payload.role!=='owner')throw new AccessError(403,'FORBIDDEN')
       await consumeLimit('customers.export',payload.organizationId+':'+payload.userId,10,60000)
@@ -49,7 +52,7 @@ export async function queryCustomers(payload:TokenPayload,request:NextRequest) {
       await assertLiveContext(tx,payload)
         const total=await tx.customer.count({where})
         if(total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
-        const rows=await cursorExport(cursor=>tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],select:{id:true,fullName:true,phone:true,address:true,creditLimit:true},take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})}))
+        const rows=await cursorExport(cursor=>tx.customer.findMany({where,orderBy,select:{id:true,fullName:true,phone:true,address:true,creditLimit:true},take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})}))
         const debts=await tx.debtEntry.groupBy({by:['customerId'],where:{customerId:{in:rows.map(row=>row.id)}},_sum:{amount:true}})
         const balances=new Map(debts.map(row=>[row.customerId,row._sum.amount??new Prisma.Decimal(0)]))
         return {filename:'customers-'+payload.organizationId+'.csv',content:csv([['ID','Mijoz','Telefon','Manzil','Nasiya limiti','Joriy ledger qoldig‘i'],...rows.map(row=>[row.id,row.fullName,row.phone,row.address,numeric(row.creditLimit),numeric(balances.get(row.id)??0)])])}
@@ -59,7 +62,7 @@ export async function queryCustomers(payload:TokenPayload,request:NextRequest) {
 
     const [customers, total] = await db.$transaction(async tx=>{
       await assertLiveContext(tx,payload)
-      const rows=await tx.customer.findMany({where,orderBy:[{fullName:'asc'},{id:'asc'}],skip,take:limit})
+      const rows=await tx.customer.findMany({where,orderBy,skip,take:limit})
       return [rows,await tx.customer.count({where})] as const
     },{isolationLevel:'RepeatableRead'})
 

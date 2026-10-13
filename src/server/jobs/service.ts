@@ -65,7 +65,9 @@ export async function executeJob(job:BackgroundJob){let active=true,inFlight:Pro
    const context=authorization&&membership?{userId:authorization.userId,organizationId:source.organizationId,organizationUserId:membership.id,role:membership.role,storeIds:membership.userStores.map(row=>row.storeId),sessionId:authorization.sessionId}:null;
    const exported=source.type==='report_export'&&context&&payload.report?await reportExport(context,payload.report):source.type==='tenant_export'?await tenantExport(source.organizationId):await catalogExport(source.organizationId,payload.filter??{active:'all'});
    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'exports:'+source.organizationId},0))::text`;
-   const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});if((used._sum.size??0)+exported.size>32*1024*1024)throw new AccessError(413,'EXPORT_QUOTA');
+   const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});
+   const scheduled=await tx.reportScheduleRun.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},result:{not:Prisma.DbNull}},_sum:{size:true}});
+   if((used._sum.size??0)+(scheduled._sum.size??0)+exported.size>32*1024*1024)throw new AccessError(413,'EXPORT_QUOTA');
    const {data,...meta}=exported;await tx.jobExport.create({data:{jobId:source.id,organizationId:source.organizationId,data,...meta,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}});result={...meta,downloadPath:'/api/jobs/'+source.id+'/export'};
   }else throw new AccessError(400,'UNSUPPORTED_JOB')
   await liveAuthorization(tx,source,true)

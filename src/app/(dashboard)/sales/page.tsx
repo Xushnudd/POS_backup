@@ -1,12 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import {useSearchParams} from 'next/navigation';
+import {parseSalesListQuery} from '@/lib/sales-list-query';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Pagination from '@/components/ui/Pagination';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { Sale } from '@/types';
 import { formatMoney, formatDate } from '@/lib/format';
+import DataTable from '@/components/ui/DataTable';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -21,31 +27,57 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function SalesPage() {
+  const {organization,user,role}=useAuth();
+  const {activeStore}=useOrganization();
+  return <Suspense fallback={<LoadingSpinner text="Savdolar yuklanmoqda..." />}>
+    <SalesJournal key={[organization?.id,user?.id,role,activeStore?.id].join(':')} />
+  </Suspense>;
+}
+
+function SalesJournal() {
   const { organization } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
   const [sales, setSales] = useState<Sale[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const params=useSearchParams();
+  let query:ReturnType<typeof parseSalesListQuery>|undefined;
+  try {query=parseSalesListQuery(params);} catch { /* Render an explicit invalid-filter state below. */ }
+  const selectedStatus=query?.status??'',page=query?.page??1;
+  const search=query?.search??'',sort=query?.sort??'newest',limit=query?.limit??20;
+  const invalidQuery=!query;
+  const changeQuery=useCallback((changes:Record<string,string>)=>{
+    const next=new URLSearchParams(params.toString());
+    for(const [key,value] of Object.entries(changes)){
+      if(value)next.set(key,value);else next.delete(key);
+    }
+    window.history.pushState(null,'',window.location.pathname+(next.size?'?'+next.toString():'')+window.location.hash);
+  },[params]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [loadError,setLoadError]=useState('');
+  const requestSequence=useRef({value:0});
+  const organizationId=organization?.id,storeId=activeStore?.id;
 
   // Selected sale for receipt preview
   const [previewSale, setPreviewSale] = useState<Sale | null>(null);
 
   const loadSales = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organizationId || invalidQuery) return;
+    const sequence=++requestSequence.current.value;
     setIsLoading(true);
+    setLoadError('');
     try {
       const res = await api.sales.list({
-        organizationId: organization.id,
-        storeId: activeStore?.id,
+        organizationId,
+        storeId,
         status: selectedStatus || undefined,
         page,
-        limit: 20,
+        limit,search,sort,
       });
 
+      if(sequence!==requestSequence.current.value)return;
+      if(!res.data)throw new Error('Savdolar natijasi mavjud emas');
       if (res.data) {
         setSales(res.data);
         if (res.pagination) {
@@ -53,14 +85,16 @@ export default function SalesPage() {
         }
       }
     } catch (err: unknown) {
-      console.error('Error loading sales:', err);
+      if(sequence===requestSequence.current.value){setSales([]);setLoadError(err instanceof Error?err.message:'Savdolarni yuklab bo‘lmadi');}
     } finally {
-      setIsLoading(false);
+      if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization, activeStore, selectedStatus, page]);
+  }, [organizationId, storeId, selectedStatus, page, limit, search, sort, invalidQuery]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadSales);
+    const sequence=requestSequence.current;let cancelled=false;
+    void Promise.resolve().then(()=>{if(!cancelled)return loadSales();});
+    return ()=>{cancelled=true;sequence.value++;};
   }, [loadSales]);
 
   const handleVoidSale = async (saleId: string) => {
@@ -125,8 +159,7 @@ export default function SalesPage() {
             <button
               key={tab.id}
               onClick={() => {
-                setSelectedStatus(tab.id);
-                setPage(1);
+                changeQuery({status:tab.id,page:'1'});
               }}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                 selectedStatus === tab.id
@@ -138,11 +171,25 @@ export default function SalesPage() {
             </button>
           ))}
         </div>
+        <form key={search} className="mt-3 flex flex-wrap items-end gap-3" onSubmit={event=>{
+          event.preventDefault();const data=new FormData(event.currentTarget);
+          changeQuery({search:String(data.get('search')??'').trim(),page:'1'});
+        }}>
+          <Input name="search" label="Chek yoki mijoz qidirish" defaultValue={search} maxLength={200} />
+          <Button type="submit" disabled={isLoading&&!invalidQuery}>Qidirish</Button>
+          <Select label="Savdolarni saralash" value={sort} onChange={event=>changeQuery({sort:event.target.value,page:'1'})}
+            options={[{value:'newest',label:'Yangi savdolar avval'},{value:'oldest',label:'Eski savdolar avval'},
+              {value:'amount_desc',label:'Summa: kattadan kichikka'},{value:'amount_asc',label:'Summa: kichikdan kattaga'},
+              {value:'receipt',label:'Chek raqami bo‘yicha'}]} />
+          <Button variant="outline" onClick={()=>changeQuery({search:'',status:'',sort:'',page:'',limit:''})}>Filtrlarni tozalash</Button>
+        </form>
       </Card>
 
       {/* Sales Table */}
       <Card padding={false}>
-        {isLoading ? (
+        {invalidQuery ? <div role="alert" aria-label="Savdolar ro‘yxati xatosi" className="p-6 text-red-700">URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalab qayta urinib ko‘ring.</div>
+        : loadError ? <div role="alert" aria-label="Savdolar ro‘yxati xatosi" className="p-6 text-red-700">{loadError} <Button onClick={loadSales}>Qayta yuklash</Button></div>
+        : isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <LoadingSpinner size="lg" text="Savdolar yuklanmoqda..." />
           </div>
@@ -154,7 +201,7 @@ export default function SalesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Chek №</th>
@@ -218,36 +265,15 @@ export default function SalesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-between text-xs">
-            <span className="text-gray-500">
-              Sahifa {page} / {totalPages}
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                Oldingi
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-              >
-                Keyingi
-              </Button>
-            </div>
-          </div>
-        )}
+        {!invalidQuery&&!loadError&&<div className="p-4 border-t border-gray-100">
+          <Pagination page={page} pages={totalPages} busy={isLoading} onPage={value=>changeQuery({page:String(value)})} />
+          {!isLoading&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+        </div>}
       </Card>
 
       {/* Receipt Modal */}

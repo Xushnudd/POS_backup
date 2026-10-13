@@ -1,0 +1,19 @@
+'use client';
+import type {ReactNode} from 'react';
+import Input from './Input';
+import Select from './Select';
+import Button from './Button';
+export default function ListFilter({search,sort,label,placeholder,options,disabled=false,onChange,children,reset={}}:{
+  search:string;sort:string;label:string;placeholder?:string;options:{value:string;label:string}[];
+  disabled?:boolean;onChange:(changes:Record<string,string>)=>void;children?:ReactNode;reset?:Record<string,string>;
+}){
+  return <form key={search} className="flex flex-wrap items-end gap-3" onSubmit={event=>{
+    event.preventDefault();onChange({search:String(new FormData(event.currentTarget).get('search')??'').trim(),page:'1'});
+  }}>
+    <Input name="search" label={label} placeholder={placeholder} maxLength={200} defaultValue={search} disabled={disabled}/>
+    <Button type="submit" disabled={disabled}>Qidirish</Button>
+    <Select label="Saralash" value={sort} disabled={disabled} options={options} onChange={event=>onChange({sort:event.target.value,page:'1'})}/>
+    {children}
+    <Button disabled={disabled} variant="outline" onClick={()=>onChange({search:'',sort:'',page:'',limit:'',categoryId:'',...reset})}>Filtrlarni tozalash</Button>
+  </form>;
+}

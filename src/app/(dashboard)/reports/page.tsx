@@ -22,7 +22,7 @@ import {
 export default function ReportsPage(){return <Suspense fallback={<LoadingSpinner/>}><ReportsContent/></Suspense>}
 function ReportsContent() {
   const searchParams=useSearchParams();
-  const { organization } = useAuth();
+  const { organization,role } = useAuth();
   const { activeStore } = useOrganization();
 
   const dateParts=new Intl.DateTimeFormat('en',{timeZone:organization?.timezone??'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
@@ -92,6 +92,7 @@ function ReportsContent() {
             Tahlil va Hisobotlar
           </h1>
           <Link href="/reports/purchases" className="text-sm text-blue-700 mr-4">Xarid narxlari tahlili</Link>
+          {role==='owner'&&<Link href="/reports/plans" className="text-sm text-blue-700 mr-4">Rejalashtirilgan hisobotlar</Link>}
           <Link href="/reports/reconciliation" className="text-sm text-blue-700">Qoldiq va pul hisobini solishtirish</Link>
           <p className="text-sm text-gray-500 mt-0.5">
             Savdo ko&apos;rsatkichlari, tovarlar aylanmasi, foyda va CSV eksport

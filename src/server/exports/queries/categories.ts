@@ -1,8 +1,9 @@
+import {parseListQuery,categoryListSorts} from '@/lib/list-query'
 import {cursorExport,EXPORT_PAGE_SIZE} from '../cursor'
 import {assertLiveContext} from "@/server/operations"
 import {Prisma} from "@prisma/client"
 import {csv,numeric} from "@/server/exports/csv"
-import {paging,searchTerm,exporting,exportCap,pagination} from "@/server/catalog/queries"
+import {exporting,exportCap,pagination} from "@/server/catalog/queries"
 import {activeStatus} from "@/server/catalog/status"
 import {AccessError} from "@/server/auth/policy"
 import {scopedPrisma} from "@/server/auth/scoped-prisma"
@@ -24,16 +25,18 @@ export async function queryCategories(payload:TokenPayload,request:NextRequest) 
       )
     }
 
-    const search=searchTerm(searchParams)
+    let query:ReturnType<typeof parseListQuery<typeof categoryListSorts[number]>>
+    try{query=parseListQuery(searchParams,categoryListSorts,'order')}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+    const {page,limit,skip,search,sort}=query
+    const orderBy:Prisma.CategoryOrderByWithRelationInput[]=sort==='name_asc'?[{name:'asc'},{id:'asc'}]:sort==='name_desc'?[{name:'desc'},{id:'desc'}]:[{sortOrder:'asc'},{id:'asc'}]
     const where = {organizationId, ...activeStatus(searchParams,payload),...(search?{name:{contains:search,mode:'insensitive' as const}}:{})}
-    const paginated=['status','search','page','limit'].some(key=>searchParams.has(key))
-    const {page,limit,skip}=paging(searchParams)
+    const paginated=['status','search','page','limit','sort'].some(key=>searchParams.has(key))
     const isExport=await exporting(searchParams,payload,'category.export')
     const result=await db.$transaction(async tx=>{
       await assertLiveContext(tx,payload)
       const total=await tx.category.count({where})
       if(isExport)exportCap(total)
-      const rows=isExport?await cursorExport(cursor=>tx.category.findMany({where,include:{parent:{select:{id:true,name:true}}},orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated&&!isExport?{skip,take:limit}:{}),take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})})):await tx.category.findMany({where,include:{parent:{select:{id:true,name:true}}},orderBy:[{sortOrder:'asc'},{id:'asc'}],...(paginated&&!isExport?{skip,take:limit}:{})})
+      const rows=isExport?await cursorExport(cursor=>tx.category.findMany({where,include:{parent:{select:{id:true,name:true}}},orderBy,...(paginated&&!isExport?{skip,take:limit}:{}),take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})})):await tx.category.findMany({where,include:{parent:{select:{id:true,name:true}}},orderBy,...(paginated&&!isExport?{skip,take:limit}:{})})
       if(isExport)return {success:true,data:{filename:'categories-'+organizationId+'.csv',content:csv([['ID','Nomi','Tartib','Faol'],...rows.map(row=>[row.id,row.name,numeric(row.sortOrder,0),row.isActive?'ha':'yo‘q'])])}}
       return {success:true,data:rows,...(paginated?{pagination:pagination(page,limit,total)}:{})}
     },{isolationLevel:'RepeatableRead'})

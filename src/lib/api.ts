@@ -193,6 +193,7 @@ class ApiClient {
       organizationId: string;
       search?: string;
       categoryId?: string;
+      sort?: import('./list-query').ProductListSort;
       status?: 'active'|'archived'|'all';
       barcode?: string;
       page?: number;
@@ -270,6 +271,8 @@ class ApiClient {
       storeId?: string;
       shiftId?: string;
       status?: string;
+      search?: string;
+      sort?: import('./sales-list-query').SaleListSort;
       page?: number;
       limit?: number;
     }) => {
@@ -469,7 +472,7 @@ class ApiClient {
 
   // Customers
   customers = {
-    list: (params: { organizationId: string; search?: string; page?: number; limit?: number }) => {
+    list: (params: { organizationId: string; search?: string; sort?: import('./list-query').CustomerListSort; page?: number; limit?: number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
