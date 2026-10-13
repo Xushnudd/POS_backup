@@ -66,6 +66,8 @@ INSERT INTO "InventoryBatchEntry"(id,"organizationId","batchId","storeId","movem
 UPDATE "StockDocument" SET status='confirmed',"confirmedAt"=NOW(),"confirmedBy"='valuation-legacy-user' WHERE id='batch-restore-doc';
 COMMIT;
 SQL
+DATABASE_URL="postgresql://pos_test:local-test-only@127.0.0.1:55439/$valuation_clone" NODE_ENV=test AUTH_CRITICAL_MFA_REQUIRED=false node --require ./scripts/test-resolver.cjs scripts/ops/valuation-cost-fixture.cjs
+valuation_cost_hash=$(query "$valuation_clone" 'SELECT md5(string_agg(payload, chr(10) ORDER BY payload)) FROM (SELECT row_to_json(a)::text AS payload FROM "ReceiptCostApplication" a UNION ALL SELECT row_to_json(c)::text FROM "ReceiptCostContinuation" c) journals')
 valuation_batch_hash=$(query "$valuation_clone" 'SELECT md5(row_to_json(b)::text||row_to_json(e)::text) FROM "InventoryBatch" b JOIN "InventoryBatchEntry" e ON e."batchId"=b.id WHERE b.id='"'"'batch-restore-batch'"'"'')
 valuation_event_hash=$(query "$valuation_clone" 'SELECT md5(row_to_json(e)::text) FROM "InventoryValuationEvent" e')
 docker exec pos-plan-test-db pg_dump -U pos_test -d "$valuation_clone" -Fc > "$valuation_workdir/valuation.dump"
@@ -74,8 +76,10 @@ docker exec -i pos-plan-test-db pg_restore -U pos_test -d "$valuation_restore" -
 [[ "$(query "$valuation_restore" 'SELECT md5(row_to_json(e)::text) FROM "InventoryValuationEvent" e')" == "$valuation_event_hash" ]]
 [[ "$(query "$valuation_restore" "SELECT md5(row_to_json(m)::text) FROM \"InventoryMovement\" m WHERE id='valuation-legacy-movement'")" == "$valuation_movement_hash" ]]
 [[ "$(query "$valuation_restore" 'SELECT md5(row_to_json(b)::text||row_to_json(e)::text) FROM "InventoryBatch" b JOIN "InventoryBatchEntry" e ON e."batchId"=b.id WHERE b.id='"'"'batch-restore-batch'"'"'')" == "$valuation_batch_hash" ]]
+[[ "$(query "$valuation_restore" 'SELECT md5(string_agg(payload, chr(10) ORDER BY payload)) FROM (SELECT row_to_json(a)::text AS payload FROM "ReceiptCostApplication" a UNION ALL SELECT row_to_json(c)::text FROM "ReceiptCostContinuation" c) journals')" == "$valuation_cost_hash" ]]
+DATABASE_URL="postgresql://pos_test:local-test-only@127.0.0.1:55439/$valuation_restore" NODE_ENV=test AUTH_CRITICAL_MFA_REQUIRED=false node --require ./scripts/test-resolver.cjs scripts/ops/valuation-cost-fixture.cjs --verify
 create_database "$valuation_fresh"
 apply "$valuation_fresh"
 valuation_expected=$(rg --files prisma/migrations | rg '/migration.sql$' | wc -l)
 [[ "$(query "$valuation_fresh" 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL')" == "$valuation_expected" ]]
-printf 'PASS: %s fresh migrations; synthetic133 dump upgrade/repeat; no legacy order backfill; proven legacy boundary; native forge rejection; full valuation and batch dump/restore unchanged\n' "$valuation_expected"
+printf 'PASS: %s fresh migrations; synthetic133 dump upgrade/repeat; no legacy order backfill; proven legacy boundary; native forge rejection; full valuation, batch, application and continuation dump/restore unchanged\n' "$valuation_expected"

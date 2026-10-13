@@ -1,3 +1,4 @@
+import {postCostContinuations} from '@/server/purchases/cost-continuations'
 import {assertLiveContext} from '@/server/operations'
 import {priceActor,costChangeReferences} from '@/server/catalog/prices'
 import { Prisma } from '@prisma/client'
@@ -127,7 +128,8 @@ async function handlePUT(
         category: true,
       },
     })
-      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Product",entityId:result.id,action:"update",afterData:{approvedBy:payload.userId,approvedRole:payload.role,valuationReferences:await costChangeReferences(tx,payload,[result.id]),prices:{salePrice:{before:current.salePrice.toFixed(),after:result.salePrice.toFixed()},costPrice:{before:current.costPrice.toFixed(),after:result.costPrice.toFixed()}}}}})
+      const costAudit=await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Product",entityId:result.id,action:"update",afterData:{approvedBy:payload.userId,approvedRole:payload.role,valuationReferences:await costChangeReferences(tx,payload,[result.id]),prices:{salePrice:{before:current.salePrice.toFixed(),after:result.salePrice.toFixed()},costPrice:{before:current.costPrice.toFixed(),after:result.costPrice.toFixed()}}}}})
+      if(!current.costPrice.eq(result.costPrice))await postCostContinuations(tx as unknown as import('@prisma/client').Prisma.TransactionClient,payload,{auditId:costAudit.id,productId:result.id})
       return result
     })
 

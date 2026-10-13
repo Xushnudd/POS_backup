@@ -40,7 +40,7 @@ export async function previewReceiptCostCorrection(context: TokenPayload, stockD
           inventoryCorrection: '0', cogsCorrection: '0', roundingCorrection: '0', varianceCorrection:'0', cogsEntries: [] })
         continue
       }
-      const correction=planValuationFactCorrection(history.facts,history.baselineUnitCost,original.eventId,line.allocatedAmount,history.dispositions)
+      const correction=planValuationFactCorrection(history.financialFacts,history.baselineUnitCost,original.eventId,line.allocatedAmount,history.financialDispositions)
       const Exact=Prisma.Decimal.clone({precision:60}),difference=(before:string,after:string)=>new Exact(after).sub(before)
       const rawEntries=[...correction.after.rows.flatMap((row,index)=>{
         if(!['sale','return'].includes(row.kind))return []

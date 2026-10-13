@@ -1425,3 +1425,16 @@ bilan qaytadi (`sequence:null`, soxta native tartib emas). Manual override
 faqat exact native eventga bog‘langan owner audit bilan tan olinadi.
 Unproven eski override `COST_MANUAL_APPROVAL_UNPROVEN` beradi. `financialPosting`
 hali `false`; API expense/payment/stock/cost/correction ledger yozmaydi.
+
+### Kirim tannarxi application/reversal va davomiy correction (PUR-01.05)
+
+Barcha quyidagi yo‘llar owner-only, tenant va URLdagi original receipt/plan bilan bog‘langan; natijalar `no-store`. Prefix: `/api/stock-documents/:id/cost-plans/:planId`.
+
+- `POST /application-preview`: strict `{reverseApplicationId?:UUID}`. Read-only; expectedHash, stock/COGS/variance/rounding, actual store corrections va transit qaytadi. Katta historical issue/COGS arrays o‘rniga count beriladi.
+- `POST /apply`: strict `{operationId:UUID,expectedHash:64hex,reason}`; kritik MFA action `receipt.cost.apply`.
+- `POST /reverse`: yuqoridagilarga `reverseApplicationId:UUID` qo‘shiladi; MFA `receipt.cost.reverse`. Original jurnal immutable, reversal alohida row.
+- `GET /applications?page=1`: original application/reversal summaries va20qatorlik continuation pagination, jami/count/source Operation/Audit havolalari. To‘liq historical COGS arrays mijozga yuborilmaydi.
+
+Hash yoki source o‘zgarsa yangi preview kerak. Unknown-result uchun original body/key qayta tekshiriladi. Active application bekor qilinmaguncha source expense yoki prepared plan bekor qilinmaydi. Keyingi authorized stock/value operatsiyasi zarur correctionni aynan shu tranzaksiyada source-linked continuationga yozadi; manual absolute override uchun audit source mavjud. Source journals yaratadigan ikkinchi pul to‘lovi yo‘q. Actual transfer send cost optional `issueUnitCostSnapshot`da, eski draft `unitCost` saqlanadi.
+
+Chegaralar:200receipt product, jami10000native fact,8MiB application snapshot; katta/unproven tarix fail-closed. Muddati tugagan bo‘lsa ham hal qilinmagan offline cash ticket postingni bloklaydi. `COST_PREVIEW_CHANGED`, `COST_HISTORY_TOO_LARGE`, source/boundary va offline cheklovlar aniq xato qaytaradi. Batafsil: `docs/operations/receipt-cost-applications.md`. Staging/production/pilot qabulini bildirmaydi.

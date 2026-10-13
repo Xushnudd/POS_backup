@@ -52,6 +52,7 @@ export async function cancelReceiptCost(context: TokenPayload, stockDocumentId: 
     await tx.$queryRaw`SELECT id FROM "ReceiptCostPlan" WHERE id=${id} FOR UPDATE`
     const current = await tx.receiptCostPlan.findUniqueOrThrow({ where: { id } })
     if (current.status !== 'prepared') throw new AccessError(409, 'INVALID_STATUS')
+    if (await tx.receiptCostApplication.findFirst({where:{planId:id,reversalOfId:null,reversal:{is:null}}})) throw new AccessError(409,'COST_REVERSE_REQUIRED','Avval qo‘llangan xarajatni reversal qiling')
     const result = await tx.receiptCostPlan.update({ where: { id }, data: { status: 'cancelled', cancelledBy: context.userId,
       cancelledAt: new Date(), cancellationReason: parsed.reason } })
     await audit(tx, context, 'ReceiptCostPlan', id, 'cancelled', { reason: parsed.reason, financialPosting: false })
@@ -67,7 +68,7 @@ export async function listReceiptCosts(context: TokenPayload, stockDocumentId: s
     if (!await tx.stockDocument.findFirst({ where: { id: stockDocumentId, AND: tenantScope('StockDocument', context) } }))
       throw new AccessError(404, 'NOT_FOUND')
     const where = { stockDocumentId, AND: tenantScope('ReceiptCostPlan', context) }
-    return { rows: await tx.receiptCostPlan.findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: [{ createdAt: 'desc' }, { id: 'asc' }] }), total: await tx.receiptCostPlan.count({ where }) }
+    return { rows: await tx.receiptCostPlan.findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],include:{applications:{select:{id:true,amount:true,createdAt:true,reversalOfId:true},orderBy:{ordinal:'asc'}}} }), total: await tx.receiptCostPlan.count({ where }) }
   }, { isolationLevel: 'RepeatableRead' })
 }
 

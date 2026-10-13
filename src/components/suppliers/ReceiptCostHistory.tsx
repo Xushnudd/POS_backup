@@ -1,4 +1,6 @@
 'use client';
+import {useAuth} from '@/context/AuthContext';
+import ReceiptCostApplication from './ReceiptCostApplication';
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import DurableMutation from '@/components/forms/DurableMutation';
@@ -10,12 +12,14 @@ import Button from '@/components/ui/Button';
 
 type Plan = {
   id: string; amount: string; method: string; status: string; reason: string;
+  applications:{id:string;reversalOfId:string|null;amount:string;createdAt:string}[];
   createdAt: string; cancelledAt: string | null; cancellationReason: string | null;
 };
 
 export default function ReceiptCostHistory({ documentId, documentNo, returnPath, items }: {
   documentId: string; documentNo: string; returnPath: string; items: {id:string;productId:string}[];
 }) {
+  const {role}=useAuth();
   const [page, setPage] = useState(1), [revision, setRevision] = useState(0);
   const [rows, setRows] = useState<Plan[]>([]), [total, setTotal] = useState(0);
   const [busy, setBusy] = useState(true), [error, setError] = useState('');
@@ -47,15 +51,16 @@ export default function ReceiptCostHistory({ documentId, documentNo, returnPath,
   return <><ReceiptCostPrepare documentId={documentId} documentNo={documentNo} items={items} returnPath={returnPath} onDone={refresh}/>
   <section aria-label={`Taqsimot tarixi: ${documentNo}`} className="my-3 space-y-3 rounded-lg border p-3">
     <h4 className="font-semibold">Saqlangan xarajat taqsimotlari</h4>
-    <p>Tayyor taqsimot hali tannarxga qo‘llanmagan. Bekor qilish ombor, pul yoki qarz balansini o‘zgartirmaydi.</p>
+    <p>Tayyorlash va tannarxga qo‘llash alohida amallar. Qo‘llashdan oldin hisobni tekshiring; qo‘llangan xarajatni avval reversal qilish kerak.</p>
     {busy && <p role="status">Taqsimot tarixi yuklanmoqda…</p>}
     {error && <p role="alert">{error}</p>}
     {!busy && !error && !rows.length && <p>Saqlangan taqsimot yo‘q.</p>}
     {rows.map(row => <article key={row.id} aria-label={`Taqsimot ${row.id}`} className="space-y-2 border p-3">
       <p>Summa: {row.amount} · Usul: {({ value: 'Qiymat', quantity: 'Miqdor', weight: 'Vazn' } as Record<string, string>)[row.method] ?? row.method}</p>
-      <p>Holat: {row.status === 'prepared' ? 'Tayyor, qo‘llanmagan' : row.status === 'cancelled' ? 'Bekor qilingan' : row.status}</p>
+      <p>Holat: {row.status === 'prepared' ? row.applications?.some(a=>!a.reversalOfId)&&!row.applications?.some(a=>a.reversalOfId)?'Tannarxga qo‘llangan':row.applications?.length?'Tannarx reversali yozilgan':'Tayyor, qo‘llanmagan' : row.status === 'cancelled' ? 'Bekor qilingan' : row.status}</p>
       <p>Sabab: {row.reason}</p><p>Yaratilgan: {new Date(row.createdAt).toLocaleString('uz-UZ')}</p>
       {row.status === 'cancelled' && <><p>Bekor qilish sababi: {row.cancellationReason}</p><p>Bekor qilingan: {row.cancelledAt ? new Date(row.cancelledAt).toLocaleString('uz-UZ') : '—'}</p></>}
+      {role==='owner'&&<ReceiptCostApplication documentId={documentId} planId={row.id} status={row.status} applications={row.applications??[]} ready={!busy&&!error&&!writing} returnPath={returnPath} onDone={refresh} onWriting={writingChanged}/>}
       {/* Keep recovery available after a lost ACK even if the next GET sees cancelled. */}
       <CancelPlan key={row.id} row={row} documentId={documentId} returnPath={returnPath} reason={reasons[row.id]??''}
         onReason={reason=>setReasons(old=>({...old,[row.id]:reason}))}
@@ -76,7 +81,7 @@ function CancelPlan({ row, documentId, returnPath, onDone, ready, reason, onReas
   // operation. Its fresh-action button is hidden for terminal rows.
   return <DurableMutation path={`/stock-documents/${documentId}/cost-plans/${row.id}/cancel`}
     returnPath={returnPath} body={{ reason }} label="Tayyor taqsimotni bekor qilish"
-    allowNew={row.status === 'prepared'} canSubmit={ready}
+    allowNew={row.status === 'prepared'&&(!row.applications?.some(a=>!a.reversalOfId)||!!row.applications?.some(a=>a.reversalOfId))} canSubmit={ready}
     review={[`Taqsimot: ${row.id}`, `Summa: ${row.amount}`, reason, 'Faqat qo‘llanmagan taqsimot bekor qilinadi. Moliyaviy posting yaratilmaydi.']}
     onSavingChange={writingChanged} onDone={(_result,body)=>onDone(typeof body?.reason==='string'?body.reason:'')}>
     {row.status === 'prepared' && <Input label="Taqsimotni bekor qilish sababi" value={reason} maxLength={2000} onChange={event => onReason(event.target.value)} />}

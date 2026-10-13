@@ -1,3 +1,4 @@
+import {costPostingsSql} from '@/server/purchases/cost-postings-query'
 import {paging} from "@/server/catalog/queries"
 import {csv,numeric,EXPORT_CAP} from "@/server/exports/csv"
 import {consumeLimit} from "@/server/auth/rate-limit"
@@ -21,15 +22,20 @@ export async function queryReportsProducts(context:TokenPayload,request:NextRequ
  const categoryFilter=category?Prisma.sql`AND p."categoryId"=${category}`:Prisma.empty
  const salesRange=Prisma.sql`${range.gte?Prisma.sql`AND s."completedAt">=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND s."completedAt"<${range.lt}`:Prisma.empty}`
  const returnsRange=Prisma.sql`${range.gte?Prisma.sql`AND r."returnedAt">=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND r."returnedAt"<${range.lt}`:Prisma.empty}`
- const cte=Prisma.sql`WITH movements AS (
+ const correctionScope=Prisma.sql`a."organizationId"=${context.organizationId} AND a."createdAt"<=${filter.asOf} ${range.gte?Prisma.sql`AND a."createdAt">=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND a."createdAt"<${range.lt}`:Prisma.empty} ${context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND entry->>'storeId' IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`} ${store?Prisma.sql`AND entry->>'storeId'=${store}`:Prisma.empty}`
+ const cte=Prisma.sql`${costPostingsSql}, movements AS (
   SELECT i."productId",i.quantity,COALESCE(i."payableAmount",i."lineTotal"-i."receiptDiscount") AS revenue,i.quantity*i."unitCost" AS cost,i."taxAmount" AS tax
   FROM "SaleItem" i JOIN "Sale" s ON s.id=i."saleId" JOIN "Product" p ON p.id=i."productId"
   WHERE s."organizationId"=${context.organizationId} AND s.status IN ('completed','partially_returned','returned') ${stores} ${storeFilter} ${categoryFilter} ${salesRange} AND s."createdAt"<=${filter.asOf} AND s."completedAt"<=${filter.asOf}
   UNION ALL
-  SELECT ri."productId",-ri.quantity,-ri."lineTotal",-ri.quantity*i."unitCost",-ri."taxAmount"
+  SELECT ri."productId",-ri.quantity,-ri."lineTotal",-ri.quantity*COALESCE(ri."unitCostSnapshot",i."unitCost"),-ri."taxAmount"
   FROM "SaleReturnItem" ri JOIN "SaleReturn" r ON r.id=ri."saleReturnId" JOIN "SaleItem" i ON i.id=ri."saleItemId"
   JOIN "Sale" s ON s.id=r."saleId" JOIN "Product" p ON p.id=ri."productId"
   WHERE s."organizationId"=${context.organizationId} ${stores} ${storeFilter} ${categoryFilter} ${returnsRange} AND r."createdAt"<=${filter.asOf} AND r."returnedAt"<=${filter.asOf}
+  UNION ALL
+  SELECT product->>'productId',0::numeric,0::numeric,(entry->>'amount')::numeric,0::numeric
+  FROM cost_postings a CROSS JOIN LATERAL jsonb_array_elements(a.snapshot->'products') product CROSS JOIN LATERAL jsonb_array_elements(product->'cogsEntries') entry JOIN "Product" p ON p.id=product->>'productId'
+  WHERE ${correctionScope} ${categoryFilter}
  ), totals AS (SELECT "productId",sum(quantity) AS quantity,sum(revenue) AS revenue,sum(cost) AS cost,sum(tax) AS tax FROM movements GROUP BY "productId")`
  type Summary={quantity:Prisma.Decimal;revenue:Prisma.Decimal;cost:Prisma.Decimal;tax:Prisma.Decimal}
  const totalsSql=Prisma.sql`${cte} SELECT COALESCE(SUM(quantity),0) AS quantity,COALESCE(SUM(revenue),0) AS revenue,COALESCE(SUM(cost),0) AS cost,COALESCE(SUM(tax),0) AS tax FROM totals`

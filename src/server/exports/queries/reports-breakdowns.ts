@@ -1,3 +1,4 @@
+import {costPostingsSql} from '@/server/purchases/cost-postings-query'
 import {NextResponse} from "next/server"
 import {Prisma} from "@prisma/client"
 import {prisma} from "@/lib/prisma"
@@ -18,9 +19,12 @@ export async function queryReportsBreakdowns(ctx:TokenPayload,request:NextReques
   const scope=Prisma.sql`s."organizationId"=${ctx.organizationId} ${branches} ${f.storeId?Prisma.sql`AND s."storeId"=${f.storeId}`:Prisma.empty}`;
   const sales=Prisma.sql`${scope} AND s.status IN ('completed','partially_returned','returned') AND s."createdAt"<=${f.asOf} AND s."completedAt"<=${f.asOf} ${f.range.gte?Prisma.sql`AND s."completedAt">=${f.range.gte}`:Prisma.empty} ${f.range.lt?Prisma.sql`AND s."completedAt"<${f.range.lt}`:Prisma.empty}`;
   const returns=Prisma.sql`${scope} AND r.status='completed' AND r."createdAt"<=${f.asOf} AND r."returnedAt"<=${f.asOf} ${f.range.gte?Prisma.sql`AND r."returnedAt">=${f.range.gte}`:Prisma.empty} ${f.range.lt?Prisma.sql`AND r."returnedAt"<${f.range.lt}`:Prisma.empty}`;
-  const moves=Prisma.sql`WITH moves AS (
+  const correctionDates=Prisma.sql`a."organizationId"=${ctx.organizationId} AND a."createdAt"<=${f.asOf} ${f.range.gte?Prisma.sql`AND a."createdAt">=${f.range.gte}`:Prisma.empty} ${f.range.lt?Prisma.sql`AND a."createdAt"<${f.range.lt}`:Prisma.empty}`;
+  const moves=Prisma.sql`${costPostingsSql}, moves AS (
    SELECT i."productId",p."categoryId",s."cashierId",s."storeId",i.quantity,COALESCE(i."payableAmount",i."lineTotal"-i."receiptDiscount") AS revenue,i.quantity*i."unitCost" AS cost,i."taxAmount" AS tax FROM "SaleItem" i JOIN "Sale" s ON s.id=i."saleId" JOIN "Product" p ON p.id=i."productId" WHERE ${sales}
-   UNION ALL SELECT ri."productId",p."categoryId",s."cashierId",s."storeId",-ri.quantity,-ri."lineTotal",-ri.quantity*i."unitCost",-ri."taxAmount" FROM "SaleReturnItem" ri JOIN "SaleReturn" r ON r.id=ri."saleReturnId" JOIN "SaleItem" i ON i.id=ri."saleItemId" JOIN "Sale" s ON s.id=r."saleId" JOIN "Product" p ON p.id=ri."productId" WHERE ${returns}
+   UNION ALL SELECT ri."productId",p."categoryId",s."cashierId",s."storeId",-ri.quantity,-ri."lineTotal",-ri.quantity*COALESCE(ri."unitCostSnapshot",i."unitCost"),-ri."taxAmount" FROM "SaleReturnItem" ri JOIN "SaleReturn" r ON r.id=ri."saleReturnId" JOIN "SaleItem" i ON i.id=ri."saleItemId" JOIN "Sale" s ON s.id=r."saleId" JOIN "Product" p ON p.id=ri."productId" WHERE ${returns}
+   UNION ALL SELECT i."productId",p."categoryId",s."cashierId",s."storeId",0::numeric,0::numeric,(entry->>'amount')::numeric,0::numeric FROM cost_postings a CROSS JOIN LATERAL jsonb_array_elements(a.snapshot->'products') product CROSS JOIN LATERAL jsonb_array_elements(product->'cogsEntries') entry JOIN "SaleItem" i ON i.id=entry->>'itemId' AND entry->>'sourceType'='sale' JOIN "Sale" s ON s.id=i."saleId" JOIN "Product" p ON p.id=i."productId" WHERE ${correctionDates} AND ${scope}
+   UNION ALL SELECT ri."productId",p."categoryId",s."cashierId",s."storeId",0::numeric,0::numeric,(entry->>'amount')::numeric,0::numeric FROM cost_postings a CROSS JOIN LATERAL jsonb_array_elements(a.snapshot->'products') product CROSS JOIN LATERAL jsonb_array_elements(product->'cogsEntries') entry JOIN "SaleReturnItem" ri ON ri.id=entry->>'itemId' AND entry->>'sourceType' IN ('return','nonstock_return') JOIN "SaleReturn" r ON r.id=ri."saleReturnId" JOIN "Sale" s ON s.id=r."saleId" JOIN "Product" p ON p.id=ri."productId" WHERE ${correctionDates} AND ${scope}
   )`;
   const payments=Prisma.sql`WITH moves AS (
    SELECT p."paymentType" AS id,p.amount AS revenue FROM "Payment" p JOIN "Sale" s ON s.id=p."saleId" WHERE ${sales} AND p.direction='in' AND p.status='recorded' AND COALESCE(p.note,'')<>'debt_collection'

@@ -1,3 +1,14 @@
+import {POST as applyCostRoute} from '@/app/api/stock-documents/[id]/cost-plans/[planId]/apply/route'
+import {POST as applyPreviewRoute} from '@/app/api/stock-documents/[id]/cost-plans/[planId]/application-preview/route'
+import {GET as applicationHistoryRoute} from '@/app/api/stock-documents/[id]/cost-plans/[planId]/applications/route'
+import {sendTransfer,receiveTransfer,confirmStockDocument} from '@/server/inventory/documents'
+import {changePrices} from '@/server/catalog/prices'
+import {queryReportsProducts} from '@/server/exports/queries/reports-products'
+import {createDraft,completeSale} from '@/server/sales/service'
+import {returnSale} from '@/server/returns/service'
+import {profitSummary} from '@/server/reports/profit'
+import {readProductValuationFacts} from '@/server/inventory/valuation-facts'
+import {previewCostApplication,applyReceiptCost} from '@/server/purchases/cost-applications'
 import { test, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
@@ -208,4 +219,191 @@ test('Late audit failure rolls back prepared source assignment and SQL refuses a
   const plan = await prepareReceiptCost(a.context, a.stock.id, body)
   assert.equal(plan.status, 'prepared')
   assert.equal(await prisma.receiptCostPlan.count({ where: { expenseDocumentId: e.expense.id } }), 1)
+})
+
+test('Actual late-cost application and reversal preserve source documents and cash, original key replays once',async()=>{
+ const a=await receipt(),fee=await capitalisedExpense(a)
+ const plan=await prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId:fee.expense.id,amount:'12.01',method:'value',reason:'Confirmed freight allocation'})
+ const before=await prisma.financialDocument.count({where:{organizationId:a.context.organizationId}})
+ const preview=await previewCostApplication(a.context,plan.id)
+ const input={operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Apply real paid freight'}
+ const applied=await applyReceiptCost(a.context,plan.id,input)
+ assert.equal(applied.financialPosting,true)
+ assert.deepEqual(await applyReceiptCost(a.context,plan.id,input),JSON.parse(JSON.stringify(applied)))
+ assert.equal(await prisma.receiptCostApplication.count({where:{planId:plan.id}}),1)
+ assert.equal(await prisma.financialDocument.count({where:{organizationId:a.context.organizationId}}),before)
+ assert.ok((await prisma.stockDocumentItem.findMany({where:{stockDocumentId:a.stock.id}})).every(row=>row.unitCost.eq(2)))
+ await assert.rejects(previewCostApplication(a.context,plan.id),{code:'COST_ALREADY_APPLIED'})
+ await assert.rejects(previewCostApplication({...a.context,role:'admin'},plan.id),{code:'OWNER_REQUIRED'})
+ await assert.rejects(prisma.receiptCostApplication.update({where:{id:applied.id},data:{reason:'Rewrite history'}}))
+ const reversal=await previewCostApplication(a.context,plan.id,applied.id)
+ await applyReceiptCost(a.context,plan.id,{operationId:randomUUID(),expectedHash:reversal.expectedHash,reason:'Reverse applied freight'},applied.id)
+ assert.equal(await prisma.receiptCostApplication.count({where:{planId:plan.id}}),2)
+ for(const product of a.products)assert.equal((await prisma.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toFixed(),'2')
+})
+
+test('Late cost keeps original sale cost, uses corrected return cost and reports dated corrections exactly once',async()=>{
+ const a=await receipt(),fee=await capitalisedExpense(a)
+ const register=await prisma.register.create({data:{storeId:a.store.id,name:'Cost register',code:randomUUID()}})
+ const shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:a.context.organizationUserId,openingCash:0}})
+ const draft=await createDraft(a.context,{organizationId:a.context.organizationId,storeId:a.store.id,registerId:register.id,shiftId:shift.id,items:[{productId:a.products[0].id,quantity:'1',discountAmount:0}],discountAmount:0},randomUUID())
+ const sale=await completeSale(a.context,draft.id,{payments:[{paymentType:'cash',amount:String(draft.totalAmount)}]},draft.id)
+ const plan=await prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId:fee.expense.id,amount:'12.01',method:'value',reason:'Freight with actual sale'})
+ const preview=await previewCostApplication(a.context,plan.id)
+ const applied=await applyReceiptCost(a.context,plan.id,{operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Apply freight after sale'})
+ const report=()=>prisma.$transaction(tx=>profitSummary(tx,a.context,new URLSearchParams()))
+ const first=await report()
+ assert.equal(first.summary.cogs.toFixed(2),'4.00')
+ const productsReport=await queryReportsProducts(a.context,new NextRequest('http://localhost:3000/api/reports/products'))
+ const productsData=await productsReport.json()
+ assert.equal(new (await import('@prisma/client')).Prisma.Decimal(productsData.summary.cost).toFixed(2),'4.00')
+ const csvReport=await queryReportsProducts(a.context,new NextRequest('http://localhost:3000/api/reports/products?format=csv'))
+ assert.equal(csvReport.status,200)
+ assert.equal(new (await import('@prisma/client')).Prisma.Decimal((await csvReport.json()).data.summary.cost).toFixed(2),'4.00')
+ assert.equal((await prisma.saleItem.findUniqueOrThrow({where:{id:sale.items[0].id}})).unitCost.toFixed(),'2')
+ const returned=await returnSale(a.context,sale.id,{operationId:randomUUID(),shiftId:shift.id,reason:'Actual return after freight',items:[{saleItemId:sale.items[0].id,quantity:'1',disposition:'sellable'}]})
+ assert.equal(new (await import('@prisma/client')).Prisma.Decimal(String(returned.items[0].unitCostSnapshot)).toFixed(),new (await import('@prisma/client')).Prisma.Decimal(preview.products.find(row=>row.productId===a.products[0].id)!.afterAverageCost).toFixed())
+ assert.equal(returned.items[0].costApplicationId,applied.id)
+ assert.equal((await report()).summary.cogs.toFixed(2),'0.00')
+ await prisma.$transaction(tx=>readProductValuationFacts(tx,a.context,a.products[0].id))
+ const reverse=await previewCostApplication(a.context,plan.id,applied.id)
+ await applyReceiptCost(a.context,plan.id,{operationId:randomUUID(),expectedHash:reverse.expectedHash,reason:'Reverse after linked return'},applied.id)
+ assert.equal((await report()).summary.cogs.toFixed(2),'0.00')
+ assert.equal((await prisma.product.findUniqueOrThrow({where:{id:a.products[0].id}})).costPrice.toFixed(),'2')
+})
+
+test('Repeated fees and selective reversal retain independent paid sources and reconcile latest cost',async()=>{
+ const a=await receipt(),fee=await capitalisedExpense(a)
+ const prepare=async(expenseDocumentId:string,amount:string)=>prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId,amount,method:'value',reason:'Independent paid expense'})
+ const apply=async(planId:string,reversalOfId?:string)=>{const preview=await previewCostApplication(a.context,planId,reversalOfId);return applyReceiptCost(a.context,planId,{operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Reviewed exact correction'},reversalOfId)}
+ const first=await prepare(fee.expense.id,'12.01'),one=await apply(first.id)
+ const secondExpense=await postExpense(a.context,{operationId:randomUUID(),accountId:fee.account.id,expenseCategoryId:fee.category.id,amount:'2',reason:'Second independent paid expense'})
+ const second=await prepare(secondExpense.id,'2'),two=await apply(second.id)
+ await apply(first.id,one.id)
+ for(const product of a.products)assert.equal((await prisma.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toFixed(),'2.333333')
+ await apply(second.id,two.id)
+ for(const product of a.products)assert.equal((await prisma.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toFixed(),'2')
+ assert.equal(await prisma.receiptCostApplication.count({where:{organizationId:a.context.organizationId}}),4)
+})
+test('Stale confirmation and late audit failure roll back cost, native events and posting before exact retry',async()=>{
+ const a=await receipt(),fee=await capitalisedExpense(a)
+ const plan=await prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId:fee.expense.id,amount:'12.01',method:'value',reason:'Rollback cost posting'})
+ const preview=await previewCostApplication(a.context,plan.id),input={operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Fault injection acceptance'}
+ await assert.rejects(applyReceiptCost(a.context,plan.id,{...input,expectedHash:'0'.repeat(64)}),{code:'COST_PREVIEW_CHANGED'})
+ const count=await prisma.inventoryValuationEvent.count({where:{organizationId:a.context.organizationId}})
+ const trigger='cost_apply_audit_'+randomUUID().replaceAll('-','')
+ await prisma.$executeRawUnsafe(`CREATE FUNCTION ${trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."organizationId"='${a.context.organizationId}' THEN RAISE EXCEPTION 'test-only posting audit failure'; END IF; RETURN NEW; END $$`)
+ await prisma.$executeRawUnsafe(`CREATE TRIGGER ${trigger} BEFORE INSERT ON "AuditLog" FOR EACH ROW EXECUTE FUNCTION ${trigger}()`)
+ try{
+  await assert.rejects(applyReceiptCost(a.context,plan.id,input))
+  assert.equal(await prisma.receiptCostApplication.count({where:{planId:plan.id}}),0)
+  assert.equal(await prisma.inventoryValuationEvent.count({where:{organizationId:a.context.organizationId}}),count)
+  assert.equal(await prisma.operation.count({where:{organizationId:a.context.organizationId,key:input.operationId}}),0)
+  for(const product of a.products)assert.equal((await prisma.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toFixed(),'2')
+ }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${trigger}()`)}
+ const outcomes=await Promise.all([applyReceiptCost(a.context,plan.id,input),applyReceiptCost(a.context,plan.id,input)])
+ assert.equal(outcomes[0].id,outcomes[1].id)
+ assert.equal(await prisma.receiptCostApplication.count({where:{planId:plan.id}}),1)
+})
+
+async function appliedFixture(){
+ const a=await receipt(),fee=await capitalisedExpense(a)
+ const plan=await prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId:fee.expense.id,amount:'12.01',method:'value',reason:'Future source fixture'})
+ const preview=await previewCostApplication(a.context,plan.id)
+ await applyReceiptCost(a.context,plan.id,{operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Actual freight source'})
+ return {...a,fee,plan,preview}
+}
+test('Future owner absolute cost override journals displaced freight in original expense branch without changing old documents',async()=>{
+ const a=await appliedFixture(),product=a.products[0]
+ const current=await prisma.product.findUniqueOrThrow({where:{id:product.id}})
+ const input={operationId:randomUUID(),field:'costPrice' as const,reason:'Actual absolute cost decision',preview:true,items:[{productId:product.id,expected:current.costPrice.toFixed(),value:'1'}]}
+ const confirmation=await changePrices(a.context,input)
+ await changePrices(a.context,{...input,preview:false,confirmationHash:confirmation.confirmationHash})
+ const entries=await prisma.receiptCostContinuation.findMany({where:{productId:product.id}})
+ assert.equal(entries.length,1);assert.equal(entries[0].storeId,a.store.id)
+ const allocated=a.preview.products.find(row=>row.productId===product.id)!
+ assert.equal(entries[0].varianceCorrection.add(allocated.roundingCorrection).toFixed(),new (await import('@prisma/client')).Prisma.Decimal(allocated.allocatedAmount).toFixed())
+ assert.equal((await prisma.stockDocumentItem.findUniqueOrThrow({where:{id:allocated.stockDocumentItemId}})).unitCost.toFixed(),'2')
+ await assert.rejects(prisma.receiptCostContinuation.update({where:{id:entries[0].id},data:{varianceCorrection:0}}))
+ await prisma.$transaction(tx=>readProductValuationFacts(tx,a.context,product.id))
+})
+test('Future stock loss books only its freight share and leaves unrelated SKU valuation untouched',async()=>{
+ const a=await appliedFixture(),product=a.products[0],current=await prisma.product.findUniqueOrThrow({where:{id:product.id}})
+ const doc=await prisma.stockDocument.create({data:{organizationId:a.context.organizationId,storeId:a.store.id,documentType:'adjustment',documentNo:randomUUID(),createdBy:a.context.userId,items:{create:{productId:product.id,quantity:'-1',unitCost:current.costPrice}}}})
+ await confirmStockDocument(a.context,doc.id)
+ const entries=await prisma.receiptCostContinuation.findMany({where:{productId:product.id}})
+ assert.equal(entries.length,1)
+ const allocated=a.preview.products.find(row=>row.productId===product.id)!
+ assert.equal(entries[0].varianceCorrection.toFixed(),new (await import('@prisma/client')).Prisma.Decimal(allocated.afterAverageCost).sub(2).toFixed())
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:a.store.id,productId:product.id}}})).quantity.toFixed(),'2')
+ const other=a.products[1];assert.equal(await prisma.receiptCostContinuation.count({where:{productId:other.id}}),0)
+})
+test('Late continuation failure rolls back the originating price operation and exact retry posts once',async()=>{
+ const a=await appliedFixture(),product=a.products[0],current=await prisma.product.findUniqueOrThrow({where:{id:product.id}})
+ const input={operationId:randomUUID(),field:'costPrice' as const,reason:'Atomic future valuation',preview:true,items:[{productId:product.id,expected:current.costPrice.toFixed(),value:'1'}]}
+ const review=await changePrices(a.context,input),confirmed={...input,preview:false,confirmationHash:review.confirmationHash}
+ const before=await prisma.inventoryValuationEvent.count({where:{organizationId:a.context.organizationId}})
+ const trigger='continuation_fault_'+randomUUID().replaceAll('-','')
+ await prisma.$executeRawUnsafe(`CREATE FUNCTION ${trigger}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."organizationId"='${a.context.organizationId}' THEN RAISE EXCEPTION 'test-only continuation fault'; END IF; RETURN NEW; END $$`)
+ await prisma.$executeRawUnsafe(`CREATE TRIGGER ${trigger} BEFORE INSERT ON "ReceiptCostContinuation" FOR EACH ROW EXECUTE FUNCTION ${trigger}()`)
+ try{
+  await assert.rejects(changePrices(a.context,confirmed))
+  assert.equal((await prisma.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toFixed(),current.costPrice.toFixed())
+  assert.equal(await prisma.receiptCostContinuation.count({where:{productId:product.id}}),0)
+  assert.equal(await prisma.inventoryValuationEvent.count({where:{organizationId:a.context.organizationId}}),before)
+  assert.equal(await prisma.operation.count({where:{organizationId:a.context.organizationId,key:input.operationId}}),0)
+ }finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger} ON "ReceiptCostContinuation"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${trigger}()`)}
+ await changePrices(a.context,confirmed);await changePrices(a.context,confirmed)
+ assert.equal(await prisma.receiptCostContinuation.count({where:{productId:product.id}}),1)
+ assert.equal(await prisma.operation.count({where:{organizationId:a.context.organizationId,key:input.operationId}}),1)
+})
+test('Future stale-draft transfer freezes active-fee cost at send and receiving after new purchase records original-branch variance once',async()=>{
+ const a=await appliedFixture(),product=a.products[0],other=await prisma.store.create({data:{organizationId:a.context.organizationId,name:'Future transfer branch'}})
+ const transfer=await prisma.stockTransfer.create({data:{organizationId:a.context.organizationId,fromStoreId:a.store.id,toStoreId:other.id,createdBy:a.context.userId,items:{create:{productId:product.id,quantity:1,unitCost:2}}},include:{items:true}})
+ const sent=await sendTransfer(a.context,transfer.id)
+ assert.equal(String(sent.items[0].unitCost),'2')
+ assert.equal(String(sent.items[0].issueUnitCostSnapshot),new (await import('@prisma/client')).Prisma.Decimal(a.preview.products.find(row=>row.productId===product.id)!.afterAverageCost).toFixed())
+ const supplier=await prisma.supplier.create({data:{organizationId:a.context.organizationId,name:'Later purchase supplier'}})
+ const order=await createPurchaseOrder(a.context,{operationId:randomUUID(),storeId:other.id,supplierId:supplier.id,referenceNo:randomUUID(),reason:'Real later purchase',items:[{productId:product.id,quantity:'1',unitCost:'8'}]})
+ await receivePurchaseOrder(a.context,order.id,{operationId:randomUUID(),referenceNo:randomUUID(),reason:'Receive later purchase',items:[{orderItemId:order.items[0].id,quantity:'1'}]})
+ const input={operationId:randomUUID(),items:[{itemId:transfer.items[0].id,quantity:'1'}]}
+ await receiveTransfer(a.context,transfer.id,input)
+ const count=await prisma.receiptCostContinuation.count({where:{productId:product.id}})
+ await receiveTransfer(a.context,transfer.id,input)
+ assert.equal(await prisma.receiptCostContinuation.count({where:{productId:product.id}}),count)
+ const report=await prisma.$transaction(tx=>profitSummary(tx,a.context,new URLSearchParams({storeId:a.store.id})))
+ assert.equal(report.summary.inventoryValueVariance.toFixed(2),'0.67')
+ assert.equal((await prisma.$transaction(tx=>profitSummary(tx,a.context,new URLSearchParams({storeId:other.id})))).summary.inventoryValueVariance.toFixed(2),'0.00')
+ await prisma.$transaction(tx=>readProductValuationFacts(tx,a.context,product.id))
+})
+test('Future write-off already records effective issue cost and does not expense freight twice; fee reversal restores base profit',async()=>{
+ const a=await appliedFixture(),register=await prisma.register.create({data:{storeId:a.store.id,name:'Future writeoff register',code:randomUUID()}}),shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:a.context.organizationUserId,openingCash:0}})
+ const draft=await createDraft(a.context,{organizationId:a.context.organizationId,storeId:a.store.id,registerId:register.id,shiftId:shift.id,items:[{productId:a.products[0].id,quantity:'1',discountAmount:0}],discountAmount:0},randomUUID())
+ const sale=await completeSale(a.context,draft.id,{payments:[{paymentType:'cash',amount:String(draft.totalAmount)}]},draft.id)
+ await returnSale(a.context,sale.id,{operationId:randomUUID(),shiftId:shift.id,reason:'Actual damaged loss',items:[{saleItemId:sale.items[0].id,quantity:'1',disposition:'write_off'}]})
+ const report=()=>prisma.$transaction(tx=>profitSummary(tx,a.context,new URLSearchParams()))
+ const after=await report();assert.equal(after.summary.cogs.toFixed(2),'0.00');assert.equal(after.summary.inventoryValueVariance.toFixed(2),'0.00');assert.equal(after.summary.inventoryWriteOff.toFixed(2),'4.00')
+ const app=await prisma.receiptCostApplication.findFirstOrThrow({where:{planId:a.plan.id,reversalOfId:null}}),preview=await previewCostApplication(a.context,a.plan.id,app.id)
+ await applyReceiptCost(a.context,a.plan.id,{operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Reverse freight after writeoff'},app.id)
+ assert.equal((await report()).summary.operatingExpenses.toFixed(2),'2.00')
+})
+
+test('Application endpoints bind tenant, original receipt path, owner role, strict input and paginated source journal',async()=>{
+ const a=await receipt(),fee=await capitalisedExpense(a)
+ const plan=await prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId:fee.expense.id,amount:'12.01',method:'value',reason:'Owner API source'})
+ const path=`/stock-documents/${a.stock.id}/cost-plans/${plan.id}`,params={params:Promise.resolve({id:a.stock.id,planId:plan.id})}
+ const previewResponse=await applyPreviewRoute(request(path+'/application-preview',a.cookie,{}),params)
+ assert.equal(previewResponse.status,200);assert.match(previewResponse.headers.get('cache-control')!,/no-store/)
+ const preview=(await previewResponse.json()).data
+ assert.ok(preview.products.every((row:Record<string,unknown>)=>!('issueCosts' in row)&&!('cogsEntries' in row)))
+ const input={operationId:randomUUID(),expectedHash:preview.expectedHash,reason:'Review actual original receipt'}
+ assert.equal((await applyCostRoute(request(path+'/apply',a.cookie,{...input,amount:'999'}),params)).status,400)
+ const foreign=await account()
+ assert.equal((await applyCostRoute(request(path+'/apply',foreign.cookie,input),params)).status,404)
+ assert.equal((await applyCostRoute(request(path+'/apply',a.cookie,input),{params:Promise.resolve({id:randomUUID(),planId:plan.id})})).status,404)
+ const applied=await applyCostRoute(request(path+'/apply',a.cookie,input),params);assert.equal(applied.status,200)
+ const history=await applicationHistoryRoute(new NextRequest('http://localhost:3000/api'+path+'/applications',{headers:{cookie:a.cookie}}),params)
+ assert.equal(history.status,200);const data=(await history.json()).data;assert.equal(data.applications.length,1);assert.equal(data.applications[0].products.length,2);assert.equal(data.total,0)
+ await prisma.organizationUser.update({where:{id:a.context.organizationUserId},data:{role:'admin'}})
+ assert.equal((await applyPreviewRoute(request(path+'/application-preview',a.cookie,{}),params)).status,403)
 })

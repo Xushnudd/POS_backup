@@ -6,6 +6,8 @@ export const READ_ONLY_BUSINESS_MODELS = [
   "Store",
   "UserStore",
   "ReceiptCostPlan",
+  "ReceiptCostApplication",
+  "ReceiptCostContinuation",
   "Register",
   "Category",
   "Product",

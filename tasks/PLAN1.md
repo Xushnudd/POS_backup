@@ -1472,6 +1472,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `CAT-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
+  **Yangilanish (2026-10-13): in_progress; real scale blocked_external.** Foydalanuvchi tasdiqlangan model/format yo‘qligini bildirdi. Configurable approved-profile parser/checksum interface va4 sintetik test tayyor; vendor format/prefix/positions/checksum taxmin qilinmagan va checkoutga ulanmagan. Oddiy barcode/fractional sales o‘zgarmadi. `docs/operations/scale-barcode-boundary.md`; bu original band done yoki real hardware acceptance emas.
+
 - [x] **CAT-01.06** — Chakana/ulgurji/mijoz narxlari; filial narxi va sanadan kuchga kiradigan narx.
 
   **Texnologiya:** Prisma price lists, PostgreSQL validity intervals.
@@ -1855,7 +1857,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `PUR-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **PUR-01.05** — Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati.
+- [x] **PUR-01.05** — Yetkazish/xarid xarajatlarini tannarxga taqsimlash siyosati.
 
   **Texnologiya:** Prisma.Decimal landed-cost service.
 
@@ -1871,10 +1873,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `PUR-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-  **Joriy holat (2026-10-12): in_progress.** ADR-081: foydalanuvchi moving-average tarixini qayta hisoblash va eski hujjatlarni o‘zgartirmasdan inventory/COGS correction jurnalini tasdiqladi. Saqlangan prepared/cancelled taqsimot tarixi, pagination/retry va bekor qilishning IndexedDB original-key lost-ACK/reload recovery UI tugadi; focused DB5, unit86, uch-browser6, build/type/lint PASS. Dalil: `tasks/evidence/receipt-cost-history-20261012.json`. Tayyorlash formasi, correction posting/jurnal/hisobotlar va to‘liq qabul ochiq; checkbox o‘zgarmaydi.
-
-
-  **Checkpoint (2026-10-13): in_progress.** ADR-085 alohida stock-valuation variance tasdiqlandi. Actual native order/source adapter transfer/receive/loss/return/manual override/adjustment/supplier withdrawal/reversalni tekshiradi. Owner read-only correction API inventory/COGS/rounding/variance va source-linked non-stock returnsni chiqaradi. 124unit/16PG/6browser/type/lint/worker/build; `tasks/evidence/valuation-variance-preview-20261013.json`. Prepare/history/recovery formasi bor; immutable application/posting, repeated-charge barriers, future effective-return-cost, financial reports va apply UI hali ochiq. Original done168, target170; preview subtask sifatida sanalmaydi.
+  **Yakuniy holat (2026-10-13): done.** ADR081/085/086/087 bo‘yicha actual receipt/paid expense allocation, immutable application/reversal va future source-linked continuation journals bajarildi. Owner public API, durable preview/MFA/original-key lost-ACK/reload recovery, tenant-scoped history, dated profit/product/breakdown corrections ishlaydi. Original hujjatlar va cash qayta yozilmaydi. 128unit,115PG (17landed-cost), uch-brauzer15, type/lint/worker/build/scanner PASS. SQL149–159 fresh/133clone upgrade/repeat va actual application/continuation dump-restore PASS. Dalil: `tasks/evidence/receipt-cost-applications-complete-20261013.json`; qo‘llanma: `docs/operations/receipt-cost-applications.md`. Original hisob168→169/259; migration/test/subtask alohida sanalmadi. Production/vendor/hardware/pilot qabuliga da’vo yo‘q.
 
 - [x] **PUR-01.06** — Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil.
 

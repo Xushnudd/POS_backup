@@ -1,5 +1,13 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ COST_PREVIEW_CHANGED:{message:"Tannarx hisobi o‘zgargan.",nextAction:"Hisobni yangilang va yangi qiymatlarni qayta ko‘rib tasdiqlang."},
+ COST_ALREADY_APPLIED:{message:"Ushbu xarajat allaqachon tannarxga qo‘llangan.",nextAction:"Original amal va tannarx jurnalini yangilang; xarajatni qayta qo‘llamang."},
+ COST_REVERSE_REQUIRED:{message:"Taqsimot tannarxga qo‘llangan.",nextAction:"Egasi avval qo‘llash reversalini yozsin; keyin taqsimotni bekor qilish mumkin."},
+ COST_SOURCE_RECONCILIATION_REQUIRED:{message:"Tannarxning original manbalari bir-biriga mos emas.",nextAction:"Kirim, savdo, qaytarma va zaxira jurnalini solishtiring; qiymatni taxmin qilib qo‘llamang."},
+ COST_HISTORY_INCOMPLETE:{message:"Oldingi qoldiq yoki tannarx tarixi isbotlanmagan.",nextAction:"Original ma’lumotlarni solishtiring. Eski harakatlar tartibini taxmin qilib yozmang."},
+ COST_HISTORY_TOO_LARGE:{message:"Tannarx manbalari xavfsiz hisoblash chegarasidan oshdi.",nextAction:"Administrator bilan manbalar hajmini tekshiring. Qisman correction qo‘llanmaydi."},
+ COST_CONTINUATION_REQUIRED:{message:"Joriy tannarx va correction jurnali mos emas.",nextAction:"Keyingi qiymat o‘zgarishlari manbalarini administrator bilan tekshiring; hisobni taxmin qilib davom ettirmang."},
+ UNRESOLVED_OFFLINE_STOCK:{message:"Hal qilinmagan offline pul yoki tovar amali bor.",nextAction:"Original offline amallar natijasini tekshiring va hal qiling, keyin tannarx hisobini yangilang."},
  TOTP_UNAVAILABLE:{message:'Authenticator hozir mavjud emas.',nextAction:'Ulanish yoqilguncha kuting; xavfsizlik holatini qayta tekshiring.'},
  TOTP_CODE_INVALID:{message:'Authenticator kodi noto‘g‘ri, ishlatilgan yoki ulash muddati tugagan.',nextAction:'Keyingi yangi kodni kiriting. Holatni tekshiring; kodni yordam xizmatiga yubormang.'},
  TOTP_RECOVERY_INVALID:{message:'Zaxira kod noto‘g‘ri, ishlatilgan yoki muddati tugagan.',nextAction:'Amaldagi boshqa zaxira kodni ishlating. Kodlarni hech kimga yubormang.'},

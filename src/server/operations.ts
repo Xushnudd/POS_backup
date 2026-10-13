@@ -1,3 +1,4 @@
+import {postCostContinuations} from './purchases/cost-continuations'
 import {READ_ONLY_OPERATION_EXCEPTIONS} from './billing/read-only-policy'
 import {billingDatabaseError} from './billing/errors'
 import {assertNewOperationAllowed} from './deployment/state'
@@ -68,7 +69,8 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
         }
         const result=await work(tx)
         const json=JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue
-        await tx.operation.create({data:{organizationId:context.organizationId,actorId:context.userId,type,key,payloadHash:hash,result:json}})
+        const operation=await tx.operation.create({data:{organizationId:context.organizationId,actorId:context.userId,type,key,payloadHash:hash,result:json}})
+        await postCostContinuations(tx,context,{operationId:operation.id,type,key})
         // Surface deferred journal violations inside the transaction before returning an acknowledgement.
         await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
         return JSON.parse(JSON.stringify(result)) as T

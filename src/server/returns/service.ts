@@ -1,3 +1,4 @@
+import {effectiveIssueCost} from '../inventory/effective-issue-cost'
 import {batchSelectionSchema,postBatchDisposition,validateBatchReturn} from '../inventory/batches'
 import {snapshotQuantity,type ConversionSnapshot} from '../catalog/conversion-math'
 import {cumulativeRefundComponent} from '../taxes/calculations'
@@ -55,6 +56,8 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
    if(discountAmount.lt(0))throw new AccessError(409,'RETURN_DISCOUNT_RECONCILIATION')
    return {saleItemId:original.id,productId:original.productId,quantity:qty,unitPrice:original.unitPrice,lineTotal:amount,taxAmount,taxBase:original.taxBase===null?null:amount.sub(taxAmount),discountAmount,disposition:requested.disposition,unitCost:original.unitCost}
   })
+  const costApplications=new Map<string,string|null>()
+  for(const row of rows){const cost=await effectiveIssueCost(tx,context.organizationId,row.saleItemId,row.unitCost);row.unitCost=cost.unitCost;costApplications.set(row.saleItemId,cost.applicationId)}
   for (const row of rows) { const unit=sale.items.find(item=>item.id===row.saleItemId)?.unit; if(unit) await validateUnitQuantity(tx,context.organizationId,unit,row.quantity) }
   for(const row of rows)await validateBatchReturn(tx,context,row.productId,row.quantity,{sourceType:'sale',sourceId:sale.id,storeId:sale.storeId,selection:input.items.find(item=>item.saleItemId===row.saleItemId)?.batchSelection})
   const refund=rows.reduce((sum,x)=>sum.add(x.lineTotal),decimal(0))
@@ -104,7 +107,7 @@ export async function returnSaleTx(tx:Prisma.TransactionClient,context:TokenPayl
   const cashRefund=split.cash
   const ret=await tx.saleReturn.create({data:{saleId:sale.id,returnReceiptNo:'RET-'+randomUUID(),refundAmount:refund,reason:input.reason,processedBy:context.userId,
     approvedBy:context.userId,approvedRole:context.role,approvedAt:new Date(),
-    items:{create:rows.map(({unitCost,...row})=>{void unitCost;return row})}},include:{items:true}})
+    items:{create:rows.map(({unitCost,...row})=>({...row,unitCostSnapshot:unitCost,costApplicationId:costApplications.get(row.saleItemId)??null}))}},include:{items:true}})
   for(const row of rows.filter(item=>item.disposition!=='sellable')){
    const original=sale.items.find(item=>item.id===row.saleItemId)!;
    const returnedItem=ret.items.find(item=>item.saleItemId===row.saleItemId)!;

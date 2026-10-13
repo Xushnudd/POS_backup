@@ -6,19 +6,19 @@ import {AccessError} from '../auth/policy'
 export type ValuationFact = (
  | {sequence:string;id:string;kind:'receipt';storeId:string;quantity:string;unitCost:string;additionalValue?:string}
  | {sequence:string;id:string;kind:'sale';storeId:string;quantity:string}
- | {sequence:string;id:string;kind:'return';storeId:string;quantity:string;issueId:string}
+ | {sequence:string;id:string;kind:'return';storeId:string;quantity:string;issueId:string;recordedUnitCost?:string}
  | {sequence:string;id:string;kind:'adjustment';storeId:string;quantityDelta:string}
  | {sequence:string;id:string;kind:'supplier_return'|'receipt_reversal';storeId:string;quantity:string;unitCost:string}
  | {sequence:string;id:string;kind:'transfer_out';storeId:string;quantity:string;transferItemId:string;recordedUnitCost:string;originalCatalogueCost:string}
  | {sequence:string;id:string;kind:'transfer_in'|'transfer_return'|'transfer_loss';storeId:string;quantity:string;transferItemId:string}
- | {sequence:string;id:string;kind:'revalue';unitCost:string}
+ | {sequence:string;id:string;kind:'revalue';unitCost:string;applicationId?:string}
  ) & {expectedAverageCost?:string}
 const Exact=Prisma.Decimal.clone({precision:60,rounding:Prisma.Decimal.ROUND_HALF_UP})
 const fixed=(value:Prisma.Decimal)=>value.toFixed()
 const numberPattern=/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/
 export type ValuationDispositions={
  transferLosses?:readonly {id:string;transferItemId:string;quantity:string}[];
- nonStockReturns?:readonly {id:string;issueId:string;storeId:string;quantity:string}[];
+ nonStockReturns?:readonly {id:string;issueId:string;storeId:string;quantity:string;recordedUnitCost?:string}[];
 }
 function invalid(message='Tannarx faktlari to‘liq yoki o‘zaro mos emas'):never{throw new AccessError(409,'VALUATION_FACT_INVALID',message)}
 function positive(value:string){if(!numberPattern.test(value))invalid();const parsed=new Exact(value);if(!parsed.gt(0))invalid();return parsed}
@@ -49,7 +49,7 @@ export function replayValuationFacts(facts:readonly ValuationFact[],baselineUnit
    issues.set(fact.id,{quantity:qty,returned:new Exact(0),unitCost:average,storeId:fact.storeId})
   }else if(fact.kind==='return'){
    const qty=positive(fact.quantity),issue=issues.get(fact.issueId);if(!issue||issue.storeId!==fact.storeId||issue.returned.add(qty).gt(issue.quantity))invalid()
-   issue.returned=issue.returned.add(qty);entryValue=qty.mul(issue.unitCost);cogsValue=cogsValue.sub(entryValue)
+   issue.returned=issue.returned.add(qty);entryValue=qty.mul(fact.recordedUnitCost===undefined?issue.unitCost:cost(fact.recordedUnitCost));cogsValue=cogsValue.sub(entryValue)
    const oldQuantity=physicalQuantity();reaverage(oldQuantity.add(qty),oldQuantity.mul(average).add(entryValue));move(fact.storeId,qty)
   }else if(fact.kind==='adjustment'){
    if(!/^-?(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(fact.quantityDelta))invalid()
@@ -89,7 +89,7 @@ export function replayValuationFacts(facts:readonly ValuationFact[],baselineUnit
   if(!returned.id||dispositionIds.has(returned.id)||seen.has(returned.id))invalid();dispositionIds.add(returned.id)
   const qty=positive(returned.quantity),issue=issues.get(returned.issueId)
   if(!issue||issue.storeId!==returned.storeId||issue.returned.add(qty).gt(issue.quantity))invalid()
-  issue.returned=issue.returned.add(qty);const value=qty.mul(issue.unitCost);cogsValue=cogsValue.sub(value)
+  issue.returned=issue.returned.add(qty);const value=qty.mul(returned.recordedUnitCost===undefined?issue.unitCost:cost(returned.recordedUnitCost));cogsValue=cogsValue.sub(value)
   dispositionRows.push({id:returned.id,kind:'nonstock_return',entryValue:fixed(value)})
  }
  const physicalValue=physicalQuantity().mul(average),transitValue=[...transit.values()].reduce((sum,row)=>sum.add(row.remaining.mul(row.unitCost)),new Exact(0)),inventoryValue=physicalValue.add(transitValue)
@@ -98,11 +98,12 @@ export function replayValuationFacts(facts:readonly ValuationFact[],baselineUnit
 }
 
 export function planValuationFactCorrection(facts:readonly ValuationFact[],baselineUnitCost:string,receiptId:string,amount:string,dispositions:ValuationDispositions={}){
- if(!/^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.test(amount)||!new Exact(amount).gt(0))invalid()
+ if(! /^-?(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.test(amount)||new Exact(amount).eq(0))invalid()
  const target=facts.find(fact=>fact.id===receiptId);if(!target||target.kind!=='receipt')invalid()
+ if(new Exact(target.additionalValue??'0').add(amount).lt(0))invalid()
  const before=replayValuationFacts(facts,baselineUnitCost,dispositions)
- const changed=facts.map(fact=>{const corrected={...fact};delete corrected.expectedAverageCost;return corrected.id===receiptId&&corrected.kind==='receipt'?{...corrected,additionalValue:new Exact(corrected.additionalValue??'0').add(amount).toFixed(2)}:corrected})
- const after=replayValuationFacts(changed,baselineUnitCost,dispositions)
+ const changed=facts.map(fact=>{const corrected={...fact};delete corrected.expectedAverageCost;if(corrected.kind==='return')delete corrected.recordedUnitCost;return corrected.id===receiptId&&corrected.kind==='receipt'?{...corrected,additionalValue:new Exact(corrected.additionalValue??'0').add(amount).toFixed(2)}:corrected})
+ const after=replayValuationFacts(changed,baselineUnitCost,{...dispositions,nonStockReturns:dispositions.nonStockReturns?.map(row=>{const clean={...row};delete clean.recordedUnitCost;return clean})})
  const delta=(field:'inventoryValue'|'cogsValue'|'roundingValue'|'varianceValue')=>new Exact(after[field]).sub(before[field])
  if(!delta('inventoryValue').add(delta('cogsValue')).add(delta('roundingValue')).add(delta('varianceValue')).eq(amount))invalid()
  return {before,after,inventoryCorrection:fixed(delta('inventoryValue')),cogsCorrection:fixed(delta('cogsValue')),roundingCorrection:fixed(delta('roundingValue')),varianceCorrection:fixed(delta('varianceValue'))}

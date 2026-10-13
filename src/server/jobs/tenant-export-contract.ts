@@ -5,6 +5,8 @@ export const DIRECT_MODELS = [
   "OrganizationUser",
   "Store",
   "ReceiptCostPlan",
+  "ReceiptCostApplication",
+  "ReceiptCostContinuation",
   "Category",
   "Product",
   "Customer",
@@ -127,4 +129,4 @@ export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = "1cae36f46225c546156618e5cfc09409754707610b615851cb5732b360ef826b"
+export const REVIEWED_SCHEMA_SHA256 = "4c10abde45b2280675367352bb43e720590d0858692de6fa9c9318aed222cb61"

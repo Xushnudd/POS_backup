@@ -4,6 +4,8 @@ export const TENANT_DIRECT_MODELS = [
   "CustomRole",
   "Store",
   "ReceiptCostPlan",
+  "ReceiptCostApplication",
+  "ReceiptCostContinuation",
   "Category",
   "Product",
   "Customer",

@@ -1,0 +1,65 @@
+{"requestId":"93dea0be-ded6-4ee1-b83d-4ccbdd621548","status":200,"durationMs":310,"event":"api_response"}
+{"requestId":"ca5f6993-35cc-4233-ae5f-1fc553519f8f","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"f12a2401-58d6-4c0f-8c7e-459c449ae54c","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":25,"event":"api_error"}
+{"requestId":"e5181966-85ba-4ab1-99ff-7567f89ebfef","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":21,"event":"api_error"}
+{"requestId":"eef74e83-49e5-4f58-9f68-6ad96d1eb7cd","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":17,"event":"api_error"}
+{"requestId":"dada5c8a-e5c7-4967-b87f-0dfba19e2a44","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":15,"event":"api_error"}
+{"requestId":"eb2a711a-9063-47c7-be97-64f41423a40e","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"b3a59eac-ddc1-4d1a-b545-90b92f931127","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"83db8cfe-fae5-483c-a073-c26fb2c1a105","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"VALIDATION_ERROR","durationMs":11,"event":"api_error"}
+{"requestId":"65f5c6e3-3220-4819-86af-37e02501fc4e","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"17228604-6335-48fc-88a3-25ffef883f72","organizationId":"633c5418-93fd-4b9a-9481-1f298a5716ac","status":400,"code":"INVALID_ITEMS","durationMs":13,"event":"api_error"}
+✔ Receipt-backed preview uses actual partial receipt snapshots, has no journal effect and rejects forged fields (705.163041ms)
+{"requestId":"5c45f46e-5e15-4368-8425-3cbdf23a5a36","status":200,"durationMs":240,"event":"api_response"}
+{"requestId":"23cebb0c-cf40-4032-8d6b-8193b3bddb8d","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"1fe46709-7d92-4e21-8ae5-776df4817617","organizationId":"7097fe8b-5618-4320-bb46-373112c2ca37","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"53d7fa33-3a4e-4e6e-9973-80dbf361cdb0","organizationId":"4b1509b5-24b3-4786-a955-e8fd5918c7f1","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"19c8080e-5320-44b9-b82d-8e05a991e5db","organizationId":"4b1509b5-24b3-4786-a955-e8fd5918c7f1","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"586a14be-b02b-40a5-88a1-e6c55ef35b2b","organizationId":"4b1509b5-24b3-4786-a955-e8fd5918c7f1","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"195370ec-cc66-4291-a2df-7849273381f9","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Preview enforces tenant, assigned branch, live role and session boundaries (653.270348ms)
+{"requestId":"29333669-b517-4f47-91fc-7d7b27a87023","status":200,"durationMs":238,"event":"api_response"}
+{"requestId":"7a8d5049-df7f-4d0a-8b5a-405de9d877fa","organizationId":"6ce3058d-7d67-4156-8c70-b2e5c6420b80","status":200,"durationMs":41,"event":"api_response"}
+{"requestId":"6652dad0-7e8a-4226-bb7f-9eaad35cacee","organizationId":"6ce3058d-7d67-4156-8c70-b2e5c6420b80","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"f8d9bf2a-8158-42f1-8954-388aefed1710","organizationId":"6ce3058d-7d67-4156-8c70-b2e5c6420b80","status":400,"code":"VALIDATION_ERROR","durationMs":10,"event":"api_error"}
+{"requestId":"1663de8f-d841-4a1c-acf9-cf62b576595f","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"ffa3511e-e202-449a-bf88-d30116cd6f31","organizationId":"d5c7933e-1708-42e3-84a5-920e4bb0c30b","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"dec8853f-f738-40c6-9c95-458f522c03a0","organizationId":"6ce3058d-7d67-4156-8c70-b2e5c6420b80","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"b7713945-45cc-49d0-bfe3-fbc3190bfefc","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Historical correction API is owner-only, read-only, bounded and rejects forged source fields (668.955305ms)
+{"requestId":"362f71e5-6c4d-43d3-bd88-9a0c8f8b9861","status":200,"durationMs":238,"event":"api_response"}
+{"requestId":"39ba372c-5550-46d9-9e32-320c506528d5","status":200,"durationMs":232,"event":"api_response"}
+✔ Receipt cost sources list only same-branch unassigned unreversed capitalised expenses and preserve original money (688.044189ms)
+{"requestId":"9c7d3708-b186-495f-98f3-56be0d313902","status":200,"durationMs":228,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Prepared receipt cost journal uses one paid source, replays once, cancels safely and never posts valuation (830.949917ms)
+{"requestId":"35466280-c5b3-417f-b161-0a5ef803ba66","status":200,"durationMs":244,"event":"api_response"}
+{"requestId":"4d3212ad-7bad-4a56-90b2-f50e0da1c4ca","status":200,"durationMs":236,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"212e05fe-a386-4fc6-b6e0-b015bc3ceb6b","organizationId":"7ac8e227-8e16-4035-93f9-8810148490fd","operationId":"47294d73-fe57-465f-9d56-68083f43e17f","status":409,"code":"EXPENSE_ALREADY_ASSIGNED","durationMs":72,"event":"api_error"}
+{"requestId":"0c64bf91-535a-4134-97d9-2e92f58a7221","organizationId":"7ac8e227-8e16-4035-93f9-8810148490fd","status":403,"code":"FORBIDDEN","durationMs":13,"event":"api_error"}
+✔ Distinct concurrent keys cannot assign one expense twice; source guards and API remain scoped (828.206244ms)
+{"requestId":"8f37f159-6d37-4346-b7fd-768d46447340","status":200,"durationMs":241,"event":"api_response"}
+✔ Late audit failure rolls back prepared source assignment and SQL refuses altered original receipt quantities (417.187225ms)
+{"requestId":"46beb63d-a880-4fac-956f-6502dc6e9258","status":200,"durationMs":251,"event":"api_response"}
+✔ Actual late-cost application and reversal preserve source documents and cash, original key replays once (593.16089ms)
+{"requestId":"af97aaa3-34d4-4ea5-851f-0c887278c37d","status":200,"durationMs":237,"event":"api_response"}
+✖ Late cost keeps original sale cost, uses corrected return cost and reports dated corrections exactly once (611.716122ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6587.061771
+
+✖ failing tests:
+
+test at .test-build/tests/landed-cost.integration.test.js:292:22
+✖ Late cost keeps original sale cost, uses corrected return cost and reports dated corrections exactly once (611.716122ms)
+  TypeError: _a.toFixed is not a function
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/landed-cost.integration.test.js:307:110)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

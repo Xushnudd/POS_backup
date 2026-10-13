@@ -602,3 +602,14 @@ Ogohlantirish ichki audit va expiry report, tashqi delivery yo‘q. Offline trac
 ## ADR-085 — Kech kelgan xarajatning alohida zaxira qiymati farqi (2026-10-13)
 
 Foydalanuvchi PUR-01.05 uchun «Alohida farq jurnalini tasdiqlayman» deb javob berdi. Transfer/in-transit, qo‘lda tannarx o‘zgarishi yoki yo‘qotishlar sabab correctionning qolgan inventory va sold COGSdan tashqari qismi alohida «zaxira qiymati farqi» immutable jurnalida ko‘rsatiladi. Oldingi receipt/sale/return hujjatlari qayta yozilmaydi, mavjud cash expense qayta to‘lanmaydi. Bu biznes siyosati tasdig‘i; posting, report va reconciliation acceptance hali tugamagan. ADR-081 authoritative moving-average replay va ADR-083 negative stock taqiqi saqlanadi; noma’lum legacy tarix uchun soxta qiymat yaratilmaydi.
+
+
+## ADR-086 — Correction filial va sana siyosati (2026-10-13)
+
+Foydalanuvchi qolgan global zaxira qiymati farqi va rounding correctionni kirim/xarajat filialiga, qo‘llangan sana bilan yozishni tasdiqladi. Inventory correction haqiqiy zaxira joylariga, COGS correction asl sale/return filiallariga bog‘lanadi; eski davrdagi hujjatlar o‘zgarmaydi va original manba havolalari saqlanadi. Bu qaror posting va hisobot qabulini almashtirmaydi.
+
+## ADR-087 — Kech xarajatdan keyingi operatsiyalar va transfer snapshoti (2026-10-13)
+
+ADR081/085/086ni bajarish: old application va hujjatlarni o‘zgartirmasdan, keyingi actual source operatsiyasining Serializable tranzaksiyasida immutable ReceiptCostContinuation yoziladi. Actual actor sessiya/rol tekshiruvi saqlanadi; ichki typed capability faqat shu tenantning projection o‘qishini ochadi. COGS actual sale/return filialiga, variance/rounding original expense filialiga operation sanasi bilan yoziladi. Corrected issue-costli write-off freightni allaqachon xarajat qilgan bo‘lsa, variancega qayta qo‘shilmaydi. Native source/transaction/sequence, live session va cost-change anchor tekshiruvlari majburiy.
+
+Faol net fee bor transfer actual jo‘natish paytida current costni additive issueUnitCostSnapshotda saqlaydi; eski draft unitCost o‘zgarmaydi. Nofee/legacy transfer original frozen-cost qoidasini saqlaydi. Bu vendor yoki yangi biznes tarifi emas, tasdiqlangan freightning qiymatini keyingi harakatlarda yo‘qotmaslik chorasi. SKU/fact/work caplarda qisman jurnal yoki taxminiy hisob o‘rniga aniq xato qaytadi. SQL155–159 qo‘shiladi, applied migration qayta yozilmaydi. Real production deployment/pilot qabul qilinmagan.

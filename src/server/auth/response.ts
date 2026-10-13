@@ -2,7 +2,7 @@
 // removed by default. Invitation capabilities and explicitly reviewed one-time
 // TOTP enrollment/recovery DTOs are presented only by their authorized endpoints.
 const credentials = new Set(['pin','pinhash','password','passwordhash','passworddigest','tokenhash','resettoken','secret','secrethash','sealedsecret','provisioninguri','apikey','privatekey','clientsecret','accesstoken','refreshtoken','sessiontoken','authorization','cookie','credentials','deliverylease','leasetoken','otp','otpcode','verificationcode','recoverycode','recoverycodes','totpsecret','totpseed']);
-const costs = new Set(['costprice','unitcost','profit','profitmargin','cost']);
+const costs = new Set(['costprice','unitcost','unitcostsnapshot','costapplicationid','profit','profitmargin','cost']);
 export function sanitizeResponse(value: unknown, role?: string): unknown {
   if (Array.isArray(value)) return value.map(row => sanitizeResponse(row, role));
   if (!value || typeof value !== 'object') return value;

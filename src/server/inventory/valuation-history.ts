@@ -2,6 +2,8 @@ import {Prisma} from '@prisma/client'
 import type {TokenPayload} from '@/lib/auth'
 import {AccessError} from '../auth/policy'
 import {assertLiveContext} from '../operations'
+// Server-only capability: never accepts a serialized client value or bypasses live-session checks.
+export const AUTOMATIC_COST_PROJECTION=Symbol('automatic-cost-projection')
 /** Completeness is proven from a zero-stock boundary, not from timestamps or
  * the absence of old movement rows alone. Unjournaled legacy stock is unproven. */
 export function assertCompleteValuationOrder(state:{legacyMovementCount:string;baselineQuantity:string|null;baselineUnitCost:string|null;lastSequence:string},sequences:readonly string[]){
@@ -13,8 +15,8 @@ export function assertCompleteValuationOrder(state:{legacyMovementCount:string;b
 }
 /** Internal owner-only reader. Caller chooses one consistent transaction and
  * must separately validate source types, receipts and financial posting rules. */
-export async function readProductValuationHistory(tx:Prisma.TransactionClient,context:TokenPayload,productId:string){
- if(context.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED','Barcha filiallarga ta’sir qiladigan tannarx tuzatishini egasi ko‘rib chiqadi')
+export async function readProductValuationHistory(tx:Prisma.TransactionClient,context:TokenPayload,productId:string,capability?:typeof AUTOMATIC_COST_PROJECTION){
+ if(context.role!=='owner'&&capability!==AUTOMATIC_COST_PROJECTION)throw new AccessError(403,'OWNER_REQUIRED','Barcha filiallarga ta’sir qiladigan tannarx tuzatishini egasi ko‘rib chiqadi')
  await assertLiveContext(tx,context)
  const product=await tx.product.findFirst({where:{id:productId,organizationId:context.organizationId},select:{id:true,costPrice:true}})
  if(!product)throw new AccessError(404,'NOT_FOUND')

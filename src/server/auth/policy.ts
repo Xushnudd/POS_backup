@@ -13,7 +13,7 @@ export function tenantScope(model: string, context: TokenPayload): Record<string
     case 'InventoryBatch': return {organizationId:org}
     case 'InventoryBatchDisposition': return {organizationId:org, sourceEntry:tenantScope('InventoryBatchEntry',context)}
     case 'InventoryBatchEntry': return {organizationId:org, ...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}
-    case 'InventoryValuationSequence': case 'InventoryValuationEvent':
+    case 'ReceiptCostContinuation': case 'ReceiptCostApplication': case 'InventoryValuationSequence': case 'InventoryValuationEvent':
       if(context.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED','Tashkilot bo‘yicha tannarx tarixi faqat egasiga ochiq');
       return {organizationId:org}
     case 'Organization': return { id: org }

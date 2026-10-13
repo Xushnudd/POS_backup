@@ -15,6 +15,8 @@ type CostReferenceReader={
  inventoryValuationEvent:{findMany(args:{where:{organizationId:string;productId:{in:string[]};transactionId:bigint;kind:string};select:{id:true;productId:true;beforeUnitCost:true;afterUnitCost:true};orderBy:{productId:'asc'}}):Promise<{id:string;productId:string;beforeUnitCost:Prisma.Decimal|null;afterUnitCost:Prisma.Decimal|null}[]>};
 }
 export async function costChangeReferences(tx:CostReferenceReader,ctx:TokenPayload,productIds:string[]){
+ // Administrators can edit sale prices but cannot read or change owner-only costs.
+ if(ctx.role!=='owner')return []
  const [current]=await tx.$queryRaw<{id:bigint}[]>`SELECT txid_current() AS id`
  const rows=await tx.inventoryValuationEvent.findMany({where:{organizationId:ctx.organizationId,productId:{in:productIds},transactionId:current.id,kind:'cost_change'},select:{id:true,productId:true,beforeUnitCost:true,afterUnitCost:true},orderBy:{productId:'asc'}})
  return rows.map(row=>({...row,beforeUnitCost:row.beforeUnitCost?.toFixed(6)??null,afterUnitCost:row.afterUnitCost?.toFixed(6)??null}))
