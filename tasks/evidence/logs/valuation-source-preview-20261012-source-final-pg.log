@@ -1,0 +1,134 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Create/complete retries are exactly one business effect, conflicts reject, stock atomic (410.03217ms)
+✔ Return disposition controls sellable stock without changing refund or duplicating replay (470.132401ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Two tills competing for last unit cannot oversell (181.557659ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Mixed cash/debt, partial collection, partial/full return conserve balances and replay (356.111382ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Manual ledger requires a scoped open shift and replays once; closed shifts reject payments (180.229885ms)
+✔ Checkout snapshots current weighted cost; completed history does not follow catalog edits (81.901697ms)
+✔ Purchase weighted cost and partial transfer preserve stock through retry and excess rejection (132.586251ms)
+✔ Revoked sessions cannot create economic effects even with a previously verified context (43.752276ms)
+✔ DB rejects return items linked to a different sale and debt linked to a different customer (93.192686ms)
+✔ Invitation is single-use, revocable, expires and cannot take over an existing account (1298.288322ms)
+✔ Reconciliation finds discrepancies without repairing history and keeps tenants isolated (175.931123ms)
+✔ Units enforce fractional precision and snapshot; additional barcodes stay unique inside a tenant (184.178711ms)
+✔ Bank debt collection never turns into an automatic cash refund (184.948079ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Cancellation tombstone blocks delayed draft posting; a committed draft keeps manager-only cancellation (431.427951ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Stock reversal preserves immutable history, inverse weighted cost, audit and exactly-one effect (239.261128ms)
+✔ Failed reversal rolls back all lines; negative adjustment reversal restores stock (151.105195ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Draft transfer cancellation replays once and cannot race a stock shipment (215.014047ms)
+✔ Transit returns conserve source/destination stock and cannot exceed unreceived quantity (125.214217ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Concurrent receive/return chooses a single effect for the same transit unit (302.143888ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Blind count freezes selected stock; recount/approval posts exactly one linked adjustment (295.458489ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Full count/cancellation and concurrent checkout preserve the count checkpoint (446.219927ms)
+✔ Partial counts leave other SKUs available; zero-difference approval needs no stock adjustment (148.369331ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Opening/adjustment/write-off debt documents are append-only, authorized and never cash (168.234071ms)
+✔ Written-off sale debt is never treated as paid cash during partial/full returns (158.487754ms)
+✔ Mixed paid/outstanding/written-off refund preserves all three liabilities (125.379634ms)
+✔ A business duplicate without a committed operation remains a conflict (35.797952ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Explicit debt allocations select receipts, conserve payment and reject invalid targets atomically (269.927687ms)
+✔ Debt export rejects oversized periods before loading the entry table (4759.978473ms)
+✔ Commercial export separates mixed sale, cash collection, refund and debt without double counting (181.255226ms)
+✔ Credit deadlines are preserved on replay and invalid deadlines leave no posting effects (130.834863ms)
+✔ Debt aging reconciles partial settlement/write-off and isolates uncertain legacy allocation (246.397875ms)
+✔ Checkout trusts catalog snapshots and session actor, combines repeated SKU lines (112.355373ms)
+✔ Invalid baskets, precision, excess discounts and foreign IDs leave no draft or operation (97.009167ms)
+✔ A failure after the first stock posting rolls back stock, snapshots, debt, payment, operation and audit (93.426273ms)
+✔ Checkout rechecks current discount limits and closed shift before any posting (64.36502ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Parallel credit checkouts cannot exceed the shared customer limit (209.980634ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Parallel shift opens and direct DB inserts leave only one open till (130.651068ms)
+✔ Posted receipt DB snapshots resist edit/delete/insert and parent cascades; linked returns remain valid (121.844259ms)
+✔ Multi-line cent allocation and successive partial returns conserve the frozen receipt after catalog edits (192.927868ms)
+✔ A late audit failure rolls back already-written payments and stock (118.347876ms)
+✔ A child edit waiting for checkout cannot change the newly posted receipt (101.256236ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Manual card debt collection requires proof, preserves cash, allocates original debt and replays once (211.554046ms)
+✔ Direct manager approvals bind reviewed document amounts and cannot transfer to another document or changed replay (685.108778ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Transfer partial receipt, damaged and shortage outcomes conserve sent quantity with exact immutable scoped journal (479.848614ms)
+{"requestId":"64847e16-63b8-4100-a7c6-c2b7419d8546","status":200,"durationMs":252,"event":"api_response"}
+{"requestId":"7a431bae-530c-4e7d-b78c-52315f622cfb","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"1de4af7a-860f-4611-a76e-361fe52537ba","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":17,"event":"api_error"}
+{"requestId":"df38f208-4132-4ef8-88b8-77ac03bf5b51","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"ebe4310d-004b-40e4-90e2-620203149f6e","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":17,"event":"api_error"}
+{"requestId":"2170b6ef-3316-456a-a27f-220a1f61d71f","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":17,"event":"api_error"}
+{"requestId":"f686178f-6291-4f97-b7d8-7c74d45017aa","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"02e88d15-99f6-4203-acaa-fca8d66cde0a","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":14,"event":"api_error"}
+{"requestId":"266f9aba-b7c2-4482-838c-9057ccb99fa9","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"79b53b69-933a-49f0-b830-48cdf7786cf2","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"f8df8bb2-e5e9-471b-afca-115b8366120d","organizationId":"ddb5cf92-1f13-46a5-8390-18b2ea86dc95","status":400,"code":"INVALID_ITEMS","durationMs":16,"event":"api_error"}
+✔ Receipt-backed preview uses actual partial receipt snapshots, has no journal effect and rejects forged fields (526.070399ms)
+{"requestId":"15adcdc2-ae3c-4807-a58e-d9a5579c75c7","status":200,"durationMs":249,"event":"api_response"}
+{"requestId":"7926e8a2-acb4-400b-b352-a404f7b46483","status":200,"durationMs":251,"event":"api_response"}
+{"requestId":"fa055174-4e55-40e6-b60b-3f2626b6c755","organizationId":"40c596ac-33a5-45d3-aa63-48dc9cd5b93b","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"a842a348-110d-49f7-99ae-daf06deca5fc","organizationId":"405fc5bb-e3c1-491a-bc08-a3eb66242fdc","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"2d8ed512-3398-40f0-a0a6-f3ca37a7e17b","organizationId":"405fc5bb-e3c1-491a-bc08-a3eb66242fdc","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"f09f3454-a170-4f6c-84a8-4335670b1af3","organizationId":"405fc5bb-e3c1-491a-bc08-a3eb66242fdc","status":403,"code":"FORBIDDEN","durationMs":9,"event":"api_error"}
+{"requestId":"da3d147f-c11a-4b4d-80cf-91ce0a95c67a","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Preview enforces tenant, assigned branch, live role and session boundaries (693.343059ms)
+{"requestId":"2e14b9d2-ff7b-4fe0-9017-c39ad7306005","status":200,"durationMs":247,"event":"api_response"}
+{"requestId":"ecb5c83d-6735-4904-8ee9-0da798c7d2cb","organizationId":"6e8bccdb-ae7d-4c6c-babc-4fa7d0b5667d","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"bcc2d213-eaa0-468a-ab54-63c80527c72b","organizationId":"6e8bccdb-ae7d-4c6c-babc-4fa7d0b5667d","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"9224459e-efab-4312-9f92-b90d2c11a233","organizationId":"6e8bccdb-ae7d-4c6c-babc-4fa7d0b5667d","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"d71e7729-97db-425d-a192-60a03920dfb8","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"a113ccec-cf45-4c0e-a9a2-58fbf090aa7d","organizationId":"c2a3264d-588c-482e-aa51-1471c2fb94e4","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"2e6c35a4-f8a2-4f4a-8308-9168073a2d7e","organizationId":"6e8bccdb-ae7d-4c6c-babc-4fa7d0b5667d","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"e4942c33-5238-40fa-89f5-c540107092a6","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Historical correction API is owner-only, read-only, bounded and rejects forged source fields (665.851024ms)
+{"requestId":"a954d1bb-ce14-4017-9926-a2cdc4a3bac8","status":200,"durationMs":241,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Prepared receipt cost journal uses one paid source, replays once, cancels safely and never posts valuation (587.656402ms)
+{"requestId":"edd8831f-c8c7-4f84-b90b-faa449d7e9d0","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"3570e44f-c440-4399-8954-10e354f12cac","status":200,"durationMs":243,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"bdd0bfdb-af48-497b-b1ca-f11735b05dc9","organizationId":"859878bc-755f-41d3-be79-58523ae0e2bd","operationId":"a31cb5fa-2388-4f63-bff9-18dc16f3f61b","status":409,"code":"EXPENSE_ALREADY_ASSIGNED","durationMs":16,"event":"api_error"}
+{"requestId":"4d5c7240-4788-4353-aac3-9e6e35e3d26d","organizationId":"859878bc-755f-41d3-be79-58523ae0e2bd","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+✔ Distinct concurrent keys cannot assign one expense twice; source guards and API remain scoped (725.280872ms)
+{"requestId":"1cef1676-9609-432e-8ab0-c7fa5cadfa20","status":200,"durationMs":244,"event":"api_response"}
+✔ Late audit failure rolls back prepared source assignment and SQL refuses altered original receipt quantities (386.627737ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (163.570767ms)
+{"requestId":"b35148c4-907e-4649-9471-ba943ee5dc6e","organizationId":"1df12b6f-0df6-4d37-928b-5275d7d0d5eb","status":200,"durationMs":19,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (293.344585ms)
+✔ Oversized exports fail without publishing a partial artifact or business mutation (762.413903ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (232.389742ms)
+✔ actual receipt captures cost change and movement in one transaction, replay adds no valuation event (187.062234ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ parallel branches receive unique committed product order, sequence does not use timestamp sorting, rollback adds no event (97.949137ms)
+✔ legacy unjournaled balance is recorded as an unproven boundary, never silently capitalised (53.577371ms)
+✔ actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes (352.594676ms)
+✔ native capture alone cannot authorize an invented source or an unimplemented adjustment adapter (76.551302ms)
+✔ organization-wide baseline preserves exact sum beyond one branch decimal capacity without breaking original cost update (31.38005ms)
+ℹ tests 60
+ℹ suites 0
+ℹ pass 60
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24833.450072

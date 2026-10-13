@@ -60,7 +60,7 @@ export default function InventoryPage() {
   const [docSupplierId, setDocSupplierId] = useState<string>('');
   const [docNote, setDocNote] = useState<string>('');
   const [docItems, setDocItems] = useState<
-    { productId: string; quantity: string; unitCost: string;tradeUnit?:string }[]
+    { productId: string; quantity: string; unitCost: string;tradeUnit?:string;batchInput?:{code:string;receivedOn:string;expiresOn:string} }[]
   >([]);
   const [documentNo,setDocumentNo]=useState('');
   const [draftRevision,setDraftRevision]=useState(0);
@@ -169,6 +169,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <Link href="/inventory/batches" className="text-blue-700 underline">Partiyalar va yaroqlilik hisoboti</Link>
       <PendingActions prefix="/stock-documents" returnPath="/inventory" revision={draftRevision} onDone={()=>{setDraftRevision(value=>value+1);void loadData()}}/>
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -424,7 +425,7 @@ export default function InventoryPage() {
         title="Yangi ombor hujjati (Kirim)"
         size="xl"
       >
-        <DurableMutation path="/stock-documents" returnPath="/inventory" label="Hujjatni yaratish" body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[`Qoralama: ${documentNo}`,`Tur: ${docType}; filial: ${activeStore?.name??''}`,`Qatorlar: ${docItems.length}`,`Sabab: ${docNote}`, ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
+        <DurableMutation path="/stock-documents" returnPath="/inventory" label="Hujjatni yaratish" body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[`Qoralama: ${documentNo}`,`Tur: ${docType}; filial: ${activeStore?.name??''}`,`Qatorlar: ${docItems.length}`,`Sabab: ${docNote}`, ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}${item.batchInput?'; partiya '+item.batchInput.code+'; kirim '+item.batchInput.receivedOn+'; yaroqli '+item.batchInput.expiresOn:''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Hujjat turi"
@@ -482,6 +483,7 @@ export default function InventoryPage() {
                         const updated = [...docItems];
                         updated[idx].productId = e.target.value;updated[idx].tradeUnit=undefined;
                         if (selProd) {
+                          updated[idx].batchInput = undefined;
                           updated[idx].unitCost = String(selProd.costPrice??'0');
                         }
                         setDocItems(updated);
@@ -530,6 +532,7 @@ export default function InventoryPage() {
                     />
                   </div>
 
+                  {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label="Partiya ma’lumotlari">{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]}<input aria-label={['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
                   <button
                     type="button"
                     onClick={() => handleRemoveItemRow(idx)}

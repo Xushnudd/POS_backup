@@ -290,6 +290,9 @@ model Category {
 }
 
 model Product {
+ batchTracking Boolean @default(false)
+ expiryAlertDays Int @default(30)
+ batches InventoryBatch[]
  valuationSequence InventoryValuationSequence?
  valuationEvents InventoryValuationEvent[]
 
@@ -423,6 +426,7 @@ model StockDocument {
 }
 
 model StockDocumentItem {
+ batchInput Json?
   conversionSnapshot Json?
  supplierCreditItems SupplierCreditItem[]
   purchaseReceiptLine PurchaseReceiptLine?
@@ -439,6 +443,7 @@ model StockDocumentItem {
 }
 
 model InventoryMovement {
+ batchEntries InventoryBatchEntry[]
  valuationEvent InventoryValuationEvent?
 
   id             String   @id @default(uuid())
@@ -457,6 +462,7 @@ model InventoryMovement {
   store          Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   creator        User         @relation("InventoryMovementCreator", fields: [createdBy], references: [id])
+  @@index([productId,sourceType,sourceId],map:"InventoryMovement_batch_source_idx")
 }
 
 model InventoryBalance {
@@ -508,6 +514,7 @@ model StockTransferItem {
 }
 
 model TransferDispositionEntry {
+ batchDispositions InventoryBatchDisposition[]
   id             String            @id @default(uuid())
   organizationId String
   storeId        String
@@ -1154,6 +1161,7 @@ model DamageLocation {
 }
 
 model ReturnDispositionEntry {
+ batchDispositions InventoryBatchDisposition[]
  id String @id @default(uuid())
  organizationId String
  storeId String
@@ -2160,7 +2168,7 @@ model InventoryValuationSequence {
  organizationId String
  lastSequence BigInt @default(0)
  legacyMovementCount BigInt
- baselineQuantity Decimal? @db.Decimal(20,6)
+ baselineQuantity Decimal? @db.Decimal(30,6)
  baselineUnitCost Decimal? @db.Decimal(20,6)
  initializedAt DateTime @default(now())
  @@index([organizationId])
@@ -2189,4 +2197,56 @@ model InventoryValuationEvent {
  createdAt DateTime @default(now())
  @@unique([productId,sequence])
  @@index([organizationId,productId,sequence])
+}
+
+model InventoryBatch {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ code String
+ receivedOn String
+ expiresOn String
+ originItemId String @unique
+ createdBy String
+ createdAt DateTime @default(now())
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ entries InventoryBatchEntry[]
+ @@unique([productId,code])
+ @@index([organizationId,expiresOn,id])
+}
+
+model InventoryBatchEntry {
+ id String @id @default(uuid())
+ organizationId String
+ batchId String
+ storeId String
+ movementId String
+ quantityDelta Decimal @db.Decimal(20,6)
+ sourceEntryId String?
+ createdAt DateTime @default(now())
+ batch InventoryBatch @relation(fields:[batchId],references:[id],onDelete:Cascade)
+ movement InventoryMovement @relation(fields:[movementId],references:[id],onDelete:Cascade)
+ sourceEntry InventoryBatchEntry? @relation("BatchRestore",fields:[sourceEntryId],references:[id],onDelete:NoAction)
+ restorations InventoryBatchEntry[] @relation("BatchRestore")
+ dispositions InventoryBatchDisposition[]
+ @@unique([movementId,batchId])
+ @@index([organizationId,storeId,batchId])
+ @@index([batchId,storeId,id],map:"InventoryBatchEntry_batch_store_id_idx")
+ @@index([sourceEntryId])
+}
+
+model InventoryBatchDisposition {
+ id String @id @default(uuid())
+ organizationId String
+ sourceEntryId String
+ transferDispositionId String?
+ returnDispositionId String?
+ quantity Decimal @db.Decimal(20,6)
+ createdAt DateTime @default(now())
+ sourceEntry InventoryBatchEntry @relation(fields:[sourceEntryId],references:[id],onDelete:Cascade)
+ transferDisposition TransferDispositionEntry? @relation(fields:[transferDispositionId],references:[id],onDelete:Cascade)
+ returnDisposition ReturnDispositionEntry? @relation(fields:[returnDispositionId],references:[id],onDelete:Cascade)
+ @@unique([sourceEntryId,transferDispositionId])
+ @@unique([sourceEntryId,returnDispositionId])
+ @@index([organizationId,id])
 }

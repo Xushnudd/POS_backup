@@ -12,7 +12,7 @@ const updateOrganizationSchema = z.object({
   phone: z.string().min(9).optional(),
   currencyCode: z.string().optional(),
   timezone: z.string().optional(),
-  allowNegativeStock: z.boolean().optional(),
+  allowNegativeStock: z.literal(false).optional(),
   receiptFooter: z.string().optional(),
 })
 

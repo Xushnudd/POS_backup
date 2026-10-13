@@ -12,6 +12,8 @@ import { createAccount, createExpenseCategory, postExpense, reverseFinancialDocu
 import { prepareReceiptCost, cancelReceiptCost, listReceiptCosts } from '@/server/purchases/receipt-cost-plans'
 import { POST as prepareRoute } from '@/app/api/stock-documents/[id]/cost-plans/route'
 import { previewReceiptLandedCost } from '@/server/purchases/landed-cost-preview'
+import { listReceiptCostSources } from '@/server/purchases/receipt-cost-plans'
+import { POST as correctionPreview } from '@/app/api/stock-documents/[id]/cost-correction-preview/route'
 
 const connection = new URL(process.env.DATABASE_URL ?? '')
 if (connection.hostname !== '127.0.0.1' || connection.port !== '55439' || connection.pathname !== '/pos_test' || connection.username !== 'pos_test')
@@ -26,6 +28,8 @@ after(async () => {
   for (const phone of phones) await clearLimit('register-account', phone)
   for (const identity of identities) await clearLimit('landed-cost-preview', identity)
   for (const identity of identities) await clearLimit('receipt-cost-write', identity)
+  for (const identity of identities) await clearLimit('receipt-cost-correction-preview', identity)
+  for (const identity of identities) await clearLimit('receipt-cost-sources', identity)
   await prisma.$disconnect()
 })
 async function account() {
@@ -100,6 +104,42 @@ async function capitalisedExpense(a: Awaited<ReturnType<typeof receipt>>) {
   const expense = await postExpense(a.context, { operationId: randomUUID(), accountId: account.id, expenseCategoryId: category.id, amount: '12.01', reason: 'Confirmed freight payment' })
   return { account, category, expense }
 }
+test('Historical correction API is owner-only, read-only, bounded and rejects forged source fields',async()=>{
+ const a=await receipt(),path=`/stock-documents/${a.stock.id}/cost-correction-preview`
+ const call=(cookie=a.cookie,body:unknown={amount:'0.03',method:'value'})=>correctionPreview(request(path,cookie,body),{params:Promise.resolve({id:a.stock.id})})
+ const before={operations:await prisma.operation.count({where:{organizationId:a.context.organizationId}}),events:await prisma.inventoryValuationEvent.count({where:{organizationId:a.context.organizationId}})}
+ const response=await call();assert.equal(response.status,200);assert.match(response.headers.get('cache-control')!,/no-store/)
+ const data=(await response.json()).data
+ assert.equal(data.previewOnly,true);assert.equal(data.financialPosting,false)
+ assert.deepEqual(data.products.map((row:{allocatedAmount:string})=>row.allocatedAmount),['0.01','0.02'])
+ assert.ok(data.products.every((row:{cogsCorrection:string;cogsEntries:unknown[]})=>row.cogsCorrection==='0'&&row.cogsEntries.length===0))
+ assert.deepEqual({operations:await prisma.operation.count({where:{organizationId:a.context.organizationId}}),events:await prisma.inventoryValuationEvent.count({where:{organizationId:a.context.organizationId}})},before)
+ for(const body of [{amount:'0',method:'value'},{amount:'1',method:'value',unitCost:'999'}])assert.equal((await call(a.cookie,body)).status,400)
+ const foreign=await account();assert.equal((await call(foreign.cookie)).status,404)
+ await prisma.organizationUser.update({where:{id:a.context.organizationUserId},data:{role:'admin'}})
+ assert.equal((await call()).status,403)
+ await prisma.session.update({where:{id:a.context.sessionId},data:{revokedAt:new Date()}})
+ assert.equal((await call()).status,401)
+})
+test('Receipt cost sources list only same-branch unassigned unreversed capitalised expenses and preserve original money',async()=>{
+ const a=await receipt(),e=await capitalisedExpense(a)
+ const before=await prisma.accountEntry.count({where:{organizationId:a.context.organizationId}})
+ const source=await listReceiptCostSources(a.context,a.stock.id,{search:'freight',page:1})
+ assert.equal(source.total,1);assert.equal(source.rows[0].id,e.expense.id);assert.equal(source.rows[0].amount,'12.01')
+ assert.equal((await listReceiptCostSources(a.context,a.stock.id,{search:e.expense.id,page:1})).total,1)
+ assert.equal((await listReceiptCostSources(a.context,a.stock.id,{search:'not matching',page:1})).total,0)
+ assert.equal((await listReceiptCostSources(a.context,a.stock.id,{page:2})).rows.length,0)
+ const plan=await prepareReceiptCost(a.context,a.stock.id,{operationId:randomUUID(),expenseDocumentId:e.expense.id,amount:'12.01',method:'value',reason:'Selected original expense'})
+ assert.equal((await listReceiptCostSources(a.context,a.stock.id,{})).total,0)
+ await cancelReceiptCost(a.context,a.stock.id,plan.id,{operationId:randomUUID(),reason:'Unassign original expense'})
+ assert.equal((await listReceiptCostSources(a.context,a.stock.id,{})).total,1)
+ assert.equal(await prisma.accountEntry.count({where:{organizationId:a.context.organizationId}}),before)
+ const foreign=await account();await assert.rejects(listReceiptCostSources(foreign.context,a.stock.id,{}),{code:'NOT_FOUND'})
+ await assert.rejects(listReceiptCostSources({...a.context,role:'cashier'},a.stock.id,{}),{code:'MANAGER_REQUIRED'})
+ await assert.rejects(listReceiptCostSources(a.context,a.stock.id,{page:0}))
+ await reverseFinancialDocument(a.context,e.expense.id,{operationId:randomUUID(),reason:'Reverse original freight',shifts:{}})
+ assert.equal((await listReceiptCostSources(a.context,a.stock.id,{})).total,0)
+})
 test('Prepared receipt cost journal uses one paid source, replays once, cancels safely and never posts valuation', async () => {
   const a = await receipt(), e = await capitalisedExpense(a)
   const body = { operationId: randomUUID(), expenseDocumentId: e.expense.id, amount: '12.01', method: 'value' as const, reason: 'Prepare freight allocation' }

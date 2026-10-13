@@ -13,7 +13,7 @@ export const reportExportSchema=z.object({
  report:z.enum(Object.keys(REPORT_QUERIES) as [keyof typeof REPORT_QUERIES,...(keyof typeof REPORT_QUERIES)[]]),
  format:z.enum(['csv','xlsx','pdf']),
  filters:z.record(z.string().regex(/^[a-zA-Z][a-zA-Z0-9]*$/).max(50),z.string().max(2000)).default({}),
-}).strict().refine(v=>Object.keys(v.filters).every(k=>(REPORT_EXPORTS[v.report].filters as readonly string[]).includes(k)),'Noma’lum hisobot filtri').refine(v=>Object.keys(v.filters).length<=30&&!Object.keys(v.filters).some(k=>['organizationId','format','page','limit','password','token','session'].includes(k)),'Tenant va pagination maydonlari eksport filtri emas')
+}).strict().refine(v=>v.report!=='inventory-batches'||z.string().uuid().safeParse(v.filters.storeId).success,'Partiya eksporti uchun filial tanlang').refine(v=>Object.keys(v.filters).every(k=>(REPORT_EXPORTS[v.report].filters as readonly string[]).includes(k)),'Noma’lum hisobot filtri').refine(v=>Object.keys(v.filters).length<=30&&!Object.keys(v.filters).some(k=>['organizationId','format','page','limit','password','token','session'].includes(k)),'Tenant va pagination maydonlari eksport filtri emas')
 export async function reportExport(context:TokenPayload,input:z.infer<typeof reportExportSchema>){
  const descriptor=reportExportSchema.parse(input),entry=REPORT_QUERIES[descriptor.report]
  assertRoutePermission(entry.path,'GET',context.role);assertCustomRoutePermission(context,entry.path,'GET')

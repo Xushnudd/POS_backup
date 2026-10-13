@@ -1,5 +1,5 @@
 import {assertLiveContext} from '@/server/operations'
-import {priceActor} from '@/server/catalog/prices'
+import {priceActor,costChangeReferences} from '@/server/catalog/prices'
 import { Prisma } from '@prisma/client'
 import { amountSchema } from '@/server/sales/service'
 import { nonnegativeQuantitySchema } from '@/server/catalog/service'
@@ -127,7 +127,7 @@ async function handlePUT(
         category: true,
       },
     })
-      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Product",entityId:result.id,action:"update",afterData:{approvedBy:payload.userId,approvedRole:payload.role,prices:{salePrice:{before:current.salePrice.toFixed(),after:result.salePrice.toFixed()},costPrice:{before:current.costPrice.toFixed(),after:result.costPrice.toFixed()}}}}})
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Product",entityId:result.id,action:"update",afterData:{approvedBy:payload.userId,approvedRole:payload.role,valuationReferences:await costChangeReferences(tx,payload,[result.id]),prices:{salePrice:{before:current.salePrice.toFixed(),after:result.salePrice.toFixed()},costPrice:{before:current.costPrice.toFixed(),after:result.costPrice.toFixed()}}}}})
       return result
     })
 

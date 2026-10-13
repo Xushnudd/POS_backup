@@ -1,3 +1,4 @@
+import {attachSaleBatches} from '../inventory/batches'
 import {resolveConversion,assertCurrentConversion} from '../catalog/conversions'
 import type {ConversionSnapshot} from '../catalog/conversion-math'
 import {complianceSnapshot,assertProductCompliance} from '../catalog/compliance'
@@ -149,14 +150,14 @@ export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPa
       if(!ownerReviewedOffline)await assertCurrentConversion(tx,context.organizationId,product,item.quantity,item.conversionSnapshot);
       assertProductCompliance(product,{taxVersionId:item.taxVersionId,taxMode:item.taxMode})
       const balance=await tx.inventoryBalance.findUnique({where:{storeId_productId:{storeId:sale.storeId,productId:item.productId}}})
-      if(!sale.organization.allowNegativeStock && item.quantity.gt(balance?.quantity??0))throw new AccessError(409,'INSUFFICIENT_STOCK','Yetarli qoldiq yo‘q; miqdorni tekshiring',undefined,{stage:'sale',productId:item.productId,productName:item.productName,requestedQuantity:item.quantity,availableQuantity:balance?.quantity??decimal(0)})
+      if(item.quantity.gt(balance?.quantity??0))throw new AccessError(409,'INSUFFICIENT_STOCK','Yetarli qoldiq yo‘q; miqdorni tekshiring',undefined,{stage:'sale',productId:item.productId,productName:item.productName,requestedQuantity:item.quantity,availableQuantity:balance?.quantity??decimal(0)})
       const currentTax=taxFor?.(product.taxProfileId)
       if(!ownerReviewedOffline&&(!currentTax||item.taxVersionId!==currentTax.taxVersionId||item.taxMode!==currentTax.taxMode||!item.taxRate.eq(currentTax.taxRate)))throw new AccessError(409,'TAX_CHANGED','Soliq siyosati o‘zgardi; original qoralamani tekshiring va qayta tasdiqlang')
       await tx.saleItem.update({where:{id:item.id},data:{complianceSnapshot:complianceSnapshot(product),receiptDiscount:sale.netAmount===null?allocation[item.id]:item.receiptDiscount,unitCost:ownerReviewedOffline?item.unitCost:product.costPrice}})
-      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:ownerReviewedOffline?item.unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,allowNegative:sale.organization.allowNegativeStock,...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
+      await moveStock(tx,context,{storeId:sale.storeId,productId:item.productId,delta:item.quantity.negated(),unitCost:ownerReviewedOffline?item.unitCost:product.costPrice,sourceType:'sale',sourceId:sale.id,...(reservedSources?.has(item.productId)?{reservedLocationId:reservedSources.get(item.productId)}:{})})
     }
     for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange,...authorization},include:{items:true,payments:true}})
     await audit(tx,context,'Sale',sale.id,'completed',{totalAmount:sale.totalAmount,payments:input.payments,cashTendered:tender,cashChange})
-    return updated
+    return attachSaleBatches(tx,context,updated)
 }

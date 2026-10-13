@@ -1,0 +1,25 @@
+[WebServer] (node:45925) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:45989) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (4.0s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (3.2s)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:1073:5 › Transfer receipt UI preserves unknown partial receipt and separates damage and confirmed shortage from sellable stock (2.3s)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:1180:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.5s)
+(node:46792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (5.2s)
+  ✓   6 [firefox] › tests/e2e/core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (3.8s)
+  ✓   7 [firefox] › tests/e2e/core.spec.ts:1073:5 › Transfer receipt UI preserves unknown partial receipt and separates damage and confirmed shortage from sellable stock (2.8s)
+  ✓   8 [firefox] › tests/e2e/core.spec.ts:1180:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (3.0s)
+(node:47839) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (7.7s)
+  ✓  10 [webkit] › tests/e2e/core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (6.5s)
+  ✓  11 [webkit] › tests/e2e/core.spec.ts:1073:5 › Transfer receipt UI preserves unknown partial receipt and separates damage and confirmed shortage from sellable stock (4.7s)
+  ✓  12 [webkit] › tests/e2e/core.spec.ts:1180:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (4.8s)
+
+  12 passed (56.9s)

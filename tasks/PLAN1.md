@@ -1648,7 +1648,9 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-01.07** — Manfiy qoldiq siyosatini aniq belgilash; yoqilsa foyda/tannarx ta’sirini hisoblash.
+- [x] **INV-01.07** — Manfiy qoldiq siyosatini aniq belgilash; yoqilsa foyda/tannarx ta’sirini hisoblash.
+
+  **Tasdiqlangan scope (2026-10-13, ADR-083):** Foydalanuvchi manfiy qoldiqni butunlay taqiqladi; yoqish va negative valuation keyinga qoldirildi. API, UI, shared stock writer va native SQL taqiqi; parallel sale/replay/legacy recovery qabuli `tasks/evidence/negative-stock-disabled-20261013.json`da. Quyidagi conditional yoqish talabi hozir faol emas; bu imkoniyat tayyor deb da’vo qilinmaydi.
 
   **Texnologiya:** Prisma organization policy, Decimal valuation.
 
@@ -1750,7 +1752,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `INV-02.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **INV-02.06** — Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1.
+- [x] **INV-02.06** — Partiya, yaroqlilik muddati, FEFO tanlash va muddati yaqin ogohlantirish — oziq-ovqat segmentida P1.
 
   **Texnologiya:** Prisma Batch, PostgreSQL expiry index, Decimal.
 
@@ -1765,6 +1767,9 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Bandning qabul mezoni:** Expiry/FEFO tanlash, muddati yaqin alert va muddati o‘tgan mahsulotni bloklash testlari o‘tadi.
 
   **Dalil:** `INV-02.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-13): done.** Native batch/entry/disposition, original FEFO/expiry va scoped report API/UI/CSV/worker; 95 PG regression,25 tenant/valuation,5 final batch assertions,3 final batch browsers va12 shared UI regression. 148 fresh/upgrade/repeat + native batch dump/restore,114 unit,type/lint/worker/build PASS. `tasks/evidence/inventory-batches-20261013.json`; `docs/operations/inventory-batches.md`. Real pilot/deploy alohida; chegaralar hujjatda.
+
 
   **Joriy holat (2026-10-12): in_progress.** Sof FEFO/expiry/business-day hisoblash moduli va6 unit gate tayyor; caller-authoritative stock/reservation/transaction, batch schema/journal, all writer coverage va alert/API/UI hali ochiq. Hech qanday stock posting yozilmadi. Original done emas; dalil `tasks/evidence/target170-core-20261012.json`.
 
@@ -1867,6 +1872,9 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Dalil:** `PUR-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
   **Joriy holat (2026-10-12): in_progress.** ADR-081: foydalanuvchi moving-average tarixini qayta hisoblash va eski hujjatlarni o‘zgartirmasdan inventory/COGS correction jurnalini tasdiqladi. Saqlangan prepared/cancelled taqsimot tarixi, pagination/retry va bekor qilishning IndexedDB original-key lost-ACK/reload recovery UI tugadi; focused DB5, unit86, uch-browser6, build/type/lint PASS. Dalil: `tasks/evidence/receipt-cost-history-20261012.json`. Tayyorlash formasi, correction posting/jurnal/hisobotlar va to‘liq qabul ochiq; checkbox o‘zgarmaydi.
+
+
+  **Checkpoint (2026-10-13): in_progress.** ADR-085 alohida stock-valuation variance tasdiqlandi. Actual native order/source adapter transfer/receive/loss/return/manual override/adjustment/supplier withdrawal/reversalni tekshiradi. Owner read-only correction API inventory/COGS/rounding/variance va source-linked non-stock returnsni chiqaradi. 124unit/16PG/6browser/type/lint/worker/build; `tasks/evidence/valuation-variance-preview-20261013.json`. Prepare/history/recovery formasi bor; immutable application/posting, repeated-charge barriers, future effective-return-cost, financial reports va apply UI hali ochiq. Original done168, target170; preview subtask sifatida sanalmaydi.
 
 - [x] **PUR-01.06** — Xarid narxi tarixi, mahsulot/yetkazib beruvchi bo‘yicha tahlil.
 
@@ -2450,7 +2458,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **REP-01.07** — P1: qoldiq qiymati, ombor harakati, kam qoldiq, yaroqlilik va sekin sotiladigan tovarlar.
+- [x] **REP-01.07** — P1: qoldiq qiymati, ombor harakati, kam qoldiq, yaroqlilik va sekin sotiladigan tovarlar.
 
   **Texnologiya:** PostgreSQL stock/batch/valuation aggregates.
 
@@ -2466,7 +2474,10 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `REP-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-  **Joriy holat (2026-10-11): in_progress.** Qoldiq qiymati/jurnal/kam qoldiq va filialdagi N×24soat completed-sale inactivity tahlili API/UI/CSVda qabuldan o‘tdi (30/60/90 UI,1–3650 API). Omborda turish yoshi emas. Finance67/focused1/unit33/browser3, production build PASS. `tasks/evidence/inactive-stock-20261011.json`; `docs/operations/inventory-inactivity.md`. Partiya/yaroqlilik muddati INV-02.06 va expiry report ochiq; original done hisoblanmaydi.
+  **Qabul (2026-10-13): done.** Native batch/entry/disposition, original FEFO/expiry va scoped report API/UI/CSV/worker; 95 PG regression,25 tenant/valuation,5 final batch assertions,3 final batch browsers va12 shared UI regression. 148 fresh/upgrade/repeat + native batch dump/restore,114 unit,type/lint/worker/build PASS. `tasks/evidence/inventory-batches-20261013.json`; `docs/operations/inventory-batches.md`. Real pilot/deploy alohida; chegaralar hujjatda.
+
+
+  **Oldingi checkpoint (2026-10-11): in_progress edi.** Qoldiq qiymati/jurnal/kam qoldiq va filialdagi N×24soat completed-sale inactivity tahlili API/UI/CSVda qabuldan o‘tdi (30/60/90 UI,1–3650 API). Omborda turish yoshi emas. Finance67/focused1/unit33/browser3, production build PASS. `tasks/evidence/inactive-stock-20261011.json`; `docs/operations/inventory-inactivity.md`. Partiya/yaroqlilik muddati INV-02.06 va expiry report ochiq; original done hisoblanmaydi.
 
 - [x] **REP-01.08** — P1: smena, pul farqi, mijoz qarzi muddati, yetkazib beruvchi qarzi va xarid hisoboti.
 

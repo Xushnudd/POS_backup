@@ -76,6 +76,8 @@ export interface Category {
 }
 
 export interface Product {
+  batchTracking?:boolean;
+  expiryAlertDays?:number;
   unitConversions?:{id:string;tradeUnit:string;baseUnit:string;ratio:string;isActive:boolean;tradePrecision?:number}[];
   mxik?:string|null;mxikSource?:string|null;mxikRequired?:boolean;taxRequired?:boolean;markingRequired?:boolean;
   taxProfileId?:string|null;
@@ -246,6 +248,8 @@ export type SaleStatus = 'draft' | 'completed' | 'voided' | 'partially_returned'
 export type PaymentType = 'cash' | 'card' | 'transfer' | 'credit';
 
 export interface SaleItem {
+  batchTracking?:boolean;
+  batchAllocations?:{batchId:string;code:string;quantity:string;expiresOn:string}[];
   conversionSnapshot?:{baseUnit:string;tradeUnit:string;ratio:string;tradeQuantity:string}|null;
   discountPercent?:string|null;
   taxMode?:string;

@@ -70,7 +70,7 @@ export interface AccountSessionRow {
   status:'active'|'revoked'|'expired';
 }
 class ApiClient {
-  csvExport=(path:'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions'|'/finance/documents'|'/reports/breakdowns'|'/reports/supplier-balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  csvExport=(path:'/inventory/batches'|'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions'|'/finance/documents'|'/reports/breakdowns'|'/reports/supplier-balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
   sessions = {
     list:(page=1,state:'active'|'all'|'revoked'|'expired'='active')=>this.request<AccountSessionRow[]>(`/auth/sessions?page=${page}&limit=20&state=${state}`,{cache:'no-store'}),
     revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
@@ -303,8 +303,8 @@ class ApiClient {
       }),
 
     returnHistory: (id:string,page=1) => this.request<SaleReturnHistory[]>(`/sales/${id}/returns?page=${page}&limit=20`),
-    returnPreview: (id:string,data:{operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off'}[]}) => this.request<{refundAmount:string;settlement:{cash:string;card:string;transfer:string;debt:string;waived:string}}>(`/sales/${id}/returns/preview`,{method:'POST',body:JSON.stringify(data)}),
-    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;manualNonCash?:{confirmed:true;referenceNo:string;expectedSettlement:{cash:string;card:string;transfer:string;debt:string;waived:string}};items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off'}[]}) =>
+    returnPreview: (id:string,data:{operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';batchSelection?:{entryId:string;quantity:string}[]}[]}) => this.request<{refundAmount:string;settlement:{cash:string;card:string;transfer:string;debt:string;waived:string}}>(`/sales/${id}/returns/preview`,{method:'POST',body:JSON.stringify(data)}),
+    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;manualNonCash?:{confirmed:true;referenceNo:string;expectedSettlement:{cash:string;card:string;transfer:string;debt:string;waived:string}};items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';batchSelection?:{entryId:string;quantity:string}[]}[]}) =>
       this.request(`/sales/${id}/returns`, {method:'POST',body:JSON.stringify(data)}),
 
     void: (id: string) =>

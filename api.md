@@ -135,6 +135,32 @@ expense reversal `409 RECEIPT_COST_PLAN_ACTIVE`. Original-key replay qo‘llanad
 immutable historyda cancellation, pulga tegmaydi. Tayyorlash/bekor qilish uchun
 30 writes/minute/user/tenant, owner yoki assigned-branch admin.
 
+`GET /api/stock-documents/{id}/cost-sources?search=&page=1`: owner/assigned-branch
+admin; live session, 60/min/user/tashkilot. Confirmed buyurtma kirimining aynan
+shu filialidagi musbat capitalised expenses; reversals va faol prepared planga
+bog‘langan manbalar chiqarilmaydi. Sabab bo‘yicha case-insensitive search yoki
+exact UUID; search max200, page1–100000,20/page, stable createdAt/id sort.
+`data:{rows,total,page}`, row id/amount(ikki kasrli matn)/reason/createdAt/category.name;
+private no-store. Bu ro‘yxat tasdiq emas: prepare expense→receipt lock tartibida
+scope, original summa va faol taqsimotni qayta tekshiradi. Cancelled plandan keyin
+manba yana ko‘rinadi; yangi moliyaviy yozuv yaratilmaydi.
+
+`POST /api/stock-documents/{id}/cost-correction-preview`: faqat owner va tirik
+sessiya; yuqoridagi preview body, musbat amount; 10/min/user/tashkilot. Original
+buyurtma kirimi va mahsulotning noldan boshlangan native valuation tartibi kerak.
+Original purchase/opening, completed sale va sellable linked return hujjatlari
+harakat quantity/cost/store snapshotlari bilan tekshiriladi. Javob
+`previewOnly:true, financialPosting:false`, products ichida lastSequence,
+allocatedAmount, quantity, before/afterAverageCost, inventoryCorrection,
+cogsCorrection, roundingCorrection va original sale/return itemIdli cogsEntries.
+Bu summalar Decimal matnlari; eski hujjatlar va joriy cost o‘zgarmaydi.
+Legacy qoldiq/tarix `409 COST_HISTORY_INCOMPLETE`, mos bo‘lmagan original manba
+`409 COST_SOURCE_RECONCILIATION_REQUIRED`, hali qo‘llanmagan transfer/adjustment/
+reversal adapterlari `409 COST_SOURCE_UNSUPPORTED`, manfiy tarix
+`409 COST_HISTORY_NEGATIVE`. Inline chegarasi: 20 kirim qatori, mahsulotda
+10 000 native event va jami 10 000 replay event; katta tarix `413 COST_HISTORY_TOO_LARGE`.
+Background posting yoki correction jurnali bu endpoint tomonidan yaratilmaydi.
+
 Bu hujjat `src/app/api` ichidagi mavjud Next.js Route Handlerlarga asoslangan. Bazaviy manzil: `/api`.
 
 ## Umumiy qoidalar
@@ -1369,3 +1395,33 @@ Server ACKidagi open Shift joriy kassa va membershipga mos bo‘lsa UI contextga
 qo‘llanadi; avval boshlangan GET yangi snapshotni bekor qila olmaydi. Handover
 metadata GET ishlamasa yangi smena tasdiqlash mavjud emas, readonly retry bor.
 Bu oqim real cash drawer yoki boshqa hardware integratsiyasi emas.
+
+### Manfiy qoldiq siyosati — ADR-083
+
+Organization POST/PUT `allowNegativeStock:true` uchun400 VALIDATION_ERROR qaytaradi; false yoki omitted mavjud contractga mos. Settings ekranida yoqish mavjud emas. Barcha yangi stock withdrawals qoldiq yetmasa409 bilan rad etiladi; eski flag/allowNegative argumenti cheklovni chetlab o‘tmaydi. SQL139 legacy flaglarni audit bilan o‘chiradi, oldingi balans/savdoni o‘zgartirmaydi. Negative row faqat mavjud authorized recovery orqali nol tomonga oshishi mumkin; tannarx aniqlanmagan tarix avtomatik kapitalizatsiya qilinmaydi. Migration deploydan oldin qo‘llanishi kerak; bu hujjat production deploy dalili emas.
+
+### Partiya va yaroqlilik core (2026-10-13)
+
+- `GET /api/inventory/batches?storeId=<UUID>&state=all|expired|due_soon|valid&search=&productId=<optional>&page=1`: filialga ruxsat tekshiriladi; 50 qator, total va organization-business today. `format=csv` manager uchun butun filtrlangan dataset, max10000.
+- `POST /api/inventory/batches/policy`: owner + critical MFA, `{operationId, productId, expiryAlertDays:0..3650, reason}`; unused SKUda yoqadi, tracked SKUda alert kunlarini yangilaydi. Disable yo‘q.
+- `GET /api/inventory/batches/sources?kind=sale|transfer_out&id=<UUID>&productId=<UUID>`: manager uchun original issue entrylari, code/expiry va hali restore/disposition qilinmagan quantity.
+- `GET /api/inventory/batches/count/:productId?storeId=<UUID>`: manager uchun barcha ma’lum partiya snapshoti/hash, unit/current cost.
+- `POST /api/inventory/batches/count/:productId`: `{operationId,storeId,expectedHash,reason,counts:[{batchId,quantity}]}`; max500; butun original partiya ro‘yxatini yuboring. Hash changed409; idempotent asli natija qaytadi.
+- Stock-document va purchase-receipt itemlarda optional `batchInput:{code,receivedOn,expiresOn}`. Tracked SKUda receipt/adjustment uchun talab qilinadi; untracked SKU avvalgi contractda ishlaydi.
+- Sale return/exchange original return itemlarida optional `batchSelection:[{entryId,quantity}]`; transfer receive itemlarida `receivedBatches`, `damagedBatches`, `shortageBatches`; transfer-return itemlarda `batchSelection`. Har selection max500, unique entry IDs, aynan o‘sha kategoriya miqdoriga teng. Qisman multi-batchda majburiy, boshqa original/manba/store qabul qilinmaydi.
+- Completed-sale itemlarida `batchTracking` va actual `batchAllocations:[{batchId,code,quantity,expiresOn}]`; tarixiy hujjatlar o‘zgarmaydi.
+- Background report key: `inventory-batches`; storeId majburiy, productId/state/search filtrlari. CSV/XLSX/PDF mavjud umumiy report eksport kanalidan foydalanadi.
+
+Xatolar: `BATCH_METADATA_REQUIRED`, `BATCH_METADATA_CONFLICT`, `BATCH_REQUIRES_UNUSED_PRODUCT`, `BATCH_SELECTION_REQUIRED`, `INVALID_BATCH_SELECTION`, `BATCH_RESTORE_QUANTITY_EXCEEDED`, `INSUFFICIENT_VALID_BATCH_STOCK`, `BATCH_COUNT_CHANGED`, `BATCH_COUNT_REQUIRED`, `BATCH_OFFLINE_CASH_UNAVAILABLE`. Unknown transport natijasida original operationId/body saqlanadi; yangi amal bilan taxminiy retry qilinmaydi. Batafsil: `docs/operations/inventory-batches.md`.
+
+#### Historical correction preview variance (2026-10-13)
+
+`POST /api/stock-documents/:id/cost-correction-preview` owner-only va read-only.
+Actual native zero-stock history va source hujjatlari tekshiriladi. Product
+natijasida `varianceCorrection`, `beforeTransitValue`, `afterTransitValue`
+qo‘shildi. `inventoryCorrection` physical+transit qiymat farqi, `quantity`
+fizik qoldiq; `cogsEntries` non-stock original return uchun ham source ID/item ID
+bilan qaytadi (`sequence:null`, soxta native tartib emas). Manual override
+faqat exact native eventga bog‘langan owner audit bilan tan olinadi.
+Unproven eski override `COST_MANUAL_APPROVAL_UNPROVEN` beradi. `financialPosting`
+hali `false`; API expense/payment/stock/cost/correction ledger yozmaydi.

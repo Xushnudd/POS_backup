@@ -1,3 +1,4 @@
+import {queryInventoryBatches} from '../exports/queries/inventory-batches'
 import {queryReportsSales} from '../exports/queries/reports-sales'
 import {queryReportsProducts} from '../exports/queries/reports-products'
 import {queryReportsPurchases} from '../exports/queries/reports-purchases'
@@ -22,6 +23,7 @@ export const REPORT_QUERIES = {
  'reports-purchases':{path:'/api/reports/purchases',query:queryReportsPurchases},
  'reports-breakdowns':{path:'/api/reports/breakdowns',query:queryReportsBreakdowns},
  'reports-supplier-balances':{path:'/api/reports/supplier-balances',query:queryReportsSupplierBalances},
+ 'inventory-batches':{path:'/api/inventory/batches',query:queryInventoryBatches},
  'inventory-balances':{path:'/api/inventory/balances',query:queryInventoryBalances},
  'inventory-movements':{path:'/api/inventory/movements',query:queryInventoryMovements},
  'inventory-dispositions':{path:'/api/inventory/dispositions',query:queryInventoryDispositions},

@@ -6,8 +6,9 @@ import {assertLiveContext} from '../operations'
  * the absence of old movement rows alone. Unjournaled legacy stock is unproven. */
 export function assertCompleteValuationOrder(state:{legacyMovementCount:string;baselineQuantity:string|null;baselineUnitCost:string|null;lastSequence:string},sequences:readonly string[]){
  const validCounter=(value:string)=>/^(?:0|[1-9]\d{0,18})$/.test(value)
- const validQuantity=(value:string|null)=>value!==null&&/^-?(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(value)
- if(!validCounter(state.legacyMovementCount)||!validCounter(state.lastSequence)||state.legacyMovementCount!=='0'||!validQuantity(state.baselineQuantity)||!validQuantity(state.baselineUnitCost)||state.baselineQuantity===null||state.baselineUnitCost===null||!new Prisma.Decimal(state.baselineQuantity).eq(0)||!new Prisma.Decimal(state.baselineUnitCost).isFinite()||new Prisma.Decimal(state.baselineUnitCost).lt(0))throw new AccessError(409,'COST_HISTORY_INCOMPLETE','Oldingi qoldiq yoki tarix tartibi isbotlanmagan; tannarx tuzatishi avtomatik posting qilinmaydi')
+ const validQuantity=(value:string|null)=>value!==null&&/^-?(?:0|[1-9]\d{0,23})(?:\.\d{1,6})?$/.test(value)
+ const validCost=(value:string|null)=>value!==null&&/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(value)
+ if(!validCounter(state.legacyMovementCount)||!validCounter(state.lastSequence)||state.legacyMovementCount!=='0'||!validQuantity(state.baselineQuantity)||!validCost(state.baselineUnitCost)||state.baselineQuantity===null||state.baselineUnitCost===null||!new Prisma.Decimal(state.baselineQuantity).eq(0)||!new Prisma.Decimal(state.baselineUnitCost).isFinite()||new Prisma.Decimal(state.baselineUnitCost).lt(0))throw new AccessError(409,'COST_HISTORY_INCOMPLETE','Oldingi qoldiq yoki tarix tartibi isbotlanmagan; tannarx tuzatishi avtomatik posting qilinmaydi')
  if(BigInt(state.lastSequence)!==BigInt(sequences.length)||sequences.some((value,index)=>value!==String(index+1)))throw new AccessError(409,'COST_HISTORY_ORDER_INVALID','Tannarx ketma-ketligi to‘liq emas; original jurnalni solishtiring')
 }
 /** Internal owner-only reader. Caller chooses one consistent transaction and

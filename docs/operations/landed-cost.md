@@ -220,3 +220,112 @@ Tartib va eventni generic tenant inserts yoki top-level ORM/raw DB write orqali 
 Owner tenant eksportiga ikkala dataset ham kiritilgan, BigInt string bo‘lib chiqariladi; recovery rejasida FKlar schema metadata orqali ko‘rinadi. Bular portable archive, SQL restore buyrug‘i emas. `bash scripts/ops/test-valuation-migrations.sh` dedicated `pos-plan-test-db`da vaqtinchalik bazalar bilan137 fresh migration, synthetic133 dump upgrade/repeat, eski movement hash o‘zgarmasligi, no fake legacy order, native forge rejection va haqiqiy valuation dump/restore hashini tekshiradi. Haqiqiy customer/staging/production qabuli emas.
 
 SQL137 counter bor holatda PK lookupdan foydalanadi; boshlang‘ich legacy/balance scan faqat birinchi captureda. Testlar: actual receipt cost/movement bir transactionda; parallel branch writes; original replay; rollback; readonly generic insert; eski unjournaled stock; owner-only read; exact tenant export. Hozircha bu capture/read/calculation core hisoblanadi. Expense-to-receipt posting, harakat turlari adapterlari va immutable stock/COGS correction journals tugamaguncha PUR-01.05 `done` emas.
+
+## Original manbalardan correction preview (2026-10-12)
+
+`readReplayableProductHistory` capture yozuvini o‘zidan-o‘zi iqtisodiy manba deb
+qabul qilmaydi. Purchase/openingning confirmed original qatori, completed/
+partially_returned/returned savdo qatori yoki sellable returnning original
+saleItem bog‘lanishi mustaqil tenant tekshiruvi bilan olinadi. Miqdor, birlik
+tannarxi va filial original snapshotga aynan mos bo‘ladi. Cost change faqat shu
+transactiondagi keyingi receipt/returnning tekshirilgan moving-average natijasi
+sifatida qabul qilinadi. Mustaqil katalog tannarx override, uydirma sourceId,
+transfer/adjustment/reversal va hali qo‘llanmagan manbalar avtomatik replayga
+kiritilmaydi. Replayning yakuniy miqdori actual barcha filial balance yig‘indisi,
+tannarxi esa current Product.costPrice bilan solishtiriladi.
+
+`POST /api/stock-documents/{id}/cost-correction-preview` owner-only, read-only
+API. U allocationni actual buyurtma kirimi snapshotlaridan oladi, original
+receipt movementni topib kechikkan xarajatni tarixdan qayta hisoblaydi. Natijada
+qolgan stock, original sale/return itemlari bo‘yicha COGS va alohida rounding
+farqlari chiqadi. `lastSequence` ko‘rilgan tarix versiyasidir; posting vakolati
+emas. `previewOnly:true` va `financialPosting:false`. Amount musbat; 10/minut,
+20 kirim qatori, mahsulotda 10 000 native capture va jami 10 000 replay event
+chegaralari bor. Katta tarix uchun background reconciliation talab qilinadi;
+shu endpoint bunday ish yaratmaydi.
+
+Original quantities/unit costs decimal(20,6), charge decimal(14,2), sequence
+signed PostgreSQL bigint chegarasi bilan rad/accept qilinadi; ortiqcha kasr
+yoki sig‘im yumaloqlanmaydi. SQL138 faqat organization-wide baseline quantityni
+decimal(30,6)ga kengaytiradi: ikki filialning har biri qonuniy maksimumda bo‘lsa
+ham ularning yig‘indisi bitta filial maydoniga sig‘ishi talab qilinmaydi. Stock,
+original cost va eski jurnal o‘zgarmaydi. Nol bo‘lmagan boshlang‘ich yig‘indi
+hanuz isbotlanmagan tarix sifatida replaydan rad etiladi.
+
+Yakuniy current qabul: 114 unit,60 PostgreSQL source/API/economic/export testi,
+138 fresh/synthetic133 upgrade/repeat/full dump-restore; type/lint/worker/Next
+Webpack build PASS. Dastlabki umumiy browser run138 PASS/15 FAIL/3 SKIP;
+beshta eski fixture tuzatilgach actual MFA bilan15/15 uch-browser PASS. Uch
+maintenance skip tekshirilgan deb hisoblanmaydi. Dalil:
+`tasks/evidence/valuation-source-preview-20261012.json`. Original PUR-01.05
+`in_progress`; prepare/apply UI, immutable correction posting/report va qolgan
+source adapterlar ochiq.
+
+## Mavjud xarajatdan tayyorlash formasi
+
+Supplierning original buyurtma kirimi ostida mavjud capitalised expense
+tanlanadi. `cost-sources` faqat kirim filialidagi unreversed va active prepared
+planga bog‘lanmagan hujjatlarni 20 qatorli sahifalarda qidiradi. Current selection
+search/page o‘zgarganda saqlanadi. Summa foydalanuvchidan qo‘lda olinmaydi;
+tanlangan original FinancialDocument snapshotidan olinadi. Server preparing
+transactionida mavjud source/receipt locks, exact amount, scope va unique faol
+assignment tekshiruvlari qolgan.
+
+Method, weight snapshot va reason bilan avval reviewed body ko‘rsatiladi. Shu
+paytda expense selection va barcha body maydonlari muzlaydi. DurableMutation
+original body/keyni POSTdan oldin IndexedDBga saqlaydi. Lost successful ACK va
+reloaddan keyin metadata manbani active plan sababli chiqarib tashlagan bo‘lsa
+ham original request replay mumkin. Metadata GET fail yangi preparega ruxsat
+bermaydi; eski selection/reason/weights va boshqa buyurtma drafti yo‘qolmaydi.
+Confirmed source errors rollback/no-effect bo‘lgani uchun yangi urinishdagi
+INVALID_EXPENSE_SOURCE/EXPENSE_AMOUNT_CHANGED/EXPENSE_ALREADY_ASSIGNED/
+STORE_MISMATCH/PURCHASE_RECEIPT_REQUIRED lokal rejected holatiga o‘tadi;
+transport/unknown result original-key recoveryda qoladi.
+
+Taqsimot history refreshidagi row remount olib tashlandi. GET error eski row va
+cancellation reasonni saqlaydi, yangi cancelni retrygacha bloklaydi. Own ACK
+faqat original bodyga mos cancellation reasonni tozalaydi. Parent/read version
+o‘zgarishi mustaqil draftni almashtirmaydi.
+
+Bu yangi expense emas va kapitalizatsiya posting emas: bank balance oldingi
+expense bilan o‘zgargan, prepare/replay uni takror kamaytirmaydi. Original
+quantity/cost, supplier invoice va COGS bu ekranda o‘zgarmaydi. Source-list va preparation backend regression dalili:
+`tasks/evidence/negative-stock-disabled-20261013.json`dagi PostgreSQL log.
+Prepare pagination browser yakuniy logi mavjud emas, qabul deb olinmaydi; original PUR-01.05ning
+immutable apply/report/source-adapter qabuliga hali ehtiyoj bor.
+
+## ADR-085 variance replay checkpoint — 2026-10-13
+
+Owner correction preview endi actual native tarixdan transfer/out/in/return,
+supplier withdrawal, receipt reversal, adjustment va kelajakdagi tasdiqlangan
+manual cost override’ni o‘qiydi. Qo‘lda override mutatsiyalarining audit yozuvi
+shu transactiondagi `InventoryValuationEvent.id`ni exact before/after narx bilan
+saqlaydi. Oldingi auditlar timestamp orqali ulanmaydi: unproven override rad.
+
+Transfer receipt/return movement `sourceId` hujjat ID emas, original operation
+key bo‘lishi mumkin. Adapter `Operation.type/key/result` orqali original transfer
+va cumulative received/returned snapshotni tekshiradi. Native product order
+va filial balanslari alohida moslashtiriladi. Loss hamda non-stock return
+hujjatlari fizik movement bo‘lmagani uchun ularga soxta vaqt/sequence berilmaydi;
+original out/sale va terminal conservation orqali hisoblanadi.
+
+Preview `inventoryCorrection`, `cogsCorrection`, `roundingCorrection` bilan
+birga `varianceCorrection`ni chiqaradi. Inventory correction physical qoldiq
+va frozen outgoing-cost bilan yuritiladigan transit qiymatini qamraydi;
+`quantity` fizik qoldiq. Absolute manual override absolute qoladi, uning
+kech kelgan xarajatga ta’siri alohida variance’da ko‘rinadi. Non-stock return
+COGS correction original return item/dispositionga bog‘lanadi.
+
+Masalan, actual10×2 kirim,4transfer-out, keyingi6×4kirim,3sale,
+2receive+1damage+1transit holatida birinchi kirimga10xarajat qo‘shish:
+inventory+6.5, COGS+1.5, variance+2, jami10. Keyin1non-stock return:
+inventory+6.5, COGS+1, variance+2.5. Absolute cost1override’dan keyin:
+inventory+1 (transit), COGS+1, variance+8. Bu qiymatlar izolatsiyalangan
+PostgreSQL fixture va actual xizmatlar bilan tekshirilgan, real mijoz emas.
+
+Bu hali **read-only**: `previewOnly=true`, `financialPosting=false`.
+Actual expense qayta to‘lanmaydi; Product.costPrice va original hujjatlar
+preview bilan o‘zgarmaydi. Prepared/cancelled plan hali kapitalizatsiya emas.
+PUR-01.05 uchun immutable application journal, apply/reversal semantics,
+previous-charge replay barriers, future linked return effective cost,
+financial report integration va apply UI qabulini tugatish kerak.

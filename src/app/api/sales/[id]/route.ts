@@ -1,3 +1,4 @@
+import {attachSaleBatches} from '@/server/inventory/batches'
 import { audit,assertLiveContext } from '@/server/operations'
 import { prisma } from '@/lib/prisma'
 import { AccessError, tenantScope } from '@/server/auth/policy'
@@ -40,7 +41,7 @@ async function handleGET(
     }
     const db = scopedPrisma(payload)
 
-    const sale = await db.sale.findUnique({
+    const sale = await db.$transaction(async tx=>{const original=await tx.sale.findUnique({
       where: { id },
       include: {
         customer: true,
@@ -51,6 +52,7 @@ async function handleGET(
         shift: true,
       },
     })
+    return original?attachSaleBatches(tx,payload,original):null},{isolationLevel:'RepeatableRead'})
 
     if (!sale) {
       return NextResponse.json(

@@ -1,4 +1,5 @@
 'use client';
+import BatchRestorePicker,{type BatchChoice} from '@/components/inventory/BatchRestorePicker';
 import {useEffect,useRef,useState} from 'react';
 import {useParams} from 'next/navigation';
 import Link from 'next/link';
@@ -11,14 +12,15 @@ import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import DurableMutation from '@/components/forms/DurableMutation';
 import PendingActions from '@/components/forms/PendingActions';
-type Sale={id:string;receiptNo:string;customerId:string|null;items:{id:string;productName:string;quantity:string}[]};
+type Sale={id:string;receiptNo:string;customerId:string|null;items:{id:string;productId:string;batchTracking?:boolean;productName:string;quantity:string}[]};
 type Quote={confirmationHash:string;refundAmount:string;replacementTotal:string;cashDifference:string;debtDifference:string};
 type Exchange={id:string;replacementSaleId:string;saleReturnId:string;cashDifference:string;debtDifference:string};
 export default function ExchangePage(){const {id}=useParams<{id:string}>(),{organization,user,role}=useAuth(),{activeShift}=useOrganization();return role!=='cashier'&&organization&&user?<Editor key={[organization.id,user.id,role,id,activeShift?.id].join(':')} organizationId={organization.id} saleId={id} shiftId={activeShift?.id}/>:<p>Almashtirish uchun rahbar hisobida kiring.</p>;}
 function Editor({organizationId,saleId,shiftId}:{organizationId:string;saleId:string;shiftId?:string}){
  const [sale,setSale]=useState<Sale|null>(null),[history,setHistory]=useState<Exchange[]>([]),[qty,setQty]=useState<Record<string,string>>({}),[reason,setReason]=useState(''),[search,setSearch]=useState(''),[products,setProducts]=useState<{id:string;name:string;sku:string}[]>([]),[productId,setProductId]=useState(''),[newQty,setNewQty]=useState('1'),[credit,setCredit]=useState('0'),[tender,setTender]=useState('0'),[quote,setQuote]=useState<Quote|null>(null),[body,setBody]=useState<Record<string,unknown>|null>(null),[error,setError]=useState(''),[readError,setReadError]=useState(''),[catalogError,setCatalogError]=useState(''),[busy,setBusy]=useState(false),[posting,setPosting]=useState(false),[loading,setLoading]=useState(true),[catalogLoading,setCatalogLoading]=useState(true),[message,setMessage]=useState(''),[revision,setRevision]=useState(0),[catalogRevision,setCatalogRevision]=useState(0);
+ const [batchChoices,setBatchChoices]=useState<Record<string,BatchChoice[]>>({}),[batchReady,setBatchReady]=useState<Record<string,boolean>>({});
  const live=useRef(true),flight=useRef(false),returnPath='/sales/'+saleId+'/exchange';
- const dirty=Boolean(reason||productId||quote||newQty!=='1'||credit!=='0'||tender!=='0'||Object.values(qty).some(value=>value!==''&&!/^0+(\.0+)?$/.test(value)));
+ const dirty=Boolean(Object.values(batchChoices).some(rows=>rows.length)||reason||productId||quote||newQty!=='1'||credit!=='0'||tender!=='0'||Object.values(qty).some(value=>value!==''&&!/^0+(\.0+)?$/.test(value)));
  useUnsavedChanges(dirty,busy||posting);
  useEffect(()=>{live.current=true;return()=>{live.current=false;};},[]);
  const refresh=()=>setRevision(value=>value+1);
@@ -26,9 +28,9 @@ function Editor({organizationId,saleId,shiftId}:{organizationId:string;saleId:st
  useEffect(()=>{let current=true;const timer=setTimeout(()=>{if(!current)return;setCatalogLoading(true);setCatalogError('');void api.request<typeof products>('/products?organizationId='+organizationId+'&limit=20&search='+encodeURIComponent(search)).then(result=>{if(current)setProducts(result.data??[]);}).catch(cause=>{if(current)setCatalogError(cause instanceof Error?cause.message:'Mahsulotlar yuklanmadi');}).finally(()=>{if(current)setCatalogLoading(false);});},250);return()=>{current=false;clearTimeout(timer);};},[search,organizationId,catalogRevision]);
  const invalidate=()=>{setQuote(null);setBody(null);setMessage('');};
  const validQuantities=()=>Boolean(sale)&&sale!.items.every(item=>/^\d+(\.\d{1,6})?$/.test(qty[item.id]||'0'));
- function command(){return {originalSaleId:saleId,shiftId,reason,items:sale!.items.filter(item=>/[1-9]/.test(qty[item.id]||'0')).map(item=>({saleItemId:item.id,quantity:qty[item.id],disposition:'sellable'})),replacement:{customerId:sale!.customerId,discountAmount:0,items:[{productId,quantity:newQty,discountAmount:0}]},creditAmount:credit};}
+ function command(){return {originalSaleId:saleId,shiftId,reason,items:sale!.items.filter(item=>/[1-9]/.test(qty[item.id]||'0')).map(item=>({saleItemId:item.id,quantity:qty[item.id],disposition:'sellable',...(batchChoices[item.id]?.length?{batchSelection:batchChoices[item.id].map(row=>({...row,quantity:row.quantity.trim().replace(/^\./,'0.').replace(/\.$/,'')}))}:{})})),replacement:{customerId:sale!.customerId,discountAmount:0,items:[{productId,quantity:newQty,discountAmount:0}]},creditAmount:credit};}
  async function preview(){
-  if(flight.current||posting||!sale||loading||catalogLoading||readError||catalogError)return;
+  if(flight.current||posting||!sale||loading||catalogLoading||readError||catalogError||sale.items.some(item=>item.batchTracking&&/[1-9]/.test(qty[item.id]??'0')&&!batchReady[item.id]))return;
   if(!validQuantities()){setError('Qaytarish miqdorini manfiy bo‘lmagan, ko‘pi bilan 6 kasrli son bilan kiriting. Noto‘g‘ri qator tashlab ketilmaydi.');return;}
   flight.current=true;setBusy(true);setError('');invalidate();
   try{const original=command(),result=await api.request<Quote>('/exchanges/preview',{method:'POST',body:JSON.stringify(original)});if(!result.data?.confirmationHash)throw new Error('Server almashtirish hisobini tasdiqlamadi');if(live.current){setQuote(result.data);setBody(original);}}
@@ -38,7 +40,7 @@ function Editor({organizationId,saleId,shiftId}:{organizationId:string;saleId:st
  function posted(_result?:unknown,original?:Record<string,unknown>){
   const {confirmationHash:ignored,cashTendered,...originalCommand}=original??{};void ignored;
   const matches=validQuantities()&&JSON.stringify(command())===JSON.stringify(originalCommand)&&tender===cashTendered;
-  if(matches){setQty({});setReason('');setProductId('');setNewQty('1');setCredit('0');setTender('0');setQuote(null);setBody(null);}
+  if(matches){setBatchChoices({});setBatchReady({});setQty({});setReason('');setProductId('');setNewQty('1');setCredit('0');setTender('0');setQuote(null);setBody(null);}
   setMessage(matches?'Almashtirish serverda saqlandi.':'Original almashtirish serverda saqlandi. Joriy mustaqil draft saqlanadi.');refresh();
  }
  return <div className="space-y-4"><h1>Tovar almashtirish</h1><Link href={'/sales/'+saleId}>Original savdoga qaytish</Link>
@@ -49,7 +51,7 @@ function Editor({organizationId,saleId,shiftId}:{organizationId:string;saleId:st
   <PendingActions prefix="/exchanges" returnPath={returnPath} revision={revision} onDone={()=>{setMessage('Saqlangan original amal serverda tasdiqlandi. Joriy draft o‘zgartirilmadi.');refresh();}}/>
   {!shiftId&&<p role="alert">Original filialda ochiq smena tanlang.</p>}
   {sale&&<><h2>Original chek: {sale.receiptNo}</h2><fieldset disabled={busy||posting} className="space-y-3">
-   {sale.items.map(item=><Input key={item.id} label={'Qaytarish miqdori: '+item.productName} value={qty[item.id]??'0'} onChange={event=>{invalidate();setQty(current=>({...current,[item.id]:event.target.value}));}}/>)}
+   {sale.items.map(item=><div key={item.id}><Input label={'Qaytarish miqdori: '+item.productName} value={qty[item.id]??'0'} onChange={event=>{invalidate();setQty(current=>({...current,[item.id]:event.target.value}));}}/>{item.batchTracking&&<BatchRestorePicker kind="sale" sourceId={saleId} productId={item.productId} label={item.productName+' almashtirish partiyalari'} value={batchChoices[item.id]??[]} onChange={rows=>{invalidate();setBatchChoices(previous=>({...previous,[item.id]:rows}))}} onReady={ready=>setBatchReady(previous=>previous[item.id]===ready?previous:{...previous,[item.id]:ready})}/>}</div>)}
    <Input label="Almashtirish sababi" value={reason} onChange={event=>{invalidate();setReason(event.target.value);}}/>
    <Input label="Yangi mahsulot qidirish" value={search} onChange={event=>setSearch(event.target.value)}/>
    <Select label="Almashtirishdagi yangi mahsulot" value={productId} placeholder="Mahsulot tanlang" options={[...(productId&&!products.some(product=>product.id===productId)?[{value:productId,label:'Tanlangan mahsulot · '+productId}]:[]),...products.map(product=>({value:product.id,label:product.name+' · '+product.sku}))]} onChange={event=>{invalidate();setProductId(event.target.value);}}/>

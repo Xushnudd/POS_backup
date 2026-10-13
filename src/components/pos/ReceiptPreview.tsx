@@ -150,7 +150,7 @@ export default function ReceiptPreview({
             {sale.items.map((item, idx) => (
               <div key={idx} className="flex flex-col text-[11px]">
                 <div className="flex justify-between font-medium text-gray-900">
-                  <span className="break-words min-w-0 flex-1">{item.productName}</span>
+                  <span className="break-words min-w-0 flex-1">{item.productName}{item.batchAllocations?.map(batch=><span key={batch.batchId} className="block text-[10px]">Partiya {batch.code}: {batch.quantity} {item.unit??''}; yaroqli {batch.expiresOn}</span>)}</span>
                   <span className="font-bold">{formatMoney(item.lineTotal)}</span>
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-600">

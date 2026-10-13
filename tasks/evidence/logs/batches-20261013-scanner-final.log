@@ -1,0 +1,5 @@
+{
+  "scanned": 1159,
+  "findings": [],
+  "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+}

@@ -586,3 +586,19 @@ Qo‘llash hali implementatsiya qilinmagan. Keyingi qabulda ko‘p filialdagi gl
 `offline-cash.policy` mavjud kritik amal bo‘lsa-da, brauzer binding validator, TOTP proof schema va SQL119 native check defisni rad etgan. Action nomini almashtirish eski original-key/hash/session identityni buzishi mumkin. Shu sabab action nomi saqlanadi; lowercase harf bilan boshlanadigan3–81belgili harf/raqam/underscore/nuqta/defis nomiga uch qatlam bir xil ruxsat beradi. Yo‘l, query, whitespace, newline va script sintaksisi rad. Bu nom validatsiyasi vakolat bermaydi: kritik registry, tirik sessiya, user/factor, original action/key/payload hash va bir martalik counter shartlari o‘zgarmaydi.
 
 SQL133 yangi native checkni avval NOT VALID yaratib, mavjud yozuvlarga VALIDATE qiladi, so‘ng eski checkni shu transactionda olib tashlaydi. Eski proof va approved operation yozuvlari o‘zgarmaydi. Migration appdan oldin qo‘llanadi; eski app qo‘shimcha ruxsat etilgan nomni hali tushunmaydi, ammo mavjud nomlar va yozuvlar mos. Down migration yoki proof tarixini o‘chirish rollback talabi emas. Qabul faqat izolatsiyalangan lokal bazada; production deploy qilinmagan.
+
+## ADR-083 — Manfiy qoldiqni butunlay taqiqlash (2026-10-13)
+
+Foydalanuvchi: “Manfiy qoldiqni hozircha butunlay taqiqlang; yoqish imkoniyatini keyinga qoldiring”. INV-01.07 uchun amaldagi qabul shu qarorga mos: default va explicit override bilan ham negative stock rad; organization flag true API/SQLda rad, UI yoqmaydi. Negative cost/provisional profit/correction feature implementatsiya qilingan deb hisoblanmaydi, u faqat keyingi alohida tasdiqlangan scope bo‘ladi. ADR-081 kech kelgan xarajat siyosati o‘z kuchida, negative stock yoqishga ruxsat emas.
+
+SQL139 oldingi true flaglarni audit yozuvi bilan false qiladi, balans/harakat/savdo/tannarxni o‘zgartirmaydi. Legacy negative qoldiqni yangi yoki chuqurroq negativega olib borish va boshqa branch/productga ko‘chirish rad. Nol tomonga tuzatish mumkin; mavjud vakolat, hujjat, stock-freeze, unit va journal talablari saqlanadi. Legacy noma’lum tannarxdan soxta foyda/correction chiqarilmaydi. Real deploy, haqiqiy mijoz upgrade va tashqi qabul bajarilmagan.
+
+## ADR-084 — Original partiya jurnali va expiry siyosati (2026-10-13)
+
+INV-02.06: nazorat unused SKUda owner/MFA bilan yoqiladi, disable yo‘q. Haqiqiy kirim kodi/sanalari immutable; organization-business expiry kuni inclusive. Sale/transfer-out yaroqli FEFO, muddati o‘tgan qoldiq savdoda bloklanadi. Return/transfer receipt/loss/reversal original issue/receiptga bog‘langan; qisman multi-batchda explicit entry quantities. Eski qoldiq taxminiy partiyalarga ajratilmaydi. Batch count aynan ma’lum partiyalar va cost snapshot bo‘yicha; umumiy StockCount tracked SKU uchun rad.
+
+Ogohlantirish ichki audit va expiry report, tashqi delivery yo‘q. Offline tracked cash lease fail-closed; online FEFO ishlaydi. Manual holds umumiy miqdor, lot reservation kafolati emas; final valid stock qayta tekshiriladi. Native triggerlar physical projection, source conservation, immutable ownership va read-only admissionni tekshiradi. 10000 candidate/export,500 count va100000 worker branch-batch caplar aniq xato bilan; real pilot profiling alohida. Batafsil `docs/operations/inventory-batches.md`.
+
+## ADR-085 — Kech kelgan xarajatning alohida zaxira qiymati farqi (2026-10-13)
+
+Foydalanuvchi PUR-01.05 uchun «Alohida farq jurnalini tasdiqlayman» deb javob berdi. Transfer/in-transit, qo‘lda tannarx o‘zgarishi yoki yo‘qotishlar sabab correctionning qolgan inventory va sold COGSdan tashqari qismi alohida «zaxira qiymati farqi» immutable jurnalida ko‘rsatiladi. Oldingi receipt/sale/return hujjatlari qayta yozilmaydi, mavjud cash expense qayta to‘lanmaydi. Bu biznes siyosati tasdig‘i; posting, report va reconciliation acceptance hali tugamagan. ADR-081 authoritative moving-average replay va ADR-083 negative stock taqiqi saqlanadi; noma’lum legacy tarix uchun soxta qiymat yaratilmaydi.

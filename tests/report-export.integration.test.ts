@@ -39,7 +39,7 @@ test('1001 selected report rows survive CSV/XLSX/native PDF document in backgrou
 })
 test('Every reviewed report uses the existing filtered CSV query for XLSX/print; arbitrary filters and cross-tenant resources cannot publish',async()=>{
  const f=await fixture(),foreign=await fixture()
- for(const report of Object.keys(REPORT_EXPORTS) as (keyof typeof REPORT_EXPORTS)[]){const artifact=await reportExport(f.ctx,{report,format:'xlsx',filters:{}});assert.ok(artifact.size>0,report);assert.ok(artifact.filename.endsWith('.xlsx'),report)}
+ for(const report of Object.keys(REPORT_EXPORTS) as (keyof typeof REPORT_EXPORTS)[]){const artifact=await reportExport(f.ctx,{report,format:'xlsx',filters:report==='inventory-batches'?{storeId:f.store.id}:{}});assert.ok(artifact.size>0,report);assert.ok(artifact.filename.endsWith('.xlsx'),report)}
  await assert.rejects(reportExport(f.ctx,{report:'reports-sales',format:'csv',filters:{storeId:foreign.store.id}}),{code:'NOT_FOUND'})
  await assert.rejects(reportExport(f.ctx,{report:'reports-sales',format:'csv',filters:{url:'http://evil.invalid'}}))
  const job=await enqueueJob(f.ctx,{operationId:randomUUID(),type:'report_export',report:{report:'reports-sales',format:'xlsx',filters:{}},reason:'Revoked source must not publish'}),claimed=(await claimJob())!;assert.equal(claimed.id,job.id)

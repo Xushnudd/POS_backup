@@ -70,3 +70,32 @@ export async function listReceiptCosts(context: TokenPayload, stockDocumentId: s
     return { rows: await tx.receiptCostPlan.findMany({ where, take: 20, skip: (page - 1) * 20, orderBy: [{ createdAt: 'desc' }, { id: 'asc' }] }), total: await tx.receiptCostPlan.count({ where }) }
   }, { isolationLevel: 'RepeatableRead' })
 }
+
+export const receiptCostSourcesSchema = z.object({
+  search: z.string().trim().max(200).default(''),
+  page: z.coerce.number().int().min(1).max(100_000).default(1),
+}).strict()
+/** Existing, unassigned capitalised expenses in precisely the receipt branch.
+ * Selection metadata is not a posting approval; prepare rechecks under locks. */
+export async function listReceiptCostSources(context: TokenPayload, stockDocumentId: string,
+  input: z.input<typeof receiptCostSourcesSchema>) {
+  financeManager(context)
+  const parsed = receiptCostSourcesSchema.parse(input)
+  return prisma.$transaction(async tx => {
+    await assertLiveContext(tx, context)
+    const receipt = await tx.stockDocument.findFirst({ where: { id: stockDocumentId, AND: tenantScope('StockDocument', context) },
+      select: { storeId: true, documentType: true, status: true, reversalOfId: true, reversal: { select: { id: true } }, purchaseReceipt: { select: { id: true } } } })
+    if (!receipt) throw new AccessError(404, 'NOT_FOUND')
+    if (receipt.documentType !== 'purchase' || receipt.status !== 'confirmed' || receipt.reversalOfId || receipt.reversal || !receipt.purchaseReceipt)
+      throw new AccessError(409, 'PURCHASE_RECEIPT_REQUIRED')
+    const where = { AND: tenantScope('FinancialDocument', context), storeId: receipt.storeId, kind: 'expense',
+      amount: { gt: 0 }, category: { treatment: 'capitalised' }, reversal: null, reversalOfId: null,
+      receiptCostPlans: { none: { status: 'prepared' } },
+      ...(parsed.search ? { OR: [{ reason: { contains: parsed.search, mode: 'insensitive' as const } },
+        ...(z.string().uuid().safeParse(parsed.search).success ? [{ id: parsed.search }] : [])] } : {}) }
+    const total = await tx.financialDocument.count({ where })
+    const rows = await tx.financialDocument.findMany({ where, take: 20, skip: (parsed.page - 1) * 20,
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }], select: { id: true, amount: true, reason: true, createdAt: true, category: { select: { name: true } } } })
+    return { rows: rows.map(row => ({ ...row, amount: row.amount.toFixed(2) })), total, page: parsed.page }
+  }, { isolationLevel: 'RepeatableRead' })
+}

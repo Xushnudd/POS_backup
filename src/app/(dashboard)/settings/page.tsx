@@ -104,8 +104,8 @@ export default function SettingsPage() {
         setOrgPhone(organization.phone || '');
         setOrgTin(organization.tin || '');
         setReceiptFooter(organization.receiptFooter || '');
-        setAllowNegativeStock(organization.allowNegativeStock || false);
-        setOrgBaseline(JSON.stringify([organization.name||'',organization.phone||'',organization.tin||'',organization.receiptFooter||'',Boolean(organization.allowNegativeStock)]));
+        setAllowNegativeStock(false);
+        setOrgBaseline(JSON.stringify([organization.name||'',organization.phone||'',organization.tin||'',organization.receiptFooter||'',false]));
         setOrgInitialized(organization.id);
       });
     }
@@ -330,15 +330,16 @@ export default function SettingsPage() {
                 <input
                   type="checkbox"
                   checked={allowNegativeStock}
-                  onChange={(e) => setAllowNegativeStock(e.target.checked)}
+                  disabled
+                  aria-label="Manfiy qoldiq taqiqlangan"
                   className="mt-0.5 rounded-sm text-blue-600 focus:ring-blue-500 cursor-pointer"
                 />
                 <div>
                   <span className="text-xs font-bold text-gray-800 block">
-                    Manfiy qoldiqqa ruxsat berish
+                    Manfiy qoldiq taqiqlangan
                   </span>
                   <span className="text-[11px] text-gray-500">
-                    Agar yoqilsa, omborda qoldiq yetarli bo&apos;lmaganda ham kassir savdoni yakunlay oladi
+                    Qoldiq yetmasa savdo rad etiladi. Manfiy qoldiqni yoqish imkoniyati keyinga qoldirilgan.
                   </span>
                 </div>
               </label>

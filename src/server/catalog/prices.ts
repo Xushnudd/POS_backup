@@ -8,6 +8,17 @@ import {amountSchema} from '../sales/service'
 import {nonnegativeQuantitySchema} from './service'
 export const priceBatchSchema=z.object({operationId:z.string().uuid(),field:z.enum(['salePrice','costPrice']),reason:z.string().trim().min(3).max(2000),preview:z.boolean().default(false),confirmationHash:z.string().regex(/^[a-f0-9]{64}$/).optional(),items:z.array(z.object({productId:z.string().uuid(),expected:nonnegativeQuantitySchema,value:nonnegativeQuantitySchema}).strict()).min(1).max(100)}).strict();
 export async function priceActor(tx:Pick<Prisma.TransactionClient,'$queryRaw'>,ctx:TokenPayload,source:string){await tx.$queryRaw`SELECT set_config('pos.price_actor',${ctx.userId},true),set_config('pos.price_source',${source},true)`;}
+/** Bind future manual cost approvals to actual native events from this exact
+ * transaction. Existing history is never joined by timestamps or backfilled. */
+type CostReferenceReader={
+ $queryRaw:Prisma.TransactionClient['$queryRaw'];
+ inventoryValuationEvent:{findMany(args:{where:{organizationId:string;productId:{in:string[]};transactionId:bigint;kind:string};select:{id:true;productId:true;beforeUnitCost:true;afterUnitCost:true};orderBy:{productId:'asc'}}):Promise<{id:string;productId:string;beforeUnitCost:Prisma.Decimal|null;afterUnitCost:Prisma.Decimal|null}[]>};
+}
+export async function costChangeReferences(tx:CostReferenceReader,ctx:TokenPayload,productIds:string[]){
+ const [current]=await tx.$queryRaw<{id:bigint}[]>`SELECT txid_current() AS id`
+ const rows=await tx.inventoryValuationEvent.findMany({where:{organizationId:ctx.organizationId,productId:{in:productIds},transactionId:current.id,kind:'cost_change'},select:{id:true,productId:true,beforeUnitCost:true,afterUnitCost:true},orderBy:{productId:'asc'}})
+ return rows.map(row=>({...row,beforeUnitCost:row.beforeUnitCost?.toFixed(6)??null,afterUnitCost:row.afterUnitCost?.toFixed(6)??null}))
+}
 export async function changePrices(ctx:TokenPayload,input:z.infer<typeof priceBatchSchema>){
  if(!['owner','admin'].includes(ctx.role))throw new AccessError(403,'FORBIDDEN');
  if(input.field==='costPrice'&&ctx.role!=='owner')throw new AccessError(403,'COST_CHANGE_FORBIDDEN');
@@ -28,7 +39,7 @@ export async function changePrices(ctx:TokenPayload,input:z.infer<typeof priceBa
   if(input.confirmationHash!==hash)throw new AccessError(409,'PRICE_PREVIEW_REQUIRED','Oldindan ko‘rilgan narxlarni qayta tasdiqlang');
   await priceActor(tx,ctx,'catalog.bulk');
   for(const row of rows)await tx.product.update({where:{id:row.productId},data:{[input.field]:new Prisma.Decimal(row.value)}});
-  await audit(tx,ctx,'PriceBatch',input.operationId,'prices_changed',{field:input.field,count:rows.length,reason:input.reason,confirmationHash:hash,approvedBy:ctx.userId,approvedRole:ctx.role,items:rows});
+  await audit(tx,ctx,'PriceBatch',input.operationId,'prices_changed',{field:input.field,count:rows.length,reason:input.reason,confirmationHash:hash,approvedBy:ctx.userId,approvedRole:ctx.role,items:rows,...(input.field==='costPrice'?{valuationReferences:await costChangeReferences(tx,ctx,rows.map(row=>row.productId))}:{})});
   return {items:rows,confirmationHash:hash};
  };
  return input.preview?prisma.$transaction(execute,{isolationLevel:'RepeatableRead'}):runOperation(ctx,'catalog.prices',input.operationId,input,execute);

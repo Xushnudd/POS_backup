@@ -11,6 +11,9 @@ export const DIRECT_MODELS = [
   "Supplier",
   "StockDocument",
   "InventoryMovement",
+  "InventoryBatch",
+  "InventoryBatchEntry",
+  "InventoryBatchDisposition",
   "InventoryValuationSequence",
   "InventoryValuationEvent",
   "StockTransfer",
@@ -124,4 +127,4 @@ export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = "bcfae89ee326b6206262d342befbc819755b4d9623e08c044d7bc1a65273c61b"
+export const REVIEWED_SCHEMA_SHA256 = "1cae36f46225c546156618e5cfc09409754707610b615851cb5732b360ef826b"

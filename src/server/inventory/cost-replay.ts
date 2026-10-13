@@ -17,13 +17,13 @@ export function replayMovingAverage(events:readonly CostReplayEvent[]){
  const seen=new Set<string>(),issues=new Map<string,{quantity:Prisma.Decimal;returned:Prisma.Decimal;unitCost:Prisma.Decimal}>()
  const rows=[]
  for(const event of events){
-  if(!/^[1-9]\d*$/.test(event.sequence)||BigInt(event.sequence)<=previous||!event.id||seen.has(event.id))reject()
+  if(!/^[1-9]\d{0,18}$/.test(event.sequence)||BigInt(event.sequence)>BigInt('9223372036854775807')||BigInt(event.sequence)<=previous||!event.id||seen.has(event.id))reject()
   previous=BigInt(event.sequence);seen.add(event.id)
-  if(!/^(?:0|[1-9]\d*)(?:\.\d{1,6})?$/.test(event.quantity))reject()
+  if(!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(event.quantity))reject()
   const amount=new Exact(event.quantity);if(amount.lte(0))reject()
   let entryValue=new Exact(0)
   if(event.kind==='receipt'){
-   if(!/^(?:0|[1-9]\d*)(?:\.\d{1,6})?$/.test(event.unitCost)||!/^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/.test(event.additionalValue??'0'))reject()
+   if(!/^(?:0|[1-9]\d{0,13})(?:\.\d{1,6})?$/.test(event.unitCost)||!/^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.test(event.additionalValue??'0'))reject()
    entryValue=amount.mul(event.unitCost).add(event.additionalValue??'0');receipts=receipts.add(entryValue)
    const nextQuantity=quantity.add(amount),unrounded=value.add(entryValue)
    cost=unrounded.div(nextQuantity).toDecimalPlaces(6)

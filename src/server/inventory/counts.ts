@@ -38,6 +38,7 @@ export async function startCount(context:TokenPayload,input:z.infer<typeof start
   // order before FK inserts, otherwise a count can hold stock while waiting
   // for checkout’s Product row and deadlock the two operations.
   await tx.$queryRaw`SELECT id FROM "Product" WHERE "organizationId"=${context.organizationId} AND id IN (${Prisma.join(products.map(p=>p.id))}) ORDER BY id FOR UPDATE`
+  if(await tx.product.count({where:{id:{in:products.map(p=>p.id)},batchTracking:true}}))throw new AccessError(409,'BATCH_COUNT_REQUIRED','Partiyali mahsulotni Partiyalar va yaroqlilik sahifasida partiya bo‘yicha sanang; umumiy miqdordan partiya tarkibi taxmin qilinmaydi')
   // Short transaction locks only selected SKU balances; no DB locks span UI time.
   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended('stock:' || ${store.id} || ':' || id,0))::text FROM (SELECT unnest(ARRAY[${Prisma.join(products.map(p=>p.id))}]::text[]) AS id ORDER BY id) selected`
   const uncertain=await tx.$queryRaw<{id:string}[]>`SELECT i.id FROM "ReservationItem" i JOIN "StockReservation" r ON r.id=i."reservationId" WHERE i."organizationId"=${context.organizationId} AND i."storeId"=${store.id} AND i."productId" IN (${Prisma.join(products.map(p=>p.id))}) AND r.kind='cash_ticket' AND r.status='active' AND i."remainingQuantity">0 LIMIT 1`

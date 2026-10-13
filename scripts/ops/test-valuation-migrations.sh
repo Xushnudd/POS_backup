@@ -52,14 +52,30 @@ query "$valuation_clone" "UPDATE \"Product\" SET \"costPrice\"=5 WHERE id='valua
 [[ "$(query "$valuation_clone" 'SELECT "legacyMovementCount"::text||'"'"':'"'"'||"baselineQuantity"::text||'"'"':'"'"'||"baselineUnitCost"::text||'"'"':'"'"'||"lastSequence"::text FROM "InventoryValuationSequence"')" == '1:4.000000:3.000000:1' ]]
 if query "$valuation_clone" 'UPDATE "InventoryValuationSequence" SET "lastSequence"="lastSequence"+1' > "$valuation_workdir/forged-sequence.log" 2>&1;then exit 1;fi
 rg -q 'requires original posting capture' "$valuation_workdir/forged-sequence.log"
+# Real native batch receipt in the upgraded isolated clone, then full dump/restore.
+docker exec -i pos-plan-test-db psql -X -U pos_test -d "$valuation_clone" -v ON_ERROR_STOP=1 <<'SQL'
+BEGIN;
+INSERT INTO "Product"(id,"organizationId",name,sku,barcode,unit,"salePrice","costPrice","updatedAt","batchTracking") VALUES('batch-restore-product','valuation-legacy-org','Synthetic batch receipt','batch-restore-sku','batch-restore-barcode','dona',10,3,NOW(),false);
+UPDATE "Product" SET "batchTracking"=true WHERE id='batch-restore-product';
+INSERT INTO "StockDocument"(id,"organizationId","storeId","documentType","documentNo","createdBy") VALUES('batch-restore-doc','valuation-legacy-org','valuation-legacy-store','purchase','BATCH-RESTORE','valuation-legacy-user');
+INSERT INTO "StockDocumentItem"(id,"stockDocumentId","productId",quantity,"unitCost","batchInput") VALUES('batch-restore-item','batch-restore-doc','batch-restore-product',1,3,jsonb_build_object('code','RESTORE-LOT','receivedOn',to_char(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tashkent','YYYY-MM-DD'),'expiresOn',to_char((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Tashkent')+interval '30 days','YYYY-MM-DD')));
+INSERT INTO "InventoryBalance"("storeId","productId",quantity,"updatedAt") VALUES('valuation-legacy-store','batch-restore-product',1,NOW());
+INSERT INTO "InventoryMovement"(id,"organizationId","storeId","productId","movementType","quantityDelta","unitCost","sourceType","sourceId","createdBy") VALUES('batch-restore-movement','valuation-legacy-org','valuation-legacy-store','batch-restore-product','stock_document',1,3,'stock_document','batch-restore-doc','valuation-legacy-user');
+INSERT INTO "InventoryBatch"(id,"organizationId","productId",code,"receivedOn","expiresOn","originItemId","createdBy") SELECT 'batch-restore-batch','valuation-legacy-org','batch-restore-product','RESTORE-LOT',"batchInput"->>'receivedOn',"batchInput"->>'expiresOn',id,'valuation-legacy-user' FROM "StockDocumentItem" WHERE id='batch-restore-item';
+INSERT INTO "InventoryBatchEntry"(id,"organizationId","batchId","storeId","movementId","quantityDelta") VALUES('batch-restore-entry','valuation-legacy-org','batch-restore-batch','valuation-legacy-store','batch-restore-movement',1);
+UPDATE "StockDocument" SET status='confirmed',"confirmedAt"=NOW(),"confirmedBy"='valuation-legacy-user' WHERE id='batch-restore-doc';
+COMMIT;
+SQL
+valuation_batch_hash=$(query "$valuation_clone" 'SELECT md5(row_to_json(b)::text||row_to_json(e)::text) FROM "InventoryBatch" b JOIN "InventoryBatchEntry" e ON e."batchId"=b.id WHERE b.id='"'"'batch-restore-batch'"'"'')
 valuation_event_hash=$(query "$valuation_clone" 'SELECT md5(row_to_json(e)::text) FROM "InventoryValuationEvent" e')
 docker exec pos-plan-test-db pg_dump -U pos_test -d "$valuation_clone" -Fc > "$valuation_workdir/valuation.dump"
 create_database "$valuation_restore"
 docker exec -i pos-plan-test-db pg_restore -U pos_test -d "$valuation_restore" --exit-on-error --single-transaction --no-owner --no-acl < "$valuation_workdir/valuation.dump"
 [[ "$(query "$valuation_restore" 'SELECT md5(row_to_json(e)::text) FROM "InventoryValuationEvent" e')" == "$valuation_event_hash" ]]
 [[ "$(query "$valuation_restore" "SELECT md5(row_to_json(m)::text) FROM \"InventoryMovement\" m WHERE id='valuation-legacy-movement'")" == "$valuation_movement_hash" ]]
+[[ "$(query "$valuation_restore" 'SELECT md5(row_to_json(b)::text||row_to_json(e)::text) FROM "InventoryBatch" b JOIN "InventoryBatchEntry" e ON e."batchId"=b.id WHERE b.id='"'"'batch-restore-batch'"'"'')" == "$valuation_batch_hash" ]]
 create_database "$valuation_fresh"
 apply "$valuation_fresh"
 valuation_expected=$(rg --files prisma/migrations | rg '/migration.sql$' | wc -l)
 [[ "$(query "$valuation_fresh" 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL')" == "$valuation_expected" ]]
-printf 'PASS: %s fresh migrations; synthetic133 dump upgrade/repeat; no legacy order backfill; proven legacy boundary; native forge rejection; full valuation dump/restore unchanged\n' "$valuation_expected"
+printf 'PASS: %s fresh migrations; synthetic133 dump upgrade/repeat; no legacy order backfill; proven legacy boundary; native forge rejection; full valuation and batch dump/restore unchanged\n' "$valuation_expected"

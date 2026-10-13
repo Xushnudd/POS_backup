@@ -14,7 +14,7 @@ const createOrganizationSchema = z.object({
   phone: z.string().min(9),
   currencyCode: z.string().default('UZS'),
   timezone: z.string().default('Asia/Tashkent'),
-  allowNegativeStock: z.boolean().default(false),
+  allowNegativeStock: z.literal(false).default(false),
   receiptFooter: z.string().optional(),
 })
 

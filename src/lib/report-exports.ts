@@ -1,5 +1,6 @@
 // Shared user-facing report selection and reviewed filter keys.
 export const REPORT_EXPORTS = {
+ "inventory-batches": {label:"Partiyalar va yaroqlilik",filters:["storeId","productId","state","search"]},
   "reports-sales": {
     "label": "Savdolar va qaytarishlar",
     "filters": [

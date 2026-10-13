@@ -29,3 +29,9 @@ test('fully sold receipt correction goes to COGS and missing or nonreceipt sourc
  const plan=planReceiptCostCorrection(events,'r','0.10');assert.equal(plan.inventoryCorrection,'0');assert.equal(plan.cogsCorrection,'0.1');assert.equal(plan.roundingCorrection,'0')
  for(const [id,value] of [['absent','1'],['s','1'],['r','0'],['r','1.001']])assert.throws(()=>planReceiptCostCorrection(events,id,value))
 })
+test('replay bounds source decimals and native bigint order without rounding excessive precision',()=>{
+ const receipt:CostReplayEvent={sequence:'1',id:'r',kind:'receipt',quantity:'1',unitCost:'1'}
+ for(const change of [{sequence:'9223372036854775808'},{quantity:'100000000000000'},{quantity:'0.0000001'},{unitCost:'100000000000000'},{unitCost:'1.0000001'},{additionalValue:'1000000000000'}])assert.throws(()=>replayMovingAverage([{...receipt,...change}]))
+ assert.doesNotThrow(()=>replayMovingAverage([{...receipt,sequence:'9223372036854775807',quantity:'99999999999999.999999',unitCost:'99999999999999.999999'}]))
+ assert.throws(()=>planReceiptCostCorrection([{...receipt,additionalValue:'999999999999.99'}],'r','0.01'))
+})
