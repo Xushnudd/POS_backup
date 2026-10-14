@@ -1,4 +1,5 @@
 import {attachSaleBatches} from '@/server/inventory/batches'
+import {attachGiftFunding} from '@/server/loyalty/gift-presentation'
 import { audit,assertLiveContext } from '@/server/operations'
 import { prisma } from '@/lib/prisma'
 import { AccessError, tenantScope } from '@/server/auth/policy'
@@ -52,7 +53,7 @@ async function handleGET(
         shift: true,
       },
     })
-    return original?attachSaleBatches(tx,payload,original):null},{isolationLevel:'RepeatableRead'})
+    return original?attachGiftFunding(tx,await attachSaleBatches(tx,payload,original)):null},{isolationLevel:'RepeatableRead'})
 
     if (!sale) {
       return NextResponse.json(

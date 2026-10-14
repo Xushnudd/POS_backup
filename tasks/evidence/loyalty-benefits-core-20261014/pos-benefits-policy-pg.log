@@ -1,0 +1,11 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Administrator policy is explicitly configured, versioned, replay-safe and native immutable/proof protected (432.868545ms)
+✔ Native JSON policy validator agrees with strict rules and rejects malformed money, booleans, shape and dates (7.518934ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 737.575614

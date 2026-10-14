@@ -6,7 +6,7 @@ const url=new URL(process.env.DATABASE_URL??'');if(url.hostname!=='127.0.0.1'||u
 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
 test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect()})
 test('Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked',async({page})=>{
- test.setTimeout(120000)
+ test.setTimeout(180000)
  page.on('dialog',d=>d.type()==='beforeunload'?d.accept():d.dismiss())
  const headers={Origin:'https://localhost:3100'},password='test-only-password'
  expect((await page.request.post('/api/auth/register',{headers,data:{phone:'serial-browser-'+randomUUID(),password,fullName:'Serial owner',organizationName:'Actual serial business'}})).ok()).toBe(true)
@@ -51,5 +51,11 @@ test('Owner serial policy MFA and original lost ACK recovery; real unit warranty
  await expect(page.getByText('Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.',{exact:true})).toHaveCount(0)
  expect(new Set(completionKeys).size).toBe(1);expect(await db.serialEvent.count({where:{serialId:serial.id,kind:'sale'}})).toBe(2)
  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toFixed()).toBe('0')
+
+ const paged=await post('/api/purchase-orders',{storeId:store.id,supplierId:supplier.id,referenceNo:randomUUID(),reason:'Source-backed serial paging acceptance',items:[{productId:product.id,quantity:'43',unitCost:'2'}]});
+ await post('/api/purchase-orders/'+paged.id+'/receive',{referenceNo:randomUUID(),reason:'Actual forty-three original unit receipt',items:[{orderItemId:paged.items[0].id,quantity:'43',serialInput:Array.from({length:43},(_,i)=>'PAGE-'+String(i).padStart(3,'0'))}]});
+ await page.goto('/inventory/serials?search=PAGE-&sort=code_desc&page=3');await expect(page.locator('tbody tr')).toHaveCount(3);await expect(page.locator('tbody tr').first()).toContainText('PAGE-002');await page.reload();await expect(page.locator('tbody tr')).toHaveCount(3);
+ await page.getByLabel('Seriya raqamini qidirish',{exact:true}).fill('PAGE-042');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);
+ await page.getByLabel('Serial holati',{exact:true}).selectOption('sold');await expect(page.getByText('Tanlangan filtrda serial yo‘q.',{exact:true})).toBeVisible();await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);
 
 })

@@ -1,4 +1,5 @@
 import {serialIdsSchema} from '../inventory/serials'
+import {attachGiftFunding} from '../loyalty/gift-presentation'
 import {attachSaleBatches} from '../inventory/batches'
 import {resolveConversion,assertCurrentConversion} from '../catalog/conversions'
 import type {ConversionSnapshot} from '../catalog/conversion-math'
@@ -111,7 +112,7 @@ export async function createDraftTx(tx:Prisma.TransactionClient,context:TokenPay
 export async function completeSale(context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string) {
   return runOperation(context,'sale.complete',key,{saleId,payments:input.payments,...(input.serialSelections?{serialSelections:input.serialSelections}:{}),...(input.reservationId?{reservationId:input.reservationId}:{}),...(input.creditDueAt?{creditDueAt:input.creditDueAt}:{}),...(input.cashTendered!==undefined?{cashTendered:input.cashTendered}:{})},tx=>completeSaleTx(tx,context,saleId,input,key))
 }
-export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string,allowedOfflineLeaseId?:string,ownerReviewedOffline=false) {
+export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPayload,saleId:string,input:z.infer<typeof completeSchema>,key:string,allowedOfflineLeaseId?:string,ownerReviewedOffline=false,prepaidGift?:{id:string;amount:string;reason:string}) {
     await tx.$queryRaw`SELECT id FROM "Sale" WHERE id=${saleId} FOR UPDATE`
     const sale=await tx.sale.findFirst({where:{id:saleId,AND:tenantScope('Sale',context)},include:{items:true,organization:true}})
     if (!sale) throw new AccessError(404,'NOT_FOUND')
@@ -135,7 +136,18 @@ export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPa
       const customer=await tx.customer.findFirst({where:{id:sale.customerId,organizationId:context.organizationId,isActive:true}})
       if (!customer) throw new AccessError(404,'CUSTOMER_NOT_FOUND')
       const debt=await tx.debtEntry.aggregate({where:{customerId:customer.id,organizationId:context.organizationId},_sum:{amount:true}})
-      if (decimal(debt._sum.amount??0).add(credit).gt(customer.creditLimit)) throw new AccessError(409,'CREDIT_LIMIT','Nasiya limiti oshdi')
+      let unfundedCredit=credit;
+      if(prepaidGift){
+        const value=decimal(positiveAmountSchema.parse(prepaidGift.amount));
+        if(ownerReviewedOffline||allowedOfflineLeaseId||value.gt(credit))throw new AccessError(409,'GIFT_SOURCE_INVALID');
+        await tx.$queryRaw`SELECT a.id FROM "CustomerAdvance" a JOIN "GiftCertificate" g ON g."advanceId"=a.id WHERE g.id=${prepaidGift.id} AND g."organizationId"=${context.organizationId} AND a."customerId"=${customer.id} FOR UPDATE OF a`;
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'loyalty-policy:'+context.organizationId},0))::text`;
+        const [funding]=await tx.$queryRaw<{advanceId:string;available:Prisma.Decimal}[]>`SELECT g."advanceId",a.available FROM "GiftCertificate" g JOIN "CustomerAdvanceBalance" a ON a.id=g."advanceId" JOIN "Organization" o ON o.id=g."organizationId" WHERE g.id=${prepaidGift.id} AND g."organizationId"=${context.organizationId} AND a."customerId"=${customer.id} AND o."currencyCode"='UZS' AND (g."expiresAt" IS NULL OR g."expiresAt">clock_timestamp()) AND (SELECT configuration#>'{gifts,enabled}' FROM "LoyaltyPolicyVersion" WHERE "organizationId"=${context.organizationId} ORDER BY revision DESC LIMIT 1)='true'::jsonb`;
+        if(!funding||value.gt(funding.available))throw new AccessError(409,'GIFT_UNAVAILABLE');
+        await tx.giftCheckout.create({data:{organizationId:context.organizationId,giftId:prepaidGift.id,saleId:sale.id,amount:value,createdBy:context.userId,sessionId:context.sessionId}});
+        unfundedCredit=credit.sub(value);
+      }
+      if (unfundedCredit.gt(0)&&decimal(debt._sum.amount??0).add(unfundedCredit).gt(customer.creditLimit)) throw new AccessError(409,'CREDIT_LIMIT','Nasiya limiti oshdi')
       await tx.debtEntry.create({data:{organizationId:context.organizationId,customerId:customer.id,sourceType:'sale',sourceId:sale.id,saleId:sale.id,amount:credit,actorId:context.userId,dueAt:input.creditDueAt?new Date(input.creditDueAt):undefined}})
     }
     const reservedSources=input.reservationId?await consumeStock(tx,context,input.reservationId,sale,key,ownerReviewedOffline):undefined
@@ -159,6 +171,14 @@ export async function completeSaleTx(tx:Prisma.TransactionClient,context:TokenPa
     }
     for (const p of input.payments) await tx.payment.create({data:{sourceType:'manual',organizationId:context.organizationId,storeId:sale.storeId,shiftId:sale.shiftId,saleId:sale.id,customerId:sale.customerId,paymentType:p.paymentType,direction:'in',amount:money(p.amount),referenceNo:p.referenceNo,receivedBy:context.userId,status:'recorded'}})
     const updated=await tx.sale.update({where:{id:sale.id},data:{status:'completed',completedAt:new Date(),cashTendered:tender,cashChange,...authorization},include:{items:true,payments:true}})
+    if(prepaidGift){
+      if(!sale.customerId)throw new AccessError(400,'CUSTOMER_REQUIRED');
+      const gift=await tx.giftCertificate.findFirst({where:{id:prepaidGift.id,organizationId:context.organizationId},select:{advanceId:true}});
+      if(!gift)throw new AccessError(409,'GIFT_UNAVAILABLE');
+      const {allocateCheckoutGiftTx}=await import('../customers/advances');
+      const allocation=await allocateCheckoutGiftTx(tx,context,sale.customerId,{operationId:key,advanceId:gift.advanceId,targetKey:'sale:'+sale.id,amount:prepaidGift.amount,reason:prepaidGift.reason});
+      await audit(tx,context,'GiftCertificate',prepaidGift.id,'gift_checkout',{allocationId:allocation.id,saleId:sale.id,amount:allocation.amount,customerConsent:true,reason:prepaidGift.reason});
+    }
     await audit(tx,context,'Sale',sale.id,'completed',{totalAmount:sale.totalAmount,payments:input.payments,cashTendered:tender,cashChange})
-    return attachSaleBatches(tx,context,updated)
+    return attachGiftFunding(tx,await attachSaleBatches(tx,context,updated))
 }

@@ -2,6 +2,8 @@
 
 import SerialPicker from '@/components/inventory/SerialPicker';
 import SalePoints from '@/components/customers/SalePoints';
+import SaleGift from '@/components/customers/SaleGift';
+import SaleBenefits from '@/components/customers/SaleBenefits';
 import BatchRestorePicker,{type BatchChoice} from '@/components/inventory/BatchRestorePicker';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import {confirmPageNavigation} from '@/lib/page-navigation';
@@ -288,7 +290,9 @@ export default function SaleDetailPage() {
         </table>
       </Card>
 
+      <SaleBenefits sale={sale} onChanged={setSale}/>
       <SalePoints sale={sale} onChanged={setSale}/>
+      <SaleGift sale={sale} onChanged={setSale}/>
       <ReturnHistory key={sale.id} saleId={sale.id} timezone={organization?.timezone??'Asia/Tashkent'} version={returnVersion}/>
       {role !== 'cashier' && <ExchangeHistory saleId={sale.id}/>}
       <ReceiptPreview

@@ -1,3 +1,4 @@
+import {z} from 'zod'
 import {randomUUID} from 'node:crypto'
 import {Prisma} from '@prisma/client'
 import {prisma} from '@/lib/prisma'
@@ -47,9 +48,11 @@ export async function resolveIncident(context:TokenPayload,id:string,input:{oper
   return result
  })
 }
-export async function incidentList(context:TokenPayload,page:number,state:string,limit=20){
+export async function incidentList(context:TokenPayload,page:number,state:string,limit=20,options:{sort?:'newest'|'oldest';search?:string}={}){
+ const {sort,search}=z.object({sort:z.enum(['newest','oldest']).default('newest'),search:z.string().trim().max(200).default('')}).strict().parse(options);
+ if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(limit)||limit<1||limit>200||(page-1)*limit>2147483647||!['open','resolved'].includes(state))throw new AccessError(400,'INVALID_PAGINATION');
  const scope=incidentScope(context)
- return prisma.$transaction(async tx=>{await assertLiveContext(tx,context);const where={...scope,state};return {rows:await tx.incident.findMany({where,orderBy:[{lastSeenAt:'desc'},{id:'asc'}],skip:(page-1)*limit,take:limit}),total:await tx.incident.count({where})}}, {isolationLevel:'RepeatableRead'})
+ return prisma.$transaction(async tx=>{await assertLiveContext(tx,context);const where={...scope,state,...(search?{OR:[{entityKey:{contains:search}},{kind:{contains:search,mode:'insensitive' as const}}]}:{})};return {rows:await tx.incident.findMany({where,orderBy:[{lastSeenAt:sort==='oldest'?'asc':'desc'},{id:'asc'}],skip:(page-1)*limit,take:limit}),total:await tx.incident.count({where})}}, {isolationLevel:'RepeatableRead'})
 }
 export async function setThreshold(context:TokenPayload,input:{storeId:string;productId:string;minimum:string|number;maximum:string|number;operationId:string}){
  incidentScope(context)

@@ -146,3 +146,21 @@ test('supplier goods return targets original expired lot and receipt reversal re
  assert.equal((await queryBatches(f.context,{storeId:f.store.id})).total,1)
  assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toFixed(),'3')
 })
+
+test('Batch list global expiry/code order and bounded pages retain FEFO source journals and filtered export',async()=>{
+ const f=await fixture();await enableBatchTracking(f.context,{operationId:randomUUID(),productId:f.product.id,expiryAlertDays:30,reason:'Actual unused SKU list traceability'});
+ const today=inventoryBusinessDate(new Date(),'Asia/Tashkent'),day=(n:number)=>{const d=new Date(today+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+ for(let i=0;i<43;i++){
+  const doc=await prisma.stockDocument.create({data:{organizationId:f.org.id,storeId:f.store.id,documentType:'purchase',documentNo:randomUUID(),createdBy:f.user.id,items:{create:{productId:f.product.id,quantity:'1',unitCost:'3',batchInput:{code:'LIST-'+String(i).padStart(3,'0'),receivedOn:today,expiresOn:day(60+i)}}}}});await confirmStockDocument(f.context,doc.id);
+ }
+ const codes:string[]=[];
+ for(let page=1;page<=3;page++){const result=await queryBatches(f.context,{storeId:f.store.id,page,limit:20,sort:'expiry_desc',search:'LIST-'});assert.equal(result.total,43);assert.equal(result.limit,20);codes.push(...result.rows.map(row=>row.code));}
+ assert.deepEqual(codes,Array.from({length:43},(_,i)=>'LIST-'+String(42-i).padStart(3,'0')));
+ assert.equal((await queryBatches(f.context,{storeId:f.store.id,search:'NO-SUCH-BATCH'})).total,0);
+ assert.equal((await queryBatches(f.context,{storeId:f.store.id})).limit,50);
+ const exported=await queryInventoryBatches(f.context,new NextRequest('http://localhost:3000/api/inventory/batches?'+new URLSearchParams({storeId:f.store.id,search:'LIST-',sort:'expiry_desc',format:'csv',page:'3'})));
+ const text=(await exported.json()).data.content as string;assert.equal(text.split('\r\n').filter(Boolean).length,44);assert.ok(text.indexOf('LIST-042')<text.indexOf('LIST-000'));
+ assert.equal(await prisma.inventoryBatchEntry.count({where:{organizationId:f.org.id}}),43);
+ await assert.rejects(queryBatches(f.context,{storeId:f.store.id,limit:201}));
+ await assert.rejects(queryBatches(f.context,{storeId:f.store.id,sort:'costPrice' as 'code'}));
+});

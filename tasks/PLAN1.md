@@ -2057,7 +2057,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-02.03** — P2: bonus ballari, chegirma kartasi, promo-kod va sovg‘a sertifikati.
+- [x] **CRM-02.03** — P2: bonus ballari, chegirma kartasi, promo-kod va sovg‘a sertifikati.
 
   **Texnologiya:** Prisma loyalty/gift ledgers, TypeScript rule engine.
 
@@ -2070,6 +2070,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Bonus/card/promo/certificate rules va liability yozuvlari ishlaydi; redemption duplicate/expiry/limit rad.
+
+  **Qabul:** `done`, 2026-10-15. [Local core qabul dalili](evidence/loyalty-marketing-20261015.json): karta/promo/gift/points, transactional usage/expiry/liability, native source/restore va owner/cashier UI. Vendor/pilot qabul alohida.
 
   **Dalil:** `CRM-02.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 

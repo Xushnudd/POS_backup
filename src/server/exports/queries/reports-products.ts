@@ -1,5 +1,5 @@
 import {costPostingsSql} from '@/server/purchases/cost-postings-query'
-import {paging} from "@/server/catalog/queries"
+import {parseListQuery,reportListSorts} from '@/lib/list-query'
 import {csv,numeric,EXPORT_CAP} from "@/server/exports/csv"
 import {consumeLimit} from "@/server/auth/rate-limit"
 import {NextResponse} from "next/server"
@@ -15,7 +15,9 @@ export async function queryReportsProducts(context:TokenPayload,request:NextRequ
  const params=new URL(request.url).searchParams
  const filter=await prisma.$transaction(tx=>financialFilter(tx,context,params)),range=filter.range
  const org={timezone:filter.meta.timezone}
- const {page,limit,skip}=paging(params,50)
+ let parsed;try{parsed=parseListQuery(params,reportListSorts,'default',50)}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+ const {page,limit,skip,sort,search}=parsed
+ const order=sort==='amount_asc'?Prisma.sql`t.revenue ASC`:Prisma.sql`t.revenue DESC`
  const store=params.get('storeId'),category=params.get('categoryId')
  const stores=context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND s."storeId" IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`
  const storeFilter=store?Prisma.sql`AND s."storeId"=${store}`:Prisma.empty
@@ -36,7 +38,7 @@ export async function queryReportsProducts(context:TokenPayload,request:NextRequ
   SELECT product->>'productId',0::numeric,0::numeric,(entry->>'amount')::numeric,0::numeric
   FROM cost_postings a CROSS JOIN LATERAL jsonb_array_elements(a.snapshot->'products') product CROSS JOIN LATERAL jsonb_array_elements(product->'cogsEntries') entry JOIN "Product" p ON p.id=product->>'productId'
   WHERE ${correctionScope} ${categoryFilter}
- ), totals AS (SELECT "productId",sum(quantity) AS quantity,sum(revenue) AS revenue,sum(cost) AS cost,sum(tax) AS tax FROM movements GROUP BY "productId")`
+ ) , totals_source AS (SELECT "productId",sum(quantity) AS quantity,sum(revenue) AS revenue,sum(cost) AS cost,sum(tax) AS tax FROM movements GROUP BY "productId"), totals AS (SELECT source.* FROM totals_source source JOIN "Product" catalog ON catalog.id=source."productId" ${search?Prisma.sql`WHERE (catalog.name ILIKE ${'%'+search+'%'} OR catalog.sku ILIKE ${'%'+search+'%'})`:Prisma.empty})`
  type Summary={quantity:Prisma.Decimal;revenue:Prisma.Decimal;cost:Prisma.Decimal;tax:Prisma.Decimal}
  const totalsSql=Prisma.sql`${cte} SELECT COALESCE(SUM(quantity),0) AS quantity,COALESCE(SUM(revenue),0) AS revenue,COALESCE(SUM(cost),0) AS cost,COALESCE(SUM(tax),0) AS tax FROM totals`
  type Stat={id:string;name:string;sku:string;quantitySold:Prisma.Decimal;revenue:Prisma.Decimal;cost:Prisma.Decimal;tax:Prisma.Decimal}
@@ -46,18 +48,18 @@ export async function queryReportsProducts(context:TokenPayload,request:NextRequ
   const data=await prisma.$transaction(async tx=>{
    const count=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`${cte} SELECT count(*) FROM totals`)
    if(Number(count[0].count)>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; davrni toraytiring')
-   const rows=await tx.$queryRaw<Stat[]>(Prisma.sql`${cte} SELECT p.id,p.name,p.sku,t.quantity AS "quantitySold",t.revenue,t.cost,t.tax FROM totals t JOIN "Product" p ON p.id=t."productId" ORDER BY t.revenue DESC,p.id LIMIT ${EXPORT_CAP}`)
+   const rows=await tx.$queryRaw<Stat[]>(Prisma.sql`${cte} SELECT p.id,p.name,p.sku,t.quantity AS "quantitySold",t.revenue,t.cost,t.tax FROM totals t JOIN "Product" p ON p.id=t."productId" ORDER BY ${order},p.id LIMIT ${EXPORT_CAP}`)
    const [summary]=await tx.$queryRaw<Summary[]>(totalsSql)
-   return {filename:'product-report-'+context.organizationId+'.csv',meta:filter.meta,summary:{...summary,profit:reportDecimal(summary.revenue).sub(summary.tax).sub(summary.cost)},content:csv([['Vaqt zonasi',org.timezone],['Hisob holati UTC',filter.meta.asOf],['Sof tovar tushumi',numeric(summary.revenue)],['Tarixiy jami tannarx',numeric(summary.cost,6)],['Davr boshi',params.get('startDate')],['Davr oxiri',params.get('endDate')],['ID','Mahsulot','SKU','Sof miqdor','Sof tovar tushumi','Tarixiy tannarx','Yalpi foyda','Soliq qismi','Soliqsiz tushum'],...rows.map(row=>[row.id,row.name,row.sku,numeric(row.quantitySold,6),numeric(row.revenue),numeric(row.cost,6),numeric(reportDecimal(row.revenue).sub(row.tax).sub(row.cost)),numeric(row.tax),numeric(reportDecimal(row.revenue).sub(row.tax))])])}
+   return {filename:'product-report-'+context.organizationId+'.csv',meta:{...filter.meta,search,sort},summary:{...summary,profit:reportDecimal(summary.revenue).sub(summary.tax).sub(summary.cost)},content:csv([['Vaqt zonasi',org.timezone],['Hisob holati UTC',filter.meta.asOf],['Sof tovar tushumi',numeric(summary.revenue)],['Tarixiy jami tannarx',numeric(summary.cost,6)],['Davr boshi',params.get('startDate')],['Davr oxiri',params.get('endDate')],['ID','Mahsulot','SKU','Sof miqdor','Sof tovar tushumi','Tarixiy tannarx','Yalpi foyda','Soliq qismi','Soliqsiz tushum'],...rows.map(row=>[row.id,row.name,row.sku,numeric(row.quantitySold,6),numeric(row.revenue),numeric(row.cost,6),numeric(reportDecimal(row.revenue).sub(row.tax).sub(row.cost)),numeric(row.tax),numeric(reportDecimal(row.revenue).sub(row.tax))])])}
   },{isolationLevel:'RepeatableRead'})
   return NextResponse.json({success:true,data})
  }
  const [rows,count,summaryRows]=await prisma.$transaction([
-  prisma.$queryRaw<Stat[]>(Prisma.sql`${cte} SELECT p.id,p.name,p.sku,t.quantity AS "quantitySold",t.revenue,t.cost,t.tax FROM totals t JOIN "Product" p ON p.id=t."productId" ORDER BY t.revenue DESC,p.id LIMIT ${limit} OFFSET ${skip}`),
+  prisma.$queryRaw<Stat[]>(Prisma.sql`${cte} SELECT p.id,p.name,p.sku,t.quantity AS "quantitySold",t.revenue,t.cost,t.tax FROM totals t JOIN "Product" p ON p.id=t."productId" ORDER BY ${order},p.id LIMIT ${limit} OFFSET ${skip}`),
   prisma.$queryRaw<{count:bigint}[]>(Prisma.sql`${cte} SELECT count(*) FROM totals`),
   prisma.$queryRaw<Summary[]>(totalsSql),
  ],{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead})
  const data=rows.map(row=>({...row,profit:reportDecimal(row.revenue).sub(row.tax).sub(row.cost),netRevenue:reportDecimal(row.revenue).sub(row.tax),profitMargin:row.revenue.sub(row.tax).gt(0)?reportDecimal(row.revenue).sub(row.tax).sub(row.cost).mul(100).div(row.revenue.sub(row.tax)).toDecimalPlaces(2):'0'}))
  const total=Number(count[0].count)
- return NextResponse.json({success:true,data,meta:filter.meta,summary:{...summaryRows[0],profit:reportDecimal(summaryRows[0].revenue).sub(summaryRows[0].tax).sub(summaryRows[0].cost)},pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}})
+ return NextResponse.json({success:true,data,meta:{...filter.meta,search,sort},summary:{...summaryRows[0],profit:reportDecimal(summaryRows[0].revenue).sub(summaryRows[0].tax).sub(summaryRows[0].cost)},pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}})
 }

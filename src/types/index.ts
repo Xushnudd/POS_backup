@@ -310,6 +310,7 @@ export interface SaleReturnHistory {
   items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
 }
 export interface Sale {
+  giftFunding?:{code:string;amount:string};
   receiptSnapshot?: {
     version: 1; capturedAt: string; organizationName: string; organizationPhone: string;
     tin: string | null; currencyCode: string; timezone: string; receiptFooter: string | null;
@@ -415,7 +416,7 @@ export interface ApiResponse<T = unknown, Summary = SalesReportSummary> {
     totalPages: number;
   };
   summary?: Summary;
-  meta?: {asOf:string;timezone:string;startDate:string|null;endDate:string|null;storeId:string|null};
+  meta?: {asOf:string;timezone:string;startDate:string|null;endDate:string|null;storeId:string|null;periodSaleCount?:number;summaryScope?:string;search?:string;sort?:string};
 }
 
 export interface OrganizationMember {

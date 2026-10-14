@@ -5,5 +5,9 @@ export function loyaltyDatabaseError(error:unknown):AccessError|null{
  if(!(error instanceof Prisma.PrismaClientKnownRequestError)&&!(error instanceof Prisma.PrismaClientUnknownRequestError))return null;
  const text=error instanceof Prisma.PrismaClientKnownRequestError?String(error.meta?.database_error??error.meta?.message??error.message):error.message;
  const code=text.match(/(?:message: "|ERROR:\s*)(POINTS_BALANCE_CHANGED|LOYALTY_SALE_CHANGED|LOYALTY_POSTING_INVALID|LOYALTY_CURRENCY_UNSUPPORTED|LOYALTY_OFFLINE_UNAVAILABLE|LOYALTY_SOURCE_UNSUPPORTED|LOYALTY_CUSTOMER_CHANGED|POINT_WALLET_TOO_LARGE)(?:"|\s|$)/)?.[1];
- return code?new AccessError(409,code,messages[code]):null;
+ if(code)return new AccessError(409,code,messages[code]);
+ const gift=text.match(/(?:message: "|ERROR:\s*)(GIFT_UNAVAILABLE|GIFT_ISSUE_INVALID|GIFT_VALIDITY_INVALID|GIFT_PROOF_REQUIRED|GIFT_CASH_REFUND_DENIED|GIFT_SALE_REQUIRED|GIFT_SOURCE_INVALID|GIFT_IMMUTABLE)(?:"|\s|$)/)?.[1];
+ if(gift)return new AccessError(409,gift,'Sertifikat muddati, qoldig‘i va original shartlarini tekshiring. Yangi pul amalini yuborishdan oldin original natijani tekshiring.');
+ const benefit=text.match(/(?:message: "|ERROR:\s*)(CARD_UNAVAILABLE|PROMO_UNAVAILABLE|PROMO_USE_LIMIT|PROMO_MIN_AMOUNT|PROMO_STORE_UNAVAILABLE|PROMO_STACKING_DENIED|LOYALTY_POLICY_CHANGED|LOYALTY_ACTOR_CHANGED|LOYALTY_REGISTRY_PROOF_REQUIRED|LOYALTY_REGISTRY_IMMUTABLE)(?:"|\s|$)/)?.[1];
+ return benefit?new AccessError(409,benefit,'Karta/promo original qoidasi, mijoz va chek holatini tekshiring.'):null;
 }

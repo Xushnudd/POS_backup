@@ -1,0 +1,19 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Actual card + whole-receipt promotion quote is exact, replay-safe, native posted once and full/partial returns preserve original discount (484.076811ms)
+✔ Actual cashier permissions and native active customer checks protect preparation and posting; cancellation stays available (265.032052ms)
+✔ Prepared campaign expires at checkout; stale policy and revoked source never consume a use or mutate the original quote (2021.387457ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Cancelling a prepared selection restores the exact original manual discount and does not consume promo usage (232.492382ms)
+✔ Customer usage, revoked card/promo and foreign scope fail closed without publishing a partial discount (332.638579ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Last global promo use is shared across customers; only one original checkout consumes the last slot (321.959482ms)
+✔ Administrator stacking flags govern actual point discount; cancellation order and original refunds retain one bonus/promo journal (479.756443ms)
+✔ Late campaign usage audit fault rolls back sale, stock and slot; original retry consumes exactly one use (174.099597ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4791.851698

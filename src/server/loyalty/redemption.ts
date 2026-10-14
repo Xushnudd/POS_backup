@@ -10,6 +10,7 @@ import {priceTaxLines,type TaxMode} from '../taxes/calculations';
 import {loyaltyPolicySchema,exactPoints,pointsDiscount} from './calculations';
 import {pointWalletRows} from './wallet';
 import {planPointSpend} from './lots';
+import {attachSaleBatches} from '../inventory/batches';
 type EditableSale=Prisma.SaleGetPayload<{include:{items:true}}>;
 export const preparePointRedemptionSchema=z.object({operationId:z.string().uuid(),policyVersionId:z.string().uuid(),points:z.string().regex(/^\d+$/).max(19).refine(value=>{try{return exactPoints(value)>BigInt(0);}catch{return false;}}),customerConsent:z.literal(true),reason:z.string().trim().min(3).max(2000)}).strict();
 export const cancelPointRedemptionSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000)}).strict();
@@ -19,12 +20,13 @@ async function source(tx:Prisma.TransactionClient,context:TokenPayload,id:string
  if(!sale)throw new AccessError(404,'NOT_FOUND');if(sale.status!=='draft')throw new AccessError(409,'INVALID_STATUS');
  await requireOpenShift(tx,context,sale.shiftId);return sale;
 }
-async function reprice(tx:Prisma.TransactionClient,context:TokenPayload,sale:EditableSale,off:Prisma.Decimal,percent:Prisma.Decimal|null,reason:string){
+export async function reprice(tx:Prisma.TransactionClient,context:TokenPayload,sale:EditableSale,off:Prisma.Decimal,percent:Prisma.Decimal|null,reason:string){
  const authorization=await enforceDiscountLimit(tx,context,sale.items,draftTotals(sale.items,off).totalAmount,reason);
  const rows=priceTaxLines(sale.items.map(item=>({...item,taxMode:item.taxMode as TaxMode})),off);
  for(const row of rows)await tx.saleItem.update({where:{id:row.id},data:{receiptDiscount:row.receiptDiscount,taxBase:row.taxBase,taxAmount:row.taxAmount,payableAmount:row.payableAmount,roundingVersion:row.roundingVersion}});
  const netAmount=rows.reduce((total,row)=>total.add(row.taxBase),decimal(0)),taxAmount=rows.reduce((total,row)=>total.add(row.taxAmount),decimal(0));
- return tx.sale.update({where:{id:sale.id},data:{discountAmount:off,discountPercent:percent,netAmount,taxAmount,totalAmount:netAmount.add(taxAmount),...authorization},include:{items:true,payments:true}});
+ const updated=await tx.sale.update({where:{id:sale.id},data:{discountAmount:off,discountPercent:percent,netAmount,taxAmount,totalAmount:netAmount.add(taxAmount),...authorization},include:{items:true,payments:true}});
+ return attachSaleBatches(tx,context,updated);
 }
 export async function preparePointRedemption(context:TokenPayload,saleId:string,input:z.infer<typeof preparePointRedemptionSchema>){
  const data=preparePointRedemptionSchema.parse(input);

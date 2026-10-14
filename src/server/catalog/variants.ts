@@ -6,7 +6,8 @@ import {AccessError} from '../auth/policy'
 import {assertLiveContext,audit,runOperation} from '../operations'
 import {amountSchema} from '../sales/service'
 import {priceActor} from './prices'
-import {paging,pagination} from './queries'
+import {pagination} from './queries'
+import {parseListQuery,variantListSorts} from '@/lib/list-query'
 const option=z.object({name:z.string().trim().min(1).max(40),value:z.string().trim().min(1).max(80)}).strict()
 export const variantSchema=z.object({operationId:z.string().uuid(),name:z.string().trim().min(2).max(200),sku:z.string().trim().min(2).max(100),barcode:z.string().trim().min(2).max(200),salePrice:amountSchema,reason:z.string().trim().min(3).max(2000),options:z.array(option).min(1).max(8)}).strict().refine(x=>new Set(x.options.map(o=>o.name.toLowerCase())).size===x.options.length,'Takror variant belgisi mumkin emas')
 async function root(tx:Prisma.TransactionClient,ctx:TokenPayload,id:string){
@@ -33,11 +34,14 @@ export async function createVariant(ctx:TokenPayload,id:string,input:z.infer<typ
  })
 }
 export async function listVariants(ctx:TokenPayload,id:string,q:URLSearchParams){
- const {page,limit,skip}=paging(q)
+ let list;try{list=parseListQuery(q,variantListSorts,'source')}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+ const {page,limit,skip,sort,search}=list,status=q.get('status')??'all'
+ if(!['all','active','archived'].includes(status))throw new AccessError(400,'INVALID_FILTER')
  return prisma.$transaction(async tx=>{
   await assertLiveContext(tx,ctx)
-  const base=await root(tx,ctx,id),where={rootProductId:base.id},total=await tx.productVariant.count({where})
-  const rows=await tx.productVariant.findMany({where,orderBy:{productId:'asc'},skip,take:limit,include:{product:{select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,isActive:true}}}})
+  const base=await root(tx,ctx,id),where:Prisma.ProductVariantWhereInput={rootProductId:base.id,product:{...(status==='all'?{}:{isActive:status==='active'}),...(search?{OR:[{name:{contains:search,mode:'insensitive'}},{sku:{contains:search,mode:'insensitive'}},{barcode:{contains:search,mode:'insensitive'}}]}:{})}},total=await tx.productVariant.count({where})
+  const orderBy:Prisma.ProductVariantOrderByWithRelationInput[]=sort==='source'?[{productId:'asc'}]:sort.startsWith('name')?[{product:{name:sort==='name_asc'?'asc':'desc'}},{productId:'asc'}]:[{product:{salePrice:sort==='price_asc'?'asc':'desc'}},{productId:'asc'}]
+  const rows=await tx.productVariant.findMany({where,orderBy,skip,take:limit,include:{product:{select:{id:true,name:true,sku:true,barcode:true,unit:true,salePrice:true,isActive:true}}}})
   const stock=await tx.inventoryBalance.groupBy({by:['productId'],where:{productId:{in:rows.map(r=>r.productId)},store:{organizationId:ctx.organizationId,...(ctx.role==='owner'?{}:{id:{in:ctx.storeIds}})}},_sum:{quantity:true}})
   const byId=new Map(stock.map(s=>[s.productId,s._sum.quantity]))
   return {success:true,root:{id:base.id,name:base.name},data:rows.map(r=>({...r.product,options:r.options,isDefault:r.productId===base.id,quantity:byId.get(r.productId)??new Prisma.Decimal(0)})),pagination:pagination(page,limit,total)}

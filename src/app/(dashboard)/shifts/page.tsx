@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api, ApiError } from '@/lib/api';
@@ -29,7 +29,14 @@ import {
   faHistory,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function ShiftsPage() {
+import {useListFilters} from '@/hooks/useListFilters';
+import {journalListSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import Pagination from '@/components/ui/Pagination';
+import DataTable from '@/components/ui/DataTable';
+import Select from '@/components/ui/Select';
+export default function ShiftsPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<p>Yuklanmoqda...</p>}><Shifts key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
+function Shifts() {
   const {role,organization,user}=useAuth();
   const cashAttempt=useRef<{shiftId:string;input:Parameters<typeof api.shifts.cashMovement>[1]&{operationId:string}}|null>(null);
   const [cashReady,setCashReady]=useState(false);
@@ -39,6 +46,11 @@ export default function ShiftsPage() {
 
   const [shiftsHistory, setShiftsHistory] = useState<Shift[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  const {query,filters,params,changeQuery}=useListFilters(journalListSorts,'newest',['from','to','status']);
+  const page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'newest',search=query?.search??'',invalidQuery=!query;
+  const [historyError,setHistoryError]=useState(''),[pages,setPages]=useState(0);
+  const historySequence=useRef({value:0});
 
   // Modals
   const [isOpenShiftModalOpen, setIsOpenShiftModalOpen] = useState(false);
@@ -63,24 +75,15 @@ export default function ShiftsPage() {
 
 
   const loadHistory = useCallback(async () => {
-    setIsLoadingHistory(true);
+    if(invalidQuery)return;
+    const sequence=++historySequence.current.value;setIsLoadingHistory(true);setHistoryError('');
     try {
-      const res = await api.shifts.list({
-        registerId: activeRegister?.id,
-      });
-      if (res.data) {
-        setShiftsHistory(res.data);
-      }
-    } catch (err: unknown) {
-      console.error('Failed to load shift history:', err);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  }, [activeRegister]);
-
-  useEffect(() => {
-    void Promise.resolve().then(loadHistory);
-  }, [loadHistory, activeShift]);
+      const res=await api.shifts.list({...filters,registerId:activeRegister?.id,page,limit,sort,search});
+      if(sequence===historySequence.current.value){setShiftsHistory(res.data??[]);setPages(res.pagination?.totalPages??0);}
+    }catch(error){if(sequence===historySequence.current.value)setHistoryError(error instanceof Error?error.message:'Smena tarixi yuklanmadi');}
+    finally{if(sequence===historySequence.current.value)setIsLoadingHistory(false);}
+  },[activeRegister,filters,page,limit,sort,search,invalidQuery]);
+  useEffect(()=>{const requests=historySequence.current;let live=true;void Promise.resolve().then(()=>{if(live)return loadHistory();});return()=>{live=false;requests.value++;};},[loadHistory,activeShift]);
 
   useEffect(()=>{
     let cancelled=false;
@@ -149,7 +152,7 @@ export default function ShiftsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {role&&role!=='cashier'&&<CsvExportButton path="/shifts" params={activeRegister?{registerId:activeRegister.id}:{}}/>}
+      {role&&role!=='cashier'&&<CsvExportButton path="/shifts" params={{...filters,search,sort,...(activeRegister?{registerId:activeRegister.id}:{})}}/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -285,7 +288,8 @@ export default function ShiftsPage() {
         subtitle="Avval yopilgan va faol barcha smenalar arxivi"
         padding={false}
       >
-        {isLoadingHistory ? (
+        <ListFilter search={search} sort={sort} label="Kassa yoki xodim qidirish" onChange={changeQuery} reset={{from:'',to:'',status:''}} options={[{value:'newest',label:'Eng yangi'},{value:'oldest',label:'Eng eski'}]}><Select label="Smena holati" value={params.get('status')??''} options={[{value:'',label:'Barchasi'},{value:'open',label:'Ochiq'},{value:'closed',label:'Yopilgan'}]} onChange={e=>changeQuery({status:e.target.value,page:'1'})}/><Input label="Smena davri boshi" type="date" value={params.get('from')??''} onChange={e=>changeQuery({from:e.target.value,page:'1'})}/><Input label="Smena davri oxiri" type="date" value={params.get('to')??''} onChange={e=>changeQuery({to:e.target.value,page:'1'})}/></ListFilter>
+        {invalidQuery?<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>:historyError?<p role="alert">{historyError}. Oxirgi tarix saqlangan.</p>:isLoadingHistory ? (
           <div className="h-48 flex items-center justify-center">
             <LoadingSpinner size="lg" text="Tarix yuklanmoqda..." />
           </div>
@@ -295,7 +299,7 @@ export default function ShiftsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Terminal</th>
@@ -367,11 +371,12 @@ export default function ShiftsPage() {
                   );
                 })}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         )}
       </Card>
 
+      <Pagination page={page} pages={pages} busy={isLoadingHistory&&!invalidQuery} blocked={invalidQuery||!!historyError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadHistory();}}/>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
       {shiftsHistory.filter(shift=>shift.pendingClose).map(shift=><Card key={shift.id} title="Smena yopilishi tasdiq kutmoqda">
         <p>Kutilgan: {formatMoney(shift.pendingClose!.expectedCash)} · Sanalgan: {formatMoney(shift.pendingClose!.countedCash)} · Farq: {formatMoney(shift.pendingClose!.difference)}</p>
         <p>Sabab: {shift.pendingClose!.reason}</p><p>Sanagan xodim ID: {shift.pendingClose!.countedBy}</p>

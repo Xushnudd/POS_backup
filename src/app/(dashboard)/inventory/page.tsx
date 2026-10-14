@@ -1,7 +1,7 @@
 'use client';
 
 import SerialPicker from '@/components/inventory/SerialPicker';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -33,26 +33,31 @@ import {
   faRightLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function InventoryPage() {
+import {useListFilters} from '@/hooks/useListFilters';
+import {inventoryListSorts,journalListSorts} from '@/lib/list-query';
+import DataTable from '@/components/ui/DataTable';
+export default function InventoryPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<p>Yuklanmoqda...</p>}><Inventory key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
+function Inventory() {
   const { organization, role } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
-  const [activeTab, setActiveTab] = useState<'balances' | 'documents'>('balances');
+  const {query,params,filters,changeQuery}=useListFilters(inventoryListSorts,'newest',['search','from','to','documentType','status','supplierId']);
+  const activeTab=params.get('tab')??'balances',page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'newest';
+  const inactiveDays=params.get('inactiveDays')??'',lowStockOnly=params.get('lowStock')==='true';
+  const invalidQuery=!query||!['balances','documents'].includes(activeTab)||(activeTab==='documents'&&!journalListSorts.some(value=>value===sort))||(params.has('lowStock')&&!['true','false'].includes(params.get('lowStock')!));
+  const setActiveTab=(tab:string)=>changeQuery({tab,page:'1',sort:''}),setInactiveDays=(value:string)=>changeQuery({inactiveDays:value,page:'1'}),setLowStockOnly=(value:boolean)=>changeQuery({lowStock:value?'true':'',page:'1'});
   const [balances, setBalances] = useState<InventoryBalance[]>([]);
   const [documents, setDocuments] = useState<StockDocument[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [inactiveDays,setInactiveDays]=useState('');
-  const [lowStockOnly, setLowStockOnly] = useState<boolean>(false);
 
   const [listError,setListError]=useState(''),[pages,setPages]=useState(0);
-  const [draftFilters,setDraftFilters]=useState({search:'',from:'',to:'',documentType:'',status:'',supplierId:''}),[filters,setFilters]=useState<Record<string,string>>({});
-  const listScope=JSON.stringify([organization?.id,activeStore?.id,activeTab,lowStockOnly,inactiveDays,filters]);
-  const [listPage,setListPage]=useState({scope:'',page:1});
-  const page=listPage.scope===listScope?listPage.page:1;
+  const [draftFilters,setDraftFilters]=useState({search:params.get('search')??'',from:params.get('from')??'',to:params.get('to')??'',documentType:params.get('documentType')??'',status:params.get('status')??'',supplierId:params.get('supplierId')??''});
+  const filterKey=JSON.stringify(filters);
+  useEffect(()=>{let live=true;void Promise.resolve().then(()=>{if(live)setDraftFilters({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',...JSON.parse(filterKey)});});return()=>{live=false;};},[filterKey]);
   const requestSequence=useRef({value:0});
 
   // New stock document modal
@@ -77,7 +82,7 @@ export default function InventoryPage() {
 
 
   const loadData = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organization?.id||invalidQuery) return;
     const sequence=++requestSequence.current.value;
     setIsLoading(true);setListError('');
     try {
@@ -85,22 +90,22 @@ export default function InventoryPage() {
         const res = await api.inventory.balances({
           organizationId: organization.id,
           storeId: activeStore?.id,
-          lowStock: lowStockOnly || undefined,inactiveDays:inactiveDays?Number(inactiveDays):undefined,search:filters.search,page,limit:20,
+          lowStock: lowStockOnly || undefined,inactiveDays:inactiveDays?Number(inactiveDays):undefined,search:filters.search,page,limit,sort,
         });
         if(sequence===requestSequence.current.value){setBalances(res.data??[]);setPages(res.pagination?.totalPages??0);}
       } else {
         const res = await api.stockDocuments.list({
           organizationId: organization.id,
-          storeId: activeStore?.id,...filters,page,limit:20,
+          storeId: activeStore?.id,...filters,page,limit,sort,
         });
         if(sequence===requestSequence.current.value){setDocuments(res.data??[]);setPages(res.pagination?.totalPages??0);}
       }
     } catch (err: unknown) {
-      if(sequence===requestSequence.current.value){setListError(err instanceof Error?err.message:'Ombor ro‘yxati yuklanmadi');setBalances([]);setDocuments([]);setPages(0);}
+      if(sequence===requestSequence.current.value)setListError(err instanceof Error?err.message:'Ombor ro‘yxati yuklanmadi');
     } finally {
       if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization, activeStore, activeTab, lowStockOnly, inactiveDays, filters, page]);
+  }, [organization, activeStore, activeTab, lowStockOnly, inactiveDays, filters, page, limit, sort, invalidQuery]);
 
   useEffect(() => {
     const requests=requestSequence.current;let cancelled=false;void Promise.resolve().then(()=>{if(!cancelled)return loadData();});
@@ -245,19 +250,22 @@ export default function InventoryPage() {
       </div>
 
       {activeTab==='balances'&&<div className="max-w-md space-y-1"><Select label="Filialda yakunlangan savdosiz qoldiq" value={inactiveDays} onChange={event=>setInactiveDays(event.target.value)} options={[{value:'',label:'Barcha qoldiqlar'},{value:'30',label:'Oxirgi 30 kun savdo yo‘q'},{value:'60',label:'Oxirgi 60 kun savdo yo‘q'},{value:'90',label:'Oxirgi 90 kun savdo yo‘q'}]}/><p className="text-xs text-gray-600">Faqat musbat joriy qoldiq. Bu omborda turish yoshi emas; qaytarilgan savdo ham savdo harakati hisoblanadi.</p></div>}
-      <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();setFilters(Object.fromEntries(Object.entries(draftFilters).filter(([,value])=>value.trim()).map(([key,value])=>[key,value.trim()])));}}>
+      <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();changeQuery({...Object.fromEntries(Object.entries(draftFilters).map(([key,value])=>[key,value.trim()])),page:'1'});}}>
         <Input label={activeTab==='balances'?'Mahsulot, SKU yoki barkod':'Hujjat raqamini qidirish'} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
         {activeTab==='documents'&&<><Input label="Hujjat davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Hujjat davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label="Hujjat turi filtri" value={draftFilters.documentType} options={[{value:'',label:'Barchasi'},{value:'purchase',label:'Xarid'},{value:'opening',label:'Boshlang‘ich qoldiq'},{value:'adjustment',label:'Tuzatish'},{value:'reversal',label:'Qarshi hujjat'},{value:'transfer_out',label:'Transfer chiqimi'},{value:'transfer_in',label:'Transfer kirimi'},{value:'return_in',label:'Qaytarish kirimi'}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label="Hujjat holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'confirmed',label:'Tasdiqlangan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label="Supplier ID filtri" value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
         <Button type="submit" disabled={isLoading}>Filtrlash</Button>
       </form>
-      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
+      <div className="flex gap-3"><Select label="Ombor saralash" value={sort} options={(activeTab==='documents'?journalListSorts:inventoryListSorts).map(value=>({value,label:({newest:'Eng yangi',oldest:'Eng eski',name_asc:'Nom: A–Z',name_desc:'Nom: Z–A',quantity_asc:'Miqdor: o‘sish',quantity_desc:'Miqdor: kamayish'} as Record<string,string>)[value]}))} onChange={e=>changeQuery({sort:e.target.value,page:'1'})}/><Button onClick={()=>changeQuery({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',sort:'',page:'',limit:'',inactiveDays:'',lowStock:''})}>Filtrlarni tozalash</Button></div>
+      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,sort,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
+      {invalidQuery&&<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>}
       {listError&&<p role="alert" className="text-red-700">{listError}</p>}
-      <Pagination page={page} pages={pages} busy={isLoading} onPage={value=>setListPage({scope:listScope,page:value})} retry={()=>{void loadData();}}/>
+      {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+      <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!listError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadData();}}/>
 
       {/* Tab Content: Balances */}
       {activeTab === 'balances' && (
         <Card padding={false}>
-          {isLoading ? (
+          {invalidQuery||listError ? (<p>Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.</p>) : isLoading ? (
             <div className="h-64 flex items-center justify-center">
               <LoadingSpinner size="lg" text="Qoldiqlar yuklanmoqda..." />
             </div>
@@ -271,7 +279,7 @@ export default function InventoryPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                     <th className="py-3.5 px-4">Mahsulot</th>
@@ -319,7 +327,7 @@ export default function InventoryPage() {
                     );
                   })}
                 </tbody>
-              </table>
+              </DataTable>
             </div>
           )}
         </Card>
@@ -328,7 +336,7 @@ export default function InventoryPage() {
       {/* Tab Content: Documents */}
       {activeTab === 'documents' && (
         <Card padding={false}>
-          {isLoading ? (
+          {invalidQuery||listError ? (<p>Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.</p>) : isLoading ? (
             <div className="h-64 flex items-center justify-center">
               <LoadingSpinner size="lg" text="Hujjatlar yuklanmoqda..." />
             </div>
@@ -342,7 +350,7 @@ export default function InventoryPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                     <th className="py-3.5 px-4">Hujjat №</th>
@@ -406,7 +414,7 @@ export default function InventoryPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </DataTable>
             </div>
           )}
         </Card>

@@ -23,6 +23,8 @@ export function transferFilters(q:URLSearchParams,timezone:string):Prisma.StockT
  if(status)where.status=status
  if(q.get('fromStoreId'))where.fromStoreId=q.get('fromStoreId')!
  if(q.get('toStoreId'))where.toStoreId=q.get('toStoreId')!
+ const search=searchTerm(q)
+ if(search)where.OR=[{note:{contains:search,mode:'insensitive'}},{fromStore:{name:{contains:search,mode:'insensitive'}}},{toStore:{name:{contains:search,mode:'insensitive'}}}]
  const range=dateRange(q.get('from'),q.get('to'),timezone)
  if(Object.keys(range).length)where.createdAt=range
  return where

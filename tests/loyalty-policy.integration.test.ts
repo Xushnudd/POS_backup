@@ -23,6 +23,11 @@ test('Administrator policy is explicitly configured, versioned, replay-safe and 
  await assert.rejects(prisma.loyaltyPolicyVersion.create({data:{organizationId:f.org.id,revision:3,configuration,createdBy:f.user.id,reason:'Missing native owner audit proof'}}));
  assert.equal((await readLoyaltyPolicy(f.ctx))?.revision,2);assert.equal(await prisma.loyaltyPolicyVersion.count({where:{organizationId:f.org.id}}),2);
  const foreign=await fixture();assert.equal(await readLoyaltyPolicy(foreign.ctx),null);await assert.rejects(readLoyaltyPolicy({...f.ctx,role:'admin'}),{code:'OWNER_REQUIRED'});
+ // Activated features now have native persistence and checkout guards. Rules
+ // remain explicitly owner-published and old policy versions stay immutable.
+ const active=await publishLoyaltyPolicy(f.ctx,{...input,operationId:randomUUID(),expectedRevision:2,
+  configuration:{...configuration,cards:{...configuration.cards,enabled:true},promos:{...configuration.promos,enabled:true}}});
+ assert.equal(active.revision,3);assert.equal((await readLoyaltyPolicy(f.ctx))?.revision,3);
 });
 test('Native JSON policy validator agrees with strict rules and rejects malformed money, booleans, shape and dates',async()=>{
  const valid=await prisma.$queryRaw<{valid:boolean}[]>`SELECT pos_loyalty_configuration_valid(CAST(${JSON.stringify(configuration)} AS jsonb)) AS valid`;assert.equal(valid[0].valid,true);

@@ -29,3 +29,14 @@ test('Expiry uses server time once, ignored expired quota does not oversell; aud
  const {POST}=await import('@/app/api/inventory/reservations/route');const req=(body:unknown)=>new NextRequest('http://localhost:3000/api/inventory/reservations',{method:'POST',headers:{cookie:f.cookie,origin:'http://localhost:3000','content-type':'application/json'},body:JSON.stringify(body)});assert.equal((await POST(req({...input,operationId:randomUUID(),storeId:foreign.store.id}),undefined)).status,404)
  await prisma.organizationUser.create({data:{organizationId:f.org.id,userId:foreign.user.id,role:'owner'}});await prisma.organizationUser.update({where:{id:f.member.id},data:{role:'cashier',userStores:{create:{storeId:f.store.id}}}});assert.equal((await POST(req({...input,operationId:randomUUID()}),undefined)).status,403);await prisma.session.update({where:{id:f.session.id},data:{revokedAt:new Date()}});assert.equal((await POST(req({...input,operationId:randomUUID()}),undefined)).status,401)
 })
+
+
+test('Reservation read URL contract covers released source history, bounds filters and leaves physical stock unchanged',async()=>{
+ const f=await fixture('Reservation list'),{listStockControl}=await import('@/server/inventory/reservations'),ids:string[]=[];
+ for(let i=0;i<43;i++){const row=await reserveStock(f.ctx,{operationId:randomUUID(),storeId:f.store.id,expiresAt:new Date(Date.now()+600000).toISOString(),reason:'Reservation list '+String(i).padStart(3,'0'),items:[{productId:f.product.id,locationId:null,quantity:'1'}]});await releaseStock(f.ctx,row.id,{operationId:randomUUID(),reason:'Actual cancelled customer hold'});ids.push(row.id);}
+ const read:string[]=[];for(let page=1;page<=3;page++){const result=await listStockControl(f.ctx,f.store.id,page,20,{sort:'oldest',status:'released',search:'Reservation list'});assert.equal(result.total,43);read.push(...result.reservations.map(row=>row.id));}assert.deepEqual(read,ids);
+ assert.equal((await listStockControl(f.ctx,f.store.id,1,20,{search:'NO-SUCH-HOLD'})).total,0);assert.equal((await listStockControl(f.ctx,f.store.id,1,20,{status:'active'})).total,0);
+ await assert.rejects(listStockControl(f.ctx,f.store.id,0));await assert.rejects(listStockControl(f.ctx,f.store.id,1,201));await assert.rejects(listStockControl(f.ctx,f.store.id,1,20,{status:'invented'}));await assert.rejects(listStockControl(f.ctx,f.store.id,1,20,{sort:'reason' as 'oldest'}));
+ const foreign=await fixture('Reservation foreign');await assert.rejects(listStockControl(foreign.ctx,f.store.id),rejected('STORE_NOT_FOUND'));
+ assert.equal((await getStockPosition(f.ctx,f.store.id,f.product.id)).onHand.toFixed(),'5');assert.equal(await prisma.inventoryMovement.count({where:{organizationId:f.org.id}}),0);
+});

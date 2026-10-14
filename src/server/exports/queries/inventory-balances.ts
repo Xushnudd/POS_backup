@@ -1,5 +1,6 @@
+import {parseListQuery,inventoryListSorts} from '@/lib/list-query'
 import {csv,numeric,productValue,shortage} from "@/server/exports/csv"
-import {paging,searchTerm,exporting,exportCap,pagination} from "@/server/catalog/queries"
+import {exporting,exportCap,pagination} from "@/server/catalog/queries"
 import {NextResponse} from "next/server"
 import {Prisma} from "@prisma/client"
 import {scopedPrisma} from "@/server/auth/scoped-prisma"
@@ -8,7 +9,10 @@ import type {NextRequest} from 'next/server'
 import type {TokenPayload} from '@/lib/auth'
 // Shared authorized query. HTTP authentication remains in the route wrapper.
 export async function queryInventoryBalances(context:TokenPayload,request:NextRequest) {
- const q=new URL(request.url).searchParams,{page,limit,skip}=paging(q,50),search=searchTerm(q)
+ const q=new URL(request.url).searchParams
+ let query;try{query=parseListQuery(q,inventoryListSorts,'newest',50)}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+ const {page,limit,skip,sort,search}=query
+ const order=sort==='oldest'?Prisma.sql`b."updatedAt" ASC`:sort==='name_asc'?Prisma.sql`p.name ASC`:sort==='name_desc'?Prisma.sql`p.name DESC`:sort==='quantity_asc'?Prisma.sql`b.quantity ASC`:sort==='quantity_desc'?Prisma.sql`b.quantity DESC`:Prisma.sql`b."updatedAt" DESC`
  const store=q.get('storeId'),category=q.get('categoryId'),low=q.get('lowStock')==='true'
  if(q.has('lowStock')&&!['true','false'].includes(q.get('lowStock')!))throw new AccessError(400,'INVALID_FILTER')
  const inactiveDays=q.has('inactiveDays')?Number(q.get('inactiveDays')):null
@@ -34,7 +38,7 @@ export async function queryInventoryBalances(context:TokenPayload,request:NextRe
  const result=await db.$transaction(async tx=>{
   const count=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`SELECT count(*) ${filter}`)
   const total=Number(count[0].count);if(isExport)exportCap(total)
-  const keys=await tx.$queryRaw<{storeId:string;productId:string}[]>(Prisma.sql`SELECT b."storeId",b."productId" ${filter} ORDER BY b."updatedAt" DESC,b."storeId",b."productId" ${!isExport?Prisma.sql`LIMIT ${limit} OFFSET ${skip}`:Prisma.empty}`)
+  const keys=await tx.$queryRaw<{storeId:string;productId:string}[]>(Prisma.sql`SELECT b."storeId",b."productId" ${filter} ORDER BY ${order},b."storeId",b."productId" ${!isExport?Prisma.sql`LIMIT ${limit} OFFSET ${skip}`:Prisma.empty}`)
   const rows=[]
   for(let offset=0;offset<keys.length;offset+=500)rows.push(...await tx.inventoryBalance.findMany({where:{OR:keys.slice(offset,offset+500)},include:{product:{include:{category:true}},store:true}}))
   const byKey=new Map(rows.map(row=>[row.storeId+':'+row.productId,row]))

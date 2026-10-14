@@ -15,10 +15,14 @@ const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/log
 test('Readiness requires the active manual-refund and supplier migration contract, without leaking dependency details',async()=>{
  const {GET}=await import('../src/app/api/health/ready/route');
  assert.equal((await GET()).status,200);
- for(const migration of ['202610070031_manual_refund_proof','202610100109_receipt_identity_snapshot'])try{
-  await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NOW() WHERE migration_name=${migration}`;
+ for(const migration of ['202610070031_manual_refund_proof','202610100109_receipt_identity_snapshot','202610140174_gift_certificates','202610140175_gift_source_currency','202610140176_gift_checkout_source']){
+ const active=await prisma.$queryRaw<{id:string}[]>`SELECT id FROM "_prisma_migrations" WHERE migration_name=${migration} AND finished_at IS NOT NULL AND rolled_back_at IS NULL`;
+ assert.equal(active.length,1);
+ try{
+  await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NOW() WHERE id=${active[0].id}`;
   const response=await GET();assert.equal(response.status,503);assert.deepEqual(await response.json(),{status:'unavailable'});
- }finally{await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NULL WHERE migration_name=${migration}`}
+ }finally{await prisma.$executeRaw`UPDATE "_prisma_migrations" SET rolled_back_at=NULL WHERE id=${active[0].id}`}
+ }
  assert.equal((await GET()).status,200);
 });
 type Handler=(request:NextRequest,context:{params:Promise<Record<string,string>>})=>Promise<Response>

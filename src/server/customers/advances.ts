@@ -3,7 +3,7 @@ import {Prisma} from '@prisma/client'
 import {z} from 'zod'
 import {prisma} from '@/lib/prisma'
 import type {TokenPayload} from '@/lib/auth'
-import {AccessError} from '../auth/policy'
+import {AccessError,tenantScope} from '../auth/policy'
 import {assertLiveContext,audit,runOperation} from '../operations'
 import {lockAccounts,postAccountEntry} from '../finance/accounts'
 import {positiveAmountSchema,requireOpenShift} from '../sales/service'
@@ -34,14 +34,29 @@ async function cashAccount(tx:Prisma.TransactionClient,ctx:TokenPayload,accountI
  if(shift.registerId!==account.registerId)throw new AccessError(409,'ACCOUNT_SHIFT_MISMATCH')
  return account
 }
-export async function receiveAdvance(ctx:TokenPayload,customerId:string,input:z.infer<typeof receiveAdvanceSchema>){owner(ctx);return runOperation(ctx,'customer.advance.receive',input.operationId,{customerId,...input},async tx=>{
+export async function receiveAdvance(ctx:TokenPayload,customerId:string,input:z.infer<typeof receiveAdvanceSchema>){owner(ctx);return runOperation(ctx,'customer.advance.receive',input.operationId,{customerId,...input},tx=>receiveAdvanceTx(tx,ctx,customerId,input))}
+export async function receiveAdvanceTx(tx:Prisma.TransactionClient,ctx:TokenPayload,customerId:string,input:z.infer<typeof receiveAdvanceSchema>){owner(ctx);receiveAdvanceSchema.parse(input)
  const account=await cashAccount(tx,ctx,input.accountId,input.shiftId);await customerLock(tx,ctx,customerId)
- const amount=money(input.amount),document=await tx.financialDocument.create({data:{organizationId:ctx.organizationId,storeId:account.storeId,kind:'customer_advance',amount,reason:input.reason,actorId:ctx.userId}})
+ const [clock]=await tx.$queryRaw<{at:Date}[]>`SELECT transaction_timestamp()::timestamp(3) AS at`
+ const amount=money(input.amount),document=await tx.financialDocument.create({data:{organizationId:ctx.organizationId,storeId:account.storeId,kind:'customer_advance',amount,reason:input.reason,actorId:ctx.userId,createdAt:clock.at}})
  await postAccountEntry(tx,ctx,account,document.id,amount,input.reason,input.shiftId)
- const row=await tx.customerAdvance.create({data:{organizationId:ctx.organizationId,customerId,documentId:document.id,amount}})
+ const row=await tx.customerAdvance.create({data:{organizationId:ctx.organizationId,customerId,documentId:document.id,amount,createdAt:clock.at}})
  await audit(tx,ctx,'CustomerAdvance',row.id,'advance_received',{customerId,documentId:document.id,accountId:account.id,amount,reason:input.reason});return row
-})}
-export async function allocateAdvance(ctx:TokenPayload,customerId:string,input:z.infer<typeof allocateAdvanceSchema>){owner(ctx);return runOperation(ctx,'customer.advance.allocate',input.operationId,{customerId,...input},async tx=>{
+}
+export async function allocateAdvance(ctx:TokenPayload,customerId:string,input:z.infer<typeof allocateAdvanceSchema>){owner(ctx);return runOperation(ctx,'customer.advance.allocate',input.operationId,{customerId,...input},tx=>allocateAdvanceTx(tx,ctx,customerId,input))}
+export async function allocateAdvanceTx(tx:Prisma.TransactionClient,ctx:TokenPayload,customerId:string,input:z.infer<typeof allocateAdvanceSchema>){owner(ctx);return allocateAdvanceWork(tx,ctx,customerId,allocateAdvanceSchema.parse(input))}
+/** Restricted prepaid-gift posting inside the transaction that completes this
+ * cashier's scoped sale. This does not grant ordinary advance allocation. */
+export async function allocateCheckoutGiftTx(tx:Prisma.TransactionClient,ctx:TokenPayload,customerId:string,input:z.infer<typeof allocateAdvanceSchema>){
+ const data=allocateAdvanceSchema.parse(input),[kind,id]=data.targetKey.split(':');
+ if(kind!=='sale')throw new AccessError(409,'GIFT_SALE_REQUIRED');
+ const sale=await tx.sale.findFirst({where:{id,status:'completed',customerId,AND:tenantScope('Sale',ctx)},select:{id:true,shiftId:true}});
+ const [actual]=await tx.$queryRaw<{current:boolean}[]>`SELECT EXISTS(SELECT 1 FROM "Sale" WHERE id=${id} AND xmin::text::bigint=txid_current()%4294967296) AS current`;
+ if(!sale||!actual.current||!await tx.giftCertificate.findFirst({where:{organizationId:ctx.organizationId,advanceId:data.advanceId},select:{id:true}}))throw new AccessError(409,'GIFT_SALE_REQUIRED');
+ await requireOpenShift(tx,ctx,sale.shiftId);
+ return allocateAdvanceWork(tx,ctx,customerId,data);
+}
+async function allocateAdvanceWork(tx:Prisma.TransactionClient,ctx:TokenPayload,customerId:string,input:z.infer<typeof allocateAdvanceSchema>){
  // Sale-before-customer matches refund/collection lock ordering. Never acquire a
  // customer lock and then wait for a sale held by a concurrent return.
  const [kind,id]=input.targetKey.split(':')
@@ -56,15 +71,16 @@ export async function allocateAdvance(ctx:TokenPayload,customerId:string,input:z
  const row=await tx.customerAdvanceAllocation.create({data:{id:allocationId,advanceId:original.id,debtEntryId,amount}})
  await tx.debtEntry.create({data:{id:debtEntryId,organizationId:ctx.organizationId,customerId,saleId:target.saleId,debtOriginId:target.debtOriginId,sourceType:'advance_allocation',sourceId:row.id,amount:amount.negated(),note:input.reason,actorId:ctx.userId}})
  await audit(tx,ctx,'CustomerAdvanceAllocation',row.id,'advance_allocated',{customerId,advanceId:original.id,targetKey:target.key,amount,reason:input.reason});return row
-})}
-export async function refundAdvance(ctx:TokenPayload,customerId:string,input:z.infer<typeof refundAdvanceSchema>){owner(ctx);return runOperation(ctx,'customer.advance.refund',input.operationId,{customerId,...input},async tx=>{
+}
+export async function refundAdvance(ctx:TokenPayload,customerId:string,input:z.infer<typeof refundAdvanceSchema>){owner(ctx);return runOperation(ctx,'customer.advance.refund',input.operationId,{customerId,...input},tx=>refundAdvanceTx(tx,ctx,customerId,input))}
+export async function refundAdvanceTx(tx:Prisma.TransactionClient,ctx:TokenPayload,customerId:string,input:z.infer<typeof refundAdvanceSchema>){owner(ctx);refundAdvanceSchema.parse(input)
  const account=await cashAccount(tx,ctx,input.accountId,input.shiftId);await customerLock(tx,ctx,customerId);const original=await source(tx,ctx,customerId,input.advanceId),amount=money(input.amount)
  if(amount.gt(original.available))throw new AccessError(409,'ADVANCE_BALANCE_EXCEEDED')
  const document=await tx.financialDocument.create({data:{organizationId:ctx.organizationId,storeId:account.storeId,kind:'customer_refund',amount,reason:input.reason,actorId:ctx.userId}})
  await postAccountEntry(tx,ctx,account,document.id,amount.negated(),input.reason,input.shiftId)
  const row=await tx.customerAdvanceRefund.create({data:{advanceId:original.id,documentId:document.id,amount}})
  await audit(tx,ctx,'CustomerAdvanceRefund',row.id,'advance_refunded',{customerId,advanceId:original.id,originalDocumentId:original.documentId,documentId:document.id,accountId:account.id,amount,reason:input.reason});return row
-})}
+}
 export async function listAdvances(ctx:TokenPayload,customerId:string,options:{page:number;limit:number}){owner(ctx);const {page,limit}=options
  if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(limit)||limit<1||limit>200)throw new AccessError(400,'INVALID_PAGINATION')
  return prisma.$transaction(async tx=>{await assertLiveContext(tx,ctx)

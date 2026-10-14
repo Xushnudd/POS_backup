@@ -200,7 +200,7 @@ export default function ReceiptPreview({
               };
               return (
                 <div key={idx} className="flex justify-between text-gray-700">
-                  <span>{pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?'chiqim':'kirim'}):</span>
+                  <span>{p.paymentType==='credit'&&p.direction==='in'&&sale.giftFunding?'Sertifikat '+sale.giftFunding.code:pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?'chiqim':'kirim'}):</span>
                   <span className="font-semibold">{formatMoney(p.amount)}</span>
                 </div>
               );

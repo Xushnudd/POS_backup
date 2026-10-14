@@ -1,36 +1,43 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/lib/api'
 import { useOrganization } from '@/context/OrganizationContext'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import {useAuth} from '@/context/AuthContext'
+import {useListQuery} from '@/hooks/useListQuery'
+import {reconciliationListSorts} from '@/lib/list-query'
+import ListFilter from '@/components/ui/ListFilter'
+import DataTable from '@/components/ui/DataTable'
+import Pagination from '@/components/ui/Pagination'
+import Select from '@/components/ui/Select'
 const names:Record<string,string>={inventory:'Ombor qoldig‘i',sales:'Savdo va to‘lov',returns:'Qaytarish summasi',shifts:'Yopilgan smena'}
 const labels:Record<string,string>={productName:'Mahsulot',receiptNo:'Chek',returnReceiptNo:'Qaytarma chek',expected:'Kutilgan',actual:'Saqlangan',difference:'Farq',itemAmount:'Chek qatorlari jami',paymentAmount:'Original to‘lov jami'}
-export default function ReconciliationPage(){
+export default function ReconciliationPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<LoadingSpinner/>}><Reconciliation key={[organization?.id,user?.id,role].join(':')}/></Suspense>}
+function Reconciliation(){
  const {stores}=useOrganization()
- const [kind,setKind]=useState('inventory'),[storeId,setStoreId]=useState(''),[page,setPage]=useState(1)
+ const {query,params,changeQuery}=useListQuery(reconciliationListSorts,'source')
+ const kind=params.get('kind')??'inventory',storeId=params.get('storeId')??'',page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'source',search=query?.search??'',invalidQuery=!query
+ const sequence=useRef({value:0})
  const [rows,setRows]=useState<Record<string,unknown>[]>([]),[total,setTotal]=useState(0)
- const [busy,setBusy]=useState(false),[error,setError]=useState('')
+ const [busy,setBusy]=useState(true),[error,setError]=useState('')
  const load=useCallback(async()=>{
-  setBusy(true);setError('')
-  try{const result=await api.reports.reconciliation({kind,storeId:storeId||undefined,page});setRows(result.data??[]);setTotal(result.pagination?.total??0)}
-  catch(error){setError(error instanceof Error?error.message:'Hisobni tekshirib bo‘lmadi')}
-  finally{setBusy(false)}
- },[kind,storeId,page])
- useEffect(()=>{void Promise.resolve().then(load)},[load])
+  if(invalidQuery)return;const request=++sequence.current.value;setBusy(true);setError('')
+  try{const result=await api.reports.reconciliation({kind,storeId:storeId||undefined,page,limit,sort,search});if(request===sequence.current.value){setRows(result.data??[]);setTotal(result.pagination?.total??0)}}
+  catch(error){if(request===sequence.current.value)setError(error instanceof Error?error.message:'Hisobni tekshirib bo‘lmadi')}
+  finally{if(request===sequence.current.value)setBusy(false)}
+ },[kind,storeId,page,limit,sort,search,invalidQuery])
+ useEffect(()=>{const requests=sequence.current;let live=true;void Promise.resolve().then(()=>{if(live)return load()});return()=>{live=false;requests.value++}},[load])
  const columns=rows.length?Object.keys(rows[0]).filter(key=>labels[key]):[]
  return <div className="space-y-4">
   <h1 className="text-xl font-bold">Qoldiq va pul hisobini solishtirish</h1>
   <p className="text-sm">Bu tekshiruv farqlarni ko‘rsatadi. Tarixni avtomatik o‘zgartirmaydi. Sababni tekshirib, vakolatli tuzatish hujjati bilan hal qiling. Harakat hujjatisiz kiritilgan eski boshlang‘ich qoldiq ham farq sifatida chiqadi.</p>
-  <div className="flex flex-wrap gap-3">
-   <select aria-label="Tekshiruv turi" value={kind} onChange={e=>{setKind(e.target.value);setPage(1)}} className="border rounded-lg p-2">{Object.entries(names).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>
-   <select aria-label="Filial" value={storeId} onChange={e=>{setStoreId(e.target.value);setPage(1)}} className="border rounded-lg p-2"><option value="">Vakolatli barcha filiallar</option>{stores.map(store=><option key={store.id} value={store.id}>{store.name}</option>)}</select>
-   <Button onClick={()=>{void load()}} disabled={busy}>Qayta tekshirish</Button>
-  </div>
-  {error?<p role="alert" className="text-red-700">{error}</p>:busy?<LoadingSpinner/>:<>
+  <ListFilter search={search} sort={sort} label="Tekshiruv mahsuloti, chek yoki ID qidirish" onChange={changeQuery} reset={{kind:'',storeId:''}} options={[{value:'source',label:'Asl ketma-ketlik'},{value:'expected_asc',label:'Kutilgan qiymat: o‘sish'},{value:'expected_desc',label:'Kutilgan qiymat: kamayish'}]}><Select label="Tekshiruv turi" value={kind} options={Object.entries(names).map(([value,label])=>({value,label}))} onChange={e=>changeQuery({kind:e.target.value,page:'1'})}/><Select label="Filial" value={storeId} options={[{value:'',label:'Vakolatli barcha filiallar'},...stores.map(store=>({value:store.id,label:store.name}))]} onChange={e=>changeQuery({storeId:e.target.value,page:'1'})}/><Button onClick={()=>{void load()}} disabled={busy&&!invalidQuery}>Qayta tekshirish</Button></ListFilter>
+  {invalidQuery?<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>:error?<p role="alert" className="text-red-700">{error}</p>:busy?<LoadingSpinner/>:<>
    <p role="status">Aniqlangan farqlar: {total}</p>
-   {rows.length>0 && <div className="overflow-auto bg-white border rounded-xl"><table className="w-full text-sm"><thead><tr><th className="p-3 text-left">Filial</th>{columns.map(key=><th key={key} className="p-3 text-left">{labels[key]}</th>)}</tr></thead><tbody>{rows.map((row,index)=><tr key={index} className="border-t"><td className="p-3">{stores.find(store=>store.id===row.storeId)?.name??String(row.storeId)}</td>{columns.map(key=><td key={key} className="p-3">{String(row[key]??'—')}</td>)}</tr>)}</tbody></table></div>}
-   <div className="flex gap-2"><Button disabled={page===1} onClick={()=>setPage(old=>old-1)}>Oldingi</Button><span>{page}</span><Button disabled={page*50>=total} onClick={()=>setPage(old=>old+1)}>Keyingi</Button></div>
+   {rows.length>0 && <div className="overflow-auto bg-white border rounded-xl"><DataTable className="text-sm"><thead><tr><th className="p-3 text-left">Filial</th>{columns.map(key=><th key={key} className="p-3 text-left">{labels[key]}</th>)}</tr></thead><tbody>{rows.map((row,index)=><tr key={index} className="border-t"><td className="p-3">{stores.find(store=>store.id===row.storeId)?.name??String(row.storeId)}</td>{columns.map(key=><td key={key} className="p-3">{String(row[key]??'—')}</td>)}</tr>)}</tbody></DataTable></div>}
+   {!rows.length&&<p>Tanlangan filtrda tafovut yo‘q.</p>}
   </>}
+  <Pagination page={page} pages={Math.ceil(total/limit)} busy={busy&&!invalidQuery} blocked={invalidQuery||!!error} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void load()}}/>
  </div>
 }

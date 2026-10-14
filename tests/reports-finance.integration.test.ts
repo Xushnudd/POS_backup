@@ -870,6 +870,9 @@ test('Damaged return locations and write-off journals are atomic, frozen, immuta
  assert.equal((await GET(req('/inventory/dispositions',cashier.cookie),undefined)).status,403);
  assert.equal((await GET(req('/inventory/dispositions?storeId='+foreign.store.id,admin.cookie),undefined)).status,404);
  const otherStore=await prisma.store.create({data:{organizationId:f.org.id,name:'Unassigned'}});const unassigned=await actor(f.org.id,otherStore.id,'admin');assert.equal((await (await GET(req('/inventory/dispositions',unassigned.cookie),undefined)).json()).data.length,0);
+ for(const format of ['', '&format=csv'])assert.equal((await GET(req('/inventory/dispositions?storeId='+f.store.id+format,unassigned.cookie),undefined)).status,404);
+ const {queryInventoryDispositions}=await import('@/server/exports/queries/inventory-dispositions');
+ await assert.rejects(queryInventoryDispositions(unassigned.context,req('/inventory/dispositions?storeId='+f.store.id,unassigned.cookie)),{code:'NOT_FOUND'});
  const csv=await GET(req('/inventory/dispositions?format=csv',f.cookie),undefined);assert.equal(csv.status,200);assert.match((await csv.json()).data.content,/Brak qaytarmalari/);
  await assert.rejects(()=>prisma.returnDispositionEntry.update({where:{id:entries[0].id},data:{quantity:100}}));await assert.rejects(()=>prisma.returnDispositionEntry.delete({where:{id:entries[0].id}}));
  const location=await prisma.damageLocation.findFirstOrThrow({where:{organizationId:f.org.id}});await assert.rejects(()=>prisma.damageLocation.update({where:{id:location.id},data:{storeId:otherStore.id}}));
@@ -1207,3 +1210,98 @@ test('Release ledger acceptance: purchase, split cash/credit sale, partial retur
  for(const dimension of ['product','category','cashier','store','payment']){const response=await breakdowns(req('/reports/breakdowns?dimension='+dimension+'&storeId='+f.store.id,f.cookie),undefined);assert.equal(response.status,200);const body=await response.json();assert.equal(body.summary.netSales,'200');if(dimension!=='payment'){assert.equal(body.summary.cogs,'100');assert.equal(body.summary.grossProfit,'100')}}
  for(const kind of ['inventory','sales','returns','shifts']){const response=await reconciliation(req('/reports/reconciliation?kind='+kind+'&storeId='+f.store.id,f.cookie),undefined);assert.equal(response.status,200);const body=await response.json();assert.deepEqual(body.data,[]);assert.equal(body.pagination.total,0)}
 })
+
+test('Original disposition journal global pages and filtered export retain frozen values and never admit an explicit unassigned branch',async()=>{
+ const f=await fixture(43),sale=await createDraft(f.context,{...f.draft,items:[{productId:f.product.id,quantity:'43',discountAmount:0}]},randomUUID());await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:'4300'}]},randomUUID());
+ await prisma.product.update({where:{id:f.product.id},data:{name:'New current name',costPrice:'999'}});
+ for(let i=0;i<43;i++)await returnSale(f.context,sale.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Original unit inspected as damaged',items:[{saleItemId:sale.items[0].id,quantity:'1',disposition:'damaged'}]});
+ const {GET}=await import('@/app/api/inventory/dispositions/route');const ids:string[]=[];
+ for(let page=1;page<=3;page++){
+  const response=await GET(req('/inventory/dispositions?search=Frozen&sort=oldest&limit=20&page='+page,f.cookie),undefined);assert.equal(response.status,200);const result=await response.json();assert.equal(result.pagination.total,43);assert.ok(result.data.every((row:{productName:string;unitCost:string})=>row.productName==='Frozen'&&row.unitCost==='50'));ids.push(...result.data.map((row:{id:string})=>row.id));assert.equal(result.summary[0]._sum.quantity,'43');
+ }
+ assert.equal(new Set(ids).size,43);
+ const csv=await GET(req('/inventory/dispositions?search=Frozen&sort=oldest&format=csv&page=3',f.cookie),undefined);assert.equal((await csv.json()).data.content.split('\r\n').filter(Boolean).length,44);
+ const zero=await GET(req('/inventory/dispositions?search=New%20current%20name',f.cookie),undefined);assert.equal((await zero.json()).pagination.total,0);
+ for(const bad of ['page=0','sort=actorId','limit=201'])assert.equal((await GET(req('/inventory/dispositions?'+bad,f.cookie),undefined)).status,400);
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toFixed(),'0');
+ assert.equal((await prisma.payment.aggregate({where:{saleId:sale.id,direction:'out'},_sum:{amount:true}}))._sum.amount?.toFixed(2),'4300.00');
+});
+
+test('Replenishment search/global suggested quantity sorting covers every product and retains default minimum-only advice',async()=>{
+ const f=await fixture(2);await prisma.product.update({where:{id:f.product.id},data:{minStock:'7'}});
+ const {GET}=await import('@/app/api/reports/replenishment/route');
+ const minimum=await GET(req('/reports/replenishment?storeId='+f.store.id+'&search=Frozen',f.cookie),undefined);assert.equal(minimum.status,200);const first=(await minimum.json()).data[0];assert.equal(first.minimum,'7');assert.equal(first.minimumOnly,true);assert.equal(first.suggestedQuantity,'5');
+ await prisma.product.createMany({data:Array.from({length:43},(_,i)=>({organizationId:f.org.id,name:'Restock list '+String(i).padStart(3,'0'),sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'10',costPrice:'2',minStock:String(i+1)}))});
+ const names:string[]=[];
+ for(let page=1;page<=3;page++){const response=await GET(req('/reports/replenishment?storeId='+f.store.id+'&search=Restock%20list&sort=suggested_desc&limit=20&page='+page,f.cookie),undefined);assert.equal(response.status,200);const result=await response.json();assert.equal(result.pagination.total,43);names.push(...result.data.map((row:{productName:string})=>row.productName));}
+ assert.deepEqual(names,Array.from({length:43},(_,i)=>'Restock list '+String(42-i).padStart(3,'0')));
+ assert.equal((await(await GET(req('/reports/replenishment?search=NO-SUCH-RESTOCK',f.cookie),undefined)).json()).pagination.total,0);
+ assert.equal((await GET(req('/reports/replenishment?sort=costPrice',f.cookie),undefined)).status,400);
+ assert.equal((await prisma.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}}})).quantity.toFixed(),'2');
+});
+
+test('Financial report filtered search/global sorts/counts/export retain one cutoff and exact source totals across large datasets',async()=>{
+ const f=await fixture(0),{confirmStockDocument}=await import('@/server/inventory/documents'),{registerSupplierInvoice}=await import('@/server/purchases/suppliers');
+ const products=[];
+ for(let i=0;i<43;i++){
+  const supplier=await prisma.supplier.create({data:{organizationId:f.org.id,name:'Report supplier '+String(i).padStart(3,'0')}}),product=await prisma.product.create({data:{organizationId:f.org.id,name:'Report product '+String(i).padStart(3,'0'),sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'100',costPrice:String(i+1)}});products.push(product);
+  const doc=await prisma.stockDocument.create({data:{organizationId:f.org.id,storeId:f.store.id,supplierId:supplier.id,documentType:'purchase',documentNo:'REPORT-'+String(i).padStart(3,'0'),createdBy:f.user.id,items:{create:{productId:product.id,quantity:'1',unitCost:String(i+1)}}}});await confirmStockDocument(f.context,doc.id);
+  await registerSupplierInvoice(f.context,{operationId:randomUUID(),supplierId:supplier.id,stockDocumentId:doc.id,referenceNo:doc.documentNo,reason:'Actual source-backed report fixture invoice'});
+ }
+ const sale=await createDraft(f.context,{...f.draft,items:products.map(product=>({productId:product.id,quantity:'1',discountAmount:0}))},randomUUID());await completeSale(f.context,sale.id,{payments:[{paymentType:'cash',amount:'4300'}]},randomUUID());
+ const cutoff=new Date().toISOString(),{GET:purchases}=await import('@/app/api/reports/purchases/route'),{GET:breakdowns}=await import('@/app/api/reports/breakdowns/route'),{GET:balances}=await import('@/app/api/reports/supplier-balances/route');
+ for(const view of ['history','comparison']){
+  const names:string[]=[];
+  for(let page=1;page<=3;page++){
+   const response=await purchases(req('/reports/purchases?'+new URLSearchParams({view,sort:'value_desc',search:'Report product',asOf:cutoff,page:String(page),limit:'20'}),f.cookie),undefined);assert.equal(response.status,200);const result=await response.json();assert.equal(result.pagination.total,43);assert.equal(result.data.summary.netPurchaseValue,'946');assert.equal(result.data.meta.asOf,cutoff);names.push(...result.data.rows.map((r:{productName:string})=>r.productName));
+  }
+  assert.deepEqual(names,Array.from({length:43},(_,i)=>'Report product '+String(42-i).padStart(3,'0')));
+ }
+ const supplierNames:string[]=[],productNames:string[]=[];
+ for(let page=1;page<=3;page++){
+  const a=await balances(req('/reports/supplier-balances?'+new URLSearchParams({sort:'unpaid_desc',search:'Report supplier',asOf:cutoff,page:String(page),limit:'20'}),f.cookie),undefined);assert.equal(a.status,200);const b=await a.json();assert.equal(b.pagination.total,43);assert.equal(b.data.summary.unpaid,'946');supplierNames.push(...b.data.rows.map((r:{supplierName:string})=>r.supplierName));
+  const c=await breakdowns(req('/reports/breakdowns?'+new URLSearchParams({dimension:'product',sort:'name_desc',search:'Report product',asOf:cutoff,page:String(page),limit:'20'}),f.cookie),undefined);assert.equal(c.status,200);const d=await c.json();assert.equal(d.pagination.total,43);assert.equal(d.summary.netSales,'4300');assert.equal(d.summary.cogs,'946');productNames.push(...d.data.map((r:{name:string})=>r.name));
+ }
+ assert.deepEqual(supplierNames,Array.from({length:43},(_,i)=>'Report supplier '+String(42-i).padStart(3,'0')));assert.deepEqual(productNames,Array.from({length:43},(_,i)=>'Report product '+String(42-i).padStart(3,'0')));
+ const one=await breakdowns(req('/reports/breakdowns?'+new URLSearchParams({dimension:'product',search:'Report product 042',asOf:cutoff}),f.cookie),undefined);const oneData=await one.json();assert.equal(oneData.pagination.total,1);assert.equal(oneData.summary.netSales,'100');assert.equal(oneData.summary.cogs,'43');
+ for(const [path,handler] of [['/reports/purchases',purchases],['/reports/breakdowns',breakdowns],['/reports/supplier-balances',balances]] as const){
+  assert.equal((await handler(req(path+'?sort=secretToken',f.cookie),undefined)).status,400);
+  const zero=await handler(req(path+'?search=NO-SUCH-REPORT-GROUP',f.cookie),undefined);assert.equal(zero.status,200);assert.equal((await zero.json()).pagination.total,0);
+ }
+ for(const [path,handler,params,lines] of [['/reports/purchases',purchases,{view:'history',sort:'value_desc',search:'Report product'},44],['/reports/supplier-balances',balances,{sort:'unpaid_desc',search:'Report supplier'},44],['/reports/breakdowns',breakdowns,{dimension:'product',sort:'name_desc',search:'Report product'},47]] as const){
+  const response=await handler(req(path+'?'+new URLSearchParams({...params,asOf:cutoff,page:'3',format:'csv'}),f.cookie),undefined);assert.equal(response.status,200);assert.equal((await response.json()).data.content.split('\r\n').filter(Boolean).length,lines);
+ }
+ assert.equal((await prisma.payment.aggregate({where:{saleId:sale.id},_sum:{amount:true}}))._sum.amount?.toFixed(2),'4300.00');assert.equal(await prisma.supplierInvoice.count({where:{organizationId:f.org.id}}),43);
+});
+
+test('Main sale/product report row search and amount sorts cover all sources while period summary and complete filtered exports stay explicit',async()=>{
+ const f=await fixture(0),{confirmStockDocument}=await import('@/server/inventory/documents'),products=[];
+ for(let i=1;i<=43;i++)products.push(await prisma.product.create({data:{organizationId:f.org.id,name:'Main report product '+String(i).padStart(3,'0'),sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:String(i),costPrice:'1'}}));
+ const doc=await prisma.stockDocument.create({data:{organizationId:f.org.id,storeId:f.store.id,documentType:'purchase',documentNo:randomUUID(),createdBy:f.user.id,items:{create:products.map(product=>({productId:product.id,quantity:'1',unitCost:'1'}))}}});await confirmStockDocument(f.context,doc.id);
+ const customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Unique main report customer',phone:randomUUID()}});let lastSale='';
+ for(const [i,product] of products.entries()){const draft=await createDraft(f.context,{...f.draft,customerId:i===42?customer.id:undefined,items:[{productId:product.id,quantity:'1',discountAmount:0}]},randomUUID());await completeSale(f.context,draft.id,{payments:[{paymentType:'cash',amount:String(i+1)}]},randomUUID());lastSale=draft.id;}
+ const cutoff=new Date().toISOString(),amounts:string[]=[],names:string[]=[];
+ for(let page=1;page<=3;page++){
+  const a=await salesReport(req('/reports/sales?'+new URLSearchParams({organizationId:f.org.id,asOf:cutoff,sort:'amount_desc',page:String(page),limit:'20'}),f.cookie),undefined);assert.equal(a.status,200);const b=await a.json();assert.equal(b.pagination.total,43);assert.equal(b.meta.periodSaleCount,43);assert.equal(b.summary.totalRevenue,'946');amounts.push(...b.data.map((row:{totalAmount:string})=>row.totalAmount));
+  const c=await productReport(req('/reports/products?'+new URLSearchParams({organizationId:f.org.id,asOf:cutoff,sort:'amount_desc',page:String(page),limit:'20'}),f.cookie),undefined);assert.equal(c.status,200);const d=await c.json();assert.equal(d.pagination.total,43);names.push(...d.data.map((row:{name:string})=>row.name));
+ }
+ assert.deepEqual(amounts,Array.from({length:43},(_,i)=>String(43-i)));assert.deepEqual(names,Array.from({length:43},(_,i)=>'Main report product '+String(43-i).padStart(3,'0')));
+ const one=await salesReport(req('/reports/sales?'+new URLSearchParams({organizationId:f.org.id,asOf:cutoff,search:'Unique main report customer'}),f.cookie),undefined);const result=await one.json();assert.equal(result.pagination.total,1);assert.equal(result.data[0].id,lastSale);assert.equal(result.summary.totalRevenue,'946');assert.equal(result.meta.summaryScope,'complete_period_before_row_search');
+ for(const [path,handler] of [['/reports/sales',salesReport],['/reports/products',productReport]] as const){
+  const zero=await handler(req(path+'?organizationId='+f.org.id+'&search=NO-SUCH-ROW',f.cookie),undefined);assert.equal(zero.status,200);assert.equal((await zero.json()).pagination.total,0);
+  assert.equal((await handler(req(path+'?organizationId='+f.org.id+'&sort=unitCost',f.cookie),undefined)).status,400);
+  const csv=await handler(req(path+'?'+new URLSearchParams({organizationId:f.org.id,search:path.endsWith('sales')?'Unique main report customer':'Main report product',sort:'amount_desc',format:'csv',page:'3',asOf:cutoff}),f.cookie),undefined);assert.equal(csv.status,200);const text=(await csv.json()).data.content as string;if(path.endsWith('sales')){assert.equal(text.split('\r\n').filter(line=>line.startsWith('"sale",')).length,1);assert.match(text,/Yig‘indilar doirasi/);}else assert.equal(text.split('\r\n').filter(Boolean).length,50);
+ }
+});
+
+
+test('Price history global read filters and CSV retain all original bulk postings without exposing owner costs to administrators',async()=>{
+ const f=await fixture(0),{changePrices,priceBatchSchema}=await import('@/server/catalog/prices'),{GET}=await import('@/app/api/products/prices/route');
+ const products=await Promise.all(Array.from({length:43},(_,i)=>prisma.product.create({data:{organizationId:f.org.id,name:'Price list product '+String(i).padStart(3,'0'),sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'10',costPrice:'1'}})));
+ const input=priceBatchSchema.parse({operationId:randomUUID(),field:'salePrice',reason:'Actual reviewed bulk price list source',preview:true,items:products.map((product,i)=>({productId:product.id,expected:'10',value:String(i+11)}))}),preview=await changePrices(f.context,input);await changePrices(f.context,{...input,preview:false,confirmationHash:preview.confirmationHash});
+ const ids:string[]=[];for(let page=1;page<=3;page++){const response=await GET(req('/products/prices?'+new URLSearchParams({field:'salePrice',search:'catalog.bulk',sort:'oldest',page:String(page),limit:'20'}),f.cookie),undefined);assert.equal(response.status,200);const result=await response.json();assert.equal(result.pagination.total,43);ids.push(...result.data.map((row:{id:string})=>row.id));}
+ assert.equal(new Set(ids).size,43);const csv=await GET(req('/products/prices?field=salePrice&search=catalog.bulk&sort=oldest&page=3&format=csv',f.cookie),undefined);assert.equal(csv.status,200);assert.equal((await csv.json()).data.content.split('\r\n').filter(Boolean).length,44);
+ assert.equal((await(await GET(req('/products/prices?search=NO-SUCH-PRICE',f.cookie),undefined)).json()).pagination.total,0);assert.equal((await GET(req('/products/prices?sort=oldValue',f.cookie),undefined)).status,400);
+ const admin=await actor(f.org.id,f.store.id,'admin');assert.equal((await GET(req('/products/prices?field=costPrice&search=Price',admin.cookie),undefined)).status,403);
+ assert.equal(await prisma.auditLog.count({where:{organizationId:f.org.id,action:'prices_changed'}}),1);
+});

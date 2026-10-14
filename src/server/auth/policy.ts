@@ -13,8 +13,8 @@ export function tenantScope(model: string, context: TenantScopeContext): Record<
   const stores = context.role === 'owner' ? { organizationId: org } : { organizationId: org, id: { in: context.storeIds } }
   const storeRelation = { store: stores }
   switch (model) {
-    case 'LoyaltyRedemption': return {organizationId:org,sale:tenantScope('Sale',context)};
-    case 'LoyaltyRecoveryTransfer': case 'LoyaltyPointLot': case 'LoyaltyPointEntry': case 'LoyaltyPolicyVersion': case 'ReportSchedule': case 'ReportScheduleRun':
+    case 'LoyaltyBenefitSelection': case 'GiftCheckout': case 'LoyaltyRedemption': return {organizationId:org,sale:tenantScope('Sale',context)};
+    case 'LoyaltyCard': case 'LoyaltyPromotion': case 'GiftCertificate': case 'LoyaltyRecoveryTransfer': case 'LoyaltyPointLot': case 'LoyaltyPointEntry': case 'LoyaltyPolicyVersion': case 'ReportSchedule': case 'ReportScheduleRun':
       if(context.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED');
       return {organizationId:org};
     case 'SerialNumber': case 'SerialEvent': case 'Warranty': return {organizationId:org,...(context.role==='owner'?{}:{storeId:{in:context.storeIds}})}

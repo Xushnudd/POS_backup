@@ -1,5 +1,10 @@
 // Every model is explicitly classified. Shared identities/configuration require separate authorization.
 export const TENANT_DIRECT_MODELS = [
+  "LoyaltyCard",
+  "LoyaltyPromotion",
+  "LoyaltyBenefitSelection",
+  "GiftCertificate",
+  "GiftCheckout",
   "LoyaltyPolicyVersion",
   "LoyaltyPointLot",
   "LoyaltyPointEntry",

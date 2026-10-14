@@ -8,6 +8,7 @@ import {scopedPrisma} from "@/server/auth/scoped-prisma"
 import {NextResponse} from "next/server"
 import type {NextRequest} from 'next/server'
 import type {TokenPayload} from '@/lib/auth'
+import {parseListQuery,namedListSorts} from '@/lib/list-query'
 // Shared authorized query. HTTP authentication remains in the route wrapper.
 export async function querySuppliers(payload:TokenPayload,request:NextRequest) {
   try {
@@ -23,19 +24,18 @@ export async function querySuppliers(payload:TokenPayload,request:NextRequest) {
       )
     }
 
-    const search=searchParams.get('search')?.trim()??''
-    if(search.length>200)throw new AccessError(400,'INVALID_FILTER')
+    let query;try{query=parseListQuery(searchParams,namedListSorts,'name_asc')}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+    const {search,page,limit,skip,sort}=query
+    const orderBy=sort==='newest'||sort==='oldest'?[{createdAt:sort==='newest'?'desc' as const:'asc' as const},{id:'asc' as const}]:[{name:sort==='name_desc'?'desc' as const:'asc' as const},{id:'asc' as const}]
     const where={organizationId,...activeStatus(searchParams,payload),...(search?{OR:[{name:{contains:search,mode:'insensitive' as const}},{phone:{contains:search}},{tin:{contains:search}}]}:{})}
-    const page=Number(searchParams.get('page')??1),limit=Number(searchParams.get('limit')??20)
-    if((page-1)*limit>2147483647)throw new AccessError(400,'INVALID_PAGINATION')
     const exporting=searchParams.get('format')==='csv'
     if(exporting)await consumeLimit('supplier.export',payload.organizationId+':'+payload.userId,10,60000)
-    const paginated=['status','search','page','limit'].some(key=>searchParams.has(key))
+    const paginated=['status','search','sort','page','limit'].some(key=>searchParams.has(key))
     const result=await db.$transaction(async tx=>{
       await assertLiveContext(tx,payload)
       const total=await tx.supplier.count({where})
       if(exporting&&total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
-      const rows=exporting?await cursorExport(cursor=>tx.supplier.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],...(!exporting&&paginated?{skip:(page-1)*limit,take:limit}:{}),take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})})):await tx.supplier.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],...(!exporting&&paginated?{skip:(page-1)*limit,take:limit}:{})})
+      const rows=exporting?await cursorExport(cursor=>tx.supplier.findMany({where,orderBy,take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})})):await tx.supplier.findMany({where,orderBy,...(paginated?{skip,take:limit}:{})})
       if(exporting)return {success:true,data:{filename:'suppliers-'+payload.organizationId+'.csv',content:csv([['ID','Nomi','Telefon','STIR','Manzil','Izoh','Bank','Bank hisob raqami','To‘lov/yetkazish shartlari','Faol'],...rows.map(row=>[row.id,row.name,row.phone,row.tin,row.address,row.note,row.bankName,row.bankAccount,row.paymentTerms,row.isActive?'ha':'yo‘q'])])}}
       return {success:true,data:rows,...(paginated?{pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}:{})}
     },{isolationLevel:'RepeatableRead'})

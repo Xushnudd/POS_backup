@@ -1,5 +1,10 @@
 // Reviewed schema coverage: new models require an explicit export decision.
 export const DIRECT_MODELS = [
+  "LoyaltyCard",
+  "LoyaltyPromotion",
+  "LoyaltyBenefitSelection",
+  "GiftCertificate",
+  "GiftCheckout",
   "LoyaltyPolicyVersion",
   "LoyaltyPointLot",
   "LoyaltyPointEntry",
@@ -134,6 +139,8 @@ export const OMITTED_MODELS: Readonly<Record<string,string>> = {
 }
 export const SPECIAL_MODELS = ['Organization','User','BillingPlanVersion','SupportPolicyVersion'] as const
 export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
+ LoyaltyBenefitSelection:['sessionId'],
+ GiftCheckout:['sessionId'],
  LoyaltyRedemption:['sessionId'],
  Organization:['closureRevision'],
  BillingPlanVersion:['createdBy'], SupportPolicyVersion:['createdBy','reason'],
@@ -141,4 +148,4 @@ export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = "1132dbdf89c2a2351e7322f7aa812f04a9e9a6ed5933c1008629e1e538a4d445"
+export const REVIEWED_SCHEMA_SHA256 = "776dc2870216532e3eeff89d748eaccde279ea933fb0793de0e4985b4efcea1a"

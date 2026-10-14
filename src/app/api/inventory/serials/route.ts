@@ -4,7 +4,7 @@ import {withApi} from '@/server/api'
 import {getRequestToken,verifyToken} from '@/lib/auth'
 import {AccessError} from '@/server/auth/policy'
 import {listSerials} from '@/server/inventory/serials'
-const schema=z.object({storeId:z.string().uuid(),productId:z.string().uuid().optional(),receiptId:z.string().uuid().optional(),saleItemId:z.string().uuid().optional(),transferId:z.string().uuid().optional(),search:z.string().trim().max(100).optional(),state:z.enum(['available','sold','transit','damaged','retired']).optional(),page:z.coerce.number().int().min(1).max(10000).default(1)}).strict()
+const schema=z.object({storeId:z.string().uuid(),productId:z.string().uuid().optional(),receiptId:z.string().uuid().optional(),saleItemId:z.string().uuid().optional(),transferId:z.string().uuid().optional(),search:z.string().trim().max(100).optional(),state:z.enum(['available','sold','transit','damaged','retired']).optional(),page:z.coerce.number().int().min(1).max(10000).default(1),limit:z.coerce.number().int().min(1).max(200).default(50),sort:z.enum(['code_asc','code_desc','newest','oldest']).default('code_asc')}).strict()
 export const GET=withApi(async(request:NextRequest)=>{
  const ctx=await verifyToken(getRequestToken(request)??'');if(!ctx)throw new AccessError(401,'UNAUTHORIZED')
  const result=await listSerials(ctx,schema.parse(Object.fromEntries(request.nextUrl.searchParams)))

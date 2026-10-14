@@ -134,3 +134,20 @@ test('Atomic serialized exchange keeps return-before-resale native order and bin
  assert.equal(await prisma.warranty.count({where:{serialId:a.serials[0].id}}),2)
  assert.equal((await prisma.payment.aggregate({where:{organizationId:a.ctx.organizationId,direction:'in'},_sum:{amount:true}}))._sum.amount?.toFixed(),'20');assert.equal((await prisma.payment.aggregate({where:{organizationId:a.ctx.organizationId,direction:'out'},_sum:{amount:true}}))._sum.amount?.toFixed(),'10')
 })
+
+test('Actual source-linked serial list global code order, pages and defaults retain original receipt provenance',async()=>{
+ const a=await fixture(),supplier=await prisma.supplier.create({data:{organizationId:a.ctx.organizationId,name:'Paged serial source supplier'}});
+ const order=await createPurchaseOrder(a.ctx,{operationId:randomUUID(),storeId:a.store.id,supplierId:supplier.id,referenceNo:randomUUID(),reason:'Actual paged original serial source',items:[{productId:a.product.id,quantity:'43',unitCost:'2'}]});
+ const codes=Array.from({length:43},(_,i)=>'PAGE-'+String(i).padStart(3,'0'));
+ const received=await receivePurchaseOrder(a.ctx,order.id,{operationId:randomUUID(),referenceNo:randomUUID(),reason:'Actual source linked paged serial receipt',items:[{orderItemId:order.items[0].id,quantity:'43',serialInput:codes}]});
+ const collected:string[]=[];
+ for(let page=1;page<=3;page++){
+  const result=await listSerials(a.ctx,{storeId:a.store.id,page,limit:20,sort:'code_desc',search:'PAGE-'});assert.equal(result.total,43);assert.equal(result.limit,20);collected.push(...result.data.map(row=>row.code));
+ }
+ assert.deepEqual(collected,codes.slice().reverse());
+ assert.equal((await listSerials(a.ctx,{storeId:a.store.id,page:1})).limit,50);
+ assert.equal((await listSerials(a.ctx,{storeId:a.store.id,page:1,search:'NO-SUCH-SERIAL'})).total,0);
+ assert.equal(await prisma.serialEvent.count({where:{sourceId:received.stockDocument.id,kind:'receipt'}}),43);
+ await assert.rejects(listSerials(a.ctx,{storeId:a.store.id,page:1,limit:201}));
+ await assert.rejects(listSerials(a.ctx,{storeId:a.store.id,page:1,sort:'unitCost' as 'code_asc'}));
+});

@@ -22,3 +22,27 @@ test('Preserved legacy duplicate diagnosis is paginated, normalized, owner-only 
  await mergeCustomer(f.ctx,{operationId:randomUUID(),sourceCustomerId:a,targetCustomerId:b,reason:'Reviewed preserved legacy duplicates'});assert.equal((await(await list()).json()).pagination.total,0);assert.equal(await prisma.customer.count({where:{id:{in:[a,b]}}}),2);assert.equal((await prisma.customer.findUniqueOrThrow({where:{id:a}})).phone,'901234567');assert.equal((await prisma.customer.findUniqueOrThrow({where:{id:b}})).phone,'+998 (90) 123-45-67');
  await prisma.organizationUser.create({data:{organizationId:f.org.id,userId:foreign.user.id,role:'owner'}});await prisma.organizationUser.update({where:{id:f.member.id},data:{role:'admin'}});assert.equal((await list()).status,403);
 });
+
+
+test('Original customer sales history and variant lists cover global sorted pages, bounded filters and preserve original tenant amounts',async()=>{
+ const f=await fixture('Identity lists'),customer=await prisma.customer.create({data:{organizationId:f.org.id,fullName:'Identity list buyer',phone:'legacy-list-buyer'}});
+ await prisma.inventoryBalance.update({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}},data:{quantity:'43'}});
+ const sales:string[]=[];
+ for(let i=0;i<43;i++){const sale=await createDraft(f.ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:f.shift.registerId,shiftId:f.shift.id,customerId:customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID());await completeSale(f.ctx,sale.id,{payments:[{paymentType:'cash',amount:'10.25'}]},randomUUID());sales.push(sale.id);}
+ const read:string[]=[];for(let page=1;page<=3;page++){const result=await customerHistory(f.ctx,customer.id,new URLSearchParams({page:String(page),limit:'20',sort:'oldest'}));assert.equal(result.pagination.total,43);read.push(...result.rows.map(row=>row.id));}assert.deepEqual(read,sales);
+ const last=await prisma.sale.findUniqueOrThrow({where:{id:sales[42]}});assert.equal((await customerHistory(f.ctx,customer.id,new URLSearchParams({search:last.receiptNo}))).pagination.total,1);
+ assert.equal((await customerHistory(f.ctx,customer.id,new URLSearchParams({search:'NO-SUCH-RECEIPT'}))).pagination.total,0);await assert.rejects(customerHistory(f.ctx,customer.id,new URLSearchParams('sort=costPrice')));await assert.rejects(customerHistory(f.ctx,customer.id,new URLSearchParams('page=0')));
+ const {createVariant,listVariants}=await import('@/server/catalog/variants');
+ for(let i=0;i<43;i++)await createVariant(f.ctx,f.product.id,{operationId:randomUUID(),name:'Variant list child '+String(i).padStart(3,'0'),sku:randomUUID(),barcode:randomUUID(),salePrice:String(i+1),reason:'Actual catalog variant source for list acceptance',options:[{name:'size',value:String(i)}]});
+ const names:string[]=[];for(let page=1;page<=3;page++){const result=await listVariants(f.ctx,f.product.id,new URLSearchParams({page:String(page),limit:'20',sort:'price_desc',search:'Variant list child'}));assert.equal(result.pagination.total,43);names.push(...result.data.map(row=>row.name));assert.ok(result.data.every(row=>!('costPrice' in row)));}assert.deepEqual(names,Array.from({length:43},(_,i)=>'Variant list child '+String(42-i).padStart(3,'0')));
+ assert.equal((await listVariants(f.ctx,f.product.id,new URLSearchParams('search=NO-SUCH-VARIANT'))).pagination.total,0);await assert.rejects(listVariants(f.ctx,f.product.id,new URLSearchParams('sort=costPrice')));await assert.rejects(listVariants(f.ctx,f.product.id,new URLSearchParams('limit=201')));
+ assert.equal((await prisma.payment.aggregate({where:{sale:{organizationId:f.org.id}},_sum:{amount:true}}))._sum.amount?.toFixed(2),'440.75');
+});
+
+test('Preserved legacy duplicate global names filter only presentation, retains group size and never creates or merges customers',async()=>{
+ const f=await fixture('Duplicate lists'),{customerDuplicates}=await import('@/server/customers/identity');
+ await prisma.$transaction(async tx=>{await tx.$executeRawUnsafe('SET LOCAL session_replication_role = replica');for(let i=0;i<43;i++)await tx.$executeRaw`INSERT INTO "Customer" (id,"organizationId","fullName",phone,"updatedAt") VALUES (${randomUUID()},${f.org.id},${'Legacy list '+String(i).padStart(3,'0')},'901234567',NOW())`});
+ const names:string[]=[];for(let page=1;page<=3;page++){const result=await customerDuplicates(f.ctx,new URLSearchParams({page:String(page),limit:'20',sort:'name_desc',search:'Legacy list'}));assert.equal(result.pagination.total,43);assert.ok(result.data.every(row=>row.duplicates===43));names.push(...result.data.map(row=>row.fullName));}assert.deepEqual(names,Array.from({length:43},(_,i)=>'Legacy list '+String(42-i).padStart(3,'0')));
+ const result=await customerDuplicates(f.ctx,new URLSearchParams('search=Legacy+list+042'));assert.equal(result.pagination.total,1);assert.equal(result.data[0].duplicates,43);await assert.rejects(customerDuplicates(f.ctx,new URLSearchParams('page=0')));await assert.rejects(customerDuplicates(f.ctx,new URLSearchParams('sort=phone')));
+ assert.equal(await prisma.customer.count({where:{organizationId:f.org.id}}),43);assert.equal(await prisma.auditLog.count({where:{organizationId:f.org.id,action:'customer_merged'}}),0);
+});

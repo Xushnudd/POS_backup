@@ -1,0 +1,170 @@
+import test,{after} from 'node:test';
+import assert from 'node:assert/strict';
+import {randomUUID,randomBytes} from 'node:crypto';
+import {prisma} from '@/lib/prisma';
+import {createAccount} from '@/server/finance/accounts';
+import {publishLoyaltyPolicy} from '@/server/loyalty/policy';
+import {issueGift,redeemGift,refundGift,listGifts,checkoutGift,saleGiftChoices} from '@/server/loyalty/gifts';
+import type {LoyaltyPolicy} from '@/server/loyalty/calculations';
+import {createDraft,completeSale,completeSaleTx} from '@/server/sales/service';
+import {readPointWallet} from '@/server/loyalty/wallet';
+import {returnSale} from '@/server/returns/service';
+import {allocateAdvance,refundAdvance} from '@/server/customers/advances';
+import {postDebtDocument,debtDocumentSchema} from '@/server/customers/ledger';
+import {sessionHash,verifySession} from '@/server/auth/session';
+const url=new URL(process.env.DATABASE_URL??'');
+if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.pathname!=='/pos_test'||url.username!=='pos_test')throw Error('Isolated pos_test only');
+const organizations:string[]=[],users:string[]=[];
+after(async()=>{await prisma.organization.deleteMany({where:{id:{in:organizations}}});await prisma.user.deleteMany({where:{id:{in:users}}});await prisma.$disconnect();});
+const configuration:LoyaltyPolicy={points:{enabled:false,earnMoneyPerPoint:'1',redeemMoneyPerPoint:'1',maxRedeemPercent:'0',minEligibleNet:'0',expiryDays:null,earnOnDiscountedSales:false,earnOnCreditSales:false},cards:{enabled:false,discountPercent:'0',validityDays:null},promos:{enabled:false,allowStackingWithCard:false,allowStackingWithPoints:false},gifts:{enabled:true,minIssueAmount:'1',maxIssueAmount:'1000',validityDays:30,allowUnusedCashRefund:false}};
+async function fixture(allowUnusedCashRefund=false){
+ const org=await prisma.organization.create({data:{name:'Gift source fixture',phone:randomUUID()}});organizations.push(org.id);
+ const user=await prisma.user.create({data:{fullName:'Gift owner',phone:randomUUID(),passwordHash:'not-a-login'}});users.push(user.id);
+ const member=await prisma.organizationUser.create({data:{organizationId:org.id,userId:user.id,role:'owner'}}),store=await prisma.store.create({data:{organizationId:org.id,name:'Gift branch'}}),register=await prisma.register.create({data:{storeId:store.id,name:'Gift till',code:randomUUID()}}),shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}});
+ const token=randomBytes(32).toString('base64url');await prisma.session.create({data:{organizationId:org.id,userId:user.id,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});const ctx=(await verifySession(token))!;
+ const account=await createAccount(ctx,{operationId:randomUUID(),storeId:store.id,registerId:register.id,name:'Gift cash',kind:'cash',openingBalance:0,reason:'Actual isolated cash account'}),customer=await prisma.customer.create({data:{organizationId:org.id,fullName:'Gift customer',phone:randomUUID(),creditLimit:1000}}),product=await prisma.product.create({data:{organizationId:org.id,name:'Gift goods',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:50}});
+ await prisma.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:10}});
+ const config={...configuration,gifts:{...configuration.gifts,allowUnusedCashRefund}},policy=await publishLoyaltyPolicy(ctx,{operationId:randomUUID(),expectedRevision:0,configuration:config,reason:'Explicit configured gift issuance terms'});
+ const issue=(amount='120.25')=>({operationId:randomUUID(),customerId:customer.id,policyVersionId:policy.id,code:'GIFT-'+randomUUID().replaceAll('-','').toUpperCase(),accountId:account.id,shiftId:shift.id,amount,reason:'Actual cash paid for assigned certificate'});
+ const sale=async()=>{const draft=await createDraft(ctx,{organizationId:org.id,storeId:store.id,registerId:register.id,shiftId:shift.id,customerId:customer.id,discountAmount:0,items:[{productId:product.id,quantity:1,discountAmount:0}]},randomUUID());await completeSale(ctx,draft.id,{payments:[{paymentType:'credit',amount:'100'}]},randomUUID());return draft;};
+ return {org,user,ctx,store,register,shift,account,customer,product,policy,config,issue,sale,token};
+}
+test('Actual cash certificate issue/replay, original sale allocation and goods cash refund conserve liability and cash once',async()=>{
+ const f=await fixture(true),body=f.issue();const [gift,replay]=await Promise.all([issueGift(f.ctx,body),issueGift(f.ctx,body)]);assert.equal(gift.id,replay.id);
+ assert.equal(await prisma.cashMovement.count({where:{shiftId:f.shift.id,movementType:'cash_in'}}),1);
+ assert.equal(await prisma.sale.count({where:{organizationId:f.org.id}}),0);
+ assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:''})).rows[0].liability,'120.25');
+ const sale=await f.sale(),spend={operationId:randomUUID(),giftId:gift.id,saleId:sale.id,amount:'100',customerConsent:true as const,reason:'Apply original certificate to actual goods sale'};
+ const [first,second]=await Promise.all([redeemGift(f.ctx,spend),redeemGift(f.ctx,spend)]);assert.equal(first.allocationId,second.allocationId);
+ assert.equal(await prisma.customerAdvanceAllocation.count({where:{advanceId:gift.advanceId}}),1);
+ const refund={operationId:randomUUID(),giftId:gift.id,accountId:f.account.id,shiftId:f.shift.id,amount:'20.25',reason:'Return permitted unused certificate funds'};
+ await refundGift(f.ctx,refund);await refundGift(f.ctx,refund);
+ const returned=await returnSale(f.ctx,sale.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Original goods paid with certificate returned',items:[{saleItemId:sale.items[0].id,quantity:1,disposition:'sellable'}]});
+ assert.equal(String(returned.settlement.cash),'100');
+ assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:body.code})).rows[0].liability,'0.00');
+ const incoming=await prisma.cashMovement.aggregate({where:{shiftId:f.shift.id,movementType:'cash_in'},_sum:{amount:true}}),outgoing=await prisma.cashMovement.aggregate({where:{shiftId:f.shift.id,movementType:'cash_out'},_sum:{amount:true}}),payments=await prisma.payment.aggregate({where:{shiftId:f.shift.id,direction:'out',paymentType:'cash'},_sum:{amount:true}});
+ assert.equal(incoming._sum.amount!.sub(outgoing._sum.amount!).sub(payments._sum.amount!).toFixed(2),'0.00');
+});
+test('Gift issuer limits/code collisions/foreign source roll back cash; native journals cannot be rewritten',async()=>{
+ const f=await fixture(),foreign=await fixture(),body=f.issue();
+ await assert.rejects(issueGift(f.ctx,{...body,amount:'1000.01'}),{code:'GIFT_ISSUE_LIMIT'});
+ assert.equal(await prisma.customerAdvance.count({where:{organizationId:f.org.id}}),0);
+ await assert.rejects(issueGift(f.ctx,{...body,customerId:foreign.customer.id}),{code:'CUSTOMER_NOT_FOUND'});
+ const gift=await issueGift(f.ctx,body);
+ await assert.rejects(issueGift(f.ctx,{...body,operationId:randomUUID()}),{code:'GIFT_CODE_EXISTS'});
+ assert.equal(await prisma.customerAdvance.count({where:{organizationId:f.org.id}}),1);
+ await assert.rejects(prisma.giftCertificate.update({where:{id:gift.id},data:{expiresAt:new Date('2099-01-01')}}));
+ await assert.rejects(prisma.giftCertificate.delete({where:{id:gift.id}}));
+ await assert.rejects(issueGift({...f.ctx,role:'admin'},f.issue()),{code:'OWNER_REQUIRED'});
+ assert.equal((await listGifts(foreign.ctx,{page:1,limit:20,query:body.code})).rows.length,0);
+ await assert.rejects(redeemGift(foreign.ctx,{operationId:randomUUID(),giftId:gift.id,saleId:randomUUID(),amount:'1',customerConsent:true,reason:'Foreign gift denied'}),{code:'NOT_FOUND'});
+});
+test('Original unused-refund terms and current spending suspension apply through the ordinary advance endpoints too',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue()),sale=await f.sale();
+ const cash={operationId:randomUUID(),advanceId:gift.advanceId,accountId:f.account.id,shiftId:f.shift.id,amount:'1',reason:'Bypass original gift refund term'};
+ await assert.rejects(refundAdvance(f.ctx,f.customer.id,cash));
+ await assert.rejects(refundGift(f.ctx,{operationId:randomUUID(),giftId:gift.id,accountId:f.account.id,shiftId:f.shift.id,amount:'1',reason:'Original unused cash refund is disallowed'}),{code:'GIFT_CASH_REFUND_DENIED'});
+ const debt=await postDebtDocument(f.ctx,f.customer.id,debtDocumentSchema.parse({operationId:randomUUID(),kind:'opening',amount:'10',reason:'Original non-sale opening balance'}));
+ await assert.rejects(allocateAdvance(f.ctx,f.customer.id,{operationId:randomUUID(),advanceId:gift.advanceId,targetKey:'document:'+debt.id,amount:'1',reason:'Gift cannot pay non-sale document'}));
+ await publishLoyaltyPolicy(f.ctx,{operationId:randomUUID(),expectedRevision:1,configuration:{...f.config,gifts:{...f.config.gifts,enabled:false}},reason:'Administrator suspends new gift spending'});
+ await assert.rejects(allocateAdvance(f.ctx,f.customer.id,{operationId:randomUUID(),advanceId:gift.advanceId,targetKey:'sale:'+sale.id,amount:'1',reason:'Suspended original gift cannot be spent'}));
+ const wallet=await listGifts(f.ctx,{page:1,limit:20,query:''});assert.equal(wallet.rows[0].liability,'120.25');assert.equal(wallet.rows[0].spendable,'0.00');
+ assert.equal(await prisma.customerAdvanceAllocation.count({where:{advanceId:gift.advanceId}}),0);
+});
+test('Two independent original operations cannot spend the same gift money twice',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue('100')),a=await f.sale(),b=await f.sale();
+ const base={giftId:gift.id,amount:'80',customerConsent:true as const,reason:'Competing actual original certificate spending'};
+ const outcomes=await Promise.allSettled([redeemGift(f.ctx,{...base,saleId:a.id,operationId:randomUUID()}),redeemGift(f.ctx,{...base,saleId:b.id,operationId:randomUUID()})]);
+ assert.equal(outcomes.filter(value=>value.status==='fulfilled').length,1);assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:''})).rows[0].liability,'20.00');
+});
+test('Zero-credit-limit customer: gift/cash checkout and duplicate original operation commit payment, stock and liability atomically',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue('70.25'));
+ await prisma.customer.update({where:{id:f.customer.id},data:{creditLimit:0}});
+ const draft=await createDraft(f.ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:f.register.id,shiftId:f.shift.id,customerId:f.customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID());
+ const body={operationId:randomUUID(),giftId:gift.id,giftAmount:'70.25',customerConsent:true as const,reason:'Actual prepaid gift and remaining cash checkout',payments:[{paymentType:'cash' as const,amount:'29.75'}],cashTendered:'40.00'};
+ const [a,b]=await Promise.all([checkoutGift(f.ctx,draft.id,body),checkoutGift(f.ctx,draft.id,body)]);assert.equal(a.id,b.id);assert.equal(String(a.cashChange),'10.25');
+ assert.deepEqual(a.giftFunding,{amount:'70.25',code:gift.code});
+ assert.equal(await prisma.customerAdvanceAllocation.count({where:{advanceId:gift.advanceId}}),1);
+ assert.equal(await prisma.inventoryMovement.count({where:{sourceId:draft.id,sourceType:'sale'}}),1);
+ assert.equal(String((await prisma.debtEntry.aggregate({where:{saleId:draft.id},_sum:{amount:true}}))._sum.amount),'0');
+ assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:''})).rows[0].liability,'0.00');
+ const returned=await returnSale(f.ctx,draft.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Original mixed prepaid gift goods returned',items:[{saleItemId:draft.items[0].id,quantity:1,disposition:'sellable'}]});assert.equal(String(returned.settlement.cash),'100');
+});
+test('Failed checkout keeps draft stock, credit and gift balance unchanged; original retry succeeds after stock recovery',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue('100'));
+ const draft=await createDraft(f.ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:f.register.id,shiftId:f.shift.id,customerId:f.customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID());
+ const body={operationId:randomUUID(),giftId:gift.id,giftAmount:'100',customerConsent:true as const,reason:'Exact full gift checkout rollback proof',payments:[]};
+ await prisma.inventoryBalance.update({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}},data:{quantity:0}});
+ await assert.rejects(checkoutGift(f.ctx,draft.id,body),{code:'INSUFFICIENT_STOCK'});
+ assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:draft.id}})).status,'draft');assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),0);assert.equal(await prisma.debtEntry.count({where:{saleId:draft.id}}),0);
+ assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:''})).rows[0].liability,'100.00');
+ await prisma.inventoryBalance.update({where:{storeId_productId:{storeId:f.store.id,productId:f.product.id}},data:{quantity:10}});
+ assert.equal((await checkoutGift(f.ctx,draft.id,body)).status,'completed');
+});
+test('Assigned cashier can use only their scoped sale/customer gift; issuance remains owner-only',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue('100'));
+ const user=await prisma.user.create({data:{fullName:'Gift cashier',phone:randomUUID(),passwordHash:'not-a-login'}});users.push(user.id);
+ const member=await prisma.organizationUser.create({data:{organizationId:f.org.id,userId:user.id,role:'cashier',userStores:{create:{storeId:f.store.id}}}});
+ const token=randomBytes(32).toString('base64url');await prisma.session.create({data:{organizationId:f.org.id,userId:user.id,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});const ctx=(await verifySession(token))!;
+ const register=await prisma.register.create({data:{storeId:f.store.id,name:'Assigned gift till',code:randomUUID()}}),shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}});
+ const draft=await createDraft(ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:register.id,shiftId:shift.id,customerId:f.customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID());
+ assert.equal((await saleGiftChoices(ctx,draft.id,{page:1,search:''})).rows[0].id,gift.id);
+ await assert.rejects(issueGift(ctx,f.issue()),{code:'OWNER_REQUIRED'});
+ const body={operationId:randomUUID(),giftId:gift.id,giftAmount:'100',customerConsent:true as const,reason:'Actual assigned cashier gift settlement',payments:[]};
+ assert.equal((await checkoutGift(ctx,draft.id,body)).status,'completed');
+ const ownerSale=await f.sale();await assert.rejects(saleGiftChoices(ctx,ownerSale.id,{page:1,search:''}),{code:'NOT_FOUND'});
+});
+test('Native source/currency proof and late checkout fault keep real cash, stock and liability consistent',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue('100'));
+ await assert.rejects(prisma.organization.update({where:{id:f.org.id},data:{currencyCode:'USD'}}));
+ const draft=await createDraft(f.ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:f.register.id,shiftId:f.shift.id,customerId:f.customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID());
+ const body={operationId:randomUUID(),giftId:gift.id,giftAmount:'100',customerConsent:true as const,reason:'Late gift source audit failure rollback',payments:[]};
+ const name='test_gift_fault_'+randomUUID().replaceAll('-','');
+ await prisma.$executeRawUnsafe(`CREATE FUNCTION ${name}() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."entityType"='GiftCertificate' AND NEW."entityId"='${gift.id}' AND NEW.action='gift_checkout' THEN RAISE EXCEPTION 'isolated gift audit fault'; END IF;RETURN NEW;END $$`);
+ await prisma.$executeRawUnsafe(`CREATE TRIGGER ${name} BEFORE INSERT ON "AuditLog" FOR EACH ROW EXECUTE FUNCTION ${name}()`);
+ try{await assert.rejects(checkoutGift(f.ctx,draft.id,body));}finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${name} ON "AuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${name}()`);}
+ assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:draft.id}})).status,'draft');
+ assert.equal(await prisma.customerAdvanceAllocation.count({where:{advanceId:gift.advanceId}}),0);
+ assert.equal(await prisma.payment.count({where:{saleId:draft.id}}),0);
+ assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:''})).rows[0].liability,'100.00');
+ assert.equal((await checkoutGift(f.ctx,draft.id,body)).status,'completed');
+});
+test('Actual gift HTTP uses strict inputs, safe DTO, current session and original customer-scoped sale',async()=>{
+ const f=await fixture(),{GET,POST}=await import('@/app/api/loyalty/gifts/route'),{GET:choicesAPI,POST:checkoutAPI}=await import('@/app/api/sales/[id]/gift/route'),{NextRequest}=await import('next/server');
+ const headers={cookie:'pos_session='+f.token,origin:'http://localhost:3000','content-type':'application/json'},base='http://localhost:3000/api/loyalty/gifts';
+ const command={action:'issue',...f.issue('100')};
+ assert.equal((await POST(new NextRequest(base,{method:'POST',headers,body:JSON.stringify({...command,provider:'fake-click'})}),undefined)).status,400);
+ const response=await POST(new NextRequest(base,{method:'POST',headers,body:JSON.stringify(command)}),undefined);assert.equal(response.status,200);const gift=(await response.json()).data;
+ assert.equal((await GET(new NextRequest(base+'?customerId='+f.customer.id,{headers}),undefined)).status,200);
+ const draft=await createDraft(f.ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:f.register.id,shiftId:f.shift.id,customerId:f.customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID()),params={params:Promise.resolve({id:draft.id})},saleURL='http://localhost:3000/api/sales/'+draft.id+'/gift';
+ const result=await choicesAPI(new NextRequest(saleURL,{headers}),params);assert.equal(result.status,200);const options=(await result.json()).data;
+ assert.deepEqual(Object.keys(options.rows[0]).sort(),['available','code','expiresAt','id']);
+ const checkout={operationId:randomUUID(),giftId:gift.id,giftAmount:'100',customerConsent:true,reason:'Original actual HTTP gift transaction',payments:[]};
+ assert.equal((await checkoutAPI(new NextRequest(saleURL,{method:'POST',headers,body:JSON.stringify({...checkout,customerConsent:false})}),params)).status,400);
+ const posted=await checkoutAPI(new NextRequest(saleURL,{method:'POST',headers,body:JSON.stringify(checkout)}),params);assert.equal(posted.status,200);
+ assert.equal((await checkoutAPI(new NextRequest(saleURL,{method:'POST',headers,body:JSON.stringify(checkout)}),params)).status,200);
+ assert.equal(await prisma.customerAdvanceAllocation.count({where:{advanceId:gift.advanceId}}),1);
+});
+test('Prepaid gift goods earn configured non-credit points once; an unfunded forged credit-exemption intent cannot commit',async()=>{
+ const f=await fixture(),gift=await issueGift(f.ctx,f.issue('200'));
+ await publishLoyaltyPolicy(f.ctx,{operationId:randomUUID(),expectedRevision:1,configuration:{...f.config,points:{...f.config.points,enabled:true,earnMoneyPerPoint:'10'}},reason:'Gift goods are paid, not a new customer loan'});
+ const draft=()=>createDraft(f.ctx,{organizationId:f.org.id,storeId:f.store.id,registerId:f.register.id,shiftId:f.shift.id,customerId:f.customer.id,discountAmount:0,items:[{productId:f.product.id,quantity:1,discountAmount:0}]},randomUUID());
+ const attempted=await draft();
+ await assert.rejects(prisma.$transaction(async tx=>{
+  await tx.giftCheckout.create({data:{organizationId:f.org.id,giftId:gift.id,saleId:attempted.id,amount:'100',createdBy:f.user.id,sessionId:f.ctx.sessionId}});
+  await completeSaleTx(tx,f.ctx,attempted.id,{payments:[{paymentType:'credit',amount:'100'}]},randomUUID());
+  // The production runOperation also forces deferred source constraints before
+  // acknowledging. Surface the proof inside this intentionally raw transaction.
+  await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`;
+ }));
+ assert.equal((await prisma.sale.findUniqueOrThrow({where:{id:attempted.id}})).status,'draft');
+ assert.equal(await prisma.loyaltyPointLot.count({where:{saleId:attempted.id}}),0);
+ assert.equal(await prisma.giftCheckout.count({where:{saleId:attempted.id}}),0);
+ const original={operationId:randomUUID(),giftId:gift.id,giftAmount:'100',customerConsent:true as const,reason:'Actual gift-funded non-credit reward receipt',payments:[]};
+ await checkoutGift(f.ctx,attempted.id,original);await checkoutGift(f.ctx,attempted.id,original);
+ assert.equal((await readPointWallet(f.ctx,f.customer.id)).availablePoints,'10');assert.equal(await prisma.loyaltyPointLot.count({where:{saleId:attempted.id}}),1);
+ const completed=await prisma.sale.findUniqueOrThrow({where:{id:attempted.id},include:{items:true}});
+ await returnSale(f.ctx,completed.id,{operationId:randomUUID(),shiftId:f.shift.id,reason:'Original prepaid rewarded goods refunded',items:[{saleItemId:completed.items[0].id,quantity:1,disposition:'sellable'}]});
+ assert.equal((await readPointWallet(f.ctx,f.customer.id)).availablePoints,'0');
+ assert.equal((await listGifts(f.ctx,{page:1,limit:20,query:''})).rows[0].liability,'100.00');
+});

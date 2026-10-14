@@ -3,6 +3,15 @@
 // New route/method pairs must be reviewed here; unknown routes fail closed.
 export type BusinessRole = 'owner' | 'admin' | 'cashier'
 export const ROUTE_PERMISSIONS: Readonly<Record<string, readonly BusinessRole[]>> = {
+  "GET /api/loyalty/marketing": ["owner"],
+  "POST /api/loyalty/marketing": ["owner"],
+  "GET /api/sales/[id]/benefits": ["owner","admin","cashier"],
+  "POST /api/sales/[id]/benefits": ["owner","admin","cashier"],
+  "POST /api/sales/[id]/benefits/cancel": ["owner","admin","cashier"],
+  "GET /api/loyalty/gifts": ["owner"],
+  "POST /api/loyalty/gifts": ["owner"],
+  "POST /api/sales/[id]/gift": ["owner","admin","cashier"],
+  "GET /api/sales/[id]/gift": ["owner","admin","cashier"],
   "GET /api/loyalty/policy": ["owner"],
   "POST /api/loyalty/policy": ["owner"],
   "GET /api/customers/[id]/points": ["owner","admin","cashier"],

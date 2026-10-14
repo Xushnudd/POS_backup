@@ -6,7 +6,7 @@ const message='Saqlanmagan o‘zgarishlar bor. Ularni tashlab ketishni tasdiqlay
 export function confirmUnsavedChanges(dirty:boolean,saving=false,warning=message){return !saving&&(!dirty||window.confirm(warning));}
 const guards = new NavigationGuards();
 let registrations = 0, committed = false;
-type HistoryNavigationEvent=Event&{navigationType:string;destination:{sameDocument:boolean}};
+type HistoryNavigationEvent=Event&{navigationType:string;destination:{sameDocument:boolean;url?:string}};
 type BrowserNavigation={addEventListener:(type:'navigate',listener:(event:HistoryNavigationEvent)=>void)=>void;removeEventListener:(type:'navigate',listener:(event:HistoryNavigationEvent)=>void)=>void};
 function installListeners() {
  const admit = () => guards.admit(warning => window.confirm(warning));
@@ -14,7 +14,13 @@ function installListeners() {
  const request=(event:Event)=>{if(!admit())event.preventDefault();};
  const commit=()=>{committed=true;};
  const navigation=(window as Window&{navigation?:BrowserNavigation}).navigation;
- const traverse=(event:HistoryNavigationEvent)=>{if(event.navigationType==='traverse'&&event.destination.sameDocument&&event.cancelable&&!admit())event.preventDefault();};
+ const traverse=(event:HistoryNavigationEvent)=>{
+  if(event.navigationType!=='traverse'||!event.destination.sameDocument||!event.cancelable)return;
+  // Query/page history changes retain this editor. Account/page departure still
+  // requires admission; a preserved business draft is not discarded by filters.
+  if(event.destination.url){const target=new URL(event.destination.url,location.href);if(target.origin===location.origin&&target.pathname===location.pathname)return;}
+  if(!admit())event.preventDefault();
+ };
  const navigate=(event:MouseEvent)=>{
   if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
   const link=event.target instanceof Element?event.target.closest<HTMLAnchorElement>('a[href]'):null;

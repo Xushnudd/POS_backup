@@ -1,0 +1,19 @@
+✔ Product-scoped promo does not discount unrelated goods and largest remainder conserves the cent (10.35792ms)
+✔ Promo denies wrong branch, empty scope, exhausted global/customer use and forbidden stacking (2.180688ms)
+✔ Customer-bound card uses exact percentage and preserves original half-open validity (3.362621ms)
+✔ Gift issue, spend, original restoration and unused cash refund reconcile without a second goods revenue (0.971687ms)
+✔ Gift liability survives expiry and goods restoration never extends original spending expiry (0.595247ms)
+✔ Gift journal rejects duplicates, foreign/repeated restoration, overdraw and unapproved cash refund (0.629679ms)
+✔ Many fractional gift uses conserve six-figure liability without floating-point rounding (1.548276ms)
+✔ Reward rules require explicit administrator choices and exact UZS integer points (1.416436ms)
+✔ Cumulative partial refunds reverse one original grant without rounding abuse or a negative spendable wallet (0.411859ms)
+✔ Promotion math retains cents, configured maximum and half-open validity boundaries (0.344415ms)
+✔ Expired grants are unavailable, refund recovery clears once, and original FIFO allocations retain exact point identities (0.418313ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.822673

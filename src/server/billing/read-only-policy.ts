@@ -1,5 +1,10 @@
 // Subscription read-only applies to business data; these exceptions preserve recovery/security.
 export const READ_ONLY_BUSINESS_MODELS = [
+  "LoyaltyCard",
+  "LoyaltyPromotion",
+  "LoyaltyBenefitSelection",
+  "GiftCertificate",
+  "GiftCheckout",
   "LoyaltyPolicyVersion",
   "LoyaltyPointLot",
   "LoyaltyPointEntry",

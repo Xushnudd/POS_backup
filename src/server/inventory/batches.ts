@@ -88,7 +88,7 @@ export async function postBatchMovement(tx:Prisma.TransactionClient,context:Toke
  const selection=selectFefo({quantity:quantity.negated().toFixed(),today,expiryRequired:true,batches:positions.map(row=>({id:row.id,receivedOn:policyValid?row.receivedOn:'0001-01-01',expiresOn:policyValid?row.expiresOn:'9999-12-31',availableQuantity:row.quantity.toFixed()}))})
  for(const row of selection.allocations)await tx.inventoryBatchEntry.create({data:{organizationId:context.organizationId,batchId:row.batchId,storeId:movement.storeId,movementId:movement.id,quantityDelta:decimal(row.quantity).negated()}})
 }
-export const batchQuerySchema=z.object({storeId:z.string().uuid(),productId:z.string().uuid().optional(),state:z.enum(['all','expired','due_soon','valid']).default('all'),search:z.string().trim().max(200).default(''),page:z.coerce.number().int().min(1).max(100000).default(1)}).strict()
+export const batchQuerySchema=z.object({storeId:z.string().uuid(),productId:z.string().uuid().optional(),state:z.enum(['all','expired','due_soon','valid']).default('all'),search:z.string().trim().max(200).default(''),page:z.coerce.number().int().min(1).max(100000).default(1),limit:z.coerce.number().int().min(1).max(200).default(50),sort:z.enum(['expiry_asc','expiry_desc','code']).default('expiry_asc')}).strict()
 export async function queryBatches(context:TokenPayload,input:z.input<typeof batchQuerySchema>,all=false){
  const parsed=batchQuerySchema.parse(input)
  return prisma.$transaction(async tx=>{
@@ -99,8 +99,9 @@ export async function queryBatches(context:TokenPayload,input:z.input<typeof bat
   const counts=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`SELECT count(*) FROM (SELECT b.id ${scope}) counted`)
   const total=Number(counts[0].count)
   if(all&&total>10000)throw new AccessError(413,'BATCH_REPORT_TOO_LARGE','Eksport uchun filtrni toraytiring')
-  const rows=await tx.$queryRaw<{id:string;productId:string;productName:string;unit:string;code:string;receivedOn:string;expiresOn:string;alertDays:number;quantity:Prisma.Decimal}[]>(Prisma.sql`SELECT b.id,b."productId",p.name AS "productName",p.unit,b.code,b."receivedOn",b."expiresOn",p."expiryAlertDays" AS "alertDays",sum(e."quantityDelta") AS quantity ${scope} ORDER BY b."expiresOn",b.id ${all?Prisma.empty:Prisma.sql`LIMIT 50 OFFSET ${(parsed.page-1)*50}`}`)
-  return {today,rows:rows.map(row=>({...row,quantity:row.quantity.toFixed(6),state:batchExpiryState(row.expiresOn,today,row.alertDays)})),total,page:parsed.page}
+  const order=parsed.sort==='expiry_desc'?Prisma.sql`b."expiresOn" DESC`:parsed.sort==='code'?Prisma.sql`b.code ASC`:Prisma.sql`b."expiresOn" ASC`
+  const rows=await tx.$queryRaw<{id:string;productId:string;productName:string;unit:string;code:string;receivedOn:string;expiresOn:string;alertDays:number;quantity:Prisma.Decimal}[]>(Prisma.sql`SELECT b.id,b."productId",p.name AS "productName",p.unit,b.code,b."receivedOn",b."expiresOn",p."expiryAlertDays" AS "alertDays",sum(e."quantityDelta") AS quantity ${scope} ORDER BY ${order},b.id ${all?Prisma.empty:Prisma.sql`LIMIT ${parsed.limit} OFFSET ${(parsed.page-1)*parsed.limit}`}`)
+  return {today,rows:rows.map(row=>({...row,quantity:row.quantity.toFixed(6),state:batchExpiryState(row.expiresOn,today,row.alertDays)})),total,page:parsed.page,limit:parsed.limit}
  },{isolationLevel:'RepeatableRead'})
 }
 

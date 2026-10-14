@@ -108,15 +108,17 @@ export async function recordWarrantyService(ctx:TokenPayload,input:z.infer<typeo
   return result
  })
 }
-export async function listSerials(ctx:TokenPayload,input:{storeId:string;productId?:string;search?:string;page:number;state?:string;receiptId?:string;saleItemId?:string;transferId?:string}){
+export async function listSerials(ctx:TokenPayload,input:{storeId:string;productId?:string;search?:string;page:number;limit?:number;sort?:'code_asc'|'code_desc'|'newest'|'oldest';state?:string;receiptId?:string;saleItemId?:string;transferId?:string}){
+ const {limit,sort}=z.object({limit:z.number().int().min(1).max(200).default(50),sort:z.enum(['code_asc','code_desc','newest','oldest']).default('code_asc')}).parse(input);
+ const orderBy=sort==='newest'||sort==='oldest'?[{createdAt:sort==='newest'?'desc' as const:'asc' as const},{id:'asc' as const}]:[{code:sort==='code_desc'?'desc' as const:'asc' as const},{id:'asc' as const}];
  return prisma.$transaction(async tx=>{
   await assertLiveContext(tx,ctx);if(!await tx.store.findFirst({where:{id:input.storeId,AND:tenantScope('Store',ctx)}}))throw new AccessError(404,'NOT_FOUND')
   if(input.receiptId&&!await tx.stockDocument.findFirst({where:{id:input.receiptId,AND:tenantScope('StockDocument',ctx)}}))throw new AccessError(404,'NOT_FOUND')
   if(input.saleItemId&&!await tx.saleItem.findFirst({where:{id:input.saleItemId,sale:tenantScope('Sale',ctx)}}))throw new AccessError(404,'NOT_FOUND')
   if(input.transferId&&!await tx.stockTransfer.findFirst({where:{id:input.transferId,AND:tenantScope('StockTransfer',ctx)}}))throw new AccessError(404,'NOT_FOUND')
   const where:Prisma.SerialNumberWhereInput={organizationId:ctx.organizationId,storeId:input.storeId,...(input.receiptId?{events:{some:{kind:'receipt',sourceId:input.receiptId}}}:{}),...(input.saleItemId?{lastSaleItemId:input.saleItemId}:{}),...(input.transferId?{lastTransferId:input.transferId}:{}),...(input.productId?{productId:input.productId}:{}),...(input.search?{code:{contains:input.search.toUpperCase()}}:{}),...(input.state?{state:input.state}:{})}
-  const total=await tx.serialNumber.count({where}),data=await tx.serialNumber.findMany({where,orderBy:{code:'asc'},skip:(input.page-1)*50,take:50,include:{events:ctx.role==='cashier'?false:{where:ctx.role==='owner'?{}:{storeId:{in:ctx.storeIds}},orderBy:{ordinal:'desc'},take:20},product:{select:{id:true,name:true}},warranties:ctx.role==='cashier'?false:{where:ctx.role==='owner'?{}:{storeId:{in:ctx.storeIds}},orderBy:{startedAt:'desc'},take:1,include:{services:{orderBy:{ordinal:'desc'},take:20}}}}})
-  return {data:ctx.role==='cashier'?data.map(row=>({id:row.id,code:row.code,state:row.state,productId:row.productId,storeId:row.storeId,product:row.product})):data,total,page:input.page,limit:50}
+  const total=await tx.serialNumber.count({where}),data=await tx.serialNumber.findMany({where,orderBy,skip:(input.page-1)*limit,take:limit,include:{events:ctx.role==='cashier'?false:{where:ctx.role==='owner'?{}:{storeId:{in:ctx.storeIds}},orderBy:{ordinal:'desc'},take:20},product:{select:{id:true,name:true}},warranties:ctx.role==='cashier'?false:{where:ctx.role==='owner'?{}:{storeId:{in:ctx.storeIds}},orderBy:{startedAt:'desc'},take:1,include:{services:{orderBy:{ordinal:'desc'},take:20}}}}})
+  return {data:ctx.role==='cashier'?data.map(row=>({id:row.id,code:row.code,state:row.state,productId:row.productId,storeId:row.storeId,product:row.product})):data,total,page:input.page,limit}
  },{isolationLevel:'RepeatableRead'})
 }
 export async function readSerialHistory(ctx:TokenPayload,id:string,page:number){

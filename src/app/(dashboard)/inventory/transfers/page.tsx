@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -33,7 +33,12 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function StockTransfersPage() {
+import {useListFilters} from '@/hooks/useListFilters';
+import {journalListSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import DataTable from '@/components/ui/DataTable';
+export default function StockTransfersPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<p>Yuklanmoqda...</p>}><Transfers key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
+function Transfers() {
   const { organization } = useAuth();
   const { stores } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
@@ -42,8 +47,11 @@ export default function StockTransfersPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [listError,setListError]=useState(''),[pages,setPages]=useState(0),[draftFilters,setDraftFilters]=useState({fromStoreId:'',toStoreId:'',from:'',to:'',status:''}),[filters,setFilters]=useState<Record<string,string>>({});
-  const scope=JSON.stringify([organization?.id,filters]),[listPage,setListPage]=useState({scope:'',page:1}),page=listPage.scope===scope?listPage.page:1;
+  const {query,params,filters,changeQuery}=useListFilters(journalListSorts,'newest',['fromStoreId','toStoreId','from','to','status']);
+  const page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'newest',search=query?.search??'',invalidQuery=!query;
+  const [listError,setListError]=useState(''),[pages,setPages]=useState(0),[draftFilters,setDraftFilters]=useState({fromStoreId:params.get('fromStoreId')??'',toStoreId:params.get('toStoreId')??'',from:params.get('from')??'',to:params.get('to')??'',status:params.get('status')??''});
+  const filterKey=JSON.stringify(filters);
+  useEffect(()=>{let live=true;void Promise.resolve().then(()=>{if(live)setDraftFilters({fromStoreId:'',toStoreId:'',from:'',to:'',status:'',...JSON.parse(filterKey)});});return()=>{live=false;};},[filterKey]);
   const requestSequence=useRef({value:0});
 
   // Modal
@@ -59,17 +67,17 @@ export default function StockTransfersPage() {
   const [receiving,setReceiving]=useState<StockTransfer|null>(null),[receiptRevision,setReceiptRevision]=useState(0);
 
   const loadTransfers = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organization?.id||invalidQuery) return;
     const sequence=++requestSequence.current.value;setIsLoading(true);setListError('');
     try {
-      const res = await api.transfers.list({ organizationId: organization.id,...filters,page,limit:20 });
+      const res = await api.transfers.list({ organizationId: organization.id,...filters,page,limit,sort,search });
       if(sequence===requestSequence.current.value){setTransfers(res.data??[]);setPages(res.pagination?.totalPages??0);}
     } catch (err: unknown) {
-      if(sequence===requestSequence.current.value){setListError(err instanceof Error?err.message:'Transferlar yuklanmadi');setTransfers([]);setPages(0);}
+      if(sequence===requestSequence.current.value)setListError(err instanceof Error?err.message:'Transferlar yuklanmadi');
     } finally {
       if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization,filters,page]);
+  }, [organization,filters,page,limit,sort,search,invalidQuery]);
 
   useEffect(() => {
     const requests=requestSequence.current;let cancelled=false;void Promise.resolve().then(()=>{if(!cancelled)return loadTransfers();});return()=>{cancelled=true;requests.value++;};
@@ -170,17 +178,20 @@ export default function StockTransfersPage() {
         </Button>
       </div>
 
-      <form className="grid sm:grid-cols-3 gap-3" onSubmit={e=>{e.preventDefault();setFilters(Object.fromEntries(Object.entries(draftFilters).filter(([,value])=>value)));}}>
+      <ListFilter search={search} sort={sort} label="Transfer izohi yoki filial qidirish" onChange={changeQuery} reset={{fromStoreId:'',toStoreId:'',from:'',to:'',status:''}} options={[{value:'newest',label:'Eng yangi'},{value:'oldest',label:'Eng eski'}]}/>
+      <form className="grid sm:grid-cols-3 gap-3" onSubmit={e=>{e.preventDefault();changeQuery({...Object.fromEntries(Object.entries(draftFilters).map(([key,value])=>[key,value.trim()])),page:'1'});}}>
         <Select label="Jo‘natuvchi filtri" value={draftFilters.fromStoreId} options={[{value:'',label:'Barcha filiallar'},...stores.map(store=>({value:store.id,label:store.name}))]} onChange={e=>setDraftFilters({...draftFilters,fromStoreId:e.target.value})}/>
         <Select label="Qabul qiluvchi filtri" value={draftFilters.toStoreId} options={[{value:'',label:'Barcha filiallar'},...stores.map(store=>({value:store.id,label:store.name}))]} onChange={e=>setDraftFilters({...draftFilters,toStoreId:e.target.value})}/>
         <Select label="Transfer holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'sent',label:'Yo‘lda'},{value:'received',label:'Qabul qilingan'},{value:'closed',label:'Yopilgan'},{value:'cancelled',label:'Bekor qilingan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/>
         <Input label="Transfer davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Transfer davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Button type="submit" disabled={isLoading}>Filtrlash</Button>
       </form>
-      {organization&&<CsvExportButton path="/transfers" params={{organizationId:organization.id,...filters}} label="Transferlarni CSV yuklash"/>}
+      {organization&&<CsvExportButton path="/transfers" params={{organizationId:organization.id,...filters,search,sort}} label="Transferlarni CSV yuklash"/>}
+      {invalidQuery&&<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>}
       {listError&&<p role="alert">{listError}</p>}
-      <Pagination page={page} pages={pages} busy={isLoading} onPage={value=>setListPage({scope,page:value})} retry={()=>{void loadTransfers();}}/>
+      {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+      <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!listError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadTransfers();}}/>
       <Card padding={false}>
-        {isLoading ? (
+        {invalidQuery||listError ? (<p>Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.</p>) : isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <LoadingSpinner size="lg" text="Transferlar yuklanmoqda..." />
           </div>
@@ -194,7 +205,7 @@ export default function StockTransfersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <DataTable className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Jo&apos;natuvchi do&apos;kon</th>
@@ -263,7 +274,7 @@ export default function StockTransfersPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         )}
       </Card>

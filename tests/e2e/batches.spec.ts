@@ -8,7 +8,7 @@ if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.path
 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
 test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect()})
 test('Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery',async({page})=>{
- test.setTimeout(120000)
+ test.setTimeout(180000)
  page.on('dialog',dialog=>dialog.type()==='beforeunload'?dialog.accept():dialog.dismiss())
  const headers={Origin:'https://localhost:3100'},password='test-only-password'
  expect((await page.request.post('/api/auth/register',{headers,data:{phone:'batch-'+randomUUID(),password,fullName:'Batch owner',organizationName:'Batch acceptance'}})).ok()).toBe(true)
@@ -62,4 +62,15 @@ test('Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count 
  await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).toHaveCount(0)
  expect(new Set(countKeys).size).toBe(1);expect(await db.auditLog.count({where:{organizationId:me.organization.id,action:'batch_count_reconciled'}})).toBe(1)
  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toFixed()).toBe('6')
+ // Source-backed large read navigation follows the already accepted policy.
+ for(let i=0;i<43;i++){const doc=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'LIST-BATCH-'+String(i).padStart(3,'0'),items:[{productId:product.id,quantity:'1',unitCost:'3',batchInput:{code:'LIST-'+String(i).padStart(3,'0'),receivedOn:today,expiresOn:day(60+i)}}]});await post('/api/stock-documents/'+doc.id+'/confirm',{})}
+ await page.goto('/inventory/batches?search=LIST-&sort=expiry_desc&page=3');await expect(page.locator('tbody tr')).toHaveCount(3);await expect(page.locator('tbody tr').first()).toContainText('LIST-002');await page.reload();await expect(page.locator('tbody tr')).toHaveCount(3);
+ await page.getByLabel('Partiya yoki mahsulot qidirish',{exact:true}).fill('LIST-042');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);
+ await page.getByLabel('Yaroqlilik holati',{exact:true}).selectOption('expired');await expect(page.getByText('Tanlangan filtrda partiya topilmadi.',{exact:true})).toBeVisible();await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);
+
+ // Three receipts, one original confirmed count adjustment and43later receipts.
+ expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id,productId:product.id,sourceType:'stock_document'}})).toBe(47);
+ await page.goto('/inventory/movements?'+new URLSearchParams({productId:product.id,sourceType:'stock_document',sort:'oldest',page:'3'}));await expect(page.locator('tbody tr')).toHaveCount(7);await page.reload();await expect(page.locator('tbody tr')).toHaveCount(7);
+ await page.getByLabel('Mahsulot, SKU yoki jurnal izohi qidirish',{exact:true}).fill('NO-SUCH-JOURNAL-SKU');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.getByText('Harakat topilmadi.',{exact:true})).toBeVisible();await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(7);
+
 })

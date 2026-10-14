@@ -1,3 +1,4 @@
+import {z} from 'zod'
 import { Prisma } from '@prisma/client'
 import type { TokenPayload } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -43,13 +44,18 @@ export function discrepancyQuery(context:ReconciliationScope,kind:Reconciliation
  FROM selected s LEFT JOIN payments p ON p."shiftId"=s.id LEFT JOIN movements m ON m."shiftId"=s.id
  WHERE s."expectedCash" IS DISTINCT FROM s."openingCash"+COALESCE(p.amount,0)+COALESCE(m.amount,0)`
 }
-export async function reconcile(context:TokenPayload,kind:ReconciliationKind,storeId?:string,page=1,limit=50) {
- if (!Number.isSafeInteger(page) || page<1 || !Number.isSafeInteger(limit) || limit<1 || limit>200) throw new AccessError(400,'INVALID_PAGINATION')
- const query=discrepancyQuery(context,kind,storeId)
+export async function reconcile(context:TokenPayload,kind:ReconciliationKind,storeId?:string,page=1,limit=50,options:{sort?:'source'|'expected_asc'|'expected_desc';search?:string}={}) {
+ const {sort,search}=z.object({sort:z.enum(['source','expected_asc','expected_desc']).default('source'),search:z.string().trim().max(200).default('')}).strict().parse(options);
+ if(!['inventory','sales','returns','shifts'].includes(kind))throw new AccessError(400,'INVALID_FILTER');
+ if (!Number.isSafeInteger(page) || page<1 || !Number.isSafeInteger(limit) || limit<1 || limit>200||(page-1)*limit>2147483647) throw new AccessError(400,'INVALID_PAGINATION')
+ const query=discrepancyQuery(context,kind,storeId);
+ const identity=Prisma.sql`COALESCE(to_jsonb(d)->>'productId',to_jsonb(d)->>'saleId',to_jsonb(d)->>'returnId',to_jsonb(d)->>'shiftId')`;
+ const filter=search?Prisma.sql`WHERE (COALESCE(to_jsonb(d)->>'productName',to_jsonb(d)->>'receiptNo',to_jsonb(d)->>'returnReceiptNo','') ILIKE ${'%'+search+'%'} OR ${identity} ILIKE ${'%'+search+'%'})`:Prisma.empty;
+ const order=sort==='expected_asc'?Prisma.sql`d.expected ASC`:sort==='expected_desc'?Prisma.sql`d.expected DESC`:Prisma.sql`d."storeId" ASC`;
  return prisma.$transaction(async tx=>{
   await assertLiveContext(tx,context)
-  const rows=await tx.$queryRaw<Record<string,unknown>[]>(Prisma.sql`SELECT * FROM (${query}) discrepancies ORDER BY "storeId",1,2 LIMIT ${limit} OFFSET ${(page-1)*limit}`)
-  const count=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`SELECT COUNT(*) AS count FROM (${query}) discrepancies`)
+  const rows=await tx.$queryRaw<Record<string,unknown>[]>(Prisma.sql`SELECT * FROM (${query}) d ${filter} ORDER BY ${order},d."storeId",${identity} LIMIT ${limit} OFFSET ${(page-1)*limit}`)
+  const count=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`SELECT COUNT(*) AS count FROM (${query}) d ${filter}`)
   const total=Number(count[0].count)
   return {rows,pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}
  },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead,timeout:15000})

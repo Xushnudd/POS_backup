@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -13,12 +13,20 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 
+import {useListQuery} from '@/hooks/useListQuery';
+import {journalListSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import Pagination from '@/components/ui/Pagination';
+import DataTable from '@/components/ui/DataTable';
 const labels={counting:'Sanash davom etmoqda',review:'Tekshirish va qayta sanash',approved:'Tasdiqlangan',cancelled:'Bekor qilingan'};
-export default function StockCountsPage(){const {organization,user,role}=useAuth();const {activeStore}=useOrganization();return organization&&user?<CountControls key={[organization.id,user.id,role,activeStore?.id].join(':')}/>:null;}
+export default function StockCountsPage(){const {organization,user,role}=useAuth();const {activeStore}=useOrganization();return organization&&user?<Suspense fallback={<p>Yuklanmoqda...</p>}><CountControls key={[organization.id,user.id,role,activeStore?.id].join(':')}/></Suspense>:null;}
 function CountControls(){
  const {organization,user}=useAuth(),{activeStore}=useOrganization(),{notifyError,notifySuccess}=useNotification();
  const [counts,setCounts]=useState<StockCount[]>([]),[current,setCurrent]=useState<StockCount|null>(null);
- const [countPage,setCountPage]=useState(1),[totalPages,setTotalPages]=useState(1),[allCounts,setAllCounts]=useState(false);
+ const {query,params,changeQuery}=useListQuery(journalListSorts,'newest');
+ const countPage=query?.page??1,limit=query?.limit??20,sort=query?.sort??'newest',listSearch=query?.search??'',filter=params.get('filter')??'active',invalidQuery=!query||!['active','all'].includes(filter),allCounts=filter==='all';
+ const [totalPages,setTotalPages]=useState(0),[listBusy,setListBusy]=useState(true),[listError,setListError]=useState('');
+ const listSequence=useRef({value:0});
  const [scope,setScope]=useState<'full'|'partial'>('full'),[blind,setBlind]=useState(true);
  const [products,setProducts]=useState<Product[]>([]),[selected,setSelected]=useState<string[]>([]),[search,setSearch]=useState('');
  const [inputs,setInputs]=useState<Record<string,string>>({}),[reason,setReason]=useState(''),[busy,setBusy]=useState(false),[unknown,setUnknown]=useState(false);
@@ -29,8 +37,13 @@ function CountControls(){
  const countDirty=Boolean(scope!=='full'||!blind||selected.length>0||Object.values(inputs).some(value=>value.length>0)||reason||unknown);
  const discardCount=useUnsavedChanges(countDirty,busy,unknown?'Sanash amalining natijasi noma’lum. Avval original amalni tekshiring. Sahifadan chiqishni tasdiqlaysizmi?':undefined);
 
- const refresh=useCallback(async()=>{try{const response=await api.stockCounts.list(countPage,allCounts?'all':'active');setCounts(response.data??[]);setTotalPages(response.pagination?.totalPages??1);}catch(error){notifyError(error instanceof Error?error.message:'Sanashlar yuklanmadi');}},[notifyError,countPage,allCounts]);
- useEffect(()=>{void Promise.resolve().then(refresh);},[refresh]);
+ const refresh=useCallback(async()=>{
+  if(invalidQuery)return;const sequence=++listSequence.current.value;setListBusy(true);setListError('');
+  try{const response=await api.stockCounts.list(countPage,allCounts?'all':'active',{limit:String(limit),sort,search:listSearch});if(sequence===listSequence.current.value){setCounts(response.data??[]);setTotalPages(response.pagination?.totalPages??0);}}
+  catch(error){if(sequence===listSequence.current.value)setListError(error instanceof Error?error.message:'Sanashlar yuklanmadi');}
+  finally{if(sequence===listSequence.current.value)setListBusy(false);}
+ },[countPage,allCounts,limit,sort,listSearch,invalidQuery]);
+ useEffect(()=>{const requests=listSequence.current;let live=true;void Promise.resolve().then(()=>{if(live)return refresh();});return()=>{live=false;requests.value++;};},[refresh]);
  const loadProducts=async()=>{if(!organization)return;try{const response=await api.products.list({organizationId:organization.id,search,limit:200});setProducts(response.data??[]);}catch(error){notifyError(error instanceof Error?error.message:'Katalog yuklanmadi');}};
  const openCount=async(id:string)=>{if(!ready||attempt.current||!discardCount())return;try{const response=await api.stockCounts.get(id);setCurrent(response.data??null);setInputs({});setReason('');}catch(error){notifyError(error instanceof Error?error.message:'Sanash topilmadi');}};
  const execute=async(name:string,path?:string,body?:Record<string,unknown>)=>{
@@ -89,7 +102,7 @@ function CountControls(){
    {scope==='partial'&&<div className="space-y-2"><Input label="Mahsulot qidirish" value={search} onChange={event=>setSearch(event.target.value)} disabled={!ready||busy||unknown}/><Button onClick={loadProducts} disabled={!ready||busy||unknown}>Mahsulotlarni topish</Button><p>{selected.length} mahsulot tanlangan; qidiruvda 200 tagacha natija.</p><div className="max-h-48 overflow-auto">{products.map(product=><label key={product.id} className="flex gap-2"><input type="checkbox" checked={selected.includes(product.id)} disabled={!ready||busy||unknown} onChange={event=>setSelected(values=>event.target.checked?[...values,product.id]:values.filter(id=>id!==product.id))}/>{product.name} ({product.sku})</label>)}</div></div>}
    <Button disabled={!ready||busy||unknown||!activeStore||(scope==='partial'&&!selected.length)} onClick={start}>Sanashni boshlash</Button>
   </Card>
-  <Card><h2 className="font-bold mb-3">Sanashlar</h2><label className="flex gap-2 mb-3"><input type="checkbox" checked={allCounts} disabled={!ready||busy||unknown} onChange={event=>{setAllCounts(event.target.checked);setCountPage(1);}}/>Yakunlangan sanashlarni ham ko‘rsatish</label><div className="flex flex-wrap gap-2">{counts.map(count=><Button variant="outline" key={count.id} disabled={!ready||busy||unknown} onClick={()=>openCount(count.id)}>{count.store?.name} — {labels[count.status]} — {count.id.slice(0,8)}</Button>)}</div><div className="flex gap-2 mt-3"><Button variant="outline" disabled={!ready||busy||unknown||countPage<=1} onClick={()=>setCountPage(page=>page-1)}>Oldingi</Button><span>{countPage} / {Math.max(totalPages,1)}</span><Button variant="outline" disabled={!ready||busy||unknown||countPage>=totalPages} onClick={()=>setCountPage(page=>page+1)}>Keyingi</Button></div></Card>
+  <Card><h2 className="font-bold mb-3">Sanashlar</h2><ListFilter search={listSearch} sort={sort} label="Sanash IDsi yoki filial qidirish" disabled={busy||unknown} onChange={changeQuery} reset={{filter:''}} options={[{value:'newest',label:'Eng yangi'},{value:'oldest',label:'Eng eski'}]}><label className="flex gap-2"><input type="checkbox" checked={allCounts} disabled={!ready||busy||unknown} onChange={e=>changeQuery({filter:e.target.checked?'all':'active',page:'1'})}/>Yakunlangan sanashlarni ham ko‘rsatish</label></ListFilter>{invalidQuery?<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>:listError?<p role="alert">{listError}. Oxirgi ro‘yxat saqlangan.</p>:listBusy?<p role="status">Sanashlar yuklanmoqda…</p>:<><DataTable><thead><tr><th>Filial / holat</th><th>Sanash ID / amal</th></tr></thead><tbody>{counts.map(count=><tr key={count.id}><td>{count.store?.name} — {labels[count.status]}</td><td><Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>openCount(count.id)}>{count.store?.name} — {labels[count.status]} — {count.id.slice(0,8)}</Button></td></tr>)}</tbody></DataTable>{!counts.length&&<p>Sanash topilmadi.</p>}</>}<Pagination page={countPage} pages={totalPages} busy={listBusy&&!invalidQuery||busy||unknown} blocked={invalidQuery||!!listError||!ready} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void refresh();}}/>{!invalidQuery&&countPage>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}</Card>
   {current&&<Card className="space-y-4">
    <h2 className="font-bold">{labels[current.status]} — {current.id.slice(0,8)}</h2>
    {current.status==='counting'&&current.blind&&<p>Kutilgan qoldiq birinchi sanash davomida yashirilgan.</p>}

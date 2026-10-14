@@ -57,7 +57,7 @@ export function cumulativePointReversal(original:string|bigint,originalPayable:s
 }
 export function promotionDiscount(eligibleNet:string,rule:z.infer<typeof promotionRuleSchema>,at:Date){
   const config=promotionRuleSchema.parse(rule),base=exactMoney(eligibleNet);
-  if(!config.enabled||at<new Date(config.startsAt)||at>=new Date(config.endsAt))throw Error('PROMO_UNAVAILABLE');
+  if(!Number.isFinite(at.getTime())||!config.enabled||at<new Date(config.startsAt)||at>=new Date(config.endsAt))throw Error('PROMO_UNAVAILABLE');
   if(base.lt(config.minEligibleNet))throw Error('PROMO_MIN_AMOUNT');
   const proposed=config.kind==='percent'?base.mul(config.value).div(100).toDecimalPlaces(2,Prisma.Decimal.ROUND_HALF_UP):new Exact(config.value);
   return Exact.min(proposed,config.maxDiscount,base).toFixed(2);

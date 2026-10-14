@@ -80,7 +80,7 @@ class ApiClient {
     read: (noticeId:string,operationId:string)=>this.request<{id:string;readAt:string}>('/auth/security/read',{method:'POST',body:JSON.stringify({operationId,noticeId})}),
     retry: (eventId:string,operationId:string)=>this.request<{eventId:string;state:string;attempts:number;maxAttempts:number}>('/auth/security/retry',{method:'POST',body:JSON.stringify({operationId,eventId})}),
   };
-  auditSummary = (params:Record<string,string>) => this.request<AuditSummary[]>(`/audit?${new URLSearchParams({...params,view:'summary',limit:'50'})}`);
+  auditSummary = (params:Record<string,string>) => this.request<AuditSummary[]>(`/audit?${new URLSearchParams({limit:'50',...params,view:'summary'})}`);
   private getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
   }
@@ -318,10 +318,9 @@ class ApiClient {
 
   // Shifts
   shifts = {
-    list: (params: { registerId?: string; status?: string } = {}) => {
+    list: (params: { registerId?: string; status?: string;storeId?:string;from?:string;to?:string;search?:string;sort?:string;page?:number;limit?:number } = {}) => {
       const q = new URLSearchParams();
-      if (params.registerId) q.append('registerId', params.registerId);
-      if (params.status) q.append('status', params.status);
+      Object.entries(params).forEach(([key,value])=>{if(value!==undefined&&value!=='')q.set(key,String(value));});
       return this.request<Shift[]>(`/shifts?${q.toString()}`);
     },
 
@@ -353,7 +352,7 @@ class ApiClient {
 
   // Inventory
   inventory = {
-    balances: (params: { organizationId: string; storeId?: string; lowStock?: boolean;inactiveDays?:number;search?:string;categoryId?:string;page?:number;limit?:number }) => {
+    balances: (params: { organizationId: string; storeId?: string; sort?:string;lowStock?: boolean;inactiveDays?:number;search?:string;categoryId?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
@@ -363,7 +362,7 @@ class ApiClient {
       return this.request<InventoryBalance[]>(`/inventory/balances?${q.toString()}`);
     },
 
-    movements: (params: { organizationId: string; storeId?: string; productId?: string; movementType?:string;sourceType?:string;sourceId?:string;from?:string;to?:string;page?:number;limit?:number }) => {
+    movements: (params: { organizationId: string; storeId?: string; productId?: string; movementType?:string;sourceType?:string;sourceId?:string;from?:string;to?:string;search?:string;sort?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
@@ -376,7 +375,7 @@ class ApiClient {
 
   // Stock Documents (Kirim / Tuzatish)
   stockCounts={
-    list:(page=1,filter:'active'|'all'='active')=>this.request<StockCount[]>(`/stock-counts?page=${page}&limit=50&filter=${filter}`),
+    list:(page=1,filter:'active'|'all'='active',options:Record<string,string>={})=>this.request<StockCount[]>('/stock-counts?'+new URLSearchParams({page:String(page),limit:'50',filter,...options})),
     get:(id:string)=>this.request<StockCount>(`/stock-counts/${id}`),
     start:(data:{operationId:string;organizationId:string;storeId:string;scope:'full'|'partial';blind:boolean;productIds?:string[]})=>this.request<StockCount>('/stock-counts',{method:'POST',body:JSON.stringify(data)}),
     record:(id:string,data:{operationId:string;items:{lineId:string;quantity:string}[]})=>this.request<StockCount>(`/stock-counts/${id}`,{method:'POST',body:JSON.stringify(data)}),
@@ -389,7 +388,7 @@ class ApiClient {
       organizationId: string;
       storeId?: string;
       documentType?: string;
-      supplierId?:string;from?:string;to?:string;search?:string;
+      supplierId?:string;from?:string;to?:string;search?:string;sort?:string;
       status?: string;
       page?: number;
       limit?: number;
@@ -431,7 +430,7 @@ class ApiClient {
 
   // Transfers
   transfers = {
-    list: (params: { organizationId: string; status?: string; page?: number; limit?: number;fromStoreId?:string;toStoreId?:string;from?:string;to?:string }) => {
+    list: (params: { organizationId: string; status?: string; page?: number; limit?: number;fromStoreId?:string;toStoreId?:string;from?:string;to?:string;search?:string;sort?:string }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -547,7 +546,7 @@ class ApiClient {
   // Reports
   reports = {
     purchases: (params:Record<string,string>) => this.request<{rows:Record<string,unknown>[];summary:{purchaseValue:string;reversalValue:string;netPurchaseValue:string};meta:{asOf:string;timezone:string;currency:string}}>(`/reports/purchases?${new URLSearchParams(params)}`),
-    reconciliation: (params:{kind:string;storeId?:string;page:number}) => this.request<Record<string,unknown>[]>(`/reports/reconciliation?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined).map(([k,v])=>[k,String(v)]))}`),
+    reconciliation: (params:{kind:string;storeId?:string;page:number;limit?:number;sort?:string;search?:string}) => this.request<Record<string,unknown>[]>(`/reports/reconciliation?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined).map(([k,v])=>[k,String(v)]))}`),
     dashboard: (params: { organizationId: string; storeId?: string; date?: string;startDate?:string;endDate?:string;asOf?:string }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
@@ -558,7 +557,7 @@ class ApiClient {
       return this.request<DashboardReportData>(`/reports/dashboard?${q.toString()}`);
     },
 
-    sales: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string;asOf?:string;page?:number;limit?:number }) => {
+    sales: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string;asOf?:string;sort?:string;search?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -568,7 +567,7 @@ class ApiClient {
       return this.request<Sale[]>(`/reports/sales?${q.toString()}`);
     },
 
-    products: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string;asOf?:string;page?:number;limit?:number }) => {
+    products: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string;asOf?:string;sort?:string;search?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {

@@ -1,3 +1,4 @@
+import {parseListQuery,journalListSorts} from '@/lib/list-query'
 import {cursorExport,EXPORT_PAGE_SIZE} from '../cursor'
 import {csv,numeric,EXPORT_CAP} from "@/server/exports/csv"
 import {consumeLimit} from "@/server/auth/rate-limit"
@@ -18,10 +19,8 @@ export async function queryInventoryMovements(payload:TokenPayload,request:NextR
     const storeId = searchParams.get('storeId')
     const productId = searchParams.get('productId')
     const movementType = searchParams.get('movementType')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const skip = (page - 1) * limit
-    if(skip>2147483647)throw new AccessError(400,'INVALID_PAGINATION')
+    let query;try{query=parseListQuery(searchParams,journalListSorts,'newest',50)}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+    const {page,limit,skip,sort,search}=query,orderBy=[{occurredAt:sort==='oldest'?'asc' as const:'desc' as const},{id:'asc' as const}]
 
     if (!organizationId) {
       return NextResponse.json(
@@ -32,6 +31,7 @@ export async function queryInventoryMovements(payload:TokenPayload,request:NextR
 
     const where: Prisma.InventoryMovementWhereInput = {
       organizationId,
+      ...(search?{OR:[{note:{contains:search,mode:'insensitive'}},{product:{name:{contains:search,mode:'insensitive'}}},{product:{sku:{contains:search,mode:'insensitive'}}}]}:{}),
     }
 
     if (storeId) where.storeId = storeId
@@ -51,7 +51,7 @@ export async function queryInventoryMovements(payload:TokenPayload,request:NextR
     const result=await db.$transaction(async tx=>{
       const total=await tx.inventoryMovement.count({where})
       if(exporting&&total>EXPORT_CAP)throw new AccessError(413,'EXPORT_TOO_LARGE','Eksport 10000 qatordan oshdi; filtrni toraytiring')
-      const rows=exporting?await cursorExport(cursor=>tx.inventoryMovement.findMany({where,include:{product:true,store:true,creator:{select:{id:true,fullName:true}}},orderBy:[{occurredAt:'desc'},{id:'asc'}],take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})})):await tx.inventoryMovement.findMany({where,include:{product:true,store:true,creator:{select:{id:true,fullName:true}}},orderBy:[{occurredAt:'desc'},{id:'asc'}],skip,take:limit})
+      const rows=exporting?await cursorExport(cursor=>tx.inventoryMovement.findMany({where,include:{product:true,store:true,creator:{select:{id:true,fullName:true}}},orderBy,take:EXPORT_PAGE_SIZE,...(cursor?{cursor:{id:cursor},skip:1}:{})})):await tx.inventoryMovement.findMany({where,include:{product:true,store:true,creator:{select:{id:true,fullName:true}}},orderBy,skip,take:limit})
       if(exporting)return {success:true,data:{filename:'stock-movements-'+payload.organizationId+'.csv',content:csv([['ID','Vaqt (UTC)','Filial','Mahsulot (joriy nom)','Birlik (joriy)','Harakat','Miqdor o‘zgarishi','Birlik tannarxi','Manba turi','Manba ID','Xodim','Izoh'],...rows.map(row=>[row.id,row.occurredAt.toISOString(),row.store.name,row.product.name,row.product.unit,row.movementType,numeric(row.quantityDelta,6),numeric(row.unitCost,6),row.sourceType,row.sourceId,row.creator?.fullName,row.note])])}}
       return {success:true,data:rows,pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}
     },{isolationLevel:'RepeatableRead'})
