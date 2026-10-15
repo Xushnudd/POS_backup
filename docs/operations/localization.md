@@ -20,7 +20,7 @@
 
 ## Pul, miqdor va sana
 
-`src/i18n/format.ts` display projection hisoblanadi. Pul avval mavjud exact fixed-point yordamchi orqali BigInt minor birlikka olinadi, so‘ng `Intl.NumberFormat` bilan guruhlanadi. `9007199254740993.01` kabi Number safe integerdan katta decimal string ham yo‘qotilmaydi. UZ ko‘rinishi `12.50 so‘m`, RU ko‘rinishi `12,50 сум`. Moliyaviy hisoblash serverning mavjud Decimal contractida qoladi.
+`src/i18n/format.ts` display projection hisoblanadi. Pul avval mavjud exact fixed-point yordamchi orqali BigInt minor birlikka olinadi, so‘ng `Intl.NumberFormat` bilan guruhlanadi. `formatToParts` orqali minglik ajratgich har ikkala tilda oddiy bo‘shliqqa keltiriladi: Node va brauzer ICU versiyasi farq qilsa ham `249 000` ko‘rinishi saqlanadi. `9007199254740993.01` kabi Number safe integerdan katta decimal string ham yo‘qotilmaydi. UZ ko‘rinishi `12.50 so‘m`, RU ko‘rinishi `12,50 сум`. Moliyaviy hisoblash serverning mavjud Decimal contractida qoladi.
 
 Formalar va requestlar canonical nuqtali decimalni saqlaydi: `12.50`, `0.125`; RU input yordam matni shu talabni tushuntiradi. Yetakchi nolli barkod stringligicha qoladi. Ko‘rinadigan umumiy quantity formatter mavjud uch xonali aniqlikni saqlaydi; original source/unit-conversion ma’lumoti alohida o‘z aniqligida ko‘rsatiladi.
 
@@ -38,7 +38,9 @@ Sale chekidagi yorliqlar, pul va sana tanlangan tilda; original organization/bra
 
 `src/offline/static-locale.ts` faqat `data-i18n` bilan belgilangan owned elementlarni tarjima qiladi. `cash-screen.ts` tanlangan lease, unlock inputi, tender va original encrypted ticketni saqlaydi. Cookie afzalligi bo‘lmasa localStorage afzalligi ishlaydi; storage yopiq bo‘lsa joriy sahifada til o‘zgartirish ishlashda davom etadi.
 
-`node scripts/build-offline.cjs` ayni dictionary va formatterdan public ES modullarni yaratadi. Service worker `shuni-public-shell-v3` ostida faqat 12 ta ochiq shell assetini cache qiladi. Authenticated HTML, API, chek, private fayl va financial ma’lumotlar umumiy cachega kiritilmaydi. `skipWaiting`/`clients.claim` bilan faol kassani majburiy yangilash yo‘q. Source/dictionary o‘zgargach offline assetlarni qayta generatsiya qiling.
+`node scripts/build-offline.cjs` ayni dictionary va formatterdan public ES modullarni yaratadi. Service worker `shuni-public-shell-v4` ostida faqat 12 ta ochiq shell assetini cache qiladi. Authenticated HTML, API, chek, private fayl va financial ma’lumotlar umumiy cachega kiritilmaydi. `skipWaiting`/`clients.claim` bilan faol kassani majburiy yangilash yo‘q. Source/dictionary o‘zgargach offline assetlarni qayta generatsiya qiling.
+
+`RELEASE-01.12` davomida topilgan Node/brauzer pul formatlash farqining tuzatishi public formatterga ham tarqalishi uchun cache versiyasi `v3`dan `v4`ga ko‘tarildi. Yangi worker odatdagi xavfsiz activationni kutadi; faollashganda faqat eski `shuni-public-shell-*` cachelarini, jumladan `v3`ni o‘chiradi. Joriy `v4` va boshqa ilovalar cachelari saqlanadi. Bu keyingi tuzatish avvalgi `localization-20261015.json` qabul dalilini qayta yozmaydi; uning tekshiruvi `RELEASE-01.12` dalillarida alohida ko‘rsatiladi.
 
 ## Tekshirish va dalil
 

@@ -1161,3 +1161,5 @@ Ichki bonus, chegirma kartasi, promo-kod va sovg‘a sertifikati administrator `
 Ro‘yxat, hisobot va original jurnallarning URL/paging hamda financial draft chegaralari: [qamrov xaritasi](docs/operations/list-query-coverage.md). UX-01.03 lokal core dalili: [manifest](tasks/evidence/list-journals-20261015.json).
 
 Interfeys o‘zbek lotin va rus tillarida ishlaydi. Sarlavha yoki modal ichidagi `UZ / RU` tanlovi savat, kiritilgan summa, sana va javobi kutilayotgan original amallarni saqlaydi. Til afzalligi qurilmada saqlanadi; foydalanuvchi va original chek ma’lumotlari tarjima qilinmaydi. [Tarjima, exact pul/sana, xatolar va offline qo‘llanmasi](docs/operations/localization.md). Yangi matn uchun ikkala JSON dictionaryni yangilang va `npm run i18n:check`ni bajaring.
+
+Ommaviy va’dalarning release imkoniyatlari va qabul dalillariga mosligi [public claim qo‘llanmasida](docs/operations/public-release-claims.md). `npm run release:claims:check` typed matnlar, ikki tarjima, original qabul bandlari, dalil/source SHA va integratsiya cheklovlarini tekshiradi. Trial konfiguratsiyasi yuklanmasa sahifa uni va’da qilmaydi; tariflar DBdan olinadi.

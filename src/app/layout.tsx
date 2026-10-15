@@ -1,3 +1,4 @@
+import {PUBLIC_COPY} from '@/release/public-copy';
 import type { Metadata } from 'next';
 import {headers,cookies} from 'next/headers';
 import {translate} from '@/i18n/messages';
@@ -7,7 +8,7 @@ import { AppProviders } from '@/context/AppProviders';
 
 export async function generateMetadata():Promise<Metadata>{
  const locale=normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);
- return {title:translate('Shuni POS — Savdo va ombor boshqaruvi tizimi',locale),description:translate('Kichik va o‘rta bizneslar uchun brauzerda ishlovchi zamonaviy POS savdo va ombor tizimi.',locale)};
+ return {title:translate(PUBLIC_COPY.rootTitle,locale),description:translate(PUBLIC_COPY.rootDescription,locale)};
 }
 
 

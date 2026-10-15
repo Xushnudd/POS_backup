@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 const connection=new URL(process.env.DATABASE_URL??'postgresql://invalid/invalid')
 if (connection.hostname!=='127.0.0.1' || connection.pathname!=='/pos_test') throw new Error('Browser E2E requires the isolated localhost pos_test DB')
 export default defineConfig({
- testDir:'./tests/e2e',fullyParallel:false,workers:1,forbidOnly:Boolean(process.env.CI),retries:0,
+ testDir:'./tests/e2e',testIgnore:['**/public-pricing-failure.spec.ts'],fullyParallel:false,workers:1,forbidOnly:Boolean(process.env.CI),retries:0,
  timeout:60000,expect:{timeout:10000},reporter:'list',
  // Lost-ack fault injection uses page.route, which service workers can bypass.
  // Dedicated PWA scenarios explicitly enable and test the real worker instead.

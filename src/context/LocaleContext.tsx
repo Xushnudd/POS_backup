@@ -1,4 +1,5 @@
 'use client';
+import {PUBLIC_COPY} from '@/release/public-copy';
 import {createContext,useCallback,useContext,useEffect,useMemo,useState,type ReactNode} from 'react';
 import {LOCALE_COOKIE,normalizeLocale,type Locale} from '@/i18n/locale';
 import {translate,translateKnownLabel,localizeOwnedMessage,localizeCodeLabel,type MessageKey,type MessageValues} from '@/i18n/messages';
@@ -16,7 +17,7 @@ export function LocaleProvider({initialLocale,children}:{initialLocale:Locale;ch
   setState(next);
  },[]);
  useEffect(()=>{
-  document.title=translate(window.location.pathname==='/'?'Shuni POS — savdo, ombor va obuna':'Shuni POS — Savdo va ombor boshqaruvi tizimi',locale);
+  document.title=translate(window.location.pathname==='/'?PUBLIC_COPY.landingTitle:PUBLIC_COPY.rootTitle,locale);
  },[locale]);
  useEffect(()=>{
   const changed=(event:StorageEvent)=>{if(event.key!==LOCALE_COOKIE||event.newValue===null)return;const next=normalizeLocale(event.newValue);document.documentElement.lang=next;setState(next)};

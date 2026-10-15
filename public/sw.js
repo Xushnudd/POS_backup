@@ -1,5 +1,5 @@
 /* Public shell only. Never cache HTML from the application, APIs, files or receipts. */
-const CACHE='shuni-public-shell-v3';
+const CACHE='shuni-public-shell-v4';
 const PUBLIC=['/pwa/offline.html','/pwa/icon-192.png','/pwa/icon-512.png','/pwa/cash.html','/pwa/cash-crypto.js','/pwa/cash-store.js','/pwa/cash-screen.js','/pwa/locale.js','/pwa/money.js','/pwa/format.js','/pwa/messages.js','/pwa/static-locale.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(PUBLIC)))});
 // Deliberately no skipWaiting/clients.claim: an update cannot replace a live checkout.

@@ -13,7 +13,7 @@
     "db:migrate": "prisma migrate deploy",
     "test": "node scripts/test.cjs",
     "test:integration": "node scripts/test.cjs --integration",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test && playwright test --config=playwright.pricing-failure.config.ts",
     "worker:build": "tsc -p tsconfig.worker.json",
     "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js",
     "prebuild": "node scripts/build-offline.cjs",
@@ -22,7 +22,8 @@
     "security:scan:test": "node --test scripts/security/scan.test.mjs",
     "worker:totp-rekey": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/totp-rekey.js",
     "test:ops": "node --test --test-isolation=none scripts/ops/*.test.mjs",
-    "worker:tenant-recovery-plan": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/tenant-recovery-plan.js"
+    "worker:tenant-recovery-plan": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/tenant-recovery-plan.js",
+    "release:claims:check": "node scripts/release/check-claims.cjs"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",

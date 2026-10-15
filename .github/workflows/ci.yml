@@ -33,6 +33,7 @@ jobs:
       - run: npm run security:scan
       - run: npm run lint
       - run: npm run i18n:check
+      - run: npm run release:claims:check
       - run: npm run typecheck
       - run: npm run worker:build
       - run: npm test

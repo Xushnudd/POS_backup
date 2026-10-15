@@ -4860,7 +4860,7 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
 
   **Dalil:** `RELEASE-01.11` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RELEASE-01.12** — Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi.
+- [x] **RELEASE-01.12** — Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi.
 
   **Texnologiya:** Release capability registry va Next.js marketing.
 
@@ -4875,6 +4875,8 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
   **Bandning qabul mezoni:** Har market claim release feature/acceptance proofga mos; deferred/unavailable imkoniyat reklama qilinmaydi.
 
   **Dalil:** `RELEASE-01.12` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul (2026-10-15):**44 typed public matn va ikki tarjima7 capability/9 immutable dalilga xaritalandi;5 render va4 display runtime fingerprinti CI’da fail-closed. Faol bo‘lmagan integratsiya/hardware/offline chegaralari ko‘rinadi. Tarif/trial faqat joriy DBdan; unavailable/no-trial CTA narx yoki sinovni uydirmaydi.161 unit,100 native PostgreSQL holati,33 core browser holati va alohida fresh-server3 timeout holati PASS; header joylashuvidan keyin6 public holat360/1280pxda qayta PASS (takror6 alohida original yoki unique case hisoblanmaydi). ICU grouping va public-only PWA v4 regressiyasi tekshirildi. Build/lint/worker/i18n/source scan o‘tdi. Dalil: `tasks/evidence/public-claims-release-20261015.json`, source `047c49e`+hashed accepted-source.patch, ADR095. API/schema/migration o‘zgarmadi. Bu band shu local candidate ommaviy va’dalari haqidagi acceptance; real pilot/deployment/vendor/hardware gate’lari ochiq. Original hisob175→176.
 
 ### 19. Har bir vazifani qanday yuritamiz?
 

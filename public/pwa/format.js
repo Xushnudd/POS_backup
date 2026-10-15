@@ -1,7 +1,9 @@
 import { fixed } from './money.js';
 import { INTL_LOCALES } from './locale.js';
 function grouped(value, locale) {
-    return new Intl.NumberFormat(INTL_LOCALES[locale], { numberingSystem: 'latn', maximumFractionDigits: 0 }).format(value).replace(/[\u00a0\u202f]/g, ' ');
+    // ICU releases disagree on the Uzbek grouping character. Normalize the
+    // semantic group parts so SSR, every browser and the offline shell agree.
+    return new Intl.NumberFormat(INTL_LOCALES[locale], { numberingSystem: 'latn', maximumFractionDigits: 0 }).formatToParts(value).map(part => part.type === 'group' ? ' ' : part.value).join('');
 }
 function decimalText(value, scale, locale) {
     const negative = value < BigInt(0), absolute = negative ? -value : value, power = BigInt(10) ** BigInt(scale);

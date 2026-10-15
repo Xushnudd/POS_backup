@@ -1,0 +1,76 @@
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 33 tests using 1 worker
+
+(node:71719) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.1s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (21.6s)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (6.7s)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (2.6s)
+  ✓   5 [chromium] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (1.3s)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (3.4s)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [chromium] › tests/e2e/core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.4s)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   8 [chromium] › tests/e2e/core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order (7.2s)
+  ✓   9 [chromium] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (667ms)
+  ✓  10 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (603ms)
+  ✓  11 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (606ms)
+(node:74006) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  12 [firefox] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.6s)
+  ✓  13 [firefox] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (26.0s)
+  ✓  14 [firefox] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (10.0s)
+  ✓  15 [firefox] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (3.3s)
+  ✓  16 [firefox] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (1.8s)
+  ✓  17 [firefox] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (4.5s)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  18 [firefox] › tests/e2e/core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.4s)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 [firefox] › tests/e2e/core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order (8.5s)
+  ✓  20 [firefox] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (840ms)
+  ✓  21 [firefox] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (935ms)
+  ✓  22 [firefox] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (985ms)
+(node:77233) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  23 [webkit] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.9s)
+  ✓  24 [webkit] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (25.5s)
+  ✓  25 [webkit] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (8.2s)
+  ✓  26 [webkit] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (3.7s)
+  ✓  27 [webkit] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (2.0s)
+  ✓  28 [webkit] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (4.5s)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  29 [webkit] › tests/e2e/core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.7s)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:71669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  30 [webkit] › tests/e2e/core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order (7.7s)
+  ✓  31 [webkit] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (1.2s)
+  ✓  32 [webkit] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (1.4s)
+  ✓  33 [webkit] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (1.2s)
+
+  33 passed (2.9m)

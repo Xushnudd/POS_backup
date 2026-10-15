@@ -1,0 +1,264 @@
+{
+  "task": "RELEASE-01.12",
+  "date": "2026-10-15",
+  "status": "done_local_candidate_claim_acceptance",
+  "originalCount": {
+    "before": 175,
+    "after": 176,
+    "total": 259,
+    "newlyAccepted": [
+      "RELEASE-01.12"
+    ],
+    "subtasksCounted": false
+  },
+  "version": {
+    "head": "047c49ec363ec2b80bd303dc3dedc6297cf18114",
+    "workingTree": true,
+    "aiCommitCreated": false,
+    "finalBuildId": "6u5SLH7YWX2iYd0r6nvbN",
+    "patch": "tasks/evidence/public-claims-20261015/accepted-source.patch",
+    "patchSha256": "5638d868f2363da1af4f15ba8f5d68e9ec07ce052fc9e4feddc63b9ccfc5968e"
+  },
+  "scope": "Source-owned public copy, metadata, pricing availability and reviewed bounded capabilities of a local candidate. No production rollout, pilot, legal, uptime, hardware or external-provider certification.",
+  "claimMap": {
+    "copyEntries": 44,
+    "locales": [
+      "uz",
+      "ru"
+    ],
+    "capabilities": 7,
+    "immutableProofs": 9,
+    "renderSources": 5,
+    "displayRuntimeSources": 4,
+    "problems": 0,
+    "registry": "tasks/release/PUBLIC_CLAIMS.json",
+    "automaticReviewOrHashRefresh": false
+  },
+  "checks": {
+    "testCompile": {
+      "exitCode": 0
+    },
+    "unit": {
+      "cases": 161,
+      "sourceFiles": 53,
+      "passed": 161,
+      "failed": 0
+    },
+    "postgres": {
+      "cases": 100,
+      "passed": 100,
+      "failed": 0,
+      "files": [
+        "foundation",
+        "catalog-purchase",
+        "catalog-import",
+        "onboarding",
+        "billing",
+        "reports-finance",
+        "receipt-identity"
+      ],
+      "sourceAttestation": "tasks/evidence/public-claims-core-20261015.json",
+      "database": "isolated127.0.0.1:55439/pos_test",
+      "schemaMigrationsCurrent": 179
+    },
+    "browserCore": {
+      "cases": 33,
+      "passed": 33,
+      "failed": 0,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "buildId": "uv0lMUEl_Un4FTvC3Pd9P",
+      "scope": "All economic/runtime/generated offline assets match final source. This build preceded only the responsive public-header spacing correction; public pages were retested on the final build below."
+    },
+    "browserFinalPublic": {
+      "cases": 6,
+      "passed": 6,
+      "failed": 0,
+      "locales": [
+        "uz",
+        "ru"
+      ],
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "widths": [
+        360,
+        1280
+      ],
+      "scope": "Final build: all reviewed body/metadata/manifest, actual DB plan data, generated PWA module execution, no login/language overlap, clickability, no horizontal overflow. These6 repeat cases already included in core33; not additional unique cases."
+    },
+    "browserFinalPricingTimeout": {
+      "cases": 3,
+      "passed": 3,
+      "failed": 0,
+      "locales": [
+        "uz",
+        "ru"
+      ],
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "config": "playwright.pricing-failure.config.ts",
+      "scope": "Fresh isolated server; actual BillingPlan transaction lock causes uncached read timeout in both languages; no plan mutation/cache bypass; register CTA and limitations remain; no invented tariff/trial."
+    },
+    "browserUniqueCases": 36,
+    "browserSuccessfulExecutions": 42,
+    "browserRepeatCases": 6,
+    "productionBuild": {
+      "exitCode": 0,
+      "node": "24.18.0",
+      "next": "16.3.8",
+      "compiler": "webpack",
+      "localOnly": true
+    },
+    "workerBuild": {
+      "exitCode": 0
+    },
+    "eslint": {
+      "exitCode": 0
+    },
+    "i18n": {
+      "checked": 953,
+      "unreviewed": 0,
+      "missing": []
+    },
+    "offlineAssets": {
+      "deterministicRegeneration": true,
+      "workerPublicCacheVersion": 4,
+      "publicAssets": 12,
+      "privateCachingAdded": false,
+      "forcedTakeoverAdded": false
+    },
+    "sourceSecurityScan": {
+      "exitCode": 0,
+      "findings": 0,
+      "credentialStoreContentsOpened": false,
+      "scope": "tracked and nonignored working source; not history/images"
+    }
+  },
+  "commands": {
+    "testCompile": "node node_modules/typescript/bin/tsc -p tsconfig.test.json",
+    "unit": "node --require ./scripts/test-resolver.cjs --test --test-isolation=none .test-build/tests/*.unit.test.js",
+    "postgres": "DATABASE_URL=<isolated127.0.0.1:55439/pos_test> NODE_ENV=test AUTH_CRITICAL_MFA_REQUIRED=false node --require ./scripts/test-resolver.cjs --test --test-concurrency=1 <seven listed .test-build/tests/*.integration.test.js>",
+    "browserEnvironment": "Isolated DB, test-only challenge secret, critical MFA on, POS_E2E_ALL_BROWSERS=1, /tmp installed browsers and WebKit runtime; generated localhost TLS from scripts/e2e-server.cjs",
+    "browserCore": "node node_modules/@playwright/test/cli.js test tests/e2e/public-claims.spec.ts tests/e2e/billing.spec.ts tests/e2e/core.spec.ts tests/e2e/permission-receipts.spec.ts --grep 'Public claims in|Billing displays DB|Production HTTPS: register, open shift|catalog management, supplier purchase|Catalog CSV import|Onboarding resumes|Training is isolated|Production HTTP role decisions|PWA private catalog|Offline signed cash basket'",
+    "browserFinalPublic": "node node_modules/@playwright/test/cli.js test tests/e2e/public-claims.spec.ts",
+    "browserFinalPricingTimeout": "node node_modules/@playwright/test/cli.js test --config=playwright.pricing-failure.config.ts",
+    "offlineBuild": "node scripts/build-offline.cjs",
+    "build": "node -e \"process.execArgv.length=0;process.argv=[process.execPath,'next','build','--webpack'];require('./node_modules/next/dist/bin/next')\"",
+    "worker": "node node_modules/typescript/bin/tsc -p tsconfig.worker.json",
+    "claimGate": "node scripts/release/check-claims.cjs",
+    "i18n": "node scripts/i18n/catalog.cjs check",
+    "security": "node scripts/security/scan.mjs",
+    "eslint": "node node_modules/eslint/bin/eslint.js <affected JS/TS paths>"
+  },
+  "initialBrowserAttempt": {
+    "accepted": false,
+    "selected": 27,
+    "passed": 16,
+    "failed": 4,
+    "interrupted": 1,
+    "notRun": 6,
+    "exitCode": 130,
+    "log": "tasks/evidence/public-claims-20261015/browser-initial-failed.log",
+    "findings": "Actual Node/Chromium Uzbek ICU grouping mismatch and stale supplier search locator; graceful interruption. Formatter normalized with formatToParts; supplier selector updated without removing economic assertions; later cohorts passed."
+  },
+  "changes": {
+    "businessPolicyChanged": false,
+    "schemaOrApiChanged": false,
+    "newMigrations": 0,
+    "newDependencies": 0,
+    "realDeployment": false,
+    "irreversibleDeletion": false
+  },
+  "visualReview": [
+    "chromium-public-uz-1280.png",
+    "webkit-public-ru-360.png",
+    "firefox-pricing-unavailable-ru.png"
+  ],
+  "review": "Independent read-only reviewer found and confirmed fixes for fresh-server CI isolation and runtime fingerprint coverage; no remaining must-fix in reviewed map.",
+  "sourceSha256": {
+    ".github/workflows/ci.yml": "485d1490bc191964509d6605b66e14ae6b34fb1d944052a52c87426467a936a2",
+    "README.md": "dc2f996247d693c9d35c4981a9c49dda278c86edd4d2f1f060b0e2cfcc686db9",
+    "package.json": "7c52dd0203e4075956e46a53ab3ac859f02ed44d41d5776b2c1eb2a9d973593e",
+    "playwright.config.ts": "1e381bdd453bbfb7c3a10f7f8c321f0c16155cf0055287b545bf3a3974b5b370",
+    "playwright.pricing-failure.config.ts": "325869fb58af548bd15bdb83f88645ee11ee102e9b61b8ab40f63390d08b68d6",
+    "public/sw.js": "0bec9b89275322a258f585a3b9d552274bd4841b4068e89ee86b407dc92d9825",
+    "public/pwa/format.js": "539d55219289d6b4b5178371327949ef2f7605e7ce2f7e2c15024b2b957052bb",
+    "src/app/layout.tsx": "37ff0b8dd2934a40ff35191b5f7beea6f5634194465e4db392dbaf582ac33a63",
+    "src/app/manifest.ts": "11bb57ada6e4e617ac32d20443f0e142f3c43107857de981cfd022e87b2b7423",
+    "src/app/page.tsx": "e22027bd10fa5668cf9207699ebcb41ff58cb8b0d7e3157bcf074c63ff8e5489",
+    "src/components/landing/LandingContent.tsx": "b82fdca30124eabb6390972ab31eb245e822f2ca8bb57443f10f85ff443771b8",
+    "src/context/LocaleContext.tsx": "cb25f7bba0d141816c2406ffb04b3d46022db3c4e35cc685bd7282439cbf8797",
+    "src/i18n/format.ts": "c673fa684b0455015bfd6004b3462dac4939d3929508c5681727adadeaff0ba3",
+    "src/release/public-copy.ts": "bd0b508c32e73d4e71140fbc2deb098cf9c5fe98638aaa2f1a177626f4ecf80f",
+    "scripts/release/check-claims.cjs": "36804245726639ecd03e745cd5ec4da319c56fec61c8c03e1927e1ecb6f9edd1",
+    "tests/marketing.unit.test.ts": "b2d6b019ceffcdc25790169b1e924df388658469a8648e13ae0c2c1ff60229df",
+    "tests/localization.unit.test.ts": "273763aec7684a2885ea24e373136a705368f573c9a523c66e23133239253743",
+    "tests/pwa-worker.unit.test.ts": "97b67fb8857dbd1a3b3bbe22342ae301712607025ed7727b5a7139cb7f9f3382",
+    "tests/e2e/billing.spec.ts": "049ef192b87be1cd24b8be51bb57197b07bdc508771eba2a0584101bb5f13fab",
+    "tests/e2e/core.spec.ts": "b7495617e62ec188efd5ec8bd0697744e64a3ad21e6056d5f29bef0b031c40a6",
+    "tests/e2e/public-claims.spec.ts": "6dabd0332fa379c7b7ce1aa1418d87e5fd1137bf870dd99ac83c8610904fef0f",
+    "tests/e2e/public-pricing-failure.spec.ts": "7ad8fbd8d638733d62097b4dd837b6d31277e64cc9f55890ae8834838a3ea52a",
+    "tasks/release/PUBLIC_CLAIMS.json": "0736b374ed33ddf6798f1fb21f1f58de6b9b6e530ffa48349556054af6a65dda",
+    "docs/operations/public-release-claims.md": "1ce9fea12deb8197f92b67681a08ccef6e11b0c432af24627b1d3850d313566d",
+    "docs/operations/localization.md": "3dd80c68b3c1fcdb2bc751eb5872094e55b77ddfa6df7e150c70e79fa0f85d88",
+    "tasks/DECISIONS.md": "c20d6bd051434a7d9ce9c69d2d33aa58331acd8c346df36d9711e6eb21049ad0",
+    "tasks/PLAN1.md": "7328ff4a6d1411e941882e164278348844be0daca5a5a8d2db156556de5cda6f",
+    "tasks/EXECUTION_STATUS.md": "cbfdaa56e365bc22f0d66968f8e1c0aebe52d4ec6ac12d690dfdde9a8713eb70",
+    "tasks/evidence/public-claims-core-20261015.json": "818e1f2b9ca0d49142b906f7c993198ebf789e0227bec9c8fadb12ab1533f848"
+  },
+  "artifactSha256": {
+    "tasks/evidence/public-claims-20261015/accepted-source.patch": "5638d868f2363da1af4f15ba8f5d68e9ec07ce052fc9e4feddc63b9ccfc5968e",
+    "tasks/evidence/public-claims-20261015/browser-core.log": "a48bb896c3db62c1c60d9b35a263307debff35472f3de804ff70910c0b9f183d",
+    "tasks/evidence/public-claims-20261015/browser-initial-failed.log": "0f2f94baf9d297fd08fa2604bf39aaad1619c197c7431354a067dacdfd099364",
+    "tasks/evidence/public-claims-20261015/build-core.log": "ee841e88cc2ab77ffbf9395bced263a587d428c13305c277a21ff8d3628b38a5",
+    "tasks/evidence/public-claims-20261015/build-final.log": "8a9d4c330f8dfe1ec32fda90c3f42fbb02146ecae3e334dbf59c9b03485bba69",
+    "tasks/evidence/public-claims-20261015/chromium-pricing-unavailable-ru.png": "073c1a81b18aae33b576ba289e22860cf7451f5e965f117b59030a2210341b6f",
+    "tasks/evidence/public-claims-20261015/chromium-pricing-unavailable-uz.png": "f0412ba90770318f843896a5639b63a87f2ec64087394890500f1ff0d0c8f91c",
+    "tasks/evidence/public-claims-20261015/chromium-public-ru-1280.png": "08a816dd9705c8e8f7e9abfa457be7388fe32e306c04f75675a7d2bd0f0421e3",
+    "tasks/evidence/public-claims-20261015/chromium-public-ru-360.png": "eae34bea52620f9f59f6eba750d5ce51cd523ec69946cde635f4815aff7c7273",
+    "tasks/evidence/public-claims-20261015/chromium-public-uz-1280.png": "3f4865e2d894568be95d933a6976d54b16ad4e42d2dedc30b2d265561494bb70",
+    "tasks/evidence/public-claims-20261015/chromium-public-uz-360.png": "dccc9a8b3308a901a0b50e2f9cb853d45bcdac529a872619d391214d0b721ec4",
+    "tasks/evidence/public-claims-20261015/claims-gate.log": "09cecfd49e7c01aaa3caf21a3c4c1db6c5b0d6b62e71af5c455fcad85fddadf0",
+    "tasks/evidence/public-claims-20261015/compile-tests.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/public-claims-20261015/core-pg.log": "940da14fda28726b4f6ed0ef52886458ff3d8c76bbc5426f8e77ab7056e36abf",
+    "tasks/evidence/public-claims-20261015/firefox-pricing-unavailable-ru.png": "e57e9440ee319efa3c98225fe1c9cad4902d4c3d5f896bb1021e9c5106b33baf",
+    "tasks/evidence/public-claims-20261015/firefox-pricing-unavailable-uz.png": "55e145ac9649c2eec0a6a3d2e2fc213b928d7b2175c20127e313aa5161304068",
+    "tasks/evidence/public-claims-20261015/firefox-public-ru-1280.png": "11bc4204c5f07a99e77c5e52ba4a6664d35b3026dae331216a503651de637898",
+    "tasks/evidence/public-claims-20261015/firefox-public-ru-360.png": "a8ef6bf97f86bfb2ce39faf12920d7b62b78691ddbcb38e991c8bf7058015d32",
+    "tasks/evidence/public-claims-20261015/firefox-public-uz-1280.png": "14d17dfd51fbf57bae6a3b96c97dad29535c2407229c12f157d08fab91ed3ced",
+    "tasks/evidence/public-claims-20261015/firefox-public-uz-360.png": "6f82d01b27b1d07b499d0953ee1115dedff2505fdf19322d52bc9c5dc0bebe63",
+    "tasks/evidence/public-claims-20261015/i18n.log": "3982ab78deaffcf3d5be87a8e76202695b2d98cb7407adcd950c893c4da82dc9",
+    "tasks/evidence/public-claims-20261015/lint-ui.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/public-claims-20261015/lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/public-claims-20261015/migration-status.log": "96f1b6dda6bcdb47a124f5e9b334903ab0c54078e0225d0befa5c9f9a1655e70",
+    "tasks/evidence/public-claims-20261015/offline-build.log": "afa02e651247b0155f2ed7d9ace32bfa86be0842223c1904a2939d5ed3ca52ea",
+    "tasks/evidence/public-claims-20261015/pricing-failure-browser.log": "b361a689c2c3401f298cf5a272627433e231fc43fe7dd33a8b572befa87d9991",
+    "tasks/evidence/public-claims-20261015/pricing-unavailable.log": "8a19b402da7be92715b77bfc4d1d13797400f79cb1e2583093659273390af272",
+    "tasks/evidence/public-claims-20261015/public-ui.log": "9f61ba0fc466b87461d8c20e5e38960d2a7671fe7754a84876bad525a22978ed",
+    "tasks/evidence/public-claims-20261015/security-scan.log": "1d95c826f494575baa0589523ae7565ee429caa8af0a9f6b4cc434c4d3679635",
+    "tasks/evidence/public-claims-20261015/unit.log": "b8f52b64bae23a61ec1173a9c846140bc349f0021bab5d12d81b3dafa542efc7",
+    "tasks/evidence/public-claims-20261015/webkit-pricing-unavailable-ru.png": "540e74e981309ddec5742601e461e7eae5ad5b8db2904fc1f899d019a3d3a90a",
+    "tasks/evidence/public-claims-20261015/webkit-pricing-unavailable-uz.png": "48a5f3aaef7df3958f0b3748c970b36e3b4ca262171788caf4511ea473963dc8",
+    "tasks/evidence/public-claims-20261015/webkit-public-ru-1280.png": "6f8d77c71348d50a424d219a46899ef3b3ac85152bfc1bc44965283218e362bd",
+    "tasks/evidence/public-claims-20261015/webkit-public-ru-360.png": "e3291b2928babbf47e9d3b4c0e2c50f4137e8091c5b2e00977f7f6dfd2ffab97",
+    "tasks/evidence/public-claims-20261015/webkit-public-uz-1280.png": "bea99a478d754d3bd5ccf516928989633eebb12867634b6f822049156be74fa5",
+    "tasks/evidence/public-claims-20261015/webkit-public-uz-360.png": "dd5791928b7d80e5b31c894d66581055c172eb63e897363816d47fe13feee366",
+    "tasks/evidence/public-claims-20261015/worker-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limitations": [
+    "Real Click/fiscal/E-POS and physical hardware integrations deferred by owner.",
+    "Real server/domain/off-site backup/monitoring/pilot and legal acceptance require external evidence.",
+    "Public cache is60s; final invoices independently re-read current plan version.",
+    "Semantic review is explicit; SHA checks do not prove marketing wording by themselves.",
+    "No original external gate was counted complete by local testing."
+  ]
+}

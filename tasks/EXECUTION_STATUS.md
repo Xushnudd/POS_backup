@@ -2,7 +2,7 @@
 
 Sana: 2026-10-15. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
-Joriy original done: **175/259**. Foydalanuvchi maqsadi **175 bajarildi**: **5/5** yangi original band qabul qilindi (REP-01.11, CRM-02.04, CRM-02.03, UX-01.03, UX-01.02). Oldingi170 maqsadi bajarilgan — original INV-02.07 qabul qilindi (169→170). Baseline164dan oldingi170 maqsadi6/6: UX-01.05, INV-01.07, INV-02.06, REP-01.07, PUR-01.05 va INV-02.07. Faqat original PLAN1 bandlari sanaladi. Local core qabul real production/pilot/vendor dalili o‘rnini bosmaydi.
+Joriy original done: **176/259**. Foydalanuvchi maqsadi **176 bajarildi**:175→176, **1/1** yangi original band **RELEASE-01.12** qabul qilindi. Oldingi **175 bajarildi**: **5/5** yangi original band qabul qilindi (REP-01.11, CRM-02.04, CRM-02.03, UX-01.03, UX-01.02). Oldingi170 maqsadi bajarilgan — original INV-02.07 qabul qilindi (169→170). Baseline164dan oldingi170 maqsadi6/6: UX-01.05, INV-01.07, INV-02.06, REP-01.07, PUR-01.05 va INV-02.07. Faqat original PLAN1 bandlari sanaladi. Local core qabul real production/pilot/vendor dalili o‘rnini bosmaydi.
 
 Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sanaladi. Alohida core subtask, yangi ID, migration, test yoki qisman qabul +20 hisobini oshirmaydi. Bandning to‘liq qabul mezoni bajarilgandagina uning original checkboxi va statusi `done`ga o‘tadi; tashqi resurs talab qiladigan qabul mezoni chetlab o‘tilmaydi.
 
@@ -275,7 +275,7 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
 | RELEASE-01.09 | CORE-1 | blocked_external | Import, boshlang‘ich hisob, trening va onboarding qo‘llanmasi tayyor. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | RELEASE-01.10 | CORE-1 | todo | Xizmat shartlari, maxfiylik, tarif va eksport/o‘chirish siyosati tayyor. | — | — |
 | RELEASE-01.11 | CORE-1 | todo | Pilotta ochiq kritik yoki yuqori darajadagi xatolar qolmagan. | — | — |
-| RELEASE-01.12 | CORE-1 | todo | Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi. | — | — |
+| RELEASE-01.12 | CORE-1 | done |44 typed public matn →7 capability/9 immutable dalil;5 render/4 runtime source pin; haqiqiy DB tarif/trial va ko‘rinadigan unavailable chegaralari |161 unit,100 PG;33 native browser+3 fresh-server timeout PASS;6 public qayta360/1280px PASS; public-claims-release-20261015.json, ADR095 | Claim/source o‘zgarsa review/proofni yangilash; real production/pilot/vendor/hardware gate’lari alohida |
 | MODEL-01 | CORE-1 | todo | PLAN1 jadvali, 1-qator/bosqich | — | — |
 | MODEL-02 | CORE-1 | todo | PLAN1 jadvali, 2-qator/bosqich | — | — |
 | MODEL-03 | CORE-1 | todo | PLAN1 jadvali, 3-qator/bosqich | — | — |
@@ -2536,3 +2536,25 @@ Real local cash fixture: `Saqlash` mahsuloti va yetakchi nolli barkod,0.125kg,12
 **Yakuniy tekshiruvlar:**155/155 unit case,53 source fayl;88/88 PostgreSQL case,4 source fayl; **bitta yakuniy72/72 native run**, har Chromium/Firefox/WebKitda24. Native guruhlar har engine uchun6 auth+2 product draft,3 locale va13 existing POS/receipt case. Type/test compile/worker,0warning source lint va so‘nggi E2E lint, offline/webpack build, catalog va source scan PASS. Historical33/48 cohortlar bu72ga qo‘shilmadi. Oldingi stale React Compiler label, invitation guidance, selector/legacy display expectation va mobil transform kutish failures saqlangan. WebKitdagi bir oldingi fetch pageError navigationdan15ms keyin kuzatilgan; test active supplier rowni kutadi, hech qanday pageerror filter yoki retry qo‘shilmagan. Yakuniy WebKit full cash case ham asl errors=[] assertion bilan PASS.
 
 Dalillar: `tasks/evidence/localization-20261015.json`, uning yonidagi hashed loglar, uch engine screenshotlari va accepted-source.patch; contract `docs/operations/localization.md`, ADR094. Source `a2de5a8`+uncommitted tree; AI commit yo‘q. SQL/schema/migration o‘zgarishi va real deployment yo‘q. Faqat isolated pos_test va local production-mode HTTPS binary sinovdan o‘tdi; tashqi server/domen/backup/monitoring/pilot, hardware va provider qabuliga tenglashtirilmaydi. Ular oldingi foydalanuvchi cheklovlari bo‘yicha alohida qoladi.
+
+
+### RELEASE-01.12 original qabul —176/259 (2026-10-15)
+
+Foydalanuvchining176 maqsadi bitta yangi original bilan bajarildi:175→176. Faqat RELEASE-01.12 checkboxi qabul qilindi; yordamchi test, proof registry yoki subtask original hisobini oshirmaydi.
+
+Contract: ommaviy sahifa, root/landing metadata, manifest tavsifi va til almashtirish sarlavhasi44 typed PUBLIC_COPY kalitidan keladi. Private PUBLIC_CLAIMS review xaritasi7 capabilityni qabul qilingan original IDlar,9 immutable dalil va actual source-attested xizmat/test hashlariga bog‘laydi.5 render va4 display runtime fingerprinti, ikki dictionary wording hashi, unaccepted original, forged proof, olib tashlangan boundary, inline/dynamic promise va eski dictionary importi CI’da rad etiladi. Hash tekshiruvi ma’no reviewini almashtirmaydi.
+
+Narx, limit va trial/grace joriy DB versiyasidan;60s public cache va invoice fresh-version contracti saqlanadi. Null/empty/no-trial holatda taxminiy narx/trial CTA yo‘q. Haqiqiy isolated DB transaction locki bilan uncached read timeout uch engineda ikkala tilda tekshirildi; tarif mutatsiyasi yoki cache bypass yo‘q. Default Playwright config timeout faylini asosiy cohortdan ajratadi; npm/CI uni dedicated config bilan yangi serverda yuritadi. Real Click/fiscal/E-POS va fizik hardware yo‘qligi, chekning ichki nefiskal nusxa ekanligi va to‘liq offline kafolati yo‘qligi ko‘rinadi.
+
+Native testda topilgan Node/Chromium ICU249 000/249,000 farqi Intl.formatToParts group normalizatsiyasi bilan tuzatildi. BigInt, minor birlik, Decimal request, transaction, stock va original body/key o‘zgarmadi. Generated PWA formatter va public-only cache v4 tekshirildi; private API/receipt cache yoki faol kassaga majburiy takeover qo‘shilmadi. Rasmdagi login/til boshqaruvi ustma-ust kelishi kichik responsive header joylashuvi bilan tuzatildi.
+
+Tekshirilgan natijalar:
+
+- Test compile,161/161 unit (53 source unit fayli), worker build, ESLint, i18n953/0 missing, claim gate44/7/9/5/0 va read-only source security scan0 findings PASS.
+- 179 migration joriy isolated PostgreSQLda actual7 fayl/100 holat PASS: foundation, catalog-purchase, catalog-import, onboarding, billing, reports-finance, receipt-identity. Xizmat/source hashlari `public-claims-core-20261015.json`da. Schema/SQL/migration o‘zgarishi yo‘q.
+- Node24/Next16.3.8 production-mode build PASS. Lokal HTTPSda Chromium/Firefox/WebKit bo‘yicha33/33 native core holati PASS: billing lost-ACK, cash single-effect, katalog/xarid/CSV, trening, scoped PWA cache, signed offline cash, import/onboarding va role revocation. Bu cohort build `uv0lMUEl_Un4FTvC3Pd9P`da, oxirgi header spacingdan oldin; iqtisodiy/runtime/PWA manbalari ayni.
+- Yakuniy headerli buildda6/6 public Uz/Ru holati360/1280pxda qayta PASS: barcha wording, DB narx/limit/trial, metadata/manifest, generated offline formatter, login clickability/no-overlap va horizontal overflow. Keyin dedicated fresh-server timeout3/3 PASS. Jami36 unique browser holati;6 public qayta bajarilgan,42 executionni42 unique deb hisoblamaymiz.
+
+Dastlabki27 browser urinishida ICU va oldingi supplier filter selector xatolari bo‘lgan, jarayon to‘xtatilgan; bu urinish PASS deb ko‘rsatilmaydi. `browser-initial-failed.log` saqlangan. Supplier testi hozirgi search label/Qidirish amaliga moslandi; asl DB/CSV/stock assertionlari saqlandi. Keyingi33 cohort to‘liq PASS. Desktop/mobile public rasmlari va unavailable rasmlari saqlandi, yakuniy Uz desktop/Ru mobile/Ru fallback ko‘rib chiqildi.
+
+Dalil: `tasks/evidence/public-claims-release-20261015.json`, hashed loglar/rasmlar va accepted-source.patch; qo‘llanma `docs/operations/public-release-claims.md`, ADR095. Source `047c49e`+uncommitted accepted patch; AI commit yo‘q. API/DB schema o‘zgarmagani uchun yangi migration yoki fresh/legacy migration rehearsal talab etilmadi. Public copy/wiring uchun yangi endpoint, vendor adapter yoki audit business mutation qo‘shilmadi. Real deploy/host/domen, real backup/monitoring, pilot, huquqiy yoki provider/hardware qabul dalili yaratilmagan; tegishli original bandlar oldingi cheklovlarda qoladi. Keyingi original faqat uning haqiqiy qabul mezoni va tashqi shartlari asosida tanlanadi.
