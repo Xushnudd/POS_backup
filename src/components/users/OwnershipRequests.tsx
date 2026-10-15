@@ -1,4 +1,8 @@
 'use client';
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {api} from '@/lib/api';
 import {useAuth} from '@/context/AuthContext';
@@ -11,6 +15,8 @@ export default function OwnershipRequests({organizationId}:{organizationId?:stri
  return organization&&user?<RequestControls key={[organization.id,user.id,role,organizationId].join(':')}/>:null;
 }
 function RequestControls(){
+ const {t:tr}=useTranslation();
+
  const [rows,setRows]=useState<RequestRow[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
  const live=useRef(true),flight=useRef(false),readSequence=useRef(0);
  useUnsavedChanges(false,busy);
@@ -36,10 +42,10 @@ function RequestControls(){
   finally{flight.current=false;if(live.current)setBusy(false);}
  }
  if(!rows.length&&!error)return null;
- return <section aria-label="Egalik so‘rovlari" className="text-xs space-y-2">
-  {error&&<p role="alert">{error} <Button size="sm" disabled={busy||loading} onClick={()=>void load()}>Egalik so‘rovlarini qayta tekshirish</Button></p>}
-  {busy&&<p role="status">Egalik amali uchun server tasdig‘i kutilmoqda…</p>}
-  {loading&&<p role="status">Egalik so‘rovlari yuklanmoqda…</p>}
-  {rows.map(row=><div key={row.id}>Egalikni topshirish so‘rovi ({new Date(row.expiresAt).toLocaleString('uz-UZ')}) {row.incoming&&<Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'accept')}>Qabul qilish</Button>} <Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'cancel')}>Bekor qilish</Button></div>)}
+ return <section aria-label={tr("Egalik so‘rovlari")} className="text-xs space-y-2">
+  {error&&<p role="alert">{error} <Button size="sm" disabled={busy||loading} onClick={()=>void load()}>{tr("Egalik so‘rovlarini qayta tekshirish")}</Button></p>}
+  {busy&&<p role="status">{tr("Egalik amali uchun server tasdig‘i kutilmoqda…")}</p>}
+  {loading&&<p role="status">{tr("Egalik so‘rovlari yuklanmoqda…")}</p>}
+  {rows.map(row=><div key={row.id}>{tr("Egalikni topshirish so‘rovi (")}{new Date(row.expiresAt).toLocaleString('uz-UZ')}) {row.incoming&&<Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'accept')}>{tr("Qabul qilish")}</Button>} <Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'cancel')}>{tr("Bekor qilish")}</Button></div>)}
  </section>;
 }

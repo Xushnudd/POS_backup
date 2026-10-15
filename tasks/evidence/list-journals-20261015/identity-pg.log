@@ -1,0 +1,24 @@
+{"requestId":"4619e951-01ee-47c9-afe8-703f40a3fae3","organizationId":"e194922a-bb7b-42f4-97f1-9a968ad9f5a8","status":200,"durationMs":57,"event":"api_response"}
+{"requestId":"6d353f00-9da1-42b0-9145-b949031231a4","organizationId":"e194922a-bb7b-42f4-97f1-9a968ad9f5a8","status":400,"code":"DUPLICATE","durationMs":60,"event":"api_error"}
+{"requestId":"9c598b90-ad63-4d88-b37b-925c5d963cfe","organizationId":"e194922a-bb7b-42f4-97f1-9a968ad9f5a8","status":403,"code":"TENANT_MISMATCH","durationMs":7,"event":"api_error"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"0451616c-3e27-418c-ba6d-86afced9f8a3","organizationId":"e194922a-bb7b-42f4-97f1-9a968ad9f5a8","status":409,"code":"CUSTOMER_MERGED","durationMs":15,"event":"api_error"}
+{"requestId":"36fb27a9-e619-4939-abf7-697e47b8794d","organizationId":"e194922a-bb7b-42f4-97f1-9a968ad9f5a8","status":409,"code":"CUSTOMER_MERGED","durationMs":15,"event":"api_error"}
+✔ Customer normalized duplicate races, scoped group pricing, settled merge and original sales/refund history preserve all financial IDs (984.031749ms)
+✔ Customer SQL and service block merge with open debt or foreign scope; normalized identity matches SQL and a failed audit rolls merge back (184.872568ms)
+{"requestId":"9681fcfd-f903-4780-ba03-37c1179ee82d","organizationId":"e6168d93-5db4-48a4-89a3-e8670fa6ef0c","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"42cbf7bf-e05c-4e2e-b560-db67f96be9b3","organizationId":"e6168d93-5db4-48a4-89a3-e8670fa6ef0c","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"71acef8e-72f6-4a4a-8f35-23fb09d8ffbf","organizationId":"b701b7fb-17a1-454c-8bc1-bf493bf8fc2a","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"992d034b-4301-4b05-b509-673cd98ad462","organizationId":"e6168d93-5db4-48a4-89a3-e8670fa6ef0c","status":200,"durationMs":30,"event":"api_response"}
+{"requestId":"d611335d-9cc1-4d61-93e6-ad2f13f7fe28","organizationId":"e6168d93-5db4-48a4-89a3-e8670fa6ef0c","status":403,"code":"OWNER_REQUIRED","durationMs":39,"event":"api_error"}
+✔ Preserved legacy duplicate diagnosis is paginated, normalized, owner-only and scoped; reviewed merge resolves the duplicate without deleting either identity (253.162959ms)
+✔ Original customer sales history and variant lists cover global sorted pages, bounded filters and preserve original tenant amounts (4217.497846ms)
+✔ Preserved legacy duplicate global names filter only presentation, retains group size and never creates or merges customers (60.612203ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7117.690622

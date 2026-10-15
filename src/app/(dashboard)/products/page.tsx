@@ -1,5 +1,7 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import {useListQuery} from '@/hooks/useListQuery';
 import {productListSorts} from '@/lib/list-query';
 import ListFilter from '@/components/ui/ListFilter';
@@ -11,7 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { Category, Product } from '@/types';
-import { formatMoney, formatNumber } from '@/lib/format';
+
 import { PRODUCT_UNITS } from '@/lib/constants';
 import DataTable from '@/components/ui/DataTable';
 import Card from '@/components/ui/Card';
@@ -32,11 +34,17 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function ProductsPage() {
+ const {t:tr}=useTranslation();
+
   const {organization,user,role}=useAuth();
-  return organization&&user?<Suspense fallback={<LoadingSpinner text="Mahsulotlar yuklanmoqda..."/>}><ProductsEditor key={[organization.id,user.id,role].join(':')}/></Suspense>:null;
+  return organization&&user?<Suspense fallback={<LoadingSpinner text={tr("Mahsulotlar yuklanmoqda...")}/>}><ProductsEditor key={[organization.id,user.id,role].join(':')}/></Suspense>:null;
 }
 
 function ProductsEditor() {
+ const {formatMoney,formatNumber}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const { organization, role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -213,30 +221,27 @@ function ProductsEditor() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={isLoading} onClick={()=>void loadData()}>Qayta yuklash</Button></div>}
-      {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{}),sort}} label="Katalogni CSV yuklash"/>}
+      {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={isLoading} onClick={()=>void loadData()}>{tr("Qayta yuklash")}</Button></div>}
+      {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{}),sort}} label={tr("Katalogni CSV yuklash")}/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Mahsulotlar katalogi
-          </h1>
-          {role==='owner'&&<Link href="/products/import">CSV / Excel import va eksport</Link>}
+            {tr("Mahsulotlar katalogi")}</h1>
+          {role==='owner'&&<Link href="/products/import">{tr("CSV / Excel import va eksport")}</Link>}
           <p className="text-sm text-gray-500 mt-0.5">
-            Tovar va xizmatlar narxi, o&apos;lchov birligi va zaxira parametrlari
-          </p>
+            {tr("Tovar va xizmatlar narxi, o'lchov birligi va zaxira parametrlari")}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          {role!=='cashier' && <Link href="/products/units" className="text-sm text-blue-700">Birliklar</Link>}
+          {role!=='cashier' && <Link href="/products/units" className="text-sm text-blue-700">{tr("Birliklar")}</Link>}
           <Button
             variant="outline"
             disabled={role==='cashier'}
             onClick={() => setIsCategoryModalOpen(true)}
             leftIcon={<FontAwesomeIcon icon={faTags} />}
           >
-            Kategoriyalar
-          </Button>
+            {tr("Kategoriyalar")}</Button>
 
           <Button
             variant="primary"
@@ -245,58 +250,56 @@ function ProductsEditor() {
             leftIcon={<FontAwesomeIcon icon={faPlus} />}
             className="font-bold shadow-md shadow-blue-500/20"
           >
-            Yangi mahsulot
-          </Button>
+            {tr("Yangi mahsulot")}</Button>
         </div>
       </div>
 
       {/* Filter Bar */}
       <Card padding={false} className="p-4">
-        <ListFilter search={searchQuery} sort={sort} label="Mahsulot qidirish" placeholder="Nom, SKU yoki barkod bo'yicha qidirish..."
+        <ListFilter search={searchQuery} sort={sort} label={tr("Mahsulot qidirish")} placeholder={tr("Nom, SKU yoki barkod bo'yicha qidirish...")}
           disabled={isSaving||isCategorySaving} onChange={changeQuery}
-          options={[{value:'name_asc',label:'Nom: A–Z'},{value:'name_desc',label:'Nom: Z–A'},{value:'price_asc',label:'Narx: kichikdan kattaga'},{value:'price_desc',label:'Narx: kattadan kichikka'},{value:'sku',label:'SKU bo‘yicha'}]}>
+          options={[{value:'name_asc',label:tr("Nom: A–Z")},{value:'name_desc',label:tr("Nom: Z–A")},{value:'price_asc',label:tr("Narx: kichikdan kattaga")},{value:'price_desc',label:tr("Narx: kattadan kichikka")},{value:'sku',label:tr("SKU bo‘yicha")}]}>
           <CameraBarcodeScanner onDetected={barcode=>changeQuery({search:barcode,page:'1'})}/>
-          <Select label="Kategoriya filtri" value={selectedCategory} disabled={isSaving||isCategorySaving}
-            options={[{value:'',label:'Barcha kategoriyalar'},...categories.map(c=>({value:c.id,label:c.name}))]}
+          <Select label={tr("Kategoriya filtri")} value={selectedCategory} disabled={isSaving||isCategorySaving}
+            options={[{value:'',label:tr("Barcha kategoriyalar")},...categories.map(c=>({value:c.id,label:c.name}))]}
             onChange={event=>changeQuery({categoryId:event.target.value,page:'1'})}/>
         </ListFilter>
       </Card>
 
       {/* Products Table */}
       <Card padding={false}>
-        {invalidQuery ? <div role="alert" className="p-6">URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalang.</div>
-        :loadError ? <div className="p-6">Ro‘yxat yuklanmadi. Qayta yuklash orqali urinib ko‘ring.</div>
+        {invalidQuery ? <div role="alert" className="p-6">{tr("URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalang.")}</div>
+        :loadError ? <div className="p-6">{tr("Ro‘yxat yuklanmadi. Qayta yuklash orqali urinib ko‘ring.")}</div>
         :isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <LoadingSpinner size="lg" text="Mahsulotlar yuklanmoqda..." />
+            <LoadingSpinner size="lg" text={tr("Mahsulotlar yuklanmoqda...")} />
           </div>
         ) : products.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
             <FontAwesomeIcon icon={faBoxesStacked} className="text-4xl text-gray-300 mb-3" />
-            <p className="text-base font-bold text-gray-700">Mahsulotlar topilmadi</p>
+            <p className="text-base font-bold text-gray-700">{tr("Mahsulotlar topilmadi")}</p>
             <p className="text-xs text-gray-400 mt-1 max-w-sm">
-              Qidiruv filtrlaringizni o&apos;zgartiring yoki yangi mahsulot qo&apos;shing
-            </p>
+              {tr("Qidiruv filtrlaringizni o'zgartiring yoki yangi mahsulot qo'shing")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Mahsulot</th>
-                  <th className="py-3.5 px-4">SKU / Barkod</th>
-                  <th className="py-3.5 px-4">Kategoriya</th>
-                  <th className="py-3.5 px-4">Birlik</th>
-                  {role!=='cashier' && <th className="py-3.5 px-4 text-right">Tannarx</th>}
-                  <th className="py-3.5 px-4 text-right">Sotuv narxi</th>
-                  <th className="py-3.5 px-4 text-center">Min. qoldiq</th>
-                  <th className="py-3.5 px-4 text-right">Amallar</th>
+                  <th className="py-3.5 px-4">{tr("Mahsulot")}</th>
+                  <th className="py-3.5 px-4">{tr("SKU / Barkod")}</th>
+                  <th className="py-3.5 px-4">{tr("Kategoriya")}</th>
+                  <th className="py-3.5 px-4">{tr("Birlik")}</th>
+                  {role!=='cashier' && <th className="py-3.5 px-4 text-right">{tr("Tannarx")}</th>}
+                  <th className="py-3.5 px-4 text-right">{tr("Sotuv narxi")}</th>
+                  <th className="py-3.5 px-4 text-center">{tr("Min. qoldiq")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Amallar")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {products.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50/70 transition">
-                    <td className="py-3.5 px-4 font-bold text-gray-900">{p.name}<p><Link href={`/products/${p.id}/variants`} className="text-xs text-blue-700">Variantlar</Link>{role!=='cashier'&&<Link href={`/products/${p.id}/media`} className="ml-2 text-xs text-blue-700">Tavsif / rasm</Link>}{role==='owner'&&<Link href={`/products/${p.id}/compliance`} className="ml-2 text-xs text-blue-700">Tasnif / cheklov</Link>}{role==='owner'&&<Link href={`/products/${p.id}/units`} className="ml-2 text-xs text-blue-700">Birlik nisbati</Link>}</p></td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900">{p.name}<p><Link href={`/products/${p.id}/variants`} className="text-xs text-blue-700">{tr("Variantlar")}</Link>{role!=='cashier'&&<Link href={`/products/${p.id}/media`} className="ml-2 text-xs text-blue-700">{tr("Tavsif / rasm")}</Link>}{role==='owner'&&<Link href={`/products/${p.id}/compliance`} className="ml-2 text-xs text-blue-700">{tr("Tasnif / cheklov")}</Link>}{role==='owner'&&<Link href={`/products/${p.id}/units`} className="ml-2 text-xs text-blue-700">{tr("Birlik nisbati")}</Link>}</p></td>
                     <td className="py-3.5 px-4">
                       <div className="font-mono text-gray-700">{p.sku}</div>
                       <div className="font-mono text-[10px] text-gray-400">{p.barcode}</div>
@@ -330,8 +333,7 @@ function ProductsEditor() {
                         onClick={() => openEditModal(p)}
                         leftIcon={<FontAwesomeIcon icon={faEdit} />}
                       >
-                        Tahrirlash
-                      </Button>
+                        {tr("Tahrirlash")}</Button>
                     </td>
                   </tr>
                 ))}
@@ -342,20 +344,20 @@ function ProductsEditor() {
       </Card>
 
       {!invalidQuery&&!loadError&&<Pagination page={page} pages={totalPages} busy={isLoading||isSaving||isCategorySaving} onPage={value=>changeQuery({page:String(value)})}/>}
-      {!invalidQuery&&!isLoading&&!loadError&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+      {!invalidQuery&&!isLoading&&!loadError&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
       {/* Product Form Modal */}
       <Modal
         isOpen={isProductModalOpen}
         onClose={closeProduct}
-        title={editingProduct ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot qo\'shish'}
+        title={editingProduct ? tr("Mahsulotni tahrirlash") : tr("Yangi mahsulot qo'shish")}
         size="lg"
       >
         <form onSubmit={handleSaveProduct} className="space-y-4">
-          {productDirty&&<p role="status">Saqlanmagan mahsulot o‘zgarishlari bor.</p>}
+          {productDirty&&<p role="status">{tr("Saqlanmagan mahsulot o‘zgarishlari bor.")}</p>}
           <fieldset disabled={isSaving||isCategorySaving} className="space-y-4">
           <Input
-            label="Mahsulot nomi *"
-            placeholder="Coca-Cola 1.5L"
+            label={tr("Mahsulot nomi *")}
+            placeholder={tr("Coca-Cola 1.5L")}
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
@@ -363,8 +365,8 @@ function ProductsEditor() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="SKU (Artikul) *"
-              placeholder="SKU-001"
+              label={tr("SKU (Artikul) *")}
+              placeholder={tr("SKU-001")}
               value={formData.sku}
               onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
               required
@@ -372,7 +374,7 @@ function ProductsEditor() {
 
             <div className="relative">
               <Input
-                label="Barkod *"
+                label={tr("Barkod *")}
                 placeholder="478000123456"
                 value={formData.barcode}
                 onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
@@ -389,15 +391,15 @@ function ProductsEditor() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Kategoriya"
+              label={tr("Kategoriya")}
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
               options={categories.map((c) => ({ value: c.id, label: c.name }))}
-              placeholder="Kategoriyani tanlang"
+              placeholder={tr("Kategoriyani tanlang")}
             />
 
             <Select
-              label="O'lchov birligi"
+              label={tr("O'lchov birligi")}
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
               options={unitOptions}
@@ -406,7 +408,7 @@ function ProductsEditor() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input
-              label="Tannarx (so'm) *"
+              label={tr("Tannarx (so'm) *")}
               type="number"
               min="0"
               step="0.000001"
@@ -418,7 +420,7 @@ function ProductsEditor() {
             />
 
             <Input
-              label="Sotuv narxi (so'm) *"
+              label={tr("Sotuv narxi (so'm) *")}
               type="number"
               min="0"
               step="0.01"
@@ -429,14 +431,14 @@ function ProductsEditor() {
             />
 
             <Input
-              label="Minimal qoldiq"
+              label={tr("Minimal qoldiq")}
               type="number"
               min="0"
               placeholder="5"
               step="0.000001"
               value={formData.minStock}
               onChange={(e) => setFormData({ ...formData, minStock: e.target.value })}
-              helperText="Kam qolganda ogohlantirish"
+              helperText={tr("Kam qolganda ogohlantirish")}
             />
           </div>
           </fieldset>
@@ -448,10 +450,9 @@ function ProductsEditor() {
               onClick={closeProduct}
               disabled={isSaving}
             >
-              Bekor qilish
-            </Button>
+              {tr("Bekor qilish")}</Button>
             <Button type="submit" variant="primary" isLoading={isSaving} className="font-bold">
-              {editingProduct ? 'Saqlash' : 'Qo\'shish'}
+              {editingProduct ? tr("Saqlash") : tr("Qo'shish")}
             </Button>
           </div>
         </form>
@@ -461,16 +462,16 @@ function ProductsEditor() {
       <Modal
         isOpen={isCategoryModalOpen}
         onClose={closeCategory}
-        title="Kategoriyalar boshqaruvi"
+        title={tr("Kategoriyalar boshqaruvi")}
         size="md"
       >
         <div className="space-y-4">
-          {categoryDirty&&<p role="status">Saqlanmagan kategoriya o‘zgarishlari bor.</p>}
+          {categoryDirty&&<p role="status">{tr("Saqlanmagan kategoriya o‘zgarishlari bor.")}</p>}
           <form onSubmit={handleCreateCategory} className="flex gap-2">
             <Input
-              label="Yangi kategoriya nomi"
+              label={tr("Yangi kategoriya nomi")}
               disabled={isCategorySaving||isSaving}
-              placeholder="Yangi kategoriya nomi..."
+              placeholder={tr("Yangi kategoriya nomi...")}
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               required
@@ -483,8 +484,7 @@ function ProductsEditor() {
               leftIcon={<FontAwesomeIcon icon={faPlus} />}
               className="whitespace-nowrap"
             >
-              Qo&apos;shish
-            </Button>
+              {tr("Qo'shish")}</Button>
           </form>
 
           <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-60 overflow-y-auto">
@@ -492,8 +492,7 @@ function ProductsEditor() {
               <div key={c.id} className="p-3 flex items-center justify-between text-xs font-semibold">
                 <span>{c.name}</span>
                 <Badge variant="neutral" size="sm">
-                  {products.filter((p) => p.categoryId === c.id).length} ta mahsulot
-                </Badge>
+                  {products.filter((p) => p.categoryId === c.id).length} {tr("ta mahsulot")}</Badge>
               </div>
             ))}
           </div>

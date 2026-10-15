@@ -1506,3 +1506,20 @@ Actual source trigger completed online salega bitta lot beradi. Checkout before-
 - `POST /api/sales/:id/gift`: `{operationId,giftId,giftAmount,customerConsent:true,reason,payments:[...]}`; gift funds and remaining non-credit payments atomically post the sale, cash/stock/advance allocation/source audit. Zero-credit-limit customers can use fully prepaid funds. Ordinary borrowing checks remain for unfunded credit.
 
 Every mutation uses original idempotency UUID and preserves unknown-result recovery. Native migrations174–179 are required before starting the new binary. Assigned gift identifiers are not vendor protocols. Detailed terms: [loyalty marketing](docs/operations/loyalty-marketing.md).
+
+
+### Ro‘yxat/query contracti — 2026-10-15
+
+Qo‘llangan search/sort/page/limit va endpointga tegishli sana/holat/filial filtrlari URL/API bilan mos. Har endpoint safe sort allowlistidan foydalanadi; ixtiyoriy DB ustunini sort sifatida yuborish rad etiladi. Search≤200, list limit1..200, positive integer page va bounded offset; serial searchmax100. Immutable journal va ayrim administrative read endpoints o‘zining fixed20/50 limit/tartibini saqlaydi. Bitta HTTP response count/rows snapshotidir, sahifalararo muzlatilgan snapshot va’dasi emas.
+
+`GET /organizations/:id/users` owner-only: opt-in page/limit/search/sort/status, status all/active/blocked/archived; sort source/name_asc/name_desc/newest/oldest. Search fullName/phone. Parametrsiz eski complete DTO saqlanadi; credential hashes qaytarilmaydi.
+
+`GET /inventory/locations`: oldingi storeId/page/limitga search (original reason/ID), sort newest/oldest, status active/released/consumed/expired, kind manual/cash_ticket qo‘shildi. serverTime expiry talqini uchun original server vaqti, synthetic hardware dalili emas. Read operatsiyasi stockni tuzatmaydi.
+
+`GET /products/prices`: original field salePrice/costPrice va productId scope bilan search frozen productName/SKU/source; sort newest/oldest; matching complete filtered CSV. Cost read/export owner-only.
+
+Variant list: search name/SKU/barcode, sort source/name_asc/name_desc/price_asc/price_desc, status all/active/archived; whole root family global paging. Original customer history: receipt search, newest/oldest/amount_asc/amount_desc. Legacy duplicate diagnosis: optional normalized full phone + name search, source/name_asc/name_desc; filtered presentation group duplicate countni qayta yozmaydi.
+
+Main sales report row search faqat chek/mijoz ro‘yxatini tanlaydi: period summary barcha tanlangan davrning pul va qarz hodisalarini saqlaydi. Metadata `periodSaleCount` va `summaryScope=complete_period_before_row_search` buni ochiq qiladi. Product/purchase/supplier/breakdown reports o‘z filtered group count/summary va original asOf scope bilan. CSV hech qachon UI sahifasi bilan qisqartirilmaydi; mavjud export cap saqlanadi.
+
+UI prefixlar, journal tartibi, manual confirmation va form-selector istisnolari `docs/operations/list-query-coverage.md` da. Vendor/protokol/hardware integration qo‘shilmadi; Uz/Ru qamrovi alohida in-progress.

@@ -1,10 +1,12 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
 import { quickProductIds, QUICK_PRODUCT_LIMIT } from '@/lib/quick-products';
 import { Category, Product } from '@/types';
-import { formatMoney } from '@/lib/format';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
@@ -44,6 +46,10 @@ export default function ProductSearch({
   quickScope,
   onQuickSelect,
 }: ProductSearchProps) {
+ const {formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [quick, setQuick] = useState<{scope: string | null; ids: string[]; products: Product[]}>({scope:null,ids:[],products:[]});
   const [quickError, setQuickError] = useState('');
@@ -106,10 +112,10 @@ export default function ProductSearch({
 
           <input
             id="pos-product-search"
-            aria-label="POS mahsulot qidirish"
+            aria-label={tr("POS mahsulot qidirish")}
             ref={searchInputRef}
             type="text"
-            placeholder="Mahsulot nomi yoki barkod..."
+            placeholder={tr("Mahsulot nomi yoki barkod...")}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -122,8 +128,7 @@ export default function ProductSearch({
               onClick={() => onSearchChange('')}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-600 hover:text-gray-600 bg-gray-100 px-2 py-1 rounded-lg"
             >
-              Tozalash
-            </button>
+              {tr("Tozalash")}</button>
           )}
         </div>
 
@@ -133,11 +138,11 @@ export default function ProductSearch({
         />
       </div>
 
-      {scanBusy && <p role="status">Barkod tekshirilmoqda…</p>}
+      {scanBusy && <p role="status">{tr("Barkod tekshirilmoqda…")}</p>}
       {quickError && <p role="alert">{quickError}</p>}
-      {quick.scope === quickScope && quick.ids.length > 0 && <section aria-label="Tezkor mahsulotlar" className="flex flex-wrap gap-2">
+      {quick.scope === quickScope && quick.ids.length > 0 && <section aria-label={tr("Tezkor mahsulotlar")} className="flex flex-wrap gap-2">
         {quick.ids.map(id => {const product=quick.products.find(row=>row.id===id);return <div key={id} className="flex border rounded-xl bg-white">
-          <button type="button" className="min-h-11 p-2 text-gray-900" disabled={!product} onClick={() => void onQuickSelect(id)}>{product?.name??'Mavjud bo‘lmagan mahsulot'} — tezkor</button>
+          <button type="button" className="min-h-11 p-2 text-gray-900" disabled={!product} onClick={() => void onQuickSelect(id)}>{product?.name??tr("Mavjud bo‘lmagan mahsulot")} {tr("— tezkor")}</button>
           <button type="button" className="min-h-11 min-w-11 text-gray-900" aria-label={(product?.name??'Mavjud bo‘lmagan mahsulot')+' — tezkor ro‘yxatdan olib tashlash'} onClick={() => toggleQuick(product??{id})}>×</button>
         </div>;})}
       </section>}
@@ -153,7 +158,7 @@ export default function ProductSearch({
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
-          Barchasi ({products.length})
+          {tr("Barchasi (")}{products.length})
         </button>
 
         {categories.map((cat) => (
@@ -174,18 +179,17 @@ export default function ProductSearch({
 
       {/* Products Grid */}
       <div className="flex-1 overflow-y-auto" aria-busy={isLoading}>
-        {isLoading && products.length > 0 && <p role="status" className="text-sm text-gray-700">Mahsulotlar yangilanmoqda…</p>}
+        {isLoading && products.length > 0 && <p role="status" className="text-sm text-gray-700">{tr("Mahsulotlar yangilanmoqda…")}</p>}
         {isLoading && products.length === 0 ? (
           <div className="h-64 flex items-center justify-center">
-            <LoadingSpinner size="lg" text="Mahsulotlar yuklanmoqda..." />
+            <LoadingSpinner size="lg" text={tr("Mahsulotlar yuklanmoqda...")} />
           </div>
         ) : products.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-center text-gray-600">
             <FontAwesomeIcon icon={faBoxesStacked} className="text-3xl text-gray-300 mb-2" />
-            <p className="text-sm font-semibold text-gray-600">Mahsulot topilmadi</p>
+            <p className="text-sm font-semibold text-gray-600">{tr("Mahsulot topilmadi")}</p>
             <p className="text-xs text-gray-600 mt-0.5">
-              Qidiruv so&apos;zini tekshiring yoki yangi mahsulot qo&apos;shing
-            </p>
+              {tr("Qidiruv so'zini tekshiring yoki yangi mahsulot qo'shing")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -202,10 +206,10 @@ export default function ProductSearch({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider truncate">
-                      {p.category?.name || 'Katalog'}
+                      {p.category?.name || tr("Katalog")}
                     </span>
                     <span className="text-[10px] font-mono text-gray-600">
-                      {p.unit || 'dona'}
+                      {p.unit || tr("dona")}
                     </span>
                   </div>
 
@@ -223,7 +227,7 @@ export default function ProductSearch({
                   </div>
                 </div>
               </button>
-              <button type="button" disabled={!quickScope||quick.scope!==quickScope} aria-pressed={quick.scope===quickScope&&quick.ids.includes(p.id)} aria-label={p.name+' — tezkor ro‘yxat'} className="min-h-11 text-xs text-gray-900 bg-white border rounded-xl" onClick={() => toggleQuick(p)}>{quick.scope===quickScope&&quick.ids.includes(p.id)?'Tezkor ro‘yxatdan olish':'Tezkor ro‘yxatga qo‘shish'}</button>
+              <button type="button" disabled={!quickScope||quick.scope!==quickScope} aria-pressed={quick.scope===quickScope&&quick.ids.includes(p.id)} aria-label={p.name+' — tezkor ro‘yxat'} className="min-h-11 text-xs text-gray-900 bg-white border rounded-xl" onClick={() => toggleQuick(p)}>{quick.scope===quickScope&&quick.ids.includes(p.id)?tr("Tezkor ro‘yxatdan olish"):tr("Tezkor ro‘yxatga qo‘shish")}</button>
               </div>
             ))}
           </div>

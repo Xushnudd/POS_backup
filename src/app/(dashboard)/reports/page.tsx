@@ -1,5 +1,7 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Link from 'next/link';
 import {useListQuery} from '@/hooks/useListQuery';
@@ -12,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { api } from '@/lib/api';
 import { ProductReportItem, Sale, SalesReportSummary } from '@/types';
-import { formatMoney, formatNumber, formatDate } from '@/lib/format';
+
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -25,6 +27,10 @@ import {
 
 export default function ReportsPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<LoadingSpinner/>}><ReportsContent key={[organization?.id,user?.id,role].join(':')}/></Suspense>}
 function ReportsContent() {
+ const {formatMoney,formatNumber,formatDate}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const {query,params:searchParams,changeQuery,replaceQuery}=useListQuery(reportListSorts,'default');
   const { organization,role } = useAuth();
   const { activeStore } = useOrganization();
@@ -85,26 +91,23 @@ function ReportsContent() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Tahlil va Hisobotlar
-          </h1>
-          <Link href="/reports/purchases" className="text-sm text-blue-700 mr-4">Xarid narxlari tahlili</Link>
-          {role==='owner'&&<Link href="/reports/plans" className="text-sm text-blue-700 mr-4">Rejalashtirilgan hisobotlar</Link>}
-          <Link href="/reports/reconciliation" className="text-sm text-blue-700">Qoldiq va pul hisobini solishtirish</Link>
+            {tr("Tahlil va Hisobotlar")}</h1>
+          <Link href="/reports/purchases" className="text-sm text-blue-700 mr-4">{tr("Xarid narxlari tahlili")}</Link>
+          {role==='owner'&&<Link href="/reports/plans" className="text-sm text-blue-700 mr-4">{tr("Rejalashtirilgan hisobotlar")}</Link>}
+          <Link href="/reports/reconciliation" className="text-sm text-blue-700">{tr("Qoldiq va pul hisobini solishtirish")}</Link>
           <p className="text-sm text-gray-500 mt-0.5">
-            Savdo ko&apos;rsatkichlari, tovarlar aylanmasi, foyda va CSV eksport
-          </p>
+            {tr("Savdo ko'rsatkichlari, tovarlar aylanmasi, foyda va CSV eksport")}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          {organization&&!isLoading&&!error&&asOf&&<CsvExportButton path={activeTab==='sales'?'/reports/sales':'/reports/products'} params={{organizationId:organization.id,startDate,endDate,asOf,sort,search,...(activeStore?.id?{storeId:activeStore.id}:{})}} label="To‘liq hisobotni CSV yuklash"/>}
+          {organization&&!isLoading&&!error&&asOf&&<CsvExportButton path={activeTab==='sales'?'/reports/sales':'/reports/products'} params={{organizationId:organization.id,startDate,endDate,asOf,sort,search,...(activeStore?.id?{storeId:activeStore.id}:{})}} label={tr("To‘liq hisobotni CSV yuklash")}/>}
 
           <Button
             variant="outline"
             onClick={()=>{changeQuery({asOf:''});setRevision(value=>value+1);}}
             leftIcon={<FontAwesomeIcon icon={faRotateLeft} />}
           >
-            Yangilash
-          </Button>
+            {tr("Yangilash")}</Button>
         </div>
       </div>
 
@@ -122,8 +125,7 @@ function ReportsContent() {
               }`}
             >
               <FontAwesomeIcon icon={faChartLine} />
-              Savdolar hisoboti
-            </button>
+              {tr("Savdolar hisoboti")}</button>
 
             <button
               onClick={() => {changeQuery({tab:'products',page:'1',sort:'',asOf:''});}}
@@ -134,14 +136,13 @@ function ReportsContent() {
               }`}
             >
               <FontAwesomeIcon icon={faBoxesStacked} />
-              Mahsulotlar hisoboti
-            </button>
+              {tr("Mahsulotlar hisoboti")}</button>
           </div>
 
           {/* Date range pickers */}
           <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
             <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-              <span className="text-gray-400">Dan:</span>
+              <span className="text-gray-400">{tr("Dan:")}</span>
               <input
                 type="date"
                 value={startDate}
@@ -151,7 +152,7 @@ function ReportsContent() {
             </div>
 
             <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-              <span className="text-gray-400">Gacha:</span>
+              <span className="text-gray-400">{tr("Gacha:")}</span>
               <input
                 type="date"
                 value={endDate}
@@ -163,10 +164,10 @@ function ReportsContent() {
         </div>
       </Card>
 
-      <ListFilter search={search} sort={sort} label={activeTab==='products'?'Hisobot mahsuloti yoki SKU qidirish':'Hisobot cheki yoki mijoz qidirish'} onChange={changeQuery} reset={{startDate:'',endDate:'',dateMode:'',asOf:'',tab:''}} options={[{value:'default',label:'Asl ketma-ketlik'},{value:'amount_asc',label:'Summa: o‘sish'},{value:'amount_desc',label:'Summa: kamayish'}]}/>{invalidQuery&&<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>}{isLoading&&!invalidQuery&&<p role="status">Hisobot yuklanmoqda…</p>}
+      <ListFilter search={search} sort={sort} label={activeTab==='products'?tr("Hisobot mahsuloti yoki SKU qidirish"):tr("Hisobot cheki yoki mijoz qidirish")} onChange={changeQuery} reset={{startDate:'',endDate:'',dateMode:'',asOf:'',tab:''}} options={[{value:'default',label:tr("Asl ketma-ketlik")},{value:'amount_asc',label:tr("Summa: o‘sish")},{value:'amount_desc',label:tr("Summa: kamayish")}]}/>{invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}{isLoading&&!invalidQuery&&<p role="status">{tr("Hisobot yuklanmoqda…")}</p>}
       {error&&<p role="alert" className="text-red-700">{error}</p>}
-      {asOf&&!isLoading&&!error&&<p className="text-xs text-slate-500">Hisob holati: {asOf}. Eksport ham shu holatdan olinadi; yangi amallarni olish uchun Yangilash ni bosing.</p>}
-      {activeTab==='sales'&&salesSummary&&!isLoading&&!error&&<Card title="Tovar va pul hisoblari"><dl className="grid grid-cols-2 gap-3">{[['Yalpi savdo',salesSummary.grossRevenue],['Qaytarilgan tovar qiymati',salesSummary.refundAmount],['Naqd savdo',salesSummary.cashSales],['Naqd qarz undirish',salesSummary.cashDebtCollections],['Naqd refund',salesSummary.cashRefunds],['Nasiya savdo — pul tushumi emas',salesSummary.creditSales]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{formatMoney(value??'0')}</dd></div>)}</dl></Card>}
+      {asOf&&!isLoading&&!error&&<p className="text-xs text-slate-500">{tr("Hisob holati:")}{' '}{asOf}{tr(". Eksport ham shu holatdan olinadi; yangi amallarni olish uchun Yangilash ni bosing.")}</p>}
+      {activeTab==='sales'&&salesSummary&&!isLoading&&!error&&<Card title={tr("Tovar va pul hisoblari")}><dl className="grid grid-cols-2 gap-3">{[['Yalpi savdo',salesSummary.grossRevenue],['Qaytarilgan tovar qiymati',salesSummary.refundAmount],['Naqd savdo',salesSummary.cashSales],['Naqd qarz undirish',salesSummary.cashDebtCollections],['Naqd refund',salesSummary.cashRefunds],['Nasiya savdo — pul tushumi emas',salesSummary.creditSales]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{formatMoney(value??'0')}</dd></div>)}</dl></Card>}
       {/* Tab 1: Sales Report */}
       {activeTab === 'sales' && !isLoading&&!error&&!invalidQuery&&(
         <div className="space-y-6">
@@ -174,59 +175,54 @@ function ReportsContent() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card padding={false} className="p-5">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
-                Umumiy savdo summasi
-              </span>
+                {tr("Umumiy savdo summasi")}</span>
               <span className="text-2xl font-black text-gray-900 mt-2 block">
                 {formatMoney(salesSummary?.totalRevenue || 0)}
               </span>
-              <span className="text-xs text-gray-400 mt-1 block">Tanlangan davr uchun</span>
+              <span className="text-xs text-gray-400 mt-1 block">{tr("Tanlangan davr uchun")}</span>
             </Card>
 
             <Card padding={false} className="p-5">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
-                Cheklar soni
-              </span>
+                {tr("Cheklar soni")}</span>
               <span className="text-2xl font-black text-blue-600 mt-2 block">
-                {formatNumber(periodCount)} ta
-              </span>
-              <span className="text-xs text-gray-400 mt-1 block">Yakunlangan cheklar</span>
+                {formatNumber(periodCount)} {tr("ta")}</span>
+              <span className="text-xs text-gray-400 mt-1 block">{tr("Yakunlangan cheklar")}</span>
             </Card>
 
             <Card padding={false} className="p-5">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
-                O&apos;rtacha chek
-              </span>
+                {tr("O'rtacha chek")}</span>
               <span className="text-2xl font-black text-purple-600 mt-2 block">
                 {formatMoney(salesSummary?.averageSale || 0)}
               </span>
-              <span className="text-xs text-gray-400 mt-1 block">1 chekka to&apos;g&apos;ri keladi</span>
+              <span className="text-xs text-gray-400 mt-1 block">{tr("1 chekka to'g'ri keladi")}</span>
             </Card>
           </div>
 
           {/* Sales table */}
           <Card
-            title="Savdolar ro'yxati"
+            title={tr("Savdolar ro'yxati")}
             subtitle={`${startDate} dan ${endDate} gacha amalga oshirilgan savdolar`}
             padding={false}
           >
             {isLoading ? (
               <div className="h-48 flex items-center justify-center">
-                <LoadingSpinner size="lg" text="Hisobot yuklanmoqda..." />
+                <LoadingSpinner size="lg" text={tr("Hisobot yuklanmoqda...")} />
               </div>
             ) : salesReport.length === 0 ? (
               <div className="h-40 flex items-center justify-center text-gray-400 text-xs">
-                Bu davrda savdolar topilmadi
-              </div>
+                {tr("Bu davrda savdolar topilmadi")}</div>
             ) : (
               <div className="overflow-x-auto">
                 <DataTable className="w-full text-left text-xs">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                      <th className="py-3 px-4">Chek №</th>
-                      <th className="py-3 px-4">Sana</th>
-                      <th className="py-3 px-4">Mijoz</th>
-                      <th className="py-3 px-4 text-right">Summa</th>
-                      <th className="py-3 px-4 text-center">Holat</th>
+                      <th className="py-3 px-4">{tr("Chek №")}</th>
+                      <th className="py-3 px-4">{tr("Sana")}</th>
+                      <th className="py-3 px-4">{tr("Mijoz")}</th>
+                      <th className="py-3 px-4 text-right">{tr("Summa")}</th>
+                      <th className="py-3 px-4 text-center">{tr("Holat")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -239,14 +235,13 @@ function ReportsContent() {
                           {formatDate(s.completedAt || s.createdAt, true)}
                         </td>
                         <td className="py-3 px-4 text-gray-700">
-                          {s.customer?.fullName || 'Mijozsiz'}
+                          {s.customer?.fullName || tr("Mijozsiz")}
                         </td>
                         <td className="py-3 px-4 text-right font-black text-gray-900">
                           {formatMoney(s.totalAmount)}
                         </td>
                         <td className="py-3 px-4 text-center font-bold text-emerald-600">
-                          Yakunlangan
-                        </td>
+                          {tr("Yakunlangan")}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -260,29 +255,28 @@ function ReportsContent() {
       {/* Tab 2: Products Report */}
       {activeTab === 'products' && !isLoading&&!error&&!invalidQuery&&(
         <Card
-          title="Mahsulotlar kesimida sotuv va foyda hisoboti"
-          subtitle="Sotilgan miqdor, yalpi tushum va tannarx solishtirmasi"
+          title={tr("Mahsulotlar kesimida sotuv va foyda hisoboti")}
+          subtitle={tr("Sotilgan miqdor, yalpi tushum va tannarx solishtirmasi")}
           padding={false}
         >
           {isLoading ? (
             <div className="h-48 flex items-center justify-center">
-              <LoadingSpinner size="lg" text="Hisobot yuklanmoqda..." />
+              <LoadingSpinner size="lg" text={tr("Hisobot yuklanmoqda...")} />
             </div>
           ) : productsReport.length === 0 ? (
             <div className="h-40 flex items-center justify-center text-gray-400 text-xs">
-              Bu davrda tovar sotuvlari topilmadi
-            </div>
+              {tr("Bu davrda tovar sotuvlari topilmadi")}</div>
           ) : (
             <div className="overflow-x-auto">
               <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                    <th className="py-3 px-4">Mahsulot</th>
+                    <th className="py-3 px-4">{tr("Mahsulot")}</th>
                     <th className="py-3 px-4">SKU</th>
-                    <th className="py-3 px-4 text-center">Sotilgan miqdor</th>
-                    <th className="py-3 px-4 text-right">Tushum</th>
-                    <th className="py-3 px-4 text-right">Tannarx</th>
-                    <th className="py-3 px-4 text-right">Yalpi foyda</th>
+                    <th className="py-3 px-4 text-center">{tr("Sotilgan miqdor")}</th>
+                    <th className="py-3 px-4 text-right">{tr("Tushum")}</th>
+                    <th className="py-3 px-4 text-right">{tr("Tannarx")}</th>
+                    <th className="py-3 px-4 text-right">{tr("Yalpi foyda")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -319,8 +313,8 @@ function ReportsContent() {
           )}
         </Card>
       )}
-      <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!error} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadReport();}}/><p>Filtrga mos yozuvlar: {totalCount}</p>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
-      {activeTab==='sales'&&<p className="text-xs">Yig‘indilar tanlangan davr bo‘yicha. Qidiruv chek ro‘yxatini tanlaydi; davr pul va qarz hodisalarini saqlaydi.</p>}
+      <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!error} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadReport();}}/><p>{tr("Filtrga mos yozuvlar:")}{' '}{totalCount}</p>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
+      {activeTab==='sales'&&<p className="text-xs">{tr("Yig‘indilar tanlangan davr bo‘yicha. Qidiruv chek ro‘yxatini tanlaydi; davr pul va qarz hodisalarini saqlaydi.")}</p>}
     </div>
   );
 }

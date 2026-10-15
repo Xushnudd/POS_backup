@@ -1,5 +1,10 @@
 'use client';
 
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
+
 import PendingActions from '@/components/forms/PendingActions';
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -28,6 +33,8 @@ type CheckoutAttempt={operationId:string;payload:string;saleId?:string};
 function writeAttempt(ref:{current:CheckoutAttempt|null},value:CheckoutAttempt|null){ref.current=value;}
 
 export default function PosPage() {
+ const {t:tr}=useTranslation();
+
   const { user, organization, role } = useAuth();
   const { activeStore, activeRegister, activeShift, refreshShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
@@ -463,13 +470,13 @@ export default function PosPage() {
     <div data-testid="pos-touch" className="min-h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-5rem)] flex flex-col gap-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11">
       <PendingActions prefix="/shifts" returnPath="/pos" revision={Number(isOpenShiftModalOpen)} onDone={()=>{void refreshShift().catch(()=>notifyError('Smena natijasi tasdiqlandi; joriy holat yuklanmadi.'))}}/>
       <div role="status" className={connection.state==='online'?'text-green-700':'bg-amber-50 text-amber-900 p-3'}>
-        <span>{connection.state==='online'?'Server bilan aloqa bor':connection.state==='checking'?'Server aloqasi tekshirilmoqda':'Server bilan aloqa yo‘q. Savat lokal saqlanadi; savdo yakunlanmaydi.'}</span>
-        <Button variant="outline" onClick={connection.recheck}>Aloqani tekshirish</Button>
+        <span>{connection.state==='online'?tr("Server bilan aloqa bor"):connection.state==='checking'?tr("Server aloqasi tekshirilmoqda"):tr("Server bilan aloqa yo‘q. Savat lokal saqlanadi; savdo yakunlanmaydi.")}</span>
+        <Button variant="outline" onClick={connection.recheck}>{tr("Aloqani tekshirish")}</Button>
       </div>
-      <p className="text-xs text-slate-500">F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.</p>
+      <p className="text-xs text-slate-500">{tr("F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.")}</p>
       {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm">Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.</p>
-        <div className="flex flex-wrap gap-2"><Button onClick={handleProceedToPayment} disabled={isProcessingPayment||connection.state!=='online'}>Qoralama to‘lovini davom ettirish</Button><Button onClick={recoverCheckout} disabled={isProcessingPayment}>Natijani tekshirish</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>Navbatni sinxronlash</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>Urinishni bekor qilish</Button></div>
+        <p className="text-sm">{tr("Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.")}</p>
+        <div className="flex flex-wrap gap-2"><Button onClick={handleProceedToPayment} disabled={isProcessingPayment||connection.state!=='online'}>{tr("Qoralama to‘lovini davom ettirish")}</Button><Button onClick={recoverCheckout} disabled={isProcessingPayment}>{tr("Natijani tekshirish")}</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>{tr("Navbatni sinxronlash")}</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>{tr("Urinishni bekor qilish")}</Button></div>
       </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (
@@ -479,10 +486,9 @@ export default function PosPage() {
               <FontAwesomeIcon icon={faExclamationTriangle} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-amber-900">Smena ochilmagan</h4>
+              <h4 className="text-sm font-bold text-amber-900">{tr("Smena ochilmagan")}</h4>
               <p className="text-xs text-amber-700">
-                Savdolarni yakunlash va chek chiqarish uchun smena ochishingiz zarur
-              </p>
+                {tr("Savdolarni yakunlash va chek chiqarish uchun smena ochishingiz zarur")}</p>
             </div>
           </div>
           <Button
@@ -492,20 +498,19 @@ export default function PosPage() {
             leftIcon={<FontAwesomeIcon icon={faClock} />}
             className="font-bold shadow-xs"
           >
-            Smenani ochish
-          </Button>
+            {tr("Smenani ochish")}</Button>
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={parkDraft} disabled={!localReady||hasPendingCheckout||isProcessingPayment||!activeShift||!items.length||connection.state!=='online'}>Qoralamani serverda saqlash</Button><a href="/pos/offline" className="text-blue-800 underline p-2">Offline ruxsat olish</a><a href="/drafts" className="text-blue-800 underline p-2">Server qoralamalari</a><a href="/sync-review" className="text-blue-800 underline p-2">Navbat va konfliktlar</a><a href="/help" className="text-blue-800 underline p-2">Yordam</a></div>
-      {draftToResume&&<Button disabled={!localReady||!activeShift||isProcessingPayment} onClick={openServerDraft}>Tanlangan server qoralamasini ochish</Button>}
+      <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={parkDraft} disabled={!localReady||hasPendingCheckout||isProcessingPayment||!activeShift||!items.length||connection.state!=='online'}>{tr("Qoralamani serverda saqlash")}</Button><a href="/pos/offline" className="text-blue-800 underline p-2">{tr("Offline ruxsat olish")}</a><a href="/drafts" className="text-blue-800 underline p-2">{tr("Server qoralamalari")}</a><a href="/sync-review" className="text-blue-800 underline p-2">{tr("Navbat va konfliktlar")}</a><a href="/help" className="text-blue-800 underline p-2">{tr("Yordam")}</a></div>
+      {draftToResume&&<Button disabled={!localReady||!activeShift||isProcessingPayment} onClick={openServerDraft}>{tr("Tanlangan server qoralamasini ochish")}</Button>}
       {parkedMessage&&<p role="status">{parkedMessage}</p>}
-      <label>Chek izohi<textarea aria-label="Chek izohi" maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
-      <label>Xizmat turi (ixtiyoriy)<input aria-label="Xizmat turi (ixtiyoriy)" maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
+      <label>{tr("Chek izohi")}<textarea aria-label={tr("Chek izohi")} maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
+      <label>{tr("Xizmat turi (ixtiyoriy)")}<input aria-label={tr("Xizmat turi (ixtiyoriy)")} maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       {/* Main 2-column layout: Left Catalog, Right Cart */}
-      {!localReady&&<p role="status">Lokal savat tiklanmoqda; mahsulot kiritishni kuting.</p>}
+      {!localReady&&<p role="status">{tr("Lokal savat tiklanmoqda; mahsulot kiritishni kuting.")}</p>}
       {catalogNotice&&<p role="status">{catalogNotice}</p>}
-      <p role="status" className="text-sm text-gray-900">{!localReady?'Lokal savat tiklanmoqda':localSaveProof===localSnapshot?'Savat lokal saqlandi':'Savat lokal saqlanmoqda; oynani yopmang'}</p>
+      <p role="status" className="text-sm text-gray-900">{!localReady?tr("Lokal savat tiklanmoqda"):localSaveProof===localSnapshot?tr("Savat lokal saqlandi"):tr("Savat lokal saqlanmoqda; oynani yopmang")}</p>
       <fieldset disabled={!localReady||!activeStore||!activeRegister||hasPendingCheckout} className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
         {/* Left: Product Catalog & Search (2 cols) */}
         <div className="lg:col-span-2 flex flex-col min-h-[320px] lg:min-h-0">
@@ -546,11 +551,11 @@ export default function PosPage() {
         </div>
       </fieldset>
 
-      <Modal isOpen={Boolean(failure)} onClose={()=>setFailure(null)} title={failure?.stage==='integration'?'Tashqi xizmat holati':'Savdo yakunlanmadi'}>
+      <Modal isOpen={Boolean(failure)} onClose={()=>setFailure(null)} title={failure?.stage==='integration'?tr("Tashqi xizmat holati"):tr("Savdo yakunlanmadi")}>
         {failure&&<div role="alert" data-stage={failure.stage} className="space-y-3"><p>{failure.code}: {failure.message}</p><p>{failure.nextAction}</p>
-          {failure.details&&<div><p>Mahsulot: {failure.details.productName}</p>{failure.details.previousPrice!==undefined&&<p>Oldingi narx: {failure.details.previousPrice} · Joriy narx: {failure.details.currentPrice??'Mahsulot mavjud emas'}</p>}{failure.details.requestedQuantity!==undefined&&<p>Savat miqdori: {failure.details.requestedQuantity} · Mavjud qoldiq: {failure.details.availableQuantity}</p>}</div>}
-          {['PRICE_CHANGED','INSUFFICIENT_STOCK'].includes(failure.code)&&<><p>Avval eski urinish serverda bekor qilinadi. Kassir qoralamasini bekor qilish uchun rahbar yordami kerak. Chegirmalar tozalanadi, to‘lov qayta tasdiqlanadi.</p><Button disabled={isProcessingPayment} onClick={refreshConflictCart}>Eski urinishni bekor qilib savatni yangilash</Button></>}
-          <Button variant="outline" onClick={()=>{setFailure(null);void recoverCheckout();}}>Asl savdo natijasini tekshirish</Button>
+          {failure.details&&<div><p>{tr("Mahsulot:")}{' '}{failure.details.productName}</p>{failure.details.previousPrice!==undefined&&<p>{tr("Oldingi narx:")}{' '}{failure.details.previousPrice} {tr("· Joriy narx:")}{' '}{failure.details.currentPrice??tr("Mahsulot mavjud emas")}</p>}{failure.details.requestedQuantity!==undefined&&<p>{tr("Savat miqdori:")}{' '}{failure.details.requestedQuantity} {tr("· Mavjud qoldiq:")}{' '}{failure.details.availableQuantity}</p>}</div>}
+          {['PRICE_CHANGED','INSUFFICIENT_STOCK'].includes(failure.code)&&<><p>{tr("Avval eski urinish serverda bekor qilinadi. Kassir qoralamasini bekor qilish uchun rahbar yordami kerak. Chegirmalar tozalanadi, to‘lov qayta tasdiqlanadi.")}</p><Button disabled={isProcessingPayment} onClick={refreshConflictCart}>{tr("Eski urinishni bekor qilib savatni yangilash")}</Button></>}
+          <Button variant="outline" onClick={()=>{setFailure(null);void recoverCheckout();}}>{tr("Asl savdo natijasini tekshirish")}</Button>
         </div>}
       </Modal>
       {/* Modals */}

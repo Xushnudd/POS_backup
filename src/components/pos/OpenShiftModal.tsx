@@ -1,5 +1,11 @@
 'use client';
 
+
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
+
 import React, { useState, useEffect } from 'react';
 import DurableMutation from '@/components/forms/DurableMutation';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
@@ -27,6 +33,8 @@ export default function OpenShiftModal({
   onClose,
   onSuccess,
 }: OpenShiftModalProps) {
+ const {t:tr}=useTranslation();
+
   const { user } = useAuth();
   const { activeStore, activeRegister, setActiveRegister, applyOpenedShift } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
@@ -66,22 +74,21 @@ export default function OpenShiftModal({
       title={
         <div className="flex items-center gap-2 text-emerald-700">
           <FontAwesomeIcon icon={faClock} />
-          <span>Yangi smena ochish</span>
+          <span>{tr("Yangi smena ochish")}</span>
         </div>
       }
       size="md"
     >
-      {handoverState==='loading'&&<p role="status">Oldingi smena tekshirilmoqda…</p>}
-      {handoverState==='failed'&&<p role="alert">{handoverError} <button type="button" className="underline" onClick={()=>setHandoverRevision(value=>value+1)}>Oldingi smenani qayta tekshirish</button></p>}
-      <DurableMutation path="/shifts" returnPath="/pos" label="Smenani ochish" allowNew={handoverState==='ready'&&Boolean(registerId&&user?.organizationUserId)} body={{registerId,organizationUserId:user?.organizationUserId,openingCash:acceptHandover&&handover?handover.countedCash:openingCash,...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),note:note.trim()||undefined}} review={[`Kassa: ${activeRegister?.name??''}`,`Boshlang‘ich naqd: ${acceptHandover&&handover?handover.countedCash:openingCash}`,`Izoh: ${note}`,...(acceptHandover&&handover?[`Qabul qilinadigan smena: ${handover.id}`]:[])]} onDone={saved}>
+      {handoverState==='loading'&&<p role="status">{tr("Oldingi smena tekshirilmoqda…")}</p>}
+      {handoverState==='failed'&&<p role="alert">{handoverError} <button type="button" className="underline" onClick={()=>setHandoverRevision(value=>value+1)}>{tr("Oldingi smenani qayta tekshirish")}</button></p>}
+      <DurableMutation path="/shifts" returnPath="/pos" label={tr("Smenani ochish")} allowNew={handoverState==='ready'&&Boolean(registerId&&user?.organizationUserId)} body={{registerId,organizationUserId:user?.organizationUserId,openingCash:acceptHandover&&handover?handover.countedCash:openingCash,...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),note:note.trim()||undefined}} review={[`Kassa: ${activeRegister?.name??''}`,`Boshlang‘ich naqd: ${acceptHandover&&handover?handover.countedCash:openingCash}`,`Izoh: ${note}`,...(acceptHandover&&handover?[`Qabul qilinadigan smena: ${handover.id}`]:[])]} onDone={saved}>
       <fieldset disabled={handoverState!=='ready'} className="space-y-4">
         <p className="text-sm text-gray-600">
-          Kassada savdo qilish uchun smena ochishingiz zarur. Boshlang&apos;ich naqd pul qoldig&apos;ini kiriting:
-        </p>
+          {tr("Kassada savdo qilish uchun smena ochishingiz zarur. Boshlang'ich naqd pul qoldig'ini kiriting:")}</p>
 
         {registers.length > 1 && (
           <Select
-            label="Kassa terminali"
+            label={tr("Kassa terminali")}
             value={activeRegister?.id || ''}
             onChange={(e) => {
               const selected = registers.find((r) => r.id === e.target.value);
@@ -91,9 +98,9 @@ export default function OpenShiftModal({
           />
         )}
 
-        {handover&&<label className="block text-sm"><input type="checkbox" checked={acceptHandover} onChange={e=>{setAcceptHandover(e.target.checked);if(e.target.checked)setOpeningCash(handover.countedCash);}}/> Oldingi smenani qabul qilish — {handover.countedCash} so‘m</label>}
+        {handover&&<label className="block text-sm"><input type="checkbox" checked={acceptHandover} onChange={e=>{setAcceptHandover(e.target.checked);if(e.target.checked)setOpeningCash(handover.countedCash);}}/> {tr("Oldingi smenani qabul qilish —")}{' '}{handover.countedCash} {tr("so‘m")}</label>}
         <Input
-          label="Boshlang'ich naqd pul (so'm)"
+          label={tr("Boshlang'ich naqd pul (so'm)")}
           type="number"
           min="0"
           step="0.01"
@@ -101,21 +108,20 @@ export default function OpenShiftModal({
           value={openingCash}
           onChange={(e) => setOpeningCash(e.target.value)}
           leftIcon={<FontAwesomeIcon icon={faMoneyBillWave} className="text-xs" />}
-          helperText="Kassa g'aladonidagi mavjud naqd pul miqdori"
+          helperText={tr("Kassa g'aladonidagi mavjud naqd pul miqdori")}
           required
         />
 
         <Input
-          label="Izoh (ixtiyoriy)"
-          placeholder="Ertalabki smena"
+          label={tr("Izoh (ixtiyoriy)")}
+          placeholder={tr("Ertalabki smena")}
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
 
         <div className="pt-2 flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={close}>
-            Bekor qilish
-          </Button>
+            {tr("Bekor qilish")}</Button>
 
         </div>
       </fieldset></DurableMutation>

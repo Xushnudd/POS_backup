@@ -1,5 +1,7 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import SerialPicker from '@/components/inventory/SerialPicker';
 import React, { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
@@ -7,7 +9,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Customer, PaymentType } from '@/types';
 import { fixed, displayed } from '@/lib/money';
-import { formatMoney } from '@/lib/format';
+
 import { useAuth } from '@/context/AuthContext';
 import { dateBoundary } from '@/server/reports/dates';
 import { useNotification } from '@/context/NotificationContext';
@@ -43,6 +45,10 @@ export default function PaymentModal({
   onProcessPayment,
   isLoading,
 }: PaymentModalProps) {
+ const {formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const {organization}=useAuth();
   const [serialChoices,setSerialChoices]=useState<Record<string,string[]>>({});
   const [creditDueDate,setCreditDueDate]=useState('');
@@ -122,13 +128,12 @@ export default function PaymentModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="To'lovni qabul qilish"
+      title={tr("To'lovni qabul qilish")}
       size="lg"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Bekor qilish
-          </Button>
+            {tr("Bekor qilish")}</Button>
           <Button
             variant="success"
             size="lg"
@@ -137,20 +142,19 @@ export default function PaymentModal({
             leftIcon={<FontAwesomeIcon icon={faCheck} />}
             className="font-bold px-8 shadow-md shadow-emerald-500/20"
           >
-            Savdoni yakunlash ({formatMoney(totalAmount)})
+            {tr("Savdoni yakunlash (")}{formatMoney(totalAmount)})
           </Button>
         </div>
       }
     >
       <div className="space-y-6">
 {storeId&&serialItems.map(item=><SerialPicker key={item.productId} storeId={storeId} productId={item.productId} label={item.name+' sotiladigan seriallar ('+item.quantity+')'} value={serialChoices[item.productId]??[]} onChange={ids=>setSerialChoices(previous=>({...previous,[item.productId]:ids}))} disabled={isLoading}/>)}
-      {taxAmount!==undefined&&<p>Server hisobi: jami ichidagi soliq qismi {taxAmount}, soliqsiz {netAmount}.</p>}
+      {taxAmount!==undefined&&<p>{tr("Server hisobi: jami ichidagi soliq qismi")}{' '}{taxAmount}{tr(", soliqsiz")}{' '}{netAmount}.</p>}
         {/* Total sum display */}
         <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">
           <div>
             <span className="text-xs text-slate-300 font-semibold uppercase tracking-wider block">
-              To&apos;lanadigan summa
-            </span>
+              {tr("To'lanadigan summa")}</span>
             <span className="text-3xl font-black text-emerald-400">
               {formatMoney(totalAmount)}
             </span>
@@ -158,7 +162,7 @@ export default function PaymentModal({
 
           {customer && (
             <div className="text-right">
-              <span className="text-xs text-slate-300 block">Mijoz</span>
+              <span className="text-xs text-slate-300 block">{tr("Mijoz")}</span>
               <span className="text-sm font-bold text-white">{customer.fullName}</span>
             </div>
           )}
@@ -167,15 +171,14 @@ export default function PaymentModal({
         {/* Payment method selector */}
         <div>
           <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block mb-2.5">
-            To&apos;lov usulini tanlang
-          </label>
+            {tr("To'lov usulini tanlang")}</label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { id: 'mixed', label: 'Aralash', icon: faMoneyBillWave, color: 'emerald' },
-              { id: 'cash', label: 'Naqd pul', icon: faMoneyBillWave, color: 'emerald' },
-              { id: 'card', label: 'Karta (qo‘lda)', icon: faCreditCard, color: 'blue' },
-              { id: 'transfer', label: 'O\'tkazma', icon: faBuildingColumns, color: 'purple' },
-              { id: 'credit', label: 'Nasiya / Qarz', icon: faHandshake, color: 'amber' },
+              { id: 'mixed', label: tr("Aralash"), icon: faMoneyBillWave, color: 'emerald' },
+              { id: 'cash', label: tr("Naqd pul"), icon: faMoneyBillWave, color: 'emerald' },
+              { id: 'card', label: tr("Karta (qo‘lda)"), icon: faCreditCard, color: 'blue' },
+              { id: 'transfer', label: tr("O'tkazma"), icon: faBuildingColumns, color: 'purple' },
+              { id: 'credit', label: tr("Nasiya / Qarz"), icon: faHandshake, color: 'amber' },
             ].map((m) => {
               const isSelected = activeMethod === m.id;
               return (
@@ -201,16 +204,16 @@ export default function PaymentModal({
         </div>
 
         {activeMethod === 'mixed' && <div className="grid gap-3 sm:grid-cols-3">
-          <Input label="Naqd" type="number" min="0" step="0.01" value={mixedCash} onChange={e=>setMixedCash(e.target.value)}/>
-          <Input label="Karta (qo‘lda qayd)" type="number" min="0" step="0.01" value={mixedCard} onChange={e=>setMixedCard(e.target.value)}/>
-          <Input label="Nasiya" type="number" min="0" step="0.01" value={mixedCredit} onChange={e=>setMixedCredit(e.target.value)}/>
+          <Input label={tr("Naqd")} type="number" min="0" step="0.01" value={mixedCash} onChange={e=>setMixedCash(e.target.value)}/>
+          <Input label={tr("Karta (qo‘lda qayd)")} type="number" min="0" step="0.01" value={mixedCard} onChange={e=>setMixedCard(e.target.value)}/>
+          <Input label={tr("Nasiya")} type="number" min="0" step="0.01" value={mixedCredit} onChange={e=>setMixedCredit(e.target.value)}/>
         </div>}
-        {activeMethod==='mixed'&&<div><Input label="Aralash to‘lovda berilgan naqd pul" type="number" min="0" step="0.01" value={cashTendered} onChange={e=>setCashTendered(e.target.value)}/><p>Naqd qaytim: {formatMoney(displayed(fixed(numericCash)>appliedMixedCash?fixed(numericCash)-appliedMixedCash:BigInt(0)))}</p></div>}
+        {activeMethod==='mixed'&&<div><Input label={tr("Aralash to‘lovda berilgan naqd pul")} type="number" min="0" step="0.01" value={cashTendered} onChange={e=>setCashTendered(e.target.value)}/><p>{tr("Naqd qaytim:")}{' '}{formatMoney(displayed(fixed(numericCash)>appliedMixedCash?fixed(numericCash)-appliedMixedCash:BigInt(0)))}</p></div>}
         {/* Method-specific content */}
         {activeMethod === 'cash' && (
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
             <Input
-              label="Mijoz bergan naqd pul (so'm)"
+              label={tr("Mijoz bergan naqd pul (so'm)")}
               type="number"
               min={totalAmount}
               step="1000"
@@ -222,8 +225,7 @@ export default function PaymentModal({
             {/* Quick cash buttons */}
             <div>
               <span className="text-xs font-semibold text-gray-600 block mb-2">
-                Tezkor summalar:
-              </span>
+                {tr("Tezkor summalar:")}</span>
               <div className="flex flex-wrap gap-2">
                 {quickAmounts.map((amt, i) => (
                   <button
@@ -244,7 +246,7 @@ export default function PaymentModal({
 
             {/* Change display */}
             <div className="pt-3 border-t border-gray-200 flex items-center justify-between">
-              <span className="text-sm font-bold text-gray-600">Qaytim:</span>
+              <span className="text-sm font-bold text-gray-600">{tr("Qaytim:")}</span>
               <span
                 className={`text-xl font-black ${
                   changeAmount > 0 ? 'text-blue-600' : 'text-gray-600'
@@ -256,30 +258,28 @@ export default function PaymentModal({
           </div>
         )}
 
-        {(activeMethod==='credit'||activeMethod==='mixed')&&<Input type="date" label="Nasiya to‘lash muddati (ixtiyoriy)" value={creditDueDate} onChange={event=>setCreditDueDate(event.target.value)} disabled={isLoading} helperText="Muddat tashkilot vaqt zonasida kun oxirigacha hisoblanadi; faqat nasiya qismiga qo‘llanadi."/>}
+        {(activeMethod==='credit'||activeMethod==='mixed')&&<Input type="date" label={tr("Nasiya to‘lash muddati (ixtiyoriy)")} value={creditDueDate} onChange={event=>setCreditDueDate(event.target.value)} disabled={isLoading} helperText={tr("Muddat tashkilot vaqt zonasida kun oxirigacha hisoblanadi; faqat nasiya qismiga qo‘llanadi.")}/>}
         {activeMethod === 'credit' && (
           <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 space-y-3">
             <div className="flex items-center gap-2 font-bold text-sm text-amber-800">
               <FontAwesomeIcon icon={faExclamationTriangle} />
-              <span>Nasiya savdo ogohlantirishi</span>
+              <span>{tr("Nasiya savdo ogohlantirishi")}</span>
             </div>
             {customer ? (
               <div className="text-xs space-y-1">
                 <p>
-                  Mijoz: <strong>{customer.fullName}</strong> ({customer.phone})
+                  {tr("Mijoz:")}{' '}<strong>{customer.fullName}</strong> ({customer.phone})
                 </p>
                 <p>
-                  Kredit limiti:{' '}
+                  {tr("Kredit limiti:")}{' '}
                   <strong>{formatMoney(customer.creditLimit || 0)}</strong>
                 </p>
                 <p className="text-gray-600">
-                  Ushbu summa mijozning qarz hisobiga yoziladi.
-                </p>
+                  {tr("Ushbu summa mijozning qarz hisobiga yoziladi.")}</p>
               </div>
             ) : (
               <p className="text-xs font-semibold text-red-600">
-                Diqqat: Savatda mijoz tanlanmagan! Nasiya savdoni amalga oshirish uchun avval mijozni tanlang.
-              </p>
+                {tr("Diqqat: Savatda mijoz tanlanmagan! Nasiya savdoni amalga oshirish uchun avval mijozni tanlang.")}</p>
             )}
           </div>
         )}
@@ -287,8 +287,8 @@ export default function PaymentModal({
         {(activeMethod === 'card' || activeMethod === 'transfer') && (
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
             <Input
-              label="Kvitansiya / Chek / Tranzaksiya raqami (ixtiyoriy)"
-              placeholder="Masalan: 987654"
+              label={tr("Kvitansiya / Chek / Tranzaksiya raqami (ixtiyoriy)")}
+              placeholder={tr("Masalan: 987654")}
               value={referenceNo}
               onChange={(e) => setReferenceNo(e.target.value)}
             />

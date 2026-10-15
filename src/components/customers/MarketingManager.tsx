@@ -1,4 +1,13 @@
 'use client';
+
+
+
+
+
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import {Suspense,useEffect,useState} from 'react';
 import {useAuth} from '@/context/AuthContext';
 import {useOrganization} from '@/context/OrganizationContext';
@@ -18,9 +27,13 @@ type Registry={id:string;code:string;revokedAt:string|null;expiresAt?:string|nul
 type Policy={id:string;configuration:LoyaltyPolicy};
 type Page={rows:Registry[];pagination:{page:number;limit:number;total:number}};
 export default function MarketingManager({customerId,policyRevision=0}:{customerId?:string;policyRevision?:number}){
- const {organization,user,role}=useAuth();return organization&&user&&role==='owner'?<Suspense fallback={<p role="status">Karta/promo jurnali yuklanmoqda…</p>}><Manager key={[organization.id,user.id,role,customerId??'campaigns'].join(':')} customerId={customerId} policyRevision={policyRevision}/></Suspense>:null;
+ const {t:tr}=useTranslation();
+
+ const {organization,user,role}=useAuth();return organization&&user&&role==='owner'?<Suspense fallback={<p role="status">{tr("Karta/promo jurnali yuklanmoqda…")}</p>}><Manager key={[organization.id,user.id,role,customerId??'campaigns'].join(':')} customerId={customerId} policyRevision={policyRevision}/></Suspense>:null;
 }
 function Manager({customerId,policyRevision}:{customerId?:string;policyRevision:number}){
+ const {t:tr}=useTranslation();
+
  const kind=customerId?'card':'promotion',returnPath=customerId?'/customers/'+customerId:'/loyalty',{stores}=useOrganization();
  const {query,changeQuery}=useListQuery(['newest','oldest','code'] as const,'newest',kind+'_');
  const [data,setData]=useState<Page|null>(null),[policy,setPolicy]=useState<Policy|null>(null),[revision,setRevision]=useState(0),[busy,setBusy]=useState(true),[posting,setPosting]=useState(false),[error,setError]=useState('');
@@ -38,22 +51,22 @@ function Manager({customerId,policyRevision}:{customerId?:string;policyRevision:
  const valid=!!enabled&&/^[A-Z0-9][A-Z0-9_-]{2,63}$/.test(code)&&reason.trim().length>=3&&
   (customerId!==undefined||([value,minimum,maximum].every(text=>/^\d+(?:\.\d{1,2})?$/.test(text))&&/^\d+$/.test(maxUses)&&/^\d+$/.test(perCustomer)&&!!startsAt&&!!endsAt));
  const refresh=()=>setRevision(count=>count+1);
- return <Card className="space-y-3"><h2 className="font-bold">{customerId?'Mijoz chegirma kartasi':'Promo-kod kampaniyalari'}</h2>
-  <p>{customerId?'Karta shu mijozga biriktiriladi. Foiz amaldagi administrator siyosatidan olinadi; original muddat saqlanadi.':'Promo butun chek uchun. Filial, muddat, summa va global/mijoz foydalanish limitlari serverda tekshiriladi. Eski qoida o‘zgartirilmaydi; o‘zgarish uchun eski kampaniyani bekor qilib, yangi kod yarating.'}</p>
-  {busy&&<p role="status">Karta/promo jurnali yuklanmoqda…</p>}{error&&<p role="alert">{error}</p>}
+ return <Card className="space-y-3"><h2 className="font-bold">{customerId?tr("Mijoz chegirma kartasi"):tr("Promo-kod kampaniyalari")}</h2>
+  <p>{customerId?tr("Karta shu mijozga biriktiriladi. Foiz amaldagi administrator siyosatidan olinadi; original muddat saqlanadi."):tr("Promo butun chek uchun. Filial, muddat, summa va global/mijoz foydalanish limitlari serverda tekshiriladi. Eski qoida o‘zgartirilmaydi; o‘zgarish uchun eski kampaniyani bekor qilib, yangi kod yarating.")}</p>
+  {busy&&<p role="status">{tr("Karta/promo jurnali yuklanmoqda…")}</p>}{error&&<p role="alert">{error}</p>}
   <PendingActions prefix="/loyalty/marketing" returnPath={returnPath} revision={revision} onDone={refresh}/>
-  <ListFilter search={search??''} sort={sort??'newest'} label={customerId?'Karta kodi qidiruvi':'Promo kodi qidiruvi'} options={[{value:'newest',label:'Yangilari avval'},{value:'oldest',label:'Eskilari avval'},{value:'code',label:'Kod bo‘yicha'}]} onChange={changeQuery} disabled={posting}/>
-  {!enabled&&<p>Egasi avval shu xizmatni bonus siyosatida yoqsin.</p>}
-  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={body} label={customerId?'Chegirma kartasini chiqarish':'Promo kampaniyasini yaratish'} review={['Kod: '+code,customerId?'Mijoz: '+customerId:'Qoida: '+ruleKind+' '+value,customerId?'Original muddat policy bo‘yicha':'Chegara: '+maximum+' UZS · jami '+maxUses+' · mijozga '+perCustomer,customerId?'Foiz: '+(policy?.configuration.cards.discountPercent??''):'Toshkent: '+starts+' — '+ends,reason]} canSubmit={!busy&&!posting&&!error} canReview={valid} onSavingChange={setPosting} onDone={refresh}>
-   <Input label={customerId?'Yangi chegirma kartasi kodi':'Yangi promo-kod'} value={code} maxLength={64} onChange={e=>setCode(e.target.value.toUpperCase())}/>
-   {!customerId&&<><Select label="Promo chegirma turi" value={ruleKind} onChange={e=>setRuleKind(e.target.value)} options={[{value:'percent',label:'Foiz'},{value:'fixed',label:'UZS summasi'}]}/><Input label="Promo chegirma qiymati" inputMode="decimal" value={value} onChange={e=>setValue(e.target.value)}/><Input label="Promo uchun minimal chek bazasi (UZS)" inputMode="decimal" value={minimum} onChange={e=>setMinimum(e.target.value)}/><Input label="Promo maksimal chegirmasi (UZS)" inputMode="decimal" value={maximum} onChange={e=>setMaximum(e.target.value)}/><Input label="Promo jami foydalanish limiti" inputMode="numeric" value={maxUses} onChange={e=>setMaxUses(e.target.value)}/><Input label="Promo mijoz foydalanish limiti" inputMode="numeric" value={perCustomer} onChange={e=>setPerCustomer(e.target.value)}/><Input label="Promo boshlanishi (Toshkent vaqti)" type="datetime-local" value={starts} onChange={e=>setStarts(e.target.value)}/><Input label="Promo tugashi (Toshkent vaqti)" type="datetime-local" value={ends} onChange={e=>setEnds(e.target.value)}/><fieldset><legend>Filiallar: tanlov bo‘sh bo‘lsa barcha filiallarda</legend>{stores.map(store=><label key={store.id} className="block"><input type="checkbox" checked={storeIds.includes(store.id)} onChange={e=>setStoreIds(ids=>e.target.checked?[...ids,store.id]:ids.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset></>}
-   <Input label={customerId?'Karta chiqarish sababi':'Promo kampaniyasi sababi'} value={reason} onChange={e=>setReason(e.target.value)}/>
+  <ListFilter search={search??''} sort={sort??'newest'} label={customerId?tr("Karta kodi qidiruvi"):tr("Promo kodi qidiruvi")} options={[{value:'newest',label:tr("Yangilari avval")},{value:'oldest',label:tr("Eskilari avval")},{value:'code',label:tr("Kod bo‘yicha")}]} onChange={changeQuery} disabled={posting}/>
+  {!enabled&&<p>{tr("Egasi avval shu xizmatni bonus siyosatida yoqsin.")}</p>}
+  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={body} label={customerId?tr("Chegirma kartasini chiqarish"):tr("Promo kampaniyasini yaratish")} review={['Kod: '+code,customerId?'Mijoz: '+customerId:'Qoida: '+ruleKind+' '+value,customerId?'Original muddat policy bo‘yicha':'Chegara: '+maximum+' UZS · jami '+maxUses+' · mijozga '+perCustomer,customerId?'Foiz: '+(policy?.configuration.cards.discountPercent??''):'Toshkent: '+starts+' — '+ends,reason]} canSubmit={!busy&&!posting&&!error} canReview={valid} onSavingChange={setPosting} onDone={refresh}>
+   <Input label={customerId?tr("Yangi chegirma kartasi kodi"):tr("Yangi promo-kod")} value={code} maxLength={64} onChange={e=>setCode(e.target.value.toUpperCase())}/>
+   {!customerId&&<><Select label={tr("Promo chegirma turi")} value={ruleKind} onChange={e=>setRuleKind(e.target.value)} options={[{value:'percent',label:tr("Foiz")},{value:'fixed',label:tr("UZS summasi")}]}/><Input label={tr("Promo chegirma qiymati")} inputMode="decimal" value={value} onChange={e=>setValue(e.target.value)}/><Input label={tr("Promo uchun minimal chek bazasi (UZS)")} inputMode="decimal" value={minimum} onChange={e=>setMinimum(e.target.value)}/><Input label={tr("Promo maksimal chegirmasi (UZS)")} inputMode="decimal" value={maximum} onChange={e=>setMaximum(e.target.value)}/><Input label={tr("Promo jami foydalanish limiti")} inputMode="numeric" value={maxUses} onChange={e=>setMaxUses(e.target.value)}/><Input label={tr("Promo mijoz foydalanish limiti")} inputMode="numeric" value={perCustomer} onChange={e=>setPerCustomer(e.target.value)}/><Input label={tr("Promo boshlanishi (Toshkent vaqti)")} type="datetime-local" value={starts} onChange={e=>setStarts(e.target.value)}/><Input label={tr("Promo tugashi (Toshkent vaqti)")} type="datetime-local" value={ends} onChange={e=>setEnds(e.target.value)}/><fieldset><legend>{tr("Filiallar: tanlov bo‘sh bo‘lsa barcha filiallarda")}</legend>{stores.map(store=><label key={store.id} className="block"><input type="checkbox" checked={storeIds.includes(store.id)} onChange={e=>setStoreIds(ids=>e.target.checked?[...ids,store.id]:ids.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset></>}
+   <Input label={customerId?tr("Karta chiqarish sababi"):tr("Promo kampaniyasi sababi")} value={reason} onChange={e=>setReason(e.target.value)}/>
   </DurableMutation>
-  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={{action:'revoke',kind,id:revokeId,reason:revokeReason}} label={customerId?'Kartani bekor qilish':'Promo kampaniyasini bekor qilish'} review={['Kod: '+(data?.rows.find(row=>row.id===revokeId)?.code??''),revokeReason]} canSubmit={!busy&&!posting&&!error} canReview={!!data?.rows.some(row=>row.id===revokeId&&!row.revokedAt)&&revokeReason.trim().length>=3} onSavingChange={setPosting} onDone={refresh}>
-   <Select label={customerId?'Bekor qilinadigan karta':'Bekor qilinadigan promo'} value={revokeId} onChange={e=>setRevokeId(e.target.value)} options={[{value:'',label:'Original yozuvni tanlang'},...(data?.rows??[]).filter(row=>!row.revokedAt).map(row=>({value:row.id,label:row.code}))]}/><Input label="Karta/promo bekor qilish sababi" value={revokeReason} onChange={e=>setRevokeReason(e.target.value)}/>
+  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={{action:'revoke',kind,id:revokeId,reason:revokeReason}} label={customerId?tr("Kartani bekor qilish"):tr("Promo kampaniyasini bekor qilish")} review={['Kod: '+(data?.rows.find(row=>row.id===revokeId)?.code??''),revokeReason]} canSubmit={!busy&&!posting&&!error} canReview={!!data?.rows.some(row=>row.id===revokeId&&!row.revokedAt)&&revokeReason.trim().length>=3} onSavingChange={setPosting} onDone={refresh}>
+   <Select label={customerId?tr("Bekor qilinadigan karta"):tr("Bekor qilinadigan promo")} value={revokeId} onChange={e=>setRevokeId(e.target.value)} options={[{value:'',label:tr("Original yozuvni tanlang")},...(data?.rows??[]).filter(row=>!row.revokedAt).map(row=>({value:row.id,label:row.code}))]}/><Input label={tr("Karta/promo bekor qilish sababi")} value={revokeReason} onChange={e=>setRevokeReason(e.target.value)}/>
   </DurableMutation>
-  {!busy&&!error&&data?.rows.length===0&&<p>Bu filtrda karta/promo yo‘q.</p>}
-  {data&&<DataTable><thead><tr><th>Kod</th><th>Holat</th><th>Muddati</th></tr></thead><tbody>{data.rows.map(row=><tr key={row.id}><td>{row.code}</td><td>{row.revokedAt?'Bekor qilingan':'Saqlangan'}</td><td>{row.expiresAt?new Intl.DateTimeFormat('uz-UZ',{timeZone:'Asia/Tashkent',dateStyle:'short'}).format(new Date(row.expiresAt)):'Kampaniya/administrator qoidasi'}</td></tr>)}</tbody></DataTable>}
-  <Button disabled={busy||posting||(page??1)<=1} onClick={()=>changeQuery({page:String((page??1)-1)})}>Oldingi karta/promo yozuvlari</Button><span>{page??1}/{Math.max(1,Math.ceil((data?.pagination.total??0)/(limit??20)))}</span><Button disabled={busy||posting||(page??1)*(limit??20)>=(data?.pagination.total??0)} onClick={()=>changeQuery({page:String((page??1)+1)})}>Keyingi karta/promo yozuvlari</Button><Button disabled={busy||posting} onClick={refresh}>Karta/promo jurnalini yangilash</Button>
+  {!busy&&!error&&data?.rows.length===0&&<p>{tr("Bu filtrda karta/promo yo‘q.")}</p>}
+  {data&&<DataTable><thead><tr><th>{tr("Kod")}</th><th>{tr("Holat")}</th><th>{tr("Muddati")}</th></tr></thead><tbody>{data.rows.map(row=><tr key={row.id}><td>{row.code}</td><td>{row.revokedAt?tr("Bekor qilingan"):tr("Saqlangan")}</td><td>{row.expiresAt?new Intl.DateTimeFormat('uz-UZ',{timeZone:'Asia/Tashkent',dateStyle:'short'}).format(new Date(row.expiresAt)):tr("Kampaniya/administrator qoidasi")}</td></tr>)}</tbody></DataTable>}
+  <Button disabled={busy||posting||(page??1)<=1} onClick={()=>changeQuery({page:String((page??1)-1)})}>{tr("Oldingi karta/promo yozuvlari")}</Button><span>{page??1}/{Math.max(1,Math.ceil((data?.pagination.total??0)/(limit??20)))}</span><Button disabled={busy||posting||(page??1)*(limit??20)>=(data?.pagination.total??0)} onClick={()=>changeQuery({page:String((page??1)+1)})}>{tr("Keyingi karta/promo yozuvlari")}</Button><Button disabled={busy||posting} onClick={refresh}>{tr("Karta/promo jurnalini yangilash")}</Button>
  </Card>;
 }

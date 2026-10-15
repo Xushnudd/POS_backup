@@ -1,4 +1,7 @@
 'use client';
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
 
 import React from 'react';
 import Link from 'next/link';
@@ -112,8 +115,15 @@ const navItems: NavItem[] = [
   {href:'/training',label:'Kassir mashqi',icon:faCashRegister},
   {href:'/security',label:'Faol sessiyalar',icon:faClockRotateLeft},
 ];
+const navItemsSource=navItems;
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+ const {locale:mapLocale}=useTranslation();
+
+ const navItems=localizeOwnedLabels(navItemsSource,mapLocale);
+
+ const {t:tr}=useTranslation();
+
   const pathname = usePathname();
   const { role, organization } = useAuth();
 
@@ -149,13 +159,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 Shuni <span className="text-emerald-400">POS</span>
               </h1>
               <p className="text-[10px] text-slate-400 truncate max-w-[130px]">
-                {organization?.name || 'Savdo tizimi'}
+                {organization?.name || tr("Savdo tizimi")}
               </p>
             </div>
           </Link>
 
           <button
-            aria-label="Menyuni yopish"
+            aria-label={tr("Menyuni yopish")}
             onClick={onClose}
             className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
           >
@@ -220,11 +230,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Footer info */}
         <div className="p-4 border-t border-slate-800 text-slate-400 text-xs flex items-center justify-between">
-          <span>v1.0.0 (MVP)</span>
+          <span>{tr("v1.0.0 (MVP)")}</span>
           <span className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px]">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Online
-          </span>
+            {tr("Online")}</span>
         </div>
       </aside>
     </>

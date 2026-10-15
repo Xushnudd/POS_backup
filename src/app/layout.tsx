@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import {headers} from 'next/headers';
+import {headers,cookies} from 'next/headers';
+import {LOCALE_COOKIE,normalizeLocale} from '@/i18n/locale';
 import './globals.css';
 import { AppProviders } from '@/context/AppProviders';
 
@@ -15,10 +16,11 @@ export default async function RootLayout({
 }>) {
   // Nonces are generated per document request; static HTML cannot reuse them.
   await headers();
+  const locale=normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);
   return (
-    <html lang="uz">
+    <html lang={locale}>
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders initialLocale={locale}>{children}</AppProviders>
       </body>
     </html>
   );

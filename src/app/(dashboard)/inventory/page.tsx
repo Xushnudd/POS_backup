@@ -1,5 +1,7 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import SerialPicker from '@/components/inventory/SerialPicker';
 import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
@@ -12,7 +14,7 @@ import PendingActions from '@/components/forms/PendingActions';
 import {confirmPageNavigation} from '@/lib/page-navigation';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { InventoryBalance, Product, StockDocument, Supplier } from '@/types';
-import { formatNumber, formatDate } from '@/lib/format';
+
 import Pagination from '@/components/ui/Pagination';
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
@@ -36,8 +38,14 @@ import {
 import {useListFilters} from '@/hooks/useListFilters';
 import {inventoryListSorts,journalListSorts} from '@/lib/list-query';
 import DataTable from '@/components/ui/DataTable';
-export default function InventoryPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<p>Yuklanmoqda...</p>}><Inventory key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
+export default function InventoryPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();return <Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Inventory key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
 function Inventory() {
+ const {formatNumber,formatDate}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const { organization, role } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
@@ -78,8 +86,6 @@ function Inventory() {
   const docDirty=isDocModalOpen&&JSON.stringify([docType,docSupplierId,docNote,docItems])!==docBaseline;
   useUnsavedChanges(docDirty);
   const closeReversal=useUnsavedChanges(Boolean(reverseTarget&&reverseReason),isReversing);
-
-
 
   const loadData = useCallback(async () => {
     if (!organization?.id||invalidQuery) return;
@@ -172,29 +178,25 @@ function Inventory() {
     setDocItems(docItems.filter((_, i) => i !== index));
   };
 
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <Link href="/inventory/serials" className="text-blue-700 underline">Seriya raqamlari va kafolat</Link>
-      <Link href="/inventory/batches" className="text-blue-700 underline">Partiyalar va yaroqlilik hisoboti</Link>
+      <Link href="/inventory/serials" className="text-blue-700 underline">{tr("Seriya raqamlari va kafolat")}</Link>
+      <Link href="/inventory/batches" className="text-blue-700 underline">{tr("Partiyalar va yaroqlilik hisoboti")}</Link>
       <PendingActions prefix="/stock-documents" returnPath="/inventory" revision={draftRevision} onDone={()=>{setDraftRevision(value=>value+1);void loadData()}}/>
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Ombor boshqaruvi
-          </h1>
+            {tr("Ombor boshqaruvi")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Tovar qoldiqlari, kirim hujjatlari va inventarizatsiya
-          </p>
+            {tr("Tovar qoldiqlari, kirim hujjatlari va inventarizatsiya")}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="/inventory/counts"><Button variant="outline">Inventarizatsiya</Button></Link>
-          <Link href="/inventory/locations">Zonalar va rezervlar</Link><Link href="/inventory/transfers">
+          <Link href="/inventory/counts"><Button variant="outline">{tr("Inventarizatsiya")}</Button></Link>
+          <Link href="/inventory/locations">{tr("Zonalar va rezervlar")}</Link><Link href="/inventory/transfers">
             <Button variant="outline" leftIcon={<FontAwesomeIcon icon={faRightLeft} />}>
-              Transferlar
-            </Button>
+              {tr("Transferlar")}</Button>
           </Link>
 
           <Button
@@ -203,8 +205,7 @@ function Inventory() {
             leftIcon={<FontAwesomeIcon icon={faPlus} />}
             className="font-bold shadow-md shadow-emerald-500/20"
           >
-            Yangi kirim hujjati
-          </Button>
+            {tr("Yangi kirim hujjati")}</Button>
         </div>
       </div>
 
@@ -220,8 +221,7 @@ function Inventory() {
             }`}
           >
             <FontAwesomeIcon icon={faBoxesStacked} className="mr-2" />
-            Joriy qoldiqlar
-          </button>
+            {tr("Joriy qoldiqlar")}</button>
 
           <button
             onClick={() => setActiveTab('documents')}
@@ -232,8 +232,7 @@ function Inventory() {
             }`}
           >
             <FontAwesomeIcon icon={faFileLines} className="mr-2" />
-            Hujjatlar (Kirim/Tuzatish)
-          </button>
+            {tr("Hujjatlar (Kirim/Tuzatish)")}</button>
         </div>
 
         {activeTab === 'balances' && (
@@ -244,50 +243,49 @@ function Inventory() {
               onChange={(e) => setLowStockOnly(e.target.checked)}
               className="rounded-sm text-blue-600 focus:ring-blue-500 cursor-pointer"
             />
-            <span>Faqat kam qolganlar</span>
+            <span>{tr("Faqat kam qolganlar")}</span>
           </label>
         )}
       </div>
 
-      {activeTab==='balances'&&<div className="max-w-md space-y-1"><Select label="Filialda yakunlangan savdosiz qoldiq" value={inactiveDays} onChange={event=>setInactiveDays(event.target.value)} options={[{value:'',label:'Barcha qoldiqlar'},{value:'30',label:'Oxirgi 30 kun savdo yo‘q'},{value:'60',label:'Oxirgi 60 kun savdo yo‘q'},{value:'90',label:'Oxirgi 90 kun savdo yo‘q'}]}/><p className="text-xs text-gray-600">Faqat musbat joriy qoldiq. Bu omborda turish yoshi emas; qaytarilgan savdo ham savdo harakati hisoblanadi.</p></div>}
+      {activeTab==='balances'&&<div className="max-w-md space-y-1"><Select label={tr("Filialda yakunlangan savdosiz qoldiq")} value={inactiveDays} onChange={event=>setInactiveDays(event.target.value)} options={[{value:'',label:tr("Barcha qoldiqlar")},{value:'30',label:tr("Oxirgi 30 kun savdo yo‘q")},{value:'60',label:tr("Oxirgi 60 kun savdo yo‘q")},{value:'90',label:tr("Oxirgi 90 kun savdo yo‘q")}]}/><p className="text-xs text-gray-600">{tr("Faqat musbat joriy qoldiq. Bu omborda turish yoshi emas; qaytarilgan savdo ham savdo harakati hisoblanadi.")}</p></div>}
       <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();changeQuery({...Object.fromEntries(Object.entries(draftFilters).map(([key,value])=>[key,value.trim()])),page:'1'});}}>
-        <Input label={activeTab==='balances'?'Mahsulot, SKU yoki barkod':'Hujjat raqamini qidirish'} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
-        {activeTab==='documents'&&<><Input label="Hujjat davri boshi" type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label="Hujjat davri oxiri" type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label="Hujjat turi filtri" value={draftFilters.documentType} options={[{value:'',label:'Barchasi'},{value:'purchase',label:'Xarid'},{value:'opening',label:'Boshlang‘ich qoldiq'},{value:'adjustment',label:'Tuzatish'},{value:'reversal',label:'Qarshi hujjat'},{value:'transfer_out',label:'Transfer chiqimi'},{value:'transfer_in',label:'Transfer kirimi'},{value:'return_in',label:'Qaytarish kirimi'}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label="Hujjat holati filtri" value={draftFilters.status} options={[{value:'',label:'Barchasi'},{value:'draft',label:'Qoralama'},{value:'confirmed',label:'Tasdiqlangan'}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label="Supplier ID filtri" value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
-        <Button type="submit" disabled={isLoading}>Filtrlash</Button>
+        <Input label={activeTab==='balances'?tr("Mahsulot, SKU yoki barkod"):tr("Hujjat raqamini qidirish")} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
+        {activeTab==='documents'&&<><Input label={tr("Hujjat davri boshi")} type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label={tr("Hujjat davri oxiri")} type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label={tr("Hujjat turi filtri")} value={draftFilters.documentType} options={[{value:'',label:tr("Barchasi")},{value:'purchase',label:tr("Xarid")},{value:'opening',label:tr("Boshlang‘ich qoldiq")},{value:'adjustment',label:tr("Tuzatish")},{value:'reversal',label:tr("Qarshi hujjat")},{value:'transfer_out',label:tr("Transfer chiqimi")},{value:'transfer_in',label:tr("Transfer kirimi")},{value:'return_in',label:tr("Qaytarish kirimi")}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label={tr("Hujjat holati filtri")} value={draftFilters.status} options={[{value:'',label:tr("Barchasi")},{value:'draft',label:tr("Qoralama")},{value:'confirmed',label:tr("Tasdiqlangan")}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label={tr("Supplier ID filtri")} value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
+        <Button type="submit" disabled={isLoading}>{tr("Filtrlash")}</Button>
       </form>
-      <div className="flex gap-3"><Select label="Ombor saralash" value={sort} options={(activeTab==='documents'?journalListSorts:inventoryListSorts).map(value=>({value,label:({newest:'Eng yangi',oldest:'Eng eski',name_asc:'Nom: A–Z',name_desc:'Nom: Z–A',quantity_asc:'Miqdor: o‘sish',quantity_desc:'Miqdor: kamayish'} as Record<string,string>)[value]}))} onChange={e=>changeQuery({sort:e.target.value,page:'1'})}/><Button onClick={()=>changeQuery({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',sort:'',page:'',limit:'',inactiveDays:'',lowStock:''})}>Filtrlarni tozalash</Button></div>
-      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?'Qoldiqlarni CSV yuklash':'Hujjatlarni CSV yuklash'} params={{organizationId:organization.id,sort,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
-      {invalidQuery&&<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>}
+      <div className="flex gap-3"><Select label={tr("Ombor saralash")} value={sort} options={(activeTab==='documents'?journalListSorts:inventoryListSorts).map(value=>({value,label:({newest:'Eng yangi',oldest:'Eng eski',name_asc:'Nom: A–Z',name_desc:'Nom: Z–A',quantity_asc:'Miqdor: o‘sish',quantity_desc:'Miqdor: kamayish'} as Record<string,string>)[value]}))} onChange={e=>changeQuery({sort:e.target.value,page:'1'})}/><Button onClick={()=>changeQuery({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',sort:'',page:'',limit:'',inactiveDays:'',lowStock:''})}>{tr("Filtrlarni tozalash")}</Button></div>
+      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?tr("Qoldiqlarni CSV yuklash"):tr("Hujjatlarni CSV yuklash")} params={{organizationId:organization.id,sort,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
+      {invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}
       {listError&&<p role="alert" className="text-red-700">{listError}</p>}
-      {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+      {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
       <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!listError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadData();}}/>
 
       {/* Tab Content: Balances */}
       {activeTab === 'balances' && (
         <Card padding={false}>
-          {invalidQuery||listError ? (<p>Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.</p>) : isLoading ? (
+          {invalidQuery||listError ? (<p>{tr("Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.")}</p>) : isLoading ? (
             <div className="h-64 flex items-center justify-center">
-              <LoadingSpinner size="lg" text="Qoldiqlar yuklanmoqda..." />
+              <LoadingSpinner size="lg" text={tr("Qoldiqlar yuklanmoqda...")} />
             </div>
           ) : balances.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
               <FontAwesomeIcon icon={faWarehouse} className="text-4xl text-gray-300 mb-3" />
-              <p className="text-base font-bold text-gray-700">Qoldiqlar mavjud emas</p>
+              <p className="text-base font-bold text-gray-700">{tr("Qoldiqlar mavjud emas")}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Omborga tovar kiritish uchun &quot;Yangi kirim hujjati&quot; tugmasini bosing
-              </p>
+                {tr("Omborga tovar kiritish uchun \"Yangi kirim hujjati\" tugmasini bosing")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Mahsulot</th>
-                    <th className="py-3.5 px-4">SKU / Barkod</th>
-                    <th className="py-3.5 px-4 text-center">Birlik</th>
-                    <th className="py-3.5 px-4 text-right">Mavjud qoldiq</th>
-                    <th className="py-3.5 px-4 text-center">Min. zaxira</th>
-                    <th className="py-3.5 px-4 text-center">Holat</th>
+                    <th className="py-3.5 px-4">{tr("Mahsulot")}</th>
+                    <th className="py-3.5 px-4">{tr("SKU / Barkod")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Birlik")}</th>
+                    <th className="py-3.5 px-4 text-right">{tr("Mavjud qoldiq")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Min. zaxira")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Holat")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -298,13 +296,13 @@ function Inventory() {
                     return (
                       <tr key={idx} className="hover:bg-gray-50/70 transition">
                         <td className="py-3.5 px-4 font-bold text-gray-900">
-                          {b.product?.name || 'Mahsulot'}
+                          {b.product?.name || tr("Mahsulot")}
                         </td>
                         <td className="py-3.5 px-4 font-mono text-gray-500">
                           {b.product?.sku}
                         </td>
                         <td className="py-3.5 px-4 text-center font-medium text-gray-600">
-                          {b.product?.unit || 'dona'}
+                          {b.product?.unit || tr("dona")}
                         </td>
                         <td className="py-3.5 px-4 text-right font-black text-sm text-gray-900">
                           {formatNumber(b.quantity)}
@@ -315,12 +313,10 @@ function Inventory() {
                         <td className="py-3.5 px-4 text-center">
                           {isLow ? (
                             <Badge variant="danger" size="sm" dot>
-                              Kam qolgan
-                            </Badge>
+                              {tr("Kam qolgan")}</Badge>
                           ) : (
                             <Badge variant="success" size="sm" dot>
-                              Yetarli
-                            </Badge>
+                              {tr("Yetarli")}</Badge>
                           )}
                         </td>
                       </tr>
@@ -336,30 +332,29 @@ function Inventory() {
       {/* Tab Content: Documents */}
       {activeTab === 'documents' && (
         <Card padding={false}>
-          {invalidQuery||listError ? (<p>Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.</p>) : isLoading ? (
+          {invalidQuery||listError ? (<p>{tr("Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.")}</p>) : isLoading ? (
             <div className="h-64 flex items-center justify-center">
-              <LoadingSpinner size="lg" text="Hujjatlar yuklanmoqda..." />
+              <LoadingSpinner size="lg" text={tr("Hujjatlar yuklanmoqda...")} />
             </div>
           ) : documents.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
               <FontAwesomeIcon icon={faFileLines} className="text-4xl text-gray-300 mb-3" />
-              <p className="text-base font-bold text-gray-700">Hujjatlar topilmadi</p>
+              <p className="text-base font-bold text-gray-700">{tr("Hujjatlar topilmadi")}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Kirim va tuzatish hujjatlari bu yerda ko&apos;rinadi
-              </p>
+                {tr("Kirim va tuzatish hujjatlari bu yerda ko'rinadi")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Hujjat №</th>
-                    <th className="py-3.5 px-4">Turi</th>
-                    <th className="py-3.5 px-4">Ta&apos;minotchi</th>
-                    <th className="py-3.5 px-4 text-center">Mahsulotlar soni</th>
-                    <th className="py-3.5 px-4">Sana</th>
-                    <th className="py-3.5 px-4 text-center">Holat</th>
-                    <th className="py-3.5 px-4 text-right">Amallar</th>
+                    <th className="py-3.5 px-4">{tr("Hujjat №")}</th>
+                    <th className="py-3.5 px-4">{tr("Turi")}</th>
+                    <th className="py-3.5 px-4">{tr("Ta'minotchi")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Mahsulotlar soni")}</th>
+                    <th className="py-3.5 px-4">{tr("Sana")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Holat")}</th>
+                    <th className="py-3.5 px-4 text-right">{tr("Amallar")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -370,35 +365,32 @@ function Inventory() {
                       </td>
                       <td className="py-3.5 px-4 font-semibold text-gray-700">
                         {doc.documentType === 'purchase'
-                          ? 'Kirim (Xarid)'
+                          ? tr("Kirim (Xarid)")
                           : doc.documentType === 'adjustment'
-                          ? 'Tuzatish'
-                          : doc.documentType === 'reversal' ? 'Qarshi hujjat' : doc.documentType}
+                          ? tr("Tuzatish")
+                          : doc.documentType === 'reversal' ? tr("Qarshi hujjat") : doc.documentType}
                       </td>
                       <td className="py-3.5 px-4 text-gray-700">
                         {doc.supplier?.name || '-'}
                       </td>
                       <td className="py-3.5 px-4 text-center font-bold text-gray-800">
-                        {doc.items?.length || 0} ta
-                      </td>
+                        {doc.items?.length || 0} {tr("ta")}</td>
                       <td className="py-3.5 px-4 text-gray-500">
                         {formatDate(doc.createdAt, true)}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {doc.status === 'confirmed' ? (
                           <Badge variant="success" size="sm">
-                            Tasdiqlangan
-                          </Badge>
+                            {tr("Tasdiqlangan")}</Badge>
                         ) : (
                           <Badge variant="warning" size="sm">
-                            Qoralama
-                          </Badge>
+                            {tr("Qoralama")}</Badge>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         {doc.status === 'confirmed' && !doc.reversalOfId && (role==='owner'||role==='admin') && (
-                          doc.reversal ? <span className="text-xs text-gray-500">Qaytarilgan: {doc.reversal.documentNo}</span> :
-                          <Button variant="outline" size="sm" onClick={()=>{setReverseTarget({id:doc.id,operationId:crypto.randomUUID()});setReverseReason('');setReverseSubmitted(false);}}>Qarshi hujjat</Button>
+                          doc.reversal ? <span className="text-xs text-gray-500">{tr("Qaytarilgan:")}{' '}{doc.reversal.documentNo}</span> :
+                          <Button variant="outline" size="sm" onClick={()=>{setReverseTarget({id:doc.id,operationId:crypto.randomUUID()});setReverseReason('');setReverseSubmitted(false);}}>{tr("Qarshi hujjat")}</Button>
                         )}
                         {doc.status === 'draft' && (
                           <Button
@@ -407,8 +399,7 @@ function Inventory() {
                             onClick={() => handleConfirmDocument(doc.id)}
                             leftIcon={<FontAwesomeIcon icon={faCheck} />}
                           >
-                            Tasdiqlash
-                          </Button>
+                            {tr("Tasdiqlash")}</Button>
                         )}
                       </td>
                     </tr>
@@ -420,46 +411,46 @@ function Inventory() {
         </Card>
       )}
 
-      <Modal isOpen={!!reverseTarget} onClose={()=>{if(!reverseSubmitted&&closeReversal())setReverseTarget(null);}} title="Ombor hujjatini qaytarish">
+      <Modal isOpen={!!reverseTarget} onClose={()=>{if(!reverseSubmitted&&closeReversal())setReverseTarget(null);}} title={tr("Ombor hujjatini qaytarish")}>
         <form onSubmit={handleReverseDocument} className="space-y-4">
-          <p className="text-sm text-gray-600">Asl hujjat o‘zgarmaydi. Miqdorlar qarshi hujjat bilan qaytariladi; yetarli qoldiq bo‘lishi shart.</p>
-          <Input label="Qaytarish sababi" value={reverseReason} onChange={event=>setReverseReason(event.target.value)} minLength={3} maxLength={2000} required disabled={reverseSubmitted}/>
-          {reverseSubmitted && <p className="text-sm text-amber-700">Javob noaniq bo‘lsa, shu amal bilan qayta urining. Sabab va kalit saqlanadi.</p>}
-          <Button type="submit" disabled={isReversing}>{isReversing?'Tekshirilmoqda...':reverseSubmitted?'Natijani qayta olish':'Qarshi hujjatni tasdiqlash'}</Button>
+          <p className="text-sm text-gray-600">{tr("Asl hujjat o‘zgarmaydi. Miqdorlar qarshi hujjat bilan qaytariladi; yetarli qoldiq bo‘lishi shart.")}</p>
+          <Input label={tr("Qaytarish sababi")} value={reverseReason} onChange={event=>setReverseReason(event.target.value)} minLength={3} maxLength={2000} required disabled={reverseSubmitted}/>
+          {reverseSubmitted && <p className="text-sm text-amber-700">{tr("Javob noaniq bo‘lsa, shu amal bilan qayta urining. Sabab va kalit saqlanadi.")}</p>}
+          <Button type="submit" disabled={isReversing}>{isReversing?tr("Tekshirilmoqda..."):reverseSubmitted?tr("Natijani qayta olish"):tr("Qarshi hujjatni tasdiqlash")}</Button>
         </form>
       </Modal>
       {/* New Document Modal */}
       <Modal
         isOpen={isDocModalOpen}
         onClose={() => {if(confirmPageNavigation())setIsDocModalOpen(false)}}
-        title="Yangi ombor hujjati (Kirim)"
+        title={tr("Yangi ombor hujjati (Kirim)")}
         size="xl"
       >
-        <DurableMutation path="/stock-documents" returnPath="/inventory" label="Hujjatni yaratish" body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[`Qoralama: ${documentNo}`,`Tur: ${docType}; filial: ${activeStore?.name??''}`,`Qatorlar: ${docItems.length}`,`Sabab: ${docNote}`, ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}${item.batchInput?'; partiya '+item.batchInput.code+'; kirim '+item.batchInput.receivedOn+'; yaroqli '+item.batchInput.expiresOn:''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
+        <DurableMutation path="/stock-documents" returnPath="/inventory" label={tr("Hujjatni yaratish")} body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[`Qoralama: ${documentNo}`,`Tur: ${docType}; filial: ${activeStore?.name??''}`,`Qatorlar: ${docItems.length}`,`Sabab: ${docNote}`, ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}${item.batchInput?'; partiya '+item.batchInput.code+'; kirim '+item.batchInput.receivedOn+'; yaroqli '+item.batchInput.expiresOn:''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Hujjat turi"
+              label={tr("Hujjat turi")}
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
               options={[
-                { value: 'purchase', label: 'Kirim (Xarid)' },
-                { value: 'opening', label: 'Boshlang‘ich qoldiq' },
-                { value: 'adjustment', label: 'Tuzatish (Inventarizatsiya)' },
+                { value: 'purchase', label: tr("Kirim (Xarid)") },
+                { value: 'opening', label: tr("Boshlang‘ich qoldiq") },
+                { value: 'adjustment', label: tr("Tuzatish (Inventarizatsiya)") },
               ]}
             />
 
             <Select
-              label="Yetkazib beruvchi (ta'minotchi)"
+              label={tr("Yetkazib beruvchi (ta'minotchi)")}
               value={docSupplierId}
               onChange={(e) => setDocSupplierId(e.target.value)}
               options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
-              placeholder="Ta'minotchini tanlang (ixtiyoriy)"
+              placeholder={tr("Ta'minotchini tanlang (ixtiyoriy)")}
             />
           </div>
 
           <Input
-            label="Izoh (ixtiyoriy)"
-            placeholder="Hujjat bo'yicha qo'shimcha ma'lumot"
+            label={tr("Izoh (ixtiyoriy)")}
+            placeholder={tr("Hujjat bo'yicha qo'shimcha ma'lumot")}
             value={docNote}
             onChange={(e) => setDocNote(e.target.value)}
           />
@@ -468,8 +459,7 @@ function Inventory() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-gray-700">
-                Mahsulotlar ro&apos;yxati
-              </label>
+                {tr("Mahsulotlar ro'yxati")}</label>
               <Button
                 type="button"
                 variant="outline"
@@ -477,11 +467,10 @@ function Inventory() {
                 onClick={handleAddItemRow}
                 leftIcon={<FontAwesomeIcon icon={faPlus} />}
               >
-                Qator qo&apos;shish
-              </Button>
+                {tr("Qator qo'shish")}</Button>
             </div>
 
-            <p>Tannarx har doim mahsulotning asosiy birligi uchun kiritiladi; hujjat miqdori tanlangan birlikdan konvertatsiya qilinadi.</p>
+            <p>{tr("Tannarx har doim mahsulotning asosiy birligi uchun kiritiladi; hujjat miqdori tanlangan birlikdan konvertatsiya qilinadi.")}</p>
             <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50">
               {docItems.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-gray-200">
@@ -508,11 +497,11 @@ function Inventory() {
                     </select>
                   </div>
 
-                  <label className="text-xs">Hujjat birligi<select aria-label={'Hujjat birligi '+idx} value={item.tradeUnit??products.find(p=>p.id===item.productId)?.unit??''} onChange={e=>{const updated=[...docItems];updated[idx]={...item,tradeUnit:e.target.value};setDocItems(updated)}}><option value={products.find(p=>p.id===item.productId)?.unit}>{products.find(p=>p.id===item.productId)?.unit}</option>{products.find(p=>p.id===item.productId)?.unitConversions?.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}:1={row.ratio} {row.baseUnit}</option>)}</select></label>
+                  <label className="text-xs">{tr("Hujjat birligi")}<select aria-label={'Hujjat birligi '+idx} value={item.tradeUnit??products.find(p=>p.id===item.productId)?.unit??''} onChange={e=>{const updated=[...docItems];updated[idx]={...item,tradeUnit:e.target.value};setDocItems(updated)}}><option value={products.find(p=>p.id===item.productId)?.unit}>{products.find(p=>p.id===item.productId)?.unit}</option>{products.find(p=>p.id===item.productId)?.unitConversions?.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}:1={row.ratio} {row.baseUnit}</option>)}</select></label>
                   <div className="w-24">
                     <input
                       type="number"
-                      placeholder="Miqdor"
+                      placeholder={tr("Miqdor")}
                       min={docType==='adjustment'?undefined:'0.000001'}
                       step="0.1"
                       value={item.quantity}
@@ -528,7 +517,7 @@ function Inventory() {
                   <div className="w-32">
                     <input
                       type="number"
-                      placeholder="Asosiy birlik tannarxi"
+                      placeholder={tr("Asosiy birlik tannarxi")}
                       aria-label={'Asosiy birlik tannarxi '+idx}
                       min="0"
                       step="100"
@@ -543,7 +532,7 @@ function Inventory() {
                   </div>
 
                   {products.find(product=>product.id===item.productId)?.serialTracking&&(item.quantity.trim().startsWith('-')&&activeStore?<SerialPicker storeId={activeStore.id} productId={item.productId} label={'Hisobdan chiqariladigan seriallar '+(idx+1)} value={item.serialInput??[]} onChange={ids=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>:<Input label={'Hujjat seriya raqamlari '+(idx+1)} value={(item.serialInput??[]).join(', ')} onChange={event=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:event.target.value.split(/[\s,;]+/).filter(Boolean)}:r))}/>)}
-                  {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label="Partiya ma’lumotlari">{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]}<input aria-label={['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
+                  {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label={tr("Partiya ma’lumotlari")}>{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]}<input aria-label={['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
                   <button
                     type="button"
                     onClick={() => handleRemoveItemRow(idx)}
@@ -562,8 +551,7 @@ function Inventory() {
               variant="outline"
               onClick={() => {if(confirmPageNavigation())setIsDocModalOpen(false)}}
             >
-              Bekor qilish
-            </Button>
+              {tr("Bekor qilish")}</Button>
 
           </div>
         </DurableMutation>

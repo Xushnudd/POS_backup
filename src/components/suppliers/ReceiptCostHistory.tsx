@@ -1,4 +1,12 @@
 'use client';
+
+
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
+import {useReadPage} from '@/hooks/useReadPage';
+import ReadQueryNotice from '@/components/ui/ReadQueryNotice';
 import {useAuth} from '@/context/AuthContext';
 import ReceiptCostApplication from './ReceiptCostApplication';
 import { useCallback, useEffect, useState } from 'react';
@@ -19,8 +27,11 @@ type Plan = {
 export default function ReceiptCostHistory({ documentId, documentNo, returnPath, items }: {
   documentId: string; documentNo: string; returnPath: string; items: {id:string;productId:string}[];
 }) {
+ const {t:tr}=useTranslation();
+
   const {role}=useAuth();
-  const [page, setPage] = useState(1), [revision, setRevision] = useState(0);
+  const {page,setPage,invalid,reset}=useReadPage('cost_'+documentId+'_');
+  const [revision, setRevision] = useState(0);
   const [rows, setRows] = useState<Plan[]>([]), [total, setTotal] = useState(0);
   const [busy, setBusy] = useState(true), [error, setError] = useState('');
   const [reasons,setReasons]=useState<Record<string,string>>({}),[posting,setPosting]=useState<Record<string,boolean>>({});
@@ -31,7 +42,7 @@ export default function ReceiptCostHistory({ documentId, documentNo, returnPath,
     let live = true;
     const controller = new AbortController();
     void (async () => {
-      setBusy(true); setError('');
+      if(invalid)return;setBusy(true); setError('');
       try {
         const response = await api.request<{ rows: Plan[]; total: number }>(
           `/stock-documents/${documentId}/cost-plans?page=${page}`,
@@ -46,29 +57,30 @@ export default function ReceiptCostHistory({ documentId, documentNo, returnPath,
       } finally { if (live) setBusy(false); }
     })();
     return () => { live = false; controller.abort(); };
-  }, [documentId, page, revision]);
+  }, [documentId, page, revision,invalid]);
   const refresh = () => { setBusy(true); setRevision(value => value + 1); };
   return <><ReceiptCostPrepare documentId={documentId} documentNo={documentNo} items={items} returnPath={returnPath} onDone={refresh}/>
   <section aria-label={`Taqsimot tarixi: ${documentNo}`} className="my-3 space-y-3 rounded-lg border p-3">
-    <h4 className="font-semibold">Saqlangan xarajat taqsimotlari</h4>
-    <p>Tayyorlash va tannarxga qo‘llash alohida amallar. Qo‘llashdan oldin hisobni tekshiring; qo‘llangan xarajatni avval reversal qilish kerak.</p>
-    {busy && <p role="status">Taqsimot tarixi yuklanmoqda…</p>}
+    <h4 className="font-semibold">{tr("Saqlangan xarajat taqsimotlari")}</h4>
+    <p>{tr("Tayyorlash va tannarxga qo‘llash alohida amallar. Qo‘llashdan oldin hisobni tekshiring; qo‘llangan xarajatni avval reversal qilish kerak.")}</p>
+    <ReadQueryNotice invalid={invalid} reset={reset}/>
+    {busy&&!invalid && <p role="status">{tr("Taqsimot tarixi yuklanmoqda…")}</p>}
     {error && <p role="alert">{error}</p>}
-    {!busy && !error && !rows.length && <p>Saqlangan taqsimot yo‘q.</p>}
+    {!busy && !error && !invalid && !rows.length && <p>{tr("Saqlangan taqsimot yo‘q.")}</p>}
     {rows.map(row => <article key={row.id} aria-label={`Taqsimot ${row.id}`} className="space-y-2 border p-3">
-      <p>Summa: {row.amount} · Usul: {({ value: 'Qiymat', quantity: 'Miqdor', weight: 'Vazn' } as Record<string, string>)[row.method] ?? row.method}</p>
-      <p>Holat: {row.status === 'prepared' ? row.applications?.some(a=>!a.reversalOfId)&&!row.applications?.some(a=>a.reversalOfId)?'Tannarxga qo‘llangan':row.applications?.length?'Tannarx reversali yozilgan':'Tayyor, qo‘llanmagan' : row.status === 'cancelled' ? 'Bekor qilingan' : row.status}</p>
-      <p>Sabab: {row.reason}</p><p>Yaratilgan: {new Date(row.createdAt).toLocaleString('uz-UZ')}</p>
-      {row.status === 'cancelled' && <><p>Bekor qilish sababi: {row.cancellationReason}</p><p>Bekor qilingan: {row.cancelledAt ? new Date(row.cancelledAt).toLocaleString('uz-UZ') : '—'}</p></>}
-      {role==='owner'&&<ReceiptCostApplication documentId={documentId} planId={row.id} status={row.status} applications={row.applications??[]} ready={!busy&&!error&&!writing} returnPath={returnPath} onDone={refresh} onWriting={writingChanged}/>}
+      <p>{tr("Summa:")}{' '}{row.amount} {tr("· Usul:")}{' '}{({ value: 'Qiymat', quantity: 'Miqdor', weight: 'Vazn' } as Record<string, string>)[row.method] ?? row.method}</p>
+      <p>{tr("Holat:")}{' '}{row.status === 'prepared' ? row.applications?.some(a=>!a.reversalOfId)&&!row.applications?.some(a=>a.reversalOfId)?tr("Tannarxga qo‘llangan"):row.applications?.length?tr("Tannarx reversali yozilgan"):tr("Tayyor, qo‘llanmagan") : row.status === 'cancelled' ? tr("Bekor qilingan") : row.status}</p>
+      <p>{tr("Sabab:")}{' '}{row.reason}</p><p>{tr("Yaratilgan:")}{' '}{new Date(row.createdAt).toLocaleString('uz-UZ')}</p>
+      {row.status === 'cancelled' && <><p>{tr("Bekor qilish sababi:")}{' '}{row.cancellationReason}</p><p>{tr("Bekor qilingan:")}{' '}{row.cancelledAt ? new Date(row.cancelledAt).toLocaleString('uz-UZ') : '—'}</p></>}
+      {role==='owner'&&<ReceiptCostApplication documentId={documentId} planId={row.id} status={row.status} applications={row.applications??[]} ready={!busy&&!error&&!writing&&!invalid} returnPath={returnPath} onDone={refresh} onWriting={writingChanged}/>}
       {/* Keep recovery available after a lost ACK even if the next GET sees cancelled. */}
       <CancelPlan key={row.id} row={row} documentId={documentId} returnPath={returnPath} reason={reasons[row.id]??''}
         onReason={reason=>setReasons(old=>({...old,[row.id]:reason}))}
         onDone={original=>{setReasons(old=>old[row.id]===original?{...old,[row.id]:''}:old);refresh();}}
-        onWriting={writingChanged} ready={!busy&&!error&&!writing} />
+        onWriting={writingChanged} ready={!busy&&!error&&!writing&&!invalid} />
     </article>)}
-    <Pagination page={page} pages={Math.ceil(total / 20)} busy={busy||writing} onPage={value=>{setBusy(true);setPage(value);}} retry={refresh} />
-    <Button variant="outline" disabled={writing} onClick={()=>{if(discard())setReasons({});}}>Bekor qilish qoralamalarini tozalash</Button>
+    <Pagination page={page} pages={Math.ceil(total / 20)} busy={busy&&!invalid||writing} blocked={invalid||!!error} onPage={value=>{setBusy(true);setPage(value);}} retry={refresh} />
+    <Button variant="outline" disabled={writing} onClick={()=>{if(discard())setReasons({});}}>{tr("Bekor qilish qoralamalarini tozalash")}</Button>
   </section></>;
 }
 
@@ -76,14 +88,16 @@ function CancelPlan({ row, documentId, returnPath, onDone, ready, reason, onReas
   row: Plan; documentId: string; returnPath: string; onDone: (originalReason:string) => void; ready:boolean;
   reason:string;onReason:(reason:string)=>void;onWriting:(id:string,saving:boolean)=>void;
 }) {
+ const {t:tr}=useTranslation();
+
   const writingChanged=useCallback((saving:boolean)=>onWriting(row.id,saving),[row.id,onWriting]);
   // Cancelled rows still mount the durable action to recover an original committed
   // operation. Its fresh-action button is hidden for terminal rows.
   return <DurableMutation path={`/stock-documents/${documentId}/cost-plans/${row.id}/cancel`}
-    returnPath={returnPath} body={{ reason }} label="Tayyor taqsimotni bekor qilish"
+    returnPath={returnPath} body={{ reason }} label={tr("Tayyor taqsimotni bekor qilish")}
     allowNew={row.status === 'prepared'&&(!row.applications?.some(a=>!a.reversalOfId)||!!row.applications?.some(a=>a.reversalOfId))} canSubmit={ready}
     review={[`Taqsimot: ${row.id}`, `Summa: ${row.amount}`, reason, 'Faqat qo‘llanmagan taqsimot bekor qilinadi. Moliyaviy posting yaratilmaydi.']}
     onSavingChange={writingChanged} onDone={(_result,body)=>onDone(typeof body?.reason==='string'?body.reason:'')}>
-    {row.status === 'prepared' && <Input label="Taqsimotni bekor qilish sababi" value={reason} maxLength={2000} onChange={event => onReason(event.target.value)} />}
+    {row.status === 'prepared' && <Input label={tr("Taqsimotni bekor qilish sababi")} value={reason} maxLength={2000} onChange={event => onReason(event.target.value)} />}
   </DurableMutation>;
 }

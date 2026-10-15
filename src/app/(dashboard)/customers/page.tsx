@@ -1,5 +1,7 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import {useListQuery} from '@/hooks/useListQuery';
 import {customerListSorts} from '@/lib/list-query';
 import ListFilter from '@/components/ui/ListFilter';
@@ -14,7 +16,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { fixed } from '@/lib/money';
 import { api } from '@/lib/api';
 import { Customer } from '@/types';
-import { formatMoney, formatPhone } from '@/lib/format';
+import {formatPhone} from '@/lib/format';
 import DataTable from '@/components/ui/DataTable';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -30,8 +32,14 @@ import {
   faEdit,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function CustomersPage(){const {organization,user,role}=useAuth();return organization&&user&&role?<Suspense fallback={<LoadingSpinner text="Mijozlar yuklanmoqda..."/>}><Customers key={[organization.id,user.id,role].join(':')}/></Suspense>:null;}
+export default function CustomersPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();return organization&&user&&role?<Suspense fallback={<LoadingSpinner text={tr("Mijozlar yuklanmoqda...")}/>}><Customers key={[organization.id,user.id,role].join(':')}/></Suspense>:null;}
 function Customers() {
+ const {formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const { organization,role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -69,14 +77,14 @@ function Customers() {
         page,limit,sort,
       });
 
-      if(!res.data)throw new Error('Mijozlar natijasi mavjud emas');
+      if(!res.data)throw new Error("Mijozlar natijasi mavjud emas");
       if (res.data) {
         // Also load debts for each customer
         const customersWithDebt = await Promise.all(
           res.data.map(async (c) => {
             try {
               const debtRes = await api.customers.getDebt(c.id);
-              if(debtRes.data?.totalDebt===undefined)throw new Error('Qarz natijasi mavjud emas');
+              if(debtRes.data?.totalDebt===undefined)throw new Error("Qarz natijasi mavjud emas");
               const debt=String(debtRes.data.totalDebt);fixed(debt);return {...c,debt,debtUnavailable:false};
             } catch {
               return {...c,debtUnavailable:true};
@@ -131,7 +139,7 @@ function Customers() {
     if (!organization?.id||isSaving) return;
 
     if (!formData.fullName || !formData.phone) {
-      notifyError('Ism va telefon raqamini kiriting');
+      notifyError("Ism va telefon raqamini kiriting");
       return;
     }
 
@@ -147,10 +155,10 @@ function Customers() {
 
       if (editingCustomer) {
         await api.customers.update(editingCustomer.id, payload);
-        notifySuccess('Mijoz ma\'lumotlari yangilandi');
+        notifySuccess("Mijoz ma'lumotlari yangilandi");
       } else {
         await api.customers.create(payload);
-        notifySuccess('Yangi mijoz muvaffaqiyatli qo\'shildi');
+        notifySuccess("Yangi mijoz muvaffaqiyatli qo'shildi");
       }
 
     },()=>{setIsCustomerModalOpen(false);void loadCustomers();});
@@ -158,18 +166,16 @@ function Customers() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {(readError||debtError)&&<p role="alert">{readError||debtError}. Oxirgi ro‘yxat va draft saqlangan.</p>}<Button disabled={isLoading||isSaving} onClick={()=>void loadCustomers()}>Mijozlarni qayta yuklash</Button>{mutation.error&&<p role="alert">{mutation.error}</p>}{isSaving&&<p role="status">Server tasdig‘i kutilmoqda…</p>}{mutation.state==='saved'&&<p role="status">Mijoz serverda saqlandi.</p>}
-      {role==='owner'&&<Link href="/customers/duplicates" className="text-blue-700 underline">Legacy telefon dublikatlarini tekshirish</Link>}
-      {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),sort}} label="Mijozlarni CSV yuklash"/>}
+      {(readError||debtError)&&<p role="alert">{readError||debtError}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}<Button disabled={isLoading||isSaving} onClick={()=>void loadCustomers()}>{tr("Mijozlarni qayta yuklash")}</Button>{mutation.error&&<p role="alert">{mutation.error}</p>}{isSaving&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Mijoz serverda saqlandi.")}</p>}
+      {role==='owner'&&<Link href="/customers/duplicates" className="text-blue-700 underline">{tr("Legacy telefon dublikatlarini tekshirish")}</Link>}
+      {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),sort}} label={tr("Mijozlarni CSV yuklash")}/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Mijozlar va Nasiya
-          </h1>
+            {tr("Mijozlar va Nasiya")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Doimiy xaridorlar ro&apos;yxati, kredit limitlari va qarzdorlik nazorati
-          </p>
+            {tr("Doimiy xaridorlar ro'yxati, kredit limitlari va qarzdorlik nazorati")}</p>
         </div>
 
         <Button
@@ -179,45 +185,43 @@ function Customers() {
           leftIcon={<FontAwesomeIcon icon={faUserPlus} />}
           className="font-bold shadow-md shadow-blue-500/20"
         >
-          Yangi mijoz qo&apos;shish
-        </Button>
+          {tr("Yangi mijoz qo'shish")}</Button>
       </div>
 
       {/* Search bar */}
       <Card padding={false} className="p-4">
-        <ListFilter search={searchQuery} sort={sort} label="Mijoz qidirish" placeholder="Mijoz ismi yoki telefon raqami bo'yicha qidirish..."
+        <ListFilter search={searchQuery} sort={sort} label={tr("Mijoz qidirish")} placeholder={tr("Mijoz ismi yoki telefon raqami bo'yicha qidirish...")}
           disabled={isSaving} onChange={changeQuery}
-          options={[{value:'name_asc',label:'Nom: A–Z'},{value:'name_desc',label:'Nom: Z–A'},{value:'newest',label:'Yangi mijozlar avval'},{value:'oldest',label:'Eski mijozlar avval'}]}/>
+          options={[{value:'name_asc',label:tr("Nom: A–Z")},{value:'name_desc',label:tr("Nom: Z–A")},{value:'newest',label:tr("Yangi mijozlar avval")},{value:'oldest',label:tr("Eski mijozlar avval")}]}/>
 
       </Card>
 
       {/* Customers Table */}
       <Card padding={false}>
-        {invalidQuery ? <div role="alert" className="p-6">URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalang.</div>
-        :readError ? <div className="p-6">Ro‘yxat yuklanmadi. Oxirgi ma’lumot asosida amal bajarmang; qayta yuklang.</div>
+        {invalidQuery ? <div role="alert" className="p-6">{tr("URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalang.")}</div>
+        :readError ? <div className="p-6">{tr("Ro‘yxat yuklanmadi. Oxirgi ma’lumot asosida amal bajarmang; qayta yuklang.")}</div>
         :isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <LoadingSpinner size="lg" text="Mijozlar yuklanmoqda..." />
+            <LoadingSpinner size="lg" text={tr("Mijozlar yuklanmoqda...")} />
           </div>
         ) : customers.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
             <FontAwesomeIcon icon={faUsers} className="text-4xl text-gray-300 mb-3" />
-            <p className="text-base font-bold text-gray-700">Mijozlar topilmadi</p>
+            <p className="text-base font-bold text-gray-700">{tr("Mijozlar topilmadi")}</p>
             <p className="text-xs text-gray-400 mt-1">
-              Yangi mijoz qo&apos;shish uchun yuqoridagi tugmani bosing
-            </p>
+              {tr("Yangi mijoz qo'shish uchun yuqoridagi tugmani bosing")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Mijoz</th>
-                  <th className="py-3.5 px-4">Telefon</th>
-                  <th className="py-3.5 px-4">Manzil</th>
-                  <th className="py-3.5 px-4 text-right">Kredit limiti</th>
-                  <th className="py-3.5 px-4 text-right">Joriy qarz</th>
-                  <th className="py-3.5 px-4 text-right">Amallar</th>
+                  <th className="py-3.5 px-4">{tr("Mijoz")}</th>
+                  <th className="py-3.5 px-4">{tr("Telefon")}</th>
+                  <th className="py-3.5 px-4">{tr("Manzil")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Kredit limiti")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Joriy qarz")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Amallar")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -225,7 +229,7 @@ function Customers() {
                   const hasDebt = !c.debtUnavailable&&fixed(c.debt ?? '0') > BigInt(0);
                   return (
                     <tr key={c.id} className="hover:bg-gray-50/70 transition">
-                      <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link><br/><Link className="text-blue-700 underline" href={`/customers/${c.id}/history`}>Xarid tarixi va merge</Link></td>
+                      <td className="py-3.5 px-4 font-bold text-gray-900"><Link className="text-blue-700 underline" href={`/customers/${c.id}`}>{c.fullName}</Link><br/><Link className="text-blue-700 underline" href={`/customers/${c.id}/history`}>{tr("Xarid tarixi va merge")}</Link></td>
                       <td className="py-3.5 px-4 text-gray-700 font-mono">
                         {formatPhone(c.phone)}
                       </td>
@@ -234,19 +238,18 @@ function Customers() {
                         {formatMoney(c.creditLimit)}
                       </td>
                       <td className="py-3.5 px-4 text-right">
-                        {c.debtUnavailable?<span>Qarz yuklanmadi</span>:hasDebt ? (
+                        {c.debtUnavailable?<span>{tr("Qarz yuklanmadi")}</span>:hasDebt ? (
                           <span className="font-black text-red-600">
                             {formatMoney(c.debt)}
                           </span>
                         ) : (
-                          <span className="text-gray-400">{fixed(c.debt??'0')<BigInt(0)?'Avans (net qoldiq): '+formatMoney(c.debt):"0 so‘m"}</span>
+                          <span className="text-gray-400">{fixed(c.debt??'0')<BigInt(0)?'Avans (net qoldiq): '+formatMoney(c.debt):tr("0 so‘m")}</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right space-x-1">
                         {hasDebt && (
                           <Link href={`/customers/${c.id}?collect=1`} className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white font-bold">
-                            <FontAwesomeIcon icon={faHandHoldingDollar} /> Qarzni undirish
-                          </Link>
+                            <FontAwesomeIcon icon={faHandHoldingDollar} /> {tr("Qarzni undirish")}</Link>
                         )}
                         <Button
                           variant="ghost"
@@ -255,8 +258,7 @@ function Customers() {
                           onClick={() => openEditModal(c)}
                           leftIcon={<FontAwesomeIcon icon={faEdit} />}
                         >
-                          Tahrirlash
-                        </Button>
+                          {tr("Tahrirlash")}</Button>
                       </td>
                     </tr>
                   );
@@ -268,19 +270,19 @@ function Customers() {
       </Card>
 
       {!invalidQuery&&!readError&&<Pagination page={page} pages={totalPages} busy={isLoading||isSaving} onPage={value=>changeQuery({page:String(value)})}/>}
-      {!invalidQuery&&!isLoading&&!readError&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+      {!invalidQuery&&!isLoading&&!readError&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
       {/* Customer Form Modal */}
       <Modal
         isOpen={isCustomerModalOpen}
         onClose={closeEditor}
-        title={editingCustomer ? 'Mijozni tahrirlash' : 'Yangi mijoz qo\'shish'}
+        title={editingCustomer ? tr("Mijozni tahrirlash") : tr("Yangi mijoz qo'shish")}
         size="md"
       >
         <form onChangeCapture={mutation.edited} onSubmit={handleSaveCustomer} className="space-y-4">
-          {dirty&&<p role="status">Saqlanmagan mijoz o‘zgarishlari bor.</p>}
+          {dirty&&<p role="status">{tr("Saqlanmagan mijoz o‘zgarishlari bor.")}</p>}
           <Input
-            label="Mijoz to'liq ismi *"
-            placeholder="Jamshid Ergashev"
+            label={tr("Mijoz to'liq ismi *")}
+            placeholder={tr("Jamshid Ergashev")}
             disabled={isSaving||isLoading||!!readError}
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -288,7 +290,7 @@ function Customers() {
           />
 
           <Input
-            label="Telefon raqami *"
+            label={tr("Telefon raqami *")}
             type="tel"
             placeholder="901234567"
             disabled={isSaving||isLoading||!!readError}
@@ -299,15 +301,15 @@ function Customers() {
           />
 
           <Input
-            label="Manzil"
-            placeholder="Toshkent sh., Yunusobod tumani"
+            label={tr("Manzil")}
+            placeholder={tr("Toshkent sh., Yunusobod tumani")}
             disabled={isSaving||isLoading||!!readError}
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
           />
 
           <Input
-            label="Maksimal nasiya / kredit limiti (so'm)"
+            label={tr("Maksimal nasiya / kredit limiti (so'm)")}
             type="number"
             min="0"
             step="0.01"
@@ -315,12 +317,12 @@ function Customers() {
             disabled={isSaving||isLoading||!!readError}
             value={formData.creditLimit}
             onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
-            helperText="Mijozga berilishi mumkin bo'lgan maksimal qarz miqdori"
+            helperText={tr("Mijozga berilishi mumkin bo'lgan maksimal qarz miqdori")}
           />
 
           <Input
-            label="Izoh (ixtiyoriy)"
-            placeholder="Mijoz haqida qo'shimcha eslatma"
+            label={tr("Izoh (ixtiyoriy)")}
+            placeholder={tr("Mijoz haqida qo'shimcha eslatma")}
             disabled={isSaving||isLoading||!!readError}
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -333,10 +335,9 @@ function Customers() {
               onClick={closeEditor}
               disabled={isSaving||isLoading||!!readError}
             >
-              Bekor qilish
-            </Button>
+              {tr("Bekor qilish")}</Button>
             <Button type="submit" variant="primary" isLoading={isSaving} disabled={isSaving||isLoading||!!readError} className="font-bold">
-              {editingCustomer ? 'Saqlash' : 'Qo\'shish'}
+              {editingCustomer ? tr("Saqlash") : tr("Qo'shish")}
             </Button>
           </div>
         </form>

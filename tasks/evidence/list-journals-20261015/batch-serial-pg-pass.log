@@ -1,0 +1,39 @@
+✔ real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold (689.413119ms)
+✔ tracked multi-batch transfer receive/loss/replay preserves original source and branch stock (467.458956ms)
+✔ partial original batch return, damaged return and exact per-batch count are atomic and idempotent (369.314894ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"event":"batch_acceptance_profile","receipts":54,"expiredRows":53,"elapsedMs":2057}
+✔ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (2085.753936ms)
+✔ supplier goods return targets original expired lot and receipt reversal restores no invented batch (283.503277ms)
+✔ Batch list global expiry/code order and bounded pages retain FEFO source journals and filtered export (1532.949628ms)
+{"requestId":"b2ed31fa-3ff9-4a7c-a6c0-b963ea384e3f","status":200,"durationMs":309,"event":"api_response"}
+✔ Actual serial receipt/sale/warranty/service/return/resale preserves original unit and immutable terms (736.68042ms)
+{"requestId":"79626de8-f67a-42d2-8fb0-29f4ec6903e6","status":200,"durationMs":244,"event":"api_response"}
+✔ Serial selection rejects wrong original unit, double sale and fractional quantity without money or stock effects (503.597095ms)
+{"requestId":"a9fe9b28-6291-46f3-8363-0ad4bea83db9","status":200,"durationMs":248,"event":"api_response"}
+✔ Exact transfer serial selection follows original unit across branches and partial receive is idempotent (455.918253ms)
+{"requestId":"13483440-656b-4316-a274-a2ee53d93d3d","status":200,"durationMs":242,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Concurrent checkouts of one serial have one winner, exact cash and one warranty (566.124542ms)
+{"requestId":"6ce59047-d42e-44f8-840b-d291dc0b17ea","status":200,"durationMs":255,"event":"api_response"}
+✔ Serial damaged and write-off returns retire the exact sold units, no available stock is invented (612.454261ms)
+{"requestId":"9d56017d-5273-4c1d-aca5-ee7b7471017a","status":200,"durationMs":243,"event":"api_response"}
+✔ Late warranty journal fault rolls back sale, serial state, money and original operation; exact retry posts once (454.173198ms)
+{"requestId":"076eeeee-3054-4929-a0f5-6975e072d12e","status":200,"durationMs":242,"event":"api_response"}
+✔ Serial loss reversal restores the original unit; supplier goods return retires only its original receipt serial (453.838306ms)
+{"requestId":"d9ec0886-4795-4133-b8ac-2277c2a05728","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"f9becb0b-a61b-4c6a-9965-b21d1b65f51d","status":200,"durationMs":241,"event":"api_response"}
+✔ Native owner policy/identity guards, branch and tenant service boundaries remain fail-closed (746.544687ms)
+{"requestId":"a97a0b8b-20b4-4b53-b222-dc4fbe241695","status":200,"durationMs":240,"event":"api_response"}
+✔ Atomic serialized exchange keeps return-before-resale native order and binds a new warranty without duplicating cash (535.918463ms)
+{"requestId":"2bd070ab-0676-451a-968e-5dc8ebfff48f","status":200,"durationMs":242,"event":"api_response"}
+✔ Actual source-linked serial list global code order, pages and defaults retain original receipt provenance (600.047854ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12213.671956

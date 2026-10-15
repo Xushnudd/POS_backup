@@ -1,4 +1,8 @@
 'use client'
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import {useEffect, useRef, useState} from 'react'
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges'
 import Modal from '@/components/ui/Modal'
@@ -19,8 +23,15 @@ const actionNames: Record<string,string> = {
   'billing.cost.record':'Platforma xarajatini qayd etish', 'billing.cost.cancel':'Platforma xarajatini bekor qilish',
   'support.policy.publish':'Yordam xizmati siyosatini o‘zgartirish', 'support.grant':'Yordam xodimiga vaqtli ruxsat berish',
 }
+const actionNamesSource=actionNames;
 
 export default function CriticalStepUp() {
+ const {locale:mapLocale}=useTranslation();
+
+ const actionNames=localizeOwnedLabels(actionNamesSource,mapLocale);
+
+ const {t:tr}=useTranslation();
+
   const {user, organization} = useAuth()
   const pending = useRef<StepUpRequest | null>(null), busy = useRef(false)
   const [binding, setBinding] = useState<StepUpRequest | null>(null)
@@ -57,15 +68,15 @@ export default function CriticalStepUp() {
     } catch (failure) {if (pending.current === request) setError(failure instanceof Error ? failure.message : 'Tasdiqlash amalga oshmadi')}
     finally {setCode(''); busy.current = false; setSaving(false)}
   }
-  return <Modal layer="critical" isOpen={binding !== null} onClose={close} title="Muhim amalni tasdiqlash" size="sm">
-    <p className="mb-3">Authenticator ilovasidagi kodni kiriting. Tasdiq faqat shu amal va joriy sessiya uchun ishlaydi.</p>
-    <p className="mb-3">Amal: {binding ? actionNames[binding.action] ?? 'Muhim amal' : ''}</p>
-    <p className="mb-3">Authenticator ulanmagan bo‘lsa, amalni bekor qilib xavfsizlik sahifasida ulang.</p>
+  return <Modal layer="critical" isOpen={binding !== null} onClose={close} title={tr("Muhim amalni tasdiqlash")} size="sm">
+    <p className="mb-3">{tr("Authenticator ilovasidagi kodni kiriting. Tasdiq faqat shu amal va joriy sessiya uchun ishlaydi.")}</p>
+    <p className="mb-3">{tr("Amal:")}{' '}{binding ? actionNames[binding.action] ?? tr("Muhim amal") : ''}</p>
+    <p className="mb-3">{tr("Authenticator ulanmagan bo‘lsa, amalni bekor qilib xavfsizlik sahifasida ulang.")}</p>
     {error && <p role="alert" className="mb-3 text-red-700">{error}</p>}
     <form onSubmit={event => {event.preventDefault(); void approve()}}>
-      <label htmlFor="critical-totp">Muhim amal uchun Authenticator kodi</label>
+      <label htmlFor="critical-totp">{tr("Muhim amal uchun Authenticator kodi")}</label>
       <input id="critical-totp" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={event => setCode(event.target.value)} disabled={saving} className="w-full border rounded p-2 my-2"/>
-      <div className="flex gap-3"><button type="submit" disabled={saving} className="bg-blue-700 text-white rounded p-2">{saving ? 'Tasdiqlanmoqda…' : 'Amalni tasdiqlash'}</button><button type="button" disabled={saving} onClick={close}>Bekor qilish</button></div>
+      <div className="flex gap-3"><button type="submit" disabled={saving} className="bg-blue-700 text-white rounded p-2">{saving ? tr("Tasdiqlanmoqda…") : tr("Amalni tasdiqlash")}</button><button type="button" disabled={saving} onClick={close}>{tr("Bekor qilish")}</button></div>
     </form>
   </Modal>
 }

@@ -16,6 +16,7 @@ export const reportListSorts=['default','amount_asc','amount_desc'] as const;
 export const reconciliationListSorts=['source','expected_asc','expected_desc'] as const;
 export const variantListSorts=['source','name_asc','name_desc','price_asc','price_desc'] as const;
 export const duplicateListSorts=['source','name_asc','name_desc'] as const;
+export const staffListSorts=['source','name_asc','name_desc','newest','oldest'] as const;
 export type ProductListSort=typeof productListSorts[number];
 export type CustomerListSort=typeof customerListSorts[number];
 export function parseListQuery<T extends string>(params:Pick<URLSearchParams,'get'>,sorts:readonly T[],defaultSort:T,defaultLimit=20){

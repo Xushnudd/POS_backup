@@ -1,10 +1,12 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import React, { useState } from 'react';
 import {clientQuantitySum} from '@/lib/unit-conversion';
 import DiscountInput from './DiscountInput';
 import { CartItem as ICartItem } from '@/types';
-import { formatMoney } from '@/lib/format';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faTrash, faPercent } from '@fortawesome/free-solid-svg-icons';
 
@@ -24,6 +26,10 @@ export default function CartItem({
   onUpdateDiscount,
   onRemove,
 }: CartItemProps) {
+ const {formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const [showDiscount, setShowDiscount] = useState(false);
   const [unitError,setUnitError]=useState('');
   const precision=item.tradeUnit?(item.product.unitConversions?.find(row=>row.tradeUnit===item.tradeUnit)?.tradePrecision??6):(item.product.unitPrecision??(item.product.unit==='dona'?0:6));const quantityStep=precision===0?'1':`0.${'0'.repeat(precision-1)}1`;
@@ -38,21 +44,21 @@ export default function CartItem({
             {item.product.name}
           </h4>
           <span className="text-[11px] text-gray-600 font-medium">
-            {formatMoney(item.unitPrice)} / {item.product.unit || 'dona'}
+            {formatMoney(item.unitPrice)} / {item.product.unit || tr("dona")}
           </span>
         </div>
 
         <button
           onClick={() => onRemove(item.product.id)}
           className="text-gray-600 hover:text-red-500 p-1 transition"
-          title="O'chirish"
+          title={tr("O'chirish")}
         >
           <FontAwesomeIcon icon={faTrash} className="text-xs" />
         </button>
       </div>
 
-      {!!item.product.unitConversions?.length&&<label className="text-xs">Savdo birligi (tanlash miqdorni 1 ga, chegirmani 0 ga qaytaradi)<select aria-label={item.product.name+' savdo birligi'} disabled={disabled} value={item.tradeUnit??item.product.unit} onChange={e=>{try{onSelectUnit(item.product.id,e.target.value);setUnitError('')}catch(error){setUnitError(error instanceof Error?error.message:'Birlik tanlanmadi')}}}><option value={item.product.unit}>{item.product.unit} (asosiy)</option>{item.product.unitConversions.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}: 1 = {row.ratio} {item.product.unit}</option>)}</select></label>}
-      {item.tradeUnit&&<p className="text-xs">{item.tradeQuantity} {item.tradeUnit} = {item.quantity} {item.product.unit}; narx asosiy birlik uchun.</p>}{unitError&&<p role="alert">{unitError}</p>}
+      {!!item.product.unitConversions?.length&&<label className="text-xs">{tr("Savdo birligi (tanlash miqdorni 1 ga, chegirmani 0 ga qaytaradi)")}<select aria-label={item.product.name+' savdo birligi'} disabled={disabled} value={item.tradeUnit??item.product.unit} onChange={e=>{try{onSelectUnit(item.product.id,e.target.value);setUnitError('')}catch(error){setUnitError(error instanceof Error?error.message:'Birlik tanlanmadi')}}}><option value={item.product.unit}>{item.product.unit} {tr("(asosiy)")}</option>{item.product.unitConversions.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}: 1 = {row.ratio} {item.product.unit}</option>)}</select></label>}
+      {item.tradeUnit&&<p className="text-xs">{item.tradeQuantity} {item.tradeUnit} = {item.quantity} {item.product.unit}{tr("; narx asosiy birlik uchun.")}</p>}{unitError&&<p role="alert">{unitError}</p>}
       {/* Middle: Quantity controls & Line Total */}
       <div className="flex items-center justify-between gap-2">
         {/* Quantity buttons */}
@@ -100,7 +106,7 @@ export default function CartItem({
             className="text-[10px] text-blue-600 hover:underline inline-flex items-center gap-0.5"
           >
             <FontAwesomeIcon icon={faPercent} className="text-[8px]" />
-            <span>{item.discountAmount > 0 ? `-${formatMoney(item.discountAmount)}` : 'Chegirma'}</span>
+            <span>{item.discountAmount > 0 ? `-${formatMoney(item.discountAmount)}` : tr("Chegirma")}</span>
           </button>
         </div>
       </div>
@@ -113,8 +119,7 @@ export default function CartItem({
             onClick={() => setShowDiscount(false)}
             className="text-[10px] text-gray-600 font-semibold hover:text-gray-700"
           >
-            Yopish
-          </button>
+            {tr("Yopish")}</button>
         </div>
       )}
     </div>

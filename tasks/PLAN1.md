@@ -3234,7 +3234,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `UX-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **UX-01.03** — Bir xil jadval/formalar, qidiruv, filtr, saralash, sahifalash va bo‘sh holatlar.
+- [x] **UX-01.03** — Bir xil jadval/formalar, qidiruv, filtr, saralash, sahifalash va bo‘sh holatlar.
 
   **Texnologiya:** Mavjud React UI va Tailwind, URLSearchParams, Prisma.
 
@@ -3249,6 +3249,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Bandning qabul mezoni:** Search/filter/sort/page/empty-state URL va API bilan mos; zero/large datasetda ishlaydi.
 
   **Dalil:** `UX-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul — 2026-10-15:** `tasks/evidence/list-journals-20261015.json`, `docs/operations/list-query-coverage.md`.139 distinct PG case (92+31+16),147 unit case/52 fayl; uch brauzer cohortlari42/42/18 va oxirgi kuchaytirilgan6/6 PASS. Cohortlar overlap qiladi,108 distinct yoki yagona run deb sanalmaydi. Type/worker/build,0warning lint va1473source/0finding PASS. URL va safe query, zero/large/source paging, Decimal sort/filtered CSV/cutoff, read errors/stale responses, immutable chronological journals va moliyaviy draft/source selection saqlanishi qabul qilindi. Version `d8a9226`+uncommitted tree, source/log SHA manifestda. Only local core; provider/hardware/production/pilot isboti emas. UX-01.02 alohida ochiq.
 
 - [x] **UX-01.04** — Xatolarni odam tushunadigan qilib yozish; foydalanuvchi keyin nima qilishi ko‘rsatilishi.
 

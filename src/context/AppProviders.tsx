@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import {LocaleProvider} from './LocaleContext';
+import {type Locale} from '@/i18n/locale';
+import {PublicLanguageSwitcher} from '@/components/ui/LanguageSwitcher';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import { NotificationProvider } from './NotificationContext';
@@ -11,16 +14,16 @@ import PwaStatus from '@/components/security/PwaStatus';
 
 config.autoAddCss = false;
 
-export function AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({ children,initialLocale='uz' }: { children: React.ReactNode;initialLocale?:Locale }) {
   return (
-    <NotificationProvider>
+    <LocaleProvider initialLocale={initialLocale}><NotificationProvider>
       <AuthProvider>
         <OrganizationProvider>
-          {children}
+          <React.Suspense fallback={null}><PublicLanguageSwitcher/></React.Suspense>{children}
           <PwaStatus />
           <ToastContainer />
         </OrganizationProvider>
       </AuthProvider>
-    </NotificationProvider>
+    </NotificationProvider></LocaleProvider>
   );
 }

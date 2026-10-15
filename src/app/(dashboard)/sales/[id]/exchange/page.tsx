@@ -1,4 +1,6 @@
 'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
 import SerialPicker from '@/components/inventory/SerialPicker';
 import BatchRestorePicker,{type BatchChoice} from '@/components/inventory/BatchRestorePicker';
 import {useEffect,useRef,useState} from 'react';
@@ -16,8 +18,12 @@ import PendingActions from '@/components/forms/PendingActions';
 type Sale={id:string;storeId:string;receiptNo:string;customerId:string|null;items:{id:string;productId:string;serialTracking?:boolean;batchTracking?:boolean;productName:string;quantity:string}[]};
 type Quote={confirmationHash:string;refundAmount:string;replacementTotal:string;cashDifference:string;debtDifference:string};
 type Exchange={id:string;replacementSaleId:string;saleReturnId:string;cashDifference:string;debtDifference:string};
-export default function ExchangePage(){const {id}=useParams<{id:string}>(),{organization,user,role}=useAuth(),{activeShift}=useOrganization();return role!=='cashier'&&organization&&user?<Editor key={[organization.id,user.id,role,id,activeShift?.id].join(':')} organizationId={organization.id} saleId={id} shiftId={activeShift?.id}/>:<p>Almashtirish uchun rahbar hisobida kiring.</p>;}
+export default function ExchangePage(){
+ const {t:tr}=useTranslation();
+const {id}=useParams<{id:string}>(),{organization,user,role}=useAuth(),{activeShift}=useOrganization();return role!=='cashier'&&organization&&user?<Editor key={[organization.id,user.id,role,id,activeShift?.id].join(':')} organizationId={organization.id} saleId={id} shiftId={activeShift?.id}/>:<p>{tr("Almashtirish uchun rahbar hisobida kiring.")}</p>;}
 function Editor({organizationId,saleId,shiftId}:{organizationId:string;saleId:string;shiftId?:string}){
+ const {t:tr}=useTranslation();
+
  const [sale,setSale]=useState<Sale|null>(null),[history,setHistory]=useState<Exchange[]>([]),[qty,setQty]=useState<Record<string,string>>({}),[reason,setReason]=useState(''),[search,setSearch]=useState(''),[products,setProducts]=useState<{id:string;name:string;sku:string;serialTracking?:boolean}[]>([]),[productId,setProductId]=useState(''),[newQty,setNewQty]=useState('1'),[credit,setCredit]=useState('0'),[tender,setTender]=useState('0'),[quote,setQuote]=useState<Quote|null>(null),[body,setBody]=useState<Record<string,unknown>|null>(null),[error,setError]=useState(''),[readError,setReadError]=useState(''),[catalogError,setCatalogError]=useState(''),[busy,setBusy]=useState(false),[posting,setPosting]=useState(false),[loading,setLoading]=useState(true),[catalogLoading,setCatalogLoading]=useState(true),[message,setMessage]=useState(''),[revision,setRevision]=useState(0),[catalogRevision,setCatalogRevision]=useState(0);
  const [serialChoices,setSerialChoices]=useState<Record<string,string[]>>({}),[replacementSerials,setReplacementSerials]=useState<string[]>([]);
  const [batchChoices,setBatchChoices]=useState<Record<string,BatchChoice[]>>({}),[batchReady,setBatchReady]=useState<Record<string,boolean>>({});
@@ -45,28 +51,28 @@ function Editor({organizationId,saleId,shiftId}:{organizationId:string;saleId:st
   if(matches){setBatchChoices({});setBatchReady({});setQty({});setReason('');setProductId('');setNewQty('1');setCredit('0');setTender('0');setQuote(null);setBody(null);}
   setMessage(matches?'Almashtirish serverda saqlandi.':'Original almashtirish serverda saqlandi. Joriy mustaqil draft saqlanadi.');refresh();
  }
- return <div className="space-y-4"><h1>Tovar almashtirish</h1><Link href={'/sales/'+saleId}>Original savdoga qaytish</Link>
-  <p>Original qaytarish va yangi savdo birga qayd etiladi. Yangi savdo rad etilsa ikkala hujjat ham yozilmaydi. Musbat naqd farq mijozdan olinadi, manfiy farq mijozga qaytariladi. Nasiya farqi original mijoz kartasida qoladi.</p>
-  {error&&<p role="alert">{error}</p>}{readError&&<p role="alert">{readError} Draft va oxirgi yuklangan tarix saqlanadi.</p>}{catalogError&&<p role="alert">{catalogError}</p>}
-  {loading&&<p role="status">Original savdo va almashtirish tarixi yuklanmoqda…</p>}{catalogLoading&&<p role="status">Yangi mahsulotlar yuklanmoqda…</p>}{busy&&<p role="status">Almashtirish farqi serverda hisoblanmoqda…</p>}{!busy&&!posting&&dirty&&<p role="status">Saqlanmagan almashtirish drafti bor.</p>}{message&&<p role="status">{message}</p>}
-  <Button disabled={loading||busy||posting} onClick={refresh}>Original savdoni qayta tekshirish</Button><Button disabled={catalogLoading||busy||posting} onClick={()=>setCatalogRevision(value=>value+1)}>Almashtirish mahsulotlarini qayta tekshirish</Button>
+ return <div className="space-y-4"><h1>{tr("Tovar almashtirish")}</h1><Link href={'/sales/'+saleId}>{tr("Original savdoga qaytish")}</Link>
+  <p>{tr("Original qaytarish va yangi savdo birga qayd etiladi. Yangi savdo rad etilsa ikkala hujjat ham yozilmaydi. Musbat naqd farq mijozdan olinadi, manfiy farq mijozga qaytariladi. Nasiya farqi original mijoz kartasida qoladi.")}</p>
+  {error&&<p role="alert">{error}</p>}{readError&&<p role="alert">{readError} {tr("Draft va oxirgi yuklangan tarix saqlanadi.")}</p>}{catalogError&&<p role="alert">{catalogError}</p>}
+  {loading&&<p role="status">{tr("Original savdo va almashtirish tarixi yuklanmoqda…")}</p>}{catalogLoading&&<p role="status">{tr("Yangi mahsulotlar yuklanmoqda…")}</p>}{busy&&<p role="status">{tr("Almashtirish farqi serverda hisoblanmoqda…")}</p>}{!busy&&!posting&&dirty&&<p role="status">{tr("Saqlanmagan almashtirish drafti bor.")}</p>}{message&&<p role="status">{message}</p>}
+  <Button disabled={loading||busy||posting} onClick={refresh}>{tr("Original savdoni qayta tekshirish")}</Button><Button disabled={catalogLoading||busy||posting} onClick={()=>setCatalogRevision(value=>value+1)}>{tr("Almashtirish mahsulotlarini qayta tekshirish")}</Button>
   <PendingActions prefix="/exchanges" returnPath={returnPath} revision={revision} onDone={()=>{setMessage('Saqlangan original amal serverda tasdiqlandi. Joriy draft o‘zgartirilmadi.');refresh();}}/>
-  {!shiftId&&<p role="alert">Original filialda ochiq smena tanlang.</p>}
-  {sale&&<><h2>Original chek: {sale.receiptNo}</h2><fieldset disabled={busy||posting} className="space-y-3">
+  {!shiftId&&<p role="alert">{tr("Original filialda ochiq smena tanlang.")}</p>}
+  {sale&&<><h2>{tr("Original chek:")}{' '}{sale.receiptNo}</h2><fieldset disabled={busy||posting} className="space-y-3">
    {sale.items.map(item=><div key={item.id}><Input label={'Qaytarish miqdori: '+item.productName} value={qty[item.id]??'0'} onChange={event=>{invalidate();setQty(current=>({...current,[item.id]:event.target.value}));}}/>{item.serialTracking&&<SerialPicker storeId={sale.storeId} productId={item.productId} state="sold" saleItemId={item.id} label={item.productName+' almashtiriladigan seriallar'} value={serialChoices[item.id]??[]} onChange={ids=>{invalidate();setSerialChoices(previous=>({...previous,[item.id]:ids}))}}/>}{item.batchTracking&&<BatchRestorePicker kind="sale" sourceId={saleId} productId={item.productId} label={item.productName+' almashtirish partiyalari'} value={batchChoices[item.id]??[]} onChange={rows=>{invalidate();setBatchChoices(previous=>({...previous,[item.id]:rows}))}} onReady={ready=>setBatchReady(previous=>previous[item.id]===ready?previous:{...previous,[item.id]:ready})}/>}</div>)}
-   {products.find(p=>p.id===productId)?.serialTracking&&<SerialPicker key={productId} storeId={sale.storeId} productId={productId} label="Yangi mahsulot seriallari" value={replacementSerials} onChange={ids=>{invalidate();setReplacementSerials(ids)}}/>}
-   <Input label="Almashtirish sababi" value={reason} onChange={event=>{invalidate();setReason(event.target.value);}}/>
-   <Input label="Yangi mahsulot qidirish" value={search} onChange={event=>setSearch(event.target.value)}/>
-   <Select label="Almashtirishdagi yangi mahsulot" value={productId} placeholder="Mahsulot tanlang" options={[...(productId&&!products.some(product=>product.id===productId)?[{value:productId,label:'Tanlangan mahsulot · '+productId}]:[]),...products.map(product=>({value:product.id,label:product.name+' · '+product.sku}))]} onChange={event=>{invalidate();setProductId(event.target.value);}}/>
-   <Input label="Yangi mahsulot miqdori" value={newQty} onChange={event=>{invalidate();setNewQty(event.target.value);}}/>
-   <Input label="Yangi savdoning nasiya qismi" value={credit} onChange={event=>{invalidate();setCredit(event.target.value);}}/>
-  </fieldset><Button disabled={busy||posting||loading||catalogLoading||Boolean(readError||catalogError)||!shiftId||!productId||reason.trim().length<3} onClick={()=>void preview()}>Almashtirish farqini hisoblash</Button>
-  {quote&&body&&<><p role="status">Qaytarish: {quote.refundAmount}; yangi savdo: {quote.replacementTotal}; naqd farq: {quote.cashDifference}; nasiya farqi: {quote.debtDifference}</p>
-   <p>Naqd farq nol yoki manfiy bo‘lsa berilgan pul0. Yangi savdoning to‘liq summasini mijoz bergan deb yozmaymiz; actual farq va qaytim almashtirish hujjatida.</p>
-   <DurableMutation path="/exchanges" returnPath={returnPath} canSubmit={!busy&&!loading&&!readError&&!catalogError} body={{...body,confirmationHash:quote.confirmationHash,cashTendered:tender}} label="Almashtirishni qayd etish" review={[sale.receiptNo,'Qaytarish '+quote.refundAmount,'Yangi savdo '+quote.replacementTotal,'Naqd farq '+quote.cashDifference,'Nasiya farqi '+quote.debtDifference,'Haqiqiy tender '+tender,reason]} onSavingChange={setPosting} onDone={posted}>
-    <Input label="Farq uchun mijoz bergan haqiqiy naqd pul" value={tender} onChange={event=>setTender(event.target.value)}/>
+   {products.find(p=>p.id===productId)?.serialTracking&&<SerialPicker key={productId} storeId={sale.storeId} productId={productId} label={tr("Yangi mahsulot seriallari")} value={replacementSerials} onChange={ids=>{invalidate();setReplacementSerials(ids)}}/>}
+   <Input label={tr("Almashtirish sababi")} value={reason} onChange={event=>{invalidate();setReason(event.target.value);}}/>
+   <Input label={tr("Yangi mahsulot qidirish")} value={search} onChange={event=>setSearch(event.target.value)}/>
+   <Select label={tr("Almashtirishdagi yangi mahsulot")} value={productId} placeholder={tr("Mahsulot tanlang")} options={[...(productId&&!products.some(product=>product.id===productId)?[{value:productId,label:'Tanlangan mahsulot · '+productId}]:[]),...products.map(product=>({value:product.id,label:product.name+' · '+product.sku}))]} onChange={event=>{invalidate();setProductId(event.target.value);}}/>
+   <Input label={tr("Yangi mahsulot miqdori")} value={newQty} onChange={event=>{invalidate();setNewQty(event.target.value);}}/>
+   <Input label={tr("Yangi savdoning nasiya qismi")} value={credit} onChange={event=>{invalidate();setCredit(event.target.value);}}/>
+  </fieldset><Button disabled={busy||posting||loading||catalogLoading||Boolean(readError||catalogError)||!shiftId||!productId||reason.trim().length<3} onClick={()=>void preview()}>{tr("Almashtirish farqini hisoblash")}</Button>
+  {quote&&body&&<><p role="status">{tr("Qaytarish:")}{' '}{quote.refundAmount}{tr("; yangi savdo:")}{' '}{quote.replacementTotal}{tr("; naqd farq:")}{' '}{quote.cashDifference}{tr("; nasiya farqi:")}{' '}{quote.debtDifference}</p>
+   <p>{tr("Naqd farq nol yoki manfiy bo‘lsa berilgan pul0. Yangi savdoning to‘liq summasini mijoz bergan deb yozmaymiz; actual farq va qaytim almashtirish hujjatida.")}</p>
+   <DurableMutation path="/exchanges" returnPath={returnPath} canSubmit={!busy&&!loading&&!readError&&!catalogError} body={{...body,confirmationHash:quote.confirmationHash,cashTendered:tender}} label={tr("Almashtirishni qayd etish")} review={[sale.receiptNo,'Qaytarish '+quote.refundAmount,'Yangi savdo '+quote.replacementTotal,'Naqd farq '+quote.cashDifference,'Nasiya farqi '+quote.debtDifference,'Haqiqiy tender '+tender,reason]} onSavingChange={setPosting} onDone={posted}>
+    <Input label={tr("Farq uchun mijoz bergan haqiqiy naqd pul")} value={tender} onChange={event=>setTender(event.target.value)}/>
    </DurableMutation>
   </>}</>}
-  <h2>Almashtirish tarixi</h2>{!loading&&!readError&&history.length===0?<p>Almashtirish yozuvi yo‘q.</p>:history.map(exchange=><article key={exchange.id}><p>Naqd farq {exchange.cashDifference}; nasiya farqi {exchange.debtDifference}</p><Link href={'/sales/'+exchange.replacementSaleId}>Bog‘langan yangi savdoni ochish</Link></article>)}
+  <h2>{tr("Almashtirish tarixi")}</h2>{!loading&&!readError&&history.length===0?<p>{tr("Almashtirish yozuvi yo‘q.")}</p>:history.map(exchange=><article key={exchange.id}><p>{tr("Naqd farq")}{' '}{exchange.cashDifference}{tr("; nasiya farqi")}{' '}{exchange.debtDifference}</p><Link href={'/sales/'+exchange.replacementSaleId}>{tr("Bog‘langan yangi savdoni ochish")}</Link></article>)}
  </div>;
 }

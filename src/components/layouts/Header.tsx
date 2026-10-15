@@ -1,5 +1,9 @@
 'use client';
+import {localizeOwnedLabels} from '@/i18n/messages';
 
+import {useTranslation} from '@/context/LocaleContext';
+
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import React, {useEffect,useState} from 'react';
 import {api} from '@/lib/api';
 import {confirmPageNavigation,commitPageNavigation} from '@/lib/page-navigation';
@@ -28,6 +32,10 @@ interface HeaderProps {
 }
 
 export default function Header({ onToggleSidebar }: HeaderProps) {
+ const {locale:mapLocale}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const pathname = usePathname();
   const { notifyError } = useNotification();
   const { user, organization, role, logout } = useAuth();
@@ -51,12 +59,11 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     }catch(error){notifyError(error instanceof Error?error.message:'Biznes almashtirilmadi');setSwitching(false);}
   };
 
-
-  const roleNames: Record<string, string> = {
+  const roleNames: Record<string, string> = localizeOwnedLabels({
     owner: 'Do\'kon egasi',
     admin: 'Administrator',
     cashier: 'Kassir',
-  };
+  },mapLocale);
 
   const isPosPage = pathname === '/pos';
 
@@ -68,7 +75,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
         <button
           onClick={onToggleSidebar}
           className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition"
-          aria-label="Menyu"
+          aria-label={tr("Menyu")}
         >
           <FontAwesomeIcon icon={faBars} className="text-lg" />
         </button>
@@ -76,7 +83,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
         <div className="hidden sm:flex items-center gap-2 text-xs">
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 rounded-lg text-gray-700 font-medium">
             <FontAwesomeIcon icon={faStore} className="text-gray-400" />
-            <span>{activeStore?.name || organization?.name || 'Do\'kon'}</span>
+            <span>{activeStore?.name || organization?.name || tr("Do'kon")}</span>
           </div>
 
           {activeRegister && (
@@ -91,13 +98,11 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
         <div className="flex items-center">
           {activeShift ? (
             <Badge variant="success" size="sm" dot>
-              Smena ochiq
-            </Badge>
+              {tr("Smena ochiq")}</Badge>
           ) : (
             <Link href="/shifts" prefetch={false}>
               <Badge variant="warning" size="sm" dot className="hover:opacity-80 transition cursor-pointer">
-                Smena ochilmagan
-              </Badge>
+                {tr("Smena ochilmagan")}</Badge>
             </Link>
           )}
         </div>
@@ -105,8 +110,8 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
       {/* Right: Quick POS link, User profile & Logout */}
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-        <SecurityNoticeBadge/>
-        {businesses.length>1 && <select aria-label="Biznesni almashtirish" value={organization?.id??''} disabled={switching} onChange={e=>{void switchBusiness(e.target.value);}} className="max-w-24 sm:max-w-36 min-w-0 text-xs border rounded-lg p-2">
+        <LanguageSwitcher compact/><SecurityNoticeBadge/>
+        {businesses.length>1 && <select aria-label={tr("Biznesni almashtirish")} value={organization?.id??''} disabled={switching} onChange={e=>{void switchBusiness(e.target.value);}} className="max-w-24 sm:max-w-36 min-w-0 text-xs border rounded-lg p-2">
           {businesses.map(business=><option key={business.id} value={business.id}>{business.name}</option>)}
         </select>}
         {!isPosPage && (
@@ -117,8 +122,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
               leftIcon={<FontAwesomeIcon icon={faBolt} />}
               className="font-bold shadow-xs"
             >
-              Kassa (POS)
-            </Button>
+              {tr("Kassa (POS)")}</Button>
           </Link>
         )}
 
@@ -134,7 +138,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
           <button
             onClick={() => { void logout().catch(error => notifyError(error instanceof Error ? error.message : 'Chiqish amalga oshmadi')); }}
-            title="Tizimdan chiqish"
+            title={tr("Tizimdan chiqish")}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
           >
             <FontAwesomeIcon icon={faRightFromBracket} className="text-base" />

@@ -1,4 +1,8 @@
 'use client';
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -19,8 +23,17 @@ import ListFilter from '@/components/ui/ListFilter';
 import Pagination from '@/components/ui/Pagination';
 import DataTable from '@/components/ui/DataTable';
 const labels={counting:'Sanash davom etmoqda',review:'Tekshirish va qayta sanash',approved:'Tasdiqlangan',cancelled:'Bekor qilingan'};
-export default function StockCountsPage(){const {organization,user,role}=useAuth();const {activeStore}=useOrganization();return organization&&user?<Suspense fallback={<p>Yuklanmoqda...</p>}><CountControls key={[organization.id,user.id,role,activeStore?.id].join(':')}/></Suspense>:null;}
+const labelsSource=labels;
+export default function StockCountsPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();const {activeStore}=useOrganization();return organization&&user?<Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><CountControls key={[organization.id,user.id,role,activeStore?.id].join(':')}/></Suspense>:null;}
 function CountControls(){
+ const {locale:mapLocale}=useTranslation();
+
+ const labels=localizeOwnedLabels(labelsSource,mapLocale);
+
+ const {t:tr}=useTranslation();
+
  const {organization,user}=useAuth(),{activeStore}=useOrganization(),{notifyError,notifySuccess}=useNotification();
  const [counts,setCounts]=useState<StockCount[]>([]),[current,setCurrent]=useState<StockCount|null>(null);
  const {query,params,changeQuery}=useListQuery(journalListSorts,'newest');
@@ -48,28 +61,28 @@ function CountControls(){
  const openCount=async(id:string)=>{if(!ready||attempt.current||!discardCount())return;try{const response=await api.stockCounts.get(id);setCurrent(response.data??null);setInputs({});setReason('');}catch(error){notifyError(error instanceof Error?error.message:'Sanash topilmadi');}};
  const execute=async(name:string,path?:string,body?:Record<string,unknown>)=>{
   if(flight.current||!ready||!organization||!user)return;
-  if(attempt.current&&path){notifyError('Avval original amal natijasini tekshiring');return;}
+  if(attempt.current&&path){notifyError("Avval original amal natijasini tekshiring");return;}
   flight.current=true;setBusy(true);setError('');setSaved(false);const retrying=Boolean(attempt.current);
   let op=attempt.current;
   try{
    if(!op){
-    if(!path||!body)throw new Error('Amal ma’lumoti topilmadi');
+    if(!path||!body)throw new Error("Amal ma’lumoti topilmadi");
     const id=typeof body.operationId==='string'?body.operationId:crypto.randomUUID();
     op=await enqueue({id,scope:{organizationId:organization.id,userId:user.id,deviceId:deviceId()},type:'finance.action',payload:{path,returnPath:'/inventory/counts',label:name,body:JSON.parse(JSON.stringify({...body,operationId:id})),review:[`Filial: ${activeStore?.name??''}`,`Sanash: ${current?.id??'yangi'}`,`Amal: ${name}`, ...(typeof body.reason==='string'?[`Sabab: ${body.reason}`]:[]),...(Array.isArray(body.items)?body.items.map(row=>`${row.lineId}: ${row.quantity}`):[])]},state:'pending',createdAt:new Date().toISOString()});
     attempt.current=op;if(live.current)setPendingView(op);
    }
    const target=String(op.payload.path);
-   if(!/^\/stock-counts(?:\/[0-9a-f-]{36}(?:\/(?:submit|approve|cancel))?)?$/.test(target))throw new Error('Original sanash manzili noto‘g‘ri');
+   if(!/^\/stock-counts(?:\/[0-9a-f-]{36}(?:\/(?:submit|approve|cancel))?)?$/.test(target))throw new Error("Original sanash manzili noto‘g‘ri");
    const response=await api.request<StockCount>(target,{method:'POST',body:JSON.stringify(op.payload.body)});
    await acknowledge(op.id,'synced',response.data);
-   if(live.current){setCurrent(response.data??null);if(target==='/stock-counts'){setScope('full');setBlind(true);setSelected([]);setInputs({});setReason('');}else if(/\/(approve|cancel)$/.test(target)){setInputs({});setReason('');}else if(!target.endsWith('/submit')){setInputs({});}attempt.current=null;setPendingView(null);setUnknown(false);setSaved(true);notifySuccess('Sanash amali serverda saqlandi');if(response.data?.id){try{const actual=await api.stockCounts.get(response.data.id);if(live.current)setCurrent(actual.data??null);}catch{if(live.current){setCurrent(null);setError('Amal saqlandi, lekin sanash holati yuklanmadi. Ro‘yxatdan qayta oching.');}}}await refresh();}
+   if(live.current){setCurrent(response.data??null);if(target==='/stock-counts'){setScope('full');setBlind(true);setSelected([]);setInputs({});setReason('');}else if(/\/(approve|cancel)$/.test(target)){setInputs({});setReason('');}else if(!target.endsWith('/submit')){setInputs({});}attempt.current=null;setPendingView(null);setUnknown(false);setSaved(true);notifySuccess("Sanash amali serverda saqlandi");if(response.data?.id){try{const actual=await api.stockCounts.get(response.data.id);if(live.current)setCurrent(actual.data??null);}catch{if(live.current){setCurrent(null);setError("Amal saqlandi, lekin sanash holati yuklanmadi. Ro‘yxatdan qayta oching.");}}}await refresh();}
   }catch(e){
    if(!retrying&&op&&e instanceof ApiError&&([400,403,404,413,415].includes(e.status??0)||['COUNT_ALREADY_ACTIVE','COUNT_INCOMPLETE','COUNT_STOCK_CHANGED','COUNT_UNIT_CHANGED','INVALID_STATUS','READING_LIMIT','RECOUNT_REQUIRED','UNRESOLVED_OFFLINE_STOCK'].includes(e.code??''))){await acknowledge(op.id,'rejected',undefined,e.code);attempt.current=null;if(live.current)setPendingView(null);}
    if(live.current){setUnknown(Boolean(attempt.current));setError(e instanceof Error?e.message:'Natija noaniq; original kalit saqlangan');}
   }finally{flight.current=false;if(live.current)setBusy(false);}
  };
  const start=()=>{
-  if(!organization||!activeStore){notifyError('Do‘kon tanlang');return;}
+  if(!organization||!activeStore){notifyError("Do‘kon tanlang");return;}
   if(!confirmUnsavedChanges(Boolean(Object.values(inputs).some(value=>value.trim())||reason),busy))return;
  const data={operationId:crypto.randomUUID(),organizationId:organization.id,storeId:activeStore.id,scope,blind,...(scope==='partial'?{productIds:selected}:{})};
   void execute('Sanashni boshlash','/stock-counts',data);
@@ -77,39 +90,39 @@ function CountControls(){
  const record=()=>{
   if(!current)return;
   const items=Object.entries(inputs).filter(([,quantity])=>quantity.trim()!=='').map(([lineId,quantity])=>({lineId,quantity:quantity.trim()}));
-  if(!items.length){notifyError('Kamida bitta sanalgan miqdorni kiriting');return;}
+  if(!items.length){notifyError("Kamida bitta sanalgan miqdorni kiriting");return;}
   const id=current.id,data={operationId:crypto.randomUUID(),items};void execute('Miqdorlarni saqlash',`/stock-counts/${id}`,data);
  };
  const decide=(action:'approve'|'cancel')=>{
-  if(!current||reason.trim().length<3){notifyError('Kamida 3 belgili sabab kiriting');return;}
+  if(!current||reason.trim().length<3){notifyError("Kamida 3 belgili sabab kiriting");return;}
   if(!confirmUnsavedChanges(Object.values(inputs).some(value=>Boolean(value.trim())),busy))return;
   const id=current.id,data={operationId:crypto.randomUUID(),reason:reason.trim()};void execute(action==='approve'?'Farqni tasdiqlash':'Sanashni bekor qilish',`/stock-counts/${id}/${action}`,data);
  };
  const active=current&&['counting','review'].includes(current.status);
  return <div className="space-y-5">
-  <div className="flex items-center gap-3"><Link href="/inventory"><Button variant="outline">Omborga qaytish</Button></Link><h1 className="text-2xl font-bold">Inventarizatsiya</h1></div>
-  <p className="text-sm text-gray-600">Tanlangan mahsulotlar sanash tugaguncha savdo, kirim va transfer uchun bloklanadi. Sanashni tez yakunlang yoki bekor qiling. Farq bo‘lsa qayta sanash va manager tasdig‘i talab qilinadi.</p>
-  {!ready&&!error&&<p role="status">Lokal sanash navbati tekshirilmoqda…</p>}
-  {busy&&<p role="status">Server tasdig‘i kutilmoqda…</p>}
-  {!busy&&countDirty&&!unknown&&<p role="status">Saqlanmagan sanash o‘zgarishlari bor.</p>}
-  {saved&&!busy&&<p role="status">Sanash serverda saqlandi.</p>}
-  {error&&<p role="alert">{error}{!ready&&<button type="button" className="underline ml-2" onClick={()=>setLocalRevision(value=>value+1)}>Lokal navbatni qayta tekshirish</button>}</p>}
-  {unknown&&<Card><p>Oldingi javob noaniq. Ma’lumot va amal kaliti saqlangan.</p>{(Array.isArray(pendingView?.payload.review)?pendingView.payload.review:[]).map((line,index)=><p key={index}>{String(line)}</p>)}<Button disabled={busy} onClick={()=>{if(attempt.current)void execute(String(attempt.current.payload.label??'Original sanash'));}}>Oldingi amalni qayta tekshirish</Button></Card>}
+  <div className="flex items-center gap-3"><Link href="/inventory"><Button variant="outline">{tr("Omborga qaytish")}</Button></Link><h1 className="text-2xl font-bold">{tr("Inventarizatsiya")}</h1></div>
+  <p className="text-sm text-gray-600">{tr("Tanlangan mahsulotlar sanash tugaguncha savdo, kirim va transfer uchun bloklanadi. Sanashni tez yakunlang yoki bekor qiling. Farq bo‘lsa qayta sanash va manager tasdig‘i talab qilinadi.")}</p>
+  {!ready&&!error&&<p role="status">{tr("Lokal sanash navbati tekshirilmoqda…")}</p>}
+  {busy&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}
+  {!busy&&countDirty&&!unknown&&<p role="status">{tr("Saqlanmagan sanash o‘zgarishlari bor.")}</p>}
+  {saved&&!busy&&<p role="status">{tr("Sanash serverda saqlandi.")}</p>}
+  {error&&<p role="alert">{error}{!ready&&<button type="button" className="underline ml-2" onClick={()=>setLocalRevision(value=>value+1)}>{tr("Lokal navbatni qayta tekshirish")}</button>}</p>}
+  {unknown&&<Card><p>{tr("Oldingi javob noaniq. Ma’lumot va amal kaliti saqlangan.")}</p>{(Array.isArray(pendingView?.payload.review)?pendingView.payload.review:[]).map((line,index)=><p key={index}>{String(line)}</p>)}<Button disabled={busy} onClick={()=>{if(attempt.current)void execute(String(attempt.current.payload.label??'Original sanash'));}}>{tr("Oldingi amalni qayta tekshirish")}</Button></Card>}
   <Card className="space-y-3">
-   <h2 className="font-bold">Yangi sanash — {activeStore?.name??'do‘kon tanlanmagan'}</h2>
-   <Select label="Sanash doirasi" value={scope} disabled={!ready||busy||unknown} onChange={event=>setScope(event.target.value as 'full'|'partial')} options={[{value:'full',label:'To‘liq katalog (2000 tagacha)'},{value:'partial',label:'Tanlangan mahsulotlar'}]}/>
-   <label className="flex gap-2"><input type="checkbox" checked={blind} disabled={!ready||busy||unknown} onChange={event=>setBlind(event.target.checked)}/>Kutilgan qoldiqni sanash paytida yashirish</label>
-   {scope==='partial'&&<div className="space-y-2"><Input label="Mahsulot qidirish" value={search} onChange={event=>setSearch(event.target.value)} disabled={!ready||busy||unknown}/><Button onClick={loadProducts} disabled={!ready||busy||unknown}>Mahsulotlarni topish</Button><p>{selected.length} mahsulot tanlangan; qidiruvda 200 tagacha natija.</p><div className="max-h-48 overflow-auto">{products.map(product=><label key={product.id} className="flex gap-2"><input type="checkbox" checked={selected.includes(product.id)} disabled={!ready||busy||unknown} onChange={event=>setSelected(values=>event.target.checked?[...values,product.id]:values.filter(id=>id!==product.id))}/>{product.name} ({product.sku})</label>)}</div></div>}
-   <Button disabled={!ready||busy||unknown||!activeStore||(scope==='partial'&&!selected.length)} onClick={start}>Sanashni boshlash</Button>
+   <h2 className="font-bold">{tr("Yangi sanash —")}{' '}{activeStore?.name??tr("do‘kon tanlanmagan")}</h2>
+   <Select label={tr("Sanash doirasi")} value={scope} disabled={!ready||busy||unknown} onChange={event=>setScope(event.target.value as 'full'|'partial')} options={[{value:'full',label:tr("To‘liq katalog (2000 tagacha)")},{value:'partial',label:tr("Tanlangan mahsulotlar")}]}/>
+   <label className="flex gap-2"><input type="checkbox" checked={blind} disabled={!ready||busy||unknown} onChange={event=>setBlind(event.target.checked)}/>{tr("Kutilgan qoldiqni sanash paytida yashirish")}</label>
+   {scope==='partial'&&<div className="space-y-2"><Input label={tr("Mahsulot qidirish")} value={search} onChange={event=>setSearch(event.target.value)} disabled={!ready||busy||unknown}/><Button onClick={loadProducts} disabled={!ready||busy||unknown}>{tr("Mahsulotlarni topish")}</Button><p>{selected.length} {tr("mahsulot tanlangan; qidiruvda 200 tagacha natija.")}</p><div className="max-h-48 overflow-auto">{products.map(product=><label key={product.id} className="flex gap-2"><input type="checkbox" checked={selected.includes(product.id)} disabled={!ready||busy||unknown} onChange={event=>setSelected(values=>event.target.checked?[...values,product.id]:values.filter(id=>id!==product.id))}/>{product.name} ({product.sku})</label>)}</div></div>}
+   <Button disabled={!ready||busy||unknown||!activeStore||(scope==='partial'&&!selected.length)} onClick={start}>{tr("Sanashni boshlash")}</Button>
   </Card>
-  <Card><h2 className="font-bold mb-3">Sanashlar</h2><ListFilter search={listSearch} sort={sort} label="Sanash IDsi yoki filial qidirish" disabled={busy||unknown} onChange={changeQuery} reset={{filter:''}} options={[{value:'newest',label:'Eng yangi'},{value:'oldest',label:'Eng eski'}]}><label className="flex gap-2"><input type="checkbox" checked={allCounts} disabled={!ready||busy||unknown} onChange={e=>changeQuery({filter:e.target.checked?'all':'active',page:'1'})}/>Yakunlangan sanashlarni ham ko‘rsatish</label></ListFilter>{invalidQuery?<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>:listError?<p role="alert">{listError}. Oxirgi ro‘yxat saqlangan.</p>:listBusy?<p role="status">Sanashlar yuklanmoqda…</p>:<><DataTable><thead><tr><th>Filial / holat</th><th>Sanash ID / amal</th></tr></thead><tbody>{counts.map(count=><tr key={count.id}><td>{count.store?.name} — {labels[count.status]}</td><td><Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>openCount(count.id)}>{count.store?.name} — {labels[count.status]} — {count.id.slice(0,8)}</Button></td></tr>)}</tbody></DataTable>{!counts.length&&<p>Sanash topilmadi.</p>}</>}<Pagination page={countPage} pages={totalPages} busy={listBusy&&!invalidQuery||busy||unknown} blocked={invalidQuery||!!listError||!ready} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void refresh();}}/>{!invalidQuery&&countPage>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}</Card>
+  <Card><h2 className="font-bold mb-3">{tr("Sanashlar")}</h2><ListFilter search={listSearch} sort={sort} label={tr("Sanash IDsi yoki filial qidirish")} disabled={busy||unknown} onChange={changeQuery} reset={{filter:''}} options={[{value:'newest',label:tr("Eng yangi")},{value:'oldest',label:tr("Eng eski")}]}><label className="flex gap-2"><input type="checkbox" checked={allCounts} disabled={!ready||busy||unknown} onChange={e=>changeQuery({filter:e.target.checked?'all':'active',page:'1'})}/>{tr("Yakunlangan sanashlarni ham ko‘rsatish")}</label></ListFilter>{invalidQuery?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:listError?<p role="alert">{listError}{tr(". Oxirgi ro‘yxat saqlangan.")}</p>:listBusy?<p role="status">{tr("Sanashlar yuklanmoqda…")}</p>:<><DataTable><thead><tr><th>{tr("Filial / holat")}</th><th>{tr("Sanash ID / amal")}</th></tr></thead><tbody>{counts.map(count=><tr key={count.id}><td>{count.store?.name} — {labels[count.status]}</td><td><Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>openCount(count.id)}>{count.store?.name} — {labels[count.status]} — {count.id.slice(0,8)}</Button></td></tr>)}</tbody></DataTable>{!counts.length&&<p>{tr("Sanash topilmadi.")}</p>}</>}<Pagination page={countPage} pages={totalPages} busy={listBusy&&!invalidQuery||busy||unknown} blocked={invalidQuery||!!listError||!ready} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void refresh();}}/>{!invalidQuery&&countPage>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}</Card>
   {current&&<Card className="space-y-4">
    <h2 className="font-bold">{labels[current.status]} — {current.id.slice(0,8)}</h2>
-   {current.status==='counting'&&current.blind&&<p>Kutilgan qoldiq birinchi sanash davomida yashirilgan.</p>}
-   <div className="overflow-auto"><table className="w-full text-sm"><thead><tr><th>Mahsulot</th><th>Kutilgan</th><th>Sanash tarixi</th><th>Yangi miqdor</th></tr></thead><tbody>{current.lines?.map(line=><tr key={line.id} className="border-t"><td className="p-2">{line.productName} ({line.sku}) — {line.unit}</td><td>{line.expectedQuantity??'Yashirilgan'}</td><td>{line.readings.map(reading=><div key={reading.id}>{reading.round}-sanash: {String(reading.quantity)} — {new Date(reading.countedAt).toLocaleString('uz-UZ')}</div>)}</td><td>{active&&<Input aria-label={`${line.sku} sanalgan miqdor`} inputMode="decimal" value={inputs[line.id]??''} onChange={event=>setInputs(values=>({...values,[line.id]:event.target.value}))} disabled={!ready||busy||unknown}/>}</td></tr>)}</tbody></table></div>
-   {active&&<><Button onClick={record} disabled={!ready||busy||unknown}>Sanalgan miqdorlarni saqlash</Button>{current.status==='counting'&&<Button disabled={!ready||busy||unknown} onClick={()=>{if(Object.values(inputs).some(value=>value.trim())){notifyError('Avval kiritilgan miqdorlarni saqlang');return;}const id=current.id;void execute('Tekshirishga yuborish',`/stock-counts/${id}/submit`,{});}}>Tekshirishga yuborish</Button>}<Input label="Tasdiqlash yoki bekor qilish sababi" value={reason} maxLength={2000} disabled={!ready||busy||unknown} onChange={event=>setReason(event.target.value)}/><div className="flex gap-2">{current.status==='review'&&<Button disabled={!ready||busy||unknown} onClick={()=>decide('approve')}>Farqni tasdiqlash</Button>}<Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>decide('cancel')}>Sanashni bekor qilish</Button></div></>}
-   {current.adjustmentId&&<p>Farq hujjati: {current.adjustmentId}</p>}
-   {current.approvedBy&&<p>Tasdiqlovchi: {current.approvedBy}; sabab: {current.reason}</p>}
+   {current.status==='counting'&&current.blind&&<p>{tr("Kutilgan qoldiq birinchi sanash davomida yashirilgan.")}</p>}
+   <div className="overflow-auto"><table className="w-full text-sm"><thead><tr><th>{tr("Mahsulot")}</th><th>{tr("Kutilgan")}</th><th>{tr("Sanash tarixi")}</th><th>{tr("Yangi miqdor")}</th></tr></thead><tbody>{current.lines?.map(line=><tr key={line.id} className="border-t"><td className="p-2">{line.productName} ({line.sku}) — {line.unit}</td><td>{line.expectedQuantity??tr("Yashirilgan")}</td><td>{line.readings.map(reading=><div key={reading.id}>{reading.round}{tr("-sanash:")}{' '}{String(reading.quantity)} — {new Date(reading.countedAt).toLocaleString('uz-UZ')}</div>)}</td><td>{active&&<Input aria-label={`${line.sku} sanalgan miqdor`} inputMode="decimal" value={inputs[line.id]??''} onChange={event=>setInputs(values=>({...values,[line.id]:event.target.value}))} disabled={!ready||busy||unknown}/>}</td></tr>)}</tbody></table></div>
+   {active&&<><Button onClick={record} disabled={!ready||busy||unknown}>{tr("Sanalgan miqdorlarni saqlash")}</Button>{current.status==='counting'&&<Button disabled={!ready||busy||unknown} onClick={()=>{if(Object.values(inputs).some(value=>value.trim())){notifyError("Avval kiritilgan miqdorlarni saqlang");return;}const id=current.id;void execute('Tekshirishga yuborish',`/stock-counts/${id}/submit`,{});}}>{tr("Tekshirishga yuborish")}</Button>}<Input label={tr("Tasdiqlash yoki bekor qilish sababi")} value={reason} maxLength={2000} disabled={!ready||busy||unknown} onChange={event=>setReason(event.target.value)}/><div className="flex gap-2">{current.status==='review'&&<Button disabled={!ready||busy||unknown} onClick={()=>decide('approve')}>{tr("Farqni tasdiqlash")}</Button>}<Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>decide('cancel')}>{tr("Sanashni bekor qilish")}</Button></div></>}
+   {current.adjustmentId&&<p>{tr("Farq hujjati:")}{' '}{current.adjustmentId}</p>}
+   {current.approvedBy&&<p>{tr("Tasdiqlovchi:")}{' '}{current.approvedBy}{tr("; sabab:")}{' '}{current.reason}</p>}
   </Card>}
  </div>;
 }

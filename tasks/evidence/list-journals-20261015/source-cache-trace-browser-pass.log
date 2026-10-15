@@ -1,0 +1,31 @@
+[WebServer] (node:102240) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 18 tests using 1 worker
+
+(node:102394) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (8.6s)
+  ✓   2 [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (7.2s)
+  ✓   3 [chromium] › tests/e2e/journal-list.spec.ts:24:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (9.6s)
+  ✓   4 [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (3.7s)
+  ✓   5 [chromium] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (3.9s)
+  ✓   6 [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (5.9s)
+(node:103968) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [firefox] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (11.9s)
+  ✓   8 [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (11.4s)
+  ✓   9 [firefox] › tests/e2e/journal-list.spec.ts:24:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (10.6s)
+  ✓  10 [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.7s)
+  ✓  11 [firefox] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (6.4s)
+  ✓  12 [firefox] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (6.8s)
+(node:104834) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 [webkit] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (8.6s)
+  ✓  14 [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (7.8s)
+  ✓  15 [webkit] › tests/e2e/journal-list.spec.ts:24:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (8.5s)
+  ✓  16 [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.7s)
+  ✓  17 [webkit] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (5.2s)
+  ✓  18 [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (7.1s)
+
+  18 passed (2.3m)

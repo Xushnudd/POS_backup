@@ -1,4 +1,6 @@
 'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
 
 import React, { useEffect, useLayoutEffect, useId, useRef, ReactNode } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -39,6 +41,8 @@ export default function Modal({
   size = 'md',
   layer = 'normal',
 }: ModalProps) {
+ const {t:tr}=useTranslation();
+
   const dialogRef=useRef<HTMLDivElement>(null);
   const restoreFrame=useRef<number|null>(null);
   const titleId=useId();
@@ -104,7 +108,7 @@ export default function Modal({
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h3 id={titleId} className="text-lg font-bold text-gray-900">{title}</h3>
             <button
-              aria-label="Oynani yopish"
+              aria-label={tr("Oynani yopish")}
               onClick={onClose}
               className="p-1.5 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition"
             >

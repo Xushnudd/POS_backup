@@ -1,3 +1,4 @@
+import {parseListQuery,staffListSorts} from '@/lib/list-query'
 import {billingDatabaseError} from '@/server/billing/errors'
 import {assertLiveContext,runOperation} from '@/server/operations'
 import {assertCriticalAction} from '@/server/auth/critical-actions'
@@ -7,7 +8,6 @@ import type {Prisma} from '@prisma/client'
 import { newPasswordSchema } from '@/server/auth/password-policy'
 import { prisma } from '@/lib/prisma'
 import { AccessError } from '@/server/auth/policy'
-import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken, hashPassword } from '@/lib/auth'
@@ -44,12 +44,21 @@ async function handleGET(
         { status: 401 }
       )
     }
-    const db = scopedPrisma(payload)
-
-    const organizationUsers = await db.organizationUser.findMany({
-      where: {
-        organizationId: id,
-      },
+    const q=request.nextUrl.searchParams;
+    const paged=['page','limit','search','sort','status'].some(key=>q.has(key));
+    let page=1,limit=20,skip=0,search='',sort:typeof staffListSorts[number]='source';
+    if(paged){try{({page,limit,skip,search,sort}=parseListQuery(q,staffListSorts,'source'))}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}}
+    const status=q.get('status')??'all';if(!['all','active','blocked','archived'].includes(status))throw new AccessError(400,'INVALID_FILTER');
+    const where:Prisma.OrganizationUserWhereInput={organizationId:id,...(status==='archived'?{archivedAt:{not:null}}:status==='all'?{}:{archivedAt:null,isActive:status==='active'}),...(search?{user:{OR:[{fullName:{contains:search,mode:'insensitive'}},{phone:{contains:search,mode:'insensitive'}}]}}:{})};
+    const orderBy:Prisma.OrganizationUserOrderByWithRelationInput[]=sort==='name_asc'||sort==='name_desc'?[{user:{fullName:sort==='name_asc'?'asc':'desc'}},{id:'asc'}]:sort==='newest'||sort==='oldest'?[{createdAt:sort==='oldest'?'asc':'desc'},{id:'asc'}]:[{id:'asc'}];
+    const result=await prisma.$transaction(async tx=>{
+    await assertLiveContext(tx,payload);
+    if(id!==payload.organizationId)throw new AccessError(403,'FORBIDDEN');
+    // Preserve legacy role/scoped-query authorization; opt-in pages use the same scope.
+    if(payload.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED');
+    const total=await tx.organizationUser.count({where});
+    const organizationUsers = await tx.organizationUser.findMany({
+      where,orderBy,...(paged?{skip,take:limit}:{}),
       include: {
         customRole:{select:{name:true,isActive:true}},
         user: {select:staffSelect},
@@ -61,8 +70,7 @@ async function handleGET(
       },
     })
 
-    return NextResponse.json({
-      success: true,
+    return {success:true,...(paged?{pagination:{page,limit,total,totalPages:Math.ceil(total/limit)}}:{}),
       data: organizationUsers.map(ou => ({
         id: ou.id,
         user: {
@@ -84,7 +92,9 @@ async function handleGET(
         })),
         createdAt: ou.createdAt,
       })),
-    })
+    };
+    },{isolationLevel:'RepeatableRead'});
+    return NextResponse.json(result)
 
   } catch (error) {
     const billingError=billingDatabaseError(error);if(billingError)throw billingError

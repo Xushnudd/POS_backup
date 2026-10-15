@@ -1,4 +1,9 @@
 'use client';
+
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { api } from '@/lib/api';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
@@ -16,6 +21,8 @@ type Result = { previewOnly: true; amount: string; lines: {
 export default function LandedCostPreview({ documentId, documentNo, items, originals }: {
   documentId: string; documentNo: string; items: ReceiptItem[]; originals: OriginalItem[];
 }) {
+ const {t:tr}=useTranslation();
+
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState('value');
   const [weights, setWeights] = useState<Record<string, string>>({});
@@ -52,28 +59,28 @@ export default function LandedCostPreview({ documentId, documentNo, items, origi
     return originals.find(row => row.productId === item?.productId)?.productName ?? 'Kirim qatori';
   };
   return <section aria-label={`Kirim xarajatlari: ${documentNo}`} className="my-3 rounded-lg border p-3 space-y-3">
-    <h4 className="font-semibold">{documentNo}: qo‘shimcha xarajat taqsimoti</h4>
-    <p>Bu oldindan hisoblash. Tannarx, ombor, qarz yoki pul balansi o‘zgarmaydi.</p>
+    <h4 className="font-semibold">{documentNo}{tr(": qo‘shimcha xarajat taqsimoti")}</h4>
+    <p>{tr("Bu oldindan hisoblash. Tannarx, ombor, qarz yoki pul balansi o‘zgarmaydi.")}</p>
     <form onSubmit={calculate} className="space-y-3">
-      <Input label="Qo‘shimcha xarajat summasi" inputMode="decimal" value={amount} required disabled={busy}
+      <Input label={tr("Qo‘shimcha xarajat summasi")} inputMode="decimal" value={amount} required disabled={busy}
         maxLength={15} onChange={event => { invalidate(); setAmount(event.target.value); }} />
-      <Select label="Taqsimlash usuli" value={method} disabled={busy} onChange={event => { invalidate(); setMethod(event.target.value); }}
-        options={[{ value: 'value', label: 'Original xarid qiymati bo‘yicha' }, { value: 'quantity', label: 'Bir xil bazaviy birlikdagi miqdor bo‘yicha' }, { value: 'weight', label: 'Vazn bo‘yicha' }]} />
+      <Select label={tr("Taqsimlash usuli")} value={method} disabled={busy} onChange={event => { invalidate(); setMethod(event.target.value); }}
+        options={[{ value: 'value', label: tr("Original xarid qiymati bo‘yicha") }, { value: 'quantity', label: tr("Bir xil bazaviy birlikdagi miqdor bo‘yicha") }, { value: 'weight', label: tr("Vazn bo‘yicha") }]} />
       {method === 'weight' && items.map(item => <Input key={item.id} label={`${name(item.id)}: kg / bazaviy birlik`}
         inputMode="decimal" value={weights[item.id] ?? ''} required disabled={busy} maxLength={19}
         onChange={event => { invalidate(); setWeights(previous => ({ ...previous, [item.id]: event.target.value })); }} />)}
-      <Button type="submit" isLoading={busy}>{busy ? 'Hisoblanmoqda' : error ? 'Qayta hisoblash' : 'Taqsimotni hisoblash'}</Button>
+      <Button type="submit" isLoading={busy}>{busy ? tr("Hisoblanmoqda") : error ? tr("Qayta hisoblash") : tr("Taqsimotni hisoblash")}</Button>
     </form>
-    {busy&&<p role="status">Taqsimot hisoblanmoqda…</p>}
-    {!busy&&(amount||method!=='value'||Object.values(weights).some(value=>value))&&<p role="status">Taqsimot formasi saqlanmagan; oldindan hisoblash hujjat yaratmaydi.</p>}
+    {busy&&<p role="status">{tr("Taqsimot hisoblanmoqda…")}</p>}
+    {!busy&&(amount||method!=='value'||Object.values(weights).some(value=>value))&&<p role="status">{tr("Taqsimot formasi saqlanmagan; oldindan hisoblash hujjat yaratmaydi.")}</p>}
     {error && <p role="alert">{error}</p>}
     {result && <div role="status" className="overflow-x-auto">
-      <p>Hisoblandi. Jami xarajat: {result.amount}. Moliyaviy hujjat yaratilmagan.</p>
-      <table className="w-full text-left"><caption className="sr-only">Original kirim bo‘yicha xarajat taqsimoti</caption>
-        <thead><tr><th scope="col">Mahsulot</th><th scope="col">Qabul miqdori</th><th scope="col">Xarajat ulushi</th><th scope="col">Hisoblangan birlik tannarxi</th><th scope="col">Yaxlitlash qoldig‘i</th></tr></thead>
+      <p>{tr("Hisoblandi. Jami xarajat:")}{' '}{result.amount}{tr(". Moliyaviy hujjat yaratilmagan.")}</p>
+      <table className="w-full text-left"><caption className="sr-only">{tr("Original kirim bo‘yicha xarajat taqsimoti")}</caption>
+        <thead><tr><th scope="col">{tr("Mahsulot")}</th><th scope="col">{tr("Qabul miqdori")}</th><th scope="col">{tr("Xarajat ulushi")}</th><th scope="col">{tr("Hisoblangan birlik tannarxi")}</th><th scope="col">{tr("Yaxlitlash qoldig‘i")}</th></tr></thead>
         <tbody>{result.lines.map(line => <tr key={line.id}><td>{name(line.id)}</td><td>{line.quantity} {line.unit}</td><td>{line.allocatedAmount}</td><td>{line.landedUnitCost}</td><td>{line.roundingResidual}</td></tr>)}</tbody>
       </table>
-      <p>Yaxlitlash qoldig‘i xarajat ulushining bir qismi; birlik tannarxiga ko‘paytirib jami summani qayta hisoblamang.</p>
+      <p>{tr("Yaxlitlash qoldig‘i xarajat ulushining bir qismi; birlik tannarxiga ko‘paytirib jami summani qayta hisoblamang.")}</p>
     </div>}
   </section>;
 }

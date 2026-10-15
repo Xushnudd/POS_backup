@@ -1,4 +1,6 @@
 'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
 
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
@@ -13,6 +15,8 @@ export default function SecurityNoticeBadge(){
 }
 
 function AccountBadge(){
+ const {t:tr}=useTranslation();
+
   const [unread,setUnread]=useState<number|null>(null);
   const [failed,setFailed]=useState(false);
 
@@ -49,7 +53,7 @@ function AccountBadge(){
   const label=failed?'Xavfsizlik bildirishnomalari: hisob tekshirilmadi':unread===null?'Xavfsizlik bildirishnomalari: yuklanmoqda':`Xavfsizlik bildirishnomalari: ${unread} ta o‘qilmagan`;
   return <Link href="/security" prefetch={false} aria-label={label} title={label} className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-200 p-2 text-xs text-gray-600 hover:bg-gray-100">
     <FontAwesomeIcon icon={faShieldHalved} aria-hidden="true"/>
-    <span className="hidden xl:inline">Xavfsizlik</span>
+    <span className="hidden xl:inline">{tr("Xavfsizlik")}</span>
     <span aria-hidden="true" className={failed?'font-bold text-amber-700':unread?'font-bold text-red-700':''}>{failed?'?':unread===null?'…':unread}</span>
   </Link>;
 }

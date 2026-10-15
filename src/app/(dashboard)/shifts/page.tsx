@@ -1,5 +1,7 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -7,7 +9,7 @@ import { api, ApiError } from '@/lib/api';
 import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { acknowledge, deviceId, enqueue, pendingOperations } from '@/lib/offline';
 import { Shift } from '@/types';
-import { formatMoney, formatDate } from '@/lib/format';
+
 import { useAuth } from '@/context/AuthContext';
 import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
@@ -35,8 +37,14 @@ import ListFilter from '@/components/ui/ListFilter';
 import Pagination from '@/components/ui/Pagination';
 import DataTable from '@/components/ui/DataTable';
 import Select from '@/components/ui/Select';
-export default function ShiftsPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<p>Yuklanmoqda...</p>}><Shifts key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
+export default function ShiftsPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();return <Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Shifts key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
 function Shifts() {
+ const {formatDate,formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const {role,organization,user}=useAuth();
   const cashAttempt=useRef<{shiftId:string;input:Parameters<typeof api.shifts.cashMovement>[1]&{operationId:string}}|null>(null);
   const [cashReady,setCashReady]=useState(false);
@@ -72,7 +80,6 @@ function Shifts() {
   const closeCashEditor=useUnsavedChanges(cashDirty,isProcessingMove);
   const shiftCloseDirty=isCloseModalOpen&&Boolean(countedCash||closeNote);
   const closeShiftEditor=useUnsavedChanges(shiftCloseDirty,isClosingShift);
-
 
   const loadHistory = useCallback(async () => {
     if(invalidQuery)return;
@@ -157,11 +164,9 @@ function Shifts() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Kassa va Smenalar nazorati
-          </h1>
+            {tr("Kassa va Smenalar nazorati")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Kassir smenalari, naqd pul harakati (inkassatsiya) va hisobdorlik
-          </p>
+            {tr("Kassir smenalari, naqd pul harakati (inkassatsiya) va hisobdorlik")}</p>
         </div>
 
         {!activeShift && (
@@ -171,8 +176,7 @@ function Shifts() {
             leftIcon={<FontAwesomeIcon icon={faClock} />}
             className="font-bold shadow-md shadow-emerald-500/20"
           >
-            Yangi smena ochish
-          </Button>
+            {tr("Yangi smena ochish")}</Button>
         )}
       </div>
 
@@ -182,7 +186,7 @@ function Shifts() {
           title={
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Joriy Ochiq Smena</span>
+              <span>{tr("Joriy Ochiq Smena")}</span>
             </div>
           }
           subtitle={`Terminal: ${activeShift.register?.name || 'Kassa'} • Ochilgan: ${formatDate(
@@ -200,8 +204,7 @@ function Shifts() {
                 }}
                 leftIcon={<FontAwesomeIcon icon={faArrowDown} />}
               >
-                Pul kiritish
-              </Button>
+                {tr("Pul kiritish")}</Button>
 
               <Button
                 variant="outline"
@@ -212,8 +215,7 @@ function Shifts() {
                 }}
                 leftIcon={<FontAwesomeIcon icon={faArrowUp} />}
               >
-                Pul olish
-              </Button>
+                {tr("Pul olish")}</Button>
 
               <Button
                 variant="danger"
@@ -225,35 +227,31 @@ function Shifts() {
                 leftIcon={<FontAwesomeIcon icon={faLock} />}
                 className="font-bold"
               >
-                Smenani yopish
-              </Button>
+                {tr("Smenani yopish")}</Button>
             </div>
           }
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
               <span className="text-xs text-gray-500 font-semibold block">
-                Boshlang&apos;ich naqd pul:
-              </span>
+                {tr("Boshlang'ich naqd pul:")}</span>
               <span className="text-xl font-black text-gray-900 mt-1 block">
                 {formatMoney(activeShift.openingCash)}
               </span>
             </div>
 
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <span className="text-xs text-gray-500 font-semibold block">Kassir:</span>
+              <span className="text-xs text-gray-500 font-semibold block">{tr("Kassir:")}</span>
               <span className="text-base font-bold text-gray-800 mt-1 block">
-                {activeShift.organizationUser?.user?.fullName || 'Kassir'}
+                {activeShift.organizationUser?.user?.fullName || tr("Kassir")}
               </span>
             </div>
 
             <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
               <span className="text-xs text-emerald-700 font-bold block">
-                Kassa holati:
-              </span>
+                {tr("Kassa holati:")}</span>
               <span className="text-xs text-emerald-900 font-medium mt-1 block">
-                Savdo qilish va to&apos;lovlarni qabul qilishga tayyor
-              </span>
+                {tr("Savdo qilish va to'lovlarni qabul qilishga tayyor")}</span>
             </div>
           </div>
         </Card>
@@ -262,18 +260,16 @@ function Shifts() {
           <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-2xl mx-auto mb-3">
             <FontAwesomeIcon icon={faClock} />
           </div>
-          <h3 className="text-lg font-bold text-gray-900">Ayni vaqtda ochiq smena yo&apos;q</h3>
+          <h3 className="text-lg font-bold text-gray-900">{tr("Ayni vaqtda ochiq smena yo'q")}</h3>
           <p className="text-xs text-gray-500 max-w-md mx-auto mt-1 mb-5">
-            Savdolarni amalga oshirish uchun boshlang&apos;ich naqd pul qoldig&apos;i bilan yangi smena oching
-          </p>
+            {tr("Savdolarni amalga oshirish uchun boshlang'ich naqd pul qoldig'i bilan yangi smena oching")}</p>
           <Button
             variant="success"
             onClick={() => setIsOpenShiftModalOpen(true)}
             leftIcon={<FontAwesomeIcon icon={faClock} />}
             className="font-bold shadow-md shadow-emerald-500/20"
           >
-            Smena ochish
-          </Button>
+            {tr("Smena ochish")}</Button>
         </Card>
       )}
 
@@ -282,35 +278,34 @@ function Shifts() {
         title={
           <div className="flex items-center gap-2">
             <FontAwesomeIcon icon={faHistory} className="text-gray-400 text-sm" />
-            <span>Smenalar tarixi</span>
+            <span>{tr("Smenalar tarixi")}</span>
           </div>
         }
-        subtitle="Avval yopilgan va faol barcha smenalar arxivi"
+        subtitle={tr("Avval yopilgan va faol barcha smenalar arxivi")}
         padding={false}
       >
-        <ListFilter search={search} sort={sort} label="Kassa yoki xodim qidirish" onChange={changeQuery} reset={{from:'',to:'',status:''}} options={[{value:'newest',label:'Eng yangi'},{value:'oldest',label:'Eng eski'}]}><Select label="Smena holati" value={params.get('status')??''} options={[{value:'',label:'Barchasi'},{value:'open',label:'Ochiq'},{value:'closed',label:'Yopilgan'}]} onChange={e=>changeQuery({status:e.target.value,page:'1'})}/><Input label="Smena davri boshi" type="date" value={params.get('from')??''} onChange={e=>changeQuery({from:e.target.value,page:'1'})}/><Input label="Smena davri oxiri" type="date" value={params.get('to')??''} onChange={e=>changeQuery({to:e.target.value,page:'1'})}/></ListFilter>
-        {invalidQuery?<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>:historyError?<p role="alert">{historyError}. Oxirgi tarix saqlangan.</p>:isLoadingHistory ? (
+        <ListFilter search={search} sort={sort} label={tr("Kassa yoki xodim qidirish")} onChange={changeQuery} reset={{from:'',to:'',status:''}} options={[{value:'newest',label:tr("Eng yangi")},{value:'oldest',label:tr("Eng eski")}]}><Select label={tr("Smena holati")} value={params.get('status')??''} options={[{value:'',label:tr("Barchasi")},{value:'open',label:tr("Ochiq")},{value:'closed',label:tr("Yopilgan")}]} onChange={e=>changeQuery({status:e.target.value,page:'1'})}/><Input label={tr("Smena davri boshi")} type="date" value={params.get('from')??''} onChange={e=>changeQuery({from:e.target.value,page:'1'})}/><Input label={tr("Smena davri oxiri")} type="date" value={params.get('to')??''} onChange={e=>changeQuery({to:e.target.value,page:'1'})}/></ListFilter>
+        {invalidQuery?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:historyError?<p role="alert">{historyError}{tr(". Oxirgi tarix saqlangan.")}</p>:isLoadingHistory ? (
           <div className="h-48 flex items-center justify-center">
-            <LoadingSpinner size="lg" text="Tarix yuklanmoqda..." />
+            <LoadingSpinner size="lg" text={tr("Tarix yuklanmoqda...")} />
           </div>
         ) : shiftsHistory.length === 0 ? (
           <div className="h-40 flex items-center justify-center text-gray-400 text-xs">
-            Smenalar tarixi topilmadi
-          </div>
+            {tr("Smenalar tarixi topilmadi")}</div>
         ) : (
           <div className="overflow-x-auto">
             <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Terminal</th>
-                  <th className="py-3.5 px-4">Kassir</th>
-                  <th className="py-3.5 px-4">Ochilgan vaqti</th>
-                  <th className="py-3.5 px-4">Yopilgan vaqti</th>
-                  <th className="py-3.5 px-4 text-right">Boshlang&apos;ich</th>
-                  <th className="py-3.5 px-4 text-right">Kutilgan summa</th>
-                  <th className="py-3.5 px-4 text-right">Sanalgan summa</th>
-                  <th className="py-3.5 px-4 text-right">Farq</th>
-                  <th className="py-3.5 px-4 text-center">Holat</th>
+                  <th className="py-3.5 px-4">{tr("Terminal")}</th>
+                  <th className="py-3.5 px-4">{tr("Kassir")}</th>
+                  <th className="py-3.5 px-4">{tr("Ochilgan vaqti")}</th>
+                  <th className="py-3.5 px-4">{tr("Yopilgan vaqti")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Boshlang'ich")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Kutilgan summa")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Sanalgan summa")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Farq")}</th>
+                  <th className="py-3.5 px-4 text-center">{tr("Holat")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -319,10 +314,10 @@ function Shifts() {
                   return (
                     <tr key={s.id} className="hover:bg-gray-50/70 transition">
                       <td className="py-3.5 px-4 font-bold text-gray-900">
-                        {s.register?.name || 'Kassa'}
+                        {s.register?.name || tr("Kassa")}
                       </td>
                       <td className="py-3.5 px-4 font-medium text-gray-700">
-                        {s.organizationUser?.user?.fullName || 'Kassir'}
+                        {s.organizationUser?.user?.fullName || tr("Kassir")}
                       </td>
                       <td className="py-3.5 px-4 text-gray-600">
                         {formatDate(s.openedAt, true)}
@@ -342,7 +337,7 @@ function Shifts() {
                       <td className="py-3.5 px-4 text-right">
                         {s.status === 'closed' ? (
                           diff === 0 ? (
-                            <span className="text-gray-400 font-bold">0 so&apos;m</span>
+                            <span className="text-gray-400 font-bold">{tr("0 so'm")}</span>
                           ) : diff > 0 ? (
                             <span className="text-emerald-600 font-black">
                               +{formatMoney(diff)}
@@ -359,12 +354,10 @@ function Shifts() {
                       <td className="py-3.5 px-4 text-center">
                         {s.status === 'open' ? (
                           <Badge variant="success" size="sm" dot>
-                            Ochiq
-                          </Badge>
+                            {tr("Ochiq")}</Badge>
                         ) : (
                           <Badge variant="neutral" size="sm">
-                            Yopilgan
-                          </Badge>
+                            {tr("Yopilgan")}</Badge>
                         )}
                       </td>
                     </tr>
@@ -376,13 +369,13 @@ function Shifts() {
         )}
       </Card>
 
-      <Pagination page={page} pages={pages} busy={isLoadingHistory&&!invalidQuery} blocked={invalidQuery||!!historyError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadHistory();}}/>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
-      {shiftsHistory.filter(shift=>shift.pendingClose).map(shift=><Card key={shift.id} title="Smena yopilishi tasdiq kutmoqda">
-        <p>Kutilgan: {formatMoney(shift.pendingClose!.expectedCash)} · Sanalgan: {formatMoney(shift.pendingClose!.countedCash)} · Farq: {formatMoney(shift.pendingClose!.difference)}</p>
-        <p>Sabab: {shift.pendingClose!.reason}</p><p>Sanagan xodim ID: {shift.pendingClose!.countedBy}</p>
-        <p>Yangi savdo va pul harakatlari tasdiq yoki rad javobigacha bloklangan.</p>
-        {role!=='cashier'&&<div className="flex flex-wrap gap-2"><Button onClick={async()=>{try{await api.shifts.close(shift.id,{countedCash:shift.pendingClose!.countedCash,approvalRequestId:shift.pendingClose!.id});await refreshShift();await loadHistory();notifySuccess('Smena farqi tasdiqlandi va yopildi');}catch(error){notifyError(error instanceof Error?error.message:'Tasdiq bajarilmadi');}}}>Farqni tasdiqlash va yopish</Button>
-        <Button variant="outline" onClick={async()=>{const reason=window.prompt('Rad etish sababi (kamida 3 belgi)');if(!reason)return;try{await api.shifts.rejectClose(shift.id,{requestId:shift.pendingClose!.id,operationId:crypto.randomUUID(),reason});await refreshShift();await loadHistory();notifySuccess('So‘rov rad etildi; qayta sanash mumkin');}catch(error){notifyError(error instanceof Error?error.message:'Rad etilmadi');}}}>Qayta sanashga qaytarish</Button></div>}
+      <Pagination page={page} pages={pages} busy={isLoadingHistory&&!invalidQuery} blocked={invalidQuery||!!historyError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadHistory();}}/>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
+      {shiftsHistory.filter(shift=>shift.pendingClose).map(shift=><Card key={shift.id} title={tr("Smena yopilishi tasdiq kutmoqda")}>
+        <p>{tr("Kutilgan:")}{' '}{formatMoney(shift.pendingClose!.expectedCash)} {tr("· Sanalgan:")}{' '}{formatMoney(shift.pendingClose!.countedCash)} {tr("· Farq:")}{' '}{formatMoney(shift.pendingClose!.difference)}</p>
+        <p>{tr("Sabab:")}{' '}{shift.pendingClose!.reason}</p><p>{tr("Sanagan xodim ID:")}{' '}{shift.pendingClose!.countedBy}</p>
+        <p>{tr("Yangi savdo va pul harakatlari tasdiq yoki rad javobigacha bloklangan.")}</p>
+        {role!=='cashier'&&<div className="flex flex-wrap gap-2"><Button onClick={async()=>{try{await api.shifts.close(shift.id,{countedCash:shift.pendingClose!.countedCash,approvalRequestId:shift.pendingClose!.id});await refreshShift();await loadHistory();notifySuccess('Smena farqi tasdiqlandi va yopildi');}catch(error){notifyError(error instanceof Error?error.message:'Tasdiq bajarilmadi');}}}>{tr("Farqni tasdiqlash va yopish")}</Button>
+        <Button variant="outline" onClick={async()=>{const reason=window.prompt('Rad etish sababi (kamida 3 belgi)');if(!reason)return;try{await api.shifts.rejectClose(shift.id,{requestId:shift.pendingClose!.id,operationId:crypto.randomUUID(),reason});await refreshShift();await loadHistory();notifySuccess('So‘rov rad etildi; qayta sanash mumkin');}catch(error){notifyError(error instanceof Error?error.message:'Rad etilmadi');}}}>{tr("Qayta sanashga qaytarish")}</Button></div>}
       </Card>)}
       {/* Open Shift Modal */}
       <OpenShiftModal
@@ -397,14 +390,14 @@ function Shifts() {
       <Modal
         isOpen={isCashMoveModalOpen}
         onClose={() => {if(closeCashEditor())setIsCashMoveModalOpen(false)}}
-        title={movementType === 'cash_in' ? 'Naqd pul kiritish' : 'Naqd pul olish'}
+        title={movementType === 'cash_in' ? tr("Naqd pul kiritish") : tr("Naqd pul olish")}
         size="md"
       >
-        {cashUnknown&&<p role="status">Natija noma’lum: asl summa va amal kaliti bilan qayta tekshiriladi.</p>}
+        {cashUnknown&&<p role="status">{tr("Natija noma’lum: asl summa va amal kaliti bilan qayta tekshiriladi.")}</p>}
         <form onSubmit={handleCashMovement} className="space-y-4">
-          <label className="block text-sm">Naqd harakat turi<select aria-label="Naqd harakat turi" value={movementType} disabled={isProcessingMove||cashUnknown||!cashReady} onChange={e=>setMovementType(e.target.value as typeof movementType)} className="block border p-2 w-full"><option value="cash_in">Naqd kirim</option><option value="cash_out">Naqd chiqim</option>{role!=='cashier'&&<><option value="bank_deposit">Bankka topshirish</option><option value="collection">Inkassatsiya</option></>}</select></label>
+          <label className="block text-sm">{tr("Naqd harakat turi")}<select aria-label={tr("Naqd harakat turi")} value={movementType} disabled={isProcessingMove||cashUnknown||!cashReady} onChange={e=>setMovementType(e.target.value as typeof movementType)} className="block border p-2 w-full"><option value="cash_in">{tr("Naqd kirim")}</option><option value="cash_out">{tr("Naqd chiqim")}</option>{role!=='cashier'&&<><option value="bank_deposit">{tr("Bankka topshirish")}</option><option value="collection">{tr("Inkassatsiya")}</option></>}</select></label>
           <Input
-            label="Summa (so'm) *"
+            label={tr("Summa (so'm) *")}
             type="number"
             min="0.01"
             step="0.01"
@@ -417,11 +410,11 @@ function Shifts() {
           />
 
           <Input
-            label="Sababi / Izoh *"
+            label={tr("Sababi / Izoh *")}
             placeholder={
               movementType === 'cash_in'
-                ? 'Mayda pul kiritish'
-                : 'Inkassatsiya / Xarajat'
+                ? tr("Mayda pul kiritish")
+                : tr("Inkassatsiya / Xarajat")
             }
             value={movementReason}
             disabled={isProcessingMove||cashUnknown||!cashReady}
@@ -436,8 +429,7 @@ function Shifts() {
               onClick={() => {if(closeCashEditor())setIsCashMoveModalOpen(false)}}
               disabled={isProcessingMove}
             >
-              Bekor qilish
-            </Button>
+              {tr("Bekor qilish")}</Button>
             <Button
               type="submit"
               variant="primary"
@@ -445,8 +437,7 @@ function Shifts() {
               disabled={!cashReady}
               className="font-bold"
             >
-              Tasdiqlash
-            </Button>
+              {tr("Tasdiqlash")}</Button>
           </div>
         </form>
       </Modal>
@@ -455,16 +446,15 @@ function Shifts() {
       <Modal
         isOpen={isCloseModalOpen}
         onClose={() => {if(closeShiftEditor())setIsCloseModalOpen(false)}}
-        title="Smenani yakunlash va yopish"
+        title={tr("Smenani yakunlash va yopish")}
         size="md"
       >
         <form onSubmit={handleCloseShift} className="space-y-4">
           <p className="text-xs text-gray-600">
-            Kassa g&apos;aladonidagi barcha naqd pullarni sanab, quyidagi maydonga kiriting. Tizim kutilayotgan summa bilan avtomatik taqqoslab, kassa farqini hisoblaydi:
-          </p>
+            {tr("Kassa g'aladonidagi barcha naqd pullarni sanab, quyidagi maydonga kiriting. Tizim kutilayotgan summa bilan avtomatik taqqoslab, kassa farqini hisoblaydi:")}</p>
 
           <Input
-            label="Kassadagi sanalgan naqd pul (so'm) *"
+            label={tr("Kassadagi sanalgan naqd pul (so'm) *")}
             type="number"
             min="0"
             step="0.01"
@@ -478,8 +468,8 @@ function Shifts() {
           />
 
           <Input
-            label="Izoh (ixtiyoriy)"
-            placeholder="Smena yakuni bo'yicha izoh"
+            label={tr("Izoh (ixtiyoriy)")}
+            placeholder={tr("Smena yakuni bo'yicha izoh")}
             value={closeNote}
             onChange={(e) => setCloseNote(e.target.value)}
           />
@@ -491,16 +481,14 @@ function Shifts() {
               onClick={() => {if(closeShiftEditor())setIsCloseModalOpen(false)}}
               disabled={isClosingShift}
             >
-              Bekor qilish
-            </Button>
+              {tr("Bekor qilish")}</Button>
             <Button
               type="submit"
               variant="danger"
               isLoading={isClosingShift}
               className="font-bold"
             >
-              Smenani yopish
-            </Button>
+              {tr("Smenani yopish")}</Button>
           </div>
         </form>
       </Modal>

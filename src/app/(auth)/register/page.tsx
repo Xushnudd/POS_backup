@@ -1,4 +1,6 @@
 'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
@@ -21,6 +23,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function RegisterPage() {
+ const {t:tr}=useTranslation();
+
   const router = useRouter();
   const { register } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
@@ -44,22 +48,22 @@ export default function RegisterPage() {
     setErrorMessage('');
 
     if (!fullName || fullName.trim().length < 2) {
-      setErrorMessage('Iltimos, ism familiyangizni kiriting');
+      setErrorMessage("Iltimos, ism familiyangizni kiriting");
       return;
     }
 
     if (!phone || phone.trim().length < 9) {
-      setErrorMessage('Telefon raqami kamida 9 ta belgidan iborat bo\'lishi kerak');
+      setErrorMessage("Telefon raqami kamida 9 ta belgidan iborat bo'lishi kerak");
       return;
     }
 
     if (!password || password.length < 8 || password.length > 72) {
-      setErrorMessage('Parol 8–72 ta belgidan iborat bo\'lishi kerak');
+      setErrorMessage("Parol 8–72 ta belgidan iborat bo'lishi kerak");
       return;
     }
 
     if (!organizationName || organizationName.trim().length < 2) {
-      setErrorMessage('Tashkilot yoki do\'kon nomini kiriting');
+      setErrorMessage("Tashkilot yoki do'kon nomini kiriting");
       return;
     }
 
@@ -75,7 +79,7 @@ export default function RegisterPage() {
         tin: tin ? tin.trim() : undefined,
       });
 
-      notifySuccess('Muvaffaqiyatli ro\'yxatdan o\'tdingiz! Tizim sozlandi.');
+      notifySuccess("Muvaffaqiyatli ro'yxatdan o'tdingiz! Tizim sozlandi.");
       setPassword('');commitPageNavigation();router.push('/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Ro\'yxatdan o\'tishda xatolik yuz berdi';
@@ -99,11 +103,9 @@ export default function RegisterPage() {
           </span>
         </Link>
         <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-          Yangi biznesni ro&apos;yxatdan o&apos;tkazish
-        </h2>
+          {tr("Yangi biznesni ro'yxatdan o'tkazish")}</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Bir necha soniyada o&apos;z do&apos;koningizni tizimga ulang
-        </p>
+          {tr("Bir necha soniyada o'z do'koningizni tizimga ulang")}</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
@@ -114,13 +116,13 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {isLoading&&<p role="status">Server tasdig‘i kutilmoqda…</p>}
-          {!isLoading&&dirty&&<p role="status">Saqlanmagan forma ma’lumotlari bor.</p>}
+          {isLoading&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}
+          {!isLoading&&dirty&&<p role="status">{tr("Saqlanmagan forma ma’lumotlari bor.")}</p>}
           <form onSubmit={handleSubmit} className="space-y-4"><fieldset disabled={isLoading} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Ism va Familiya"
-                placeholder="Ali Valiyev"
+                label={tr("Ism va Familiya")}
+                placeholder={tr("Ali Valiyev")}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 leftIcon={<FontAwesomeIcon icon={faUser} className="text-xs" />}
@@ -128,7 +130,7 @@ export default function RegisterPage() {
               />
 
               <Input
-                label="Telefon raqam"
+                label={tr("Telefon raqam")}
                 type="tel"
                 placeholder="901234567"
                 value={phone}
@@ -140,8 +142,8 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Do'kon yoki Biznes nomi"
-                placeholder="Mening Do'konim"
+                label={tr("Do'kon yoki Biznes nomi")}
+                placeholder={tr("Mening Do'konim")}
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
                 leftIcon={<FontAwesomeIcon icon={faBuilding} className="text-xs" />}
@@ -149,7 +151,7 @@ export default function RegisterPage() {
               />
 
               <Input
-                label="STIR / INN (ixtiyoriy)"
+                label={tr("STIR / INN (ixtiyoriy)")}
                 placeholder="123456789"
                 value={tin}
                 onChange={(e) => setTin(e.target.value)}
@@ -158,7 +160,7 @@ export default function RegisterPage() {
             </div>
 
             <Input
-              label="Email (ixtiyoriy)"
+              label={tr("Email (ixtiyoriy)")}
               type="email"
               placeholder="example@pos.uz"
               value={email}
@@ -167,7 +169,7 @@ export default function RegisterPage() {
             />
 
             <Input
-              label="Parol (8–72 ta belgi)"
+              label={tr("Parol (8–72 ta belgi)")}
               type="password"
               placeholder="••••••••"
               value={password}
@@ -187,20 +189,18 @@ export default function RegisterPage() {
                 rightIcon={<FontAwesomeIcon icon={faArrowRight} />}
                 className="font-bold shadow-md shadow-emerald-500/20"
               >
-                Hisob yaratish va Boshlash
-              </Button>
+                {tr("Hisob yaratish va Boshlash")}</Button>
             </div>
           </fieldset></form>
 
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-600">
-              Allaqachon ro&apos;yxatdan o&apos;tganmisiz?{' '}
+              {tr("Allaqachon ro'yxatdan o'tganmisiz?")}{' '}
               <Link
                 href="/login"
                 className="font-bold text-blue-600 hover:text-blue-700 hover:underline"
               >
-                Kirish
-              </Link>
+                {tr("Kirish")}</Link>
             </p>
           </div>
         </div>

@@ -1,5 +1,8 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -12,6 +15,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import CriticalStepUp from '@/components/security/CriticalStepUp';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+ const {t:tr}=useTranslation();
+
   const router = useRouter();
   const { isAuthenticated, isLoading, user, organization } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,7 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Yuklanmoqda..." fullPage />
+        <LoadingSpinner size="lg" text={tr("Yuklanmoqda...")} fullPage />
       </div>
     );
   }
@@ -37,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
       <CriticalStepUp key={`${user?.id}:${organization?.id}`}/>
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-60 bg-white text-blue-900 p-3">Asosiy mazmunga o‘tish</a>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-60 bg-white text-blue-900 p-3">{tr("Asosiy mazmunga o‘tish")}</a>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="lg:pl-64 flex flex-col flex-1">

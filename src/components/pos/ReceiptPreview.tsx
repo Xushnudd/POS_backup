@@ -1,4 +1,7 @@
 'use client';
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
 
 import React, { useRef, useState } from 'react';
 import Modal from '@/components/ui/Modal';
@@ -7,7 +10,7 @@ import Select from '@/components/ui/Select';
 import { Sale } from '@/types';
 import { api } from '@/lib/api';
 import { posFailure } from '@/lib/pos-failure';
-import { formatMoney } from '@/lib/format';
+
 import { useAuth } from '@/context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -25,6 +28,12 @@ export default function ReceiptPreview({
   sale,
   copy=false,
 }: ReceiptPreviewProps) {
+ const {formatMoney}=useTranslation();
+
+ const {locale:mapLocale}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const { organization, user } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
   const [width,setWidth]=useState('80');
@@ -65,14 +74,14 @@ export default function ReceiptPreview({
       title={
         <div className="flex items-center gap-2 text-emerald-700">
           <FontAwesomeIcon icon={faCheckCircle} />
-          <span>{copy?'Chek nusxasi':sale.status==='draft'?'Savdo qoralamasi':'Savdo muvaffaqiyatli yakunlandi'}</span>
+          <span>{copy?tr("Chek nusxasi"):sale.status==='draft'?tr("Savdo qoralamasi"):tr("Savdo muvaffaqiyatli yakunlandi")}</span>
         </div>
       }
       size="md"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button variant="outline" onClick={onClose}>
-            {copy?'Yopish':'Yangi savdo'}
+            {copy?tr("Yopish"):tr("Yangi savdo")}
           </Button>
           <Button
             variant="primary"
@@ -81,15 +90,14 @@ export default function ReceiptPreview({
             leftIcon={<FontAwesomeIcon icon={faPrint} />}
             className="font-bold shadow-md"
           >
-            Chekni chop etish
-          </Button>
+            {tr("Chekni chop etish")}</Button>
         </div>
       }
     >
-      <Select disabled={printing||!!printError} label="Chek qog‘ozi eni" value={width} options={[{value:'58',label:'58 mm'},{value:'80',label:'80 mm'}]} onChange={event=>setWidth(event.target.value)}/>
-      <p className="text-xs text-slate-500 mb-3">Brauzer orqali chop etish/PDF. Printer sozlamasida mos qog‘ozni tanlang. Bu fiskal chek emas.</p>
+      <Select disabled={printing||!!printError} label={tr("Chek qog‘ozi eni")} value={width} options={[{value:'58',label:tr("58 mm")},{value:'80',label:tr("80 mm")}]} onChange={event=>setWidth(event.target.value)}/>
+      <p className="text-xs text-slate-500 mb-3">{tr("Brauzer orqali chop etish/PDF. Printer sozlamasida mos qog‘ozni tanlang. Bu fiskal chek emas.")}</p>
       {printError&&<div role="alert" data-stage="print" className="text-red-600 text-xs"><p>{printError}</p><p>{posFailure(null,'print').nextAction}</p></div>}
-      {printRequested&&<p role="status" className="text-xs">Chop etish oynasi so‘raldi; fizik chop etilganligi tasdiqlanmaydi.</p>}
+      {printRequested&&<p role="status" className="text-xs">{tr("Chop etish oynasi so‘raldi; fizik chop etilganligi tasdiqlanmaydi.")}</p>}
       {/* Printable Receipt Paper */}
       <div
         ref={printRef}
@@ -98,68 +106,68 @@ export default function ReceiptPreview({
         style={{width:width+'mm',maxWidth:'100%'}}
       >
         {/* Header */}
-        <p className="text-center font-bold">{sale.status==='draft'?'QORALAMA · ':''}{copy?'CHEK NUSXASI':'SAVDO CHEKI'} · FISKAL EMAS</p>
+        <p className="text-center font-bold">{sale.status==='draft'?tr("QORALAMA ·"):''}{copy?tr("CHEK NUSXASI"):tr("SAVDO CHEKI")} {tr("· FISKAL EMAS")}</p>
         <div className="text-center pb-3 border-b border-dashed border-gray-300">
           <h2 className="text-base font-black uppercase text-gray-900 tracking-wider">
-            {receiptName || 'SHUNI POS'}
+            {receiptName || tr("SHUNI POS")}
           </h2>
           {receiptPhone && (
-            <p className="text-[11px] text-gray-600 mt-0.5">Tel: {receiptPhone}</p>
+            <p className="text-[11px] text-gray-600 mt-0.5">{tr("Tel:")}{' '}{receiptPhone}</p>
           )}
           {receiptTin && (
-            <p className="text-[11px] text-gray-600">STIR: {receiptTin}</p>
+            <p className="text-[11px] text-gray-600">{tr("STIR:")}{' '}{receiptTin}</p>
           )}
-          {identity && <><p>{identity.storeName} · {identity.registerName} ({identity.registerCode})</p>{identity.storeAddress && <p>{identity.storeAddress}</p>}<p>Valyuta: {identity.currencyCode}</p></>}
-          {!identity && !draft && <p>Eski chek: tashkilot/filial/kassirning tarixiy rekvizitlari yozilmagan. Sana joriy vaqt zonasida ko‘rsatiladi.</p>}
+          {identity && <><p>{identity.storeName} · {identity.registerName} ({identity.registerCode})</p>{identity.storeAddress && <p>{identity.storeAddress}</p>}<p>{tr("Valyuta:")}{' '}{identity.currencyCode}</p></>}
+          {!identity && !draft && <p>{tr("Eski chek: tashkilot/filial/kassirning tarixiy rekvizitlari yozilmagan. Sana joriy vaqt zonasida ko‘rsatiladi.")}</p>}
         </div>
 
         {/* Info */}
         <div className="py-2.5 border-b border-dashed border-gray-300 space-y-1 text-[11px]">
           <div className="flex justify-between">
-            <span className="text-gray-600">Chek raqami:</span>
+            <span className="text-gray-600">{tr("Chek raqami:")}</span>
             <span className="font-bold">{sale.receiptNo}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Sana:</span>
+            <span className="text-gray-600">{tr("Sana:")}</span>
             <span>{new Date(sale.completedAt||sale.createdAt).toLocaleString('uz-UZ',{timeZone:receiptTimezone})}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Kassir:</span>
+            <span className="text-gray-600">{tr("Kassir:")}</span>
             <span>{identity?.cashierName || (draft ? sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:'Chekdagi kassir ID: '+sale.cashierId) : 'Chekdagi kassir ID: '+sale.cashierId)}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Mijoz:</span>
+              <span className="text-gray-600">{tr("Mijoz:")}</span>
               <span className="font-semibold">{sale.customer.fullName}</span>
             </div>
           )}
         </div>
 
-        {sale.discountReason&&<p className="break-words">Chegirma sababi: {sale.discountReason}</p>}
-        {sale.discountApprovedRole&&<p>Chegirma vakolati: {sale.discountApprovedRole}</p>}
-        {sale.serviceType&&<p>Xizmat: {sale.serviceType}</p>}
-        {sale.note&&<p className="break-words">Izoh: {sale.note}</p>}
-        {sale.cashTendered!=null&&sale.cashChange!=null&&<div><p>Berilgan naqd: {formatMoney(sale.cashTendered)}</p><p>Qaytim: {formatMoney(sale.cashChange)}</p></div>}
+        {sale.discountReason&&<p className="break-words">{tr("Chegirma sababi:")}{' '}{sale.discountReason}</p>}
+        {sale.discountApprovedRole&&<p>{tr("Chegirma vakolati:")}{' '}{sale.discountApprovedRole}</p>}
+        {sale.serviceType&&<p>{tr("Xizmat:")}{' '}{sale.serviceType}</p>}
+        {sale.note&&<p className="break-words">{tr("Izoh:")}{' '}{sale.note}</p>}
+        {sale.cashTendered!=null&&sale.cashChange!=null&&<div><p>{tr("Berilgan naqd:")}{' '}{formatMoney(sale.cashTendered)}</p><p>{tr("Qaytim:")}{' '}{formatMoney(sale.cashChange)}</p></div>}
         {/* Items List */}
         <div className="py-2.5 border-b border-dashed border-gray-300">
           <div className="flex justify-between font-bold pb-1 text-[11px] text-gray-600 uppercase">
-            <span>Mahsulot</span>
-            <span>Summa</span>
+            <span>{tr("Mahsulot")}</span>
+            <span>{tr("Summa")}</span>
           </div>
           <div className="space-y-2 mt-1">
             {sale.items.map((item, idx) => (
               <div key={idx} className="flex flex-col text-[11px]">
                 <div className="flex justify-between font-medium text-gray-900">
-                  <span className="break-words min-w-0 flex-1">{item.productName}{item.serialAssignments?.map(serial=><span key={serial.id} className="block text-[10px]">Serial {serial.code}; kafolat {serial.startedAt} — {serial.endsAt}; {serial.terms}</span>)}{item.batchAllocations?.map(batch=><span key={batch.batchId} className="block text-[10px]">Partiya {batch.code}: {batch.quantity} {item.unit??''}; yaroqli {batch.expiresOn}</span>)}</span>
+                  <span className="break-words min-w-0 flex-1">{item.productName}{item.serialAssignments?.map(serial=><span key={serial.id} className="block text-[10px]">{tr("Serial")}{' '}{serial.code}{tr("; kafolat")}{' '}{serial.startedAt} — {serial.endsAt}; {serial.terms}</span>)}{item.batchAllocations?.map(batch=><span key={batch.batchId} className="block text-[10px]">{tr("Partiya")}{' '}{batch.code}: {batch.quantity} {item.unit??''}{tr("; yaroqli")}{' '}{batch.expiresOn}</span>)}</span>
                   <span className="font-bold">{formatMoney(item.lineTotal)}</span>
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-600">
                   <span>
-                    {item.quantity} {item.unit??''} x {formatMoney(item.unitPrice)}{item.conversionSnapshot&&<span className="block">Asl: {item.conversionSnapshot.tradeQuantity} {item.conversionSnapshot.tradeUnit}; 1 = {item.conversionSnapshot.ratio} {item.conversionSnapshot.baseUnit}</span>}
+                    {item.quantity} {item.unit??''} {tr("x")}{' '}{formatMoney(item.unitPrice)}{item.conversionSnapshot&&<span className="block">{tr("Asl:")}{' '}{item.conversionSnapshot.tradeQuantity} {item.conversionSnapshot.tradeUnit}; 1 = {item.conversionSnapshot.ratio} {item.conversionSnapshot.baseUnit}</span>}
                   </span>
                   {item.discountAmount > 0 && (
                     <span className="text-red-500">
-                      Chegirma: -{formatMoney(item.discountAmount)}
+                      {tr("Chegirma: -")}{formatMoney(item.discountAmount)}
                     </span>
                   )}
                 </div>
@@ -171,18 +179,18 @@ export default function ReceiptPreview({
         {/* Totals */}
         <div className="py-3 border-b border-dashed border-gray-300 space-y-1.5 text-[11px]">
           <div className="flex justify-between text-gray-600">
-            <span>Oraliq summa:</span>
+            <span>{tr("Oraliq summa:")}</span>
             <span>{formatMoney(sale.subtotal)}</span>
           </div>
           {sale.discountAmount > 0 && (
             <div className="flex justify-between text-red-600 font-medium">
-              <span>Umumiy chegirma:</span>
+              <span>{tr("Umumiy chegirma:")}</span>
               <span>-{formatMoney(sale.discountAmount)}</span>
             </div>
           )}
-          {sale.netAmount!=null&&sale.taxAmount!==undefined&&<div className="flex justify-between text-gray-600"><span>Jami ichidagi soliq qismi:</span><span>{formatMoney(sale.taxAmount)}</span></div>}
+          {sale.netAmount!=null&&sale.taxAmount!==undefined&&<div className="flex justify-between text-gray-600"><span>{tr("Jami ichidagi soliq qismi:")}</span><span>{formatMoney(sale.taxAmount)}</span></div>}
           <div className="flex justify-between text-sm font-black text-gray-950 pt-1 border-t border-gray-200">
-            <span>JAMI TO&apos;LOV:</span>
+            <span>{tr("JAMI TO'LOV:")}</span>
             <span className="text-emerald-700">{formatMoney(sale.totalAmount)}</span>
           </div>
         </div>
@@ -190,17 +198,17 @@ export default function ReceiptPreview({
         {/* Payments breakdown */}
         {sale.payments && sale.payments.length > 0 && (
           <div className="py-2.5 border-b border-dashed border-gray-300 space-y-1 text-[11px]">
-            <span className="text-gray-600 font-bold block mb-1">To&apos;lov turi:</span>
+            <span className="text-gray-600 font-bold block mb-1">{tr("To'lov turi:")}</span>
             {sale.payments.map((p, idx) => {
-              const pTypeLabels: Record<string, string> = {
+              const pTypeLabels: Record<string, string> = localizeOwnedLabels({
                 cash: 'Naqd pul',
                 card: 'Plastik karta',
                 transfer: 'O\'tkazma',
                 credit: 'Nasiya / Qarz',
-              };
+              },mapLocale);
               return (
                 <div key={idx} className="flex justify-between text-gray-700">
-                  <span>{p.paymentType==='credit'&&p.direction==='in'&&sale.giftFunding?'Sertifikat '+sale.giftFunding.code:pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?'chiqim':'kirim'}):</span>
+                  <span>{p.paymentType==='credit'&&p.direction==='in'&&sale.giftFunding?'Sertifikat '+sale.giftFunding.code:pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?tr("chiqim"):tr("kirim")}):</span>
                   <span className="font-semibold">{formatMoney(p.amount)}</span>
                 </div>
               );
@@ -210,8 +218,8 @@ export default function ReceiptPreview({
 
         {/* Footer message */}
         <div className="text-center pt-4 text-[11px] text-gray-600">
-          <p>{identity ? identity.receiptFooter || 'Xaridingiz uchun rahmat!' : draft ? organization?.receiptFooter || 'Xaridingiz uchun rahmat!' : 'Xaridingiz uchun rahmat!'}</p>
-          <p className="text-[9px] text-gray-600 mt-2">Dastur: Shuni POS</p>
+          <p>{identity ? identity.receiptFooter || tr("Xaridingiz uchun rahmat!") : draft ? organization?.receiptFooter || tr("Xaridingiz uchun rahmat!") : tr("Xaridingiz uchun rahmat!")}</p>
+          <p className="text-[9px] text-gray-600 mt-2">{tr("Dastur: Shuni POS")}</p>
         </div>
       </div>
     </Modal>

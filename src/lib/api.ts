@@ -496,7 +496,7 @@ class ApiClient {
       }),
 
     exportStatement:(id:string,params:{from?:string;to?:string;format?:'csv'|'commercial-csv'|'html'}={})=>this.request<{filename:string;content:string}>(`/customers/${id}/ledger?${new URLSearchParams({format:'csv',...Object.fromEntries(Object.entries(params).filter(([,value])=>value))})}`),
-    statement:(id:string,params:{page?:number;from?:string;to?:string}={})=>this.request<CustomerStatement>(`/customers/${id}/ledger?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!=='').map(([k,v])=>[k,String(v)]))}`),
+    statement:(id:string,params:{page?:number;limit?:number;from?:string;to?:string}={})=>this.request<CustomerStatement>(`/customers/${id}/ledger?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!=='').map(([k,v])=>[k,String(v)]))}`),
     postDebtDocument:(id:string,data:CustomerDebtDocumentInput)=>this.request<{id:string}>(`/customers/${id}/ledger`,{method:'POST',body:JSON.stringify(data)}),
     getDebt: (id: string, targetsPage?:number) => this.request<CustomerDebt>(`/customers/${id}/debt${targetsPage?`?targetsPage=${targetsPage}`:''}`),
   };
@@ -614,7 +614,7 @@ class ApiClient {
     revokeInvitation: (id:string,invitationId:string) => this.request(`/organizations/${id}/invitations/${invitationId}`,{method:'DELETE',body:'{}'}),
     createInvitation: (id:string,data:{operationId?:string;phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken?:string;invitationTokenUnavailable?:boolean}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()})}),
     updateMember: (id:string,memberId:string,data:{operationId?:string;role?:string;customRoleId?:string|null;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()})}),
-    users: (id: string) => this.request<OrganizationMember[]>(`/organizations/${id}/users`),
+    users: (id: string,params?:Record<string,string>) => this.request<OrganizationMember[]>(`/organizations/${id}/users${params?'?'+new URLSearchParams(params):''}`),
 
     addUser: (
       id: string,

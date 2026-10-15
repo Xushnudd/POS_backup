@@ -1,4 +1,8 @@
 'use client';
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import { Suspense, useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
@@ -12,8 +16,12 @@ import {journalListSorts} from '@/lib/list-query';
 import ListFilter from '@/components/ui/ListFilter';
 import DataTable from '@/components/ui/DataTable';
 import Pagination from '@/components/ui/Pagination';
-export default function AuditPage(){const {role,organization,user}=useAuth();return role==='owner'&&organization&&user?<Suspense fallback={<p>Yuklanmoqda...</p>}><Audit key={[organization.id,user.id,role].join(':')}/></Suspense>:<p>Audit tarixini ko‘rish uchun biznes egasi vakolati kerak.</p>;}
+export default function AuditPage(){
+ const {t:tr}=useTranslation();
+const {role,organization,user}=useAuth();return role==='owner'&&organization&&user?<Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Audit key={[organization.id,user.id,role].join(':')}/></Suspense>:<p>{tr("Audit tarixini ko‘rish uchun biznes egasi vakolati kerak.")}</p>;}
 function Audit(){
+ const {t:tr}=useTranslation();
+
  const {role,organization}=useAuth();
  const [rows,setRows]=useState<AuditSummary[]>([]),[pages,setPages]=useState(0),[busy,setBusy]=useState(true),[error,setError]=useState('');
  const {query,params,changeQuery}=useListQuery(journalListSorts,'newest');
@@ -32,18 +40,18 @@ function Audit(){
    finally{if(!cancelled)setBusy(false);}
   });return()=>{cancelled=true;};
  },[role,organization?.id,page,limit,sort,search,filterKey,retry,invalidQuery]);
- if(role!=='owner')return <p>Audit tarixini ko‘rish uchun biznes egasi vakolati kerak.</p>;
- return <div className="space-y-4"><h1 className="text-2xl font-bold">Audit tarixi</h1>
+ if(role!=='owner')return <p>{tr("Audit tarixini ko‘rish uchun biznes egasi vakolati kerak.")}</p>;
+ return <div className="space-y-4"><h1 className="text-2xl font-bold">{tr("Audit tarixi")}</h1>
   <CsvExportButton path="/audit" params={{...filters,sort,search,view:'summary'}}/>
-  <ListFilter search={search} sort={sort} label="Resurs yoki amal qidirish" disabled={false} onChange={changeQuery} reset={{from:'',to:'',entityType:'',entityId:'',actorId:'',action:''}} options={[{value:'newest',label:'Eng yangi'},{value:'oldest',label:'Eng eski'}]}/>
+  <ListFilter search={search} sort={sort} label={tr("Resurs yoki amal qidirish")} disabled={false} onChange={changeQuery} reset={{from:'',to:'',entityType:'',entityId:'',actorId:'',action:''}} options={[{value:'newest',label:tr("Eng yangi")},{value:'oldest',label:tr("Eng eski")}]}/>
   <Card><form className="grid sm:grid-cols-2 gap-3" onSubmit={event=>{event.preventDefault();changeQuery({...Object.fromEntries(Object.entries(draft).map(([key,value])=>[key,value.trim()])),page:'1'});}}>
-   <Input label="Davr boshi" type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/><Input label="Davr oxiri" type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/>
-   <Input label="Resurs turi (masalan SaleReturn)" maxLength={100} value={draft.entityType} onChange={event=>setDraft({...draft,entityType:event.target.value})}/><Input label="Amal (masalan returned)" maxLength={100} value={draft.action} onChange={event=>setDraft({...draft,action:event.target.value})}/>
-   <Input label="Resurs ID" value={draft.entityId} onChange={event=>setDraft({...draft,entityId:event.target.value})}/><Input label="Xodim ID" value={draft.actorId} onChange={event=>setDraft({...draft,actorId:event.target.value})}/>
-   <Button type="submit" disabled={busy}>Filtrlash</Button>
+   <Input label={tr("Davr boshi")} type="date" value={draft.from} onChange={event=>setDraft({...draft,from:event.target.value})}/><Input label={tr("Davr oxiri")} type="date" value={draft.to} onChange={event=>setDraft({...draft,to:event.target.value})}/>
+   <Input label={tr("Resurs turi (masalan SaleReturn)")} maxLength={100} value={draft.entityType} onChange={event=>setDraft({...draft,entityType:event.target.value})}/><Input label={tr("Amal (masalan returned)")} maxLength={100} value={draft.action} onChange={event=>setDraft({...draft,action:event.target.value})}/>
+   <Input label={tr("Resurs ID")} value={draft.entityId} onChange={event=>setDraft({...draft,entityId:event.target.value})}/><Input label={tr("Xodim ID")} value={draft.actorId} onChange={event=>setDraft({...draft,actorId:event.target.value})}/>
+   <Button type="submit" disabled={busy}>{tr("Filtrlash")}</Button>
   </form></Card>
-  <Card><p className="text-xs text-slate-500 mb-3">Sanalar tashkilot vaqt zonasida. Ushbu ekran yozilgan audit hodisalarini ko‘rsatadi; tafsilot payloadlari va IP manzillar chiqarilmaydi.</p>
-   {invalidQuery?<p role="alert">URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.</p>:busy?<p>Yuklanmoqda...</p>:error?<div role="alert">{error}<Button onClick={()=>setRetry(value=>value+1)}>Qayta yuklash</Button></div>:<div className="overflow-auto"><DataTable className="text-sm"><thead><tr><th>Sana</th><th>Xodim</th><th>Resurs</th><th>Amal</th></tr></thead><tbody>{rows.map(row=><tr key={row.id} className="border-t"><td className="p-2">{new Date(row.createdAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone})}</td><td>{row.actor?.fullName??'Tizim / xodim mavjud emas'}<div className="text-xs">{row.actorId}</div></td><td>{row.entityType}<div className="text-xs break-all">{row.entityId}</div></td><td>{row.action}</td></tr>)}</tbody></DataTable>{rows.length===0&&<p>Hodisa topilmadi.</p>}</div>}
-   <Pagination page={page} pages={pages} busy={busy} blocked={invalidQuery||!!error} onPage={value=>changeQuery({page:String(value)})} retry={()=>setRetry(value=>value+1)}/>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>Birinchi sahifaga qaytish</Button>}
+  <Card><p className="text-xs text-slate-500 mb-3">{tr("Sanalar tashkilot vaqt zonasida. Ushbu ekran yozilgan audit hodisalarini ko‘rsatadi; tafsilot payloadlari va IP manzillar chiqarilmaydi.")}</p>
+   {invalidQuery?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:busy?<p>{tr("Yuklanmoqda...")}</p>:error?<div role="alert">{error}<Button onClick={()=>setRetry(value=>value+1)}>{tr("Qayta yuklash")}</Button></div>:<div className="overflow-auto"><DataTable className="text-sm"><thead><tr><th>{tr("Sana")}</th><th>{tr("Xodim")}</th><th>{tr("Resurs")}</th><th>{tr("Amal")}</th></tr></thead><tbody>{rows.map(row=><tr key={row.id} className="border-t"><td className="p-2">{new Date(row.createdAt).toLocaleString('uz-UZ',{timeZone:organization?.timezone})}</td><td>{row.actor?.fullName??tr("Tizim / xodim mavjud emas")}<div className="text-xs">{row.actorId}</div></td><td>{row.entityType}<div className="text-xs break-all">{row.entityId}</div></td><td>{row.action}</td></tr>)}</tbody></DataTable>{rows.length===0&&<p>{tr("Hodisa topilmadi.")}</p>}</div>}
+   <Pagination page={page} pages={pages} busy={busy} blocked={invalidQuery||!!error} onPage={value=>changeQuery({page:String(value)})} retry={()=>setRetry(value=>value+1)}/>{!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
   </Card></div>;
 }

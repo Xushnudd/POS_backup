@@ -1,4 +1,6 @@
 'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
@@ -13,6 +15,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faLock, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 export default function LoginPage() {
+ const {t:tr}=useTranslation();
+
   const router = useRouter();
   const { login } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
@@ -31,12 +35,12 @@ export default function LoginPage() {
     setErrorMessage('');
 
     if (!phone || phone.trim().length < 9) {
-      setErrorMessage('Iltimos, to\'g\'ri telefon raqam kiriting (kamida 9 ta raqam)');
+      setErrorMessage("Iltimos, to'g'ri telefon raqam kiriting (kamida 9 ta raqam)");
       return;
     }
 
     if (!password) {
-      setErrorMessage('Iltimos, parolingizni kiriting');
+      setErrorMessage("Iltimos, parolingizni kiriting");
       return;
     }
 
@@ -44,7 +48,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const authenticated=await login(phone.trim(), password);
-      notifySuccess('Tizimga muvaffaqiyatli kirdingiz!');
+      notifySuccess("Tizimga muvaffaqiyatli kirdingiz!");
       setPhone('');setPassword('');commitPageNavigation();router.push(authenticated.role==='cashier'?'/pos':'/dashboard');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Kirishda xatolik yuz berdi';
@@ -68,11 +72,9 @@ export default function LoginPage() {
           </span>
         </Link>
         <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-          Tizimga kirish
-        </h2>
+          {tr("Tizimga kirish")}</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Kassa va savdo boshqaruvi tizimingizga xush kelibsiz
-        </p>
+          {tr("Kassa va savdo boshqaruvi tizimingizga xush kelibsiz")}</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -83,22 +85,22 @@ export default function LoginPage() {
             </div>
           )}
 
-          {isLoading&&<p role="status">Server tasdig‘i kutilmoqda…</p>}
-          {!isLoading&&dirty&&<p role="status">Saqlanmagan forma ma’lumotlari bor.</p>}
+          {isLoading&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}
+          {!isLoading&&dirty&&<p role="status">{tr("Saqlanmagan forma ma’lumotlari bor.")}</p>}
           <form onSubmit={handleSubmit} className="space-y-5"><fieldset disabled={isLoading} className="space-y-5">
             <Input
-              label="Telefon raqam"
+              label={tr("Telefon raqam")}
               type="tel"
               placeholder="901234567"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               leftIcon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
-              helperText="Misol: 901234567 yoki +998901234567"
+              helperText={tr("Misol: 901234567 yoki +998901234567")}
               required
             />
 
             <Input
-              label="Parol"
+              label={tr("Parol")}
               type="password"
               placeholder="••••••••"
               value={password}
@@ -116,21 +118,19 @@ export default function LoginPage() {
               rightIcon={<FontAwesomeIcon icon={faArrowRight} />}
               className="mt-2 font-bold shadow-md shadow-blue-500/20"
             >
-              Kirish
-            </Button>
+              {tr("Kirish")}</Button>
           </fieldset></form>
 
-          <Link href="/forgot-password" className="mt-4 block text-sm text-blue-600 underline">Parolni unutdingizmi?</Link>
+          <Link href="/forgot-password" className="mt-4 block text-sm text-blue-600 underline">{tr("Parolni unutdingizmi?")}</Link>
 
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-600">
-              Hisobingiz yo&apos;qmi?{' '}
+              {tr("Hisobingiz yo'qmi?")}{' '}
               <Link
                 href="/register"
                 className="font-bold text-blue-600 hover:text-blue-700 hover:underline"
               >
-                Ro&apos;yxatdan o&apos;tish
-              </Link>
+                {tr("Ro'yxatdan o'tish")}</Link>
             </p>
           </div>
         </div>

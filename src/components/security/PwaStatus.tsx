@@ -1,6 +1,10 @@
 'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
 import {useEffect,useState} from 'react';
 export default function PwaStatus(){
+ const {t:tr}=useTranslation();
+
  const [waiting,setWaiting]=useState(false);
  useEffect(()=>{
   if(!('serviceWorker' in navigator)||!window.isSecureContext)return;
@@ -12,5 +16,5 @@ export default function PwaStatus(){
   }).catch(()=>undefined);
   return()=>{stopped=true};
  },[]);
- return waiting?<p role="status" className="bg-blue-50 p-2 text-blue-950">Yangi ilova versiyasi tayyor. Savat va amallarni saqlab, barcha POS oynalarini yopib qayta oching.</p>:null;
+ return waiting?<p role="status" className="bg-blue-50 p-2 text-blue-950">{tr("Yangi ilova versiyasi tayyor. Savat va amallarni saqlab, barcha POS oynalarini yopib qayta oching.")}</p>:null;
 }

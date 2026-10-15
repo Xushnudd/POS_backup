@@ -1,4 +1,8 @@
 'use client';
+
+
+import {useTranslation} from '@/context/LocaleContext';
+
 import ProductBarcodes from '@/components/catalog/ProductBarcodes';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -28,6 +32,8 @@ export default function ProductDetailPage() {
 }
 
 function ProductEditor({id}:{id:string}) {
+ const {t:tr}=useTranslation();
+
   const router = useRouter();
   const { organization, role } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
@@ -137,7 +143,7 @@ function ProductEditor({id}:{id:string}) {
   if (isLoading) {
     return (
       <div className="h-64 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Mahsulot yuklanmoqda..." />
+        <LoadingSpinner size="lg" text={tr("Mahsulot yuklanmoqda...")} />
       </div>
     );
   }
@@ -145,9 +151,9 @@ function ProductEditor({id}:{id:string}) {
   if (!product) {
     return (
       <div className="p-8 text-center">
-        {loadError?<><p role="alert" className="mb-4">{loadError}</p><Button onClick={()=>setRevision(n=>n+1)}>Qayta yuklash</Button></>:<p className="text-gray-500 mb-4">Mahsulot topilmadi</p>}
+        {loadError?<><p role="alert" className="mb-4">{loadError}</p><Button onClick={()=>setRevision(n=>n+1)}>{tr("Qayta yuklash")}</Button></>:<p className="text-gray-500 mb-4">{tr("Mahsulot topilmadi")}</p>}
         <Link href="/products">
-          <Button variant="outline">Mahsulotlarga qaytish</Button>
+          <Button variant="outline">{tr("Mahsulotlarga qaytish")}</Button>
         </Link>
       </div>
     );
@@ -160,7 +166,7 @@ function ProductEditor({id}:{id:string}) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/products">
-            <Button variant="ghost" size="icon" aria-label="Mahsulotlarga qaytish">
+            <Button variant="ghost" size="icon" aria-label={tr("Mahsulotlarga qaytish")}>
               <FontAwesomeIcon icon={faArrowLeft} />
             </Button>
           </Link>
@@ -174,18 +180,17 @@ function ProductEditor({id}:{id:string}) {
           disabled={isSaving||barcodeState.busy}
           leftIcon={<FontAwesomeIcon icon={faTrash} />}
         >
-          O&apos;chirish
-        </Button>
+          {tr("O'chirish")}</Button>
       </div>
 
       <ProductBarcodes key={product.id} productId={product.id} disabled={isSaving} revision={barcodeRevision} onEditStateChange={setBarcodeState}/>
-      <Card title="Mahsulot ma'lumotlarini tahrirlash">
+      <Card title={tr("Mahsulot ma'lumotlarini tahrirlash")}>
         <form onSubmit={handleSave} className="space-y-4">
-          {dirty&&<p role="status">Saqlanmagan mahsulot o‘zgarishlari bor.</p>}
-          {!dirty&&saved&&<p role="status">Mahsulotning asosiy ma’lumotlari saqlandi.</p>}
+          {dirty&&<p role="status">{tr("Saqlanmagan mahsulot o‘zgarishlari bor.")}</p>}
+          {!dirty&&saved&&<p role="status">{tr("Mahsulotning asosiy ma’lumotlari saqlandi.")}</p>}
           <fieldset disabled={isSaving||barcodeState.busy} className="space-y-4">
           <Input
-            label="Mahsulot nomi *"
+            label={tr("Mahsulot nomi *")}
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
@@ -193,14 +198,14 @@ function ProductEditor({id}:{id:string}) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="SKU (Artikul) *"
+              label={tr("SKU (Artikul) *")}
               value={formData.sku}
               onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
               required
             />
             <div className="relative">
               <Input
-                label="Barkod *"
+                label={tr("Barkod *")}
                 value={formData.barcode}
                 onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                 className="pr-11"
@@ -216,13 +221,13 @@ function ProductEditor({id}:{id:string}) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Kategoriya"
+              label={tr("Kategoriya")}
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
               options={categories.map((c) => ({ value: c.id, label: c.name }))}
             />
             <Select
-              label="O'lchov birligi"
+              label={tr("O'lchov birligi")}
               value={formData.unit}
               onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
               options={units.length?units.filter(unit=>unit.isActive).map(unit=>({value:unit.code,label:unit.name})):PRODUCT_UNITS}
@@ -231,21 +236,21 @@ function ProductEditor({id}:{id:string}) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input
-              label="Tannarx (so'm) *"
+              label={tr("Tannarx (so'm) *")}
               type="number" min="0" step="0.000001"
               value={formData.costPrice}
               onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
               required
             />
             <Input
-              label="Sotuv narxi (so'm) *"
+              label={tr("Sotuv narxi (so'm) *")}
               type="number" min="0" step="0.01"
               value={formData.salePrice}
               onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
               required
             />
             <Input
-              label="Minimal qoldiq"
+              label={tr("Minimal qoldiq")}
               type="number"
               min="0" step="0.000001"
               value={formData.minStock}
@@ -257,8 +262,7 @@ function ProductEditor({id}:{id:string}) {
           <div className="pt-4 flex justify-end gap-3">
             <Link href="/products">
               <Button type="button" variant="outline" disabled={isSaving}>
-                Bekor qilish
-              </Button>
+                {tr("Bekor qilish")}</Button>
             </Link>
             <Button
               type="submit"
@@ -268,8 +272,7 @@ function ProductEditor({id}:{id:string}) {
               leftIcon={<FontAwesomeIcon icon={faSave} />}
               className="font-bold"
             >
-              Saqlash
-            </Button>
+              {tr("Saqlash")}</Button>
           </div>
         </form>
       </Card>
