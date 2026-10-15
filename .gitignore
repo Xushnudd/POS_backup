@@ -48,3 +48,7 @@ next-env.d.ts
 /test-results/
 
 .worker-build/
+
+# Private local TLS files and opt-in workstation Compose overlay.
+/.local/
+/docker-compose.override.yml

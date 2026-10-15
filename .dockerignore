@@ -20,3 +20,5 @@ tests
 tasks
 
 .worker-build
+.local
+docker-compose.override.yml

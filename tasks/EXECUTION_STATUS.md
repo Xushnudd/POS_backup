@@ -2558,3 +2558,50 @@ Tekshirilgan natijalar:
 Dastlabki27 browser urinishida ICU va oldingi supplier filter selector xatolari bo‘lgan, jarayon to‘xtatilgan; bu urinish PASS deb ko‘rsatilmaydi. `browser-initial-failed.log` saqlangan. Supplier testi hozirgi search label/Qidirish amaliga moslandi; asl DB/CSV/stock assertionlari saqlandi. Keyingi33 cohort to‘liq PASS. Desktop/mobile public rasmlari va unavailable rasmlari saqlandi, yakuniy Uz desktop/Ru mobile/Ru fallback ko‘rib chiqildi.
 
 Dalil: `tasks/evidence/public-claims-release-20261015.json`, hashed loglar/rasmlar va accepted-source.patch; qo‘llanma `docs/operations/public-release-claims.md`, ADR095. Source `047c49e`+uncommitted accepted patch; AI commit yo‘q. API/DB schema o‘zgarmagani uchun yangi migration yoki fresh/legacy migration rehearsal talab etilmadi. Public copy/wiring uchun yangi endpoint, vendor adapter yoki audit business mutation qo‘shilmadi. Real deploy/host/domen, real backup/monitoring, pilot, huquqiy yoki provider/hardware qabul dalili yaratilmagan; tegishli original bandlar oldingi cheklovlarda qoladi. Keyingi original faqat uning haqiqiy qabul mezoni va tashqi shartlari asosida tanlanadi.
+
+
+### Lokal Docker registration tuzatishi (2026-10-15; original hisob176/259 saqlanadi)
+
+Foydalanuvchi bergan74cd0ee1-871b-4fdd-8b51-4f39b4053aaa so‘rovi403 CSRF_REJECTED: HTTP browser manzili HTTPS APP_ORIGINga mos emas edi. Diagnostikada konteyner DATABASE_URL loopbackka qaragani, persistent role paroli joriy Compose sozlamasiga mos emasligi va25-jadvalli legacy bazada migration tarixi yo‘qligi ham topildi.
+
+Private env/DB/role backup olindi; yangi disposable restored clone schema initial migrationga aynan mosligi Prisma diff0 bilan tekshirildi. Clone baseline+179 migration PASS;25 original jadvalning barcha oldingi ustunlari count/SHA256 bo‘yicha source bilan teng. Keyin faqat ushbu lokal bazaga baseline+179 migration qo‘llandi, original ustunlar yana tengligi va mavjud foydalanuvchi saqlangani tekshirildi. Reset/drop/old-record delete yo‘q. Role paroli ayni Compose konfiguratsiyasiga moslandi; secret qiymatlar log/javobga chiqarilmadi. Source bo‘lmagan disposable clone/baseline bazalar testdan keyin olib tashlandi; private backup `.local/backups/`da qoladi.
+
+Tracked docker-compose.local.yml va Node HTTPS proxy, private localhost sertifikati/setup script, ignored opt-in docker-compose.override.yml symlink tayyorlandi. Default lokal docker compose up --build HTTP3000ni HTTPS3443ga yo‘naltiradi; migrate appdan oldin, proxy app healthy bo‘lgach ishlaydi. Explicit production -f fayllari bu workstation overlayni qo‘llamaydi. CSRF, exact Origin, Secure/HttpOnly/SameSite cookie saqlanadi; yangi vendor/dependency yo‘q.
+
+Proxy real HTTP/TLS testi1/1, ESLint/shell syntax/setup idempotency/config quiet PASS. Actual docker compose up -d --build --wait exit0; db/app/proxy healthy. HTTPS home/readiness200, valid Origin bo‘sh register400 VALIDATION_ERROR, wrong Origin403 CSRF_REJECTED. Haqiqiy registration+session faqat clone appda200/200, Secure cookie saqlandi; sourcega test hisob qo‘shilmadi. Rebuilt local servicedagi Chromium HTTP→HTTPS va registration forma smoke PASS; explicit local certificate bilan readiness200. Self-signed sertifikat foydalanuvchi brauzerida localhost istisnosini talab qiladi; system/user trust o‘zgartirilmadi.
+
+Dalil `tasks/evidence/local-docker-https-20261015.json`, yo‘riqnoma `docs/operations/local-docker-https.md`. Bu user workstation bugfix, yangi original done emas va real external production/pilot/deployment qabuli emas.
+
+
+### Lokal Compose P1001 uchun mustaqil DB target (2026-10-15;176/259 saqlanadi)
+
+Foydalanuvchi yuborgan terminal chiqishida image build muvaffaqiyatli, PostgreSQL recovery tugagan/healthy, lekin migrate localhost:5432 bilan P1001 bo‘lgan. Oldingi lokal tuzatish host `.env` DATABASE_URLiga bog‘liq qolgan edi. Hozir local-only docker-database.cjs wrapper URLni db servisining ayni POSTGRES_USER/PASSWORD/DB qiymatlaridan db:5432ga percent-encode qiladi. App/migrate/jobs/reconciliation hammasi wrapper bilan ishlaydi; host development URL konteyner targetini tanlamaydi. Operatorning `.env` fayli va paroli bu paketda o‘zgartirilmadi. Explicit base/release yo‘li operator DATABASE_URLini saqlaydi.
+
+3/3 real child-signal/encoding/HTTP-TLS regression testi, ESLint/shell syntax/config quiet PASS. Deliberately invalid host URL bilan rendered configda4 lokal servis ajralgani va explicit base o‘z URLini saqlagani tekshirildi. Actual docker compose up -d --build --wait exit0; migrate db:5432,179 migration/no pending/exit0; db/app/HTTPS proxy healthy. Rebuilt app wrapperidan actual SQL probe PASS. Aniq local certificate bilan TLS home/readiness200, valid Origin bo‘sh register400 VALIDATION_ERROR, wrong Origin403 CSRF_REJECTED. Ma’lumot reset, yangi schema/migration yoki source test account yo‘q.
+
+Dalil `tasks/evidence/local-docker-db-target-20261015.json`; local qo‘llanma yangilandi. Bu operational bugfix, yangi original done emas.
+
+
+### Lokal HTTP3443 manzilini HTTPSga yo‘naltirish (2026-10-15;176/259 saqlanadi)
+
+Foydalanuvchi http://localhost:3443 manzilini ochgan: proxy faqat TLS kutgani uchun empty reply, haqiqiy HTTPS esa200 edi. Local-only proxyga TCP first-byte routing qo‘shildi; birinchi buffer native HTTP/TLS parserga to‘liq qaytariladi. HTTP3000/3443 faqat canonical HTTPSga308 beradi, yo‘l/query saqlanadi; appga faqat TLS tomoni boradi. Auth/CSRF/Secure cookie va user browser trust o‘zgarmadi.
+
+3/3 regression testi: fragmented HTTP bir baytdan, plaintext POST backendga uzatilmasligi, host injectionga fixed redirect, actual TLS/body/cookie/CSRF hamda DB wrapper encoding/signal regressiyasi. ESLint/shell syntax PASS. Bind-mounted proxy restart va Compose health wait exit0. Exact local certificate bilan actual HTTP3443 home/register va HTTP3000 home HTTPSga o‘tib200; readiness200. Chromiumda foydalanuvchi ko‘rsatgan HTTP3443 home/register formasi HTTPSdan render bo‘lishi tekshirildi. Self-signed certificate exception faqat alohida test kontekstida; user brauzeri uchun localhost istisnosi kerak bo‘lishi mumkin. DB/env/cert o‘zgarishi yoki test hisob yo‘q. Dalil tasks/evidence/local-http3443-20261015.json; original done hisobi o‘zgarmadi.
+
+
+### Actual browser CA trust — keyinchalik user rad etdi, HTTP tanlandi (2026-10-15;176/259 saqlanadi)
+
+Foydalanuvchi ERR_CERT_AUTHORITY_INVALIDni aniq yubordi: localhost self-signed issuer. Server/redirect ishlaydi, explicit certificate bilan HTTPS200, lekin oddiy system trust bilan curl va tayyor --check rejimi exit60. Oldingi headless testdagi ignoreHTTPSErrors yoki explicit --cacert foydalanuvchi browser trustini isbotlamagan; browser-ready yakuniy xulosa hozir berilmaydi.
+
+Official upstream/Fedora manbalari asosida scripts/local/setup-trusted-https.sh tayyorlandi: --help/--check mutatsiyasiz; --install-ca aniq opt-in, oddiy desktop user, mkcert system/NSS CA trust, private old leaf backup, localhost leaf/key, proxy restart va bypasssiz default TLS tekshiruvi. Script shell syntax/help va source scan PASS. mkcert/nss-tools hali o‘rnatilmagan. System/browser CA ishonchi authorityni o‘zgartirgani sabab foydalanuvchidan alohida tasdiq so‘raldi; hozircha import/install, browser warning bypass yoki user trust sozlamasi bajarilmadi. Dalil tasks/evidence/local-ca-trust-20261015.json.
+
+
+### User tanlagan lokal HTTP development (2026-10-15;176/259 saqlanadi)
+
+Foydalanuvchi CA installni rad etdi, HTTPdan HTTPSga yo‘naltirmaslik va backendni HTTP bilan ishlatishni so‘radi. Avvalgi pending CA qarori bekor: mkcert/NSS/root trust o‘rnatilmadi, user browser/profile trust o‘zgarmadi. Lokal Docker app alohida local-development image targetida standart Next dev --webpack/NODE_ENV=development bilan ishlaydi. Default/final production runner, HTTPS startup validation va production Secure cookie talabi o‘zgarmadi.
+
+HTTP3000 va HTTP3443 real sahifa/APIlarni redirectsiz beradi; optional HTTPS3443 transporti qoldi, self-signed browser trust qabul qilindi deb ko‘rsatilmaydi. Backend relative /api bilan ayni origin orqali olinadi; local proxy request/response/cookie/Originni saqlaydi va HMR WebSocketni uzatadi. Developmentda faqat configured origin va uch fixed localhost interfeysi, production/testda faqat exact configured origin qabul qilinadi; cross-site Sec-Fetch tekshiruvi saqlanadi. Local portlar loopbackdan tashqariga ochilmadi.
+
+Test compile,163/163 unit,3/3 transport/DB-wrapper testi, ESLint/shell syntax, actual Compose build/wait exit0 va barcha service health PASS. Production exact-Origin va HTTP config rejection, dev wrong-host/port denial yangi testlarda bor. Actual HTTP3000/3443 home/readiness200 va same URL/no redirect, valid Origin bo‘sh register400, wrong Origin/port403. Optional HTTPS explicit leaf trust bilan200/400; bu user browser trust emas.
+
+Chromium default contextida ignoreHTTPSErrors/sertifikat istisnosiz ikkala HTTP home/register formasi render bo‘ldi, URL HTTP bo‘lib qoldi. Yangi disposable bo‘sh bazaga179 migration, keyin ikki HTTP origin uchun haqiqiy register200/me200 va HttpOnly/SameSite development cookie (Secure=false) PASS; asosiy bazaga0 test hisob. Temporary app/baza o‘chirildi, source ma’lumot/schema reset yo‘q. Dalil tasks/evidence/local-http-development-20261015.json; bu lokal operational fix, yangi original done yoki production deployment emas.

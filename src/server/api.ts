@@ -1,4 +1,5 @@
 import {requestTrace,logEvent} from './observability/context'
+import {requestOriginAllowed} from './auth/request-origin'
 import {errorGuidance} from '@/lib/error-guidance'
 import { consumeLimit } from './auth/rate-limit'
 import { IntegrationUnavailable } from './integrations/contracts'
@@ -98,7 +99,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
         const origin = request.headers.get('origin')
         const expected = process.env.APP_ORIGIN ?? new URL(request.url).origin
         // JSON-only plus exact Origin/Sec-Fetch-Site forms the cookie CSRF boundary.
-        if ((origin && origin !== expected) || request.headers.get('sec-fetch-site') === 'cross-site') throw new AccessError(403,'CSRF_REJECTED')
+        if (!requestOriginAllowed(origin,expected) || request.headers.get('sec-fetch-site') === 'cross-site') throw new AccessError(403,'CSRF_REJECTED')
         if (!request.headers.get('content-type')?.startsWith('application/json')) throw new AccessError(415,'JSON_REQUIRED','JSON so‘rov talab qilinadi')
         const length = request.headers.get('content-length')
         if (length && !/^\d+$/.test(length)) throw new AccessError(400,'INVALID_CONTENT_LENGTH')

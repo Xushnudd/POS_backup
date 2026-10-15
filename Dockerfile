@@ -12,6 +12,20 @@ COPY prisma ./prisma/
 RUN npm ci --engine-strict
 RUN npx prisma generate
 
+# Local HTTP development only. The final/default stage remains the production runner.
+FROM deps AS local-development
+COPY . .
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN node scripts/build-offline.cjs \
+    && mkdir -p /app/.next \
+    && touch /app/next-env.d.ts \
+    && groupadd --system --gid 1001 nodejs \
+    && useradd --system --create-home --uid 1001 --gid nodejs nextjs \
+    && chown 1001:1001 /app /app/.next /app/next-env.d.ts /app/tsconfig.json
+USER 1001:1001
+CMD ["node", "node_modules/next/dist/bin/next", "dev", "--webpack", "--hostname", "0.0.0.0", "--port", "3000"]
+
 # ─── Stage 2: builder ─────────────────────────────────────────────────────────
 FROM node:24-slim AS builder
 ARG NEXT_DEPLOYMENT_ID

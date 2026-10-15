@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-15",
+  "status": "local_http_development_verified",
+  "ownerDecision": {
+    "localCAInstallationDeclined": true,
+    "noHttpsRedirect": true,
+    "httpBackendRequested": true
+  },
+  "supersedes": "tasks/evidence/local-ca-trust-20261015.json (earlier approval pending; owner declined)",
+  "implementation": {
+    "localDockerTarget": "local-development",
+    "localImage": "pos-app:development",
+    "localCommand": "next dev --webpack",
+    "nodeEnv": "development",
+    "mainOrigin": "http://localhost:3000",
+    "additionalHttpOrigin": "http://localhost:3443",
+    "optionalHttps": "https://localhost:3443",
+    "httpRedirectToHttps": false,
+    "proxyWebSocketSupport": true,
+    "hostBindings": "127.0.0.1 only"
+  },
+  "security": {
+    "productionDefaultTarget": "runner",
+    "productionHttpsValidatorPreserved": true,
+    "productionOriginExact": true,
+    "productionSecureCookiePreserved": true,
+    "devAdditionalOrigins": "fixed localhost3000 HTTP,localhost3443 HTTP/HTTPS only",
+    "crossSiteFetchStillRejected": true,
+    "caInstalled": false,
+    "systemBrowserTrustChanged": false,
+    "hostEnvEdited": false,
+    "sourceAccountsCreated": 0,
+    "newSchemaMigrations": 0,
+    "optionalHttpsTrust": "Self-signed; browser trust not claimed"
+  },
+  "verification": {
+    "testCompileExit": 0,
+    "unitPassed": 163,
+    "unitFailed": 0,
+    "localTransportTestsPassed": 3,
+    "localTransportTestsFailed": 0,
+    "eslintExit": 0,
+    "composeBuildWaitExit": 0,
+    "appHealthy": true,
+    "dbHealthy": true,
+    "proxyHealthy": true,
+    "eachHttpOrigin": {
+      "home": 200,
+      "readiness": 200,
+      "emptyValidOriginRegistration": 400,
+      "noRedirect": true
+    },
+    "optionalHttpsWithExplicitLeafTrust": {
+      "home": 200,
+      "readiness": 200,
+      "emptyValidOriginRegistration": 400
+    },
+    "unapprovedOriginAndPort": 403,
+    "chromium": {
+      "defaultContext": true,
+      "ignoreHTTPSErrors": false,
+      "certificateException": false,
+      "http3000HomeAndRegistrationRender": true,
+      "http3443HomeAndRegistrationRender": true,
+      "sourceAccountsCreated": 0
+    },
+    "isolatedRegistration": {
+      "environment": "development",
+      "isolatedDatabase": true,
+      "httpOriginsTested": 2,
+      "registrationStatus": 200,
+      "sessionStatus": 200,
+      "httpOnlySameSiteCookie": true,
+      "devSecureCookie": false,
+      "sourceAccountsCreated": 0
+    },
+    "disposableTestDatabaseAndAppRemoved": true,
+    "publicClaimGateProblems": 0
+  },
+  "originalDoneCount": 176,
+  "sourceSha256": {
+    "Dockerfile": "48ad6150d3f39d599aaa656dbf84663d3b8d0f06b1904b6b56878af45ecf4359",
+    "docker-compose.local.yml": "3c350bc0503dda899f97e7afb83b4795bcd8d06c63542760b809d8c6bc3c1eef",
+    "src/server/api.ts": "e2dda529e648e23593ddc1f728a9e10ce8453662b1381f83ef0507ec4f777fca",
+    "src/server/auth/request-origin.ts": "588518fe1d19b4ad49a89e415cc7cadf6b3793ee274de255f001b0137eaad911",
+    "tests/request-origin.unit.test.ts": "d01f95fa922729161a7a89cd12cb682adecaa4307de7b46d2bc82c074f8480ad",
+    "scripts/local/https-proxy.cjs": "d3a749b7cb075452a6c899c9c6611b58c0006eb8abea5630ab0213526c6ce9b3",
+    "scripts/local/https-proxy.test.cjs": "bbcb8ae30a6be92c12d3627ca1fb172755a1730ccdb07bb5d6b73a8ca20f22ae",
+    "scripts/local/setup-https.sh": "7d0878b0138af6e7eae934379e806f4012f41260c2d1e3dee3d841c1b4ccc067",
+    ".env.example": "9001320021ff40209930a0e0c76905fcce07c19b723a524d9bdbdc7bb1ac5383",
+    "README.md": "fbe662273970f7ab0201af6eae0769ed271aec14b264de394462cf202e63af24",
+    "docs/operations/local-docker-https.md": "2f4f7db2a4ff7df90a06eae6ea02c0350a77b4c9db09a55bb914c3498045ac84"
+  },
+  "artifactSha256": {
+    "tasks/evidence/local-http-development-20261015/transport-tests.log": "9d32ecf6aa0acfcf8520b88c02584ae08868fc2079386b54b41e563bd2d62f99",
+    "tasks/evidence/local-http-development-20261015/test-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/local-http-development-20261015/units.log": "7fd89dc433e48be862202079496bee27b664504a47487d1742037a3f1842a8a1",
+    "tasks/evidence/local-http-development-20261015/compose-build.log": "1aed53f2e42b7d21cc3770ede7daf06d088f8e910d770b79a34c236e173be87f"
+  }
+}

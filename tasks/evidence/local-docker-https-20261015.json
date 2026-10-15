@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-15",
+  "scope": "Actual user workstation Compose correction, not external staging/production deployment or a new original PLAN1 acceptance. Original done stays176/259.",
+  "causes": [
+    "HTTP browser Origin did not match HTTPS APP_ORIGIN.",
+    "Container DATABASE_URL referenced loopback instead of Compose db service.",
+    "Existing persistent PostgreSQL role password differed from current Compose configuration.",
+    "Legacy25-table schema had no Prisma migration history."
+  ],
+  "fixes": [
+    "Opt-in ignored override symlink selects tracked local-only HTTPS overlay.",
+    "HTTP localhost3000 redirects to canonical HTTPS localhost3443; both ports bind loopback.",
+    "Private env corrected and local role password aligned after private backup.",
+    "Actual pg_dump/restore clone, exact initial-schema diff, baseline resolve,179 existing migrations, and original-column preservation verification."
+  ],
+  "database": {
+    "legacyOriginalTables": 25,
+    "cloneVerified": true,
+    "sourceOriginalColumnsPreserved": true,
+    "appliedMigrations": 179,
+    "usersPreserved": true,
+    "backupRetained": true,
+    "dataReset": false
+  },
+  "isolatedRegistrationSmoke": {
+    "isolatedClone": true,
+    "registrationStatus": 200,
+    "sessionStatus": 200,
+    "secureCookie": true,
+    "sourceAccountCreated": false
+  },
+  "httpChecks": {
+    "httpHomeRedirect": 308,
+    "httpsHome": 200,
+    "httpsReadiness": 200,
+    "correctOriginEmptyRegistration": {
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    "wrongOriginEmptyRegistration": {
+      "status": 403,
+      "code": "CSRF_REJECTED"
+    }
+  },
+  "browser": {
+    "engine": "chromium",
+    "httpToHttps": true,
+    "registrationFormReady": true,
+    "accountCreatedOnSource": false,
+    "certificateException": "separate automated test context only; user browser/system trust untouched"
+  },
+  "verification": {
+    "proxyTransportTest": {
+      "passed": 1,
+      "failed": 0
+    },
+    "dockerComposeUpBuildWaitExit": 0,
+    "appHealthy": true,
+    "databaseHealthy": true,
+    "httpsProxyHealthy": true,
+    "tlsReadinessWithExplicitLocalCertificate": 200,
+    "eslintExit": 0,
+    "shellSyntaxExit": 0,
+    "setupIdempotent": true,
+    "composeConfigQuietExit": 0,
+    "publicClaimsGateProblems": 0
+  },
+  "security": {
+    "csrfDisabled": false,
+    "secureCookieDisabled": false,
+    "privateCredentialsInEvidence": false,
+    "localKeysAndBackupsIgnoredAndExcludedFromDocker": true,
+    "temporaryCloneAndBaselineDatabasesRemoved": true,
+    "privateBackupsRetained": ".local/backups/",
+    "certificate": "Locally generated self-signed localhost SAN certificate; browser exception needed; no external certificate/vendor claim."
+  },
+  "sourceSha256": {
+    "docker-compose.local.yml": "479f1ba064cda7a7330981b3736eb6a2db2547d20df67e5e6f7afbdcb83fc860",
+    "scripts/local/https-proxy.cjs": "b188f4a8c63cdab46ec405e7ff681d51d2d2a986394489823d8dfe7c5325199c",
+    "scripts/local/https-proxy.test.cjs": "24a5e108add10504fd668d52cd42152bb9b4adf5518bd6433f05776b08fbcf0c",
+    "scripts/local/setup-https.sh": "edf94714daf1af63e9313464a7b69860bdb73f9325a7893c18c6f72e6e49cf2c",
+    ".dockerignore": "572b21fecb56ba0ea830077404e415d245441046de4d43aa8829e0ced60a0657",
+    ".gitignore": "928daaafd2b89b5782719064cac2d283d2b0fdada09f5f63b14cf51e67e64976",
+    ".env.example": "6196c47414e9116627c1af7af2f5beb324d59d02fe1d62e28d32073ef8ad80ae",
+    "package.json": "398005dd440a04cbe10f5dd4249fbceb6ec093e94ac146f96e227ff7d1569347",
+    ".github/workflows/ci.yml": "0d5b758a18f6d833c1e80f479446400e0ec730de1f33227010b2e8e6d045b456",
+    "docs/operations/local-docker-https.md": "d2f6d01b819ab79875846ff5ca42ba5c7d4c852c8d47cb2f12b9ae9f5e35ebde",
+    "README.md": "708850341d00ed3b7ef2817edb3c58716aca98e80e5e3b631900e9b4e105c052"
+  },
+  "artifactSha256": {
+    "tasks/evidence/local-docker-https-20261015/proxy-test.log": "af2a13bc43697823e1b97203e879e28c8a5dd7019d9baa3f5ccfba5db239da12",
+    "tasks/evidence/local-docker-https-20261015/compose-build.log": "ad82db2e9915573a5b5eb0d2949961c9670ca59aba2da75fe5cc06696797a1d0"
+  }
+}

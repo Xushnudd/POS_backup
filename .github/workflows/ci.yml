@@ -38,6 +38,7 @@ jobs:
       - run: npm run worker:build
       - run: npm test
       - run: npm run test:ops
+      - run: npm run test:local-https
       - run: npm run test:integration
         env:
           POS_TEST_PSQL_CONTAINER: ${{ job.services.postgres.id }}
