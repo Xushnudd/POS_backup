@@ -1,8 +1,5 @@
 'use client'
-
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -32,6 +29,8 @@ export default function RolesPage(){
  return user&&organization?<RolesPanel key={`${user.id}:${organization.id}:${role}`} organizationId={organization.id}/>:null
 }
 function RolesPanel({organizationId}:{organizationId:string}){
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const {query,changeQuery}=useListQuery(['source'] as const,'source');
@@ -57,17 +56,17 @@ function RolesPanel({organizationId}:{organizationId:string}){
   try{const [roles,staff]=await Promise.all([api.request<Listing>(`/roles?page=${page}&search=${encodeURIComponent(search)}`),api.organizations.users(organizationId)])
    if(!roles.data||!staff.data)throw new Error('Rollar yoki xodimlar natijasi mavjud emas')
    if(live.current&&request===readSequence.current.value){setData(roles.data);setMembers(staff.data);setReadError('')}}
-  catch(failure){if(live.current&&request===readSequence.current.value)setReadError(failure instanceof Error?failure.message:'Rollar yuklanmadi');throw failure}
+  catch(failure){if(live.current&&request===readSequence.current.value)setReadError(displayErrorMessage(failure,'Rollar yuklanmadi'));throw failure}
   finally{if(live.current&&request===readSequence.current.value)setLoading(false)}
  },[readPage,search,invalid,organizationId]);
  useEffect(()=>{const requests=readSequence.current;let active=true;void Promise.resolve().then(()=>{if(active)return load()}).catch(()=>undefined);return()=>{active=false;requests.value++}},[load]);
  async function perform(work:()=>Promise<void>){
   if(flight.current||!live.current)return
   flight.current=true;setBusy(true);setError('');setMessage('')
-  try{await work()}catch(failure){if(live.current)setError(failure instanceof Error?failure.message:'Amal bajarilmadi')}
+  try{await work()}catch(failure){if(live.current)setError(displayErrorMessage(failure,'Amal bajarilmadi'))}
   finally{flight.current=false;if(live.current)setBusy(false)}
  }
- async function refreshAfterSave(){try{await load(data?.page??1)}catch(failure){if(live.current)setError('Amal saqlandi; ro‘yxat yangilanmadi. Rollarni qayta yuklang. '+(failure instanceof Error?failure.message:''))}}
+ async function refreshAfterSave(){try{await load(data?.page??1)}catch(failure){if(live.current)setError('Amal saqlandi; ro‘yxat yangilanmadi. Rollarni qayta yuklang. '+(displayErrorMessage(failure,'')))}}
  async function save(){
   if(!editor||(!roleRequest&&!ready))return
   const {id,revision,baseRole,isActive,...fields}=editor
@@ -96,7 +95,7 @@ function RolesPanel({organizationId}:{organizationId:string}){
   <p>{tr("Namunalar hech kimga avtomatik biriktirilmaydi. O‘qish vakolati asosiy rolga ko‘rinadigan ma’lumotlarni ham ochishi mumkin; xodimga berishdan oldin tekshiring.")}</p>
   <ReadQueryNotice invalid={invalid} reset={()=>changeQuery({page:'',limit:'',search:'',sort:''})}/><ListFilter search={search} sort="source" label={tr("Rol nomi")} maxLength={100} disabled={busy} onChange={changeQuery} options={[{value:'source',label:tr("Nom A → Z")}]}/><button disabled={busy} onClick={()=>void perform(()=>load())}>{tr("Rollarni yuklash")}</button>
 
-  {readError&&<p role="alert">{readError}{tr(". Oxirgi ro‘yxat va draftlar saqlangan; yangi amal oldidan rollarni qayta yuklang.")}</p>}{error&&error!==readError&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}
+  {readError&&<p role="alert">{uiMessage(readError)}{tr(". Oxirgi ro‘yxat va draftlar saqlangan; yangi amal oldidan rollarni qayta yuklang.")}</p>}{error&&error!==readError&&<p role="alert">{uiMessage(error)}</p>}{message&&<p role="status">{uiMessage(message)}</p>}
   {loading&&<p role="status">{tr("Rollar va xodimlar yuklanmoqda...")}</p>}
   {busy&&!loading&&<p role="status">{tr("Amal javobi kutilmoqda...")}</p>}
   {roleDirty&&<p role="status">{tr("Saqlanmagan rol o‘zgarishlari bor.")}</p>}

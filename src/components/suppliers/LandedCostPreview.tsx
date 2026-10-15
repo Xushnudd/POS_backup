@@ -1,6 +1,5 @@
 'use client';
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -21,6 +20,8 @@ type Result = { previewOnly: true; amount: string; lines: {
 export default function LandedCostPreview({ documentId, documentNo, items, originals }: {
   documentId: string; documentNo: string; items: ReceiptItem[]; originals: OriginalItem[];
 }) {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const [amount, setAmount] = useState('');
@@ -48,7 +49,7 @@ export default function LandedCostPreview({ documentId, documentNo, items, origi
         setResult(response.data);
       }
     } catch (cause) {
-      if (mounted.current) setError(cause instanceof Error ? cause.message : 'Hisoblash bajarilmadi. Qayta urinib ko‘ring.');
+      if (mounted.current) setError(displayErrorMessage(cause,'Hisoblash bajarilmadi. Qayta urinib ko‘ring.'));
     } finally {
       pending.current = false;
       if (mounted.current) setBusy(false);
@@ -56,9 +57,9 @@ export default function LandedCostPreview({ documentId, documentNo, items, origi
   }
   const name = (id: string) => {
     const item = items.find(row => row.id === id);
-    return originals.find(row => row.productId === item?.productId)?.productName ?? 'Kirim qatori';
+    return originals.find(row => row.productId === item?.productId)?.productName ?? tr('Kirim qatori');
   };
-  return <section aria-label={`Kirim xarajatlari: ${documentNo}`} className="my-3 rounded-lg border p-3 space-y-3">
+  return <section aria-label={tr("Kirim xarajatlari: {value1}",{value1:String(documentNo)})} className="my-3 rounded-lg border p-3 space-y-3">
     <h4 className="font-semibold">{documentNo}{tr(": qo‘shimcha xarajat taqsimoti")}</h4>
     <p>{tr("Bu oldindan hisoblash. Tannarx, ombor, qarz yoki pul balansi o‘zgarmaydi.")}</p>
     <form onSubmit={calculate} className="space-y-3">
@@ -66,14 +67,14 @@ export default function LandedCostPreview({ documentId, documentNo, items, origi
         maxLength={15} onChange={event => { invalidate(); setAmount(event.target.value); }} />
       <Select label={tr("Taqsimlash usuli")} value={method} disabled={busy} onChange={event => { invalidate(); setMethod(event.target.value); }}
         options={[{ value: 'value', label: tr("Original xarid qiymati bo‘yicha") }, { value: 'quantity', label: tr("Bir xil bazaviy birlikdagi miqdor bo‘yicha") }, { value: 'weight', label: tr("Vazn bo‘yicha") }]} />
-      {method === 'weight' && items.map(item => <Input key={item.id} label={`${name(item.id)}: kg / bazaviy birlik`}
+      {method === 'weight' && items.map(item => <Input key={item.id} label={tr("{value1}: kg / bazaviy birlik",{value1:String(name(item.id))})}
         inputMode="decimal" value={weights[item.id] ?? ''} required disabled={busy} maxLength={19}
         onChange={event => { invalidate(); setWeights(previous => ({ ...previous, [item.id]: event.target.value })); }} />)}
       <Button type="submit" isLoading={busy}>{busy ? tr("Hisoblanmoqda") : error ? tr("Qayta hisoblash") : tr("Taqsimotni hisoblash")}</Button>
     </form>
     {busy&&<p role="status">{tr("Taqsimot hisoblanmoqda…")}</p>}
     {!busy&&(amount||method!=='value'||Object.values(weights).some(value=>value))&&<p role="status">{tr("Taqsimot formasi saqlanmagan; oldindan hisoblash hujjat yaratmaydi.")}</p>}
-    {error && <p role="alert">{error}</p>}
+    {error && <p role="alert">{uiMessage(error)}</p>}
     {result && <div role="status" className="overflow-x-auto">
       <p>{tr("Hisoblandi. Jami xarajat:")}{' '}{result.amount}{tr(". Moliyaviy hujjat yaratilmagan.")}</p>
       <table className="w-full text-left"><caption className="sr-only">{tr("Original kirim bo‘yicha xarajat taqsimoti")}</caption>

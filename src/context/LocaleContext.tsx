@@ -1,7 +1,7 @@
 'use client';
 import {createContext,useCallback,useContext,useEffect,useMemo,useState,type ReactNode} from 'react';
 import {LOCALE_COOKIE,normalizeLocale,type Locale} from '@/i18n/locale';
-import {translate,translateKnownLabel,type MessageKey,type MessageValues} from '@/i18n/messages';
+import {translate,translateKnownLabel,localizeOwnedMessage,localizeCodeLabel,type MessageKey,type MessageValues} from '@/i18n/messages';
 import {formatLocaleDate,formatLocaleMoney,formatLocaleNumber} from '@/i18n/format';
 const Context=createContext<{locale:Locale;setLocale:(locale:Locale)=>void}|null>(null);
 export function LocaleProvider({initialLocale,children}:{initialLocale:Locale;children:ReactNode}){
@@ -15,6 +15,9 @@ export function LocaleProvider({initialLocale,children}:{initialLocale:Locale;ch
   try{localStorage.setItem(LOCALE_COOKIE,next)}catch{/* The cookie still persists the preference. */}
   setState(next);
  },[]);
+ useEffect(()=>{
+  document.title=translate(window.location.pathname==='/'?'Shuni POS — savdo, ombor va obuna':'Shuni POS — Savdo va ombor boshqaruvi tizimi',locale);
+ },[locale]);
  useEffect(()=>{
   const changed=(event:StorageEvent)=>{if(event.key!==LOCALE_COOKIE||event.newValue===null)return;const next=normalizeLocale(event.newValue);document.documentElement.lang=next;setState(next)};
   window.addEventListener('storage',changed);return()=>window.removeEventListener('storage',changed);
@@ -31,6 +34,8 @@ export function useTranslation(){
   return {
    t:(key:MessageKey,values?:MessageValues)=>translate(key,locale,values),
    label:(value:string)=>translateKnownLabel(value,locale),
+   message:(value:string)=>localizeOwnedMessage(value,locale),
+   status:(value:string|null|undefined)=>localizeCodeLabel(value,locale),
    formatMoney:(value:number|string|null|undefined)=>formatLocaleMoney(value,locale),
    formatNumber:(value:number|string|null|undefined)=>formatLocaleNumber(value,locale),
    formatDate:(value?:string|Date|null,includeTime=false,timeZone?:string)=>formatLocaleDate(value,locale,includeTime,timeZone),

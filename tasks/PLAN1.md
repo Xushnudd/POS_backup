@@ -3218,7 +3218,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `UX-01.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **UX-01.02** — O‘zbek lotin va rus tili; barcha ishchi matnlarni yagona tarjima tizimiga olish.
+- [x] **UX-01.02** — O‘zbek lotin va rus tili; barcha ishchi matnlarni yagona tarjima tizimiga olish.
 
   **Texnologiya:** Mavjud JSON dictionaries, TypeScript typed keys, Intl.
 
@@ -3233,6 +3233,8 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
   **Bandning qabul mezoni:** Uz-Latn/Ru barcha ishchi ekran/xato/chekda; locale almashtirish hisob va sana semantikasini buzmaydi.
 
   **Dalil:** `UX-01.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+
+  **Qabul — 2026-10-15:** `tasks/evidence/localization-20261015.json`, `docs/operations/localization.md`. 3937 ta ikki tilli typed kalit,39 ta owned label jadvali, static offline shell, xato chegaralari, sale/return chek va Intl exact display ulandi. 155/155 unit (53 fayl),88/88 PostgreSQL (4 fayl), bitta yakuniy native run72/72 (har Chromium/Firefox/WebKitda24) PASS. Type/worker,0-warning lint, offline/webpack build,953 canonical/table/static key check va zero-finding source scan PASS. Locale savat, telefon/parol qoralamasi,0.125 miqdor, ISO sana, original pending body/key, encrypted ticket va original ism/chek snapshotini o‘zgartirmaydi. Lost ACKdan keyin bitta sale/payment/movement va exact qaytim DB bilan tekshirildi. Oldingi failed/overlap cohortlar qo‘shib sanalmaydi; loglar, screenshots, source SHA va `a2de5a8` ustidagi uncommitted patch manifestda. Bu local core qabul; real hosting/vendor/hardware/pilot isboti emas.
 
 - [x] **UX-01.03** — Bir xil jadval/formalar, qidiruv, filtr, saralash, sahifalash va bo‘sh holatlar.
 
@@ -3250,7 +3252,7 @@ Markirovkalangan mahsulotlar bilan ishlashda oddiy mahsulot barkodi va har bir b
 
   **Dalil:** `UX-01.03` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-  **Qabul — 2026-10-15:** `tasks/evidence/list-journals-20261015.json`, `docs/operations/list-query-coverage.md`.139 distinct PG case (92+31+16),147 unit case/52 fayl; uch brauzer cohortlari42/42/18 va oxirgi kuchaytirilgan6/6 PASS. Cohortlar overlap qiladi,108 distinct yoki yagona run deb sanalmaydi. Type/worker/build,0warning lint va1473source/0finding PASS. URL va safe query, zero/large/source paging, Decimal sort/filtered CSV/cutoff, read errors/stale responses, immutable chronological journals va moliyaviy draft/source selection saqlanishi qabul qilindi. Version `d8a9226`+uncommitted tree, source/log SHA manifestda. Only local core; provider/hardware/production/pilot isboti emas. UX-01.02 alohida ochiq.
+  **Qabul — 2026-10-15:** `tasks/evidence/list-journals-20261015.json`, `docs/operations/list-query-coverage.md`.139 distinct PG case (92+31+16),147 unit case/52 fayl; uch brauzer cohortlari42/42/18 va oxirgi kuchaytirilgan6/6 PASS. Cohortlar overlap qiladi,108 distinct yoki yagona run deb sanalmaydi. Type/worker/build,0warning lint va1473source/0finding PASS. URL va safe query, zero/large/source paging, Decimal sort/filtered CSV/cutoff, read errors/stale responses, immutable chronological journals va moliyaviy draft/source selection saqlanishi qabul qilindi. Version `d8a9226`+uncommitted tree, source/log SHA manifestda. Only local core; provider/hardware/production/pilot isboti emas. UX-01.02 mazkur qabulga kirmagan.
 
 - [x] **UX-01.04** — Xatolarni odam tushunadigan qilib yozish; foydalanuvchi keyin nima qilishi ko‘rsatilishi.
 

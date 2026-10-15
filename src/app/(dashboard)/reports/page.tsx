@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -27,6 +28,8 @@ import {
 
 export default function ReportsPage(){const {organization,user,role}=useAuth();return <Suspense fallback={<LoadingSpinner/>}><ReportsContent key={[organization?.id,user?.id,role].join(':')}/></Suspense>}
 function ReportsContent() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney,formatNumber,formatDate}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -75,7 +78,7 @@ function ReportsContent() {
         if (res.data) setProductsReport(res.data);
       }
     } catch (err: unknown) {
-      if(version===requestVersion.current.value){setError(err instanceof Error?err.message:'Hisobot yuklanmadi');}
+      if(version===requestVersion.current.value){setError(displayErrorMessage(err,'Hisobot yuklanmadi'));}
     } finally {
       if(version===requestVersion.current.value)setIsLoading(false);
     }
@@ -165,9 +168,9 @@ function ReportsContent() {
       </Card>
 
       <ListFilter search={search} sort={sort} label={activeTab==='products'?tr("Hisobot mahsuloti yoki SKU qidirish"):tr("Hisobot cheki yoki mijoz qidirish")} onChange={changeQuery} reset={{startDate:'',endDate:'',dateMode:'',asOf:'',tab:''}} options={[{value:'default',label:tr("Asl ketma-ketlik")},{value:'amount_asc',label:tr("Summa: o‘sish")},{value:'amount_desc',label:tr("Summa: kamayish")}]}/>{invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}{isLoading&&!invalidQuery&&<p role="status">{tr("Hisobot yuklanmoqda…")}</p>}
-      {error&&<p role="alert" className="text-red-700">{error}</p>}
+      {error&&<p role="alert" className="text-red-700">{uiMessage(error)}</p>}
       {asOf&&!isLoading&&!error&&<p className="text-xs text-slate-500">{tr("Hisob holati:")}{' '}{asOf}{tr(". Eksport ham shu holatdan olinadi; yangi amallarni olish uchun Yangilash ni bosing.")}</p>}
-      {activeTab==='sales'&&salesSummary&&!isLoading&&!error&&<Card title={tr("Tovar va pul hisoblari")}><dl className="grid grid-cols-2 gap-3">{[['Yalpi savdo',salesSummary.grossRevenue],['Qaytarilgan tovar qiymati',salesSummary.refundAmount],['Naqd savdo',salesSummary.cashSales],['Naqd qarz undirish',salesSummary.cashDebtCollections],['Naqd refund',salesSummary.cashRefunds],['Nasiya savdo — pul tushumi emas',salesSummary.creditSales]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{formatMoney(value??'0')}</dd></div>)}</dl></Card>}
+      {activeTab==='sales'&&salesSummary&&!isLoading&&!error&&<Card title={tr("Tovar va pul hisoblari")}><dl className="grid grid-cols-2 gap-3">{[[tr("Yalpi savdo"),salesSummary.grossRevenue],[tr("Qaytarilgan tovar qiymati"),salesSummary.refundAmount],[tr("Naqd savdo"),salesSummary.cashSales],[tr("Naqd qarz undirish"),salesSummary.cashDebtCollections],[tr("Naqd refund"),salesSummary.cashRefunds],[tr("Nasiya savdo — pul tushumi emas"),salesSummary.creditSales]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{formatMoney(value??'0')}</dd></div>)}</dl></Card>}
       {/* Tab 1: Sales Report */}
       {activeTab === 'sales' && !isLoading&&!error&&!invalidQuery&&(
         <div className="space-y-6">
@@ -203,7 +206,7 @@ function ReportsContent() {
           {/* Sales table */}
           <Card
             title={tr("Savdolar ro'yxati")}
-            subtitle={`${startDate} dan ${endDate} gacha amalga oshirilgan savdolar`}
+            subtitle={tr("{value1} dan {value2} gacha amalga oshirilgan savdolar",{value1:String(startDate),value2:String(endDate)})}
             padding={false}
           >
             {isLoading ? (

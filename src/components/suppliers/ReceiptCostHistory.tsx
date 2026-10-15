@@ -1,7 +1,5 @@
 'use client';
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -27,6 +25,10 @@ type Plan = {
 export default function ReceiptCostHistory({ documentId, documentNo, returnPath, items }: {
   documentId: string; documentNo: string; returnPath: string; items: {id:string;productId:string}[];
 }) {
+ const {formatDate}=useTranslation();
+
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const {role}=useAuth();
@@ -53,25 +55,25 @@ export default function ReceiptCostHistory({ documentId, documentNo, returnPath,
           setRows(response.data.rows); setTotal(response.data.total);
         }
       } catch (cause) {
-        if (live) setError(cause instanceof Error ? cause.message : 'Taqsimot tarixi yuklanmadi.');
+        if (live) setError(displayErrorMessage(cause,'Taqsimot tarixi yuklanmadi.'));
       } finally { if (live) setBusy(false); }
     })();
     return () => { live = false; controller.abort(); };
   }, [documentId, page, revision,invalid]);
   const refresh = () => { setBusy(true); setRevision(value => value + 1); };
   return <><ReceiptCostPrepare documentId={documentId} documentNo={documentNo} items={items} returnPath={returnPath} onDone={refresh}/>
-  <section aria-label={`Taqsimot tarixi: ${documentNo}`} className="my-3 space-y-3 rounded-lg border p-3">
+  <section aria-label={tr("Taqsimot tarixi: {value1}",{value1:String(documentNo)})} className="my-3 space-y-3 rounded-lg border p-3">
     <h4 className="font-semibold">{tr("Saqlangan xarajat taqsimotlari")}</h4>
     <p>{tr("Tayyorlash va tannarxga qo‘llash alohida amallar. Qo‘llashdan oldin hisobni tekshiring; qo‘llangan xarajatni avval reversal qilish kerak.")}</p>
     <ReadQueryNotice invalid={invalid} reset={reset}/>
     {busy&&!invalid && <p role="status">{tr("Taqsimot tarixi yuklanmoqda…")}</p>}
-    {error && <p role="alert">{error}</p>}
+    {error && <p role="alert">{uiMessage(error)}</p>}
     {!busy && !error && !invalid && !rows.length && <p>{tr("Saqlangan taqsimot yo‘q.")}</p>}
-    {rows.map(row => <article key={row.id} aria-label={`Taqsimot ${row.id}`} className="space-y-2 border p-3">
-      <p>{tr("Summa:")}{' '}{row.amount} {tr("· Usul:")}{' '}{({ value: 'Qiymat', quantity: 'Miqdor', weight: 'Vazn' } as Record<string, string>)[row.method] ?? row.method}</p>
+    {rows.map(row => <article key={row.id} aria-label={tr("Taqsimot {value1}",{value1:String(row.id)})} className="space-y-2 border p-3">
+      <p>{tr("Summa:")}{' '}{row.amount} {tr("· Usul:")}{' '}{({ value: 'Qiymat', quantity: tr("Miqdor"), weight: tr("Vazn") } as Record<string, string>)[row.method] ?? row.method}</p>
       <p>{tr("Holat:")}{' '}{row.status === 'prepared' ? row.applications?.some(a=>!a.reversalOfId)&&!row.applications?.some(a=>a.reversalOfId)?tr("Tannarxga qo‘llangan"):row.applications?.length?tr("Tannarx reversali yozilgan"):tr("Tayyor, qo‘llanmagan") : row.status === 'cancelled' ? tr("Bekor qilingan") : row.status}</p>
-      <p>{tr("Sabab:")}{' '}{row.reason}</p><p>{tr("Yaratilgan:")}{' '}{new Date(row.createdAt).toLocaleString('uz-UZ')}</p>
-      {row.status === 'cancelled' && <><p>{tr("Bekor qilish sababi:")}{' '}{row.cancellationReason}</p><p>{tr("Bekor qilingan:")}{' '}{row.cancelledAt ? new Date(row.cancelledAt).toLocaleString('uz-UZ') : '—'}</p></>}
+      <p>{tr("Sabab:")}{' '}{row.reason}</p><p>{tr("Yaratilgan:")}{' '}{formatDate(row.createdAt,true)}</p>
+      {row.status === 'cancelled' && <><p>{tr("Bekor qilish sababi:")}{' '}{row.cancellationReason}</p><p>{tr("Bekor qilingan:")}{' '}{row.cancelledAt ? formatDate(row.cancelledAt,true) : '—'}</p></>}
       {role==='owner'&&<ReceiptCostApplication documentId={documentId} planId={row.id} status={row.status} applications={row.applications??[]} ready={!busy&&!error&&!writing&&!invalid} returnPath={returnPath} onDone={refresh} onWriting={writingChanged}/>}
       {/* Keep recovery available after a lost ACK even if the next GET sees cancelled. */}
       <CancelPlan key={row.id} row={row} documentId={documentId} returnPath={returnPath} reason={reasons[row.id]??''}
@@ -96,7 +98,7 @@ function CancelPlan({ row, documentId, returnPath, onDone, ready, reason, onReas
   return <DurableMutation path={`/stock-documents/${documentId}/cost-plans/${row.id}/cancel`}
     returnPath={returnPath} body={{ reason }} label={tr("Tayyor taqsimotni bekor qilish")}
     allowNew={row.status === 'prepared'&&(!row.applications?.some(a=>!a.reversalOfId)||!!row.applications?.some(a=>a.reversalOfId))} canSubmit={ready}
-    review={[`Taqsimot: ${row.id}`, `Summa: ${row.amount}`, reason, 'Faqat qo‘llanmagan taqsimot bekor qilinadi. Moliyaviy posting yaratilmaydi.']}
+    review={[tr("Taqsimot: {value1}",{value1:String(row.id)}), tr("Summa: {value1}",{value1:String(row.amount)}), reason, tr("Faqat qo‘llanmagan taqsimot bekor qilinadi. Moliyaviy posting yaratilmaydi.")]}
     onSavingChange={writingChanged} onDone={(_result,body)=>onDone(typeof body?.reason==='string'?body.reason:'')}>
     {row.status === 'prepared' && <Input label={tr("Taqsimotni bekor qilish sababi")} value={reason} maxLength={2000} onChange={event => onReason(event.target.value)} />}
   </DurableMutation>;

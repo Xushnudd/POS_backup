@@ -1,4 +1,6 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
 import {localizeOwnedLabels} from '@/i18n/messages';
 
 import {useTranslation} from '@/context/LocaleContext';
@@ -22,7 +24,6 @@ const eventLabels:Record<SecurityEventType,string>={
 const eventLabelsSource=eventLabels;
 const deliveryLabels:Record<string,string>={pending:'Navbatda',queued:'Navbatda',delivered:'Hisobingizga yetkazildi',dead:'Yetkazishda xato',cancelled:'Bekor qilindi',skipped:'Yetkazilmadi (hisob yoki muddat)'};
 const deliveryLabelsSource=deliveryLabels;
-const errorMessage=(error:unknown)=>error instanceof Error?error.message:'Xavfsizlik ma’lumotlari yuklanmadi';
 
 export default function SecurityHistory(){
   const {user,organization}=useAuth();
@@ -30,13 +31,15 @@ export default function SecurityHistory(){
 }
 
 function AccountHistory({timezone}:{timezone?:string}){
+ const {message:uiMessage}=useTranslation();
+
  const {locale:mapLocale}=useTranslation();
 
  const deliveryLabels=localizeOwnedLabels(deliveryLabelsSource,mapLocale);
 
  const eventLabels=localizeOwnedLabels(eventLabelsSource,mapLocale);
 
- const {t:tr}=useTranslation();
+ const {t:tr,formatDate}=useTranslation();
 
   const {page,setPage,invalid,reset}=useReadPage('security_events_');
   const [data,setData]=useState<SecurityHistoryData|null>(null);
@@ -59,7 +62,7 @@ function AccountHistory({timezone}:{timezone?:string}){
       }
       return response.data;
     }catch(error){
-      if(live.current&&request===sequence.current)setError(errorMessage(error));
+      if(live.current&&request===sequence.current)setError(displayErrorMessage(error));
       throw error;
     }finally{
       if(live.current&&request===sequence.current)setBusy(false);
@@ -88,7 +91,7 @@ function AccountHistory({timezone}:{timezone?:string}){
         const latest=await refresh();
         confirmed=!!latest?.notices.find(row=>row.id===notice.id)?.readAt;
       }catch{/* Preserve the original operation ID and show an explicit error. */}
-      if(!confirmed&&live.current)setReadError(errorMessage(error)+' Natijani tekshirish uchun qayta yuklang yoki shu bildirishnomani yana belgilang.');
+      if(!confirmed&&live.current)setReadError(displayErrorMessage(error)+' Natijani tekshirish uchun qayta yuklang yoki shu bildirishnomani yana belgilang.');
     }
     if(confirmed&&live.current){
       setMessage('Bildirishnoma o‘qildi deb belgilandi.');
@@ -121,7 +124,7 @@ function AccountHistory({timezone}:{timezone?:string}){
         // which concurrent operation queued it. Do not submit a second queue.
         resolved=current?.deliveryState==='pending'||current?.deliveryState==='delivered';
       }catch{/* Keep the original confirmation key for an unresolved result. */}
-      if(!resolved&&live.current)setRetryError(errorMessage(error)+' Natijani tekshirish uchun qayta yuklang yoki shu bildirishnomani yana tasdiqlang.');
+      if(!resolved&&live.current)setRetryError(displayErrorMessage(error)+' Natijani tekshirish uchun qayta yuklang yoki shu bildirishnomani yana tasdiqlang.');
     }
     if(resolved&&live.current){
       intent.resolved=true;
@@ -134,17 +137,17 @@ function AccountHistory({timezone}:{timezone?:string}){
 
   const date=(value:string)=>{
     const parsed=new Date(value);
-    if(!Number.isFinite(parsed.getTime()))return 'Sana mavjud emas';
-    try{return parsed.toLocaleString('uz-UZ',{timeZone:timezone});}
+    if(!Number.isFinite(parsed.getTime()))return tr('Sana mavjud emas');
+    try{return formatDate(parsed,true,timezone);}
     catch{return parsed.toISOString();}
   };
 
   return <section className="space-y-4" aria-label={tr("Hisob xavfsizligi tarixi")}>
     <ReadQueryNotice invalid={invalid} reset={reset}/><Card title={tr("Xavfsizlik bildirishnomalari")}>
       <p className="mb-3 text-sm text-gray-600">{tr("Bir safar ko‘pi bilan 20 bildirishnoma ko‘rsatiladi. Avval o‘qilmaganlari chiqadi; o‘qilgan deb belgilagach keyingilari yuklanadi. O‘qilmaganlar soni barcha 90 kunlik tarixni hisoblaydi. Yangi brauzer belgisi yoki takroriy muvaffaqiyatsiz kirish xavfsizlikni tekshirish uchun sabab bo‘ladi; bu hisob buzilganini tasdiqlamaydi. Tanish bo‘lmagan kirishda yuqoridagi faol sessiyalarni tekshiring va parolni almashtiring.")}</p>
-      {error&&<div role="alert" className="mb-3 text-sm text-red-700">{error} {data&&tr("Quyida oxirgi muvaffaqiyatli yuklangan ma’lumotlar ko‘rsatilgan.")} <Button size="sm" disabled={busy||!!reading||!!retrying} onClick={()=>setRevision(value=>value+1)}>{tr("Xavfsizlikni qayta yuklash")}</Button></div>}
-      {readError&&<p role="alert" className="mb-3 text-sm text-red-700">{readError}</p>}
-      {message&&<p role="status" className="mb-3 text-sm text-emerald-700">{message}</p>}
+      {error&&<div role="alert" className="mb-3 text-sm text-red-700">{uiMessage(error)} {data&&tr("Quyida oxirgi muvaffaqiyatli yuklangan ma’lumotlar ko‘rsatilgan.")} <Button size="sm" disabled={busy||!!reading||!!retrying} onClick={()=>setRevision(value=>value+1)}>{tr("Xavfsizlikni qayta yuklash")}</Button></div>}
+      {readError&&<p role="alert" className="mb-3 text-sm text-red-700">{uiMessage(readError)}</p>}
+      {message&&<p role="status" className="mb-3 text-sm text-emerald-700">{uiMessage(message)}</p>}
       {busy&&!invalid&&<p role="status">{tr("Xavfsizlik ma’lumotlari yuklanmoqda...")}</p>}
       {data&&<>
         <p className="mb-3 text-sm font-medium">{tr("O‘qilmagan:")}{' '}{data.unread}</p>
@@ -160,7 +163,7 @@ function AccountHistory({timezone}:{timezone?:string}){
     <Card title={tr("Xavfsizlik hodisalari")}>
       <p className="mb-3 text-sm text-gray-600">{tr("Hisobingizning barcha bizneslardagi kirishlari, sessiyalari va muhim xavfsizlik amallari ko‘rsatiladi. Tarix va bildirishnomalar 90 kun saqlanadi. Qurilma modeli yoki joylashuv taxmin qilinmaydi.")}</p>
       <p className="mb-3 text-sm text-gray-600">{tr("Yetkazishda xato bo‘lsa, qayta yetkazishni tasdiqlashingiz mumkin. Har bir tasdiqlash ko‘pi bilan 3 ta yangi urinishga ruxsat beradi; bitta bildirishnoma uchun jami 30 ta urinish chegarasi saqlanadi.")}</p>
-      {retryError&&<p role="alert" className="mb-3 text-sm text-red-700">{retryError}</p>}
+      {retryError&&<p role="alert" className="mb-3 text-sm text-red-700">{uiMessage(retryError)}</p>}
       {retryMessage&&<p role="status" className="mb-3 text-sm text-emerald-700">{retryMessage}</p>}
       {data&&(data.events.length===0?<p className="text-sm text-gray-600">{tr("Hozircha xavfsizlik hodisalari yo‘q.")}</p>:data.events.map(event=><article key={event.id} className="space-y-1 border-t border-gray-100 py-3">
         <div className="flex flex-wrap items-center gap-2"><p className="font-semibold">{eventLabels[event.type]??tr("Xavfsizlik hodisasi")}</p>{event.suspicious&&<Badge variant="warning" size="sm">{tr("Tekshirish tavsiya etiladi")}</Badge>}</div>
@@ -170,7 +173,7 @@ function AccountHistory({timezone}:{timezone?:string}){
         {event.deliveryState&&<p className="text-xs text-gray-600">{tr("Bildirishnoma:")}{' '}{deliveryLabels[event.deliveryState]??tr("Holat aniqlanmoqda")}</p>}
         {event.deliveryState==='dead'&&<div className="space-y-2 py-1">
           <p role="alert" className="text-sm text-red-700">{tr("Bildirishnoma yetkazilmadi. Urinishlar:")}{' '}{event.deliveryAttempts??'—'} / {event.deliveryMaxAttempts??'—'}.</p>
-          {event.canRetry?<Button size="sm" aria-label={'Bildirishnomani qayta yetkazish '+event.id} disabled={busy||!!reading||!!retrying} onClick={()=>{void retryDelivery(event);}}>{retrying===event.id?tr("Tekshirilmoqda..."):tr("Bildirishnomani qayta yetkazish")}</Button>:<p className="text-xs text-gray-600">{tr("Bu bildirishnoma uchun qayta yetkazish ruxsati mavjud emas.")}</p>}
+          {event.canRetry?<Button size="sm" aria-label={tr("Bildirishnomani qayta yetkazish")+" "+event.id} disabled={busy||!!reading||!!retrying} onClick={()=>{void retryDelivery(event);}}>{retrying===event.id?tr("Tekshirilmoqda..."):tr("Bildirishnomani qayta yetkazish")}</Button>:<p className="text-xs text-gray-600">{tr("Bu bildirishnoma uchun qayta yetkazish ruxsati mavjud emas.")}</p>}
         </div>}
         <p className="text-xs text-gray-600">{tr("Tarixda saqlash muddati:")}{' '}{date(event.expiresAt)}</p>
       </article>))}

@@ -28,6 +28,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
+ const {message:uiMessage}=useTranslation();
+
     const {locale,t:tr}=useTranslation();
     const decimalHint=props.inputMode==='decimal'&&locale==='ru'&&!helperText?tr('Sonni guruhlashsiz, kasr qismini nuqta bilan kiriting.'):undefined;
     const effectiveHint=helperText??decimalHint;
@@ -86,7 +88,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error ? (
-          <p id={descriptionId} role="alert" className="text-xs text-red-700 font-medium">{error}</p>
+          <p id={descriptionId} role="alert" className="text-xs text-red-700 font-medium">{uiMessage(error)}</p>
         ) : effectiveHint ? (
           <p id={descriptionId} className="text-xs text-gray-600">{effectiveHint}</p>
         ) : null}

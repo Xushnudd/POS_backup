@@ -1,0 +1,11 @@
+{
+  "historical_run": "historical-ambiguous-aside-and-webkit-navigation.log",
+  "page_error_time_ms": 205947.18,
+  "navigation_start_ms": 205932.224,
+  "navigation_url": "/suppliers",
+  "origin": "isolated localhost HTTPS",
+  "observed": "WebKit emitted a fetch access-control pageError 15ms after full navigation while the preceding active-list read was being replaced. Completed supplier reads in the trace all returned200.",
+  "interpretation": "Navigation cancellation race; not evidence of a production CORS failure.",
+  "correction": "Await the restored supplier row after selecting the active filter before the next full page navigation. Keep the original errors=[] assertion; no exception filter or automatic retry was added.",
+  "reverification": "Final72/72 native run passed, including unchanged empty-pageerror assertion in the full WebKit cash-sale case."
+}

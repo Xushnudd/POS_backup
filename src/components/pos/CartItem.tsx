@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -26,6 +27,8 @@ export default function CartItem({
   onUpdateDiscount,
   onRemove,
 }: CartItemProps) {
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -33,7 +36,7 @@ export default function CartItem({
   const [showDiscount, setShowDiscount] = useState(false);
   const [unitError,setUnitError]=useState('');
   const precision=item.tradeUnit?(item.product.unitConversions?.find(row=>row.tradeUnit===item.tradeUnit)?.tradePrecision??6):(item.product.unitPrecision??(item.product.unit==='dona'?0:6));const quantityStep=precision===0?'1':`0.${'0'.repeat(precision-1)}1`;
-  const changeTrade=(value:string)=>{if(value==='0'){onRemove(item.product.id);return}try{onUpdateTradeQuantity(item.product.id,value);setUnitError('')}catch(e){setUnitError(e instanceof Error?e.message:'Birlik miqdori noto‘g‘ri')}};
+  const changeTrade=(value:string)=>{if(value==='0'){onRemove(item.product.id);return}try{onUpdateTradeQuantity(item.product.id,value);setUnitError('')}catch(e){setUnitError(displayErrorMessage(e,'Birlik miqdori noto‘g‘ri'))}};
 
   return (
     <div className="p-3 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition shadow-2xs space-y-2">
@@ -57,15 +60,15 @@ export default function CartItem({
         </button>
       </div>
 
-      {!!item.product.unitConversions?.length&&<label className="text-xs">{tr("Savdo birligi (tanlash miqdorni 1 ga, chegirmani 0 ga qaytaradi)")}<select aria-label={item.product.name+' savdo birligi'} disabled={disabled} value={item.tradeUnit??item.product.unit} onChange={e=>{try{onSelectUnit(item.product.id,e.target.value);setUnitError('')}catch(error){setUnitError(error instanceof Error?error.message:'Birlik tanlanmadi')}}}><option value={item.product.unit}>{item.product.unit} {tr("(asosiy)")}</option>{item.product.unitConversions.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}: 1 = {row.ratio} {item.product.unit}</option>)}</select></label>}
-      {item.tradeUnit&&<p className="text-xs">{item.tradeQuantity} {item.tradeUnit} = {item.quantity} {item.product.unit}{tr("; narx asosiy birlik uchun.")}</p>}{unitError&&<p role="alert">{unitError}</p>}
+      {!!item.product.unitConversions?.length&&<label className="text-xs">{tr("Savdo birligi (tanlash miqdorni 1 ga, chegirmani 0 ga qaytaradi)")}<select aria-label={item.product.name+" "+tr("savdo birligi")} disabled={disabled} value={item.tradeUnit??item.product.unit} onChange={e=>{try{onSelectUnit(item.product.id,e.target.value);setUnitError('')}catch(error){setUnitError(displayErrorMessage(error,'Birlik tanlanmadi'))}}}><option value={item.product.unit}>{item.product.unit} {tr("(asosiy)")}</option>{item.product.unitConversions.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}: 1 = {row.ratio} {item.product.unit}</option>)}</select></label>}
+      {item.tradeUnit&&<p className="text-xs">{item.tradeQuantity} {item.tradeUnit} = {item.quantity} {item.product.unit}{tr("; narx asosiy birlik uchun.")}</p>}{unitError&&<p role="alert">{uiMessage(unitError)}</p>}
       {/* Middle: Quantity controls & Line Total */}
       <div className="flex items-center justify-between gap-2">
         {/* Quantity buttons */}
         <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
           <button
             type="button"
-            aria-label={item.product.name+' miqdorini kamaytirish'}
+            aria-label={item.product.name+" "+tr("miqdorini kamaytirish")}
             onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',-1)):onUpdateQuantity(item.product.id, item.quantity - 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
@@ -73,7 +76,7 @@ export default function CartItem({
           </button>
 
           <input
-            aria-label={item.product.name+' miqdori'}
+            aria-label={item.product.name+" "+tr("miqdori")}
             type="number"
             min={quantityStep}
             step={quantityStep}
@@ -87,7 +90,7 @@ export default function CartItem({
 
           <button
             type="button"
-            aria-label={item.product.name+' miqdorini oshirish'}
+            aria-label={item.product.name+" "+tr("miqdorini oshirish")}
             onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',1)):onUpdateQuantity(item.product.id, item.quantity + 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
@@ -114,7 +117,7 @@ export default function CartItem({
       {/* Optional Line Discount Input */}
       {showDiscount && (
         <div className="pt-2 border-t border-gray-100 flex items-center gap-2">
-          <DiscountInput label={item.product.name+' qator chegirmasi'} amount={item.discountAmount} percent={item.discountPercent} onChange={(amount,percent)=>onUpdateDiscount(item.product.id,amount,percent)}/>
+          <DiscountInput label={item.product.name+" "+tr("qator chegirmasi")} amount={item.discountAmount} percent={item.discountPercent} onChange={(amount,percent)=>onUpdateDiscount(item.product.id,amount,percent)}/>
           <button
             onClick={() => setShowDiscount(false)}
             className="text-[10px] text-gray-600 font-semibold hover:text-gray-700"

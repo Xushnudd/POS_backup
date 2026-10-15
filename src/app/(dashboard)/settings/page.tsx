@@ -1,13 +1,7 @@
 'use client';
-
-
-
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
-
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -50,6 +44,8 @@ type SettingsUser = {
 
 export default function SettingsPage(){const {organization,user,role}=useAuth();return organization&&user?<SettingsContent key={[organization.id,user.id,role].join(':')}/>:null;}
 function SettingsContent() {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const { organization, refreshUser, role } = useAuth();
@@ -139,7 +135,7 @@ function SettingsContent() {
     try {
       const res = await api.organizations.users(organization.id,{page:String(userPage),limit:String(userLimit),search:userSearch,sort:userSort,status:userStatus});
       if(request===userReadSequence.current.value){setUsers(res.data??[]);setUserPages(res.pagination?.totalPages??0)}
-    } catch (error: unknown) {if(request===userReadSequence.current.value)setUserError(error instanceof Error?error.message:'Xodimlar yuklanmadi');
+    } catch (error: unknown) {if(request===userReadSequence.current.value)setUserError(displayErrorMessage(error,'Xodimlar yuklanmadi'));
     } finally {if(request===userReadSequence.current.value)setIsLoadingUsers(false);}
   }, [organization,role,invalidUsers,userPage,userLimit,userSearch,userSort,userStatus]);
 
@@ -167,7 +163,7 @@ function SettingsContent() {
       notifySuccess('Tashkilot sozlamalari muvaffaqiyatli saqlandi');
       await refreshUser();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Sozlamalarni saqlashda xatolik');
+      notifyError(displayErrorMessage(err,'Sozlamalarni saqlashda xatolik'));
     } finally {
       savingFlights.current.organization=false;
       setIsSavingOrg(false);
@@ -196,7 +192,7 @@ function SettingsContent() {
       setStorePhone('');
       await refreshStores();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Do\'kon yaratishda xatolik');
+      notifyError(displayErrorMessage(err,'Do\'kon yaratishda xatolik'));
     } finally {
       savingFlights.current.store=false;
       setIsSavingStore(false);
@@ -222,7 +218,7 @@ function SettingsContent() {
       setRegisterCode('');
       await refreshStores();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Kassa yaratishda xatolik');
+      notifyError(displayErrorMessage(err,'Kassa yaratishda xatolik'));
     } finally {
       savingFlights.current.register=false;
       setIsSavingRegister(false);
@@ -263,7 +259,7 @@ function SettingsContent() {
       setUserStoreIds([]);
       loadUsers();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Foydalanuvchi qo\'shishda xatolik');
+      notifyError(displayErrorMessage(err,'Foydalanuvchi qo\'shishda xatolik'));
     } finally {
       userFlight.current=false;
       setIsSavingUser(false);
@@ -472,7 +468,7 @@ function SettingsContent() {
           padding={false}
         >
           <ListFilter search={userSearch} sort={userSort} label={tr("Xodim ismi yoki telefon qidirish")} onChange={changeQuery} reset={{status:''}} options={[{value:'source',label:tr("Asl ketma-ketlik")},{value:'name_asc',label:tr("Nom A → Z")},{value:'name_desc',label:tr("Nom Z → A")},{value:'newest',label:tr("Yangi → eski")},{value:'oldest',label:tr("Eski → yangi")}]}><Select label={tr("Xodim holati")} value={userStatus} options={[{value:'all',label:tr("Barcha xodimlar")},{value:'active',label:tr("Faol")},{value:'blocked',label:tr("Bloklangan")},{value:'archived',label:tr("Arxiv")}]} onChange={event=>changeQuery({status:event.target.value,page:'1'})}/></ListFilter>
-          {invalidUsers?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:userError?<p role="alert">{userError}</p>:isLoadingUsers ? (
+          {invalidUsers?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:userError?<p role="alert">{uiMessage(userError)}</p>:isLoadingUsers ? (
             <div className="h-48 flex items-center justify-center">
               <LoadingSpinner size="lg" text={tr("Xodimlar yuklanmoqda...")} />
             </div>
@@ -519,16 +515,16 @@ function SettingsContent() {
                           : u.role==='owner'?tr("Barcha do‘konlar"):tr("Filial biriktirilmagan")}
                       </td>
                       <td className="py-3 px-4"><div className="flex gap-2">
-                        {u.isActive&&<Button size="sm" onClick={async()=>{if(!organization?.id||!window.confirm(`${u.user?.fullName} ga egalik so‘rovini yuborasizmi? Qabul qilganda siz administrator bo‘lasiz.`))return;try{await api.ownership.request(organization.id,u.id);notifySuccess('Qabul qiluvchi tasdig‘i kutilmoqda');}catch(error){notifyError(error instanceof Error?error.message:'So‘rov yuborilmadi');}}}>{tr("Egalikni topshirish")}</Button>}
+                        {u.isActive&&<Button size="sm" onClick={async()=>{if(!organization?.id||!window.confirm(`${u.user?.fullName} ga egalik so‘rovini yuborasizmi? Qabul qilganda siz administrator bo‘lasiz.`))return;try{await api.ownership.request(organization.id,u.id);notifySuccess('Qabul qiluvchi tasdig‘i kutilmoqda');}catch(error){notifyError(displayErrorMessage(error,'So‘rov yuborilmadi'));}}}>{tr("Egalikni topshirish")}</Button>}
                         <Badge size="sm">{u.archivedAt?tr("Arxivlangan"):u.isActive?tr("Faol"):tr("Bloklangan")}</Badge>
                         {!u.archivedAt&&<Button size="sm" onClick={()=>{setEditingMember(u);setMemberRole(u.role);setMemberStores(u.stores?.map(store=>store.id)??[]);}}>{tr("Vakolat")}</Button>}
                         {!u.archivedAt&&<Button size="sm" onClick={async()=>{
                           if (!organization?.id) return;
-                          try{await api.organizations.updateMember(organization.id,u.id,{isActive:!u.isActive});await loadUsers();notifySuccess(u.isActive?'Xodim bloklandi':'Xodim faollashtirildi');}catch(error){notifyError(error instanceof Error?error.message:'Amal bajarilmadi');}
+                          try{await api.organizations.updateMember(organization.id,u.id,{isActive:!u.isActive});await loadUsers();notifySuccess(u.isActive?'Xodim bloklandi':'Xodim faollashtirildi');}catch(error){notifyError(displayErrorMessage(error,'Amal bajarilmadi'));}
                         }}>{u.isActive?tr("Bloklash"):tr("Faollashtirish")}</Button>}
                         <Button size="sm" onClick={async()=>{
                           if(!organization?.id||!window.confirm(u.archivedAt?'Xodim arxivdan bloklangan holatda tiklanadi. Vakolatlarini tekshirib, alohida faollashtiring.':'Xodim arxivlanadi va sessiyalari bekor qilinadi. Savdo tarixi saqlanadi. Davom etasizmi?'))return;
-                          try{await api.organizations.updateMember(organization.id,u.id,{action:u.archivedAt?'restore':'archive'});await loadUsers();notifySuccess(u.archivedAt?'Arxivdan tiklandi; hali bloklangan':'Xodim arxivlandi');}catch(error){notifyError(error instanceof Error?error.message:'Amal bajarilmadi');}
+                          try{await api.organizations.updateMember(organization.id,u.id,{action:u.archivedAt?'restore':'archive'});await loadUsers();notifySuccess(u.archivedAt?'Arxivdan tiklandi; hali bloklangan':'Xodim arxivlandi');}catch(error){notifyError(displayErrorMessage(error,'Amal bajarilmadi'));}
                         }}>{u.archivedAt?tr("Arxivdan tiklash"):tr("Arxivlash")}</Button>
                       </div></td>
                     </tr>
@@ -627,7 +623,7 @@ function SettingsContent() {
         <p className="text-sm mb-2">{tr("Havola 72 soat amal qiladi. Uni faqat tegishli xodimga ulashing; umumiy chatga qo‘ymang.")}</p>
         {invitationLink?<Input label={tr("Taklif havolasi")} value={invitationLink} readOnly />:<p>{tr("Havola faqat bir marta beriladi. Bekor qilib yangi taklif yarating.")}</p>}
         <div className="flex gap-2 mt-2"><Button disabled={!invitationLink} onClick={()=>setInvitationLink('')}>{tr("Havolani yashirish")}</Button>
-        <Button onClick={async()=>{if (!organization?.id) return;try{await api.organizations.revokeInvitation(organization.id,invitationId);setInvitationLink('');setInvitationId('');userMutation.current=null;notifySuccess('Taklif bekor qilindi');}catch(error){notifyError(error instanceof Error?error.message:'Taklif bekor qilinmadi');}}}>{tr("Taklifni bekor qilish")}</Button></div>
+        <Button onClick={async()=>{if (!organization?.id) return;try{await api.organizations.revokeInvitation(organization.id,invitationId);setInvitationLink('');setInvitationId('');userMutation.current=null;notifySuccess('Taklif bekor qilindi');}catch(error){notifyError(displayErrorMessage(error,'Taklif bekor qilinmadi'));}}}>{tr("Taklifni bekor qilish")}</Button></div>
       </Card>}
       <Modal isOpen={Boolean(editingMember)} onClose={()=>{if(closeUser())setEditingMember(null)}} title={tr("Xodim vakolatlari")} size="md">
         <form className="space-y-4" onSubmit={async event=>{
@@ -637,7 +633,7 @@ function SettingsContent() {
           if(memberMutation.current?.signature!==signature)memberMutation.current={signature,operationId:crypto.randomUUID()};
           setIsSavingUser(true);
           try {await api.organizations.updateMember(organization.id,editingMember.id,{operationId:memberMutation.current.operationId,role:memberRole,storeIds:memberStores});memberMutation.current=null;setEditingMember(null);await loadUsers();notifySuccess('Vakolat yangilandi; xodim qayta kirishi kerak');}
-          catch(error){notifyError(error instanceof Error?error.message:'Vakolat o‘zgarmadi');}finally{userFlight.current=false;setIsSavingUser(false);}
+          catch(error){notifyError(displayErrorMessage(error,'Vakolat o‘zgarmadi'));}finally{userFlight.current=false;setIsSavingUser(false);}
         }}>
           <fieldset disabled={isSavingUser} className="space-y-4">
           <Select label={tr("Rol")} value={memberRole} onChange={e=>setMemberRole(e.target.value as typeof memberRole)} options={[{value:'owner',label:tr("Egasi")},{value:'admin',label:tr("Administrator")},{value:'cashier',label:tr("Kassir")}]} />

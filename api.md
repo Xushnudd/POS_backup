@@ -1522,4 +1522,8 @@ Variant list: search name/SKU/barcode, sort source/name_asc/name_desc/price_asc/
 
 Main sales report row search faqat chek/mijoz ro‘yxatini tanlaydi: period summary barcha tanlangan davrning pul va qarz hodisalarini saqlaydi. Metadata `periodSaleCount` va `summaryScope=complete_period_before_row_search` buni ochiq qiladi. Product/purchase/supplier/breakdown reports o‘z filtered group count/summary va original asOf scope bilan. CSV hech qachon UI sahifasi bilan qisqartirilmaydi; mavjud export cap saqlanadi.
 
-UI prefixlar, journal tartibi, manual confirmation va form-selector istisnolari `docs/operations/list-query-coverage.md` da. Vendor/protokol/hardware integration qo‘shilmadi; Uz/Ru qamrovi alohida in-progress.
+UI prefixlar, journal tartibi, manual confirmation va form-selector istisnolari `docs/operations/list-query-coverage.md` da. Vendor/protokol/hardware integration qo‘shilmadi.
+
+### UI locale va API contracti
+
+`pos_locale=uz|ru` faqat display afzalligi; authentication, authorization va tenant scope uchun ishlatilmaydi. UI til tanlovi yangi endpoint yoki mutatsiya yubormaydi. API machine `code`, `status`, permission/query nomlari, canonical nuqtali decimal, ISO sana va idempotency UUID bir xil qoladi. Masalan, RU ko‘rinishidagi `12,50 сум` requestdagi `12.50` yoki original pending body o‘rniga yuborilmaydi. Diagnostic `requestId` saqlanadi; foydalanuvchiga tarjima qilingan reviewed error guidance ko‘rsatiladi. Original mahsulot/mijoz nomlari, izoh va hujjat snapshotlari o‘zgarmaydi. [Locale va recovery contracti](docs/operations/localization.md).

@@ -1,0 +1,25 @@
+'use client';
+import {useTranslation} from '@/context/LocaleContext';
+
+import Link from 'next/link';
+import type {PublicPlan} from '@/server/billing/public-pricing';
+export default function LandingContent({plans}:{plans:PublicPlan[]|null}){
+ const {t:tr,formatMoney}=useTranslation();
+
+ const trial=plans?.find(plan=>plan.isTrial);
+ return <div className="min-h-screen bg-slate-50 text-slate-900"><header className="border-b bg-white"><nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-6 p-6" aria-label={tr("Asosiy navigatsiya")}><Link href="/" className="text-xl font-bold">Shuni POS</Link><a href="#features">{tr("Imkoniyatlar")}</a><a href="#prices">{tr("Tariflar")}</a><a href="#devices">{tr("Moslik")}</a><Link href="/login" className="ml-auto underline">{tr("Kirish")}</Link></nav></header>
+ <main><section className="mx-auto max-w-6xl px-6 py-20"><h1 className="max-w-3xl text-4xl font-bold leading-tight">{tr("Savdo, ombor va hisoblarni bir joyda boshqaring")}</h1><p className="my-6 max-w-3xl text-lg">{tr("Naqd savdo, mijoz qarzi, xarid, qaytarish va smena hisoblari uchun POS. Tashkilot va filiallar bo‘yicha vakolatlar bilan ishlang.")}</p>
+ {trial&&<p className="mb-6">{tr("Yangi tashkilot uchun")}{' '}{trial.trialDays} {tr("kunlik")}{' '}{trial.name} {tr("sinovi. Sinovdan so‘ng")}{' '}{trial.graceDays} {tr("kun imtiyozli muddat.")}</p>}
+ <Link href="/register" className="inline-block rounded bg-emerald-700 px-6 py-3 font-semibold text-white">{tr("Sinovni boshlash")}</Link><Link href="/pos" className="ml-6 underline">{tr("POSni ochish")}</Link>
+ </section><section id="features" className="mx-auto max-w-6xl px-6 py-12"><h2 className="mb-6 text-2xl font-bold">{tr("Hozir ishlaydigan imkoniyatlar")}</h2><div className="grid gap-6 md:grid-cols-3">
+ <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr("Savdo va mijoz hisobi")}</h3><p className="mt-3">{tr("Naqd savdo, chegirma, qisman qaytarish, nasiya va mijoz ko‘chirmasi. Karta yoki bank yozuvi qo‘lda tasdiqlanadi.")}</p></article>
+ <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr("Ombor va xarid")}</h3><p className="mt-3">{tr("Mahsulot va barkod katalogi, kirim, ombor harakati, filiallararo ko‘chirish va inventarizatsiya.")}</p></article>
+ <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr("Smena va hisobot")}</h3><p className="mt-3">{tr("Smena ochish/yopish, naqd pul jurnali, savdo va qarz hisobotlari, filtrlangan CSV eksport.")}</p></article>
+ </div></section><section id="prices" className="bg-slate-900 px-6 py-16 text-white"><div className="mx-auto max-w-6xl"><h2 className="mb-6 text-2xl font-bold">{tr("Oylik tariflar")}</h2>
+ {!plans&&<p role="status">{tr("Tariflar vaqtincha yuklanmadi. Keyinroq qayta oching; taxminiy narx ko‘rsatilmaydi.")}</p>}
+ <div className="grid gap-6 md:grid-cols-3">{plans?.map(plan=><article key={plan.code} className="rounded border border-slate-600 p-6"><h3 className="text-xl font-semibold">{plan.name}</h3><p className="my-4 text-3xl font-bold">{plan.currency==='UZS'?formatMoney(plan.monthlyPrice):plan.monthlyPrice+' '+plan.currency}{tr('/oy')}</p><ul className="mb-6 space-y-2"><li>{plan.branchLimit} {tr("filial")}</li><li>{tr("Tashkilot bo‘yicha")}{' '}{plan.registerLimit} {tr("kassa")}</li><li>{tr("Jami")}{' '}{plan.staffLimit} {tr("xodim")}</li></ul><Link className="underline" href="/register">{tr("Ro‘yxatdan o‘tish")}</Link></article>)}</div>
+ <p className="mt-6">{tr("Limitlar tashkilot bo‘yicha jami; arxivlangan yozuvlar ham hisoblanadi. Obuna tugaganda mavjud ma’lumotlar o‘chirilmaydi. Yakuniy invoice joriy tarif versiyasi bo‘yicha tasdiqlanadi.")}</p></div></section>
+ <section id="devices" className="mx-auto max-w-6xl px-6 py-12"><h2 className="text-2xl font-bold">{tr("Brauzer, qurilmalar va integratsiyalar")}</h2><p className="mt-4">{tr("Asosiy oqimlar Chromium, Firefox va WebKit dvigatellarida avtomatik tekshiriladi. Barkodni klaviatura sifatida kiritish qo‘llanadi.")}</p><p className="mt-3">{tr("58/80 mm brauzer chek andozalari ichki, fiskal bo‘lmagan nusxa uchun. Real printer, tarozi, maxsus skanner va cash drawer modellari hali tasdiqlanmagan.")}</p><p className="mt-3">{tr("Real Click, fiskalizatsiya va E-POS integratsiyalari hali ulanmagan. To‘liq offline to‘lov yoki fizik uskunalar mosligi va’da qilinmaydi.")}</p></section>
+ <section className="mx-auto max-w-6xl px-6 py-12"><h2 className="text-2xl font-bold">{tr("Boshlash va yordam")}</h2><p className="mt-4">{tr("Hisob yarating, tashkilot va kassani sozlang, katalogni import qiling va boshlang‘ich qoldiqni tekshiring. Ilovadagi yordam va kassir mashqi ish tartibini tushuntiradi.")}</p><div className="mt-4 flex gap-6"><Link href="/onboarding" className="underline">{tr("Birlamchi sozlash")}</Link><Link href="/help" className="underline">{tr("Foydalanish qo‘llanmasi")}</Link></div></section>
+ </main><footer className="border-t p-6 text-center">{tr("Shuni POS · SaaS oylik obuna. Mahsulot imkoniyatlari ushbu sahifadagi doira bilan cheklangan.")}</footer></div>
+}

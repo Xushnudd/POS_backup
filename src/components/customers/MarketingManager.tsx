@@ -1,10 +1,5 @@
 'use client';
-
-
-
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -32,6 +27,8 @@ export default function MarketingManager({customerId,policyRevision=0}:{customer
  const {organization,user,role}=useAuth();return organization&&user&&role==='owner'?<Suspense fallback={<p role="status">{tr("Karta/promo jurnali yuklanmoqda…")}</p>}><Manager key={[organization.id,user.id,role,customerId??'campaigns'].join(':')} customerId={customerId} policyRevision={policyRevision}/></Suspense>:null;
 }
 function Manager({customerId,policyRevision}:{customerId?:string;policyRevision:number}){
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const kind=customerId?'card':'promotion',returnPath=customerId?'/customers/'+customerId:'/loyalty',{stores}=useOrganization();
@@ -43,7 +40,7 @@ function Manager({customerId,policyRevision}:{customerId?:string;policyRevision:
  useEffect(()=>{let cancelled=false;void Promise.resolve().then(async()=>{if(cancelled)return;setBusy(true);setError('');setData(null);
   if(page===undefined||limit===undefined||search===undefined||sort===undefined){setError('Karta/promo URL filtri noto‘g‘ri. Filtrlarni tozalang.');setBusy(false);return;}
   try{const [p,list]=await Promise.all([api.request<Policy|null>('/loyalty/policy'),api.request<Page>('/loyalty/marketing?'+new URLSearchParams({kind,page:String(page),limit:String(limit),search,sort,...(customerId?{customerId}:{})}))]);if(!cancelled){setPolicy(p.data??null);setData(list.data??null);}}
-  catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Karta/promo jurnali yuklanmadi');}finally{if(!cancelled)setBusy(false);}
+  catch(e){if(!cancelled)setError(displayErrorMessage(e,'Karta/promo jurnali yuklanmadi'));}finally{if(!cancelled)setBusy(false);}
  });return()=>{cancelled=true;};},[customerId,kind,page,limit,search,sort,revision,policyRevision]);
  let startsAt='',endsAt='';try{if(starts)startsAt=tashkentLocalToISO(starts);if(ends)endsAt=tashkentLocalToISO(ends);}catch{/* Field remains editable and no invalid date is submitted. */}
  const body=customerId?{action:'issue_card',policyVersionId:policy?.id??'',customerId,code,reason}:{action:'create_promotion',policyVersionId:policy?.id??'',code,reason,configuration:{enabled:true,kind:ruleKind,value,minEligibleNet:minimum,maxDiscount:maximum,maxUses:Number(maxUses),maxUsesPerCustomer:Number(perCustomer),storeIds,productIds:[],startsAt,endsAt}};
@@ -53,16 +50,16 @@ function Manager({customerId,policyRevision}:{customerId?:string;policyRevision:
  const refresh=()=>setRevision(count=>count+1);
  return <Card className="space-y-3"><h2 className="font-bold">{customerId?tr("Mijoz chegirma kartasi"):tr("Promo-kod kampaniyalari")}</h2>
   <p>{customerId?tr("Karta shu mijozga biriktiriladi. Foiz amaldagi administrator siyosatidan olinadi; original muddat saqlanadi."):tr("Promo butun chek uchun. Filial, muddat, summa va global/mijoz foydalanish limitlari serverda tekshiriladi. Eski qoida o‘zgartirilmaydi; o‘zgarish uchun eski kampaniyani bekor qilib, yangi kod yarating.")}</p>
-  {busy&&<p role="status">{tr("Karta/promo jurnali yuklanmoqda…")}</p>}{error&&<p role="alert">{error}</p>}
+  {busy&&<p role="status">{tr("Karta/promo jurnali yuklanmoqda…")}</p>}{error&&<p role="alert">{uiMessage(error)}</p>}
   <PendingActions prefix="/loyalty/marketing" returnPath={returnPath} revision={revision} onDone={refresh}/>
   <ListFilter search={search??''} sort={sort??'newest'} label={customerId?tr("Karta kodi qidiruvi"):tr("Promo kodi qidiruvi")} options={[{value:'newest',label:tr("Yangilari avval")},{value:'oldest',label:tr("Eskilari avval")},{value:'code',label:tr("Kod bo‘yicha")}]} onChange={changeQuery} disabled={posting}/>
   {!enabled&&<p>{tr("Egasi avval shu xizmatni bonus siyosatida yoqsin.")}</p>}
-  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={body} label={customerId?tr("Chegirma kartasini chiqarish"):tr("Promo kampaniyasini yaratish")} review={['Kod: '+code,customerId?'Mijoz: '+customerId:'Qoida: '+ruleKind+' '+value,customerId?'Original muddat policy bo‘yicha':'Chegara: '+maximum+' UZS · jami '+maxUses+' · mijozga '+perCustomer,customerId?'Foiz: '+(policy?.configuration.cards.discountPercent??''):'Toshkent: '+starts+' — '+ends,reason]} canSubmit={!busy&&!posting&&!error} canReview={valid} onSavingChange={setPosting} onDone={refresh}>
+  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={body} label={customerId?tr("Chegirma kartasini chiqarish"):tr("Promo kampaniyasini yaratish")} review={[tr("Kod:")+" "+code,customerId?tr("Mijoz:")+" "+customerId:tr("Qoida:")+" "+ruleKind+' '+value,customerId?tr("Original muddat policy bo‘yicha"):tr("Chegara:")+" "+maximum+" "+tr("UZS · jami")+" "+maxUses+" "+tr("· mijozga")+" "+perCustomer,customerId?tr("Foiz:")+" "+(policy?.configuration.cards.discountPercent??''):tr("Toshkent:")+" "+starts+' — '+ends,reason]} canSubmit={!busy&&!posting&&!error} canReview={valid} onSavingChange={setPosting} onDone={refresh}>
    <Input label={customerId?tr("Yangi chegirma kartasi kodi"):tr("Yangi promo-kod")} value={code} maxLength={64} onChange={e=>setCode(e.target.value.toUpperCase())}/>
    {!customerId&&<><Select label={tr("Promo chegirma turi")} value={ruleKind} onChange={e=>setRuleKind(e.target.value)} options={[{value:'percent',label:tr("Foiz")},{value:'fixed',label:tr("UZS summasi")}]}/><Input label={tr("Promo chegirma qiymati")} inputMode="decimal" value={value} onChange={e=>setValue(e.target.value)}/><Input label={tr("Promo uchun minimal chek bazasi (UZS)")} inputMode="decimal" value={minimum} onChange={e=>setMinimum(e.target.value)}/><Input label={tr("Promo maksimal chegirmasi (UZS)")} inputMode="decimal" value={maximum} onChange={e=>setMaximum(e.target.value)}/><Input label={tr("Promo jami foydalanish limiti")} inputMode="numeric" value={maxUses} onChange={e=>setMaxUses(e.target.value)}/><Input label={tr("Promo mijoz foydalanish limiti")} inputMode="numeric" value={perCustomer} onChange={e=>setPerCustomer(e.target.value)}/><Input label={tr("Promo boshlanishi (Toshkent vaqti)")} type="datetime-local" value={starts} onChange={e=>setStarts(e.target.value)}/><Input label={tr("Promo tugashi (Toshkent vaqti)")} type="datetime-local" value={ends} onChange={e=>setEnds(e.target.value)}/><fieldset><legend>{tr("Filiallar: tanlov bo‘sh bo‘lsa barcha filiallarda")}</legend>{stores.map(store=><label key={store.id} className="block"><input type="checkbox" checked={storeIds.includes(store.id)} onChange={e=>setStoreIds(ids=>e.target.checked?[...ids,store.id]:ids.filter(id=>id!==store.id))}/>{store.name}</label>)}</fieldset></>}
    <Input label={customerId?tr("Karta chiqarish sababi"):tr("Promo kampaniyasi sababi")} value={reason} onChange={e=>setReason(e.target.value)}/>
   </DurableMutation>
-  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={{action:'revoke',kind,id:revokeId,reason:revokeReason}} label={customerId?tr("Kartani bekor qilish"):tr("Promo kampaniyasini bekor qilish")} review={['Kod: '+(data?.rows.find(row=>row.id===revokeId)?.code??''),revokeReason]} canSubmit={!busy&&!posting&&!error} canReview={!!data?.rows.some(row=>row.id===revokeId&&!row.revokedAt)&&revokeReason.trim().length>=3} onSavingChange={setPosting} onDone={refresh}>
+  <DurableMutation path="/loyalty/marketing" returnPath={returnPath} body={{action:'revoke',kind,id:revokeId,reason:revokeReason}} label={customerId?tr("Kartani bekor qilish"):tr("Promo kampaniyasini bekor qilish")} review={[tr("Kod:")+" "+(data?.rows.find(row=>row.id===revokeId)?.code??''),revokeReason]} canSubmit={!busy&&!posting&&!error} canReview={!!data?.rows.some(row=>row.id===revokeId&&!row.revokedAt)&&revokeReason.trim().length>=3} onSavingChange={setPosting} onDone={refresh}>
    <Select label={customerId?tr("Bekor qilinadigan karta"):tr("Bekor qilinadigan promo")} value={revokeId} onChange={e=>setRevokeId(e.target.value)} options={[{value:'',label:tr("Original yozuvni tanlang")},...(data?.rows??[]).filter(row=>!row.revokedAt).map(row=>({value:row.id,label:row.code}))]}/><Input label={tr("Karta/promo bekor qilish sababi")} value={revokeReason} onChange={e=>setRevokeReason(e.target.value)}/>
   </DurableMutation>
   {!busy&&!error&&data?.rows.length===0&&<p>{tr("Bu filtrda karta/promo yo‘q.")}</p>}

@@ -1,6 +1,5 @@
 'use client';
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -25,6 +24,10 @@ export default function SecurityPage(){
  return user?<AccountSecurityPage key={user.id}/>:null;
 }
 function AccountSecurityPage(){
+ const {formatDate}=useTranslation();
+
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const {user,organization,refreshUser}=useAuth();
@@ -51,7 +54,7 @@ function AccountSecurityPage(){
    await api.auth.changePassword(currentPassword,newPassword);
    if(!live.current)return;setAck('Parol serverda yangilandi. Qayta kiring.');setCurrentPassword('');setNewPassword('');setConfirmation('');commitPageNavigation();
    try{await refreshUser();}catch{/* A confirmed password change is not undone by a failed profile read. */}finally{if(live.current)router.replace('/login');}
-  }catch(error){if(live.current)setPasswordError(error instanceof Error?error.message:'Natija noaniq. Qayta kirishda yangi parolni tekshiring.');}
+  }catch(error){if(live.current)setPasswordError(displayErrorMessage(error,'Natija noaniq. Qayta kirishda yangi parolni tekshiring.'));}
   finally{accountFlight.current=false;if(live.current)setChanging(false);}
  };
  useEffect(()=>{
@@ -59,17 +62,17 @@ function AccountSecurityPage(){
   void Promise.resolve().then(async()=>{
    if(cancelled)return;setBusy(true);setError('');
    try{const response=await api.sessions.list(page,sessionView as 'active'|'all');if(!response.data)throw new Error('Sessiyalar yuklanmadi');if(!cancelled){setRows(response.data);setPages(response.pagination?.totalPages??0);}}
-   catch(error){if(!cancelled)setError(error instanceof Error?error.message:'Sessiyalar yuklanmadi');}
+   catch(error){if(!cancelled)setError(displayErrorMessage(error,'Sessiyalar yuklanmadi'));}
    finally{if(!cancelled)setBusy(false);}
   });return()=>{cancelled=true;};
  },[user?.id,page,version,sessionView,invalid]);
  const revoke=async(id:string)=>{
   if(revokeFlight.current||accountFlight.current||busy||error)return;revokeFlight.current=true;setRevoking(id);setAck('');
   try{await api.sessions.revoke(id);if(live.current){setAck('Sessiya serverda bekor qilindi.');setBusy(true);setVersion(value=>value+1);}}
-  catch(error){if(live.current)setError(error instanceof Error?error.message:'Sessiya natijasi tasdiqlanmadi; holatni yangilang');}
+  catch(error){if(live.current)setError(displayErrorMessage(error,'Sessiya natijasi tasdiqlanmadi; holatni yangilang'));}
   finally{revokeFlight.current=false;if(live.current)setRevoking('');}
  };
- const date=(value:string)=>new Date(value).toLocaleString('uz-UZ',{timeZone:organization?.timezone});
+ const date=(value:string)=>formatDate(value,true,organization?.timezone);
  const logoutAll=async()=>{
   if(accountFlight.current||revokeFlight.current||!user||!organization||!confirmPasswordDiscard())return;
   accountFlight.current=true;setChanging(true);setPasswordError('');setAck('');
@@ -77,15 +80,15 @@ function AccountSecurityPage(){
    if((await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).length)throw new Error('Sinxronlanmagan amallar bor; avval ularning natijasini tekshiring');
    await api.auth.logoutAll();if(!live.current)return;setAck('Barcha sessiyalar serverda yopildi.');setCurrentPassword('');setNewPassword('');setConfirmation('');commitPageNavigation();
    try{await refreshUser();}catch{/* Logout ACK stays valid when the profile read fails. */}finally{if(live.current)router.replace('/login');}
-  }catch(error){if(live.current)setPasswordError(error instanceof Error?error.message:'Chiqish amalga oshmadi');}
+  }catch(error){if(live.current)setPasswordError(displayErrorMessage(error,'Chiqish amalga oshmadi'));}
   finally{accountFlight.current=false;if(live.current)setChanging(false);}
  };
  const changeSessionView=(view:'active'|'all')=>{setRows([]);setPages(0);setBusy(true);changeQuery({view,page:'1'});};
- return <div className="space-y-4">{ack&&<p role="status">{ack}</p>}<CashierPin/><ContactVerification/><Totp key={organization?.id}/><ReadQueryNotice invalid={invalid} reset={()=>changeQuery({page:'',limit:'',sort:'',search:'',view:''})}/><h1 className="text-2xl font-bold">{sessionView==='active'?tr("Faol sessiyalar"):tr("Sessiyalar tarixi")}</h1><Card>
+ return <div className="space-y-4">{ack&&<p role="status">{uiMessage(ack)}</p>}<CashierPin/><ContactVerification/><Totp key={organization?.id}/><ReadQueryNotice invalid={invalid} reset={()=>changeQuery({page:'',limit:'',sort:'',search:'',view:''})}/><h1 className="text-2xl font-bold">{sessionView==='active'?tr("Faol sessiyalar"):tr("Sessiyalar tarixi")}</h1><Card>
   <p className="text-sm mb-3">{tr("Bu ro‘yxat hisobingizning barcha bizneslardagi")}{' '}{sessionView==='active'?tr("faol sessiyalarini"):tr("saqlangan sessiyalarini, jumladan bekor qilingan va muddati tugagan kirishlarini")} {tr("ko‘rsatadi. Qurilma modeli yoki joylashuv taxmin qilinmaydi. Joriy sessiyadan chiqish uchun menyudagi Chiqish tugmasini ishlating.")}</p>
   {sessionView==='all'&&<p className="mb-3 text-sm text-gray-600">{tr("Sessiyalar tarixida oxirgi 90 kunda yaratilgan kirishlar ko‘rsatiladi.")}</p>}
   <div className="mb-3 flex flex-wrap gap-2"><Button size="sm" aria-pressed={sessionView==='active'} disabled={!!revoking||sessionView==='active'} onClick={()=>changeSessionView('active')}>{tr("Faol sessiyalar")}</Button><Button size="sm" aria-pressed={sessionView==='all'} disabled={!!revoking||sessionView==='all'} onClick={()=>changeSessionView('all')}>{tr("Sessiyalar tarixi")}</Button></div>
-  {error&&<div role="alert">{error}<Button onClick={()=>{setBusy(true);setVersion(value=>value+1);}}>{tr("Qayta yuklash")}</Button></div>}
+  {error&&<div role="alert">{uiMessage(error)}<Button onClick={()=>{setBusy(true);setVersion(value=>value+1);}}>{tr("Qayta yuklash")}</Button></div>}
   {busy&&!invalid?<p role="status">{tr("Yuklanmoqda...")}</p>:rows.map(row=><article key={row.id} className="border-t py-3 space-y-1">
    <p className="font-semibold">{row.current?tr("Joriy sessiya"):tr("Boshqa sessiya")}</p><p className="text-sm">{tr("Holat:")}{' '}{row.status==='revoked'?tr("Bekor qilingan"):row.status==='expired'?tr("Muddati tugagan"):tr("Faol")}{tr("; kirish usuli:")}{' '}{row.authenticationMethod==='pin'?tr("Kassir PIN"):tr("Parol")}</p><p className="text-xs break-all">{tr("Sessiya ID:")}{' '}{row.id}</p>
    <p className="text-xs break-all">{tr("Biznes ID:")}{' '}{row.organizationId}</p><p className="text-sm">{tr("Yaratilgan:")}{' '}{date(row.createdAt)}</p><p className="text-sm">{tr("Amal qilish muddati:")}{' '}{date(row.expiresAt)}</p><p className="text-sm">{tr("Faolsizlik muddati:")}{' '}{date(row.idleExpiresAt)}</p>
@@ -99,6 +102,6 @@ function AccountSecurityPage(){
   <Input label={tr("Joriy parol")} type="password" autoComplete="current-password" required maxLength={72} disabled={changing||!!revoking} value={currentPassword} onChange={event=>setCurrentPassword(event.target.value)}/>
   <Input label={tr("Yangi parol")} type="password" autoComplete="new-password" required minLength={8} maxLength={72} disabled={changing||!!revoking} value={newPassword} onChange={event=>setNewPassword(event.target.value)}/>
   <Input label={tr("Yangi parolni tasdiqlash")} type="password" autoComplete="new-password" required minLength={8} maxLength={72} disabled={changing||!!revoking} value={confirmation} onChange={event=>setConfirmation(event.target.value)}/>
-  {passwordDirty&&<p role="status">{tr("Saqlanmagan parol o‘zgarishlari bor.")}</p>}{changing&&<p role="status">{tr("Hisob amali tekshirilmoqda…")}</p>}{passwordError&&<p role="alert">{passwordError}</p>}<Button type="submit" disabled={changing||!!revoking}>{tr("Parolni yangilash")}</Button>
+  {passwordDirty&&<p role="status">{tr("Saqlanmagan parol o‘zgarishlari bor.")}</p>}{changing&&<p role="status">{tr("Hisob amali tekshirilmoqda…")}</p>}{passwordError&&<p role="alert">{uiMessage(passwordError)}</p>}<Button type="submit" disabled={changing||!!revoking}>{tr("Parolni yangilash")}</Button>
  </form></Card><Card title={tr("Barcha sessiyalardan chiqish")}><p className="text-sm mb-3">{tr("Barcha bizneslardagi kirishlar, shu jumladan joriy sessiya ham yopiladi. Lokal amallar o‘chirilmaydi.")}</p><Button disabled={changing||!!revoking} onClick={logoutAll}>{tr("Barcha sessiyalardan chiqish")}</Button></Card><SecurityHistory/></div>;
 }

@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -112,7 +113,7 @@ export default function PaymentModal({
     let creditDueAt:string|undefined;
     if(payments.some(payment=>payment.paymentType==='credit')&&creditDueDate){
       try{const deadline=new Date(dateBoundary(creditDueDate,organization?.timezone??'Asia/Tashkent',true).getTime()-1);if(deadline.getTime()<Date.now())throw new Error('Nasiya muddati o‘tgan sana bo‘lmasligi kerak');creditDueAt=deadline.toISOString();}
-      catch(error){notifyError(error instanceof Error?error.message:'Muddat noto‘g‘ri');return;}
+      catch(error){notifyError(displayErrorMessage(error,'Muddat noto‘g‘ri'));return;}
     }
     const applied=payments.filter(p=>p.paymentType==='cash').reduce((sum,p)=>sum+fixed(p.amount),BigInt(0));
     let tender:string|undefined;
@@ -148,7 +149,7 @@ export default function PaymentModal({
       }
     >
       <div className="space-y-6">
-{storeId&&serialItems.map(item=><SerialPicker key={item.productId} storeId={storeId} productId={item.productId} label={item.name+' sotiladigan seriallar ('+item.quantity+')'} value={serialChoices[item.productId]??[]} onChange={ids=>setSerialChoices(previous=>({...previous,[item.productId]:ids}))} disabled={isLoading}/>)}
+{storeId&&serialItems.map(item=><SerialPicker key={item.productId} storeId={storeId} productId={item.productId} label={item.name+" "+tr("sotiladigan seriallar (")+item.quantity+')'} value={serialChoices[item.productId]??[]} onChange={ids=>setSerialChoices(previous=>({...previous,[item.productId]:ids}))} disabled={isLoading}/>)}
       {taxAmount!==undefined&&<p>{tr("Server hisobi: jami ichidagi soliq qismi")}{' '}{taxAmount}{tr(", soliqsiz")}{' '}{netAmount}.</p>}
         {/* Total sum display */}
         <div className="bg-slate-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-sm">

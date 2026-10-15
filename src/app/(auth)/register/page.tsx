@@ -1,6 +1,7 @@
 'use client';
-import {useTranslation} from '@/context/LocaleContext';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
+import {useTranslation} from '@/context/LocaleContext';
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
@@ -23,6 +24,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function RegisterPage() {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const router = useRouter();
@@ -82,7 +85,7 @@ export default function RegisterPage() {
       notifySuccess("Muvaffaqiyatli ro'yxatdan o'tdingiz! Tizim sozlandi.");
       setPassword('');commitPageNavigation();router.push('/dashboard');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ro\'yxatdan o\'tishda xatolik yuz berdi';
+      const msg = displayErrorMessage(err,'Ro\'yxatdan o\'tishda xatolik yuz berdi');
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
@@ -112,7 +115,7 @@ export default function RegisterPage() {
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-gray-100">
           {errorMessage && (
             <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-              {errorMessage}
+              {uiMessage(errorMessage)}
             </div>
           )}
 

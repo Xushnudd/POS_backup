@@ -1,4 +1,6 @@
 'use client'
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
 import {localizeOwnedLabels} from '@/i18n/messages';
 
 import {useTranslation} from '@/context/LocaleContext';
@@ -26,6 +28,8 @@ const actionNames: Record<string,string> = {
 const actionNamesSource=actionNames;
 
 export default function CriticalStepUp() {
+ const {message:uiMessage}=useTranslation();
+
  const {locale:mapLocale}=useTranslation();
 
  const actionNames=localizeOwnedLabels(actionNamesSource,mapLocale);
@@ -65,14 +69,14 @@ export default function CriticalStepUp() {
       // An account switch or unmount cancels the old request during the await.
       if (pending.current !== request) return
       pending.current = null; setBinding(null); request.finish(true)
-    } catch (failure) {if (pending.current === request) setError(failure instanceof Error ? failure.message : 'Tasdiqlash amalga oshmadi')}
+    } catch (failure) {if (pending.current === request) setError(displayErrorMessage(failure,'Tasdiqlash amalga oshmadi'))}
     finally {setCode(''); busy.current = false; setSaving(false)}
   }
   return <Modal layer="critical" isOpen={binding !== null} onClose={close} title={tr("Muhim amalni tasdiqlash")} size="sm">
     <p className="mb-3">{tr("Authenticator ilovasidagi kodni kiriting. Tasdiq faqat shu amal va joriy sessiya uchun ishlaydi.")}</p>
     <p className="mb-3">{tr("Amal:")}{' '}{binding ? actionNames[binding.action] ?? tr("Muhim amal") : ''}</p>
     <p className="mb-3">{tr("Authenticator ulanmagan bo‘lsa, amalni bekor qilib xavfsizlik sahifasida ulang.")}</p>
-    {error && <p role="alert" className="mb-3 text-red-700">{error}</p>}
+    {error && <p role="alert" className="mb-3 text-red-700">{uiMessage(error)}</p>}
     <form onSubmit={event => {event.preventDefault(); void approve()}}>
       <label htmlFor="critical-totp">{tr("Muhim amal uchun Authenticator kodi")}</label>
       <input id="critical-totp" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={event => setCode(event.target.value)} disabled={saving} className="w-full border rounded p-2 my-2"/>

@@ -1,15 +1,17 @@
 'use client';
+import {browserLocale} from '@/i18n/locale';
+import {localizeOwnedMessage} from '@/i18n/messages';
 import {useCallback,useEffect,useRef} from 'react';
 import {PAGE_NAVIGATION_REQUEST,PAGE_NAVIGATION_COMMITTED} from '@/lib/page-navigation';
 import {NavigationGuards} from '@/lib/navigation-guards';
 const message='Saqlanmagan o‘zgarishlar bor. Ularni tashlab ketishni tasdiqlaysizmi?';
-export function confirmUnsavedChanges(dirty:boolean,saving=false,warning=message){return !saving&&(!dirty||window.confirm(warning));}
+export function confirmUnsavedChanges(dirty:boolean,saving=false,warning=message){return !saving&&(!dirty||window.confirm(localizeOwnedMessage(warning,browserLocale())));}
 const guards = new NavigationGuards();
 let registrations = 0, committed = false;
 type HistoryNavigationEvent=Event&{navigationType:string;destination:{sameDocument:boolean;url?:string}};
 type BrowserNavigation={addEventListener:(type:'navigate',listener:(event:HistoryNavigationEvent)=>void)=>void;removeEventListener:(type:'navigate',listener:(event:HistoryNavigationEvent)=>void)=>void};
 function installListeners() {
- const admit = () => guards.admit(warning => window.confirm(warning));
+ const admit = () => guards.admit(warning => window.confirm(localizeOwnedMessage(warning,browserLocale())));
  const unload=(event:BeforeUnloadEvent)=>{if(guards.active&&!committed){event.preventDefault();event.returnValue='';}};
  const request=(event:Event)=>{if(!admit())event.preventDefault();};
  const commit=()=>{committed=true;};

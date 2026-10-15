@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -31,6 +32,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function DashboardPage() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney,formatNumber}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -57,7 +60,7 @@ export default function DashboardPage() {
         setData(res.data);setAsOf(res.meta?.asOf??'');
       }
     } catch (err) {
-      setData(null);setError(err instanceof Error?err.message:'Dashboard yuklanmadi');
+      setData(null);setError(displayErrorMessage(err,'Dashboard yuklanmadi'));
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +107,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {error&&<p role="alert" className="text-red-700">{error}</p>}
+      {error&&<p role="alert" className="text-red-700">{uiMessage(error)}</p>}
       {organization&&asOf&&!isLoading&&!error&&<div className="flex flex-wrap gap-3 items-center"><p className="text-xs">{tr("Hisob holati:")}{' '}{asOf}</p><CsvExportButton path="/reports/sales" params={{organizationId:organization.id,startDate:date,endDate:date,asOf,...(activeStore?.id?{storeId:activeStore.id}:{})}} label={tr("Shu holatdagi savdolar CSV")}/><Link href={`/reports?startDate=${date}&endDate=${date}&asOf=${encodeURIComponent(asOf)}`}>{tr("Shu holatdagi jadval")}</Link><Button variant="outline" onClick={loadDashboardData}>{tr("Yangilash")}</Button></div>}
       {/* Metric Cards Grid */}
       {isLoading ? (

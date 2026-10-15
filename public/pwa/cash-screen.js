@@ -1,11 +1,16 @@
+import { ownedErrorMessage } from './messages.js';
+import { t, messageText, currentLocale } from './static-locale.js';
+import { formatLocaleMoney, formatLocaleDate } from './format.js';
 import { listCashTickets, unlockCashTicket, takeOfflineCash, readCashAction, acknowledgeCash, observeCashClock } from './cash-store.js';
 import { usableCashTicket } from './cash-crypto.js';
 const selector = document.querySelector('#ticket'), phrase = document.querySelector('#phrase'), tender = document.querySelector('#tender'), message = document.querySelector('#message'), details = document.querySelector('#details'), take = document.querySelector('#take'), sync = document.querySelector('#sync');
 let ticket, stored, busy = false, clockFailed = false;
-const show = (text) => { message.textContent = text; };
-async function inventory() { const rows = await listCashTickets(); selector.replaceChildren(new Option('Ruxsatni tanlang', ''), ...rows.filter(r => r.deviceId === localStorage.getItem('pos_device_id')).map(r => new Option(r.id + ' · ' + r.state, r.id))); }
+let currentMessage = '', currentValues;
+const show = (text, values) => { currentMessage = text; currentValues = values; message.textContent = values ? t(text, { ...values, ...(typeof values.error === 'string' ? { error: messageText(values.error) } : {}) }) : messageText(text); };
+const stateLabel = (state) => t({ unused: 'Ishlatilmagan', pending: 'Javob kutilmoqda', synced: 'Server tasdiqlagan', conflict: 'Qo‘lda tekshirish kerak', cancelled: 'Bekor qilingan' }[state]);
+async function inventory() { const selected = selector.value, rows = await listCashTickets(); selector.replaceChildren(new Option(t('Ruxsatni tanlang'), ''), ...rows.filter(r => r.deviceId === localStorage.getItem('pos_device_id')).map(r => new Option(r.id + ' · ' + stateLabel(r.state), r.id))); selector.value = selected; }
 async function render() { if (!ticket || !stored)
-    return; const action = await readCashAction(stored.cashOperationId); details.replaceChildren(); for (const text of [...ticket.payload.items.map(i => i.name + ' · ' + i.quantity + ' ' + i.unit + ' · ' + i.unitPrice), 'Jami: ' + ticket.payload.totalAmount, 'Muddati: ' + ticket.payload.expiresAt, 'Holat: ' + stored.state, ...(action ? ['Olingan naqd: ' + action.cashTendered, 'Qaytim: ' + action.cashChange, 'Original amal: ' + action.id] : []), ...(stored.result ? ['Server natijasi: ' + JSON.stringify(stored.result)] : [])]) {
+    return; const action = await readCashAction(stored.cashOperationId); details.replaceChildren(); for (const text of [...ticket.payload.items.map(i => i.name + ' · ' + i.quantity + ' ' + i.unit + ' · ' + i.unitPrice), t('Jami:') + ' ' + formatLocaleMoney(ticket.payload.totalAmount, currentLocale()), t('Muddati:') + ' ' + formatLocaleDate(ticket.payload.expiresAt, currentLocale(), true, 'UTC') + ' UTC', t('Holat:') + ' ' + stateLabel(stored.state), ...(action ? [t('Olingan naqd:') + ' ' + formatLocaleMoney(action.cashTendered, currentLocale()), t('Qaytim:') + ' ' + formatLocaleMoney(action.cashChange, currentLocale()), t('Original amal:') + ' ' + action.id] : []), ...(stored.result ? [t('Server natijasi:') + ' ' + JSON.stringify(stored.result)] : [])]) {
     const p = document.createElement('p');
     p.textContent = text;
     details.append(p);
@@ -25,7 +30,7 @@ document.querySelector('#unlock').onclick = async () => { if (busy)
     show('Faqat shu savat uchun bir marta naqd pul qabul qilinadi.');
 }
 catch (e) {
-    show(e instanceof Error ? e.message : 'Ruxsat ochilmadi');
+    show(ownedErrorMessage(e, 'Ruxsat ochilmadi'));
 }
 finally {
     busy = false;
@@ -38,7 +43,7 @@ take.onclick = async () => { if (busy || !ticket || !stored)
     await refresh();
 }
 catch (e) {
-    show(e instanceof Error ? e.message : 'Naqd amal saqlanmadi');
+    show(ownedErrorMessage(e, 'Naqd amal saqlanmadi'));
 }
 finally {
     busy = false;
@@ -48,7 +53,7 @@ sync.onclick = async () => { if (busy || !ticket || !stored)
     return; busy = true; try {
     const response = await fetch('/api/offline-cash/' + stored.id, { credentials: 'same-origin', cache: 'no-store' }), body = await response.json();
     if (!response.ok)
-        throw new Error(body.error?.message ?? 'Asl sessiyada kirib server natijasini tekshiring');
+        throw new Error('Asl sessiyada kirib server natijasini tekshiring');
     const proof = body.data;
     if (proof.leaseId !== stored.id || proof.cashOperationId !== stored.cashOperationId || proof.organizationId !== stored.organizationId || proof.userId !== stored.userId || proof.deviceId !== stored.deviceId)
         throw new Error('Server proof original ruxsatga mos emas');
@@ -69,7 +74,7 @@ sync.onclick = async () => { if (busy || !ticket || !stored)
         const result = await fetch('/api/sync', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ commands: [{ operationId: action.id, type: 'offline.cash', payload: { leaseId: action.leaseId, deviceId: action.deviceId, cashTendered: action.cashTendered } }] }) });
         const reply = await result.json();
         if (!result.ok)
-            throw new Error(reply.error?.message ?? 'Server sinxronizatsiyasi rad');
+            throw new Error('Server sinxronizatsiyasi rad');
         const ack = reply.data?.[0];
         if (reply.data?.length !== 1 || ack?.operationId !== action.id || !['synced', 'conflict', 'pending'].includes(ack.state))
             throw new Error('Server acknowledgement noto‘g‘ri');
@@ -77,12 +82,15 @@ sync.onclick = async () => { if (busy || !ticket || !stored)
             throw new Error('Original chek acknowledgement mos emas');
         if (ack.state !== 'pending')
             await acknowledgeCash(stored.id, ack.state, ack.state === 'synced' ? { saleId: ack.result.id, receiptNo: ack.result.receiptNo, totalAmount: ack.result.totalAmount, cashChange: ack.result.cashChange } : undefined, ack.code);
-        show(ack.state === 'synced' ? 'Original naqd savdo serverda yakunlandi.' : ack.state === 'conflict' ? 'Konflikt: ' + ack.code + '. Rahbar pul/tovar natijasini tekshirsin; qayta pul olmang.' : 'Natija noma’lum; original amalni saqlang va yana tekshiring.');
+        if (ack.state === 'conflict')
+            show('Konflikt: {code}. Rahbar pul/tovar natijasini tekshirsin; qayta pul olmang.', { code: ack.code ?? '' });
+        else
+            show(ack.state === 'synced' ? 'Original naqd savdo serverda yakunlandi.' : 'Natija noma’lum; original amalni saqlang va yana tekshiring.');
     }
     await refresh();
 }
 catch (e) {
-    show((e instanceof Error ? e.message : 'Server bilan aloqa yo‘q') + '; original amal saqlangan. Yangi pul olmang; natijani yana tekshiring.');
+    show('{error}; original amal saqlangan. Yangi pul olmang; natijani yana tekshiring.', { error: ownedErrorMessage(e, 'Server bilan aloqa yo‘q') });
 }
 finally {
     busy = false;
@@ -91,3 +99,4 @@ finally {
 setInterval(() => { if (!ticket || !stored || stored.state !== 'unused' || busy)
     return; void observeCashClock(stored.id).then(refresh).catch(() => { clockFailed = true; take.disabled = true; show('Qurilma vaqti tekshirilmadi; offline naqd qabul bloklandi'); }); }, 1000);
 void inventory().catch(() => show('Lokal offline ruxsatlar yuklanmadi'));
+window.addEventListener('pos:display-locale', () => { show(currentMessage, currentValues); void inventory(); void render(); });

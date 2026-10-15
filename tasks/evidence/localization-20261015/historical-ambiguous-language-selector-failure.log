@@ -1,0 +1,162 @@
+[WebServer] (node:257000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 33 tests using 1 worker
+
+(node:257124) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.2s)
+  ✓   2 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (807ms)
+  ✓   3 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (408ms)
+  ✓   4 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (496ms)
+  ✓   5 [chromium] › tests/e2e/auth-form-state.spec.ts:54:5 › successful login uses authenticated role ACK and does not require a second me request (1.0s)
+  ✓   6 [chromium] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (605ms)
+  ✓   7 [chromium] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (497ms)
+  ✓   8 [chromium] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (479ms)
+  ✘   9 [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (6.5s)
+(node:257809) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (2.5s)
+  ✓  11 [chromium] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (929ms)
+(node:257980) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  12 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.8s)
+  ✓  13 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.3s)
+  ✓  14 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (632ms)
+  ✓  15 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (702ms)
+  ✓  16 [firefox] › tests/e2e/auth-form-state.spec.ts:54:5 › successful login uses authenticated role ACK and does not require a second me request (1.1s)
+  ✓  17 [firefox] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (868ms)
+  ✓  18 [firefox] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (699ms)
+  ✓  19 [firefox] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (724ms)
+  ✘  20 [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (7.0s)
+(node:258676) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  21 [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (3.6s)
+  ✓  22 [firefox] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (1.2s)
+(node:259027) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  23 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.7s)
+  ✓  24 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.4s)
+  ✓  25 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (760ms)
+  ✓  26 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (862ms)
+  ✓  27 [webkit] › tests/e2e/auth-form-state.spec.ts:54:5 › successful login uses authenticated role ACK and does not require a second me request (1.5s)
+  ✓  28 [webkit] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (1.1s)
+  ✓  29 [webkit] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (976ms)
+  ✓  30 [webkit] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (829ms)
+  ✘  31 [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (7.8s)
+(node:259867) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  32 [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (3.3s)
+  ✓  33 [webkit] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (1.5s)
+
+
+  1) [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Error: locator.selectOption: Error: strict mode violation: getByLabel('Язык', { exact: true }) resolved to 2 elements:
+        1) <select aria-label="Язык" class="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-900">…</select> aka getByRole('banner').getByLabel('Язык')
+        2) <select aria-label="Язык" class="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-900">…</select> aka getByTestId('pos-touch').getByLabel('Язык')
+
+    Call log:
+      - waiting for getByLabel('Язык', { exact: true })
+
+
+      55 |  await expect.poll(()=>db.sale.count({where:{organizationId:me.organization.id,status:'completed'}})).toBe(1);
+      56 |  const pending=()=>page.evaluate(async()=>{const open=indexedDB.open('shuni-pos-local-v1'),db=await new Promise<IDBDatabase>((resolve,reject)=>{open.onsuccess=()=>resolve(open.result);open.onerror=()=>reject(open.error)});try{return await new Promise<string>((resolve,reject)=>{const read=db.transaction('operations').objectStore('operations').getAll();read.onsuccess=()=>resolve(JSON.stringify(read.result.filter((op:{type:string;state:string})=>op.type==='sale.complete'&&op.state==='pending').map((op:{id:string;payload:unknown})=>({id:op.id,payload:op.payload}))));read.onerror=()=>reject(read.error)})}finally{db.close()}});
+    > 57 |  const original=await pending();expect(JSON.parse(original)).toHaveLength(1);await page.getByLabel('Язык',{exact:true}).selectOption('uz');expect(await pending()).toBe(original);await page.getByLabel('Til',{exact:true}).selectOption('ru');expect(await pending()).toBe(original);expect(bodies).toHaveLength(1);
+         |                                                                                                                         ^
+      58 |  await page.getByRole('button',{name:'Проверить результат',exact:true}).click();await expect(page.getByRole('button',{name:'Проверить результат',exact:true})).toHaveCount(0);
+      59 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(sale.items[0].quantity.toString()).toBe('0.125');expect(sale.items[0].productName).toBe('Saqlash');expect(sale.totalAmount.toString()).toBe('12.5');expect(sale.cashTendered?.toString()).toBe('20');expect(sale.cashChange?.toString()).toBe('7.5');expect(sale.payments).toHaveLength(1);expect(sale.payments[0].paymentType).toBe('cash');expect(sale.payments[0].amount.toString()).toBe('12.5');expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('1.875');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect(bodies).toHaveLength(1);await expect(page.locator('#printable-receipt')).toContainText('Saqlash');await expect(page.locator('#printable-receipt')).toContainText('12,50 сум');await page.screenshot({path:test.info().outputPath('locale-receipt-ru.png')});await page.getByRole('dialog').getByRole('button',{name:'Новая продажа',exact:true}).click();await page.setViewportSize({width:360,height:800});await expect(page.getByLabel('Язык',{exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:test.info().outputPath('locale-mobile-pos-ru.png')});
+      60 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:57:121
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Error: locator.selectOption: Error: strict mode violation: getByLabel('Язык', { exact: true }) resolved to 2 elements:
+        1) <select aria-label="Язык" class="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-900">…</select> aka getByRole('banner').getByLabel('Язык')
+        2) <select aria-label="Язык" class="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-900">…</select> aka getByTestId('pos-touch').getByLabel('Язык')
+
+    Call log:
+      - waiting for getByLabel('Язык', { exact: true })
+
+
+      55 |  await expect.poll(()=>db.sale.count({where:{organizationId:me.organization.id,status:'completed'}})).toBe(1);
+      56 |  const pending=()=>page.evaluate(async()=>{const open=indexedDB.open('shuni-pos-local-v1'),db=await new Promise<IDBDatabase>((resolve,reject)=>{open.onsuccess=()=>resolve(open.result);open.onerror=()=>reject(open.error)});try{return await new Promise<string>((resolve,reject)=>{const read=db.transaction('operations').objectStore('operations').getAll();read.onsuccess=()=>resolve(JSON.stringify(read.result.filter((op:{type:string;state:string})=>op.type==='sale.complete'&&op.state==='pending').map((op:{id:string;payload:unknown})=>({id:op.id,payload:op.payload}))));read.onerror=()=>reject(read.error)})}finally{db.close()}});
+    > 57 |  const original=await pending();expect(JSON.parse(original)).toHaveLength(1);await page.getByLabel('Язык',{exact:true}).selectOption('uz');expect(await pending()).toBe(original);await page.getByLabel('Til',{exact:true}).selectOption('ru');expect(await pending()).toBe(original);expect(bodies).toHaveLength(1);
+         |                                                                                                                         ^
+      58 |  await page.getByRole('button',{name:'Проверить результат',exact:true}).click();await expect(page.getByRole('button',{name:'Проверить результат',exact:true})).toHaveCount(0);
+      59 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(sale.items[0].quantity.toString()).toBe('0.125');expect(sale.items[0].productName).toBe('Saqlash');expect(sale.totalAmount.toString()).toBe('12.5');expect(sale.cashTendered?.toString()).toBe('20');expect(sale.cashChange?.toString()).toBe('7.5');expect(sale.payments).toHaveLength(1);expect(sale.payments[0].paymentType).toBe('cash');expect(sale.payments[0].amount.toString()).toBe('12.5');expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('1.875');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect(bodies).toHaveLength(1);await expect(page.locator('#printable-receipt')).toContainText('Saqlash');await expect(page.locator('#printable-receipt')).toContainText('12,50 сум');await page.screenshot({path:test.info().outputPath('locale-receipt-ru.png')});await page.getByRole('dialog').getByRole('button',{name:'Новая продажа',exact:true}).click();await page.setViewportSize({width:360,height:800});await expect(page.getByLabel('Язык',{exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:test.info().outputPath('locale-mobile-pos-ru.png')});
+      60 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:57:121
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Error: locator.selectOption: Error: strict mode violation: getByLabel('Язык', { exact: true }) resolved to 2 elements:
+        1) <select aria-label="Язык" class="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-900">…</select> aka getByRole('banner').getByLabel('Язык')
+        2) <select aria-label="Язык" class="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-slate-900">…</select> aka getByTestId('pos-touch').getByLabel('Язык')
+
+    Call log:
+      - waiting for getByLabel('Язык', { exact: true })
+
+
+      55 |  await expect.poll(()=>db.sale.count({where:{organizationId:me.organization.id,status:'completed'}})).toBe(1);
+      56 |  const pending=()=>page.evaluate(async()=>{const open=indexedDB.open('shuni-pos-local-v1'),db=await new Promise<IDBDatabase>((resolve,reject)=>{open.onsuccess=()=>resolve(open.result);open.onerror=()=>reject(open.error)});try{return await new Promise<string>((resolve,reject)=>{const read=db.transaction('operations').objectStore('operations').getAll();read.onsuccess=()=>resolve(JSON.stringify(read.result.filter((op:{type:string;state:string})=>op.type==='sale.complete'&&op.state==='pending').map((op:{id:string;payload:unknown})=>({id:op.id,payload:op.payload}))));read.onerror=()=>reject(read.error)})}finally{db.close()}});
+    > 57 |  const original=await pending();expect(JSON.parse(original)).toHaveLength(1);await page.getByLabel('Язык',{exact:true}).selectOption('uz');expect(await pending()).toBe(original);await page.getByLabel('Til',{exact:true}).selectOption('ru');expect(await pending()).toBe(original);expect(bodies).toHaveLength(1);
+         |                                                                                                                         ^
+      58 |  await page.getByRole('button',{name:'Проверить результат',exact:true}).click();await expect(page.getByRole('button',{name:'Проверить результат',exact:true})).toHaveCount(0);
+      59 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(sale.items[0].quantity.toString()).toBe('0.125');expect(sale.items[0].productName).toBe('Saqlash');expect(sale.totalAmount.toString()).toBe('12.5');expect(sale.cashTendered?.toString()).toBe('20');expect(sale.cashChange?.toString()).toBe('7.5');expect(sale.payments).toHaveLength(1);expect(sale.payments[0].paymentType).toBe('cash');expect(sale.payments[0].amount.toString()).toBe('12.5');expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('1.875');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect(bodies).toHaveLength(1);await expect(page.locator('#printable-receipt')).toContainText('Saqlash');await expect(page.locator('#printable-receipt')).toContainText('12,50 сум');await page.screenshot({path:test.info().outputPath('locale-receipt-ru.png')});await page.getByRole('dialog').getByRole('button',{name:'Новая продажа',exact:true}).click();await page.setViewportSize({width:360,height:800});await expect(page.getByLabel('Язык',{exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:test.info().outputPath('locale-mobile-pos-ru.png')});
+      60 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:57:121
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+    [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+    [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+  30 passed (1.1m)

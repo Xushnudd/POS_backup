@@ -1,8 +1,5 @@
 'use client';
-
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -27,6 +24,8 @@ export default function UnitsPage(){
  const {t:tr}=useTranslation();
 const {organization,user,role}=useAuth();return organization&&user&&role&&role!=='cashier'?<Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Units key={[organization.id,user.id,role].join(':')}/></Suspense>:<p>{tr("Birliklarni boshqarish uchun rahbar vakolati kerak.")}</p>;}
 function Units(){
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const {role,organization}=useAuth();
@@ -38,10 +37,10 @@ function Units(){
  const refresh=()=>{setLoading(true);setRetry(x=>x+1);};
  const dirty=code!==(editing?.code??'')||name!==(editing?.name??'')||precision!==String(editing?.precision??0);
  const confirmDiscard=useUnsavedChanges(dirty,busy);
- useEffect(()=>{if(!organization||!role||role==='cashier'||invalidQuery)return;let cancelled=false;void Promise.resolve().then(async()=>{if(cancelled)return;setLoading(true);setError('');try{const response=await api.units.list({page:String(page),limit:String(limit),status,search,sort});if(!cancelled){setUnits(response.data??[]);setPages(response.pagination?.totalPages??0);}}catch(error){if(!cancelled)setError(error instanceof Error?error.message:'Birliklar yuklanmadi');}finally{if(!cancelled)setLoading(false);}});return()=>{cancelled=true;};},[organization,role,page,limit,status,search,sort,retry,invalidQuery]);
+ useEffect(()=>{if(!organization||!role||role==='cashier'||invalidQuery)return;let cancelled=false;void Promise.resolve().then(async()=>{if(cancelled)return;setLoading(true);setError('');try{const response=await api.units.list({page:String(page),limit:String(limit),status,search,sort});if(!cancelled){setUnits(response.data??[]);setPages(response.pagination?.totalPages??0);}}catch(error){if(!cancelled)setError(displayErrorMessage(error,'Birliklar yuklanmadi'));}finally{if(!cancelled)setLoading(false);}});return()=>{cancelled=true;};},[organization,role,page,limit,status,search,sort,retry,invalidQuery]);
  if(!role||role==='cashier')return <p>{tr("Birliklarni boshqarish uchun rahbar vakolati kerak.")}</p>;
  const reset=()=>{setEditing(null);setCode('');setName('');setPrecision('0');};
- return <div className="max-w-3xl space-y-4"><h1 className="text-xl font-bold">{tr("Mahsulot birliklari")}</h1><Link href="/products" className="text-blue-700 text-sm">{tr("Mahsulotlarga qaytish")}</Link><p className="text-sm">{tr("Aniqlik kasrdan keyingi raqamlar sonidir: dona — 0, kilogramm — 6 gacha. Mahsulotda ishlatilgan birlik aniqligi va faol holati o‘zgarmaydi. Quti boshqa birlikka avtomatik aylantirilmaydi.")}</p>{error&&<p role="alert" className="text-red-700">{error}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}{mutation.error&&<p role="alert">{mutation.error}</p>}{busy&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Birlik serverda saqlandi.")}</p>}
+ return <div className="max-w-3xl space-y-4"><h1 className="text-xl font-bold">{tr("Mahsulot birliklari")}</h1><Link href="/products" className="text-blue-700 text-sm">{tr("Mahsulotlarga qaytish")}</Link><p className="text-sm">{tr("Aniqlik kasrdan keyingi raqamlar sonidir: dona — 0, kilogramm — 6 gacha. Mahsulotda ishlatilgan birlik aniqligi va faol holati o‘zgarmaydi. Quti boshqa birlikka avtomatik aylantirilmaydi.")}</p>{error&&<p role="alert" className="text-red-700">{uiMessage(error)}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}{mutation.error&&<p role="alert">{uiMessage(mutation.error)}</p>}{busy&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Birlik serverda saqlandi.")}</p>}
  <Card title={editing?tr("Birlik nomini tahrirlash"):tr("Yangi birlik")}><form className="space-y-3" onChangeCapture={mutation.edited} onSubmit={e=>{e.preventDefault();void mutation.execute(()=>editing?api.units.update(editing.id,{name,precision:Number(precision)}):api.units.create({code,name,precision:Number(precision)}),()=>{reset();refresh();});}}><Input label={tr("Kod")} value={code} onChange={e=>setCode(e.target.value)} disabled={!!editing||busy||loading||!!error} pattern="[a-z][a-z0-9_-]{0,31}" maxLength={32} required/><Input label={tr("Nomi")} value={name} onChange={e=>setName(e.target.value)} disabled={busy||loading||!!error} maxLength={100} required/><Input label={tr("Kasr aniqligi")} type="number" value={precision} onChange={e=>setPrecision(e.target.value)} disabled={busy||loading||!!error} min={0} max={6} step={1} required/><div className="flex gap-2"><Button type="submit" disabled={busy||loading||!!error}>{tr("Saqlash")}</Button>{(editing||dirty)&&<Button type="button" disabled={busy||loading||!!error} onClick={()=>{if(confirmDiscard())reset();}}>{tr("Bekor qilish")}</Button>}</div></form></Card>
  {dirty&&<p role="status">{tr("Saqlanmagan birlik o‘zgarishlari bor.")}</p>}
  <ListFilter search={search} sort={sort} label={tr("Birlik qidirish")} disabled={busy} onChange={changeQuery} reset={{status:''}}

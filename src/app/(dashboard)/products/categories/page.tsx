@@ -1,8 +1,5 @@
 'use client';
-
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -27,6 +24,8 @@ export default function CategoriesPage(){
  const {t:tr}=useTranslation();
 const {organization,user,role}=useAuth();return organization&&user&&role&&role!=='cashier'?<Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Categories key={[organization.id,user.id,role].join(':')}/></Suspense>:<p>{tr("Kategoriyalarni boshqarish uchun rahbar vakolati kerak.")}</p>;}
 function Categories(){
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const {organization,role}=useAuth();
@@ -38,11 +37,11 @@ function Categories(){
  const refresh=()=>{setBusy(true);setRetry(x=>x+1);};
  const dirty=name!==(editing?.name??'')||sortOrder!==String(editing?.sortOrder??0)||parentId!==(editing?.parentId??'');
  const confirmDiscard=useUnsavedChanges(dirty,saving);
- useEffect(()=>{if(!organization||!role||role==='cashier'||invalidQuery)return;let cancelled=false;void Promise.resolve().then(async()=>{if(cancelled)return;setBusy(true);setError('');try{const response=await api.categories.list(organization.id,{page:String(page),limit:String(limit),status,search,sort});if(!cancelled){setRows(response.data??[]);setPages(response.pagination?.totalPages??0);}}catch(error){if(!cancelled)setError(error instanceof Error?error.message:'Kategoriyalar yuklanmadi');}finally{if(!cancelled)setBusy(false);}});return()=>{cancelled=true;};},[organization,role,page,limit,status,search,sort,retry,invalidQuery]);
+ useEffect(()=>{if(!organization||!role||role==='cashier'||invalidQuery)return;let cancelled=false;void Promise.resolve().then(async()=>{if(cancelled)return;setBusy(true);setError('');try{const response=await api.categories.list(organization.id,{page:String(page),limit:String(limit),status,search,sort});if(!cancelled){setRows(response.data??[]);setPages(response.pagination?.totalPages??0);}}catch(error){if(!cancelled)setError(displayErrorMessage(error,'Kategoriyalar yuklanmadi'));}finally{if(!cancelled)setBusy(false);}});return()=>{cancelled=true;};},[organization,role,page,limit,status,search,sort,retry,invalidQuery]);
  if(!organization||!role||role==='cashier')return <p>{tr("Kategoriyalarni boshqarish uchun rahbar vakolati kerak.")}</p>;
  const reset=()=>{setEditing(null);setName('');setSortOrder('0');setParentId('');};
- return <div className="max-w-4xl space-y-4"><h1 className="text-2xl font-bold">{tr("Kategoriyalar")}</h1><Link href="/products" className="text-blue-700">{tr("Mahsulotlarga qaytish")}</Link><p>{tr("Tartib kichikdan kattaga. Arxivlash mahsulot va savdo tarixini o‘zgartirmaydi.")}</p>{error&&<p role="alert">{error}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}{mutation.error&&<p role="alert">{mutation.error}</p>}{saving&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Kategoriya serverda saqlandi.")}</p>}
- <Card title={editing?tr("Kategoriyani tahrirlash"):tr("Yangi kategoriya")}><form className="flex flex-wrap items-end gap-3" onChangeCapture={mutation.edited} onSubmit={e=>{e.preventDefault();const data={name,sortOrder:Number(sortOrder),parentId:parentId||null};void mutation.execute(()=>editing?api.categories.update(editing.id,data):api.categories.create({organizationId:organization.id,...data}),()=>{reset();refresh();});}}><Input label={tr("Kategoriya nomi")} minLength={2} maxLength={200} value={name} disabled={saving||busy||!!error} required onChange={e=>setName(e.target.value)}/><Input label={tr("Tartib raqami")} type="number" step="1" min={-2147483648} max={2147483647} value={sortOrder} disabled={saving||busy||!!error} required onChange={e=>setSortOrder(e.target.value)}/><Select label={tr("Ota kategoriya")} value={parentId} disabled={saving||busy||!!error} onChange={e=>setParentId(e.target.value)} options={[{value:'',label:tr("Asosiy kategoriya")},...(parentId&&!rows.some(r=>r.id===parentId)?[{value:parentId,label:editing?.parent?.name||'Joriy ota kategoriya'}]:[]),...rows.filter(r=>r.id!==editing?.id).map(r=>({value:r.id,label:r.name}))]}/><Button type="submit" disabled={saving||busy||!!error}>{tr("Saqlash")}</Button>{(editing||dirty)&&<Button type="button" disabled={saving||busy||!!error} onClick={()=>{if(confirmDiscard())reset();}}>{tr("Bekor qilish")}</Button>}</form></Card>
+ return <div className="max-w-4xl space-y-4"><h1 className="text-2xl font-bold">{tr("Kategoriyalar")}</h1><Link href="/products" className="text-blue-700">{tr("Mahsulotlarga qaytish")}</Link><p>{tr("Tartib kichikdan kattaga. Arxivlash mahsulot va savdo tarixini o‘zgartirmaydi.")}</p>{error&&<p role="alert">{uiMessage(error)}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}{mutation.error&&<p role="alert">{uiMessage(mutation.error)}</p>}{saving&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Kategoriya serverda saqlandi.")}</p>}
+ <Card title={editing?tr("Kategoriyani tahrirlash"):tr("Yangi kategoriya")}><form className="flex flex-wrap items-end gap-3" onChangeCapture={mutation.edited} onSubmit={e=>{e.preventDefault();const data={name,sortOrder:Number(sortOrder),parentId:parentId||null};void mutation.execute(()=>editing?api.categories.update(editing.id,data):api.categories.create({organizationId:organization.id,...data}),()=>{reset();refresh();});}}><Input label={tr("Kategoriya nomi")} minLength={2} maxLength={200} value={name} disabled={saving||busy||!!error} required onChange={e=>setName(e.target.value)}/><Input label={tr("Tartib raqami")} type="number" step="1" min={-2147483648} max={2147483647} value={sortOrder} disabled={saving||busy||!!error} required onChange={e=>setSortOrder(e.target.value)}/><Select label={tr("Ota kategoriya")} value={parentId} disabled={saving||busy||!!error} onChange={e=>setParentId(e.target.value)} options={[{value:'',label:tr("Asosiy kategoriya")},...(parentId&&!rows.some(r=>r.id===parentId)?[{value:parentId,label:editing?.parent?.name||tr("Joriy ota kategoriya")}]:[]),...rows.filter(r=>r.id!==editing?.id).map(r=>({value:r.id,label:r.name}))]}/><Button type="submit" disabled={saving||busy||!!error}>{tr("Saqlash")}</Button>{(editing||dirty)&&<Button type="button" disabled={saving||busy||!!error} onClick={()=>{if(confirmDiscard())reset();}}>{tr("Bekor qilish")}</Button>}</form></Card>
  {dirty&&<p role="status">{tr("Saqlanmagan kategoriya o‘zgarishlari bor.")}</p>}
  <ListFilter search={search} sort={sort} label={tr("Kategoriya qidirish")} disabled={saving} onChange={changeQuery} reset={{status:''}}
    options={[{value:'order',label:tr("Tartib raqami bo‘yicha")},{value:'name_asc',label:tr("Nom: A–Z")},{value:'name_desc',label:tr("Nom: Z–A")}]}>

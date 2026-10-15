@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -41,6 +42,8 @@ export default function ShiftsPage(){
  const {t:tr}=useTranslation();
 const {organization,user,role}=useAuth();return <Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Shifts key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
 function Shifts() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatDate,formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -87,7 +90,7 @@ function Shifts() {
     try {
       const res=await api.shifts.list({...filters,registerId:activeRegister?.id,page,limit,sort,search});
       if(sequence===historySequence.current.value){setShiftsHistory(res.data??[]);setPages(res.pagination?.totalPages??0);}
-    }catch(error){if(sequence===historySequence.current.value)setHistoryError(error instanceof Error?error.message:'Smena tarixi yuklanmadi');}
+    }catch(error){if(sequence===historySequence.current.value)setHistoryError(displayErrorMessage(error,'Smena tarixi yuklanmadi'));}
     finally{if(sequence===historySequence.current.value)setIsLoadingHistory(false);}
   },[activeRegister,filters,page,limit,sort,search,invalidQuery]);
   useEffect(()=>{const requests=historySequence.current;let live=true;void Promise.resolve().then(()=>{if(live)return loadHistory();});return()=>{live=false;requests.value++;};},[loadHistory,activeShift]);
@@ -99,7 +102,7 @@ function Shifts() {
       try{const saved=(await pendingOperations({organizationId:organization.id,userId:user.id,deviceId:deviceId()})).find(op=>op.type==='shift.cash');if(cancelled)return;
         if(saved){const {shiftId,...input}=saved.payload;cashAttempt.current={shiftId:String(shiftId),input:input as NonNullable<typeof cashAttempt.current>['input']};setMovementType(input.movementType as typeof movementType);setMovementAmount(String(input.amount));setMovementReason(String(input.reason));setCashUnknown(true);setIsCashMoveModalOpen(true);}
         setCashReady(true);
-      }catch(err){if(!cancelled)notifyError(err instanceof Error?err.message:'Lokal pul amali o‘qilmadi');}
+      }catch(err){if(!cancelled)notifyError(displayErrorMessage(err,'Lokal pul amali o‘qilmadi'));}
     });return()=>{cancelled=true;};
   },[organization,user,notifyError]);
 
@@ -119,7 +122,7 @@ function Shifts() {
       await acknowledge(saved.input.operationId,'synced',result.data);
       cashAttempt.current=null;setCashUnknown(false);setIsCashMoveModalOpen(false);setMovementAmount('');setMovementReason('');notifySuccess('Naqd harakat qayd etildi');await refreshShift();await loadHistory();
     }catch(err){
-      notifyError(err instanceof Error?err.message:'Natija noma’lum; asl pul amalini tekshiring');
+      notifyError(displayErrorMessage(err,'Natija noma’lum; asl pul amalini tekshiring'));
       if(!wasRetry&&err instanceof ApiError&&['VALIDATION_ERROR','INVALID_SHIFT','MANAGER_REQUIRED'].includes(err.code??'')){
         try{await acknowledge(saved.input.operationId,'rejected',undefined,err.code);cashAttempt.current=null;setCashUnknown(false);}catch{notifyError('Rad natijasi lokal saqlanmadi; asl amalni tekshiring');}
       }
@@ -151,7 +154,7 @@ function Shifts() {
       await refreshShift();
       loadHistory();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Smenani yopishda xatolik yuz berdi');
+      notifyError(displayErrorMessage(err,'Smenani yopishda xatolik yuz berdi'));
     } finally {
       setIsClosingShift(false);
     }
@@ -189,10 +192,10 @@ function Shifts() {
               <span>{tr("Joriy Ochiq Smena")}</span>
             </div>
           }
-          subtitle={`Terminal: ${activeShift.register?.name || 'Kassa'} • Ochilgan: ${formatDate(
+          subtitle={tr("Terminal: {value1} • Ochilgan: {value2}",{value1:String(activeShift.register?.name || 'Kassa'),value2:String(formatDate(
             activeShift.openedAt,
             true
-          )}`}
+          ))})}
           action={
             <div className="flex items-center gap-2">
               <Button
@@ -285,7 +288,7 @@ function Shifts() {
         padding={false}
       >
         <ListFilter search={search} sort={sort} label={tr("Kassa yoki xodim qidirish")} onChange={changeQuery} reset={{from:'',to:'',status:''}} options={[{value:'newest',label:tr("Eng yangi")},{value:'oldest',label:tr("Eng eski")}]}><Select label={tr("Smena holati")} value={params.get('status')??''} options={[{value:'',label:tr("Barchasi")},{value:'open',label:tr("Ochiq")},{value:'closed',label:tr("Yopilgan")}]} onChange={e=>changeQuery({status:e.target.value,page:'1'})}/><Input label={tr("Smena davri boshi")} type="date" value={params.get('from')??''} onChange={e=>changeQuery({from:e.target.value,page:'1'})}/><Input label={tr("Smena davri oxiri")} type="date" value={params.get('to')??''} onChange={e=>changeQuery({to:e.target.value,page:'1'})}/></ListFilter>
-        {invalidQuery?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:historyError?<p role="alert">{historyError}{tr(". Oxirgi tarix saqlangan.")}</p>:isLoadingHistory ? (
+        {invalidQuery?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:historyError?<p role="alert">{uiMessage(historyError)}{tr(". Oxirgi tarix saqlangan.")}</p>:isLoadingHistory ? (
           <div className="h-48 flex items-center justify-center">
             <LoadingSpinner size="lg" text={tr("Tarix yuklanmoqda...")} />
           </div>
@@ -374,8 +377,8 @@ function Shifts() {
         <p>{tr("Kutilgan:")}{' '}{formatMoney(shift.pendingClose!.expectedCash)} {tr("· Sanalgan:")}{' '}{formatMoney(shift.pendingClose!.countedCash)} {tr("· Farq:")}{' '}{formatMoney(shift.pendingClose!.difference)}</p>
         <p>{tr("Sabab:")}{' '}{shift.pendingClose!.reason}</p><p>{tr("Sanagan xodim ID:")}{' '}{shift.pendingClose!.countedBy}</p>
         <p>{tr("Yangi savdo va pul harakatlari tasdiq yoki rad javobigacha bloklangan.")}</p>
-        {role!=='cashier'&&<div className="flex flex-wrap gap-2"><Button onClick={async()=>{try{await api.shifts.close(shift.id,{countedCash:shift.pendingClose!.countedCash,approvalRequestId:shift.pendingClose!.id});await refreshShift();await loadHistory();notifySuccess('Smena farqi tasdiqlandi va yopildi');}catch(error){notifyError(error instanceof Error?error.message:'Tasdiq bajarilmadi');}}}>{tr("Farqni tasdiqlash va yopish")}</Button>
-        <Button variant="outline" onClick={async()=>{const reason=window.prompt('Rad etish sababi (kamida 3 belgi)');if(!reason)return;try{await api.shifts.rejectClose(shift.id,{requestId:shift.pendingClose!.id,operationId:crypto.randomUUID(),reason});await refreshShift();await loadHistory();notifySuccess('So‘rov rad etildi; qayta sanash mumkin');}catch(error){notifyError(error instanceof Error?error.message:'Rad etilmadi');}}}>{tr("Qayta sanashga qaytarish")}</Button></div>}
+        {role!=='cashier'&&<div className="flex flex-wrap gap-2"><Button onClick={async()=>{try{await api.shifts.close(shift.id,{countedCash:shift.pendingClose!.countedCash,approvalRequestId:shift.pendingClose!.id});await refreshShift();await loadHistory();notifySuccess('Smena farqi tasdiqlandi va yopildi');}catch(error){notifyError(displayErrorMessage(error,'Tasdiq bajarilmadi'));}}}>{tr("Farqni tasdiqlash va yopish")}</Button>
+        <Button variant="outline" onClick={async()=>{const reason=window.prompt('Rad etish sababi (kamida 3 belgi)');if(!reason)return;try{await api.shifts.rejectClose(shift.id,{requestId:shift.pendingClose!.id,operationId:crypto.randomUUID(),reason});await refreshShift();await loadHistory();notifySuccess('So‘rov rad etildi; qayta sanash mumkin');}catch(error){notifyError(displayErrorMessage(error,'Rad etilmadi'));}}}>{tr("Qayta sanashga qaytarish")}</Button></div>}
       </Card>)}
       {/* Open Shift Modal */}
       <OpenShiftModal

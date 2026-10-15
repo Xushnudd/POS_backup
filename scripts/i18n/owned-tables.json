@@ -1,0 +1,197 @@
+[
+  {
+    "file": "src/app/(dashboard)/billing/page.tsx",
+    "name": "names",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/billing/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/incidents/page.tsx",
+    "name": "kindNames",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/incidents/page.tsx",
+    "name": "evidenceNames",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/inventory/batches/page.tsx",
+    "name": "states",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/inventory/counts/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/inventory/serials/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/jobs/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/onboarding/page.tsx",
+    "name": "guidance",
+    "kind": "fields"
+  },
+  {
+    "file": "src/app/(dashboard)/platform/page.tsx",
+    "name": "states",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/reports/breakdowns/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/reports/plans/page.tsx",
+    "name": "states",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/reports/purchases/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/reports/reconciliation/page.tsx",
+    "name": "names",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/reports/reconciliation/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/reports/supplier-balances/page.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/billing/Retention.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/customers/CustomerLedger.tsx",
+    "name": "names",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/finance/ShiftCashSummary.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/forms/ReportExportFields.tsx",
+    "name": "filterLabels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/layouts/Header.tsx",
+    "name": "roleNames",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/layouts/Sidebar.tsx",
+    "name": "navItems",
+    "kind": "fields"
+  },
+  {
+    "file": "src/components/pos/ReceiptPreview.tsx",
+    "name": "pTypeLabels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/pos/ReturnHistory.tsx",
+    "name": "labels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/security/CriticalStepUp.tsx",
+    "name": "actionNames",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/security/SecurityHistory.tsx",
+    "name": "eventLabels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/security/SecurityHistory.tsx",
+    "name": "deliveryLabels",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/support/TicketDetail.tsx",
+    "name": "states",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/support/TicketList.tsx",
+    "name": "stateNames",
+    "kind": "record"
+  },
+  {
+    "file": "src/components/support/TicketList.tsx",
+    "name": "severityNames",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/help/page.tsx",
+    "name": "guides",
+    "kind": "fields"
+  },
+  {
+    "file": "src/components/support/TicketDetail.tsx",
+    "name": "severities",
+    "kind": "record"
+  },
+  {
+    "file": "src/app/(dashboard)/settings/support/page.tsx",
+    "name": "permissions",
+    "kind": "pairs"
+  },
+  {
+    "file": "src/lib/constants.ts",
+    "name": "PRODUCT_UNITS",
+    "kind": "fields"
+  },
+  {
+    "file": "src/lib/constants.ts",
+    "name": "PAYMENT_TYPES",
+    "kind": "fields"
+  },
+  {
+    "file": "src/lib/constants.ts",
+    "name": "STOCK_DOCUMENT_TYPES",
+    "kind": "fields"
+  },
+  {
+    "file": "src/lib/constants.ts",
+    "name": "USER_ROLES",
+    "kind": "fields"
+  },
+  {
+    "file": "src/lib/report-exports.ts",
+    "name": "REPORT_EXPORTS",
+    "kind": "fields"
+  },
+  {
+    "file": "src/lib/error-guidance.ts",
+    "name": "guidance",
+    "kind": "guidance"
+  }
+]

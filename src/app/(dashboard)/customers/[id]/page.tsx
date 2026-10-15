@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -30,6 +31,8 @@ import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function CustomerDetailPage() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -81,7 +84,7 @@ export default function CustomerDetailPage() {
           setAllocationMode(payload.allocations?'explicit':'fifo');setAllocations(payload.allocations??[]);setIsDebtModalOpen(true);
         }
         if(!cancelled)setLocalReady(true);
-      }catch(error){if(!cancelled)setLocalError(error instanceof Error?error.message:'Lokal to‘lovlar yuklanmadi');}
+      }catch(error){if(!cancelled)setLocalError(displayErrorMessage(error,'Lokal to‘lovlar yuklanmadi'));}
     });
     return ()=>{cancelled=true;};
   },[organization?.id,user?.id,id,recoveryVersion]);
@@ -166,7 +169,7 @@ export default function CustomerDetailPage() {
       if(!wasRetry&&attempt.current&&err instanceof ApiError&&['VALIDATION_ERROR','DEBT_OVERPAYMENT','DUPLICATE_DEBT_TARGET','DEBT_ALLOCATION_TOTAL_MISMATCH','DEBT_TARGET_NOT_FOUND','DEBT_TARGET_OVERPAYMENT','DEBT_ALLOCATION_MISMATCH','MANUAL_PAYMENT_PROOF_REQUIRED','MANUAL_PAYMENT_DOCUMENT_REUSED'].includes(err.code??'')){
         try{await acknowledge(attempt.current.operationId,'rejected',undefined,err.code);attempt.current=null;setHasPendingPayment(false);}catch{notifyError("Lokal holat saqlanmadi. Oldingi to‘lov kaliti saqlangan; qayta tekshiring");}
       }
-      notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
+      notifyError(displayErrorMessage(err,'Xatolik yuz berdi'));
     } finally {
       setIsProcessing(false);
     }
@@ -193,7 +196,7 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      {localError&&<Card><p role="alert">{tr("Lokal to‘lovlarni tekshirishda xato:")}{' '}{localError}{tr(". Yangi to‘lov vaqtincha bloklangan.")}</p><Button onClick={()=>setRecoveryVersion(v=>v+1)}>{tr("Lokal to‘lovlarni qayta tekshirish")}</Button></Card>}
+      {localError&&<Card><p role="alert">{tr("Lokal to‘lovlarni tekshirishda xato:")}{' '}{uiMessage(localError)}{tr(". Yangi to‘lov vaqtincha bloklangan.")}</p><Button onClick={()=>setRecoveryVersion(v=>v+1)}>{tr("Lokal to‘lovlarni qayta tekshirish")}</Button></Card>}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/customers">

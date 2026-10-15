@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -17,6 +18,8 @@ import Input from '@/components/ui/Input';
 type InputData=Parameters<typeof api.shifts.correct>[1];
 type Entry=NonNullable<Awaited<ReturnType<typeof api.shifts.corrections>>['data']>[number];
 export default function ShiftCorrections({shifts,activeShiftId,onChanged}:{shifts:Shift[];activeShiftId?:string;onChanged:()=>Promise<void>}){
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -39,7 +42,7 @@ export default function ShiftCorrections({shifts,activeShiftId,onChanged}:{shift
     if(cancelled)return;
     if(saved){const {originalShiftId,...input}=saved.payload;attempt.current={originalShiftId:String(originalShiftId),input:input as InputData};setOriginal(String(originalShiftId));setAmount(String(input.amount));setReason(String(input.reason));setDirection(input.direction as 'cash_in'|'cash_out');setUnknown(true);}
     setReady(true);
-   }catch(err){if(!cancelled)setError(err instanceof Error?err.message:'Lokal amal o‘qilmadi');}
+   }catch(err){if(!cancelled)setError(displayErrorMessage(err,'Lokal amal o‘qilmadi'));}
   });
   return()=>{cancelled=true;};
  },[organizationId,userId]);
@@ -48,7 +51,7 @@ export default function ShiftCorrections({shifts,activeShiftId,onChanged}:{shift
   void Promise.resolve().then(async()=>{
    if(!original||invalid){setRows([]);setPages(0);return;}
    try{const result=await api.shifts.corrections(original,page);if(!cancelled){setRows(result.data??[]);setPages(result.pagination?.totalPages??0);}}
-   catch(err){if(!cancelled){setRows([]);setPages(0);setError(err instanceof Error?err.message:'Tuzatish tarixi yuklanmadi');}}
+   catch(err){if(!cancelled){setRows([]);setPages(0);setError(displayErrorMessage(err,'Tuzatish tarixi yuklanmadi'));}}
   });
   return()=>{cancelled=true;};
  },[original,page,version,invalid]);
@@ -66,7 +69,7 @@ export default function ShiftCorrections({shifts,activeShiftId,onChanged}:{shift
    const result=await api.shifts.correct(savedAttempt.originalShiftId,savedAttempt.input);
    await acknowledge(savedAttempt.input.operationId,'synced',result.data);attempt.current=null;setUnknown(false);setAmount('');setReason('');setVersion(value=>value+1);setSaved(true);try{await onChanged();}catch{setError('Tuzatish saqlandi, lekin smena holati qayta yuklanmadi. Holatni tekshiring.');}
   }catch(err){
-   setError(err instanceof Error?err.message:'Natija noma’lum; asl amalni tekshiring');
+   setError(displayErrorMessage(err,'Natija noma’lum; asl amalni tekshiring'));
    if(!wasRetry&&err instanceof ApiError&&['VALIDATION_ERROR','SHIFT_NOT_CLOSED','INVALID_SHIFT','INVALID_RELATION','MANAGER_REQUIRED','NOT_FOUND'].includes(err.code??'')){
     try{await acknowledge(savedAttempt.input.operationId,'rejected',undefined,err.code);attempt.current=null;setUnknown(false);}catch{setError('Rad natijasi lokal saqlanmadi; asl amalni tekshiring');}
    }
@@ -76,7 +79,7 @@ export default function ShiftCorrections({shifts,activeShiftId,onChanged}:{shift
   <p className="text-sm mb-3">{tr("Original smena o‘zgarmaydi. Tuzatish shu filialdagi ochiq smenada alohida naqd harakat sifatida yoziladi; savdo daromadi hisoblanmaydi.")}</p>
   {busy&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}
   {!busy&&!unknown&&(amount||reason)&&<p role="status">{tr("Saqlanmagan smena tuzatishi bor.")}</p>}
-  {error&&<p role="alert" className="text-red-700">{error}</p>}
+  {error&&<p role="alert" className="text-red-700">{uiMessage(error)}</p>}
   {saved&&!busy&&<p role="status">{tr("Smena tuzatishi serverda saqlandi.")}</p>}
   {unknown&&<p role="status">{tr("Asl amal natijasi tekshirilishi kerak; summa va kalit o‘zgartirilmaydi.")}</p>}
   <div className="grid sm:grid-cols-2 gap-3">

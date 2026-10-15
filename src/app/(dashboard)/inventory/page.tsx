@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -42,6 +43,8 @@ export default function InventoryPage(){
  const {t:tr}=useTranslation();
 const {organization,user,role}=useAuth();return <Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Inventory key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
 function Inventory() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatNumber,formatDate}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -107,7 +110,7 @@ function Inventory() {
         if(sequence===requestSequence.current.value){setDocuments(res.data??[]);setPages(res.pagination?.totalPages??0);}
       }
     } catch (err: unknown) {
-      if(sequence===requestSequence.current.value)setListError(err instanceof Error?err.message:'Ombor ro‘yxati yuklanmadi');
+      if(sequence===requestSequence.current.value)setListError(displayErrorMessage(err,'Ombor ro‘yxati yuklanmadi'));
     } finally {
       if(sequence===requestSequence.current.value)setIsLoading(false);
     }
@@ -137,7 +140,7 @@ function Inventory() {
       notifySuccess('Ombor hujjati tasdiqlandi va qoldiqlar yangilandi!');
       loadData();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Hujjatni tasdiqlashda xatolik');
+      notifyError(displayErrorMessage(err,'Hujjatni tasdiqlashda xatolik'));
     }
   };
 
@@ -150,7 +153,7 @@ function Inventory() {
       setReverseTarget(null);notifySuccess('Qarshi hujjat tasdiqlandi; asl hujjat tarixda saqlandi');await loadData();
     }catch(error){
       if(error instanceof ApiError && error.status && error.status>=400 && error.status<500){setReverseSubmitted(false);if(error.code==='ALREADY_REVERSED'){setReverseTarget(null);await loadData();}}
-      notifyError(error instanceof Error?error.message:'Qarshi hujjat yaratilmadi. Shu amal bilan qayta urinishingiz mumkin');
+      notifyError(displayErrorMessage(error,'Qarshi hujjat yaratilmadi. Shu amal bilan qayta urinishingiz mumkin'));
     }
     finally{setIsReversing(false);}
   };
@@ -254,10 +257,10 @@ function Inventory() {
         {activeTab==='documents'&&<><Input label={tr("Hujjat davri boshi")} type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label={tr("Hujjat davri oxiri")} type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label={tr("Hujjat turi filtri")} value={draftFilters.documentType} options={[{value:'',label:tr("Barchasi")},{value:'purchase',label:tr("Xarid")},{value:'opening',label:tr("Boshlang‘ich qoldiq")},{value:'adjustment',label:tr("Tuzatish")},{value:'reversal',label:tr("Qarshi hujjat")},{value:'transfer_out',label:tr("Transfer chiqimi")},{value:'transfer_in',label:tr("Transfer kirimi")},{value:'return_in',label:tr("Qaytarish kirimi")}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label={tr("Hujjat holati filtri")} value={draftFilters.status} options={[{value:'',label:tr("Barchasi")},{value:'draft',label:tr("Qoralama")},{value:'confirmed',label:tr("Tasdiqlangan")}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label={tr("Supplier ID filtri")} value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
         <Button type="submit" disabled={isLoading}>{tr("Filtrlash")}</Button>
       </form>
-      <div className="flex gap-3"><Select label={tr("Ombor saralash")} value={sort} options={(activeTab==='documents'?journalListSorts:inventoryListSorts).map(value=>({value,label:({newest:'Eng yangi',oldest:'Eng eski',name_asc:'Nom: A–Z',name_desc:'Nom: Z–A',quantity_asc:'Miqdor: o‘sish',quantity_desc:'Miqdor: kamayish'} as Record<string,string>)[value]}))} onChange={e=>changeQuery({sort:e.target.value,page:'1'})}/><Button onClick={()=>changeQuery({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',sort:'',page:'',limit:'',inactiveDays:'',lowStock:''})}>{tr("Filtrlarni tozalash")}</Button></div>
+      <div className="flex gap-3"><Select label={tr("Ombor saralash")} value={sort} options={(activeTab==='documents'?journalListSorts:inventoryListSorts).map(value=>({value,label:({newest:tr("Eng yangi"),oldest:tr("Eng eski"),name_asc:tr("Nom: A–Z"),name_desc:tr("Nom: Z–A"),quantity_asc:tr("Miqdor: o‘sish"),quantity_desc:tr("Miqdor: kamayish")} as Record<string,string>)[value]}))} onChange={e=>changeQuery({sort:e.target.value,page:'1'})}/><Button onClick={()=>changeQuery({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',sort:'',page:'',limit:'',inactiveDays:'',lowStock:''})}>{tr("Filtrlarni tozalash")}</Button></div>
       {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?tr("Qoldiqlarni CSV yuklash"):tr("Hujjatlarni CSV yuklash")} params={{organizationId:organization.id,sort,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
       {invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}
-      {listError&&<p role="alert" className="text-red-700">{listError}</p>}
+      {listError&&<p role="alert" className="text-red-700">{uiMessage(listError)}</p>}
       {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
       <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!listError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadData();}}/>
 
@@ -426,7 +429,7 @@ function Inventory() {
         title={tr("Yangi ombor hujjati (Kirim)")}
         size="xl"
       >
-        <DurableMutation path="/stock-documents" returnPath="/inventory" label={tr("Hujjatni yaratish")} body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[`Qoralama: ${documentNo}`,`Tur: ${docType}; filial: ${activeStore?.name??''}`,`Qatorlar: ${docItems.length}`,`Sabab: ${docNote}`, ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}${item.batchInput?'; partiya '+item.batchInput.code+'; kirim '+item.batchInput.receivedOn+'; yaroqli '+item.batchInput.expiresOn:''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
+        <DurableMutation path="/stock-documents" returnPath="/inventory" label={tr("Hujjatni yaratish")} body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[tr("Qoralama: {value1}",{value1:String(documentNo)}),tr("Tur: {value1}; filial: {value2}",{value1:String(docType),value2:String(activeStore?.name??'')}),tr("Qatorlar: {value1}",{value1:String(docItems.length)}),tr("Sabab: {value1}",{value1:String(docNote)}), ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}${item.batchInput?'; partiya '+item.batchInput.code+'; kirim '+item.batchInput.receivedOn+'; yaroqli '+item.batchInput.expiresOn:''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label={tr("Hujjat turi")}
@@ -497,7 +500,7 @@ function Inventory() {
                     </select>
                   </div>
 
-                  <label className="text-xs">{tr("Hujjat birligi")}<select aria-label={'Hujjat birligi '+idx} value={item.tradeUnit??products.find(p=>p.id===item.productId)?.unit??''} onChange={e=>{const updated=[...docItems];updated[idx]={...item,tradeUnit:e.target.value};setDocItems(updated)}}><option value={products.find(p=>p.id===item.productId)?.unit}>{products.find(p=>p.id===item.productId)?.unit}</option>{products.find(p=>p.id===item.productId)?.unitConversions?.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}:1={row.ratio} {row.baseUnit}</option>)}</select></label>
+                  <label className="text-xs">{tr("Hujjat birligi")}<select aria-label={tr("Hujjat birligi")+" "+idx} value={item.tradeUnit??products.find(p=>p.id===item.productId)?.unit??''} onChange={e=>{const updated=[...docItems];updated[idx]={...item,tradeUnit:e.target.value};setDocItems(updated)}}><option value={products.find(p=>p.id===item.productId)?.unit}>{products.find(p=>p.id===item.productId)?.unit}</option>{products.find(p=>p.id===item.productId)?.unitConversions?.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}:1={row.ratio} {row.baseUnit}</option>)}</select></label>
                   <div className="w-24">
                     <input
                       type="number"
@@ -518,7 +521,7 @@ function Inventory() {
                     <input
                       type="number"
                       placeholder={tr("Asosiy birlik tannarxi")}
-                      aria-label={'Asosiy birlik tannarxi '+idx}
+                      aria-label={tr("Asosiy birlik tannarxi")+" "+idx}
                       min="0"
                       step="100"
                       value={item.unitCost}
@@ -531,8 +534,8 @@ function Inventory() {
                     />
                   </div>
 
-                  {products.find(product=>product.id===item.productId)?.serialTracking&&(item.quantity.trim().startsWith('-')&&activeStore?<SerialPicker storeId={activeStore.id} productId={item.productId} label={'Hisobdan chiqariladigan seriallar '+(idx+1)} value={item.serialInput??[]} onChange={ids=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>:<Input label={'Hujjat seriya raqamlari '+(idx+1)} value={(item.serialInput??[]).join(', ')} onChange={event=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:event.target.value.split(/[\s,;]+/).filter(Boolean)}:r))}/>)}
-                  {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label={tr("Partiya ma’lumotlari")}>{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]}<input aria-label={['Partiya kodi','Partiya kirim kuni','Yaroqlilik kuni'][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
+                  {products.find(product=>product.id===item.productId)?.serialTracking&&(item.quantity.trim().startsWith('-')&&activeStore?<SerialPicker storeId={activeStore.id} productId={item.productId} label={tr("Hisobdan chiqariladigan seriallar")+" "+(idx+1)} value={item.serialInput??[]} onChange={ids=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>:<Input label={tr("Hujjat seriya raqamlari")+" "+(idx+1)} value={(item.serialInput??[]).join(', ')} onChange={event=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:event.target.value.split(/[\s,;]+/).filter(Boolean)}:r))}/>)}
+                  {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label={tr("Partiya ma’lumotlari")}>{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{[tr("Partiya kodi"),tr("Partiya kirim kuni"),tr("Yaroqlilik kuni")][index]}<input aria-label={[tr("Partiya kodi"),tr("Partiya kirim kuni"),tr("Yaroqlilik kuni")][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
                   <button
                     type="button"
                     onClick={() => handleRemoveItemRow(idx)}

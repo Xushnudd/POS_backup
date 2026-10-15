@@ -1,6 +1,7 @@
 'use client';
-import {useTranslation} from '@/context/LocaleContext';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
+import {useTranslation} from '@/context/LocaleContext';
 
 import React, { useRef, useState } from 'react';
 import Link from 'next/link';
@@ -15,6 +16,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faLock, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 export default function LoginPage() {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const router = useRouter();
@@ -51,7 +54,7 @@ export default function LoginPage() {
       notifySuccess("Tizimga muvaffaqiyatli kirdingiz!");
       setPhone('');setPassword('');commitPageNavigation();router.push(authenticated.role==='cashier'?'/pos':'/dashboard');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Kirishda xatolik yuz berdi';
+      const msg = displayErrorMessage(err,'Kirishda xatolik yuz berdi');
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
@@ -81,7 +84,7 @@ export default function LoginPage() {
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-gray-100">
           {errorMessage && (
             <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-              {errorMessage}
+              {uiMessage(errorMessage)}
             </div>
           )}
 

@@ -4,7 +4,7 @@ import {localizeOwnedLabels} from '@/i18n/messages';
 import {useTranslation} from '@/context/LocaleContext';
 
 import {useCallback,useState} from 'react'
-import {REPORT_EXPORTS} from '@/lib/report-exports'
+import {REPORT_EXPORTS as REPORT_EXPORTS_SOURCE} from '@/lib/report-exports'
 import Select from '@/components/ui/Select'
 import Input from '@/components/ui/Input'
 import DurableMutation from './DurableMutation'
@@ -16,7 +16,8 @@ export default function ReportExportFields({reason,onDone,ready=true,onSavingCha
 
  const filterLabels=localizeOwnedLabels(filterLabelsSource,mapLocale);
 
- const {t:tr}=useTranslation();
+ const {t:tr,locale}=useTranslation();
+ const REPORT_EXPORTS=localizeOwnedLabels(REPORT_EXPORTS_SOURCE,locale);
 
  const [report,setReport]=useState<keyof typeof REPORT_EXPORTS>('reports-sales'),[format,setFormat]=useState('csv'),[filters,setFilters]=useState<Record<string,string>>({})
  const [saving,setSaving]=useState(false);const changed=useCallback((value:boolean)=>{setSaving(value);onSavingChange?.(value);},[onSavingChange]);

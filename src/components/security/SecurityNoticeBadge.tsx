@@ -50,7 +50,7 @@ function AccountBadge(){
     };
   },[]);
 
-  const label=failed?'Xavfsizlik bildirishnomalari: hisob tekshirilmadi':unread===null?'Xavfsizlik bildirishnomalari: yuklanmoqda':`Xavfsizlik bildirishnomalari: ${unread} ta o‘qilmagan`;
+  const label=failed?tr("Xavfsizlik bildirishnomalari: hisob tekshirilmadi"):unread===null?tr("Xavfsizlik bildirishnomalari: yuklanmoqda"):tr("Xavfsizlik bildirishnomalari: {count} ta o‘qilmagan",{count:unread});
   return <Link href="/security" prefetch={false} aria-label={label} title={label} className="flex shrink-0 items-center gap-1 rounded-lg border border-gray-200 p-2 text-xs text-gray-600 hover:bg-gray-100">
     <FontAwesomeIcon icon={faShieldHalved} aria-hidden="true"/>
     <span className="hidden xl:inline">{tr("Xavfsizlik")}</span>

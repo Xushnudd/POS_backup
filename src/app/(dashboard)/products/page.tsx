@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -41,6 +42,8 @@ export default function ProductsPage() {
 }
 
 function ProductsEditor() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney,formatNumber}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -107,7 +110,7 @@ function ProductsEditor() {
       if (catsRes.data) setCategories(catsRes.data);
       if (unitsRes.data?.length) setUnitOptions(unitsRes.data.filter(unit=>unit.isActive).map(unit=>({value:unit.code,label:unit.name})));
     } catch (err: unknown) {
-      if(sequence===loadSequence.current.value)setLoadError(err instanceof Error?err.message:'Mahsulotlar yuklanmadi');
+      if(sequence===loadSequence.current.value)setLoadError(displayErrorMessage(err,'Mahsulotlar yuklanmadi'));
     } finally {
       if(sequence===loadSequence.current.value)setIsLoading(false);
     }
@@ -191,7 +194,7 @@ function ProductsEditor() {
       setIsProductModalOpen(false);
       loadData();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Mahsulotni saqlashda xatolik');
+      notifyError(displayErrorMessage(err,'Mahsulotni saqlashda xatolik'));
     } finally {
       flight.current=false;setIsSaving(false);
     }
@@ -213,7 +216,7 @@ function ProductsEditor() {
       if (catsRes.data) setCategories(catsRes.data);
 
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Kategoriya qo\'shishda xatolik');
+      notifyError(displayErrorMessage(err,'Kategoriya qo\'shishda xatolik'));
     } finally {
       categoryFlight.current=false;setIsCategorySaving(false);
     }
@@ -221,7 +224,7 @@ function ProductsEditor() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={isLoading} onClick={()=>void loadData()}>{tr("Qayta yuklash")}</Button></div>}
+      {loadError&&<div role="alert"><p>{uiMessage(loadError)}</p><Button disabled={isLoading} onClick={()=>void loadData()}>{tr("Qayta yuklash")}</Button></div>}
       {organization&&role!=='cashier'&&<CsvExportButton path="/products" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),...(selectedCategory?{categoryId:selectedCategory}:{}),sort}} label={tr("Katalogni CSV yuklash")}/>}
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

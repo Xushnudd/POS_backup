@@ -1,5 +1,5 @@
 'use client';
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -32,6 +32,8 @@ export default function ProductDetailPage() {
 }
 
 function ProductEditor({id}:{id:string}) {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const router = useRouter();
@@ -84,7 +86,7 @@ function ProductEditor({id}:{id:string}) {
         }
         if (catRes.data) setCategories(catRes.data);
       })
-      .catch((err) => {if(!isCancelled)setLoadError(err instanceof Error?err.message:'Mahsulot yuklanmadi');})
+      .catch((err) => {if(!isCancelled)setLoadError(displayErrorMessage(err,'Mahsulot yuklanmadi'));})
       .finally(() => {
         if (!isCancelled) setIsLoading(false);
       });
@@ -120,7 +122,7 @@ function ProductEditor({id}:{id:string}) {
       notifySuccess('Mahsulot muvaffaqiyatli saqlandi');
       if(!barcodeState.dirty)router.push('/products');
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
+      notifyError(displayErrorMessage(err,'Xatolik yuz berdi'));
     } finally {
       flight.current=false;setIsSaving(false);
     }
@@ -134,7 +136,7 @@ function ProductEditor({id}:{id:string}) {
       notifySuccess('Mahsulot o\'chirildi');
       router.push('/products');
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'O\'chirishda xatolik');
+      notifyError(displayErrorMessage(err,'O\'chirishda xatolik'));
     } finally {
       flight.current=false;setIsSaving(false);
     }
@@ -151,7 +153,7 @@ function ProductEditor({id}:{id:string}) {
   if (!product) {
     return (
       <div className="p-8 text-center">
-        {loadError?<><p role="alert" className="mb-4">{loadError}</p><Button onClick={()=>setRevision(n=>n+1)}>{tr("Qayta yuklash")}</Button></>:<p className="text-gray-500 mb-4">{tr("Mahsulot topilmadi")}</p>}
+        {loadError?<><p role="alert" className="mb-4">{uiMessage(loadError)}</p><Button onClick={()=>setRevision(n=>n+1)}>{tr("Qayta yuklash")}</Button></>:<p className="text-gray-500 mb-4">{tr("Mahsulot topilmadi")}</p>}
         <Link href="/products">
           <Button variant="outline">{tr("Mahsulotlarga qaytish")}</Button>
         </Link>

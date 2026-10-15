@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -39,6 +40,8 @@ export default function SalesPage() {
 }
 
 function SalesJournal() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatDate,formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -93,7 +96,7 @@ function SalesJournal() {
         }
       }
     } catch (err: unknown) {
-      if(sequence===requestSequence.current.value){setSales([]);setLoadError(err instanceof Error?err.message:'Savdolarni yuklab bo‘lmadi');}
+      if(sequence===requestSequence.current.value){setSales([]);setLoadError(displayErrorMessage(err,'Savdolarni yuklab bo‘lmadi'));}
     } finally {
       if(sequence===requestSequence.current.value)setIsLoading(false);
     }
@@ -113,7 +116,7 @@ function SalesJournal() {
       notifySuccess('Savdo muvaffaqiyatli bekor qilindi');
       loadSales();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Savdoni bekor qilishda xatolik');
+      notifyError(displayErrorMessage(err,'Savdoni bekor qilishda xatolik'));
     }
   };
 
@@ -193,7 +196,7 @@ function SalesJournal() {
       {/* Sales Table */}
       <Card padding={false}>
         {invalidQuery ? <div role="alert" aria-label={tr("Savdolar ro‘yxati xatosi")} className="p-6 text-red-700">{tr("URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalab qayta urinib ko‘ring.")}</div>
-        : loadError ? <div role="alert" aria-label={tr("Savdolar ro‘yxati xatosi")} className="p-6 text-red-700">{loadError} <Button onClick={loadSales}>{tr("Qayta yuklash")}</Button></div>
+        : loadError ? <div role="alert" aria-label={tr("Savdolar ro‘yxati xatosi")} className="p-6 text-red-700">{uiMessage(loadError)} <Button onClick={loadSales}>{tr("Qayta yuklash")}</Button></div>
         : isLoading ? (
           <div className="h-64 flex items-center justify-center">
             <LoadingSpinner size="lg" text={tr("Savdolar yuklanmoqda...")} />

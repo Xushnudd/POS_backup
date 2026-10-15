@@ -1,5 +1,5 @@
 'use client';
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -15,6 +15,10 @@ export default function OwnershipRequests({organizationId}:{organizationId?:stri
  return organization&&user?<RequestControls key={[organization.id,user.id,role,organizationId].join(':')}/>:null;
 }
 function RequestControls(){
+ const {formatDate}=useTranslation();
+
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const [rows,setRows]=useState<RequestRow[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true);
@@ -24,7 +28,7 @@ function RequestControls(){
   const sequence=++readSequence.current;
   if(live.current)setLoading(true);
   try{const result=await api.ownership.list();if(live.current&&sequence===readSequence.current){setRows(result.data??[]);setError('');}}
-  catch(cause){if(live.current&&sequence===readSequence.current)setError(cause instanceof Error?cause.message:'Egalik so‘rovlari yuklanmadi');}
+  catch(cause){if(live.current&&sequence===readSequence.current)setError(displayErrorMessage(cause,'Egalik so‘rovlari yuklanmadi'));}
   finally{if(live.current&&sequence===readSequence.current)setLoading(false);}
  },[]);
  useEffect(()=>{live.current=true;void Promise.resolve().then(()=>{if(live.current)return load();});const timer=setInterval(()=>{if(!flight.current)void load();},30000);return()=>{live.current=false;clearInterval(timer);};},[load]);
@@ -38,14 +42,14 @@ function RequestControls(){
     if(action==='accept'){commitPageNavigation();window.location.assign(new URL('/pos',window.location.origin).toString());}
     else{setRows(previous=>previous.filter(item=>item.id!==row.id));}
    }
-  }catch(cause){if(live.current)setError(cause instanceof Error?cause.message:'Egalik amali tasdiqlanmadi; holatni qayta tekshiring');}
+  }catch(cause){if(live.current)setError(displayErrorMessage(cause,'Egalik amali tasdiqlanmadi; holatni qayta tekshiring'));}
   finally{flight.current=false;if(live.current)setBusy(false);}
  }
  if(!rows.length&&!error)return null;
  return <section aria-label={tr("Egalik so‘rovlari")} className="text-xs space-y-2">
-  {error&&<p role="alert">{error} <Button size="sm" disabled={busy||loading} onClick={()=>void load()}>{tr("Egalik so‘rovlarini qayta tekshirish")}</Button></p>}
+  {error&&<p role="alert">{uiMessage(error)} <Button size="sm" disabled={busy||loading} onClick={()=>void load()}>{tr("Egalik so‘rovlarini qayta tekshirish")}</Button></p>}
   {busy&&<p role="status">{tr("Egalik amali uchun server tasdig‘i kutilmoqda…")}</p>}
   {loading&&<p role="status">{tr("Egalik so‘rovlari yuklanmoqda…")}</p>}
-  {rows.map(row=><div key={row.id}>{tr("Egalikni topshirish so‘rovi (")}{new Date(row.expiresAt).toLocaleString('uz-UZ')}) {row.incoming&&<Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'accept')}>{tr("Qabul qilish")}</Button>} <Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'cancel')}>{tr("Bekor qilish")}</Button></div>)}
+  {rows.map(row=><div key={row.id}>{tr("Egalikni topshirish so‘rovi (")}{formatDate(row.expiresAt,true)}) {row.incoming&&<Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'accept')}>{tr("Qabul qilish")}</Button>} <Button size="sm" disabled={busy||loading} onClick={()=>void respond(row,'cancel')}>{tr("Bekor qilish")}</Button></div>)}
  </section>;
 }

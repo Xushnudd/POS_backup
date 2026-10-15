@@ -1,10 +1,7 @@
 'use client';
-
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
-
 
 import React, { useState, useEffect } from 'react';
 import DurableMutation from '@/components/forms/DurableMutation';
@@ -33,6 +30,8 @@ export default function OpenShiftModal({
   onClose,
   onSuccess,
 }: OpenShiftModalProps) {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const { user } = useAuth();
@@ -53,7 +52,7 @@ export default function OpenShiftModal({
       setHandover(null);setAcceptHandover(false);setHandoverState('loading');setHandoverError('');
       if(!isOpen||!registerId)return;
       try{const response=await api.shifts.handover(registerId);if(!cancelled){setHandover(response.data??null);setHandoverState('ready');}}
-      catch(error){if(!cancelled){setHandoverError(error instanceof Error?error.message:'Oldingi smena tekshirilmadi');setHandoverState('failed');}}
+      catch(error){if(!cancelled){setHandoverError(displayErrorMessage(error,'Oldingi smena tekshirilmadi'));setHandoverState('failed');}}
     });
     return()=>{cancelled=true;};
   },[isOpen,registerId,handoverRevision]);
@@ -80,8 +79,8 @@ export default function OpenShiftModal({
       size="md"
     >
       {handoverState==='loading'&&<p role="status">{tr("Oldingi smena tekshirilmoqda…")}</p>}
-      {handoverState==='failed'&&<p role="alert">{handoverError} <button type="button" className="underline" onClick={()=>setHandoverRevision(value=>value+1)}>{tr("Oldingi smenani qayta tekshirish")}</button></p>}
-      <DurableMutation path="/shifts" returnPath="/pos" label={tr("Smenani ochish")} allowNew={handoverState==='ready'&&Boolean(registerId&&user?.organizationUserId)} body={{registerId,organizationUserId:user?.organizationUserId,openingCash:acceptHandover&&handover?handover.countedCash:openingCash,...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),note:note.trim()||undefined}} review={[`Kassa: ${activeRegister?.name??''}`,`Boshlang‘ich naqd: ${acceptHandover&&handover?handover.countedCash:openingCash}`,`Izoh: ${note}`,...(acceptHandover&&handover?[`Qabul qilinadigan smena: ${handover.id}`]:[])]} onDone={saved}>
+      {handoverState==='failed'&&<p role="alert">{uiMessage(handoverError)} <button type="button" className="underline" onClick={()=>setHandoverRevision(value=>value+1)}>{tr("Oldingi smenani qayta tekshirish")}</button></p>}
+      <DurableMutation path="/shifts" returnPath="/pos" label={tr("Smenani ochish")} allowNew={handoverState==='ready'&&Boolean(registerId&&user?.organizationUserId)} body={{registerId,organizationUserId:user?.organizationUserId,openingCash:acceptHandover&&handover?handover.countedCash:openingCash,...(acceptHandover&&handover?{handoverFromId:handover.id}:{}),note:note.trim()||undefined}} review={[tr("Kassa: {value1}",{value1:String(activeRegister?.name??'')}),tr("Boshlang‘ich naqd: {value1}",{value1:String(acceptHandover&&handover?handover.countedCash:openingCash)}),tr("Izoh: {value1}",{value1:String(note)}),...(acceptHandover&&handover?[`Qabul qilinadigan smena: ${handover.id}`]:[])]} onDone={saved}>
       <fieldset disabled={handoverState!=='ready'} className="space-y-4">
         <p className="text-sm text-gray-600">
           {tr("Kassada savdo qilish uchun smena ochishingiz zarur. Boshlang'ich naqd pul qoldig'ini kiriting:")}</p>

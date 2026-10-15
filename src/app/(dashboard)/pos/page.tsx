@@ -1,9 +1,7 @@
 'use client';
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
-
 
 import PendingActions from '@/components/forms/PendingActions';
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
@@ -33,7 +31,7 @@ type CheckoutAttempt={operationId:string;payload:string;saleId?:string};
 function writeAttempt(ref:{current:CheckoutAttempt|null},value:CheckoutAttempt|null){ref.current=value;}
 
 export default function PosPage() {
- const {t:tr}=useTranslation();
+ const {t:tr,message:uiMessage}=useTranslation();
 
   const { user, organization, role } = useAuth();
   const { activeStore, activeRegister, activeShift, refreshShift } = useOrganization();
@@ -109,7 +107,7 @@ export default function PosPage() {
       if(catalogRequest.current!==requestNumber)return;
       if(err instanceof ApiError&&err.code==='NETWORK_ERROR'){
         try{const saved=await loadCatalog(scope,query);if(catalogRequest.current!==requestNumber)return;setProducts(saved?.products??[]);setCatalogExpiresAt(saved?.lease.expiresAt??null);setCatalogNotice(saved?'Oxirgi qidiruvning lokal katalogi (5 daqiqagacha). Narx va qoldiq serverda qayta tekshirilmaguncha savdo yakunlanmaydi.':'Lokal katalog yo‘q yoki muddati tugagan. Internetni tiklang.');}catch{if(catalogRequest.current!==requestNumber)return;setProducts([]);setCatalogNotice('Lokal katalog o‘qilmadi. Internetni tiklang.');}
-      }else{setProducts([]);setCatalogNotice('Katalog ruxsati tekshirilmadi.');notifyError(err instanceof Error?err.message:'Mahsulotlarni yuklash amalga oshmadi');}
+      }else{setProducts([]);setCatalogNotice('Katalog ruxsati tekshirilmadi.');notifyError(displayErrorMessage(err,'Mahsulotlarni yuklash amalga oshmadi'));}
     } finally {
       if(catalogRequest.current===requestNumber)setIsLoadingProducts(false);
     }
@@ -156,7 +154,7 @@ export default function PosPage() {
       setSearchQuery('');
       notifySuccess(`${response.data.name} savatga qo‘shildi`);
     } catch (error: unknown) {
-      notifyError(error instanceof Error ? error.message : 'Barkod bo‘yicha mahsulot topilmadi');
+      notifyError(displayErrorMessage(error,'Barkod bo‘yicha mahsulot topilmadi'));
     } finally {
       lookupCount.current--;
     }
@@ -315,7 +313,7 @@ export default function PosPage() {
     } catch (err: unknown) {
       setFailure({...posFailure(err),details:err instanceof ApiError?err.details as NonNullable<typeof failure>['details']:undefined});
       setIsPaymentModalOpen(false);
-      notifyError(err instanceof Error ? err.message : 'To\'lovni yakunlashda xatolik yuz berdi');
+      notifyError(displayErrorMessage(err,'To\'lovni yakunlashda xatolik yuz berdi'));
     } finally {
       setIsProcessingPayment(false);
     }
@@ -339,7 +337,7 @@ export default function PosPage() {
       await acknowledge(operationId,'synced',result.data);
       await saveDraft(scope,{cart:{items:[],cartDiscount:0,customer:null,note:''},attempt:null});
       parkAttempt.current=null;writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);clearCart();setServiceType('');setParkedMessage('Qoralama serverda saqlandi: '+result.data.receiptNo);
-    }catch(error){notifyError(error instanceof Error?error.message:'Qoralama saqlanmadi; asl natijani tekshiring');}finally{setIsProcessingPayment(false);}
+    }catch(error){notifyError(displayErrorMessage(error,'Qoralama saqlanmadi; asl natijani tekshiring'));}finally{setIsProcessingPayment(false);}
   };
   const [draftToResume,setDraftToResume]=useState('');
   useEffect(()=>{void Promise.resolve().then(()=>setDraftToResume(new URLSearchParams(window.location.search).get('draft')??''));},[]);
@@ -357,7 +355,7 @@ export default function PosPage() {
       hydrate({items:restored,cartDiscount:Number(sale.discountAmount),cartDiscountPercent:sale.discountPercent==null?undefined:Number(sale.discountPercent),discountReason:sale.discountReason??'',customer:sale.customer??null,note:sale.note??''});setServiceType(sale.serviceType??'');
       writeAttempt(checkoutAttempt,{...attempt});setHasPendingCheckout(true);setDraftToResume('');
       setParkedMessage('Server qoralamasi ochildi; narx va qoldiq yakunlashda qayta tekshiriladi.');
-    }catch(error){notifyError(error instanceof Error?error.message:'Qoralama ochilmadi');}finally{setIsProcessingPayment(false);}
+    }catch(error){notifyError(displayErrorMessage(error,'Qoralama ochilmadi'));}finally{setIsProcessingPayment(false);}
   };
 
   const cancelPendingCheckout=async()=>{
@@ -392,7 +390,7 @@ export default function PosPage() {
       writeAttempt(checkoutAttempt,null);setHasPendingCheckout(false);setIsPaymentModalOpen(false);
       notifySuccess('Urinish serverda bekor qilindi. Savat saqlangan.');
       return true;
-    }catch(error){notifyError(error instanceof Error?error.message:'Bekor qilish tasdiqlanmadi; urinish saqlangan');return false;}
+    }catch(error){notifyError(displayErrorMessage(error,'Bekor qilish tasdiqlanmadi; urinish saqlangan'));return false;}
     finally{setIsProcessingPayment(false);}
   };
 
@@ -404,7 +402,7 @@ export default function PosPage() {
       if(checkoutAttempt.current&&!await cancelPendingCheckout())return;
       hydrate({items:current,cartDiscount:0,customer,note});setFailure(null);await loadProducts();
       notifySuccess('Narxlar yangilandi, chegirmalar tozalandi; miqdorlar asosiy birlikda. Miqdorlarni tekshirib, to‘lovni qayta tasdiqlang.');
-    }catch(error){notifyError(error instanceof Error?error.message:'Savat yangilanmadi; asl urinish saqlangan');}
+    }catch(error){notifyError(displayErrorMessage(error,'Savat yangilanmadi; asl urinish saqlangan'));}
   };
 
   const recoverCheckout = async () => {
@@ -439,7 +437,7 @@ export default function PosPage() {
       setIsPaymentModalOpen(false);
       setIsReceiptModalOpen(true);
       notifySuccess('Oldingi savdoning yakunlangan natijasi tiklandi');
-    } catch(error) { notifyError(error instanceof Error?error.message:'Savdo holatini tekshirib bo‘lmadi'); }
+    } catch(error) { notifyError(displayErrorMessage(error,'Savdo holatini tekshirib bo‘lmadi')); }
     finally { setIsProcessingPayment(false); }
   };
 
@@ -476,7 +474,7 @@ export default function PosPage() {
       <p className="text-xs text-slate-500">{tr("F2: qidirish · F4: qidiruv filtrlarini tozalash · F9: to‘lov oynasi · Esc: oynani yopish. To‘lov avtomatik yuborilmaydi.")}</p>
       {hasPendingCheckout && <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm">{tr("Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.")}</p>
-        <div className="flex flex-wrap gap-2"><Button onClick={handleProceedToPayment} disabled={isProcessingPayment||connection.state!=='online'}>{tr("Qoralama to‘lovini davom ettirish")}</Button><Button onClick={recoverCheckout} disabled={isProcessingPayment}>{tr("Natijani tekshirish")}</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(error instanceof Error?error.message:'Navbat saqlangan');}finally{setIsProcessingPayment(false);}}}>{tr("Navbatni sinxronlash")}</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>{tr("Urinishni bekor qilish")}</Button></div>
+        <div className="flex flex-wrap gap-2"><Button onClick={handleProceedToPayment} disabled={isProcessingPayment||connection.state!=='online'}>{tr("Qoralama to‘lovini davom ettirish")}</Button><Button onClick={recoverCheckout} disabled={isProcessingPayment}>{tr("Natijani tekshirish")}</Button><Button disabled={isProcessingPayment||connection.state!=='online'} onClick={async()=>{if(!organization||!user)return;setIsProcessingPayment(true);try{await synchronize({organizationId:organization.id,userId:user.id,deviceId:deviceId()});await recoverCheckout();}catch(error){notifyError(displayErrorMessage(error,'Navbat saqlangan'));}finally{setIsProcessingPayment(false);}}}>{tr("Navbatni sinxronlash")}</Button><Button variant="outline" onClick={cancelPendingCheckout} disabled={isProcessingPayment}>{tr("Urinishni bekor qilish")}</Button></div>
       </div>}
       {/* Warning banner if shift is closed */}
       {!activeShift && (
@@ -509,7 +507,7 @@ export default function PosPage() {
       <label>{tr("Xizmat turi (ixtiyoriy)")}<input aria-label={tr("Xizmat turi (ixtiyoriy)")} maxLength={100} value={serviceType} onChange={e=>setServiceType(e.target.value)} disabled={!localReady||hasPendingCheckout||isProcessingPayment} className="block border rounded p-2 w-full"/></label>
       {/* Main 2-column layout: Left Catalog, Right Cart */}
       {!localReady&&<p role="status">{tr("Lokal savat tiklanmoqda; mahsulot kiritishni kuting.")}</p>}
-      {catalogNotice&&<p role="status">{catalogNotice}</p>}
+      {catalogNotice&&<p role="status">{uiMessage(catalogNotice)}</p>}
       <p role="status" className="text-sm text-gray-900">{!localReady?tr("Lokal savat tiklanmoqda"):localSaveProof===localSnapshot?tr("Savat lokal saqlandi"):tr("Savat lokal saqlanmoqda; oynani yopmang")}</p>
       <fieldset disabled={!localReady||!activeStore||!activeRegister||hasPendingCheckout} className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 min-w-0">
         {/* Left: Product Catalog & Search (2 cols) */}
@@ -552,7 +550,7 @@ export default function PosPage() {
       </fieldset>
 
       <Modal isOpen={Boolean(failure)} onClose={()=>setFailure(null)} title={failure?.stage==='integration'?tr("Tashqi xizmat holati"):tr("Savdo yakunlanmadi")}>
-        {failure&&<div role="alert" data-stage={failure.stage} className="space-y-3"><p>{failure.code}: {failure.message}</p><p>{failure.nextAction}</p>
+        {failure&&<div role="alert" data-stage={failure.stage} className="space-y-3"><p>{failure.code}: {uiMessage(failure.message)}</p><p>{uiMessage(failure.nextAction)}</p>
           {failure.details&&<div><p>{tr("Mahsulot:")}{' '}{failure.details.productName}</p>{failure.details.previousPrice!==undefined&&<p>{tr("Oldingi narx:")}{' '}{failure.details.previousPrice} {tr("· Joriy narx:")}{' '}{failure.details.currentPrice??tr("Mahsulot mavjud emas")}</p>}{failure.details.requestedQuantity!==undefined&&<p>{tr("Savat miqdori:")}{' '}{failure.details.requestedQuantity} {tr("· Mavjud qoldiq:")}{' '}{failure.details.availableQuantity}</p>}</div>}
           {['PRICE_CHANGED','INSUFFICIENT_STOCK'].includes(failure.code)&&<><p>{tr("Avval eski urinish serverda bekor qilinadi. Kassir qoralamasini bekor qilish uchun rahbar yordami kerak. Chegirmalar tozalanadi, to‘lov qayta tasdiqlanadi.")}</p><Button disabled={isProcessingPayment} onClick={refreshConflictCart}>{tr("Eski urinishni bekor qilib savatni yangilash")}</Button></>}
           <Button variant="outline" onClick={()=>{setFailure(null);void recoverCheckout();}}>{tr("Asl savdo natijasini tekshirish")}</Button>

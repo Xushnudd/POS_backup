@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -30,6 +31,8 @@ export function CustomerGifts({customerId,onChanged}:{customerId:string;onChange
  return role==='owner'&&organization&&user?<Suspense fallback={<p role="status">{tr("Sertifikatlar yuklanmoqda…")}</p>}><GiftPanel key={[organization.id,user.id,role,customerId].join(':')} customerId={customerId} onChanged={onChanged}/></Suspense>:null;
 }
 function GiftPanel({customerId,onChanged}:{customerId:string;onChanged:()=>Promise<void>}){
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -44,24 +47,24 @@ function GiftPanel({customerId,onChanged}:{customerId:string;onChanged:()=>Promi
   if(page===undefined||limit===undefined||search===undefined){setError('Sertifikat filtri noto‘g‘ri. URL parametrlarini tozalang.');setBusy(false);return;}
   try{const [w,p,a,d]=await Promise.all([api.request<Wallet>('/loyalty/gifts?'+new URLSearchParams({page:String(page),limit:String(limit),search,customerId})),api.request<Policy|null>('/loyalty/policy'),api.request<Account[]>('/finance/accounts'),api.customers.getDebt(customerId,debtPage)]);
    if(!cancelled){setWallet(w.data??null);setPolicy(p.data??null);setAccounts(a.data??[]);setTargets(d.data?.allocationTargets?.items??[]);setMoreDebt(d.data?.allocationTargets?.hasMore??false);}
-  }catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Sertifikatlar yuklanmadi');}finally{if(!cancelled)setBusy(false);}
+  }catch(e){if(!cancelled)setError(displayErrorMessage(e,'Sertifikatlar yuklanmadi'));}finally{if(!cancelled)setBusy(false);}
  });return()=>{cancelled=true;};},[page,limit,search,customerId,debtPage,revision]);
  const selected=wallet?.rows.find(row=>row.id===giftId),selectedSale=targets.find(row=>row.saleId===saleId);
  const selectedAccount=accounts.find(row=>row.id===accountId&&row.kind==='cash'&&row.isActive&&row.registerId===activeShift?.registerId);
  const body={action,amount,reason,...(action==='issue'?{customerId,code,policyVersionId:policy?.id??'',accountId,shiftId:activeShift?.id??''}:action==='redeem'?{giftId,saleId,customerConsent:consent}:{giftId,accountId,shiftId:activeShift?.id??''})};
  const valid=/^\d+(?:\.\d{1,2})?$/.test(amount)&&reason.trim().length>=3&&
   (action==='issue'?!!policy?.configuration.gifts.enabled&&!!selectedAccount&&/^[A-Z0-9][A-Z0-9_-]{2,63}$/.test(code):action==='redeem'?!!selected&&!!selectedSale&&consent:!!selected?.allowUnusedCashRefund&&!!selectedAccount);
- function refreshed(){if(!live.current)return;setRevision(value=>value+1);void onChanged().catch(e=>{if(live.current)setError(e instanceof Error?e.message:'Mijoz hisobi qayta yuklanmadi');});}
+ function refreshed(){if(!live.current)return;setRevision(value=>value+1);void onChanged().catch(e=>{if(live.current)setError(displayErrorMessage(e,'Mijoz hisobi qayta yuklanmadi'));});}
  const totalPages=Math.max(1,Math.ceil((wallet?.pagination.total??0)/(limit??20)));
  return <Card className="space-y-3"><h2 className="font-bold">{tr("Sovg‘a sertifikatlari")}</h2>
   <p>{tr("Sertifikat ushbu mijozga biriktiriladi. Kod maxfiy to‘lov tokeni emas. Chiqarish — naqd kirim va majburiyat; sarflash — mavjud nasiya savdosini to‘lash. Tovar qaytarilishi mavjud avans qoidasi bilan naqd qaytariladi; sertifikat qayta to‘ldirilmaydi.")}</p>
   <Link href="/loyalty">{tr("Administrator sertifikat siyosati")}</Link>
-  {error&&<p role="alert">{error}</p>}{busy&&<p role="status">{tr("Sertifikatlar yuklanmoqda…")}</p>}
+  {error&&<p role="alert">{uiMessage(error)}</p>}{busy&&<p role="status">{tr("Sertifikatlar yuklanmoqda…")}</p>}
   <PendingActions prefix="/loyalty/gifts" returnPath={'/customers/'+customerId} revision={revision} onDone={refreshed}/>
   <ListFilter search={search??''} sort="newest" label={tr("Sertifikat kodi bo‘yicha qidirish")} options={[{value:'newest',label:tr("Yangilari avval")}]} onChange={changeQuery} disabled={posting}/>
-  <DurableMutation path="/loyalty/gifts" returnPath={'/customers/'+customerId} body={body} label={tr("Sertifikat amalini saqlash")} review={['Amal: '+action,'Kod: '+(action==='issue'?code:selected?.code??''),'Mijoz: '+customerId,'Savdo: '+(selectedSale?.receiptNo??saleId),'Summa: '+amount+' UZS',reason]} canSubmit={!busy&&!posting&&!error} canReview={valid} onSavingChange={setPosting} onDone={refreshed}>
+  <DurableMutation path="/loyalty/gifts" returnPath={'/customers/'+customerId} body={body} label={tr("Sertifikat amalini saqlash")} review={[tr("Amal:")+" "+action,tr("Kod:")+" "+(action==='issue'?code:selected?.code??''),tr("Mijoz:")+" "+customerId,tr("Savdo:")+" "+(selectedSale?.receiptNo??saleId),tr("Summa:")+" "+amount+' UZS',reason]} canSubmit={!busy&&!posting&&!error} canReview={valid} onSavingChange={setPosting} onDone={refreshed}>
    <Select label={tr("Sertifikat amali")} value={action} onChange={e=>setAction(e.target.value)} options={[{value:'issue',label:tr("Naqd pul bilan chiqarish")},{value:'redeem',label:tr("Mavjud savdoga sarflash")},{value:'refund',label:tr("Ruxsat etilgan ishlatilmagan pulni qaytarish")}]}/>
-   {action==='issue'?<Input label={tr("Yangi sertifikat kodi")} value={code} maxLength={64} onChange={e=>setCode(e.target.value.toUpperCase())}/>:<Select label={tr("Original sertifikat")} value={giftId} onChange={e=>setGiftId(e.target.value)} options={[{value:'',label:tr("Sertifikatni tanlang")},...(wallet?.rows??[]).map(row=>({value:row.id,label:row.code+' · majburiyat '+formatMoney(row.liability)+' · sarflash '+formatMoney(row.spendable)}))]}/>}
+   {action==='issue'?<Input label={tr("Yangi sertifikat kodi")} value={code} maxLength={64} onChange={e=>setCode(e.target.value.toUpperCase())}/>:<Select label={tr("Original sertifikat")} value={giftId} onChange={e=>setGiftId(e.target.value)} options={[{value:'',label:tr("Sertifikatni tanlang")},...(wallet?.rows??[]).map(row=>({value:row.id,label:row.code+" "+tr("· majburiyat")+" "+formatMoney(row.liability)+" "+tr("· sarflash")+" "+formatMoney(row.spendable)}))]}/>}
    {action==='redeem'?<><Select label={tr("Sertifikat sarflanadigan original savdo")} value={saleId} onChange={e=>setSaleId(e.target.value)} options={[{value:'',label:tr("Nasiya savdosini tanlang")},...targets.filter(row=>row.saleId).map(row=>({value:row.saleId!,label:(row.receiptNo??row.saleId!)+' · '+formatMoney(row.balance)}))]}/><Button disabled={debtPage<=1||busy} onClick={()=>setDebtPage(value=>value-1)}>{tr("Oldingi sertifikat savdolari")}</Button><Button disabled={!moreDebt||busy} onClick={()=>setDebtPage(value=>value+1)}>{tr("Keyingi sertifikat savdolari")}</Button><label><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/> {tr("Mijoz ushbu sertifikatni sarflashga rozi")}</label></>:<Select label={tr("Sertifikat uchun naqd hisob")} value={accountId} onChange={e=>setAccountId(e.target.value)} options={[{value:'',label:tr("Ochiq smena hisobini tanlang")},...accounts.filter(row=>row.kind==='cash'&&row.isActive&&row.registerId===activeShift?.registerId).map(row=>({value:row.id,label:row.name}))]}/>}
    <Input label={tr("Sertifikat amali summasi (UZS)")} inputMode="decimal" value={amount} onChange={e=>setAmount(e.target.value)}/><Input label={tr("Sertifikat amali sababi")} value={reason} onChange={e=>setReason(e.target.value)}/>
   </DurableMutation>

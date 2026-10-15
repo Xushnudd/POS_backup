@@ -1,4 +1,6 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
 import {localizeOwnedLabels} from '@/i18n/messages';
 
 import {useTranslation} from '@/context/LocaleContext';
@@ -56,7 +58,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
       localStorage.removeItem('pos_active_store');localStorage.removeItem('pos_active_register');
       commitPageNavigation();
       window.location.assign(new URL('/pos', window.location.origin).toString());
-    }catch(error){notifyError(error instanceof Error?error.message:'Biznes almashtirilmadi');setSwitching(false);}
+    }catch(error){notifyError(displayErrorMessage(error,'Biznes almashtirilmadi'));setSwitching(false);}
   };
 
   const roleNames: Record<string, string> = localizeOwnedLabels({
@@ -115,7 +117,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           {businesses.map(business=><option key={business.id} value={business.id}>{business.name}</option>)}
         </select>}
         {!isPosPage && (
-          <Link href="/pos" prefetch={false}>
+          <Link href="/pos" prefetch={false} className="hidden sm:block">
             <Button
               variant="success"
               size="sm"
@@ -137,7 +139,7 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
           </div>
 
           <button
-            onClick={() => { void logout().catch(error => notifyError(error instanceof Error ? error.message : 'Chiqish amalga oshmadi')); }}
+            onClick={() => { void logout().catch(error => notifyError(displayErrorMessage(error,'Chiqish amalga oshmadi'))); }}
             title={tr("Tizimdan chiqish")}
             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
           >

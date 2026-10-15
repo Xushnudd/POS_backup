@@ -1,0 +1,496 @@
+[WebServer] (node:295572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 48 tests using 1 worker
+
+(node:295609) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:125:5 › Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests (2.2s)
+  ✘   2 [chromium] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (17.7s)
+(node:295963) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:716:5 › Checkout price/stock conflicts require review; print failure and integration failure stay separate (21.2s)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:780:5 › Owner mobile dashboard and cashier touch controls remain reachable at 360, 768 and 1280 pixels (5.0s)
+  ✓   5 [chromium] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (4.0s)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:1032:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.9s)
+  ✓   7 [chromium] › tests/e2e/core.spec.ts:1039:5 › Discount UI applies exact line and receipt percentages with reason and immutable manager authorization (2.6s)
+  ✓   8 [chromium] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (2.0s)
+  ✘   9 [chromium] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (13.9s)
+(node:298534) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [chromium] › tests/e2e/core.spec.ts:1137:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (3.7s)
+  ✓  11 [chromium] › tests/e2e/core.spec.ts:1143:5 › Owner reviews a changed-price offline cash conflict, recovers lost settlement acknowledgment and confirms the original receipt once (3.7s)
+  ✓  12 [chromium] › tests/e2e/core.spec.ts:1359:5 › Dashboard boundary recovers a render failure without creating an economic operation or exposing input data (1.2s)
+  ✓  13 [chromium] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (871ms)
+  ✓  14 [chromium] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (566ms)
+  ✘  15 [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (1.0m)
+(node:301178) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  16 [chromium] › tests/e2e/permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change (2.1s)
+(node:301332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  17 [firefox] › tests/e2e/core.spec.ts:125:5 › Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests (3.1s)
+  ✘  18 [firefox] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (22.4s)
+(node:303108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 [firefox] › tests/e2e/core.spec.ts:716:5 › Checkout price/stock conflicts require review; print failure and integration failure stay separate (22.8s)
+  ✓  20 [firefox] › tests/e2e/core.spec.ts:780:5 › Owner mobile dashboard and cashier touch controls remain reachable at 360, 768 and 1280 pixels (6.6s)
+  ✓  21 [firefox] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (5.0s)
+  ✓  22 [firefox] › tests/e2e/core.spec.ts:1032:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (9.2s)
+  ✓  23 [firefox] › tests/e2e/core.spec.ts:1039:5 › Discount UI applies exact line and receipt percentages with reason and immutable manager authorization (3.2s)
+  ✓  24 [firefox] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (2.8s)
+  ✘  25 [firefox] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (15.6s)
+(node:306487) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  26 [firefox] › tests/e2e/core.spec.ts:1137:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (4.8s)
+  ✓  27 [firefox] › tests/e2e/core.spec.ts:1143:5 › Owner reviews a changed-price offline cash conflict, recovers lost settlement acknowledgment and confirms the original receipt once (4.5s)
+  ✓  28 [firefox] › tests/e2e/core.spec.ts:1359:5 › Dashboard boundary recovers a render failure without creating an economic operation or exposing input data (1.4s)
+  ✓  29 [firefox] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (1.2s)
+  ✓  30 [firefox] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (867ms)
+  ✘  31 [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (1.0m)
+(node:309034) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  32 [firefox] › tests/e2e/permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change (3.1s)
+(node:309351) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  33 [webkit] › tests/e2e/core.spec.ts:125:5 › Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests (3.9s)
+  ✘  34 [webkit] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (33.1s)
+(node:310766) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  35 [webkit] › tests/e2e/core.spec.ts:716:5 › Checkout price/stock conflicts require review; print failure and integration failure stay separate (23.1s)
+  ✓  36 [webkit] › tests/e2e/core.spec.ts:780:5 › Owner mobile dashboard and cashier touch controls remain reachable at 360, 768 and 1280 pixels (8.3s)
+  ✓  37 [webkit] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (8.7s)
+  ✓  38 [webkit] › tests/e2e/core.spec.ts:1032:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (11.5s)
+  ✓  39 [webkit] › tests/e2e/core.spec.ts:1039:5 › Discount UI applies exact line and receipt percentages with reason and immutable manager authorization (5.0s)
+  ✓  40 [webkit] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (3.3s)
+  ✘  41 [webkit] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (17.2s)
+(node:312764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  42 [webkit] › tests/e2e/core.spec.ts:1137:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (5.3s)
+  ✓  43 [webkit] › tests/e2e/core.spec.ts:1143:5 › Owner reviews a changed-price offline cash conflict, recovers lost settlement acknowledgment and confirms the original receipt once (6.2s)
+  ✓  44 [webkit] › tests/e2e/core.spec.ts:1359:5 › Dashboard boundary recovers a render failure without creating an economic operation or exposing input data (2.4s)
+  ✓  45 [webkit] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (1.6s)
+  ✓  46 [webkit] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (1.3s)
+  ✘  47 [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (1.0m)
+(node:315815) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  48 [webkit] › tests/e2e/permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change (4.1s)
+
+
+  1) [chromium] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "tasdiq: owner"
+    Received string:    "<!doctype html><html lang=\"uz\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'\"><title>Qaytarma chek</title><style>@page{size:80mm 297mm;margin:4mm}body{font:12px system-ui;width:72mm;margin:auto;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td{border-bottom:1px dashed #999;padding:5px}h1{font-size:16px}</style></head><body><h1>QAYTARMA CHEK — NUSXA</h1><p>FISKAL EMAS. Brauzerda Ctrl+P orqali chop etish/PDF saqlash.</p><p>RET-4e48a9b3-6f2a-4db8-b419-3fb128fd47bb</p><p>Original savdo: 7d330347-c01a-4548-990e-a7e74fc6434a</p><p>15.10.2026 13:04 (Asia/Tashkent)</p><p>Xodim: Browser Owner; tasdiq: Do&#39;kon egasi</p><p>Sabab: Damaged refund recovery</p><table><tr><td>Browser coffee<br>1 dona<br>Brak — sotiladigan qoldiqqa qo‘shilmagan</td><td>100.25 so‘m</td></tr></table><p>Qaytarilgan tovar qiymati: 100.25 so‘m</p><p>Bu qiymatning hammasi naqd refund degani emas; nasiya qismi qarzni kamaytirishi mumkin.</p></body></html>"
+
+      427 |  await expect(page.getByText('Qiymat qaytarilgan tovar summasi; uning hammasi naqd refund degani emas.',{exact:true})).toBeVisible()
+      428 |  const returnDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Qaytarma chek HTML yuklash',exact:true}).click();const returnHtml=await returnDownload;
+    > 429 |  const returnMarkup=await (await import('node:fs/promises')).readFile((await returnHtml.path())!,'utf8');expect(returnMarkup).toContain('QAYTARMA CHEK — NUSXA');expect(returnMarkup).toContain(sale.id);expect(returnMarkup).toContain('Damaged refund recovery');expect(returnMarkup).toContain('tasdiq: owner');
+          |                                                                                                                                                                                                                                                                                         ^
+      430 |
+      431 |  await page.getByRole('link',{name:'Audit tarixi',exact:true}).click()
+      432 |  await expect(page.getByRole('heading',{name:'Audit tarixi',exact:true})).toBeVisible()
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:429:281
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-chromium/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Offline savat tafsiloti', { exact: true })
+    Expected substring: "Holat: unused"
+    Received string:    "Private offline signed basket item · 1 dona · 10.25Jami: 10.25 so‘mMuddati: 15.10.2026 08:10 UTCHolat: Ishlatilmagan"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" getByLabel('Offline savat tafsiloti', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('Offline savat tafsiloti', { exact: true })
+        2 × locator resolved to <section id="details" aria-label="Offline savat tafsiloti" data-i18n-aria="Offline savat tafsiloti"></section>
+          - unexpected value ""
+        22 × locator resolved to <section id="details" aria-label="Offline savat tafsiloti" data-i18n-aria="Offline savat tafsiloti">…</section>
+           - unexpected value "Private offline signed basket item · 1 dona · 10.25Jami: 10.25 so‘mMuddati: 15.10.2026 08:10 UTCHolat: Ishlatilmagan"
+
+
+      1130 |  await context.addCookies([{name:'pos_test_transport_offline',value:'1',domain:'localhost',path:'/',secure:true,sameSite:'Strict'}]);await page.reload();await page.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await page.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await page.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(page.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Private offline signed basket item');expect(await page.evaluate(async(id)=>{const path='/pwa/cash-store.js',store=await import(path),original=await store.unlockCashTicket(id,'test-only-private-phrase');try{await store.takeOfflineCash({...original.ticket,payload:{...original.ticket.payload,items:original.ticket.payload.items.map((i:Record<string,unknown>)=>({...i,quantity:'1000'}))}},'20');return false}catch{return true}},lease.id)).toBe(true);await page.getByLabel('Mijoz bergan naqd pul',{exact:true}).fill('20');
+      1131 |  // The second real offline tab unlocks the same source before either takes cash.
+    > 1132 |  const second=await context.newPage();await second.goto('/pwa/cash.html');await second.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await second.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await second.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(second.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Holat: unused');await second.getByLabel('Mijoz bergan naqd pul',{exact:true}).fill('20');await page.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true}).click();await expect(page.getByRole('status')).toContainText('SERVER TASDIQLAMAGAN');await second.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true}).click();await expect(second.getByRole('status')).toContainText('qayta pul olmang');await second.close();expect(await db.payment.count({where:{saleId:sale.id}})).toBe(0);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('5');
+           |                                                                                                                                                                                                                                                                                                                                                                                                             ^
+      1133 |  await page.reload();await page.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await page.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await page.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(page.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Qaytim: 9.75');await expect(page.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true})).toBeDisabled();await context.addCookies([{name:'pos_test_transport_offline',value:'0',domain:'localhost',path:'/',secure:true,sameSite:'Strict'}]);await page.getByRole('button',{name:'Original naqd natijasini sinxronlash',exact:true}).click();await expect(page.getByRole('status')).toContainText('Original naqd savdo serverda yakunlandi.');expect(await db.payment.count({where:{saleId:sale.id}})).toBe(1);expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('4');expect((await db.sale.findUniqueOrThrow({where:{id:sale.id}})).cashChange?.toString()).toBe('9.75');expect(await db.debtEntry.count({where:{saleId:sale.id}})).toBe(0);
+      1134 | });
+      1135 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1132:397
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-chromium/error-context.md
+
+    Error Context: test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-chromium/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Закрыть меню', exact: true })
+        - locator resolved to <button aria-label="Закрыть меню" class="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">…</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not stable
+        - retrying click action
+        - waiting 20ms
+        - waiting for element to be visible, enabled and stable
+        - element is not stable
+      2 × retrying click action
+          - waiting 100ms
+          - waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - element is outside of the viewport
+      99 × retrying click action
+           - waiting 500ms
+           - waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - element is outside of the viewport
+      - retrying click action
+        - waiting 500ms
+
+
+      57 |  const original=await pending();expect(JSON.parse(original)).toHaveLength(1);await page.getByRole('dialog').getByLabel('Язык',{exact:true}).selectOption('uz');expect(await pending()).toBe(original);await page.getByRole('dialog').getByLabel('Til',{exact:true}).selectOption('ru');expect(await pending()).toBe(original);expect(bodies).toHaveLength(1);
+      58 |  await page.getByRole('dialog').getByRole('button',{name:'Проверить результат исходной продажи',exact:true}).click();await expect(page.getByRole('button',{name:'Проверить результат',exact:true})).toHaveCount(0);
+    > 59 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(sale.items[0].quantity.toString()).toBe('0.125');expect(sale.items[0].productName).toBe('Saqlash');expect(sale.totalAmount.toString()).toBe('12.5');expect(sale.cashTendered?.toString()).toBe('20');expect(sale.cashChange?.toString()).toBe('7.5');expect(sale.payments).toHaveLength(1);expect(sale.payments[0].paymentType).toBe('cash');expect(sale.payments[0].amount.toString()).toBe('12.5');expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('1.875');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect(bodies).toHaveLength(1);await expect(page.locator('#printable-receipt')).toContainText('Saqlash');await expect(page.locator('#printable-receipt')).toContainText('12,50 сум');await page.screenshot({path:test.info().outputPath('locale-receipt-ru.png')});await page.getByRole('dialog').getByRole('button',{name:'Новая продажа',exact:true}).click();await page.setViewportSize({width:360,height:800});const closeMenu=page.getByRole('button',{name:'Закрыть меню',exact:true});if(await closeMenu.isVisible())await closeMenu.click();await expect(page.getByLabel('Язык',{exact:true})).toBeVisible();await page.getByLabel('Язык',{exact:true}).selectOption('uz');await page.getByLabel('Til',{exact:true}).selectOption('ru');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:test.info().outputPath('locale-mobile-pos-ru.png')});
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      60 | });
+      61 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:59:1297
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [firefox] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "tasdiq: owner"
+    Received string:    "<!doctype html><html lang=\"uz\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'\"><title>Qaytarma chek</title><style>@page{size:80mm 297mm;margin:4mm}body{font:12px system-ui;width:72mm;margin:auto;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td{border-bottom:1px dashed #999;padding:5px}h1{font-size:16px}</style></head><body><h1>QAYTARMA CHEK — NUSXA</h1><p>FISKAL EMAS. Brauzerda Ctrl+P orqali chop etish/PDF saqlash.</p><p>RET-327458c7-cb22-4864-b92d-eab914c4a2c7</p><p>Original savdo: f19ef425-64c8-4928-95c9-675d88d0bdc5</p><p>15.10.2026 13:07 (Asia/Tashkent)</p><p>Xodim: Browser Owner; tasdiq: Do&#39;kon egasi</p><p>Sabab: Damaged refund recovery</p><table><tr><td>Browser coffee<br>1 dona<br>Brak — sotiladigan qoldiqqa qo‘shilmagan</td><td>100.25 so‘m</td></tr></table><p>Qaytarilgan tovar qiymati: 100.25 so‘m</p><p>Bu qiymatning hammasi naqd refund degani emas; nasiya qismi qarzni kamaytirishi mumkin.</p></body></html>"
+
+      427 |  await expect(page.getByText('Qiymat qaytarilgan tovar summasi; uning hammasi naqd refund degani emas.',{exact:true})).toBeVisible()
+      428 |  const returnDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Qaytarma chek HTML yuklash',exact:true}).click();const returnHtml=await returnDownload;
+    > 429 |  const returnMarkup=await (await import('node:fs/promises')).readFile((await returnHtml.path())!,'utf8');expect(returnMarkup).toContain('QAYTARMA CHEK — NUSXA');expect(returnMarkup).toContain(sale.id);expect(returnMarkup).toContain('Damaged refund recovery');expect(returnMarkup).toContain('tasdiq: owner');
+          |                                                                                                                                                                                                                                                                                         ^
+      430 |
+      431 |  await page.getByRole('link',{name:'Audit tarixi',exact:true}).click()
+      432 |  await expect(page.getByRole('heading',{name:'Audit tarixi',exact:true})).toBeVisible()
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:429:281
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-firefox/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [firefox] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Offline savat tafsiloti', { exact: true })
+    Expected substring: "Holat: unused"
+    Received string:    "Private offline signed basket item · 1 dona · 10.25Jami: 10.25 so‘mMuddati: 15.10.2026 08:13 UTCHolat: Ishlatilmagan"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" getByLabel('Offline savat tafsiloti', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('Offline savat tafsiloti', { exact: true })
+        24 × locator resolved to <section id="details" aria-label="Offline savat tafsiloti" data-i18n-aria="Offline savat tafsiloti">…</section>
+           - unexpected value "Private offline signed basket item · 1 dona · 10.25Jami: 10.25 so‘mMuddati: 15.10.2026 08:13 UTCHolat: Ishlatilmagan"
+
+
+      1130 |  await context.addCookies([{name:'pos_test_transport_offline',value:'1',domain:'localhost',path:'/',secure:true,sameSite:'Strict'}]);await page.reload();await page.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await page.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await page.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(page.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Private offline signed basket item');expect(await page.evaluate(async(id)=>{const path='/pwa/cash-store.js',store=await import(path),original=await store.unlockCashTicket(id,'test-only-private-phrase');try{await store.takeOfflineCash({...original.ticket,payload:{...original.ticket.payload,items:original.ticket.payload.items.map((i:Record<string,unknown>)=>({...i,quantity:'1000'}))}},'20');return false}catch{return true}},lease.id)).toBe(true);await page.getByLabel('Mijoz bergan naqd pul',{exact:true}).fill('20');
+      1131 |  // The second real offline tab unlocks the same source before either takes cash.
+    > 1132 |  const second=await context.newPage();await second.goto('/pwa/cash.html');await second.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await second.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await second.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(second.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Holat: unused');await second.getByLabel('Mijoz bergan naqd pul',{exact:true}).fill('20');await page.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true}).click();await expect(page.getByRole('status')).toContainText('SERVER TASDIQLAMAGAN');await second.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true}).click();await expect(second.getByRole('status')).toContainText('qayta pul olmang');await second.close();expect(await db.payment.count({where:{saleId:sale.id}})).toBe(0);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('5');
+           |                                                                                                                                                                                                                                                                                                                                                                                                             ^
+      1133 |  await page.reload();await page.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await page.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await page.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(page.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Qaytim: 9.75');await expect(page.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true})).toBeDisabled();await context.addCookies([{name:'pos_test_transport_offline',value:'0',domain:'localhost',path:'/',secure:true,sameSite:'Strict'}]);await page.getByRole('button',{name:'Original naqd natijasini sinxronlash',exact:true}).click();await expect(page.getByRole('status')).toContainText('Original naqd savdo serverda yakunlandi.');expect(await db.payment.count({where:{saleId:sale.id}})).toBe(1);expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('4');expect((await db.sale.findUniqueOrThrow({where:{id:sale.id}})).cashChange?.toString()).toBe('9.75');expect(await db.debtEntry.count({where:{saleId:sale.id}})).toBe(0);
+      1134 | });
+      1135 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1132:397
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-firefox/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-firefox/error-context.md
+
+    Error Context: test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-firefox/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Закрыть меню', exact: true })
+        - locator resolved to <button aria-label="Закрыть меню" class="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">…</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not stable
+        - retrying click action
+        - waiting 20ms
+        - waiting for element to be visible, enabled and stable
+        - element is not stable
+      2 × retrying click action
+          - waiting 100ms
+          - waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - element is outside of the viewport
+      97 × retrying click action
+           - waiting 500ms
+           - waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - element is outside of the viewport
+      - retrying click action
+        - waiting 500ms
+
+
+      57 |  const original=await pending();expect(JSON.parse(original)).toHaveLength(1);await page.getByRole('dialog').getByLabel('Язык',{exact:true}).selectOption('uz');expect(await pending()).toBe(original);await page.getByRole('dialog').getByLabel('Til',{exact:true}).selectOption('ru');expect(await pending()).toBe(original);expect(bodies).toHaveLength(1);
+      58 |  await page.getByRole('dialog').getByRole('button',{name:'Проверить результат исходной продажи',exact:true}).click();await expect(page.getByRole('button',{name:'Проверить результат',exact:true})).toHaveCount(0);
+    > 59 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(sale.items[0].quantity.toString()).toBe('0.125');expect(sale.items[0].productName).toBe('Saqlash');expect(sale.totalAmount.toString()).toBe('12.5');expect(sale.cashTendered?.toString()).toBe('20');expect(sale.cashChange?.toString()).toBe('7.5');expect(sale.payments).toHaveLength(1);expect(sale.payments[0].paymentType).toBe('cash');expect(sale.payments[0].amount.toString()).toBe('12.5');expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('1.875');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect(bodies).toHaveLength(1);await expect(page.locator('#printable-receipt')).toContainText('Saqlash');await expect(page.locator('#printable-receipt')).toContainText('12,50 сум');await page.screenshot({path:test.info().outputPath('locale-receipt-ru.png')});await page.getByRole('dialog').getByRole('button',{name:'Новая продажа',exact:true}).click();await page.setViewportSize({width:360,height:800});const closeMenu=page.getByRole('button',{name:'Закрыть меню',exact:true});if(await closeMenu.isVisible())await closeMenu.click();await expect(page.getByLabel('Язык',{exact:true})).toBeVisible();await page.getByLabel('Язык',{exact:true}).selectOption('uz');await page.getByLabel('Til',{exact:true}).selectOption('ru');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:test.info().outputPath('locale-mobile-pos-ru.png')});
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      60 | });
+      61 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:59:1297
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [webkit] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "tasdiq: owner"
+    Received string:    "<!doctype html><html lang=\"uz\"><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'\"><title>Qaytarma chek</title><style>@page{size:80mm 297mm;margin:4mm}body{font:12px system-ui;width:72mm;margin:auto;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse}td{border-bottom:1px dashed #999;padding:5px}h1{font-size:16px}</style></head><body><h1>QAYTARMA CHEK — NUSXA</h1><p>FISKAL EMAS. Brauzerda Ctrl+P orqali chop etish/PDF saqlash.</p><p>RET-c5be2876-32a8-4574-92e7-0f8c8824e0ea</p><p>Original savdo: edb4cdf7-58d1-47c6-82b0-47a95c2c3915</p><p>15.10.2026 13:10 (Asia/Tashkent)</p><p>Xodim: Browser Owner; tasdiq: Do&#39;kon egasi</p><p>Sabab: Damaged refund recovery</p><table><tr><td>Browser coffee<br>1 dona<br>Brak — sotiladigan qoldiqqa qo‘shilmagan</td><td>100.25 so‘m</td></tr></table><p>Qaytarilgan tovar qiymati: 100.25 so‘m</p><p>Bu qiymatning hammasi naqd refund degani emas; nasiya qismi qarzni kamaytirishi mumkin.</p></body></html>"
+
+      427 |  await expect(page.getByText('Qiymat qaytarilgan tovar summasi; uning hammasi naqd refund degani emas.',{exact:true})).toBeVisible()
+      428 |  const returnDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Qaytarma chek HTML yuklash',exact:true}).click();const returnHtml=await returnDownload;
+    > 429 |  const returnMarkup=await (await import('node:fs/promises')).readFile((await returnHtml.path())!,'utf8');expect(returnMarkup).toContain('QAYTARMA CHEK — NUSXA');expect(returnMarkup).toContain(sale.id);expect(returnMarkup).toContain('Damaged refund recovery');expect(returnMarkup).toContain('tasdiq: owner');
+          |                                                                                                                                                                                                                                                                                         ^
+      430 |
+      431 |  await page.getByRole('link',{name:'Audit tarixi',exact:true}).click()
+      432 |  await expect(page.getByRole('heading',{name:'Audit tarixi',exact:true})).toBeVisible()
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:429:281
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-webkit/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-regi-1fd10--and-sell-cash-exactly-once-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [webkit] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Offline savat tafsiloti', { exact: true })
+    Expected substring: "Holat: unused"
+    Received string:    "Private offline signed basket item · 1 dona · 10.25Jami: 10.25 so‘mMuddati: 15.10.2026 08:17 UTCHolat: Ishlatilmagan"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" getByLabel('Offline savat tafsiloti', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('Offline savat tafsiloti', { exact: true })
+        2 × locator resolved to <section id="details" aria-label="Offline savat tafsiloti" data-i18n-aria="Offline savat tafsiloti"></section>
+          - unexpected value ""
+        22 × locator resolved to <section id="details" aria-label="Offline savat tafsiloti" data-i18n-aria="Offline savat tafsiloti">…</section>
+           - unexpected value "Private offline signed basket item · 1 dona · 10.25Jami: 10.25 so‘mMuddati: 15.10.2026 08:17 UTCHolat: Ishlatilmagan"
+
+
+      1130 |  await context.addCookies([{name:'pos_test_transport_offline',value:'1',domain:'localhost',path:'/',secure:true,sameSite:'Strict'}]);await page.reload();await page.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await page.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await page.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(page.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Private offline signed basket item');expect(await page.evaluate(async(id)=>{const path='/pwa/cash-store.js',store=await import(path),original=await store.unlockCashTicket(id,'test-only-private-phrase');try{await store.takeOfflineCash({...original.ticket,payload:{...original.ticket.payload,items:original.ticket.payload.items.map((i:Record<string,unknown>)=>({...i,quantity:'1000'}))}},'20');return false}catch{return true}},lease.id)).toBe(true);await page.getByLabel('Mijoz bergan naqd pul',{exact:true}).fill('20');
+      1131 |  // The second real offline tab unlocks the same source before either takes cash.
+    > 1132 |  const second=await context.newPage();await second.goto('/pwa/cash.html');await second.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await second.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await second.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(second.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Holat: unused');await second.getByLabel('Mijoz bergan naqd pul',{exact:true}).fill('20');await page.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true}).click();await expect(page.getByRole('status')).toContainText('SERVER TASDIQLAMAGAN');await second.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true}).click();await expect(second.getByRole('status')).toContainText('qayta pul olmang');await second.close();expect(await db.payment.count({where:{saleId:sale.id}})).toBe(0);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('5');
+           |                                                                                                                                                                                                                                                                                                                                                                                                             ^
+      1133 |  await page.reload();await page.getByLabel('Offline ruxsat',{exact:true}).selectOption(lease.id);await page.getByLabel('Unlock iborasi',{exact:true}).fill('test-only-private-phrase');await page.getByRole('button',{name:'Offline savatni ochish',exact:true}).click();await expect(page.getByLabel('Offline savat tafsiloti',{exact:true})).toContainText('Qaytim: 9.75');await expect(page.getByRole('button',{name:'Shu savat uchun naqdni bir marta qabul qilish',exact:true})).toBeDisabled();await context.addCookies([{name:'pos_test_transport_offline',value:'0',domain:'localhost',path:'/',secure:true,sameSite:'Strict'}]);await page.getByRole('button',{name:'Original naqd natijasini sinxronlash',exact:true}).click();await expect(page.getByRole('status')).toContainText('Original naqd savdo serverda yakunlandi.');expect(await db.payment.count({where:{saleId:sale.id}})).toBe(1);expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('4');expect((await db.sale.findUniqueOrThrow({where:{id:sale.id}})).cashChange?.toString()).toBe('9.75');expect(await db.debtEntry.count({where:{saleId:sale.id}})).toBe(0);
+      1134 | });
+      1135 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1132:397
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-webkit/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-webkit/error-context.md
+
+    Error Context: test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-webkit/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Real-offline-cash-wor-cd459-e-with-exact-stock-and-cash-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Закрыть меню', exact: true })
+        - locator resolved to <button aria-label="Закрыть меню" class="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">…</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not stable
+        - retrying click action
+        - waiting 20ms
+        - waiting for element to be visible, enabled and stable
+        - element is not stable
+      2 × retrying click action
+          - waiting 100ms
+          - waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - element is outside of the viewport
+      92 × retrying click action
+           - waiting 500ms
+           - waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - element is outside of the viewport
+      - retrying click action
+        - waiting 500ms
+
+
+      57 |  const original=await pending();expect(JSON.parse(original)).toHaveLength(1);await page.getByRole('dialog').getByLabel('Язык',{exact:true}).selectOption('uz');expect(await pending()).toBe(original);await page.getByRole('dialog').getByLabel('Til',{exact:true}).selectOption('ru');expect(await pending()).toBe(original);expect(bodies).toHaveLength(1);
+      58 |  await page.getByRole('dialog').getByRole('button',{name:'Проверить результат исходной продажи',exact:true}).click();await expect(page.getByRole('button',{name:'Проверить результат',exact:true})).toHaveCount(0);
+    > 59 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id,status:'completed'},include:{items:true,payments:true}});expect(sale.items[0].quantity.toString()).toBe('0.125');expect(sale.items[0].productName).toBe('Saqlash');expect(sale.totalAmount.toString()).toBe('12.5');expect(sale.cashTendered?.toString()).toBe('20');expect(sale.cashChange?.toString()).toBe('7.5');expect(sale.payments).toHaveLength(1);expect(sale.payments[0].paymentType).toBe('cash');expect(sale.payments[0].amount.toString()).toBe('12.5');expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('1.875');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1);expect(bodies).toHaveLength(1);await expect(page.locator('#printable-receipt')).toContainText('Saqlash');await expect(page.locator('#printable-receipt')).toContainText('12,50 сум');await page.screenshot({path:test.info().outputPath('locale-receipt-ru.png')});await page.getByRole('dialog').getByRole('button',{name:'Новая продажа',exact:true}).click();await page.setViewportSize({width:360,height:800});const closeMenu=page.getByRole('button',{name:'Закрыть меню',exact:true});if(await closeMenu.isVisible())await closeMenu.click();await expect(page.getByLabel('Язык',{exact:true})).toBeVisible();await page.getByLabel('Язык',{exact:true}).selectOption('uz');await page.getByLabel('Til',{exact:true}).selectOption('ru');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:test.info().outputPath('locale-mobile-pos-ru.png')});
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      60 | });
+      61 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:59:1297
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9 failed
+    [chromium] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once 
+    [chromium] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash 
+    [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+    [firefox] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once 
+    [firefox] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash 
+    [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+    [webkit] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once 
+    [webkit] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash 
+    [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+  39 passed (9.0m)

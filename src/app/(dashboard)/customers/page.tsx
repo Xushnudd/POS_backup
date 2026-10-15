@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -36,6 +37,8 @@ export default function CustomersPage(){
  const {t:tr}=useTranslation();
 const {organization,user,role}=useAuth();return organization&&user&&role?<Suspense fallback={<LoadingSpinner text={tr("Mijozlar yuklanmoqda...")}/>}><Customers key={[organization.id,user.id,role].join(':')}/></Suspense>:null;}
 function Customers() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -94,7 +97,7 @@ function Customers() {
         if(request===readRequest.current.value){setCustomers(customersWithDebt);setTotalPages(res.pagination?.totalPages??0);setReadError('');setDebtError(customersWithDebt.some(row=>row.debtUnavailable)?'Ba’zi mijozlarning qarzi yuklanmadi; noma’lum qiymat nol deb ko‘rsatilmaydi.':'');}
       }
     } catch (err: unknown) {
-      if(request===readRequest.current.value)setReadError(err instanceof Error?err.message:'Mijozlar yuklanmadi');
+      if(request===readRequest.current.value)setReadError(displayErrorMessage(err,'Mijozlar yuklanmadi'));
     } finally {
       if(request===readRequest.current.value)setIsLoading(false);
     }
@@ -166,7 +169,7 @@ function Customers() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {(readError||debtError)&&<p role="alert">{readError||debtError}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}<Button disabled={isLoading||isSaving} onClick={()=>void loadCustomers()}>{tr("Mijozlarni qayta yuklash")}</Button>{mutation.error&&<p role="alert">{mutation.error}</p>}{isSaving&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Mijoz serverda saqlandi.")}</p>}
+      {(readError||debtError)&&<p role="alert">{readError||debtError}{tr(". Oxirgi ro‘yxat va draft saqlangan.")}</p>}<Button disabled={isLoading||isSaving} onClick={()=>void loadCustomers()}>{tr("Mijozlarni qayta yuklash")}</Button>{mutation.error&&<p role="alert">{uiMessage(mutation.error)}</p>}{isSaving&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}{mutation.state==='saved'&&<p role="status">{tr("Mijoz serverda saqlandi.")}</p>}
       {role==='owner'&&<Link href="/customers/duplicates" className="text-blue-700 underline">{tr("Legacy telefon dublikatlarini tekshirish")}</Link>}
       {organization&&role==='owner'&&<CsvExportButton path="/customers" params={{organizationId:organization.id,...(searchQuery?{search:searchQuery}:{}),sort}} label={tr("Mijozlarni CSV yuklash")}/>}
       {/* Top Header */}
@@ -243,7 +246,7 @@ function Customers() {
                             {formatMoney(c.debt)}
                           </span>
                         ) : (
-                          <span className="text-gray-400">{fixed(c.debt??'0')<BigInt(0)?'Avans (net qoldiq): '+formatMoney(c.debt):tr("0 so‘m")}</span>
+                          <span className="text-gray-400">{fixed(c.debt??'0')<BigInt(0)?tr("Avans (net qoldiq):")+" "+formatMoney(c.debt):tr("0 so‘m")}</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right space-x-1">

@@ -9,6 +9,7 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit --incremental false",
+    "i18n:check": "node scripts/i18n/catalog.cjs check",
     "db:migrate": "prisma migrate deploy",
     "test": "node scripts/test.cjs",
     "test:integration": "node scripts/test.cjs --integration",

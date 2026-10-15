@@ -1,4 +1,7 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
+import type {Locale} from '@/i18n/locale';
 import {localizeOwnedLabels} from '@/i18n/messages';
 
 import {useTranslation} from '@/context/LocaleContext';
@@ -28,7 +31,9 @@ export default function ReceiptPreview({
   sale,
   copy=false,
 }: ReceiptPreviewProps) {
- const {formatMoney}=useTranslation();
+ const {message:uiMessage}=useTranslation();
+
+ const {formatMoney,formatDate}=useTranslation();
 
  const {locale:mapLocale}=useTranslation();
 
@@ -39,12 +44,12 @@ export default function ReceiptPreview({
   const [width,setWidth]=useState('80');
   const [printRequested,setPrintRequested]=useState(false);
   const [printing,setPrinting]=useState(false),[printError,setPrintError]=useState('');
-  const printAttempt=useRef<{saleId:string;operationId:string;width:58|80;copy:boolean;markup:string}|null>(null);
+  const printAttempt=useRef<{saleId:string;operationId:string;width:58|80;copy:boolean;markup:string;locale:Locale}|null>(null);
 
   if (!sale) return null;
   const identity = sale.receiptSnapshot;
   const draft = sale.status === 'draft';
-  const receiptName = identity?.organizationName ?? (draft ? organization?.name : 'Original rekvizitlar saqlanmagan');
+  const receiptName = identity?.organizationName ?? (draft ? organization?.name : tr('Original rekvizitlar saqlanmagan'));
   const receiptPhone = identity?.organizationPhone ?? (draft ? organization?.phone : null);
   const receiptTin = identity ? identity.tin : (draft ? organization?.tin : null);
   const receiptTimezone = identity?.timezone ?? organization?.timezone ?? 'Asia/Tashkent';
@@ -53,16 +58,16 @@ export default function ReceiptPreview({
     // This records only a browser print request, never hardware confirmation.
     if(!printRef.current)return;
     if(printing)return;
-    const attempt=(printAttempt.current?.saleId===sale.id?printAttempt.current:null)??{saleId:sale.id,operationId:crypto.randomUUID(),width:Number(width)===58?58 as const:80 as const,copy,markup:printRef.current.outerHTML};
+    const attempt=(printAttempt.current?.saleId===sale.id?printAttempt.current:null)??{saleId:sale.id,operationId:crypto.randomUUID(),width:Number(width)===58?58 as const:80 as const,copy,markup:printRef.current.outerHTML,locale:mapLocale};
     printAttempt.current=attempt;setPrinting(true);setPrintError('');
     try{await api.sales.printRequest(attempt.saleId,{operationId:attempt.operationId,width:attempt.width,copy:attempt.copy});}
-    catch(error){setPrintError('PRINT_REQUEST_FAILED: '+(error instanceof Error?error.message:'Chop etish so‘rovi yozilmadi; qayta urinib ko‘ring'));setPrinting(false);return;}
+    catch(error){setPrintError('PRINT_REQUEST_FAILED: '+(displayErrorMessage(error,'Chop etish so‘rovi yozilmadi; qayta urinib ko‘ring')));setPrinting(false);return;}
     printAttempt.current=null;setPrinting(false);
     if(!printRef.current)return;
     setPrintRequested(true);
-    const frame=document.createElement('iframe');frame.title='Chek chop etish';frame.style.cssText='position:fixed;width:0;height:0;border:0;';
+    const frame=document.createElement('iframe');frame.title=tr('Chek chop etish');frame.style.cssText='position:fixed;width:0;height:0;border:0;';
     const paper=attempt.width;
-    frame.srcdoc=`<!doctype html><html lang="uz"><head><meta charset="utf-8"><title>POS chek</title><style>@page{size:${paper}mm 297mm;margin:2mm}body{margin:0;font:11px monospace;color:#111}#printable-receipt{width:${paper-4}mm!important;max-width:none!important;padding:0!important;border:0!important}p{margin:3px 0}h2{font-size:14px}.flex{display:flex}.flex-col{flex-direction:column}.justify-between{justify-content:space-between}.text-center{text-align:center}.font-bold,.font-black{font-weight:bold}.break-words{overflow-wrap:anywhere}.flex-1{flex:1}.border-b{border-bottom:1px dashed #aaa}.py-2\\.5,.py-3{padding:6px 0}.space-y-2>div{margin:5px 0}svg{display:none}</style></head><body>${attempt.markup}</body></html>`;
+    frame.srcdoc=`<!doctype html><html lang="${attempt.locale}"><head><meta charset="utf-8"><title>${tr('POS chek')}</title><style>@page{size:${paper}mm 297mm;margin:2mm}body{margin:0;font:11px monospace;color:#111}#printable-receipt{width:${paper-4}mm!important;max-width:none!important;padding:0!important;border:0!important}p{margin:3px 0}h2{font-size:14px}.flex{display:flex}.flex-col{flex-direction:column}.justify-between{justify-content:space-between}.text-center{text-align:center}.font-bold,.font-black{font-weight:bold}.break-words{overflow-wrap:anywhere}.flex-1{flex:1}.border-b{border-bottom:1px dashed #aaa}.py-2\\.5,.py-3{padding:6px 0}.space-y-2>div{margin:5px 0}svg{display:none}</style></head><body>${attempt.markup}</body></html>`;
     frame.onload=()=>{frame.contentWindow?.addEventListener('afterprint',()=>frame.remove(),{once:true});try{if(!frame.contentWindow)throw new Error('Chop etish oynasi ochilmadi');frame.contentWindow.focus();frame.contentWindow.print();}catch(error){setPrintRequested(false);setPrintError('PRINT_FAILED: '+posFailure(error,'print').message);frame.remove();}};
     document.body.append(frame);setTimeout(()=>frame.remove(),120000);
   };
@@ -96,7 +101,7 @@ export default function ReceiptPreview({
     >
       <Select disabled={printing||!!printError} label={tr("Chek qog‘ozi eni")} value={width} options={[{value:'58',label:tr("58 mm")},{value:'80',label:tr("80 mm")}]} onChange={event=>setWidth(event.target.value)}/>
       <p className="text-xs text-slate-500 mb-3">{tr("Brauzer orqali chop etish/PDF. Printer sozlamasida mos qog‘ozni tanlang. Bu fiskal chek emas.")}</p>
-      {printError&&<div role="alert" data-stage="print" className="text-red-600 text-xs"><p>{printError}</p><p>{posFailure(null,'print').nextAction}</p></div>}
+      {printError&&<div role="alert" data-stage="print" className="text-red-600 text-xs"><p>{uiMessage(printError)}</p><p>{uiMessage(posFailure(null,'print').nextAction)}</p></div>}
       {printRequested&&<p role="status" className="text-xs">{tr("Chop etish oynasi so‘raldi; fizik chop etilganligi tasdiqlanmaydi.")}</p>}
       {/* Printable Receipt Paper */}
       <div
@@ -129,11 +134,11 @@ export default function ReceiptPreview({
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">{tr("Sana:")}</span>
-            <span>{new Date(sale.completedAt||sale.createdAt).toLocaleString('uz-UZ',{timeZone:receiptTimezone})}</span>
+            <span>{formatDate(sale.completedAt||sale.createdAt,true,receiptTimezone)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">{tr("Kassir:")}</span>
-            <span>{identity?.cashierName || (draft ? sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:'Chekdagi kassir ID: '+sale.cashierId) : 'Chekdagi kassir ID: '+sale.cashierId)}</span>
+            <span>{identity?.cashierName || (draft ? sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:tr("Chekdagi kassir ID:")+" "+sale.cashierId) : tr("Chekdagi kassir ID:")+" "+sale.cashierId)}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between">
@@ -208,7 +213,7 @@ export default function ReceiptPreview({
               },mapLocale);
               return (
                 <div key={idx} className="flex justify-between text-gray-700">
-                  <span>{p.paymentType==='credit'&&p.direction==='in'&&sale.giftFunding?'Sertifikat '+sale.giftFunding.code:pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?tr("chiqim"):tr("kirim")}):</span>
+                  <span>{p.paymentType==='credit'&&p.direction==='in'&&sale.giftFunding?tr("Sertifikat")+" "+sale.giftFunding.code:pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?tr("chiqim"):tr("kirim")}):</span>
                   <span className="font-semibold">{formatMoney(p.amount)}</span>
                 </div>
               );

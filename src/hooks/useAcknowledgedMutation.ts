@@ -1,4 +1,6 @@
 'use client';
+import {errorMessage} from '@/i18n/errors';
+
 import {useEffect,useRef,useState} from 'react';
 import {ApiError} from '@/lib/api';
 /** Legacy catalogue writes have no operation key. Protect a single in-flight
@@ -15,7 +17,7 @@ export function useAcknowledgedMutation(ready:boolean){
    await work();
    if(live.current){setState('saved');onAck();}
   }catch(cause){
-   if(live.current){const definite=cause instanceof ApiError&&[400,401,403,404,409,413,415,422,429].includes(cause.status??0);setState(definite?'failed':'unknown');setError(definite?(cause instanceof Error?cause.message:'Amal rad etildi'):'Server natijasi tasdiqlanmadi. Ro‘yxatni yangilab natijani tekshiring; qayta yuborish avtomatik bajarilmaydi.');}
+   if(live.current){const definite=cause instanceof ApiError&&[400,401,403,404,409,413,415,422,429].includes(cause.status??0);setState(definite?'failed':'unknown');setError(definite?(errorMessage(cause,'Amal rad etildi')):'Server natijasi tasdiqlanmadi. Ro‘yxatni yangilab natijani tekshiring; qayta yuborish avtomatik bajarilmaydi.');}
   }finally{flight.current=false;}
  };
  return {state,error,saving:state==='saving',execute,edited:()=>{if(!flight.current)setState('idle');}};

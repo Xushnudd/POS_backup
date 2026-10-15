@@ -1,7 +1,7 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
-
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -25,8 +25,10 @@ export default function CameraBarcodeScanner({
   onDetected,
   disabled = false,
   className = '',
-  ariaLabel = 'Kamera orqali barkodni skanerlash',
+  ariaLabel,
 }: CameraBarcodeScannerProps) {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -79,7 +81,7 @@ export default function CameraBarcodeScanner({
       );
       controlsRef.current = controls;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '';
+      const message = displayErrorMessage(error,'');
       setErrorMessage(
         message || 'Kameraga ulanib bo‘lmadi. Ruxsat berilganini va HTTPS ishlatilayotganini tekshiring.'
       );
@@ -100,7 +102,7 @@ export default function CameraBarcodeScanner({
     <>
       <button
         type="button"
-        aria-label={ariaLabel}
+        aria-label={ariaLabel??tr('Kamera orqali barkodni skanerlash')}
         title={ariaLabel}
         disabled={disabled}
         onClick={() => setIsOpen(true)}
@@ -123,7 +125,7 @@ export default function CameraBarcodeScanner({
 
           {errorMessage ? (
             <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-              {errorMessage}
+              {uiMessage(errorMessage)}
             </p>
           ) : (
             <p className="text-center text-xs text-gray-600">

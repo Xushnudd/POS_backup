@@ -1,5 +1,9 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ CUSTOMER_HAS_BALANCE:{message:'Mijozning qarz/avans qoldig‘i bor; avval uni hal qiling',nextAction:'Mijoz kartochkasida qarz va ishlatilmagan avansni tekshiring. Haqiqiy hisob-kitob yakunlanmaguncha mijozni arxivlamang.'},
+ INVITATION_INVALID:{message:'Taklif eskirgan, bekor qilingan yoki ishlatilgan.',nextAction:'Biznes egasidan yangi taklif so‘rang; parol va bir martalik havolani umumiy chatga yubormang.'},
+ INVITATION_ALREADY_USED:{message:'Taklif allaqachon ishlatilgan.',nextAction:'O‘z hisobingizga kiring yoki biznes egasidan a’zolik holatini tekshirishni so‘rang.'},
+ INVALID_CREDENTIALS:{message:'Telefon yoki parol noto‘g‘ri.',nextAction:'Kirish ma’lumotlarini tekshiring. Ko‘p marta takrorlamang; kerak bo‘lsa xavfsiz tiklashdan foydalaning.'},
  CARD_UNAVAILABLE:{message:'Karta bu mijoz yoki muddat uchun faol emas.',nextAction:'Original mijoz, kartaning muddati va bekor qilish tarixini tekshiring.'},
  PROMO_UNAVAILABLE:{message:'Promo kampaniyasi hozir amal qilmaydi.',nextAction:'Boshlanish/tugash vaqti, bekor qilish tarixi va administrator siyosatini tekshiring.'},
  PROMO_USE_LIMIT:{message:'Promo foydalanish limiti tugagan.',nextAction:'Global va mijoz limitini tekshiring. Boshqa mijoz profili yoki qaytarma bilan limitni chetlab o‘tmang.'},
@@ -98,5 +102,5 @@ const guidance:Record<string,ErrorGuidance>={
  INTERNAL_ERROR:{message:'Server amalni yakunlay olmadi.',nextAction:'Asl natijani tekshiring. So‘rov raqamini yordam xizmatiga bering; maxfiy ma’lumot yubormang.'},
 }
 export function errorGuidance(code:string,message?:string):ErrorGuidance{
- return guidance[code]??{message:message??'Amalni bajarib bo‘lmadi.',nextAction:'Savat va amal holatini saqlang, sababni tekshiring va zarur bo‘lsa rahbarga murojaat qiling.'}
+ return Object.hasOwn(guidance,code)?guidance[code]:{message:message??'Amalni bajarib bo‘lmadi.',nextAction:'Savat va amal holatini saqlang, sababni tekshiring va zarur bo‘lsa rahbarga murojaat qiling.'}
 }

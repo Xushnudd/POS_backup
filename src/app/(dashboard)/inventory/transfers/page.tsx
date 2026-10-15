@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -43,6 +44,8 @@ export default function StockTransfersPage(){
  const {t:tr}=useTranslation();
 const {organization,user,role}=useAuth();return <Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Transfers key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
 function Transfers() {
+ const {message:uiMessage}=useTranslation();
+
  const {formatDate}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -81,7 +84,7 @@ function Transfers() {
       const res = await api.transfers.list({ organizationId: organization.id,...filters,page,limit,sort,search });
       if(sequence===requestSequence.current.value){setTransfers(res.data??[]);setPages(res.pagination?.totalPages??0);}
     } catch (err: unknown) {
-      if(sequence===requestSequence.current.value)setListError(err instanceof Error?err.message:'Transferlar yuklanmadi');
+      if(sequence===requestSequence.current.value)setListError(displayErrorMessage(err,'Transferlar yuklanmadi'));
     } finally {
       if(sequence===requestSequence.current.value)setIsLoading(false);
     }
@@ -134,7 +137,7 @@ function Transfers() {
       intent={operationId:crypto.randomUUID(),reason};returnIntents.current[id]=intent;
     }
     try{await api.transfers.returnTransit(id,intent);notifySuccess('Qabul qilinmagan miqdorlar manba omborga qaytarildi');await loadTransfers();}
-    catch(error){notifyError(error instanceof Error?error.message:'Natija noaniq; shu amal bilan qayta urinishingiz mumkin');await loadTransfers();}
+    catch(error){notifyError(displayErrorMessage(error,'Natija noaniq; shu amal bilan qayta urinishingiz mumkin'));await loadTransfers();}
   };
   const cancelReasons=useRef<Record<string,string>>({});
   const handleCancel=async(id:string)=>{
@@ -143,7 +146,7 @@ function Transfers() {
     if(reason.length<3||reason.length>2000){notifyError('Sabab 3–2000 belgi bo‘lishi kerak');return;}
     cancelReasons.current[id]=reason;
     try{await api.transfers.cancel(id,reason);notifySuccess('Transfer bekor qilindi; qoldiq o‘zgarmadi');await loadTransfers();}
-    catch(error){notifyError(error instanceof Error?error.message:'Natija noaniq. Shu transferni yana tekshiring');await loadTransfers();}
+    catch(error){notifyError(displayErrorMessage(error,'Natija noaniq. Shu transferni yana tekshiring'));await loadTransfers();}
   };
 
   const handleSend = async (id: string) => {
@@ -152,7 +155,7 @@ function Transfers() {
       notifySuccess('Transfer jo\'natildi');
       loadTransfers();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Transferni jo\'natishda xatolik');
+      notifyError(displayErrorMessage(err,'Transferni jo\'natishda xatolik'));
     }
   };
 
@@ -192,7 +195,7 @@ function Transfers() {
       </form>
       {organization&&<CsvExportButton path="/transfers" params={{organizationId:organization.id,...filters,search,sort}} label={tr("Transferlarni CSV yuklash")}/>}
       {invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}
-      {listError&&<p role="alert">{listError}</p>}
+      {listError&&<p role="alert">{uiMessage(listError)}</p>}
       {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
       <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!listError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadTransfers();}}/>
       <Card padding={false}>
@@ -285,7 +288,7 @@ function Transfers() {
         title={tr("Yangi do'konlararo transfer")}
         size="lg"
       >
-        <DurableMutation path="/transfers" returnPath="/inventory/transfers" label={tr("Transferni yaratish")} body={{organizationId:organization?.id,fromStoreId,toStoreId,note:note.trim()||undefined,items}} review={[`Yo‘nalish: ${stores.find(store=>store.id===fromStoreId)?.name??''} → ${stores.find(store=>store.id===toStoreId)?.name??''}`,`Izoh: ${note}`,...items.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity}; asosiy birlik tannarxi: ${item.unitCost}`)]} onDone={()=>{notifySuccess('Transfer qoralamasi yaratildi');setIsModalOpen(false);setReceiptRevision(value=>value+1);void loadTransfers()}}>
+        <DurableMutation path="/transfers" returnPath="/inventory/transfers" label={tr("Transferni yaratish")} body={{organizationId:organization?.id,fromStoreId,toStoreId,note:note.trim()||undefined,items}} review={[tr("Yo‘nalish: {value1} → {value2}",{value1:String(stores.find(store=>store.id===fromStoreId)?.name??''),value2:String(stores.find(store=>store.id===toStoreId)?.name??'')}),tr("Izoh: {value1}",{value1:String(note)}),...items.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity}; asosiy birlik tannarxi: ${item.unitCost}`)]} onDone={()=>{notifySuccess('Transfer qoralamasi yaratildi');setIsModalOpen(false);setReceiptRevision(value=>value+1);void loadTransfers()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label={tr("Qaysi do'kondan (Chiqim) *")}
@@ -343,7 +346,7 @@ function Transfers() {
                     </select>
                   </div>
 
-                  {products.find(p=>p.id===item.productId)?.serialTracking&&fromStoreId&&<SerialPicker key={fromStoreId+item.productId} storeId={fromStoreId} productId={item.productId} label={'Jo‘natiladigan seriallar '+(idx+1)} value={item.serialInput??[]} onChange={ids=>setItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>}
+                  {products.find(p=>p.id===item.productId)?.serialTracking&&fromStoreId&&<SerialPicker key={fromStoreId+item.productId} storeId={fromStoreId} productId={item.productId} label={tr("Jo‘natiladigan seriallar")+" "+(idx+1)} value={item.serialInput??[]} onChange={ids=>setItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>}
                   <div className="w-24">
                     <input
                       type="number"

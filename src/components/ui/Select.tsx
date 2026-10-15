@@ -1,8 +1,13 @@
+'use client';
+
+import type {MessageKey} from '@/i18n/messages';
+import {useTranslation} from '@/context/LocaleContext';
 import React, { SelectHTMLAttributes, forwardRef,useId } from 'react';
 
 export interface SelectOption {
   value: string | number;
   label: string;
+  labelKey?:MessageKey;
 }
 
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
@@ -14,6 +19,8 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, placeholder, className = '', id, ...props }, ref) => {
+ const {message:uiMessage,t:tr}=useTranslation();
+
     const generatedId=useId();const selectId=id??generatedId;
 
     return (
@@ -43,12 +50,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           )}
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {opt.labelKey?tr(opt.labelKey):opt.label}
             </option>
           ))}
         </select>
 
-        {error && <p id={selectId+'-error'} role="alert" className="text-xs text-red-700 font-medium">{error}</p>}
+        {error && <p id={selectId+'-error'} role="alert" className="text-xs text-red-700 font-medium">{uiMessage(error)}</p>}
       </div>
     );
   }

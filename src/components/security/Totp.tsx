@@ -1,6 +1,5 @@
 'use client'
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -14,6 +13,8 @@ import { deviceId, pendingOperations } from '@/lib/offline'
 type Status={available:boolean;recoveryAvailable?:boolean;enabled?:boolean;factorId?:string|null;enrollmentExpiresAt?:string|null;recoveryCodesRemaining?:number;passwordRebindRequired?:boolean}
 type Enrollment={factorId:string;expiresAt:string;provisioningUri:string}
 export default function Totp(){
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
  const {user,organization,refreshUser}=useAuth(),router=useRouter()
@@ -21,8 +22,8 @@ export default function Totp(){
  const [password,setPassword]=useState(''),[code,setCode]=useState(''),[recoveryCode,setRecoveryCode]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[version,setVersion]=useState(0)
  useUnsavedChanges(Boolean(password||code||recoveryCode||setup||backups.length),busy,'Authenticatorning saqlanmagan maydonlari yoki faqat shu oynada ko‘rinadigan kalit/kodlari bor. Chiqishni tasdiqlaysizmi?')
  const busyRef=useRef(false)
- useEffect(()=>{let live=true;void api.request<Status>('/auth/totp').then(result=>{if(live){setStatus(result.data??null);if(result.data?.enabled)setSetup(null)}}).catch(e=>{if(live)setError(e instanceof Error?e.message:'Authenticator holati yuklanmadi')});return()=>{live=false}},[version])
- const perform=async(action:()=>Promise<void>)=>{if(busyRef.current)return;busyRef.current=true;setBusy(true);setError('');try{await action()}catch(e){setError(e instanceof Error?e.message:'Natija noaniq. Holatni qayta tekshiring.')}finally{setPassword('');setCode('');setRecoveryCode('');setBusy(false);busyRef.current=false}}
+ useEffect(()=>{let live=true;void api.request<Status>('/auth/totp').then(result=>{if(live){setStatus(result.data??null);if(result.data?.enabled)setSetup(null)}}).catch(e=>{if(live)setError(displayErrorMessage(e,'Authenticator holati yuklanmadi'))});return()=>{live=false}},[version])
+ const perform=async(action:()=>Promise<void>)=>{if(busyRef.current)return;busyRef.current=true;setBusy(true);setError('');try{await action()}catch(e){setError(displayErrorMessage(e,'Natija noaniq. Holatni qayta tekshiring.'))}finally{setPassword('');setCode('');setRecoveryCode('');setBusy(false);busyRef.current=false}}
  const start=()=>perform(async()=>{const response=await api.request<Enrollment>('/auth/totp/enroll',{method:'POST',body:JSON.stringify({password})});if(!response.data?.provisioningUri)throw new Error('Ulash kaliti olinmadi; holatni tekshiring');setSetup(response.data);setBackups([]);setVersion(v=>v+1)})
  const confirm=()=>perform(async()=>{if(!setup)return;const response=await api.request<{enabled:boolean;recoveryCodes:string[]}>('/auth/totp/confirm',{method:'POST',body:JSON.stringify({factorId:setup.factorId,code})});setSetup(null);setBackups(response.data?.recoveryCodes??[]);setVersion(v=>v+1)})
  const rotate=()=>perform(async()=>{const response=await api.request<{recoveryCodes:string[]}>('/auth/totp/rotate',{method:'POST',body:JSON.stringify({password,code})});setBackups(response.data?.recoveryCodes??[]);setVersion(v=>v+1)})
@@ -35,7 +36,7 @@ export default function Totp(){
  const seed=(()=>{try{return setup?new URL(setup.provisioningUri).searchParams.get('secret'):null}catch{return null}})()
  return <section aria-label={tr("Authenticator")} className="space-y-3 rounded border p-4"><h2>{tr("Authenticator")}</h2>
  <p>{tr("Authenticator kodlarini ulash. Hozir bu kirishda majburiy ikkinchi faktor sifatida ishlatilmaydi.")}</p>
- {error&&<p role="alert">{error}</p>}
+ {error&&<p role="alert">{uiMessage(error)}</p>}
  <button disabled={busy} className="underline" onClick={()=>{setError('');setVersion(v=>v+1)}}>{tr("Authenticator holatini tekshirish")}</button>
  {!status&&!error&&<p role="status">{tr("Yuklanmoqda…")}</p>}
  {status&&!status.available&&<p>{tr("Authenticator hozir mavjud emas.")}{status.recoveryAvailable?tr("Mavjud ulanishni zaxira kod bilan bekor qilish mumkin."):''}</p>}

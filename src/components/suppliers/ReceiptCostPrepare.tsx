@@ -1,6 +1,5 @@
 'use client';
-
-
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -18,6 +17,8 @@ export default function ReceiptCostPrepare({ documentId, documentNo, items, retu
   documentId: string; documentNo: string; items: { id: string; productId: string }[];
   returnPath: string; onDone: () => void;
 }) {
+ const {message:uiMessage}=useTranslation();
+
  const {t:tr}=useTranslation();
 
   const [search, setSearch] = useState(''), [page, setPage] = useState(1), [revision, setRevision] = useState(0);
@@ -36,7 +37,7 @@ export default function ReceiptCostPrepare({ documentId, documentNo, items, retu
           new URLSearchParams({ search, page: String(page) }), { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15_000)]) });
         if (!response.data) throw new Error('Xarajatlar ro‘yxati olinmadi.');
         if (live) { setRows(response.data.rows); setTotal(response.data.total); }
-      } catch (cause) { if (live) setError(cause instanceof Error ? cause.message : 'Xarajatlar yuklanmadi.'); }
+      } catch (cause) { if (live) setError(displayErrorMessage(cause,'Xarajatlar yuklanmadi.')); }
       finally { if (live) setLoading(false); }
     })();
     return () => { live = false; controller.abort(); };
@@ -45,13 +46,13 @@ export default function ReceiptCostPrepare({ documentId, documentNo, items, retu
   const body = { expenseDocumentId: selected?.id ?? '', amount: selected?.amount ?? '', method,
     ...(method === 'weight' ? { weights: items.map(item => ({ stockDocumentItemId: item.id, unitWeightKg: weights[item.id] ?? '' })) } : {}), reason };
   const clear = () => { setSelected(null); setReason(''); setMethod('value'); setWeights({}); };
-  return <section aria-label={`Taqsimotni tayyorlash: ${documentNo}`} className="my-3 rounded-lg border p-3 space-y-3">
+  return <section aria-label={tr("Taqsimotni tayyorlash: {value1}",{value1:String(documentNo)})} className="my-3 rounded-lg border p-3 space-y-3">
     <h4 className="font-semibold">{tr("Mavjud xarajatdan taqsimot tayyorlash")}</h4>
     <p>{tr("Shu filialda oldin qayd etilgan kapitalizatsiya xarajati tanlanadi. Tayyorlash yangi xarajat, pul yoki tannarx yozuvini yaratmaydi.")}</p>
     <Input label={tr("Taqsimot uchun xarajat qidirish")} value={search} maxLength={200} disabled={posting}
       onChange={event => { setLoading(true); setSearch(event.target.value); setPage(1); }} />
     {loading && <p role="status">{tr("Xarajatlar yuklanmoqda…")}</p>}
-    {error && <p role="alert">{error}</p>}
+    {error && <p role="alert">{uiMessage(error)}</p>}
     {!loading && !error && !rows.length && <p>{tr("Mos, taqsimlanmagan kapitalizatsiya xarajati yo‘q.")}</p>}
     <Pagination page={page} pages={Math.ceil(total / 20)} busy={loading || posting}
       onPage={value => { setLoading(true); setPage(value); }} retry={refresh} />
@@ -59,9 +60,9 @@ export default function ReceiptCostPrepare({ documentId, documentNo, items, retu
     <DurableMutation path={`/stock-documents/${documentId}/cost-plans`} returnPath={returnPath} body={body}
       label={tr("Kirim xarajatini tayyorlash")} onSavingChange={setPosting}
       canSubmit={!loading && !error} allowNew={Boolean(selected) && reason.trim().length >= 3}
-      review={[`Kirim: ${documentNo}`, `Xarajat: ${selected?.id ?? 'Tanlanmagan'}`, `Original summa: ${selected?.amount ?? '—'}`,
-        `Usul: ${method}`, reason, ...(method === 'weight' ? items.map(item => `${item.id}: ${weights[item.id] ?? ''} kg/baza`) : []),
-        'Faqat tayyor taqsimot saqlanadi. Inventory va COGSga qo‘llanmaydi.']}
+      review={[tr("Kirim: {value1}",{value1:String(documentNo)}), tr("Xarajat: {value1}",{value1:String(selected?.id ?? 'Tanlanmagan')}), tr("Original summa: {value1}",{value1:String(selected?.amount ?? '—')}),
+        tr("Usul: {value1}",{value1:String(method)}), reason, ...(method === 'weight' ? items.map(item => `${item.id}: ${weights[item.id] ?? ''} kg/baza`) : []),
+        tr("Faqat tayyor taqsimot saqlanadi. Inventory va COGSga qo‘llanmaydi.")]}
       onDone={(_result, originalBody) => {
         if (JSON.stringify(originalBody) === JSON.stringify(body)) clear();
         refresh(); onDone();
@@ -72,7 +73,7 @@ export default function ReceiptCostPrepare({ documentId, documentNo, items, retu
       </Button>)}
       <Select label={tr("Saqlanadigan taqsimot usuli")} value={method} onChange={event => setMethod(event.target.value)}
         options={[{ value: 'value', label: tr("Original qiymat") }, { value: 'quantity', label: tr("Bir xil bazaviy birlik miqdori") }, { value: 'weight', label: tr("Vazn") }]} />
-      {method === 'weight' && items.map((item, index) => <Input key={item.id} label={`Saqlanadigan taqsimot qatori ${index + 1}: kg / bazaviy birlik`}
+      {method === 'weight' && items.map((item, index) => <Input key={item.id} label={tr("Saqlanadigan taqsimot qatori {value1}: kg / bazaviy birlik",{value1:String(index + 1)})}
         inputMode="decimal" maxLength={19} value={weights[item.id] ?? ''}
         onChange={event => setWeights(previous => ({ ...previous, [item.id]: event.target.value }))} />)}
       <Input label={tr("Taqsimotni tayyorlash sababi")} value={reason} maxLength={2000} onChange={event => setReason(event.target.value)} />

@@ -1,4 +1,5 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
 
@@ -33,6 +34,10 @@ import { faArrowLeft, faPrint, faBan } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '@/context/NotificationContext';
 
 export default function SaleDetailPage() {
+ const {status:codeLabel}=useTranslation();
+
+ const {message:uiMessage}=useTranslation();
+
  const {formatDate,formatMoney}=useTranslation();
 
  const {t:tr}=useTranslation();
@@ -83,7 +88,7 @@ export default function SaleDetailPage() {
           returnAttempt.current=input;setSerialChoices(Object.fromEntries(input.items.map(item=>[item.saleItemId,item.serialIds??[]])));setBatchChoices(Object.fromEntries(input.items.map(item=>[item.saleItemId,item.batchSelection??[]])));setReturnQty(Object.fromEntries(input.items.map(item=>[item.saleItemId,String(item.quantity)])));setReturnDisposition(Object.fromEntries(input.items.map(item=>[item.saleItemId,item.disposition])));setReason(input.reason);setManualNonCash(!!input.manualNonCash);setManualReference(input.manualNonCash?.referenceNo??'');setReturnUnknown(true);setReturnOpen(true);
         }
         setLocalReady(true);
-      }catch(error){if(!cancelled)setLocalError(error instanceof Error?error.message:'Lokal qaytarish yuklanmadi');}
+      }catch(error){if(!cancelled)setLocalError(displayErrorMessage(error,'Lokal qaytarish yuklanmadi'));}
     });
     return()=>{cancelled=true;};
   },[id,organization?.id,user?.id]);
@@ -97,7 +102,7 @@ export default function SaleDetailPage() {
         if (!isCancelled && res?.data) setSale(res.data);
       })
       .catch((err) => {
-        if(!isCancelled){setSale(null);setLoadError(err instanceof Error?err.message:'Savdo yuklanmadi');}
+        if(!isCancelled){setSale(null);setLoadError(displayErrorMessage(err,'Savdo yuklanmadi'));}
       })
       .finally(() => {
         if (!isCancelled) setIsLoading(false);
@@ -115,7 +120,7 @@ export default function SaleDetailPage() {
       notifySuccess('Savdo bekor qilindi');
       router.push('/sales');
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
+      notifyError(displayErrorMessage(err,'Xatolik yuz berdi'));
     }
   };
 
@@ -142,7 +147,7 @@ export default function SaleDetailPage() {
       if(!wasRetry&&returnAttempt.current&&error instanceof ApiError&&['BATCH_SELECTION_REQUIRED','INVALID_BATCH_SELECTION','BATCH_RESTORE_QUANTITY_EXCEEDED','VALIDATION_ERROR','RETURN_QUANTITY_EXCEEDED','DUPLICATE_ITEM','INVALID_SHIFT','EXTERNAL_REFUND_REQUIRED','REFUND_ALLOCATION_CHANGED','DEBT_ALLOCATION_REQUIRED','DEBT_RECONCILIATION_REQUIRED','INVALID_STATUS'].includes(error.code??'')){
         try{await acknowledge(returnAttempt.current.operationId,'rejected',undefined,error.code);returnAttempt.current=null;setReturnUnknown(false);}catch{notifyError('Lokal natija saqlanmadi; asl amalni qayta tekshiring');}
       }
-      notifyError(error instanceof Error?error.message:'Qaytarish amalga oshmadi');
+      notifyError(displayErrorMessage(error,'Qaytarish amalga oshmadi'));
     }
     finally{setReturning(false);}
   };
@@ -152,7 +157,7 @@ export default function SaleDetailPage() {
     const data={operationId:crypto.randomUUID(),shiftId:activeShift.id,reason,items};
     setPreviewing(true);
     try{const response=await api.sales.returnPreview(sale.id,data);if(response.data)setPreview({fingerprint:JSON.stringify({saleId:sale.id,shiftId:activeShift.id,reason,items}),value:response.data.settlement});}
-    catch(error){setPreview(null);notifyError(error instanceof Error?error.message:'Qaytarma hisoblanmadi');}
+    catch(error){setPreview(null);notifyError(displayErrorMessage(error,'Qaytarma hisoblanmadi'));}
     finally{setPreviewing(false);}
   };
 
@@ -164,7 +169,7 @@ export default function SaleDetailPage() {
     );
   }
 
-  if(loadError)return <div role="alert">{loadError}<Button onClick={()=>window.location.reload()}>{tr("Qayta yuklash")}</Button></div>;
+  if(loadError)return <div role="alert">{uiMessage(loadError)}<Button onClick={()=>window.location.reload()}>{tr("Qayta yuklash")}</Button></div>;
   if (!sale) {
     return (
       <div className="p-8 text-center">
@@ -182,9 +187,9 @@ export default function SaleDetailPage() {
         <div className="space-y-3">
           {sale.items.map(item=><div key={item.id} className="space-y-2">
             <Input id={`return-quantity-${item.id}`} label={item.productName} disabled={returning||returnUnknown} type="number" min="0" max={Number(item.quantity)} step="0.001" value={returnQty[item.id!]??'0'} onChange={e=>setReturnQty(q=>({...q,[item.id!]:e.target.value}))}/>
-            <Select id={`return-disposition-${item.id}`} label={`${item.productName}: qaytarilgan tovar holati`} disabled={returning||returnUnknown} value={returnDisposition[item.id!]??'sellable'} options={[{value:'sellable',label:tr("Sotiladigan qoldiqqa qaytarish")},{value:'damaged',label:tr("Brak — sotiladigan qoldiqqa qo‘shilmaydi")},{value:'write_off',label:tr("Hisobdan chiqarish — sotiladigan qoldiqqa qo‘shilmaydi")}]} onChange={e=>setReturnDisposition(values=>({...values,[item.id!]:e.target.value as 'sellable'|'damaged'|'write_off'}))}/>
-            {item.serialTracking&&<SerialPicker storeId={sale.storeId} productId={item.productId} saleItemId={item.id} state="sold" label={item.productName+' original qaytariladigan seriallar'} value={serialChoices[item.id!]??[]} disabled={returning||returnUnknown} onChange={ids=>setSerialChoices(previous=>({...previous,[item.id!]:ids}))}/>}
-            {item.batchTracking&&<BatchRestorePicker kind="sale" sourceId={sale.id} productId={item.productId} label={item.productName+' qaytariladigan partiyalar'} value={batchChoices[item.id!]??[]} disabled={returning||returnUnknown} onChange={rows=>setBatchChoices(previous=>({...previous,[item.id!]:rows}))} onReady={ready=>setBatchReady(previous=>previous[item.id!]===ready?previous:{...previous,[item.id!]:ready})}/>}
+            <Select id={`return-disposition-${item.id}`} label={tr("{value1}: qaytarilgan tovar holati",{value1:String(item.productName)})} disabled={returning||returnUnknown} value={returnDisposition[item.id!]??'sellable'} options={[{value:'sellable',label:tr("Sotiladigan qoldiqqa qaytarish")},{value:'damaged',label:tr("Brak — sotiladigan qoldiqqa qo‘shilmaydi")},{value:'write_off',label:tr("Hisobdan chiqarish — sotiladigan qoldiqqa qo‘shilmaydi")}]} onChange={e=>setReturnDisposition(values=>({...values,[item.id!]:e.target.value as 'sellable'|'damaged'|'write_off'}))}/>
+            {item.serialTracking&&<SerialPicker storeId={sale.storeId} productId={item.productId} saleItemId={item.id} state="sold" label={item.productName+" "+tr("original qaytariladigan seriallar")} value={serialChoices[item.id!]??[]} disabled={returning||returnUnknown} onChange={ids=>setSerialChoices(previous=>({...previous,[item.id!]:ids}))}/>}
+            {item.batchTracking&&<BatchRestorePicker kind="sale" sourceId={sale.id} productId={item.productId} label={item.productName+" "+tr("qaytariladigan partiyalar")} value={batchChoices[item.id!]??[]} disabled={returning||returnUnknown} onChange={rows=>setBatchChoices(previous=>({...previous,[item.id!]:rows}))} onReady={ready=>setBatchReady(previous=>previous[item.id!]===ready?previous:{...previous,[item.id!]:ready})}/>}
           </div>)}
           <Input label={tr("Sabab")} disabled={returning||returnUnknown} value={reason} onChange={e=>setReason(e.target.value)}/>
           <Button variant="outline" disabled={!activeShift||returning||returnUnknown||previewing} onClick={calculateReturnPreview}>{tr("Qaytariladigan summalarni hisoblash")}</Button>
@@ -195,7 +200,7 @@ export default function SaleDetailPage() {
           <p className="text-xs text-slate-500">{tr("Faqat sotilgan va hali qaytarilmagan miqdor qabul qilinadi. Naqd/nasiya hisobini server original chekdan hisoblaydi.")}</p>
           <p className="text-xs text-slate-500">{tr("Brak va hisobdan chiqarilgan tovar qaytarish hujjatida qayd etiladi; alohida brak omboriga ko‘chirilmaydi.")}</p>
           {returnUnknown&&<p role="status">{tr("Oldingi qaytarish natijasi tekshirilishi kerak. Asl miqdor, holat va smena saqlangan.")}</p>}
-          {localError&&<p role="alert">{localError}{tr(". Yangi qaytarish bloklandi; sahifani qayta yuklang.")}</p>}
+          {localError&&<p role="alert">{uiMessage(localError)}{tr(". Yangi qaytarish bloklandi; sahifani qayta yuklang.")}</p>}
           <Button onClick={handleReturn} disabled={returning||!localReady}>{returnUnknown?tr("Oldingi qaytarishni tekshirish"):tr("Qaytarishni tasdiqlash")}</Button>
         </div>
       </Modal>
@@ -250,7 +255,7 @@ export default function SaleDetailPage() {
           <span className="text-xs text-gray-500">{tr("Holat")}</span>
           <div className="mt-1">
             <Badge variant={sale.status === 'completed' ? 'success' : 'warning'}>
-              {sale.status}
+              {codeLabel(sale.status)}
             </Badge>
           </div>
         </Card>
