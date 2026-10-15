@@ -43,6 +43,7 @@ test('Dry-run preserves bytes; audited apply preserves authenticator, counter an
  assert.deepEqual(await prisma.totpRecoveryCode.findMany({where:{factorId:f.factor.id}}),before)
  assert.equal(await prisma.totpKeyRotation.count({where:{factorId:f.factor.id}}),1)
  delete process.env.AUTH_TOTP_PREVIOUS_SECRETS
+ assert.throws(()=>unsealTotpSecret(f.factor.sealedSecret!,f.user.id,f.factor.id),{code:'TOTP_SECRET_INVALID'})
  assert.ok(isTotpEnvelopeCurrent(current.sealedSecret!,f.user.id,f.factor.id))
  assert.equal(unsealTotpSecret(current.sealedSecret!,f.user.id,f.factor.id),f.totp.secret.base32)
  const acceptedCode=f.totp.generate()

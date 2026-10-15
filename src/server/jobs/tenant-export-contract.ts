@@ -1,5 +1,6 @@
 // Reviewed schema coverage: new models require an explicit export decision.
 export const DIRECT_MODELS = [
+  "ConsentEvent",
   "LoyaltyCard",
   "LoyaltyPromotion",
   "LoyaltyBenefitSelection",
@@ -148,4 +149,4 @@ export const OMITTED_FIELDS: Readonly<Record<string,readonly string[]>> = {
  AuditLog:['beforeData','afterData'], SyncReview:['payload','result'], OnboardingCheckpoint:['proof'], SupportTicket:['diagnostics'], BillingPayment:['proofHash'],
 }
 // Update only after reviewing schema changes, including new scalar fields.
-export const REVIEWED_SCHEMA_SHA256 = "776dc2870216532e3eeff89d748eaccde279ea933fb0793de0e4985b4efcea1a"
+export const REVIEWED_SCHEMA_SHA256 = "5d150a718a4a808a561e4b0d2e891ae9ee2e90d2546eea4619fc0069f785ce22"

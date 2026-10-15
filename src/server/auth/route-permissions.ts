@@ -14,6 +14,8 @@ export const ROUTE_PERMISSIONS: Readonly<Record<string, readonly BusinessRole[]>
   "GET /api/sales/[id]/gift": ["owner","admin","cashier"],
   "GET /api/loyalty/policy": ["owner"],
   "POST /api/loyalty/policy": ["owner"],
+  "GET /api/customers/[id]/consents": ["owner"],
+  "POST /api/customers/[id]/consents": ["owner"],
   "GET /api/customers/[id]/points": ["owner","admin","cashier"],
   "GET /api/sales/[id]/points": ["owner","admin","cashier"],
   "POST /api/sales/[id]/points": ["owner","admin","cashier"],

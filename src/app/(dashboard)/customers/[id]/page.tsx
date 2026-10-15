@@ -10,6 +10,7 @@ import { DebtAllocationPicker } from '@/components/customers/DebtAllocationPicke
 import Select from '@/components/ui/Select';
 import { CustomerSales } from '@/components/customers/CustomerSales';
 import {CustomerAdvances} from '@/components/customers/CustomerAdvances';
+import CustomerConsent from '@/components/customers/CustomerConsent';
 import {CustomerGifts} from '@/components/customers/CustomerGifts';
 import MarketingManager from '@/components/customers/MarketingManager';
 import { CustomerLedger } from '@/components/customers/CustomerLedger';
@@ -265,6 +266,7 @@ export default function CustomerDetailPage() {
 
       <CustomerSales key={'sales:'+id} customerId={id} version={ledgerVersion}/>
       <MarketingManager customerId={id}/>
+      {role==='owner'&&<CustomerConsent key={'consent:'+id} customerId={id}/>}
       {role==='owner'&&<CustomerGifts customerId={id} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));setLedgerVersion(v=>v+1)}}/>}
       {role==='owner'&&<CustomerAdvances key={'advance:'+id} customerId={id} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));setLedgerVersion(v=>v+1)}}/>}
       {role==='owner'&&<CustomerLedger key={id} customerId={id} version={ledgerVersion} onChanged={async()=>{const response=await api.customers.getDebt(id);if(response.data)setDebt(String(response.data.totalDebt));}}/>}

@@ -62,6 +62,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.worker-build ./.worker-build
 COPY --from=builder /app/scripts/worker-resolver.cjs ./scripts/worker-resolver.cjs
+COPY --from=builder /app/scripts/ops/release-entrypoint.mjs ./scripts/ops/release-entrypoint.mjs
 
 # Copy Prisma CLI for explicit migration job
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma

@@ -4,6 +4,7 @@ import type {TokenPayload} from '@/lib/auth'
 // Top-level inserts require an explicit root. Nested relations are checked by
 // native tenant FK/constraint triggers in the same transaction.
 export function tenantInsertReference(model:string,value:unknown,context:TokenPayload):{model:string;id:string}|null{
+ if(model==='ConsentEvent')throw new AccessError(403,'CONSENT_JOURNAL_READ_ONLY')
  if(['LoyaltyCard','LoyaltyPromotion','LoyaltyBenefitSelection'].includes(model))throw new AccessError(403,'LOYALTY_JOURNAL_READ_ONLY')
  if(model==='GiftCertificate'||model==='GiftCheckout')throw new AccessError(403,'LOYALTY_JOURNAL_READ_ONLY')
  if(['LoyaltyPolicyVersion','LoyaltyPointLot','LoyaltyPointEntry','LoyaltyRedemption','LoyaltyRecoveryTransfer'].includes(model))throw new AccessError(403,'LOYALTY_JOURNAL_READ_ONLY')

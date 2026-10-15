@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "date": "2026-10-16",
+  "timezone": "Asia/Tashkent",
+  "task": "LEG-01.05",
+  "acceptance": "Separate electronic-receipt/service-reminder/marketing consent by channel with server timestamp, source, evidence reference, text version and immutable withdrawal history",
+  "sourceBase": "0047e96d122d0360e35c6f5c57bb22af93c55507",
+  "sourceFiles": {
+    "prisma/schema.prisma": "79c8b49459703ecaea4074fdb9cac3136a71232c1739b02ac985d57af7a4ecd6",
+    "prisma/migrations/202610150180_customer_consent_events/migration.sql": "fb8d15587a1b4f5e7a0ee56c378fffb57b33d4c9a7420f47fc675dbb463b5581",
+    "prisma/migrations/202610150181_consent_withdraw_readonly/migration.sql": "8ae68711888a184ae215c5ca5b2cef945a233273c3f4151b7b7a8f9ddc61bb12",
+    "prisma/migrations/202610160182_consent_tenant_proof/migration.sql": "079bb0949c8661b40251a40aac5247d68588934ae91b613df29f36519d761744",
+    "prisma/migrations/202610160183_extension_tenant_guards/migration.sql": "32748338d44bbaae6214a405365132834d2386fdd9bcb957ef799fff01658c02",
+    "src/server/customers/consent.ts": "a077a30bee98c610aa4bed8b4cc6df06f435a5756afe3f1ffc4e2949e1cbff70",
+    "src/app/api/customers/[id]/consents/route.ts": "013cb27a33d942ea30f1e40d3948df97547c8787120a926f0c6c91e92864f1e1",
+    "src/components/customers/CustomerConsent.tsx": "1b7d937113e95ba753956be57db30d4e03287db436f255194e3c6c0d56d35b3b",
+    "src/components/forms/DurableMutation.tsx": "79bb84b59c23687f3ed7fbe15bce7693027c4a33c5236a5089c4b26f942a021d",
+    "tests/customer-consent.integration.test.ts": "17f4557e86b3e15a6e2c6e775192cca5d54f2c672e7a52c1ea2ed9c0ce5b9d8d",
+    "tests/e2e/customer-consent.spec.ts": "066cee7217f28f1d2b28bd9bf8fd4724e62d9aa9d07087e8ab3aa38cdde9e94b",
+    "src/server/deployment/required-migrations.ts": "0efa4e09c0face0bb4847660e78ecc92f634bd62f4edcfa5ab09f65747caad1b",
+    "src/server/jobs/tenant-export-contract.ts": "d06f906754497ccb92f06e908ddedde801916a87638dcf653d1456f6db45244e"
+  },
+  "environment": {
+    "database": "isolated PostgreSQL on 127.0.0.1:55439/pos_test",
+    "migrations": 183,
+    "browser": "Playwright Chromium, locally built production-mode server, synthetic fixtures only"
+  },
+  "results": {
+    "newConsentIntegrationCases": 6,
+    "integrationIncludingTenantAndReadonly": {
+      "passed": 16,
+      "failed": 0
+    },
+    "unit": {
+      "passed": 163,
+      "failed": 0
+    },
+    "browser": {
+      "passed": 3,
+      "failed": 0
+    },
+    "localTransport": {
+      "passed": 3,
+      "failed": 0
+    },
+    "productionBuild": "pass",
+    "typecheck": "pass",
+    "changedFileLint": "pass",
+    "i18nCheck": "pass",
+    "workerBuild": "pass",
+    "publicClaimsGate": "pass"
+  },
+  "covered": [
+    "default denial",
+    "independent purpose and channel",
+    "withdrawal and re-grant invalidate queued event",
+    "contact/card changes fail closed",
+    "immutable native history",
+    "current owner/session and same-transaction audit proof",
+    "tenant roots and foreign-reference guards",
+    "idempotent original-key replay",
+    "stale and concurrent revision rejection",
+    "read-only withdrawal allowed, grant blocked",
+    "50-row exclusive cursor pagination",
+    "editable empty form and validation",
+    "lost success acknowledgement and lost definitive conflict recovery",
+    "unknown conflict preserves original queued operation"
+  ],
+  "limits": [
+    "No real SMS/e-mail/Telegram delivery configured or claimed",
+    "No real customer consent evidence or pilot acceptance",
+    "No live business database migration or deployment",
+    "Dispatch helper is mandatory contract for future customer notification adapters; no existing customer sender exists"
+  ],
+  "logs": {
+    "integration": "tasks/evidence/consent-20261016/integration.log",
+    "unit": "tasks/evidence/consent-20261016/unit.log",
+    "browser": "tasks/evidence/consent-20261016/browser.log",
+    "build": "tasks/evidence/consent-20261016/build.log",
+    "localTransport": "tasks/evidence/consent-20261016/localTransport.log",
+    "migrations": "tasks/evidence/consent-20261016/migrations.log"
+  }
+}

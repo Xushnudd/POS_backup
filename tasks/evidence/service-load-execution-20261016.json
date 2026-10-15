@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-15T19:33:03.257Z",
+  "endedAt": "2026-10-15T19:33:06.254Z",
+  "processExit": 1,
+  "signal": null,
+  "sourceRevision": "0047e96d122d0360e35c6f5c57bb22af93c55507",
+  "sourceFilesUnchangedDuringMeasurement": true,
+  "sourceFiles": 623,
+  "nodeEnvironment": "test",
+  "criticalMfaRequired": false,
+  "productionNetwork": false,
+  "compiledHarnessSha256": "a6e93ef7308ca368aeb6fc6c64a52218e17878e8c1d7d5a74d2dc24125411af8"
+}

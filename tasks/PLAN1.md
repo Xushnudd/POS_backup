@@ -3843,7 +3843,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Qabul (2026-10-08):** `done`. Yakuniy individual dalil EXECUTION_STATUS.md dagi “Soliq, refund, scope va backup — yakuniy qabul” protokolida.
 
-- [ ] **OPS-03.03** — Nuqtaga tiklash imkoniyati, backup muddati va kirish vakolati.
+- [x] **OPS-03.03** — Nuqtaga tiklash imkoniyati, backup muddati va kirish vakolati.
 
   **Texnologiya:** PostgreSQL base backup/WAL archive T12.
 
@@ -4508,7 +4508,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Dalil:** `LEG-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **LEG-01.05** — Elektron chek, xizmat eslatmasi va reklama roziligini alohida qayd etish.
+- [x] **LEG-01.05** — Elektron chek, xizmat eslatmasi va reklama roziligini alohida qayd etish.
 
   **Texnologiya:** Prisma ConsentEvent, Next.js UI, notification service.
 

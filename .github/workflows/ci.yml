@@ -38,6 +38,10 @@ jobs:
       - run: npm run worker:build
       - run: npm test
       - run: npm run test:ops
+      - run: docker pull node:24-alpine
+      - run: npm run test:pitr
+        env:
+          POS_PITR_NODE_IMAGE: node:24-alpine
       - run: npm run test:local-https
       - run: npm run test:integration
         env:

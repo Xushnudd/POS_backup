@@ -1,0 +1,67 @@
+# Release uchun yuklama va xizmat maqsadlari
+
+Bu hujjat `RELEASE-01.08`ning texnik tayyorgarlik hisobotidir. Mahalliy sintetik sinov, tarixiy sinov va kelajakdagi xizmat majburiyatlari alohida ko‘rsatiladi. Haqiqiy staging, production, pilot, tashqi monitoring yoki mijozlarga beriladigan SLA tasdiqlangan deb hisoblanmaydi. Bu hujjatning o‘zi productionga chiqarishga ruxsat bermaydi.
+
+## Joriy qisqa yuklama profili
+
+2026-10-16 o‘lchovining xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016.json` orqali bog‘lanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
+
+```sh
+node scripts/release/check-service-targets.cjs
+node --test --test-isolation=none scripts/ops/service-targets.test.mjs
+```
+
+Profil faqat `127.0.0.1:55439/pos_test`dagi alohida sintetik tashkilotda ishlaydi. Bir filial, 20 faol kassa va ochiq smena, 50 000 mahsulot hamda 1 000 000 sintetik draft SaleItem mavjud. Bitta ownerning 20 alohida sessiyasi parallel ishlaydi; bu 20 mustaqil kassir yoki haqiqiy pilot yuklamasi emas. Har bir kassada besh martadan mahsulot qidirish, draft yaratish va bir mahsulotli 100 UZS naqd savdoni yakunlash bajariladi. Yakunda 100 yangi completed Sale va 100 Payment bo‘lishi shart.
+
+| Ko‘rsatkich | Qanday o‘lchanadi | Texnik mezon |
+| --- | --- | --- |
+| Qidiruv p95 | Haqiqiy products Route Handler chaqiruvi va javob body o‘qilishi; 100 namuna | ≤ 500 ms |
+| Savdoni yakunlash p95 | Normal `completeSale` xizmati; draft yaratish va tashqi tarmoq vaqti kirmaydi; 100 namuna | ≤ 2 000 ms |
+| Qisqa profil xatolari | 100 qidiruv + 100 completeSale chaqiruvining 200 ta urinishida muvaffaqiyatsiz natijalar | 0/200; barcha 100 draft ham yaratilgan bo‘lishi shart |
+| Iqtisodiy natija | Boshlang‘ich va oxirgi completed Sale/Payment soni farqi | Har biri aniq 100 |
+
+Bu p95 APIga brauzerdan HTTP orqali borib kelish, internet, TLS, printer, Click yoki fiskal provayder vaqti emas. Qidiruv Route Handler orqali, checkout biznes xizmati orqali chaqiriladi. Testning o‘zi tashqi HTTP so‘rov yubormaydi. Draft setup xatosi alohida qayd etiladi; u yashirincha 200 urinishga qo‘shib yuborilmaydi. Birorta xato, yetishmayotgan namuna yoki ortiqcha/yo‘qolgan iqtisodiy yozuv qabulni yiqitadi.
+
+Haqiqiy qiymatlar takroriy Markdown sonlari o‘rniga xom JSONda saqlanadi; gate p95, denominator, statuslar, apparat tavsifi, iqtisodiy invariantlar va manba mosligini tekshiradi. Tegishli server/API/Prisma/manba yoki dependency o‘zgarsa gate avvalgi dalilni eskirgan deb rad etadi. Joriy o‘lchov 14 kundan eski bo‘lsa ham qayta o‘lchash talab etiladi. Bu 14 kunlik ichki hujjat yangiligi qoidasi; production SLO kafolati emas.
+
+## Tarixiy dalillar va ularning chegarasi
+
+| Sana va dalil | Kuzatilgan natija | Tatbiq chegarasi |
+| --- | --- | --- |
+| 2026-10-09, `volume-measure-jitter-20261009.json` | Qidiruv p95 388.87 ms; checkout 132.23 ms; 100+100 namuna, xato 0 | Avvalgi service-level kod; joriy release o‘lchovi sifatida ko‘rsatilmaydi |
+| 2026-10-09, `volume-measure-repeat-20261009.json` | Qidiruv p95 393.69 ms; checkout 114.99 ms; 100+100 namuna, xato 0 | O‘sha profildagi ikkinchi tarixiy run |
+| 2026-10-12 qabul protokoli, `core-164-20261012.json` | 40 parallel checkout bilan 15 min stress p95 673.38 ms; 20 parallel bilan 2 soat soak p95 363.70 ms | Avvalgi 132 migratsiyali standalone HTTP fixture; joriy kodda ikki soat takrorlangani da’vo qilinmaydi |
+
+Tarixiy soakda 18 717 HTTP javobining 16 624 tasi 200, 1 785 tasi 409 va 308 tasi 429 bo‘lgan. Shunday qilib raw non-2xx ulushi **2 093/18 717 ≈ 11.18%**; u “HTTP xatolari nol” deb ko‘rsatilmaydi. Cheklangan retrydan keyin 5 540 savdo buyruqlarining yo‘qolishi va dublikati nol bo‘lgan. HTTP latency backoff kutishini qamramaydi. Stress closed-loop bo‘lgani uchun navbat cheksiz yig‘ilmagan, 2× parallelizm esa 2× erishilgan throughput degani emas. To‘liq takrorlash yo‘riqnomasi: [stress-soak.md](stress-soak.md).
+
+## Recovery maqsadlari
+
+`PLAN1`dagi boshlang‘ich texnik maqsad: **RPO ≤ 15 daqiqa, RTO ≤ 4 soat**. Bu shartnomadagi majburiyat emas. RPO — avariya paytida yo‘qolishi mumkin bo‘lgan oxirgi tasdiqlangan yozuvlar oynasi. RTO — e’lon qilingan boshlanish nuqtasidan kerakli xizmat tiklanib, tekshiruvdan o‘tguncha vaqt. Har bir drill o‘zining boshlanish/tugash nuqtasini aniq yozadi.
+
+Joriy dalil `tasks/evidence/pitr-drill-20261016.json`dagi alohida PostgreSQL PITR fixturega bog‘lanadi. Undagi SQL tekshiruvigacha bo‘lgan lokal tiklash vaqti butun POS, secret/key custody, offline qurilmalar, provider reconciliation yoki productionga trafik qaytarish vaqtiga tenglashtirilmaydi. Targetdan oldingi barcha fixture yozuvlari saqlanishi shart; targetdan keyingi yozuvning ataylab yo‘qligi avariya yo‘qotishi sifatida hisoblanmaydi. Off-host yuklash/tushirish, katta haqiqiy baza, tashqi kalit saqlash va operator javob berish vaqti ushbu o‘lchov bilan kafolatlanmaydi.
+
+Productionda ushbu maqsadlar tasdiqlanishidan oldin haqiqiy dataset, doimiy WAL transporti, off-site nusxa va alohida credentiallar bilan to‘liq restore rehearsal kerak. Operator tashkilotni xavfsiz qayta ochishdan oldin audit/auth restore checkpoint, provider unknown holatlari va offline navbatlarni solishtiradi. Eski bazani live bazaga avtomatik overwrite qilish yoki hujjatlarni o‘chirish mumkin emas. [Deployment readiness](deployment-readiness.md) va [tenant recovery](tenant-recovery.md) shartlari saqlanadi.
+
+## Support va uptime
+
+| Maqsad | Hozirgi holat | Tasdiqlanishi kerak bo‘lgan qism |
+| --- | --- | --- |
+| Ish vaqti | Egasi taklif qilgan baseline: dushanba–shanba 09:00–18:00, Asia/Tashkent | Faol xizmat jamoasi va haqiqiy mas’ullar |
+| Birinchi javob | Ish vaqtida 240 ish minutgacha; versioned DB siyosatida boshqariladi | Mijozlarga beriladigan rasmiy kafolat va actual support kuzatuvi |
+| Hal qilish muddati | Birinchi javobdan alohida o‘lchanadi; qat’iy muddat tasdiqlanmagan | Daraja bo‘yicha egasi tasdiqlaydigan muddatlar |
+| Eskalatsiya | Ichki baseline 240 ish minuti; real telefon yoki Telegram kiritilmagan | Mas’ul va favqulodda kanal |
+| Uptime foizi | Raqamli production target va hisob davri hali tasdiqlanmagan; actual production o‘lchovi yo‘q | Hosting, mustaqil probe, kuzatuv davri, texnik xizmat va istisnolar kelishuvi |
+
+Support baseline manbasi `202610100108_support_tickets` migratsiyasi va [support-tickets.md](support-tickets.md). Administrator qiymatlarni yangi policy versiyasi bilan o‘zgartirishi mumkin; ushbu hujjat mavjud production bazasida aynan shu qiymatlar faol degan da’vo qilmaydi. Hech qanday uydirma favqulodda aloqa yoki SLA qo‘shilmagan.
+
+Uptime hisoblash uchun kelajakda mustaqil hostdagi probe ketma-ket o‘lchovlari, UTC vaqt oynasi, yo‘qolgan namunalarga munosabat va rejalashtirilgan ishlar qoidasi kelishiladi. `ready` javobi, lokal serverning qayta ishga tushishi yoki unit test o‘tishi oylik uptime dalili emas. Hozir raqam uydirish o‘rniga `unapproved_and_unmeasured` qayd etiladi. Real monitoring/alert/on-call acceptance `OPS-02.05` va `RELEASE-01.07`da ochiq qoladi.
+
+## Takrorlash va chiqarish chegarasi
+
+1. Alohida test bazasiga amaldagi migratsiyalarni qo‘llang va `tsconfig.test.json`ni compile qiling. Haqiqiy biznes DB yoki `.env` qiymatlarini logga chiqarmang.
+2. `node --require ./scripts/test-resolver.cjs .test-build/tests/performance/core-profile.js --seed-only` orqali guarded sintetik dataset yarating; `/tmp/pos-volume-dataset.json`dagi haqiqiy fixture IDni faqat `POS_PROFILE_TEST_ORG` uchun ishlating. Shu running serial tayyorlash bosqichi 50 000 mahsulot va 50 000 qoldiq yaratilgach to‘xtatilib, o‘sha fixture `core-resume-seed.ts`dagi to‘rt worker orqali yakunlangan. `service-load-seed-interrupted-20261016.json` buni yuklama sinovi sifatida ko‘rsatmaydi. Resume yordamchisi barcha guardlarni saqlaydi, faqat yetishmayotgan deterministik draft IDlarni qo‘shadi va aniq 1 000 000 satrni qayta tekshiradi; haqiqiy savdo yoki payment bor fixtureda ishlamaydi.
+3. `node --require ./scripts/test-resolver.cjs .test-build/tests/performance/core-measure.js`ni `POS_PROFILE_TEST_ORG` bilan bajaring. Xom `/tmp/pos-volume-measure.json`ni evidencega saqlang; xato runni yashirmang.
+4. PITR drillni izolyatsiyada takrorlang; har bir natijaning chegarasi va source SHA256larini saqlang. Profil yaratgan tashkilot, mahsulotlar va foydalanuvchinigina tozalang; shared test ma’lumotlariga tegmang.
+5. Hujjat/evidence/source snapshot yangilang va read-only gate hamda uning salbiy ssenariy testlarini bajaring. Gate muvaffaqiyati faqat shu hujjatning lokal texnik dalillarini tasdiqlaydi.
+
+Staging yoki productionda haqiqiy ish yuklamasi sezilarli farq qilsa, katta savat, bonus/refund/seriya/partiya, ko‘p tashkilot va boshqa actor profillari alohida o‘lchanadi. Uzoq soak, browser/network, recovery va provayder mezonlari tegishli original vazifalarda qoladi. Tashqi resurslarning mavjud emasligi bu hisobotda yashirilmaydi.

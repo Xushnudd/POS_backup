@@ -29,6 +29,8 @@ docker compose --env-file "$pos_env" -f docker-compose.yml -f docker-compose.rel
 
 `config`ni --quiet ishlating; to‘liq rendered output credentiallarni ko‘rsatishi mumkin. Docker daemon vakolati credential va DB vakolati sifatida cheklansin; Compose environment secret store o‘rnini bosmaydi. Host va registryning aniq secret boshqaruvi tashqi muhit tasdiqlanganda qabul qilinadi.
 
+[Release image xavfsizligi](release-image-security.md) release overlaydagi digest/non-root startup gate, read-only root, tmpfs va layered credential auditni tushuntiradi. Lokal isolated image qabulidan keyin ham haqiqiy registry, secret-store ACL va staging/production operator qabuli alohida qoladi.
+
 ## TLS va firewall
 
 `ops/nginx/pos.conf.template` host-local reverse proxy uchun. Operator haqiqiy hostname, loopback app porti va mavjud certificate/private-key mutlaq yo‘llarini qo‘yadi; barcha __TOKEN__lar almashtirilmaguncha ishlatmang. `nginx -t` va certificate chain/hostname/expiry tekshiruvi **tanlangan nginx versiyasi va hostda** bajariladi. Hozir nginx o‘rnatilgani yoki domen/TLS ishlayotgani da’vo qilinmaydi. Template rasmiy [proxy](https://nginx.org/en/docs/http/ngx_http_proxy_module.html) va [TLS](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) direktivalari asosida tayyorlandi.

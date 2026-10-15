@@ -96,6 +96,7 @@ export const READ_ONLY_BUSINESS_MODELS = [
   "CustomerAdvanceRefund"
 ] as const
 export const READ_ONLY_EXEMPT_MODELS = [
+  "ConsentEvent", // Native trigger restricts grants; withdrawals stay available.
   "ReportSchedule", // Stop and worker metadata are allowed; native configuration admission remains writable-only.
   "ReportScheduleRun", // Derived report/export state, not an economic document.
   // Trigger-only derivatives: original Product/InventoryMovement admission
@@ -141,6 +142,7 @@ export const READ_ONLY_EXEMPT_MODELS = [
   "IntegrationCost"
 ] as const
 export const READ_ONLY_OPERATION_EXCEPTIONS = [
+  "customer.consent.withdraw",
   "report.schedule.stop",
   "retention.closure.request",
   "retention.closure.cancel",

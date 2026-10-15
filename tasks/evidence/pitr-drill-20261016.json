@@ -1,0 +1,146 @@
+{
+  "task": "OPS-03.03",
+  "status": "passed",
+  "executedAtUtc": "2026-10-15T19:24:53.395Z",
+  "scope": "Disposable local PostgreSQL15 native WAL/PITR rehearsal; no source/live database, .env, external provider, deployment or production SLA involved.",
+  "command": "node scripts/ops/test-pitr.mjs",
+  "sourceRevision": "0047e96d122d0360e35c6f5c57bb22af93c55507",
+  "files": [
+    {
+      "path": "scripts/ops/pitr/archive-wal.sh",
+      "sha256": "5ab0789493779ec6525230306b3d6d5baef8f6fc1e49c6784db5eaebfca35662"
+    },
+    {
+      "path": "scripts/ops/pitr/restore-wal.sh",
+      "sha256": "e060b9f0d578f055d1b3e104ed3dc1f73866f7ed5dbfe173c3253750e122bfec"
+    },
+    {
+      "path": "scripts/ops/pitr/base-backup.sh",
+      "sha256": "a28043e4ea6cb38e426cb4205f02db95e28568de0435c085e6e7f26739f1c0ad"
+    },
+    {
+      "path": "scripts/ops/pitr/prepare-restore.sh",
+      "sha256": "9c5622be0c8b2d9c7bea9bbc7e6d2c5f9198076147ad86c56f2d33f9965151d7"
+    },
+    {
+      "path": "scripts/ops/pitr/retention-plan.mjs",
+      "sha256": "157aef3cef92764ce6966227bd0c0b4f3dfae162e260066ce7f2c1aff58cbe51"
+    },
+    {
+      "path": "scripts/ops/pitr-retention.test.mjs",
+      "sha256": "fbd425c0c2e3f6953b759105327f7e244ac65991aceea941f6be81f8aaf140de"
+    },
+    {
+      "path": "scripts/ops/pitr-shell.test.mjs",
+      "sha256": "3c3ff83bba03dada97ac2cfe10ec0df8d318973776f0df5d0e8a00c453af4fad"
+    },
+    {
+      "path": "scripts/ops/test-pitr.mjs",
+      "sha256": "4cac284b13a436d3bd349620f97ed90b73ee4606904d73c03562827dbc6ac852"
+    },
+    {
+      "path": "ops/postgresql/pitr-policy.json",
+      "sha256": "9e420c6916e3e4a1c9def550b4a5f47d195688f033070fb83508caa01030eb55"
+    },
+    {
+      "path": "ops/postgresql/pitr.conf",
+      "sha256": "768251e6c7c15ddc634328b7c9ce59c467d0186a9e0476344dbe75498ab0cb8a"
+    },
+    {
+      "path": "docker-compose.pitr.yml",
+      "sha256": "316588b06fdf427e07bf70c51dba80bc5d586ae87ceb67c904cde7ca327033ab"
+    },
+    {
+      "path": "docs/operations/pitr.md",
+      "sha256": "10daf8f0d124a8df0ba722f16ebf911dd64d368d55b48cb49a1dbf53224ee57c"
+    }
+  ],
+  "postgresImageId": "sha256:a46e076249ce434e41203b8c1dadfaa025b9726331d72390df038385d6dc29cd",
+  "network": "none; no ports published",
+  "localResources": {
+    "prefix": "pos-pitr-drill-1792092287339-78346",
+    "containers": [
+      "pos-pitr-drill-1792092287339-78346-source",
+      "pos-pitr-drill-1792092287339-78346-recovered",
+      "pos-pitr-drill-1792092287339-78346-unreachable"
+    ],
+    "volumes": [
+      "pos-pitr-drill-1792092287339-78346-source-data",
+      "pos-pitr-drill-1792092287339-78346-repository",
+      "pos-pitr-drill-1792092287339-78346-recovered-data",
+      "pos-pitr-drill-1792092287339-78346-unreachable-data"
+    ]
+  },
+  "checks": [
+    {
+      "check": "native_base_backup_and_continuous_archive",
+      "passed": true,
+      "pgVerifyBackup": "passed before publication and restore",
+      "settings": "15.19|replica|on|1min|on",
+      "archiver": "5|0"
+    },
+    {
+      "check": "private_access_and_archive_integrity",
+      "passed": true,
+      "repositoryMode": "0700",
+      "walFileMode": "0600",
+      "unauthorizedReadDenied": true,
+      "unauthorizedWriteDenied": true,
+      "unrelatedOsUidCannotImpersonateDatabaseRole": true,
+      "identicalRetryAccepted": true,
+      "conflictingOverwriteDenied": true
+    },
+    {
+      "check": "configured_retention_on_real_repository",
+      "passed": true,
+      "result": {
+        "format": 1,
+        "mode": "plan_only",
+        "automaticDeletion": false,
+        "retentionDays": 30,
+        "requestedWindowCovered": false,
+        "oldestRetainedStartWal": "000000010000000000000003",
+        "retainedBaseBackups": [
+          "20261015T192450Z-XXADDNNO"
+        ],
+        "baseRemovalCandidates": [],
+        "walRemovalCandidates": [
+          "000000010000000000000001",
+          "000000010000000000000002"
+        ],
+        "warning": "No files deleted. Operator must verify restore, holds, timelines, off-host copies and concurrent backups before any separately authorized pruning."
+      },
+      "note": "New drill repository has no 30-day history; the configured retention window is not an elapsed 30-day availability claim."
+    },
+    {
+      "check": "real_timestamp_restore",
+      "passed": true,
+      "targetTimestampUtc": "2026-10-15 19:24:50.131070+00",
+      "lastReplayedCommit": "2026-10-15 19:24:50.089887+00",
+      "restoredBalance": "125.75",
+      "sourceAfterTargetBalance": "0.00",
+      "restoredLedgerIds": [
+        "baseline",
+        "before_target"
+      ],
+      "excludedLedgerId": "after_target",
+      "recoveryPaused": true,
+      "readOnlyWritesRejected": true,
+      "localFixtureRecoverySeconds": 0.758,
+      "committedBeforeTargetRowsLost": 0
+    },
+    {
+      "check": "restore_rejection_paths",
+      "passed": true,
+      "malformedTimestampRejectedBeforeMutation": true,
+      "nonemptyTargetRejected": true,
+      "unreachableFutureTimestampFailedClosed": true
+    }
+  ],
+  "limits": [
+    "Production off-host encrypted storage, scheduler, real operator/key custody and disaster RPO/RTO require separate external acceptance.",
+    "30-day retention is configured; this newly created repository cannot prove 30 days of elapsed history.",
+    "Recovery stays paused/read-only. No promotion, application traffic, vendor dispatch, auth/offline reconciliation or irreversible data deletion was performed."
+  ],
+  "cleanup": "all drill containers and volumes removed"
+}

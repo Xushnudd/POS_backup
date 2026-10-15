@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-15T19:30:09.968Z",
+  "organizationId": "c13f47e9-3bb4-467f-ad30-a71c1e3a685c",
+  "dataset": {
+    "products": 50000,
+    "saleItems": 1000000,
+    "activeRegisters": 20,
+    "historyStatus": "synthetic drafts; real measured checkout uses normal service"
+  },
+  "kind": "isolated synthetic volume; not production history",
+  "resume": {
+    "beforeSaleItems": 362750,
+    "afterSaleItems": 1000000,
+    "workers": 4,
+    "guardsDisabled": false
+  }
+}

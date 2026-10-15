@@ -48,4 +48,9 @@ export const REQUIRED_EXTENDED_MIGRATIONS = [
   '202610140177_loyalty_cards_promotions',
   '202610140178_loyalty_benefit_source_guards',
   '202610150179_loyalty_active_customer',
+  '202610150180_customer_consent_events',
+  '202610150181_consent_withdraw_readonly',
+  '202610160182_consent_tenant_proof',
+  '202610160183_extension_tenant_guards',
+  '202610160184_consent_native_revision',
 ] as const;

@@ -1,0 +1,14 @@
+{
+  "task": "RELEASE-01.08",
+  "kind": "interrupted_synthetic_fixture_preparation_not_load_measurement",
+  "at": "2026-10-15T19:26:52.750Z",
+  "organizationId": "c13f47e9-3bb4-467f-ad30-a71c1e3a685c",
+  "sourceSha256": "ccfed12edfabf5f734d4f115f0543d51d94c2c71eb0dfd73136536fc2a46630c",
+  "products": 50000,
+  "inventoryBalances": 50000,
+  "draftItemsObservedBeforeStop": 362500,
+  "requestedSignal": "SIGTERM",
+  "reason": "Resume same deterministic fixture using four disjoint guarded INSERT workers; no constraints disabled, no financial history fabricated",
+  "productionTouched": false,
+  "observedProcessExit": 143
+}

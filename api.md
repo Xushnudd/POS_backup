@@ -1527,3 +1527,9 @@ UI prefixlar, journal tartibi, manual confirmation va form-selector istisnolari 
 ### UI locale va API contracti
 
 `pos_locale=uz|ru` faqat display afzalligi; authentication, authorization va tenant scope uchun ishlatilmaydi. UI til tanlovi yangi endpoint yoki mutatsiya yubormaydi. API machine `code`, `status`, permission/query nomlari, canonical nuqtali decimal, ISO sana va idempotency UUID bir xil qoladi. Masalan, RU ko‘rinishidagi `12,50 сум` requestdagi `12.50` yoki original pending body o‘rniga yuborilmaydi. Diagnostic `requestId` saqlanadi; foydalanuvchiga tarjima qilingan reviewed error guidance ko‘rsatiladi. Original mahsulot/mijoz nomlari, izoh va hujjat snapshotlari o‘zgarmaydi. [Locale va recovery contracti](docs/operations/localization.md).
+
+### Mijozning aloqa roziliklari — LEG-01.05
+
+Owner-only `GET /api/customers/:id/consents[?before=<revision>]` elektron chek, xizmat eslatmasi va reklama qarorlarini vaqt/manba/dalil/versiya bilan qaytaradi: `data.revision`, eng yangi 50 ta `data.rows`, exclusive `data.nextBefore`. `POST` qat’iy `operationId`, `expectedRevision`, `purpose` (`electronic_receipt|service_reminder|marketing`), `channel` (`sms|email|telegram`), `granted`, `source` (`in_person|written|customer_request`), `evidenceRef`, `policyVersion` oladi. Actor va vaqt serverdan; tarix immutable. `expectedRevision` eskirsa `409 CONSENT_REVISION_CONFLICT`; body almashtirilgan original key rad etiladi. Bekor qilish alohida hodisa va read-only davrda ham mumkin; yangi ruxsat business-write talab qiladi.
+
+Ruxsat maqsad/kanallar o‘rtasida ko‘chmaydi. Navbatdagi eski xabar withdrawal, re-grant yoki mijoz tahriridan keyin ruxsatli hisoblanmaydi; kelajakdagi dispatch `assertCurrentConsent` bilan joriy hodisani tekshirishi shart. Bu endpoint xabar yubormaydi yoki akkauntni tasdiqlamaydi. Real delivery vendorlari hali ulanmagan. [Operator va worker contracti](docs/operations/customer-consent.md).

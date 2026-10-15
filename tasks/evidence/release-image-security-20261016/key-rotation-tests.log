@@ -1,0 +1,12 @@
+✔ Dry-run preserves bytes; audited apply preserves authenticator, counter and recovery; rerun writes once and works with retired key removed (637.662029ms)
+✔ Concurrent apply is once; unaudited ciphertext/source changes and provenance edits fail closed (532.202761ms)
+✔ Audit fault rolls back encryption; missing previous key and revoked operator never alter credentials (562.762045ms)
+✔ Operator CLI defaults to safe counts-only check, rejects wrong target and requires explicit valid maintenance for apply (1159.560889ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3084.433869

@@ -391,6 +391,8 @@ model Product {
 }
 
 model Customer {
+  consentRevision Int @default(0)
+  consentEvents ConsentEvent[]
  loyaltyBenefits LoyaltyBenefitSelection[]
  loyaltyCards LoyaltyCard[]
   loyaltyLots LoyaltyPointLot[]
@@ -417,6 +419,27 @@ model Customer {
   debtEntries    DebtEntry[]
   
   @@index([phone])
+}
+
+model ConsentEvent {
+  id String @id @default(uuid())
+  organizationId String
+  customerId String
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  revision Int
+  purpose String
+  channel String
+  granted Boolean
+  source String
+  evidenceRef String
+  policyVersion String
+  createdBy String
+  customerVersion DateTime
+  customerRevision Int @default(-1)
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, revision])
+  @@index([organizationId, customerId, purpose, channel, revision])
 }
 
 model Supplier {
