@@ -2,7 +2,6 @@ import {test,expect,type Page} from '@playwright/test';
 import {PrismaClient} from '@prisma/client';
 import {randomUUID} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {mkdirSync} from 'node:fs';
 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[],headers={Origin:'https://localhost:3100'};
 test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect();});
 async function post(page:Page,path:string,data:unknown){const response=await page.request.post(path,{headers,data});expect(response.ok(),path).toBe(true);return (await response.json()).data;}
@@ -16,7 +15,7 @@ async function fixture(page:Page){
  await post(page,'/api/sales/'+sale.id+'/complete',{operationId:randomUUID(),payments:[{paymentType:'cash',amount:'1.01'}]});
  return {orgId:me.organization.id,product,sale};
 }
-test('Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke',async({page,browser,browserName})=>{
+test('Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke',async({page,browser,browserName},testInfo)=>{
  const f=await fixture(page);await page.goto('/sales/'+f.sale.id);await page.getByRole('button',{name:'Chekni chop etish',exact:true}).click();
  const section=page.getByRole('region',{name:'Elektron chek',exact:true}),preview=section.getByRole('button',{name:'Elektron chek havolasini yaratish: oldindan ko‘rish',exact:true});
  await expect(preview).toBeDisabled();await section.getByRole('checkbox').check();await expect(preview).toBeEnabled();
@@ -40,7 +39,7 @@ test('Receipt consent UI survives lost acknowledgement; anonymous receipt matche
    if(browserName==='chromium'){const pdf=await receipt.pdf({preferCSSPageSize:true});expect(pdf.subarray(0,4).toString()).toBe('%PDF');const box=/\/MediaBox\s*\[\s*0\s+0\s+([\d.]+)/.exec(pdf.toString('latin1'));expect(box).not.toBeNull();expect(Math.abs(Number(box![1])-Number(width)*72/25.4)).toBeLessThan(2);}
   }
   const capability=new URL(url).hash.slice(1).split('.')[2];expect(requests.some(request=>request.includes(capability))).toBe(false);
-  mkdirSync('tasks/evidence/core185-20261016',{recursive:true});await receipt.screenshot({path:'tasks/evidence/core185-20261016/receipt.png',fullPage:true});
+  await receipt.screenshot({path:testInfo.outputPath('receipt.png'),fullPage:true});
   await section.getByRole('button',{name:'Havolani bekor qilish',exact:true}).click();await expect(section.getByText('Havola faol emas.',{exact:true})).toBeVisible();
   await receipt.reload();await expect(receipt.getByRole('heading',{name:'Elektron chek mavjud emas yoki muddati tugagan.',exact:true})).toBeVisible();
  }finally{await anonymous.close();}

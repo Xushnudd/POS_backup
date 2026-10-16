@@ -1,0 +1,13 @@
+[WebServer] (node:125986) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 1 worker
+
+(node:126022) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/shared-documents.spec.ts:18:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke (2.8s)
+  ✓  2 [chromium] › tests/e2e/shared-documents.spec.ts:48:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload (2.4s)
+  ✓  3 [chromium] › tests/e2e/shared-documents.spec.ts:69:5 › Legacy external image metadata cannot create an automatic browser request (973ms)
+  ✓  4 [chromium] › tests/e2e/shared-documents.spec.ts:76:5 › Lost consent rejection clears only the blocked reminder attempt and permits a newly consented request (1.6s)
+
+  4 passed (9.0s)

@@ -9,9 +9,22 @@ import {createDraft,completeSale} from '@/server/sales/service'
 import {returnSale} from '@/server/returns/service'
 import {postDebtDocument,debtDocumentSchema,customerStatement} from '@/server/customers/ledger'
 import {assertCustomerCanArchive} from '@/server/customers/archive'
-const u=new URL(process.env.DATABASE_URL??'');if(u.hostname!=='127.0.0.1'||u.port!=='55439'||u.pathname!=='/pos_test')throw new Error('Isolated DB only')
+const u=new URL(process.env.DATABASE_URL??'');if(u.protocol!=='postgresql:'||u.hostname!=='127.0.0.1'||u.port!=='55439'||u.pathname!=='/pos_test'||u.username!=='pos_test')throw new Error('Isolated DB only')
 const orgs:string[]=[],users:string[]=[]
-after(async()=>{await prisma.organization.deleteMany({where:{id:{in:orgs}}});await prisma.user.deleteMany({where:{id:{in:users}}});await prisma.$disconnect()})
+after(async()=>{
+ try{
+  // Only this guarded disposable DB: validate the refund/document edge after
+  // both tenant cascades, then restore its original policy atomically.
+  await prisma.$transaction(async tx=>{
+   await tx.$executeRawUnsafe('ALTER TABLE "CustomerAdvanceRefund" ALTER CONSTRAINT "CustomerAdvanceRefund_documentId_fkey" DEFERRABLE INITIALLY IMMEDIATE')
+   await tx.$executeRawUnsafe('SET CONSTRAINTS "CustomerAdvanceRefund_documentId_fkey" DEFERRED')
+   await tx.organization.deleteMany({where:{id:{in:orgs}}})
+   await tx.$executeRawUnsafe('SET CONSTRAINTS "CustomerAdvanceRefund_documentId_fkey" IMMEDIATE')
+   await tx.$executeRawUnsafe('ALTER TABLE "CustomerAdvanceRefund" ALTER CONSTRAINT "CustomerAdvanceRefund_documentId_fkey" NOT DEFERRABLE')
+  },{timeout:30000})
+  await prisma.user.deleteMany({where:{id:{in:users}}})
+ }finally{await prisma.$disconnect()}
+})
 const code=(value:string)=>(e:unknown)=>!!e&&typeof e==='object'&&'code'in e&&e.code===value
 async function fixture(){
  const org=await prisma.organization.create({data:{name:'Advance isolated',phone:randomUUID()}});orgs.push(org.id)

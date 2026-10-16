@@ -4,12 +4,22 @@ Bu hujjat `RELEASE-01.08`ning texnik tayyorgarlik hisobotidir. Mahalliy sintetik
 
 ## Joriy qisqa yuklama profili
 
-2026-10-16 o‘lchovining xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016-core185.json` orqali bog‘lanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
+Joriy o‘lchovning xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016-post185.json` orqali bog‘lanadi. Bu 185 bosqichidan keyingi eksport va package o‘zgarishlari bilan qayta o‘lchangan dalil; avvalgi `release-service-targets-20261016-core185.json` tarixiy holatda saqlanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
 
 ```sh
 node scripts/release/check-service-targets.cjs
 node --test --test-isolation=none scripts/ops/service-targets.test.mjs
 ```
+
+Asosiy CI ham `check-service-targets.cjs`ni bajaradi: source/evidence mosligi va
+14 kunlik yangilik talabi buzilsa pipeline to‘xtaydi. Yangi manba hashlarini
+eski tezlik natijasiga ko‘chirish qabul emas; haqiqiy harness qayta bajariladi.
+
+Joriy gate barcha 100 mahsulotda birinchi valuation capture hali mavjud
+bo‘lmaganini ham tekshiradi (`valuationCaptureBefore`).
+`POS_PROFILE_PRODUCT_OFFSET` 0–48000 oralig‘ida boshqa, hali sotilmagan
+sintetik mahsulotlar guruhini tanlashga imkon beradi; jami 50k/1m/20 profili
+o‘zgarmaydi. Warm qayta sinov cold regressiyasini yashirish uchun qabul qilinmaydi.
 
 Profil faqat `127.0.0.1:55439/pos_test`dagi alohida sintetik tashkilotda ishlaydi. Bir filial, 20 faol kassa va ochiq smena, 50 000 mahsulot hamda 1 000 000 sintetik draft SaleItem mavjud. Bitta ownerning 20 alohida sessiyasi parallel ishlaydi; bu 20 mustaqil kassir yoki haqiqiy pilot yuklamasi emas. Har bir kassada besh martadan mahsulot qidirish, draft yaratish va bir mahsulotli 100 UZS naqd savdoni yakunlash bajariladi. Yakunda 100 yangi completed Sale va 100 Payment bo‘lishi shart.
 

@@ -1,0 +1,19 @@
+[WebServer] (node:119111) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 10 tests using 1 worker
+
+(node:119214) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event (2.6s)
+  ✓   2 [chromium] › tests/e2e/customer-consent.spec.ts:55:5 › Concurrent consent revision rejection refreshes history and permits a fresh reviewed decision (1.0s)
+  ✓   3 [chromium] › tests/e2e/customer-consent.spec.ts:69:5 › Recovered stale consent discards only a definitive rollback; unknown conflicts retain the original operation (1.5s)
+  ✓   4 [chromium] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (673ms)
+  ✓   5 [chromium] › tests/e2e/permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change (1.1s)
+  ✓   6 [chromium] › tests/e2e/shared-documents.spec.ts:19:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke (2.4s)
+  ✓   7 [chromium] › tests/e2e/shared-documents.spec.ts:49:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload (2.2s)
+  ✓   8 [chromium] › tests/e2e/shared-documents.spec.ts:70:5 › Legacy external image metadata cannot create an automatic browser request (727ms)
+  ✓   9 [chromium] › tests/e2e/shared-documents.spec.ts:77:5 › Lost consent rejection clears only the blocked reminder attempt and permits a newly consented request (1.5s)
+  ✓  10 [chromium] › tests/e2e/tenant-export.spec.ts:9:5 › Owner recovers original tenant export enqueue after lost ACK and downloads an exact manifest from the production worker (1.6s)
+
+  10 passed (16.9s)

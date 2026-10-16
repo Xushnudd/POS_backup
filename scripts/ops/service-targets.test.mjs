@@ -18,6 +18,7 @@ function fixture(run){
  load.retryPolicy={maxAttempts:8,deadlineMs:10000,code:'CONCURRENT_CONFLICT',originalKey:true,checkoutLatencyIncludesBackoff:true};
  load.rawErrorRate={failed:5,denominator:305,rate:5/305};
  load.fixtureOrganizationId='synthetic-fixture';
+ load.valuationCaptureBefore={productOffset:20000,selectedProducts:100,alreadyCaptured:0,firstCaptureProducts:100};
  const dataset=reference('tasks/evidence/dataset.json',{organizationId:load.fixtureOrganizationId,dataset:{products:50000,saleItems:1000000,activeRegisters:20}});
  write('scripts/ops/pitr/restore-wal.sh','synthetic recovery source');
  const recoverySource={path:'scripts/ops/pitr/restore-wal.sh',sha256:sha(readFileSync(join(root,'scripts/ops/pitr/restore-wal.sh')))};
@@ -32,6 +33,12 @@ test('service-target gate accepts complete local evidence without implying uptim
 test('service-target gate rejects omitted errors, incomplete sample denominators and excessive p95',()=>{
  for(const mutation of [load=>{delete load.errors;},load=>{load.rawErrorRate.failed=0;},load=>{load.physicalAttempts.checkout.calls=100;},load=>{load.retryPolicy.originalKey=false;},load=>{load.errorRate.denominator=199;},load=>{load.search.p95Ms=501;},load=>{load.checkout.failed=1;},load=>{load.economicInvariants.newPayments=99;}])fixture(({root,report,load,reference})=>{
   mutation(load);report.load=reference('tasks/evidence/load.json',load);assert.throws(()=>gate.validateServiceTargets(report,{root,now}),/LOAD_|LATENCY_/);
+ });
+});
+test('service-target gate rejects warm products or missing first-capture evidence',()=>{
+ for(const mutation of [load=>{delete load.valuationCaptureBefore;},load=>{load.valuationCaptureBefore.alreadyCaptured=1;load.valuationCaptureBefore.firstCaptureProducts=99;},load=>{load.valuationCaptureBefore.productOffset=-1;}])fixture(({root,report,load,reference})=>{
+  mutation(load);report.load=reference('tasks/evidence/load.json',load);
+  assert.throws(()=>gate.validateServiceTargets(report,{root,now}),/COLD_CAPTURE_PROFILE_REQUIRED/);
  });
 });
 test('service-target gate fails after source additions, evidence tampering, expiry or unsupported SLA claims',()=>{

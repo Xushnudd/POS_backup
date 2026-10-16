@@ -47,6 +47,8 @@ function validateServiceTargets(report,{root=process.cwd(),now=new Date()}={}){
  const migrationFiles=Object.keys(current).filter(file=>/^prisma\/migrations\/[^/]+\/migration\.sql$/.test(file));
  if(!Array.isArray(load.databaseMigrations)||load.databaseMigrations.length!==migrationFiles.length||new Set(load.databaseMigrations.map(row=>row.migrationName)).size!==migrationFiles.length||load.databaseMigrations.some(row=>!/^[A-Za-z0-9_-]+$/.test(row.migrationName)||current['prisma/migrations/'+row.migrationName+'/migration.sql']!==row.checksum))fail('DATABASE_MIGRATIONS_NOT_CURRENT');
  if(load.version!==3||load.at!==report.measuredAt||load.dataset?.products!==50000||load.dataset?.syntheticDraftItems!==1000000||load.dataset?.activeRegisters!==20||load.concurrency!==20||load.actorRole!=='owner'||load.checkoutItemsPerSale!==1)fail('LOAD_PROFILE_INCOMPLETE');
+ const capture=load.valuationCaptureBefore;
+ if(!capture||capture.selectedProducts!==100||capture.alreadyCaptured!==0||capture.firstCaptureProducts!==100||!Number.isSafeInteger(capture.productOffset)||capture.productOffset<0||capture.productOffset>48000)fail('COLD_CAPTURE_PROFILE_REQUIRED');
  if(load.errors?.length!==0||load.search?.samples!==100||load.search?.attempted!==100||load.search?.failed!==0||load.search?.byStatus?.['200']!==100||Object.keys(load.search.byStatus).length!==1||load.checkout?.samples!==100||load.checkout?.attempted!==100||load.checkout?.failed!==0||load.draft?.attempted!==100||load.draft?.succeeded!==100||load.draft?.excludedFromCheckoutLatency!==true)fail('LOAD_ERRORS_OR_MISSING_SAMPLES');
  const physical=load.physicalAttempts,policy=load.retryPolicy;
  if(!physical||policy?.maxAttempts!==8||policy?.deadlineMs!==10000||policy?.code!=='CONCURRENT_CONFLICT'||policy?.originalKey!==true||policy?.checkoutLatencyIncludesBackoff!==true)fail('LOAD_RETRY_PROTOCOL_INVALID');
@@ -76,7 +78,7 @@ function validateServiceTargets(report,{root=process.cwd(),now=new Date()}={}){
  return {task:report.task,currentSearchP95Ms:load.search.p95Ms,currentCheckoutP95Ms:load.checkout.p95Ms,failed:0,denominator:200,rawFailed,rawDenominator,sourceFiles:Object.keys(current).length,scope:report.scope,contractualSla:false};
 }
 if(require.main===module){
- try{const report=JSON.parse(read(process.cwd(),'tasks/evidence/release-service-targets-20261016-core185.json'));console.info(JSON.stringify(validateServiceTargets(report)));}
+ try{const report=JSON.parse(read(process.cwd(),'tasks/evidence/release-service-targets-20261016-post185.json'));console.info(JSON.stringify(validateServiceTargets(report)));}
  catch(error){console.error('SERVICE_TARGETS_'+(error.message??'CHECK_FAILED'));process.exitCode=1;}
 }
 module.exports={sourceHashes,validateServiceTargets};

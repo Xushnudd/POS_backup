@@ -10,7 +10,7 @@ import {POST as viewRoute} from '@/app/api/receipt-view/route'
 import {POST as createRoute} from '@/app/api/sales/[id]/receipt-links/route'
 import {NextRequest} from 'next/server'
 import sharp from 'sharp'
-import {QRCodeReader,RGBLuminanceSource,HybridBinarizer,BinaryBitmap} from '@zxing/library'
+import {QRCodeReader,RGBLuminanceSource,HybridBinarizer,BinaryBitmap,DecodeHintType} from '@zxing/library'
 const connection=new URL(process.env.DATABASE_URL??'');if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw new Error('Isolated DB only')
 const orgs:string[]=[],users:string[]=[]
 after(async()=>{await prisma.organization.deleteMany({where:{id:{in:orgs}}});await prisma.user.deleteMany({where:{id:{in:users}}});await prisma.$disconnect()})
@@ -39,7 +39,10 @@ test('Consented receipt share retries once, preserves original decimals/identity
  const proof=input(a.url!);assert.ok(!JSON.stringify(persisted).includes(proof.capability))
  const svg=Buffer.from(a.qrDataUrl!.split(',')[1],'base64')
  const raster=await sharp(svg).flatten({background:'#ffffff'}).greyscale().raw().toBuffer({resolveWithObject:true})
- const decoded=new QRCodeReader().decode(new BinaryBitmap(new HybridBinarizer(new RGBLuminanceSource(new Uint8ClampedArray(raster.data),raster.info.width,raster.info.height))))
+ // This is a pure generated QR, not a camera frame. The detector can mistake
+ // random payload patterns for finder marks; decode the complete matrix and
+ // still require the exact original capability URL, including its fragment.
+ const decoded=new QRCodeReader().decode(new BinaryBitmap(new HybridBinarizer(new RGBLuminanceSource(new Uint8ClampedArray(raster.data),raster.info.width,raster.info.height))),new Map([[DecodeHintType.PURE_BARCODE,true]]))
  assert.equal(decoded.getText(),a.url)
  await prisma.organization.update({where:{id:f.org.id},data:{name:'Changed merchant'}})
  await prisma.product.update({where:{id:f.product.id},data:{name:'Changed product'}})

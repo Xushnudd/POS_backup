@@ -2,7 +2,9 @@
 
 Sana: 2026-10-16. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
-Joriy original done: **185/259**. Foydalanuvchining **185** maqsadi bajarildi: baseline180 →185, **5/5 original band — POS-02.09, CRM-02.02, OPS-02.02, LEG-01.06, RELEASE-01.06**. Dalil: `tasks/evidence/core185-20261016.json`. Qolgan74 original band o‘z haqiqiy holatida; mahalliy environment rehearsal OPS-01.01ni tashqi qabul o‘rniga done qilmadi.
+Joriy original done: **185/259**. Joriy maqsad **195** hali bajarilmadi; ushbu davomda yangi original done **+0**, yana **10** ta to‘liq original qabul kerak. Oldingi190 maqsadi ham bajarilmagan. Foydalanuvchi 2026-10-16 kuni staging/mustaqil status hosti/pilot **hali tayyor emas**ligini qayta tasdiqladi. 74 ochiq bandning qabul to‘siqlari: `tasks/190_BLOCKERS.md`;195 uchun qayta tekshiruv va qabul yo‘li: `tasks/195_READINESS.md`. CI/test/yuklama dalili tuzatishlari yangi original band sifatida sanalmaydi.
+
+185 bosqichining tarixiy yakuni: baseline180 →185, **5/5 original band — POS-02.09, CRM-02.02, OPS-02.02, LEG-01.06, RELEASE-01.06**. Dalil: `tasks/evidence/core185-20261016.json`. Qolgan74 original band o‘z haqiqiy holatida; mahalliy environment rehearsal OPS-01.01ni tashqi qabul o‘rniga done qilmadi.
 
 180 bosqichining tarixiy yakuni: Foydalanuvchining **180** maqsadi bajarildi: baseline176 →180, **4/4 original band — LEG-01.05, OPS-03.03, OPS-01.05, RELEASE-01.08**. Quyidagi176 maqsadi tarixiy.  Foydalanuvchi maqsadi **176 bajarildi**:175→176, **1/1** yangi original band **RELEASE-01.12** qabul qilindi. Oldingi **175 bajarildi**: **5/5** yangi original band qabul qilindi (REP-01.11, CRM-02.04, CRM-02.03, UX-01.03, UX-01.02). Oldingi170 maqsadi bajarilgan — original INV-02.07 qabul qilindi (169→170). Baseline164dan oldingi170 maqsadi6/6: UX-01.05, INV-01.07, INV-02.06, REP-01.07, PUR-01.05 va INV-02.07. Faqat original PLAN1 bandlari sanaladi. Local core qabul real production/pilot/vendor dalili o‘rnini bosmaydi.
 
@@ -218,7 +220,7 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
 | OPS-02.03 | CORE-1 | done | Savdo/to‘lov/qoldiq solishtirish farqi uchun biznes ogohlantirishlari. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | OPS-02.04 | CORE-1 | done | Navbatdagi ishlarni takrorlash va yechilmagan ishlar ro‘yxati. | ADR051;183full+5focused PG,84migrations/restore,40unit,6browser realworker; qabul quyida | Lease/authorization/history/retry regressiyasini saqlash |
 | OPS-02.05 | CORE-1 | blocked_external | Xatoni mas’ul xodimga yuborish va eskalatsiya; kim javob berishi aniq bo‘lishi. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
-| OPS-02.06 | CORE-1 | in_progress | Dependency-siz Node24 va alohida Docker/Podman status xizmati; public timeline, stale→unknown, private postmortem | 5/5 focused tests; native+OCI synthetic outage/read-only/health PASS; tasks/evidence/status186/drill.json; ADR-099 | Haqiqiy boshqa host mavjud emas; user Docker va dockersiz ishlashni so‘radi. Original boshqa-server mezoni bekor qilinmagan; done sanalmadi |
+| OPS-02.06 | CORE-1 | in_progress | Dependency-siz Node24 va alohida Docker/Podman status xizmati; public timeline, stale→unknown, private postmortem | 5 status tests; Docker Engine/native configured healthcheck + outage/read-only PASS; tasks/evidence/status-fixes-20261016/drill.json; ADR-099/100 | Haqiqiy boshqa host mavjud emas; user Docker va dockersiz ishlashni so‘radi. Original boshqa-server mezoni bekor qilinmagan; done sanalmadi |
 | OPS-03.01 | CORE-1 | blocked_external | Shifrlangan avtomatik backup; bazaning asosiy serveridan boshqa saqlash joyi. | Node24 non-root image, explicit migrations, CI, env validation, health, GPG backup/empty-db restore smoke | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
 | OPS-03.02 | CORE-1 | done | Baza bilan birga mahsulot rasmlari, hujjatlar va zarur konfiguratsiya zaxirasi. | 2026-10-08: soliq/refund/scope/backup yakuniy protokoli; versioned source va avtomatik sinovlar | Regressiyani saqlash; hosting/vendor integratsiyalari alohida |
 | OPS-03.03 | CORE-1 | done | PG15 native base+WAL/PITR; private0700/0600 access, 30day configurable retention/no-delete planner; real target-timestamp restore. | tasks/evidence/pitr-drill-20261016.json; 5 drill groups/9 new PITR tests; target ledger125.75 retained, post-target excluded; local recovery0.758s | Tiny isolated fixture; off-host encryption/scheduler/real disaster RPO/RTO va production qabul alohida ochiq |
@@ -238,7 +240,7 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
 | QA-01.05 | CORE-1 | done | Parallel so‘rov va takror amal testlari. | +50 checkpoint: individual qabul protokoli, versioned tests/migrations; 90 PG + 17 unit + 6 HTTPS browser | Regressiyani saqlash |
 | QA-01.06 | CORE-1 | todo | Provider sandbox, timeout, noto‘g‘ri imzo, takror/kechikkan callback testlari. | — | — |
 | QA-01.07 | CORE-1 | in_progress | Offline/reconnect, printer uzilishi, brauzer yopilishi va server restart sinovlari. | Uch browser core offline/reconnect/close/print boundary va actual standalone restart o‘tdi | Haqiqiy printer uzilishi vendor/hardware tayyor bo‘lganda tekshiriladi |
-| QA-01.08 | CORE-1 | in_progress | Paket xavfsizligi, secret scanning va stagingda xavfsizlik tekshiruvi. | Lokal working-tree scanner; history scanner4/4 tests, security-history-20261016.json | Dependency/image CVE va real staging qabuli ochiq; external npm auditga oldingi approval rad javobi chetlab o‘tilmadi; done emas |
+| QA-01.08 | CORE-1 | in_progress | Paket xavfsizligi, secret scanning va stagingda xavfsizlik tekshiruvi. | Source/history scanner va testlar full-history CIga ulangan; lokal scans0finding; ADR-100; security-history-20261016.json tarixiy | Dependency/image CVE va real staging qabuli ochiq; external npm auditga oldingi approval rad javobi chetlab o‘tilmadi; done emas |
 | QA-01.09 | CORE-1 | done | Backup restore, migratsiya va chiqarishdan qaytish mashqi. | +20 qabul: kirish/natija va versioned testlar quyidagi plus-20-2026-10-07 checkpointda | Yangi o‘zgarishlarda regressiyani saqlash; tashqi release/pilot alohida bandlarda |
 | BIZ-01.01 | CORE-1 | done | SaaS obuna, lokal o‘rnatish yoki ikkalasini qo‘llash modelini tanlash. | — | — |
 | BIZ-01.02 | CORE-1 | done | Tarifni filial/kassa/xodim yoki funksiyalar bo‘yicha tushunarli belgilash. | saas-core-20261010.json; billing SQL/API/race/replay/export, cost source/CSV, three-browser recovery | Vendor/hosting/MFA global acceptance alohida bandlarda; fake integration yo‘q |
@@ -2681,3 +2683,73 @@ Barcha disposable app/DB container/network/volume, GPG/temp auth/database key va
 QA-01.08 uchun lokal ref tarixidagi bloblarni read-only tekshiruvchi scanner qo‘shildi. 4/4 focused test: o‘chirilgan tarixiy token, sirni chiqarmaslik, credential-store kontentini o‘qimaslik, incomplete budget va binary/empty history. Yakuniy scan 3576 text blob, 31 binary excluded, 0 finding, 0 skip. Dalil: `tasks/evidence/security-history-20261016.json`. Dastlabki1MiB scan2katta blobni skip qilgan;4MiB bounded limit bilan yakuniy doira tekshirildi. Ref history o‘zgartirilmadi; tarmoqqa ma’lumot yuborilmadi.
 
 Original done **185/259** saqlandi;190maqsadi bajarilmadi. QA-01.08 dependency/image/staging qabuli, OPS-02.06 boshqa-host qabuli hamda qolgan original bandlarning real provider/hardware/pilot/legal shartlari ochiq. BIZ-02.07 katta eksport implementatsiyasi hali bajarilmadi: JobExport16MiB, tenant32MiBquota, worker publication, download va closure SQL guard birgalikda o‘zgarishi kerak; limitni ko‘r-ko‘rona oshirish qilinmadi. Done/blocked/deferred bandlar o‘zgartirilmadi yoki qayta sinovdan o‘tkazilmadi.
+
+## 2026-10-16 — 09d31bc review tuzatishlari; 190 maqsadi ochiq
+
+Original **185/259**, yangi original done **+0**, maqsad190 **bajarilmadi**.
+Owner real staging/mustaqil status hosti/pilot hali tayyor emasligini qayta
+tasdiqladi. `tasks/190_BLOCKERS.md` barcha74ochiq original bandning qabul
+shartlarini saqlaydi. Lokal test yoki yangi subtask hisobiga190yozilmadi.
+
+### Tuzatilgan kamchiliklar
+
+- Status drill Podmanga xos `healthcheck run` o‘rniga image’dagi CMD/CMD-SHELL
+  probe’ni umumiy `exec` orqali bajaradi. Haqiqiy Docker Engine/native
+  uzilish/tiklanish/read-only mashqi o‘tdi; yangi dalil
+  `tasks/evidence/status-fixes-20261016/`. Old Podman dalili saqlandi.
+- Katta operator eksporti testi `.integration.test.ts`ga ko‘chirildi va standart
+  guarded pos_test runnerining65faylli inventory’sida avtomatik bajarildi.
+  History scanner/test full-history checkout bilan CIga ulandi.
+- Yangilangan release gate source mosligi/14kunlik yangilik bilan birga100ta
+  birinchi valuation capture dalilini talab qiladi; warm o‘lchov cold xatoni
+  yashira olmaydi. Gate asosiy CIga ulandi. Actual GitHub run/deploy bajarilmadi.
+- Full regression topgan4xato tuzatildi:2capability viewer session-role/org
+  budgetdan alohida public-token/IP budget sifatida tekshiriladi; qo‘shimcha
+  malformed/unknown/cross-origin negatives va public budget testi bor.
+  Advance fixture cleanupidagi refund/document FK faqat guarded disposable
+  teardown transactionida deferred, keyin IMMEDIATE tekshirilib original
+  NOT DEFERRABLE holatiga qaytariladi. Production schema o‘zgarmadi.
+  Pure generated QR matritsasi aynan original URLga dekodlanadi; kamera/hardware
+  qabuli deb ko‘rsatilmaydi. Browser screenshot eski185dalilini almashtirmaydi.
+- Yangi cold yuklama haqiqiy checkout konfliktini aniqladi. PG15 index-only
+  plan diagnostikasidan keyin runOperation posting tranzaksiyasiga
+  `SET LOCAL enable_indexonlyscan = off` qo‘shildi. SERIALIZABLE, native
+  stock/ledger/tenant/authorization guardlari va retry budget saqlangan.
+  Rolga berilgan vaqtinchalik diagnostik override RESET qilindi; default `on`.
+  ADR-100/101da sabab, chegaralar va IO tradeoff bor.
+
+### Yakuniy bajarilgan tekshiruvlar
+
+| Tekshiruv | Haqiqiy natija |
+| --- | --- |
+| Standard full PostgreSQL integration runner | **457/457**,65fayl,0fail; posting tuzatishidan keyingi to‘liq qayta run |
+| Unit | **168/168** |
+| Ops/release gate | **42/42** |
+| Source/history scanner + status HTTP tests | **11/11** |
+| Production standalone Chromium | **10/10**, eksport/receipt/reminder/consent/permissions |
+| Next webpack production build / worker build / lint / typecheck | O‘tdi |
+| i18n / public claims / data flows |960reviewed;44copy/7capability/9proof/5surface,0problem;9flow,0active third party |
+| Source va lokal Git history secret scan | Scannerning cheklangan doirasida0finding; history0skip |
+| Ishlayotgan lokal POS root/readiness | HTTP200/200; real pilot qabuli emas |
+
+Birinchi full run457testdan453pass/4fail bo‘lgan va qabulga kiritilmagan;
+failed log saqlandi. Test tuzatishlaridan so‘ng457/457, planner tuzatishidan
+so‘ng yana457/457o‘tdi. Eng so‘nggi10Chromium ham yangi posting buildga qarshi.
+
+Cold failed o‘lchov: checkout92/94,2yakuniy conflict, raw143/423,
+p95checkout2349.333ms. Bu yashirilmadi. Diagnostik roldagi boshqa100cold
+mahsulot o‘tgach override RESET qilindi; ilova tuzatishi/default role bilan
+yana boshqa100cold mahsulotda final searchp95 **309.311ms**, checkoutp95
+**190.436ms**, final0/200/raw0/300, aniq100yangi Sale/100Payment o‘tdi.
+50kproducts/1m SYN draft rows/20registers/20owner sessions;188migration va
+636source hash mos. Manba o‘lchov davomida o‘zgarmadi. Bu WAN/browser/vendor,
+production uptime/SLA yoki real pilot emas. Eskirgan185dalili tarixiy qoladi;
+joriy manifest `tasks/evidence/release-service-targets-20261016-post185.json`.
+
+Fixture initial seedingi249500draft qatorda to‘xtatilib, existing deterministic
+4-worker resume harnessi bilan1mga to‘ldirildi; guardsDisabled=false. Eski
+moliyaviy hujjatlar yoki production sozlamalari o‘zgartirilmadi. Barcha testlar
+tugagach faqat o‘zimiz yaratgan disposable test DB/status resurslari tozalandi;
+`pos_backup-*`, `.env`/`.env_backup` va host trust store tahrir qilinmadi.
+Katta web eksport, legal/retention, vendor/hardware/host/pilot qabul bandlari
+alohida ochiq. To‘liq dalil: `tasks/evidence/post185-fixes-20261016/validation.json`.

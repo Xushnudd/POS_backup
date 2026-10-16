@@ -1,0 +1,282 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-16T14:35:08.464Z",
+  "baselineRevision": "09d31bcfcf1f03bdfbe8a5ccad3c707a8e674799",
+  "sourceState": "baseline plus uncommitted SHA256-listed changes; no commit or push created",
+  "originalPlan": {
+    "total": 259,
+    "done": 185,
+    "addedDone": 0,
+    "open": 74,
+    "target": 190,
+    "targetAchieved": false,
+    "ownerConfirmedExternalResourcesNotReady": true,
+    "blockerIndex": "tasks/190_BLOCKERS.md"
+  },
+  "tests": {
+    "integration": {
+      "tests": 457,
+      "pass": 457,
+      "fail": 0
+    },
+    "unit": {
+      "tests": 168,
+      "pass": 168,
+      "fail": 0
+    },
+    "ops": {
+      "tests": 42,
+      "pass": 42,
+      "fail": 0
+    },
+    "securityAndStatus": {
+      "tests": 11,
+      "pass": 11,
+      "fail": 0
+    },
+    "chromium": {
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    }
+  },
+  "checks": {
+    "nextWebpackProductionBuild": "passed",
+    "workerBuild": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "gitDiffWhitespace": "passed",
+    "statusDockerNativeDrill": "passed",
+    "sourceScan": {
+      "scanned": 1773,
+      "findings": 0,
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    },
+    "historyScan": {
+      "scanned": 3591,
+      "findings": 0,
+      "skipped": 0,
+      "complete": true,
+      "scope": "Local refs reachable blobs only; no network, reflogs, unreachable objects, LFS payloads, archives or image CVEs. File is one Git inventory path per object, not every occurrence. Credential-store paths reported without reading contents. Binary blobs excluded. Known token patterns only."
+    },
+    "dataFlows": {
+      "task": "LEG-01.06",
+      "activeThirdPartyProviders": 0,
+      "reviewedFlows": 9,
+      "sourceFiles": 13,
+      "scope": "current_local_core_and_explicitly_disabled_external_boundaries",
+      "productionDeploymentVerified": false
+    },
+    "publicClaims": {
+      "copyEntries": 44,
+      "capabilities": 7,
+      "proofs": 9,
+      "surfaces": 5,
+      "problems": []
+    },
+    "i18n": {
+      "checked": 960,
+      "unreviewed": 0,
+      "missing": []
+    },
+    "localPosHttp": {
+      "root": 200,
+      "readiness": 200
+    }
+  },
+  "performance": {
+    "task": "RELEASE-01.08",
+    "currentSearchP95Ms": 309.3106610000001,
+    "currentCheckoutP95Ms": 190.4361530000001,
+    "failed": 0,
+    "denominator": 200,
+    "rawFailed": 0,
+    "rawDenominator": 300,
+    "sourceFiles": 636,
+    "scope": "local_technical_readiness",
+    "contractualSla": false
+  },
+  "cleanup": {
+    "disposableTestDatabaseRemoved": true,
+    "statusDrillResourcesRemoved": true,
+    "temporaryStatusImageRemoved": true,
+    "realBusinessDatabaseWritten": false,
+    "envFilesEdited": false,
+    "hostTrustStoreChanged": false
+  },
+  "limits": [
+    "Original 190 goal not achieved: 185 original tasks remain done.",
+    "No actual GitHub CI execution, deployment, staging, vendor, hardware, pilot or legal acceptance.",
+    "Local synthetic service-level measurement; 20 sessions for one owner, not 20 real cashier actors.",
+    "Initial four-test failure and failed cold load retained as nonacceptance evidence.",
+    "Source/history scanners check a bounded known-pattern scope, not complete CVE/security certification."
+  ],
+  "changedSourceHashes": {
+    ".github/workflows/ci.yml": "0e738abc3a53215184f355143f556951181ef2f925ac72d7a71a73fedcc853b3",
+    "docs/operations/release-service-targets.md": "68884c12190a6aa75a02e00f719fd0b7f2d82396db97d64e5dff703efb2c1009",
+    "docs/operations/security-history-scan.md": "7949afec71341651c18b7fa8303b1f70c4152c2a52b7c9dc6b4345666da2c335",
+    "docs/operations/status-page.md": "582a94670d219389aab7c85c56de60cfabe80d6d94caa3bd6065df9033376983",
+    "docs/operations/tenant-export-file.md": "49ee13862c2570f400b2b0aae791c671fc24dbfe5512e7dc0d94f89634cf46d4",
+    "scripts/ops/service-targets.test.mjs": "a238386ce472c1d4b57355a41683326cdadec16a8c86d573130328c1432c65fd",
+    "scripts/release/check-service-targets.cjs": "a8a5385fcd55781a456fe1354667a5426ae3d0e3287c35c4e9f7ef931d614526",
+    "scripts/status/drill.mjs": "1d8e2d392a345cdfc22a9d7ea347c7d1d94b0bb8a8a62f5905ab8e43087fa923",
+    "src/server/operations.ts": "a1f65441e1ebe90122d6ccba37d02fd5a16bb82d875e15c314e603d60295702e",
+    "tasks/190_BLOCKERS.md": "278355623702c5c0089ff2a91b60ff77ad8f35510acac8a0a83b019b98dde5c5",
+    "tasks/DECISIONS.md": "c1f62feab30c1417cf0e86e00225d2c3d5c53ede87c1c2636aa98de200e80e1a",
+    "tasks/EXECUTION_STATUS.md": "a8112d2c6a7226a5516f2282023b2b6bfacd72b38b66d0cc3ae6bb53e8dcbe8e",
+    "tasks/PLAN1.md": "2bb291dae4a88bd4c6ad8010ef0d4d1341f41def767c80486cd7dfe6bd6ea952",
+    "tests/customer-advances.integration.test.ts": "c26503d297902de5ecd18cfe9530a9345d261a107ba32e8dc537f987fd4ba7e6",
+    "tests/e2e/shared-documents.spec.ts": "9c923a0fb81e1817d1c1d77768ec4fde0e38c896dc7defb64a7349ffe31a00cb",
+    "tests/performance/core-measure.ts": "38e2f981971348d33f22ebb0861ca9b7929e727da63d3b603f56b8135e6cb6dc",
+    "tests/receipt-links.integration.test.ts": "de00923263577652c15055ba99744d00c97536242d839e2692ceeed10ceef428",
+    "tests/request-budgets.integration.test.ts": "aad7c73f79c585759a9242ea5df8f9e39d9a4bea2e6812956a7447dde6821a0f",
+    "tests/route-boundaries.integration.test.ts": "eb056df52425a7428091109278968b64370b1b3c96846e7d1753163d0f984bdf",
+    "tests/tenant-export-stream.integration.test.ts": "58c0d5a949c3c23d60696bf34d10a78f296671078f45ebc081814227f15f7b94"
+  },
+  "artifacts": [
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/browser-before-planner.log",
+      "sha256": "29431b2a9a6a7e4e3f5df7ff619485ca3dfd6fb022d82645a1c21df4a57092e1"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/browser-screenshot-output.log",
+      "sha256": "8eceec3c7fff7fd0f10e129e8c6290617b21fba424a35bda53ccfe554fa2220a"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/browser.log",
+      "sha256": "b2b3193cca5d2b511387f1197dd9eec3f1dd0caeb40107ca779818e492e85cde"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/cold-measure-failed.log",
+      "sha256": "a4ee36f0786d4c2ff1f804ff295eb20a32964dead97d37681b1fa56414c3c874"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/cold-measure-pass.log",
+      "sha256": "8952b1f8ec201e5c96a6f3f3503826834cfbcabf030fbd48dff9d9c8ec52379c"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/data-flows.json",
+      "sha256": "e65e3ec9a8f1fe291aaab27f694cd84f5c369c5b673f562c800d02cddfed8067"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/database-final-check.json",
+      "sha256": "b7b7655aa30887fde87287c722500fa70264be41cb220975097a628075c06bc4"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/fixture-seed-resume.log",
+      "sha256": "142c51bda5054ed71a58425d3b4bd3858cd3bd2d3edb1ec98722cfcb549b88db"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/focused-retest.log",
+      "sha256": "a9870d2995ec78ad8335383766c0f949a8cc4d2065126302a827078d3035448c"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/history-scan.json",
+      "sha256": "1c351152277e64babaa32e9a649a59052583528e65f5d492a38a1f5902863f47"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/i18n.json",
+      "sha256": "acf77dde5526a4f5d6accc19380d5b6eb3fe440d13d23b9eb34bf87e03365ed2"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/integration-before-planner.log",
+      "sha256": "c744eb02e694bf0fa865944181e88b29c6628fc89fc3d49d601ba3206fa48ff2"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/integration-first-failed.log",
+      "sha256": "e28629c5d70c8c80798790a5510f1ebf3875679e0100392c1e252357ded80ef9"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/integration.log",
+      "sha256": "14426f3ecf8ae728dbb55484702326caff6e9ac8481341d7d464705faaf70841"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/measure-runner.txt",
+      "sha256": "c583b3692e8c8b15a0309dd95408431f55a4a30c348d0dbf57c31d20effe0f62"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/next-build.log",
+      "sha256": "0d0b151c16f070062c0db99265e3d8216837acfcd90f625715adb22c63f07db4"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/ops.log",
+      "sha256": "a1a9df8496fc992e5bcf105f98276bdaec3528cf32f919c2ca0189ac9a0820a1"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/public-claims.json",
+      "sha256": "09cecfd49e7c01aaa3caf21a3c4c1db6c5b0d6b62e71af5c455fcad85fddadf0"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/receipt.png",
+      "sha256": "0f488a991326e6286899bcdad9a8e1721f0ced0c77eb6554973673d1eda85d19"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/security-status.log",
+      "sha256": "232637e1f4e45b723cf8eff0e38b66d332a6c71a233f9823f1c6346716111039"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/service-target-check.json",
+      "sha256": "a8716baa6c2faf2e6f34345928aac2ebd9d1b1ea600e98979fa190ee4668a9db"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/source-scan.json",
+      "sha256": "5d0aa1f8b232db3d36d2677e110b7469f7522228c9a5ef2010311c3c2373f1cb"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/status-drill.log",
+      "sha256": "f36900dab4f15527705ca16e4376c4d16cf3fc61f965048b9d097293a2145614"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/unit.log",
+      "sha256": "2b740b5d35458b65457ddda96174ca74518be997b371b80dcc7c4c806836ee41"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/worker-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/release-service-targets-20261016-post185.json",
+      "sha256": "89c01e36b2246fcd81feb919b1e9bf82fd40cdbed92932799f3b8956b6cd782d"
+    },
+    {
+      "path": "tasks/evidence/service-load-20261016-post185-failed.json",
+      "sha256": "96623ba7c6e3fc3e8bf2adcceca06061c579b76f5cb07e5a59e7617ee4a3f00d"
+    },
+    {
+      "path": "tasks/evidence/service-load-20261016-post185-planner-diagnostic.json",
+      "sha256": "8f743f34f50e9662ea81e279a1587a3c295f0cc1654b8b757b75d95887393155"
+    },
+    {
+      "path": "tasks/evidence/service-load-20261016-post185.json",
+      "sha256": "105c4e908a497cf82d13d91f122827d06ebfd4cbe91353bbca09635123ebf2d1"
+    },
+    {
+      "path": "tasks/evidence/service-load-dataset-20261016-post185.json",
+      "sha256": "ab0279fac135f17c8c034c5ecf36f8e5eb210782069bd9fd767dc568a29f8f95"
+    },
+    {
+      "path": "tasks/evidence/service-load-execution-20261016-post185-failed.json",
+      "sha256": "6794073438b3c11b795c94e0ffe4fdfe384a58df50084addb2d8ac3855b41813"
+    },
+    {
+      "path": "tasks/evidence/service-load-execution-20261016-post185.json",
+      "sha256": "9bed830b040efd80dec0fa0131186ffab373e97bac0f55976a4fbc216fb7e08f"
+    },
+    {
+      "path": "tasks/evidence/status-fixes-20261016/drill.json",
+      "sha256": "343605ecaa1c8b10c57d14104e66cb502b71ab207faa409ac7d5090f232029de"
+    },
+    {
+      "path": "tasks/evidence/status-fixes-20261016/public-drill.json",
+      "sha256": "2fb7406f8500435123556cc4908af92a753f315f6aa47c61ffc64fe3db36214d"
+    }
+  ]
+}

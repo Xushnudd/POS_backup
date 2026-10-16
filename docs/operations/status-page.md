@@ -67,3 +67,10 @@ Docker va native runtime mashqi alohida dalil bilan qayd qilinadi. Mahalliy
 container ajratilishi boshqa fizik hostning quvvat/tarmoq uzilishidan himoya
 emas. Real mustaqil hosting, TLS va on-call tashqi deployment shartlari bo‘lib
 qoladi. Qabul sanog‘i o‘zgarishi aniq tasdiqlangan scope va dalilga bog‘liq.
+
+Docker Engine uchun regressiya: `scripts/status/drill.mjs` image ichidagi
+`CMD` yoki `CMD-SHELL` healthcheckni `exec` bilan bajaradi. Podmanga xos
+`healthcheck run` buyrug‘i ishlatilmaydi. `STATUS_IMAGE` sinov image’ini,
+`CONTAINER_ENGINE` runtime’ni, `STATUS_EVIDENCE_DIR` esa yangi dalil katalogini
+belgilaydi. Har bir mashq yangi katalogga yozilsa avvalgi dalil saqlanadi.
+2026-10-16 Docker/native qayta sinovi: `tasks/evidence/status-fixes-20261016/`.

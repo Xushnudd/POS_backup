@@ -47,6 +47,10 @@ export async function runOperation<T>(context: TokenPayload, type: string, key: 
         // Keep SERIALIZABLE and all business guards; selective indexed reads
         // stay narrow. Unindexed scans remain available, without JIT overhead.
         await tx.$executeRaw`SET LOCAL enable_seqscan = off`
+        // PG15 cold valuation capture showed repeated SIREAD conflicts with
+        // index-only plans. Prefer heap index scans for posting transactions;
+        // SERIALIZABLE, business guards and retry limits remain unchanged.
+        await tx.$executeRaw`SET LOCAL enable_indexonlyscan = off`
         await tx.$executeRaw`SET LOCAL jit = off`
         await assertLiveContext(tx,context)
         // Extra privileges can be revoked independently of the business role.

@@ -10,7 +10,7 @@ import {tenantExport,streamTenantExport} from '@/server/jobs/tenant-export'
 import {tenantExportToFile} from '@/server/jobs/tenant-export-file'
 
 const url=new URL(process.env.DATABASE_URL??'')
-if(url.hostname!=='127.0.0.1'||url.port!=='55449'||url.pathname!=='/pos_export_test')throw Error('Dedicated export test DB only')
+if(url.protocol!=='postgresql:'||url.hostname!=='127.0.0.1'||url.port!=='55439'||url.pathname!=='/pos_test'||url.username!=='pos_test')throw Error('Isolated export test DB only')
 const orgs:string[]=[],users:string[]=[],dirs:string[]=[]
 after(async()=>{
  await prisma.organization.deleteMany({where:{id:{in:orgs}}});await prisma.user.deleteMany({where:{id:{in:users}}})

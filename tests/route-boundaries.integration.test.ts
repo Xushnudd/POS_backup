@@ -11,7 +11,9 @@ const connection=new URL(process.env.DATABASE_URL??'');if(connection.hostname!==
 const orgs:string[]=[],users:string[]=[];after(async()=>{await prisma.organization.deleteMany({where:{id:{in:orgs}}});await prisma.user.deleteMany({where:{id:{in:users}}});await prisma.$disconnect()})
 async function account(role:string){const org=await prisma.organization.create({data:{name:'Route matrix',phone:randomUUID()}});orgs.push(org.id);const user=await prisma.user.create({data:{fullName:'Matrix actor',phone:randomUUID(),passwordHash:'not-a-login'}});users.push(user.id);await prisma.organizationUser.create({data:{organizationId:org.id,userId:user.id,role}});const token=randomBytes(32).toString('base64url');await prisma.session.create({data:{organizationId:org.id,userId:user.id,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});return {org,user,cookie:'pos_session='+token}}
 function routes(dir:string):string[]{return readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?routes(join(dir,entry.name)):entry.name==='route.ts'?[join(dir,entry.name)]:[])}
-const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready'])
+// These two reviewed viewers authenticate a capability, not a POS session.
+// Dedicated negative coverage below keeps them outside the role matrix.
+const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready','/api/receipt-view','/api/reminder-view'])
 test('Readiness requires the active manual-refund and supplier migration contract, without leaking dependency details',async()=>{
  const {GET}=await import('../src/app/api/health/ready/route');
  assert.equal((await GET()).status,200);
@@ -26,6 +28,17 @@ test('Readiness requires the active manual-refund and supplier migration contrac
  assert.equal((await GET()).status,200);
 });
 type Handler=(request:NextRequest,context:{params:Promise<Record<string,string>>})=>Promise<Response>
+test('Public document viewers require a valid capability and same-origin admission independently of session roles',async()=>{
+ for(const [path,idField] of [['receipt-view','operationId'],['reminder-view','jobId']]){
+  const route=await import(join(process.cwd(),'.test-build/src/app/api',path,'route.js'))
+  const request=(body:unknown,origin='http://localhost:3000')=>new NextRequest('http://localhost:3000/api/'+path,{method:'POST',headers:{origin,'content-type':'application/json'},body:JSON.stringify(body)})
+  assert.equal((await route.POST(request({}),undefined)).status,400)
+  const unknown={organizationId:randomUUID(),[idField]:randomUUID(),capability:randomBytes(32).toString('base64url')}
+  const denied=await route.POST(request(unknown),undefined)
+  assert.equal(denied.status,404);assert.equal(denied.headers.get('Cache-Control'),'private, no-store');assert.equal(denied.headers.get('Set-Cookie'),null)
+  assert.equal((await route.POST(request(unknown,'https://attacker.invalid'),undefined)).status,403)
+ }
+})
 test('Every exported protected API handler rejects unauthenticated, foreign tenant and foreign branch requests',async()=>{
  const own=await account('owner'),cashier=await account('cashier'),admin=await account('admin'),foreign=await account('owner')
  const foreignStore=await prisma.store.create({data:{organizationId:foreign.org.id,name:'Foreign branch'}})

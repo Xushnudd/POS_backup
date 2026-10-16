@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdtempSync, writeFileSync, renameSync, rmSync, readFileSync, chmodSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, renameSync, rmSync, readFileSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 
 const engine = process.env.CONTAINER_ENGINE ?? 'docker';
 const image = process.env.STATUS_IMAGE ?? 'localhost/pos-status:ops0206';
+const evidenceDirectory = resolve(process.env.STATUS_EVIDENCE_DIR ?? 'tasks/evidence/status186');
 const dir = mkdtempSync(join(tmpdir(), 'pos-status-drill-'));
 chmodSync(dir, 0o755); // Public synthetic snapshot must be readable by container's non-root user.
 const name = `pos-status-drill-${process.pid}`;
@@ -77,11 +78,17 @@ try {
     const html = await (await fetch(`http://127.0.0.1:${p}`)).text(); assert.ok(html.includes('Tiklandi'));
   }
   assert.equal(run(['exec', name, 'node', '-e', "const fs=require('fs');try{fs.writeFileSync('/status/write-probe','x');process.exit(1)}catch(e){if(e.code!=='EROFS')process.exit(2)}console.log('read-only')"]), 'read-only');
-  const health = run(['healthcheck', 'run', name]);
+  // Docker and Podman both support exec; `healthcheck run` is Podman-only.
+  // Execute the image's actual probe instead of duplicating its definition.
+  const probe = inspect.Config.Healthcheck?.Test;
+  assert.ok(Array.isArray(probe) && ((probe[0] === 'CMD' && probe.length > 1) || (probe[0] === 'CMD-SHELL' && probe.length === 2)), 'Image healthcheck required');
+  run(['exec', name, ...(probe[0] === 'CMD' ? probe.slice(1) : ['/bin/sh', '-c', probe[1]])]);
+  const health = 'configured_probe_passed';
   const sources = {};
   for (const path of ['ops/status/server.mjs', 'ops/status/status.mjs', 'ops/status/Dockerfile', 'ops/status/style.css', 'docker-compose.status.yml', 'scripts/status/drill.mjs', 'scripts/status/status.test.mjs']) sources[path] = createHash('sha256').update(readFileSync(path)).digest('hex');
-  writeFileSync('tasks/evidence/status186/drill.json', JSON.stringify({ date: new Date().toISOString(), scope: 'local_native_and_oci_synthetic_process_drill', node: process.version, engine, imageId: inspect.Image, native: 'pass', container: 'pass', independentDuringSyntheticOutage: true, nonRoot: true, readOnly: true, healthcheck: health || 'pass', events, sources, limits: ['No actual remote hosting/domain/TLS or real POS outage.', 'Linux Node24 and Podman tested; Windows/macOS and Docker Engine not executed.', 'No business data or existing done feature tested or changed.'] }, null, 2) + '\n');
-  writeFileSync('tasks/evidence/status186/public-drill.json', JSON.stringify(data, null, 2) + '\n');
+  mkdirSync(evidenceDirectory, {recursive: true});
+  writeFileSync(join(evidenceDirectory, 'drill.json'), JSON.stringify({ date: new Date().toISOString(), scope: 'local_native_and_oci_synthetic_process_drill', node: process.version, engine, imageId: inspect.Image, native: 'pass', container: 'pass', independentDuringSyntheticOutage: true, nonRoot: true, readOnly: true, healthcheck: health, events, sources, limits: ['No actual remote hosting/domain/TLS or real POS outage.', `Linux Node24 and ${engine} tested in this run; Windows/macOS not executed.`, 'No business data or existing done feature tested or changed.'] }, null, 2) + '\n');
+  writeFileSync(join(evidenceDirectory, 'public-drill.json'), JSON.stringify(data, null, 2) + '\n');
   await stop(recovered); await stop(native);
   console.log('Native + container + independent outage/timeline + read-only/health: PASS');
 } finally {

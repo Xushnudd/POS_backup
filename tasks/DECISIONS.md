@@ -702,3 +702,21 @@ Linux native Node24 va Podmanda Docker-format image tekshirildi. Windows/macOS
 va Docker Engine testdan o‘tgani da’vo qilinmaydi; Node standart APIlari ishlatiladi.
 Hosting mezonini olib tashlash aniq tasdiqlanmadi. Local process independence
 real boshqa host outage kafolati emas, original OPS-02.06 in_progress qoladi.
+
+## ADR-100 — 185 dan keyingi qabul dalillari va CI regressiyasi (2026-10-16)
+
+Status drill Docker/Podman umumiy `exec` orqali image’dagi haqiqiy CMD/CMD-SHELL healthcheckni bajaradi; runtime’ga xos buyruq ishlatilmaydi. Yangi evidence katalogi tarixiy Podman dalilini saqlaydi. Katta operator eksporti testi standart `.integration.test.ts` bo‘lib, faqat guarded localhost pos_test bazasida ishlaydi; tarix scanner/test full-history checkout bilan CI’da bajariladi.
+
+Public receipt/reminder capability endpointlari session-role/org-budget matritsasiga kirmaydi; ularga public IP budget, server token/tenant/expiry/consent/restore va origin nazorati tegishli. Har ikkala endpoint uchun malformed/unknown capability va cross-origin negative test hamda public budget exhaustion tekshiruvi saqlanadi. Role guard yoki production business nazorati bo‘shatilmagan.
+
+Customer advance test teardownidagi FK faqat guarded disposable bazaning yakuniy tozalash tranzaksiyasida deferred qilinib, ikki cascade tugagach IMMEDIATE bilan tekshiriladi va original NOT DEFERRABLE holatiga qaytariladi; production schema/migration o‘zgarmaydi. QR sintetik testida kamera finder detektori o‘rniga pure barcode matritsasi dekodlanadi va aynan original fragmentli URL solishtiriladi; real scanner/hardware qabuli da’vo qilinmaydi. Browser screenshotlari tarixiy milestone faylini almashtirmay, testning o‘z outputiga yoziladi.
+
+190 sanog‘i uchun yangi ID yoki subtask qo‘shilmaydi. Owner tashqi host/pilot hali tayyor emasligini qayta tasdiqladi; uydirma deployment, huquqiy tasdiq va vendor/hardware qabuli yaratilmaydi. Original count185 saqlanadi. Yangi yuklama dalili faqat haqiqiy qayta bajarilgan harness va o‘zgarmagan source hashlar bilan qabul qilinadi; old185 dalili tarixiy holda qoladi.
+
+## ADR-101 — Cold valuation capture va SERIALIZABLE posting (2026-10-16)
+
+Yangi 50k product/1m draft/20-register fixture’da old runOperation bilan birinchi capture yuklamasi o‘tmadi:92/94 checkout,2yakuniy conflict; raw143/423 va checkout p95 2349.333ms. Bu qabul emas; failed raw/execution artefaktlari saqlandi. PG15 loglarida ko‘p xato inventory_valuation_record bosqichida qayd etildi. Faqat disposable rolda index-only scan diagnostik o‘chirilganda boshqa100ta cold mahsulot0/200 yakuniy xato bilan o‘tdi; roldagi override keyin RESET qilindi.
+
+Ilova runOperation ichida faqat posting tranzaksiyasi uchun `SET LOCAL enable_indexonlyscan = off` tanlandi. Mavjud SERIALIZABLE, stock/ledger/tenant/authorization guardlari, native baseline/capture,3server retry va original-key client budget o‘zgarmadi. Schema, eski hujjatlar va production DB konfiguratsiyasi o‘zgartirilmadi. Heap index plan hisob natijasini o‘zgartirmaydi; tradeoff — ayrim posting readlarida qo‘shimcha heap IO. Read-only hisobotlar uchun global planner taqiqlanmaydi.
+
+Role override’siz, ilova tuzatishi bilan yana boshqa100cold mahsulotda yakuniy o‘lchov o‘tdi: search309.311ms/checkout190.436ms p95; final0/200, raw0/300; aniq100Sale/100Payment. `service-load-20261016-post185.json` va `release-service-targets-20261016-post185.json`. Harness mahsulot offsetini hamda oldindan mavjud capture sonini yozadi; gate100ta yangi capture talab qiladi, warm qayta urinishni yangi cold dalili deb qabul qilmaydi. Bu haqiqiy hosting/pilot/SLA emas va original done sanog‘ini oshirmaydi.

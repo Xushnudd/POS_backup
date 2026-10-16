@@ -20,7 +20,9 @@ const key=(category:string,identity:string)=>createHash('sha256').update(categor
 async function exhaust(category:string,identity:string,limit:number){const value=key(category,identity);keys.push(value);await prisma.rateLimit.upsert({where:{key:value},create:{key:value,attempts:limit,expiresAt:new Date(Date.now()+60000)},update:{attempts:limit,expiresAt:new Date(Date.now()+60000)}});return value}
 function request(path:string,cookie:string,body?:string,headers:Record<string,string>={}){return new NextRequest('http://localhost:3000'+path,{method:body===undefined?'GET':'POST',headers:{cookie,origin:'http://localhost:3000','content-type':'application/json',...headers},...(body===undefined?{}:{body})})}
 function routes(dir:string):string[]{return readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?routes(join(dir,entry.name)):entry.name==='route.ts'?[join(dir,entry.name)]:[])}
-const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready'])
+// Approved bearer-document viewers use the public IP budget and their own
+// per-capability budget; they are not authorized by an organization session.
+const publicPaths=new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready','/api/receipt-view','/api/reminder-view'])
 test('Every protected HTTP handler rejects an exhausted shared budget before business work; tenants isolate and expiry permits retry',async()=>{
  const f=await fixture(),other=await fixture(),identity=f.org.id+':'+f.user.id
  const readKey=await exhaust('api.read',identity,600),writeKey=await exhaust('api.write',identity,300)
@@ -56,7 +58,7 @@ test('Every public authentication admission limit resists spoofed IPs; health/lo
  try{
   delete process.env.TRUST_PROXY_IP
   const publicKey=await exhaust('api.public.write','unattributed',1200)
-  for(const path of ['/api/auth/login','/api/auth/register','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete']){
+  for(const path of ['/api/auth/login','/api/auth/register','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/receipt-view','/api/reminder-view']){
    const routeHandlers=await import(join(process.cwd(),'.test-build/src/app',path.slice(1),'route.js'))
    const response=await routeHandlers.POST(request(path,'','{}',{'x-real-ip':'192.0.2.123','x-forwarded-for':randomUUID()}),undefined)
    assert.equal(response.status,429,path);assert.ok(response.headers.get('Retry-After'))

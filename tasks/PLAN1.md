@@ -3801,6 +3801,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Yangilanish (2026-10-16): in_progress.** Foydalanuvchi Docker va dockersiz ishlashni so‘radi, hosting yo‘qligini tasdiqladi. Mustaqil Node24/OCI xizmati, public hodisa jurnali va amaliy sintetik postmortem tayyor; 5 focused test hamda native/container outage mashqi o‘tdi. `docs/operations/status-page.md`, `tasks/evidence/status186/drill.json`. Boshqa fizik server talabi lokal container bilan isbotlanmaydi; original band hozircha done emas.
 
+  **Qayta tekshiruv (2026-10-16):** Dockerga mos healthcheck va alohida evidence output tuzatildi; haqiqiy Docker Engine/native mashq o‘tdi (`tasks/evidence/status-fixes-20261016/`). Owner tashqi host/pilot hali tayyor emasligini qayta tasdiqladi; checkbox ochiq qoladi.
+
   **Texnologiya:** Mustaqil hostingda static status + Markdown incident docs T11.
 
   **Bajarish:** Status sahifa asosiy app bilan bir serverda qolmaydi; incident vaqt chizig‘i, sabab va prevention yoziladi. Ticket eksporti mijoz sirlarini yashiradi.
@@ -4152,6 +4154,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 - [ ] **QA-01.08** — Paket xavfsizligi, secret scanning va stagingda xavfsizlik tekshiruvi.
 
   **Yangilanish (2026-10-16): in_progress.** Lokal Git tarixidagi ma’lum secret formatlari uchun read-only scanner,4focused test va sanali dalil tayyor: `tasks/evidence/security-history-20261016.json`. Dependency/image/staging qabuli va tashqi audit ruxsati ochiq; original done emas.
+
+  **Qayta tekshiruv (2026-10-16):** History scanner va uning testlari full-history checkout bilan asosiy CI’ga ulandi. Bu GitHub pipeline bajarilgan yoki real staging security qabuli o‘tgan degani emas; original checkbox ochiq qoladi.
 
   **Texnologiya:** npm audit, Git platform secret scanning yoki T14 scanner, staging security tests.
 

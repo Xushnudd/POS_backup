@@ -1,0 +1,7 @@
+{
+  "scope": "disposable_test_database_only",
+  "checkedAt": "2026-10-16T14:31:38.097Z",
+  "enableIndexOnlyScan": "on",
+  "refundForeignKeyDeferrable": false,
+  "appliedMigrations": 188
+}

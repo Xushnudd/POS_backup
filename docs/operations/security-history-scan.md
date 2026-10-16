@@ -30,3 +30,8 @@ aniq object/sabab bilan review qaydi talab qilinadi, avtomatik allowlist yo‘q.
 
 Bu ish paket/CVE, image yoki staging xavfsizlik qabulini almashtirmaydi.
 QA-01.08 original bandi bu scanner tayyorligi bilan done bo‘lmaydi.
+
+Asosiy CI `actions/checkout`da `fetch-depth: 0` bilan mavjud to‘liq tarixni
+oladi va source scan bilan birga `security:history:test` hamda
+`security:history`ni bajaradi. Finding yoki incomplete scan pipeline’ni
+to‘xtatadi. Lokal scannerning o‘zi tarmoqqa ulanmaydi.
