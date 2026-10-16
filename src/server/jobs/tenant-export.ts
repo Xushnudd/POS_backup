@@ -28,7 +28,9 @@ function serialize(_key:string,value:unknown):unknown{
  if(value&&typeof value==='object'&&'type' in value&&value.type==='Buffer'&&'data' in value&&Array.isArray(value.data))return {encoding:'base64',data:Buffer.from(value.data).toString('base64')}
  return value
 }
-export async function tenantExport(organizationId:string,db:Pick<PrismaClient,'$transaction'>=prisma,options:{readOnly?:boolean}={}){
+type StreamOptions={write:(chunk:Buffer)=>Promise<void>;maxBytes:number;maxRows:number;timeoutMs:number}
+async function exportArchive(organizationId:string,db:Pick<PrismaClient,'$transaction'>,options:{readOnly?:boolean},stream?:StreamOptions){
+ if(stream&&[stream.maxBytes,stream.maxRows,stream.timeoutMs].some(value=>!Number.isSafeInteger(value)||value<1))throw new AccessError(400,'EXPORT_LIMIT_INVALID')
  assertExportCoverage()
  return db.$transaction(async tx=>{
   if(options.readOnly){
@@ -42,8 +44,9 @@ export async function tenantExport(organizationId:string,db:Pick<PrismaClient,'$
   const [snapshot]=await tx.$queryRaw<{asOf:Date}[]>`SELECT transaction_timestamp() AS "asOf"`
   const datasets: {model:string;rows:number;sha256:string}[]=[],chunks:Buffer[]=[]
   let bytes=0,rowCount=0
-  const append=(text:string)=>{const chunk=Buffer.from(text);bytes+=chunk.length;if(bytes>MAX_EXPORT_BYTES)throw new AccessError(413,'EXPORT_TOO_LARGE');chunks.push(chunk)}
-  append('{"format":"pos-tenant-export","version":1,"organizationId":'+JSON.stringify(organizationId)+',"asOf":'+JSON.stringify(snapshot.asOf.toISOString())+',"datasets":{')
+  const archiveHash=createHash('sha256')
+  const append=async(text:string)=>{const chunk=Buffer.from(text);bytes+=chunk.length;if(bytes>(stream?.maxBytes??MAX_EXPORT_BYTES))throw new AccessError(413,'EXPORT_TOO_LARGE');archiveHash.update(chunk);if(stream)await stream.write(chunk);else chunks.push(chunk)}
+  await append('{"format":"pos-tenant-export","version":1,"organizationId":'+JSON.stringify(organizationId)+',"asOf":'+JSON.stringify(snapshot.asOf.toISOString())+',"datasets":{')
   const names=[...DIRECT_MODELS,...Object.keys(CHILD_RELATIONS),...SPECIAL_MODELS].sort()
   for(const [index,name] of names.entries()){
    const model=models.find(m=>m.name===name)!
@@ -59,19 +62,30 @@ export async function tenantExport(organizationId:string,db:Pick<PrismaClient,'$
    const orderKeys=primary.length?primary:model.primaryKey?.fields??model.uniqueFields[0]
    if(!orderKeys?.length)throw new AccessError(503,'EXPORT_SCHEMA_UNREVIEWED')
    const reader=(tx as unknown as Record<string,Reader>)[name[0].toLowerCase()+name.slice(1)]
-   append((index?',':'')+JSON.stringify(name)+':[')
+   await append((index?',':'')+JSON.stringify(name)+':[')
    const hash=createHash('sha256');let count=0
    for(;;){
     const page=await reader.findMany({where,select,orderBy:orderKeys.map(key=>({[key]:'asc'})),skip:count,take:name==='FileAsset'?8:250})
     if(!page.length)break
     for(const row of page){
      if(name==='FileAsset'&&row.data!==null){const blob=Buffer.from(row.data as Uint8Array);if(blob.length!==row.size||createHash('sha256').update(blob).digest('hex')!==row.sha256)throw new AccessError(503,'EXPORT_CORRUPTED')}
-     const encoded=JSON.stringify(row,serialize);append((count?',':'')+encoded);hash.update(encoded+'\n');count++;rowCount++;if(rowCount>100000)throw new AccessError(413,'EXPORT_TOO_LARGE')}
+     const encoded=JSON.stringify(row,serialize);await append((count?',':'')+encoded);hash.update(encoded+'\n');count++;rowCount++;if(rowCount>(stream?.maxRows??100000))throw new AccessError(413,'EXPORT_TOO_LARGE')}
    }
-   append(']');datasets.push({model:name,rows:count,sha256:hash.digest('hex')})
+   await append(']');datasets.push({model:name,rows:count,sha256:hash.digest('hex')})
   }
-  append('},"manifest":'+JSON.stringify({datasets,rowCount,omittedModels:OMITTED_MODELS,omittedFields:OMITTED_FIELDS,decimalEncoding:'string',binaryEncoding:'base64',purpose:'portable_business_data_not_database_restore',automaticDeletionEnabled:false})+'}')
+  await append('},"manifest":'+JSON.stringify({datasets,rowCount,omittedModels:OMITTED_MODELS,omittedFields:OMITTED_FIELDS,decimalEncoding:'string',binaryEncoding:'base64',purpose:'portable_business_data_not_database_restore',automaticDeletionEnabled:false})+'}')
   const data=Buffer.concat(chunks)
-  return {data,size:data.length,sha256:createHash('sha256').update(data).digest('hex'),rowCount,filename:'organization-'+organizationId+'.json',mime:'application/json',asOf:snapshot.asOf.toISOString()}
- },{isolationLevel:'RepeatableRead',timeout:60000})
+  return {data,size:bytes,sha256:archiveHash.digest('hex'),rowCount,filename:'organization-'+organizationId+'.json',mime:'application/json',asOf:snapshot.asOf.toISOString()}
+ },{isolationLevel:'RepeatableRead',timeout:stream?.timeoutMs??60000})
+}
+
+// Existing browser/worker and recovery callers retain their original bounded buffer contract.
+export async function tenantExport(organizationId:string,db:Pick<PrismaClient,'$transaction'>=prisma,options:{readOnly?:boolean}={}){
+ return exportArchive(organizationId,db,options)
+}
+// Internal sink only: caller must authorize, keep partial bytes private and remove them on failure.
+export async function streamTenantExport(organizationId:string,write:(chunk:Buffer)=>Promise<void>,db:Pick<PrismaClient,'$transaction'>=prisma){
+ const {data,...metadata}=await exportArchive(organizationId,db,{readOnly:true},{write,maxBytes:1024*1024*1024,maxRows:10000000,timeoutMs:600000})
+ void data
+ return metadata
 }

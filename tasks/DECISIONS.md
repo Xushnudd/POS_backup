@@ -689,3 +689,16 @@ Mahsulot egasi faqat mavjud ichki `/api/files` uploadlarini ishlatishni tasdiqla
 ## ADR-098 — Shaxsan xizmat eslatmasi (2026-10-16)
 
 Mahsulot egasi CRM-02.02 uchun alohida service consent bilan shaxsan muddatli ko‘chirma/QR taqdim etishni tasdiqladi. Mavjud durable job queue snapshot tayyorlaydi; tayyorlash yetkazish sifatida ko‘rsatilmaydi. SMS/e-mail o‘chiq. Consent purpose/channel va native customer revision queue/prepare/read vaqtida tekshiriladi; withdrawal, contact edit, expiry, rotation va restore eski accessni to‘xtatadi. Bir customer/consent/local day uchun takror queue yo‘q.
+
+## ADR-099 — Docker va dockersiz mustaqil status xizmati (2026-10-16)
+
+Foydalanuvchi hosting hozir yo‘qligini, kod Dockerda ham dockersiz ham ishlashi
+kerakligini bildirdi. OPS-02.06 uchun mavjud runtime Node24 bilan dependency-siz
+HTTP xizmati tanlandi; Next/POS/DB o‘zgarmaydi. Reviewed public JSON, strict
+schema, escaped HTML, no-store va muddati o‘tgan tasdiqda unknown ishlaydi.
+Public yozish API yoki raw ticket eksporti yo‘q; private postmortem imagega kirmaydi.
+Dockerfile alohida build context, Compose alohida project; non-root/read-only.
+Linux native Node24 va Podmanda Docker-format image tekshirildi. Windows/macOS
+va Docker Engine testdan o‘tgani da’vo qilinmaydi; Node standart APIlari ishlatiladi.
+Hosting mezonini olib tashlash aniq tasdiqlanmadi. Local process independence
+real boshqa host outage kafolati emas, original OPS-02.06 in_progress qoladi.

@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: stale and future snapshots never assert operational status
+ok 1 - stale and future snapshots never assert operational status
+  ---
+  duration_ms: 3.614964
+  type: 'test'
+  ...
+# Subtest: public schema rejects private fields, duplicate IDs and unknown states
+ok 2 - public schema rejects private fields, duplicate IDs and unknown states
+  ---
+  duration_ms: 0.942627
+  type: 'test'
+  ...
+# Subtest: incident ordering, component linkage and unresolved operational claims are enforced
+ok 3 - incident ordering, component linkage and unresolved operational claims are enforced
+  ---
+  duration_ms: 0.65855
+  type: 'test'
+  ...
+# Subtest: HTML escapes reviewed text instead of executing markup
+ok 4 - HTML escapes reviewed text instead of executing markup
+  ---
+  duration_ms: 0.465072
+  type: 'test'
+  ...
+# Subtest: HTTP publication: HEAD, no private paths, no writes, atomic updates and corrupt-data fail closed
+ok 5 - HTTP publication: HEAD, no private paths, no writes, atomic updates and corrupt-data fail closed
+  ---
+  duration_ms: 75.575706
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 226.718255

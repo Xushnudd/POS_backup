@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-16T08:42:29.678Z",
+  "validForMinutes": 60,
+  "components": [
+    {
+      "id": "pos",
+      "name": "Sintetik mashq xizmati",
+      "status": "operational"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "local-process-drill",
+      "title": "Mahalliy sintetik uzilish mashqi",
+      "components": [
+        "pos"
+      ],
+      "updates": [
+        {
+          "at": "2026-10-16T08:42:29.535Z",
+          "phase": "investigating",
+          "message": "Sintetik xizmat to‘xtatildi; holat sahifasi tekshirilmoqda."
+        },
+        {
+          "at": "2026-10-16T08:42:29.549Z",
+          "phase": "identified",
+          "message": "Sabab: mashq davomida alohida test jarayoniga SIGTERM yuborildi."
+        },
+        {
+          "at": "2026-10-16T08:42:29.672Z",
+          "phase": "monitoring",
+          "message": "Test jarayoni qayta ishga tushdi; HTTP javobi tekshirildi."
+        },
+        {
+          "at": "2026-10-16T08:42:29.678Z",
+          "phase": "resolved",
+          "message": "Sintetik xizmat qayta ochildi. Real POS yoki hosting sinovi emas."
+        }
+      ]
+    }
+  ]
+}

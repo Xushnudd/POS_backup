@@ -3799,6 +3799,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
 - [ ] **OPS-02.06** — Status sahifasi, hodisa jurnali va jiddiy hodisadan keyingi tahlil.
 
+  **Yangilanish (2026-10-16): in_progress.** Foydalanuvchi Docker va dockersiz ishlashni so‘radi, hosting yo‘qligini tasdiqladi. Mustaqil Node24/OCI xizmati, public hodisa jurnali va amaliy sintetik postmortem tayyor; 5 focused test hamda native/container outage mashqi o‘tdi. `docs/operations/status-page.md`, `tasks/evidence/status186/drill.json`. Boshqa fizik server talabi lokal container bilan isbotlanmaydi; original band hozircha done emas.
+
   **Texnologiya:** Mustaqil hostingda static status + Markdown incident docs T11.
 
   **Bajarish:** Status sahifa asosiy app bilan bir serverda qolmaydi; incident vaqt chizig‘i, sabab va prevention yoziladi. Ticket eksporti mijoz sirlarini yashiradi.
@@ -4148,6 +4150,8 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
   **Dalil:** `QA-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
 - [ ] **QA-01.08** — Paket xavfsizligi, secret scanning va stagingda xavfsizlik tekshiruvi.
+
+  **Yangilanish (2026-10-16): in_progress.** Lokal Git tarixidagi ma’lum secret formatlari uchun read-only scanner,4focused test va sanali dalil tayyor: `tasks/evidence/security-history-20261016.json`. Dependency/image/staging qabuli va tashqi audit ruxsati ochiq; original done emas.
 
   **Texnologiya:** npm audit, Git platform secret scanning yoki T14 scanner, staging security tests.
 

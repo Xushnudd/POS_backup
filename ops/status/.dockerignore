@@ -1,0 +1,6 @@
+*
+!Dockerfile
+!status.mjs
+!server.mjs
+!style.css
+!public-status.json

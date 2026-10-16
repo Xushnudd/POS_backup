@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-16T00:00:00.000Z",
+  "validForMinutes": 60,
+  "components": [
+    { "id": "pos", "name": "Savdo xizmati", "status": "unknown" },
+    { "id": "sync", "name": "Sinxronlash", "status": "unknown" }
+  ],
+  "incidents": []
+}
