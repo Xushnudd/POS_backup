@@ -45,10 +45,12 @@ export async function postDebtDocument(context:TokenPayload,customerId:string,in
  })
 }
 export async function customerStatement(context:TokenPayload,customerId:string,options:{page?:number;limit?:number;from?:string|null;to?:string|null;exportAll?:boolean}={}){
+ return prisma.$transaction(tx=>customerStatementTx(tx,context,customerId,options),{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead})
+}
+export async function customerStatementTx(tx:Prisma.TransactionClient,context:TokenPayload,customerId:string,options:{page?:number;limit?:number;from?:string|null;to?:string|null;exportAll?:boolean}={}){
  manager(context)
  const page=options.exportAll?1:(options.page??1),limit=options.exportAll?10000:(options.limit??50)
  if(!Number.isSafeInteger(page)||page<1||!Number.isSafeInteger(limit)||limit<1||limit>(options.exportAll?10000:200))throw new AccessError(400,'INVALID_PAGINATION')
- return prisma.$transaction(async tx=>{
   const customer=await tx.customer.findFirst({where:{id:customerId,organizationId:context.organizationId}})
   if(!customer)throw new AccessError(404,'CUSTOMER_NOT_FOUND')
   const organization=await tx.organization.findUniqueOrThrow({where:{id:context.organizationId}})
@@ -66,5 +68,4 @@ export async function customerStatement(context:TokenPayload,customerId:string,o
   const all=await tx.debtEntry.aggregate({where:{organizationId:context.organizationId,customerId},_sum:{amount:true}})
   const aging=await debtAging(tx,context.organizationId,customerId,new Date())
   return {advanceAvailable:await unusedAdvance(tx,context.organizationId,customerId),aging,timezone:organization.timezone,customer:{id:customer.id,fullName:customer.fullName},entries,summary:{openingBalance,increases:totals.increases,reductions:totals.reductions,closingBalance:debtClosingBalance(openingBalance,totals.increases,totals.reductions),currentBalance:decimal(all._sum.amount??0)},pagination:{page,limit,total:Number(totals.total),totalPages:Math.ceil(Number(totals.total)/limit)}}
- },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead})
 }

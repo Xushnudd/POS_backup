@@ -1,3 +1,4 @@
+import {internalProductImagePattern} from '@/lib/product-image'
 import {queryProducts} from '@/server/exports/queries/products'
 import {assertLiveContext} from '@/server/operations'
 
@@ -28,7 +29,7 @@ const createProductSchema = z.object({
   salePrice: amountSchema,
   costPrice: nonnegativeQuantitySchema,
   minStock: nonnegativeQuantitySchema.default(0),
-  imageUrl: z.union([z.string().url().refine(value=>/^https?:\/\//i.test(value)),z.string().regex(/^\/api\/files\/[0-9a-f-]{36}$/i)]).nullable().optional(),
+  imageUrl: z.string().regex(internalProductImagePattern).nullable().optional(),
 })
 
 async function handleGET(request:NextRequest) {

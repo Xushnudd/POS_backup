@@ -9,6 +9,7 @@ import { deploymentState } from '../deployment/state'
 import { IntegrationUnavailable } from './contracts'
 import { decimal } from '../sales/calculations'
 import { authenticationRestoreReady } from '../auth/restore-state'
+import { logEvent } from '../observability/context'
 
 export const providerRequestSchema = z.object({
   businessType: z.enum(['sale', 'sale_return', 'receipt']), businessId: z.string().uuid(),
@@ -232,6 +233,7 @@ export async function executeProviderClaim(claim: Claim, registry: ProviderRegis
   const identity: ProviderIdentity = { operationId: claim.intentId, organizationId: claim.intent.organizationId,
     provider: claim.intent.provider, capability: claim.intent.capability, ...(current.externalId ? { externalId: current.externalId } : {}) }
   let outcome: ProviderOutcome
+  const transportStarted = performance.now()
   try {
     if (claim.mode === 'lookup') outcome = await boundedCall(signal => binding.transport.lookup(identity, signal), timeoutMs)
     else {
@@ -243,6 +245,14 @@ export async function executeProviderClaim(claim: Claim, registry: ProviderRegis
       if (outcome.state === 'not_found') outcome = { state: 'unknown' }
     }
   } catch { outcome = { state: 'unknown' } }
+  // Worker-local duration goes to structured stdout, not an app-process counter.
+  // Transport payloads, external IDs/codes and exception messages never enter logs.
+  // A broken log sink must not change a payment/fiscal outcome or retry decision.
+  try {
+    logEvent('provider_transport', { organizationId: claim.intent.organizationId, operationId: claim.intentId,
+      kind: `${claim.intent.capability}.${claim.mode}`, code: `PROVIDER_${outcome.state.toUpperCase()}`,
+      durationMs: Math.max(0, Math.round(performance.now() - transportStarted)) })
+  } catch { /* Operational logging is not the financial commit boundary. */ }
   try { return await finishClaim(claim, binding, outcome) }
   catch {
     // A late domain/audit rollback cannot justify resubmitting a successful call.

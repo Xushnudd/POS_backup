@@ -4,7 +4,7 @@ Bu hujjat `RELEASE-01.08`ning texnik tayyorgarlik hisobotidir. Mahalliy sintetik
 
 ## Joriy qisqa yuklama profili
 
-2026-10-16 o‘lchovining xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016.json` orqali bog‘lanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
+2026-10-16 o‘lchovining xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016-core185.json` orqali bog‘lanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
 
 ```sh
 node scripts/release/check-service-targets.cjs
@@ -16,11 +16,15 @@ Profil faqat `127.0.0.1:55439/pos_test`dagi alohida sintetik tashkilotda ishlayd
 | Ko‘rsatkich | Qanday o‘lchanadi | Texnik mezon |
 | --- | --- | --- |
 | Qidiruv p95 | Haqiqiy products Route Handler chaqiruvi va javob body o‘qilishi; 100 namuna | ≤ 500 ms |
-| Savdoni yakunlash p95 | Normal `completeSale` xizmati; draft yaratish va tashqi tarmoq vaqti kirmaydi; 100 namuna | ≤ 2 000 ms |
-| Qisqa profil xatolari | 100 qidiruv + 100 completeSale chaqiruvining 200 ta urinishida muvaffaqiyatsiz natijalar | 0/200; barcha 100 draft ham yaratilgan bo‘lishi shart |
+| Savdoni yakunlash p95 | Normal `completeSale` xizmati, ichki retry va original-key qayta urinish kutishi bilan; draft yaratish va tashqi tarmoq vaqti kirmaydi; 100 tasdiqlangan namuna | ≤ 2 000 ms |
+| Qisqa profil xatolari | 100 qidiruv + 100 mantiqiy checkout yakuniy natijasi; jismoniy urinishlar alohida qayd etiladi | 0/200 yakuniy xato; barcha 100 draft ham yaratilgan bo‘lishi shart |
 | Iqtisodiy natija | Boshlang‘ich va oxirgi completed Sale/Payment soni farqi | Har biri aniq 100 |
 
 Bu p95 APIga brauzerdan HTTP orqali borib kelish, internet, TLS, printer, Click yoki fiskal provayder vaqti emas. Qidiruv Route Handler orqali, checkout biznes xizmati orqali chaqiriladi. Testning o‘zi tashqi HTTP so‘rov yubormaydi. Draft setup xatosi alohida qayd etiladi; u yashirincha 200 urinishga qo‘shib yuborilmaydi. Birorta xato, yetishmayotgan namuna yoki ortiqcha/yo‘qolgan iqtisodiy yozuv qabulni yiqitadi.
+
+Avvalgi v2 harnessda 20 lane to‘g‘ridan-to‘g‘ri xizmatni chaqirib, serverning `CONCURRENT_CONFLICT` javobida to‘xtagan. Muvaffaqiyatsiz natija `service-load-20261016-failed-v2.json` va mos execution faylida saqlangan: yetishmagan namunalar qabul hisoblanmadi. Bu versiya yoki p95 yaxshilandi degan da’vo emas. V3 harness server ko‘rsatgan original-key tiklanish protokolini bajaradi: faqat aniq `409 CONCURRENT_CONFLICT` uchun bir xil body/key, ko‘pi bilan 8 chaqiruv va 10 soniya budget. Boshqa409,403 yoki noma’lum tarmoq natijasi avtomatik takrorlanmaydi. PostgreSQL SERIALIZABLE va serverning uch ichki urinish siyosati o‘zgartirilmagan. Uchta unit holati protokol va chegaralarni tekshiradi.
+
+`errorRate` — yakuniy qidiruv/checkout natijalari, `rawErrorRate` — barcha jismoniy qidiruv, draft va checkout xizmat chaqiruvlari, shu jumladan nazoratli konfliktlar. `physicalAttempts` har bosqichdagi calls/failed/conflicts/retriesni saqlaydi; konfliktlar hisobotdan olib tashlanmaydi. Bular SQL statement error rate yoki haqiqiy tashqi HTTP error rate emas. Qayta urinishlar bo‘lsa checkout p95 kutishni ham qamraydi. Budget tugashi, noma’lum natija yoki yo‘qolgan iqtisodiy yozuv qabulni yiqitadi. 180 bosqichidagi tarixiy v3 o‘lchovda p95 qidiruv291.255ms, checkout264.996ms, yakuniy xato0/200 va jismoniy xato0/300 edi. 185 bosqichining joriy188-migration o‘lchovida qidiruv336.103ms, checkout213.273ms, yakuniy xato0/200; jismoniy checkoutda bitta nazoratli409original-key bilan qayta bajarildi: raw1/301≈0.332%. Checkout p95shu kutishni ham qamraydi. Aniq100 ta savdo va100 ta payment yozildi. Bu qisqa lokal namuna boshqa yuklamada konflikt bo‘lmasligini kafolatlamaydi.
 
 Haqiqiy qiymatlar takroriy Markdown sonlari o‘rniga xom JSONda saqlanadi; gate p95, denominator, statuslar, apparat tavsifi, iqtisodiy invariantlar va manba mosligini tekshiradi. Tegishli server/API/Prisma/manba yoki dependency o‘zgarsa gate avvalgi dalilni eskirgan deb rad etadi. Joriy o‘lchov 14 kundan eski bo‘lsa ham qayta o‘lchash talab etiladi. Bu 14 kunlik ichki hujjat yangiligi qoidasi; production SLO kafolati emas.
 

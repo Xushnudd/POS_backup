@@ -1,0 +1,1 @@
+PASS: rendered configuration and 3 isolated databases; 6 foreign-credential and 6 cross-network writes rejected. Evidence: /home/fedora/Developments/POS_backup/tasks/evidence/environment-isolation-20261016.json

@@ -34,10 +34,14 @@ jobs:
       - run: npm run lint
       - run: npm run i18n:check
       - run: npm run release:claims:check
+      - run: node scripts/release/check-data-flows.cjs
       - run: npm run typecheck
       - run: npm run worker:build
       - run: npm test
       - run: npm run test:ops
+      - run: node scripts/ops/test-environment-isolation.mjs
+        env:
+          POS_ISOLATION_EVIDENCE: /tmp/pos-environment-isolation-ci.json
       - run: docker pull node:24-alpine
       - run: npm run test:pitr
         env:

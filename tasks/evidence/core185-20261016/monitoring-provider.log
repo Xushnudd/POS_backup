@@ -1,0 +1,63 @@
+{"requestId":"e88dff36-3202-4c0b-8e8c-05e936b47838","organizationId":"7e521c4c-3f82-4d51-98ce-6a788a40b3a4","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"421a0122-9648-42c8-baae-1de9ed328392","organizationId":"7e521c4c-3f82-4d51-98ce-6a788a40b3a4","status":403,"code":"TENANT_MISMATCH","durationMs":3,"event":"api_error"}
+{"requestId":"3db87ada-c345-40ff-90ad-aec27e2492f3","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+✔ Owner monitoring exposes only own counters/queues and overdue alert, without payloads or revoked/manager access (158.664066ms)
+✔ Real blocked DB query and expired provider lease generate scoped alerts without financial writes (753.464485ms)
+✔ Test-only rejected transport and dead job alert without leaking payloads; broken telemetry cannot alter settlement (195.800094ms)
+{"requestId":"59f48081-7073-4154-893d-59dcc63fd3bd","status":200,"durationMs":257,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"5ab1861a-f176-475b-8552-e55b68df637c","organizationId":"af5f5f15-51a6-41fb-807f-b28142db22fc","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"06c42c64-84aa-41af-aad8-3ca766fbeeec","status":200,"durationMs":243,"event":"api_response"}
+✔ Business/source/outbox commit together; rollback leaves none and unconfigured adapters stay fail-closed (669.282508ms)
+{"requestId":"d2cf45f3-bcd7-45a7-8054-b1d7937dbf7f","status":200,"durationMs":240,"event":"api_response"}
+{"organizationId":"b7b9f8fa-8e26-41bb-92f0-4c9ee635cd63","operationId":"b5951702-9386-460d-8e02-fbb4fce9a5ae","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":3,"event":"provider_transport"}
+✔ Transport waits outside real DB locks; settlement/domain acknowledgement commits once (297.456769ms)
+{"requestId":"bb8d9fb0-4ae0-4bbe-bb00-e1e8329f13c2","status":200,"durationMs":241,"event":"api_response"}
+{"organizationId":"fb63389f-462a-466f-ab89-1f8694d9b03f","operationId":"2ccb2e24-eb16-4607-9dd6-e9892b361acc","kind":"payment.submit","code":"PROVIDER_UNKNOWN","durationMs":0,"event":"provider_transport"}
+{"organizationId":"fb63389f-462a-466f-ab89-1f8694d9b03f","operationId":"2ccb2e24-eb16-4607-9dd6-e9892b361acc","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Lost acknowledgement without external ID reconciles by original key, never another execute (328.696877ms)
+{"requestId":"72136f4f-c49e-406a-946a-1ecfcf5c2c28","status":200,"durationMs":239,"event":"api_response"}
+{"organizationId":"901cd8a7-9f70-46dc-b7a1-924cf0e648c9","operationId":"ac02be56-b019-4edd-baa9-f73430d54d1c","kind":"payment.submit","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"901cd8a7-9f70-46dc-b7a1-924cf0e648c9","operationId":"ac02be56-b019-4edd-baa9-f73430d54d1c","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"901cd8a7-9f70-46dc-b7a1-924cf0e648c9","operationId":"ac02be56-b019-4edd-baa9-f73430d54d1c","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Changed external identity stays unknown and never posts the wrong proof (328.624238ms)
+{"requestId":"ffcd3ac4-991c-4b03-b011-f17289fbb03d","status":200,"durationMs":242,"event":"api_response"}
+{"organizationId":"aa610417-57cf-431a-bb9e-5bccf2153336","operationId":"5880b403-0858-4933-b038-fc74d15e9f91","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"aa610417-57cf-431a-bb9e-5bccf2153336","operationId":"5880b403-0858-4933-b038-fc74d15e9f91","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":26,"event":"provider_transport"}
+✔ Expired lease recovers only lookup; stale worker result cannot finalize or submit again (309.476595ms)
+{"requestId":"77701635-0928-4706-a3ae-a9973034cb36","status":200,"durationMs":242,"event":"api_response"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.submit","code":"PROVIDER_UNKNOWN","durationMs":10,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_UNKNOWN","durationMs":1,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_NOT_FOUND","durationMs":0,"event":"provider_transport"}
+{"organizationId":"7fad409a-546d-482d-8d63-e8dc47cff1db","operationId":"8e14ae2c-aca1-420f-9878-726e1924aa56","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Timeout, malformed status, not-found and bounded lookup require review; owner resumes lookup only (460.474001ms)
+{"requestId":"a07c94fc-d21c-496d-a2c4-4a30a184dbbf","status":200,"durationMs":235,"event":"api_response"}
+{"organizationId":"3215a4ee-dfe9-4256-9277-0eef33f62876","operationId":"43b9db72-34a3-467c-8fc8-e6a6b1615923","kind":"payment.submit","code":"PROVIDER_FAILED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"3215a4ee-dfe9-4256-9277-0eef33f62876","operationId":"736c9ff6-3137-423b-908a-9489d70ef787","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"organizationId":"3215a4ee-dfe9-4256-9277-0eef33f62876","operationId":"a28e9503-f8c0-4497-9b5e-8a8b491f0341","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":1,"event":"provider_transport"}
+✔ Definitive failure is terminal; approved compensation is separately idempotent and linked to original proof (403.679363ms)
+{"requestId":"808d2d8f-ab47-4aaa-91d9-8de3a2a81494","status":200,"durationMs":238,"event":"api_response"}
+{"organizationId":"577947bc-ae08-4f68-a683-e34ed53ac75f","operationId":"b0d9184e-373e-4648-a780-520c1428e2b2","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"577947bc-ae08-4f68-a683-e34ed53ac75f","operationId":"b0d9184e-373e-4648-a780-520c1428e2b2","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Remote confirmation plus late domain/audit failure recovers through lookup, never another charge (307.302498ms)
+{"requestId":"75405bb7-283b-478a-9794-d25978136dad","status":200,"durationMs":253,"event":"api_response"}
+✔ Actual worker process crash after remote commit restarts with lookup and one domain finalization (714.10223ms)
+{"requestId":"db7ea087-bec9-4a4b-a75c-bae5f82f0a8c","status":200,"durationMs":253,"event":"api_response"}
+{"requestId":"a07e5e3f-9d5f-4c62-bcf0-7ba37f46b1bc","status":200,"durationMs":250,"event":"api_response"}
+✔ Actual backup restore fences queued and old running provider submissions; only original-ID lookup can settle once (14103.822515ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19544.176558

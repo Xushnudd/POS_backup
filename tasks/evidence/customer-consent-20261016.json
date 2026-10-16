@@ -6,33 +6,35 @@
   "acceptance": "Separate electronic-receipt/service-reminder/marketing consent by channel with server timestamp, source, evidence reference, text version and immutable withdrawal history",
   "sourceBase": "0047e96d122d0360e35c6f5c57bb22af93c55507",
   "sourceFiles": {
-    "prisma/schema.prisma": "79c8b49459703ecaea4074fdb9cac3136a71232c1739b02ac985d57af7a4ecd6",
+    "prisma/schema.prisma": "b8d87867ae2d9cf49754a6ab9286bd732a3a95f9540bc25ddad82d7dc9e3dfd5",
     "prisma/migrations/202610150180_customer_consent_events/migration.sql": "fb8d15587a1b4f5e7a0ee56c378fffb57b33d4c9a7420f47fc675dbb463b5581",
     "prisma/migrations/202610150181_consent_withdraw_readonly/migration.sql": "8ae68711888a184ae215c5ca5b2cef945a233273c3f4151b7b7a8f9ddc61bb12",
     "prisma/migrations/202610160182_consent_tenant_proof/migration.sql": "079bb0949c8661b40251a40aac5247d68588934ae91b613df29f36519d761744",
     "prisma/migrations/202610160183_extension_tenant_guards/migration.sql": "32748338d44bbaae6214a405365132834d2386fdd9bcb957ef799fff01658c02",
-    "src/server/customers/consent.ts": "a077a30bee98c610aa4bed8b4cc6df06f435a5756afe3f1ffc4e2949e1cbff70",
+    "src/server/customers/consent.ts": "5bc68745f962b73bd01c9ed68ed8f4c8b67a41415423f755cbbe02def9ad6186",
     "src/app/api/customers/[id]/consents/route.ts": "013cb27a33d942ea30f1e40d3948df97547c8787120a926f0c6c91e92864f1e1",
     "src/components/customers/CustomerConsent.tsx": "1b7d937113e95ba753956be57db30d4e03287db436f255194e3c6c0d56d35b3b",
     "src/components/forms/DurableMutation.tsx": "79bb84b59c23687f3ed7fbe15bce7693027c4a33c5236a5089c4b26f942a021d",
-    "tests/customer-consent.integration.test.ts": "17f4557e86b3e15a6e2c6e775192cca5d54f2c672e7a52c1ea2ed9c0ce5b9d8d",
+    "tests/customer-consent.integration.test.ts": "0fca78ddcf00c723c0266b0e1e2378014fe7f39a256285397c4648084f2ccf7a",
     "tests/e2e/customer-consent.spec.ts": "066cee7217f28f1d2b28bd9bf8fd4724e62d9aa9d07087e8ab3aa38cdde9e94b",
-    "src/server/deployment/required-migrations.ts": "0efa4e09c0face0bb4847660e78ecc92f634bd62f4edcfa5ab09f65747caad1b",
-    "src/server/jobs/tenant-export-contract.ts": "d06f906754497ccb92f06e908ddedde801916a87638dcf653d1456f6db45244e"
+    "src/server/deployment/required-migrations.ts": "af8c16ab7ca90b9f981c5e73585dc4e8e69fbe663cf47f946e445c7cf49f5cd1",
+    "src/server/jobs/tenant-export-contract.ts": "b7331a45285391f6a4b3be59a99a26caaa90ec734ab76ab3ea859fd735329798",
+    "prisma/migrations/202610160184_consent_native_revision/migration.sql": "8592f95b9848045311aa891171ee6304a084fa67bb99933c1ee4b076e09c108e"
   },
   "environment": {
     "database": "isolated PostgreSQL on 127.0.0.1:55439/pos_test",
-    "migrations": 183,
+    "migrations": 184,
     "browser": "Playwright Chromium, locally built production-mode server, synthetic fixtures only"
   },
   "results": {
     "newConsentIntegrationCases": 6,
     "integrationIncludingTenantAndReadonly": {
-      "passed": 16,
-      "failed": 0
+      "passed": 138,
+      "failed": 0,
+      "scope": "Final financial/loyalty/report/export/tenant/consent regression selection; includes six consent cases"
     },
     "unit": {
-      "passed": 163,
+      "passed": 166,
       "failed": 0
     },
     "browser": {
@@ -48,7 +50,11 @@
     "changedFileLint": "pass",
     "i18nCheck": "pass",
     "workerBuild": "pass",
-    "publicClaimsGate": "pass"
+    "publicClaimsGate": "pass",
+    "nativeRevisionSameTimestampEdit": "pass",
+    "nativeUnauditedOwnerWriteRejected": "pass",
+    "cursorAboveDatabaseIntRejected": "pass",
+    "productionImage": "pos-core-180@sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee"
   },
   "covered": [
     "default denial",
@@ -64,7 +70,10 @@
     "50-row exclusive cursor pagination",
     "editable empty form and validation",
     "lost success acknowledgement and lost definitive conflict recovery",
-    "unknown conflict preserves original queued operation"
+    "unknown conflict preserves original queued operation",
+    "native monotonic card revision invalidates grant even with preserved updatedAt and attempted counter reset",
+    "same-tenant direct write without same-transaction owner/session audit rejected",
+    "cursor above PostgreSQL Int maximum rejected as400"
   ],
   "limits": [
     "No real SMS/e-mail/Telegram delivery configured or claimed",
@@ -73,11 +82,13 @@
     "Dispatch helper is mandatory contract for future customer notification adapters; no existing customer sender exists"
   ],
   "logs": {
-    "integration": "tasks/evidence/consent-20261016/integration.log",
-    "unit": "tasks/evidence/consent-20261016/unit.log",
-    "browser": "tasks/evidence/consent-20261016/browser.log",
-    "build": "tasks/evidence/consent-20261016/build.log",
+    "integration": "tasks/evidence/core180-20261016/integration.log",
+    "unit": "tasks/evidence/core180-20261016/unit.log",
+    "browser": "tasks/evidence/core180-20261016/browser.log",
+    "build": "tasks/evidence/release-image-security-20261016/image-build.log",
     "localTransport": "tasks/evidence/consent-20261016/localTransport.log",
     "migrations": "tasks/evidence/consent-20261016/migrations.log"
-  }
+  },
+  "reviewSourceRevision": "15bd1cf4dc5e281590f940661cddea7683758100",
+  "nativeRevisionNote": "184 replaces timestamp-only dispatch validity; pre-184 grants remain historical and require re-consent"
 }

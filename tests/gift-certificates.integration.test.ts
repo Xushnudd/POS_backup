@@ -15,7 +15,22 @@ import {sessionHash,verifySession} from '@/server/auth/session';
 const url=new URL(process.env.DATABASE_URL??'');
 if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.pathname!=='/pos_test'||url.username!=='pos_test')throw Error('Isolated pos_test only');
 const organizations:string[]=[],users:string[]=[];
-after(async()=>{await prisma.organization.deleteMany({where:{id:{in:organizations}}});await prisma.user.deleteMany({where:{id:{in:users}}});await prisma.$disconnect();});
+after(async()=>{
+ try{
+  // Disposable fixture removal spans both financial-document and advance
+  // cascades. Check this NO ACTION edge after both branches have finished;
+  // restore its exact production admission policy in the same transaction.
+  // The isolated-DB guard above runs before any test or cleanup is registered.
+  await prisma.$transaction(async tx=>{
+   await tx.$executeRawUnsafe('ALTER TABLE "CustomerAdvanceRefund" ALTER CONSTRAINT "CustomerAdvanceRefund_documentId_fkey" DEFERRABLE INITIALLY IMMEDIATE');
+   await tx.$executeRawUnsafe('SET CONSTRAINTS "CustomerAdvanceRefund_documentId_fkey" DEFERRED');
+   await tx.organization.deleteMany({where:{id:{in:organizations}}});
+   await tx.$executeRawUnsafe('SET CONSTRAINTS "CustomerAdvanceRefund_documentId_fkey" IMMEDIATE');
+   await tx.$executeRawUnsafe('ALTER TABLE "CustomerAdvanceRefund" ALTER CONSTRAINT "CustomerAdvanceRefund_documentId_fkey" NOT DEFERRABLE');
+  },{timeout:30000});
+  await prisma.user.deleteMany({where:{id:{in:users}}});
+ }finally{await prisma.$disconnect();}
+});
 const configuration:LoyaltyPolicy={points:{enabled:false,earnMoneyPerPoint:'1',redeemMoneyPerPoint:'1',maxRedeemPercent:'0',minEligibleNet:'0',expiryDays:null,earnOnDiscountedSales:false,earnOnCreditSales:false},cards:{enabled:false,discountPercent:'0',validityDays:null},promos:{enabled:false,allowStackingWithCard:false,allowStackingWithPoints:false},gifts:{enabled:true,minIssueAmount:'1',maxIssueAmount:'1000',validityDays:30,allowUnusedCashRefund:false}};
 async function fixture(allowUnusedCashRefund=false){
  const org=await prisma.organization.create({data:{name:'Gift source fixture',phone:randomUUID()}});organizations.push(org.id);

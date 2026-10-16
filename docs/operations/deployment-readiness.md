@@ -16,6 +16,8 @@ node scripts/ops/check-environment-isolation.mjs "$dev_env" "$staging_env" "$pro
 
 Checker own0600/no-symlink fayllar, baza targeti/parol/active+old key reuse, release MFA/loopback/image IDni rad etadi. Secret/path/URL chop etilmaydi. DNS alias, haqiqiy host izolatsiyasi va secret-store ACL operator qabulini talab qiladi; `ready_for_operator_review` real deploy readiness emas.
 
+Rendered network/volume/bind tekshiruvi va uchta haqiqiy sintetik bazada cross-environment write sinovi [muhit izolatsiyasi protokoli](environment-isolation.md)da. Bu lokal dalil haqiqiy staging/production muhitlari tasdiqlanmaganini o‘zgartirmaydi.
+
 Bir immutable image digestni stagingdan productionga ko‘tarish mumkin: runtime secrets buildga berilmaydi. POS_RELEASE build/runtime deployment ID bilan bir xil bo‘lsin. POS_IMAGEga approved `registry/image@sha256:...`ning haqiqiy qiymatini kiriting; namuna uydirma digest bermaydi. Base Compose legacy defaultlarini saqlaydi, release overlay MFAni majburiy yoqadi va bo‘sh asosiy kalitni rad etadi. Startup enabled MFA uchun key va ikkala flag mosligini, overlap ≤2 valid distinct keyligini tekshiradi; noto‘g‘ri konfiguratsiya ishga tushmaydi. `npm run test:ops` private-env va uptime/disk core sinovlarini bajaradi va CIga ulangan; CI real deploy/pilot emas.
 
 App/jobs/reconciliation bir xil runtime auth va API budget sozlamalarini oladi. Migration alohida process, avtomatik app startupga qo‘shilmagan.

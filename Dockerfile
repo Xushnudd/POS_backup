@@ -42,6 +42,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run worker:build
 RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
 
+# Standalone tracing covers Next routes, but raw compiled worker modules also
+# require packages bundled away by webpack. Keep their production dependency
+# closure, with the same lockfile, rather than copying individual missing files.
+FROM deps AS runtime-deps
+RUN npm prune --omit=dev --ignore-scripts --no-audit --no-fund
+
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
 FROM node:24-slim AS runner
 ARG NEXT_DEPLOYMENT_ID
@@ -58,6 +64,7 @@ ENV PORT=3000
 
 # Copy standalone output
 COPY --from=builder /app/.next/standalone ./
+COPY --from=runtime-deps /app/node_modules ./node_modules
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.worker-build ./.worker-build

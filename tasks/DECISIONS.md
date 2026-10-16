@@ -677,3 +677,15 @@ Tarif qiymatlari real DB versiyasidan;60s cache va fresh invoice contracti saqla
 Native Chromium sinovi Node/ICU va browser Uzbek grouping farqini ko‘rsatdi. Intl.formatToPartsdagi faqat group qismlari oddiy bo‘shliqqa almashtirildi; BigInt minor-unit, exact hisob, request Decimal va original hujjat o‘zgarmaydi. Public offline asset qayta build qilinadi, cache v4 yangi baytlarni oladi; faol kassaga majburiy takeover va private cache yo‘q.
 
 Visible Click/fiscal/E-POS/hardware va cheklangan offline chegaralari qoladi. Local candidate release qabulini real server, pilot, vendor yoki fizik qurilma tasdig‘i deb talqin qilish mumkin emas; ular foydalanuvchi belgilagan tashqi gate’larda qoladi. Asl PLAN1 hisobini faqat shu bandning yakuniy acceptance dalili oshiradi.
+
+## ADR-096 — Shaxsan elektron chek havolasi (2026-10-16)
+
+Mahsulot egasi mijozning roziligi bilan kassir QR yoki muddatli havolani shaxsan taqdim etishini tasdiqladi. SMS/e-mail va vendor hardware ulanmaydi. Sale-scoped aniq rozilik, server original snapshot, bir soatlik hash-only capability, revoke/audit va restore fence ishlatiladi. Bu marketing roziligi emas.
+
+## ADR-097 — Ichki mahsulot rasmlari (2026-10-16)
+
+Mahsulot egasi faqat mavjud ichki `/api/files` uploadlarini ishlatishni tasdiqladi. Tarixiy tashqi URLlar o‘chirilmaydi; avtomatik yuklanmaydi. Yangi tashqi URL assignment API/native DBda rad, UI exact internal pathni render qiladi, CSP remote image originni qabul qilmaydi. Mavjud ichki upload va protected file authorization saqlanadi.
+
+## ADR-098 — Shaxsan xizmat eslatmasi (2026-10-16)
+
+Mahsulot egasi CRM-02.02 uchun alohida service consent bilan shaxsan muddatli ko‘chirma/QR taqdim etishni tasdiqladi. Mavjud durable job queue snapshot tayyorlaydi; tayyorlash yetkazish sifatida ko‘rsatilmaydi. SMS/e-mail o‘chiq. Consent purpose/channel va native customer revision queue/prepare/read vaqtida tekshiriladi; withdrawal, contact edit, expiry, rotation va restore eski accessni to‘xtatadi. Bir customer/consent/local day uchun takror queue yo‘q.

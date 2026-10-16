@@ -13,6 +13,7 @@ import Select from '@/components/ui/Select';
 import { Sale } from '@/types';
 import { api } from '@/lib/api';
 import { posFailure } from '@/lib/pos-failure';
+import ReceiptLinks from './ReceiptLinks';
 
 import { useAuth } from '@/context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -103,6 +104,7 @@ export default function ReceiptPreview({
       <p className="text-xs text-slate-500 mb-3">{tr("Brauzer orqali chop etish/PDF. Printer sozlamasida mos qog‘ozni tanlang. Bu fiskal chek emas.")}</p>
       {printError&&<div role="alert" data-stage="print" className="text-red-600 text-xs"><p>{uiMessage(printError)}</p><p>{uiMessage(posFailure(null,'print').nextAction)}</p></div>}
       {printRequested&&<p role="status" className="text-xs">{tr("Chop etish oynasi so‘raldi; fizik chop etilganligi tasdiqlanmaydi.")}</p>}
+      {isOpen&&!draft&&<ReceiptLinks key={sale.id} saleId={sale.id}/>}
       {/* Printable Receipt Paper */}
       <div
         ref={printRef}

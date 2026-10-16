@@ -6,14 +6,14 @@ import {AccessError} from '../auth/policy'
 import {assertLiveContext,audit,runOperation} from '../operations'
 
 export const consentPurpose=z.enum(['electronic_receipt','service_reminder','marketing'])
-export const consentChannel=z.enum(['sms','email','telegram'])
+export const consentChannel=z.enum(['sms','email','telegram','in_person'])
 export const consentSchema=z.object({
  operationId:z.string().uuid(),expectedRevision:z.number().int().min(0).max(2147483646),
  purpose:consentPurpose,channel:consentChannel,granted:z.boolean(),
  source:z.enum(['in_person','written','customer_request']),
  evidenceRef:z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/-]{2,159}$/),
  policyVersion:z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/),
-}).strict()
+}).strict().refine(value=>value.channel!=='in_person'||value.purpose==='service_reminder','Shaxsan kanal faqat xizmat eslatmasiga tegishli')
 function owner(ctx:TokenPayload){if(ctx.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED')}
 async function customer(tx:Prisma.TransactionClient,ctx:TokenPayload,id:string){
  const row=await tx.customer.findFirst({where:{id,organizationId:ctx.organizationId}})

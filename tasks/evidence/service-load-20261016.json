@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "at": "2026-10-15T19:33:06.214Z",
+  "version": 3,
+  "at": "2026-10-16T03:10:21.566Z",
   "node": "v24.18.0",
   "fixtureOrganizationId": "c13f47e9-3bb4-467f-ad30-a71c1e3a685c",
   "environment": {
@@ -758,52 +758,65 @@
   "actorRole": "owner",
   "checkoutItemsPerSale": 1,
   "search": {
-    "samples": 48,
-    "attempted": 48,
+    "samples": 100,
+    "attempted": 100,
     "failed": 0,
     "byStatus": {
-      "200": 48
+      "200": 100
     },
-    "p95Ms": 345.66312700000003,
+    "p95Ms": 291.2545970000001,
     "targetMs": 500
   },
   "checkout": {
-    "samples": 35,
-    "attempted": 40,
-    "failed": 5,
-    "p95Ms": 314.6439519999999,
+    "samples": 100,
+    "attempted": 100,
+    "failed": 0,
+    "p95Ms": 264.99611300000015,
     "targetMs": 2000
   },
   "draft": {
-    "attempted": 48,
-    "succeeded": 40,
+    "attempted": 100,
+    "succeeded": 100,
     "excludedFromCheckoutLatency": true
   },
+  "physicalAttempts": {
+    "draft": {
+      "calls": 100,
+      "conflicts": 0,
+      "retries": 0,
+      "failed": 0
+    },
+    "checkout": {
+      "calls": 100,
+      "conflicts": 0,
+      "retries": 0,
+      "failed": 0
+    }
+  },
+  "retryPolicy": {
+    "maxAttempts": 8,
+    "deadlineMs": 10000,
+    "code": "CONCURRENT_CONFLICT",
+    "originalKey": true,
+    "checkoutLatencyIncludesBackoff": true
+  },
+  "rawErrorRate": {
+    "failed": 0,
+    "denominator": 300,
+    "rate": 0,
+    "scope": "Every search and physical draft/checkout service invocation; controlled conflicts included"
+  },
   "errorRate": {
-    "failed": 5,
-    "denominator": 88,
-    "rate": 0.056818181818181816,
+    "failed": 0,
+    "denominator": 200,
+    "rate": 0,
     "scope": "Product route-handler response plus completeSale invocation; draft setup failures reported separately; not HTTP end-to-end"
   },
   "economicInvariants": {
-    "newCompletedSales": 35,
-    "newPayments": 35
+    "newCompletedSales": 100,
+    "newPayments": 100
   },
-  "errors": [
-    "checkout: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "checkout: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "checkout: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "checkout: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "draft: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring",
-    "checkout: Parallel amal konflikti; aynan shu amal kaliti bilan qayta tekshiring"
-  ],
+  "errors": [],
   "providerTime": "No vendor calls; internal cash only",
   "limits": "Synthetic draft volume; service-level API harness, no public network latency; not real pilot or production SLA"
 }

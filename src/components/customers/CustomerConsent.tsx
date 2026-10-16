@@ -40,8 +40,8 @@ export default function CustomerConsent({customerId}:{customerId:string}){
    canReview={!busy&&!error&&!!history} canEdit={!busy&&!error&&!!history} canSubmit={!busy&&!error&&!!history&&/^[A-Za-z0-9][A-Za-z0-9._:/-]{2,159}$/.test(evidenceRef)&&/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(policyVersion)}
    onRejected={()=>{setBefore(undefined);refresh()}}
    onDone={()=>{setEvidenceRef('');setPolicyVersion('');setBefore(undefined);refresh()}}>
-   <Select label={tr('Rozilik maqsadi')} value={purpose} onChange={e=>setPurpose(e.target.value)} options={purposes}/>
-   <Select label={tr('Aloqa kanali')} value={channel} onChange={e=>setChannel(e.target.value)} options={[{value:'sms',label:'SMS'},{value:'email',label:'E-mail'},{value:'telegram',label:'Telegram'}]}/>
+   <Select label={tr('Rozilik maqsadi')} value={purpose} onChange={e=>{setPurpose(e.target.value);if(channel==='in_person'&&e.target.value!=='service_reminder')setChannel('sms');}} options={purposes}/>
+   <Select label={tr('Aloqa kanali')} value={channel} onChange={e=>setChannel(e.target.value)} options={[{value:'sms',label:'SMS'},{value:'email',label:'E-mail'},{value:'telegram',label:'Telegram'},...(purpose==='service_reminder'?[{value:'in_person',label:tr('Shaxsan taqdim etish')}]:[])]}/>
    <Select label={tr('Rozilik manbasi')} value={source} onChange={e=>setSource(e.target.value)} options={sources}/>
    <Select label={tr('Rozilik qarori')} value={granted?'grant':'withdraw'} onChange={e=>setGranted(e.target.value==='grant')} options={[{value:'withdraw',label:tr('Rozilik bekor qilindi')},{value:'grant',label:tr('Rozilik berildi')}]}/>
    <Input label={tr('Rozilik dalilining identifikatori')} value={evidenceRef} onChange={e=>setEvidenceRef(e.target.value)} maxLength={160}/>

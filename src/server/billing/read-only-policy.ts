@@ -142,6 +142,7 @@ export const READ_ONLY_EXEMPT_MODELS = [
   "IntegrationCost"
 ] as const
 export const READ_ONLY_OPERATION_EXCEPTIONS = [
+  "receipt.share.revoke",
   "customer.consent.withdraw",
   "report.schedule.stop",
   "retention.closure.request",

@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "date": "2026-10-16",
+  "task": "OPS-01.05",
+  "status": "passed",
+  "scope": "local_technical_readiness",
+  "sourceBaseAtBuild": "0047e96d122d0360e35c6f5c57bb22af93c55507 plus then-working-tree changes",
+  "reviewSourceRevision": "15bd1cf4dc5e281590f940661cddea7683758100",
+  "imageId": "sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee",
+  "localRepoDigests": [
+    "pos-core-180@sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee"
+  ],
+  "sourceReviewHashes": {
+    "Dockerfile": "52ea376d50c006048927e1c3b76685e9b2e14a5ef18dc8844db7d0767aabf7a3",
+    "docker-compose.release.yml": "7d92d61f383f9769e9da97aa41db318213528ba9af068752193403f4eda276f0",
+    "scripts/ops/release-entrypoint.mjs": "c96c24fe9f4beafcdd79d8391ba98ce1527caa5bf019b49bf0ef122b89616389",
+    "scripts/ops/release-entrypoint.test.mjs": "796a8b374ea67e72c8669d0905389c54bad6203ddabd7bfc66b8a4b2afc59aa8",
+    "scripts/ops/release-compose.integration.mjs": "210f33b9a92725728a0875cc373bb074454a3109c3899a4397e5881c0ad2fa77",
+    "scripts/ops/check-release-image.mjs": "48e076e653cc6adc7db777abf013db440b375048c245f7955b452fff5cb371bb",
+    "scripts/ops/check-release-image.test.mjs": "856d0bb12e7305810c4aa5916346a4efb9cb50ef137e60782ef43b1178de1a5b",
+    "scripts/ops/test-release-image-negative.mjs": "a253853024b2746a3e0ff5b2fb89d88cee7446949e264f76f6cec226d976fb05",
+    "scripts/ops/public-crypto-test-vectors.json": "1ce936c1cdcaf012d5c1406d52ed7da100aa82257b89b76112eb130ebb792340",
+    "tests/totp-key-rotation.integration.test.ts": "ece668cd108570e9c4caf1dbb9dbcaa54b91c9dcb6a14d488363d904afbb85fc",
+    "docs/operations/release-image-security.md": "1e777070b8295feb6a5d22b82c42c113fa50a371e55d1a4818d95a6d859695ff"
+  },
+  "artifacts": {
+    "tasks/evidence/release-image-security-20261016/compose-tests.log": "926905e54d749c9d76a333f68b5cdf349ecea9500ec2a62b9924bb8d0556c240",
+    "tasks/evidence/release-image-security-20261016/eslint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/release-image-security-20261016/image-audit.json": "83b74728cb722927d2c9960445a4e429205eda77c6b37c87f39e64cae60031b4",
+    "tasks/evidence/release-image-security-20261016/image-build.log": "d677ffbcf10fd52602cc2228dac003e75af77e124dc872c7c597bd59fe3fa235",
+    "tasks/evidence/release-image-security-20261016/key-rotation-tests.log": "94f1d74451cd49b3b4b0655b17bf3006c8b684b851cbe0e190485348ae111af4",
+    "tasks/evidence/release-image-security-20261016/migration-status.log": "127dfc671bedbecaa59e63fc4f6703e3b7f8183e41ffd7c735f35b31b205c035",
+    "tasks/evidence/release-image-security-20261016/mutable-reference-rejection.log": "4543fd3520019b3843d8e80647e8b4540686a5554661e54aa53faf2afc4adb99",
+    "tasks/evidence/release-image-security-20261016/negative-layer-audit.json": "b1f8cd94ce73715f1206fc39c7bdb746907970a463afa207911ddc2da98fefd8",
+    "tasks/evidence/release-image-security-20261016/ops-tests.log": "8bc662dc891387e881ad62c3ffe3821c059cbd1e4570b1b03ce13285b55df639",
+    "tasks/evidence/release-image-security-20261016/public-vector-review.json": "6c29964c63e9aba628d1d60a9f6d29644aebf3efb4844aa706615f2a87c1c6e4",
+    "tasks/evidence/release-image-security-20261016/runtime.json": "fc53e386e0e8e6fe79c4c9502edd75bd4c43500594065e5e600044616a36611f",
+    "tasks/evidence/release-image-security-20261016/runtime.log": "e91a3f9cafcd3fc3c4d9d2941e9b725102e92850d63e25644f265f0b27746c76",
+    "tasks/evidence/release-image-security-20261016/source-scan.json": "88c319a309aa21dd2d5852c267f4f3978c5b5c9eba7afcf920fd22ae6cfb2d5d",
+    "tasks/evidence/release-image-security-20261016/test-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "results": {
+    "opsFocused": 14,
+    "composeCommandMatrix": 1,
+    "keyRotation": 4,
+    "layersAudited": 18,
+    "deletedCredentialCanaryRejected": true,
+    "nativeMigrationCount": 184,
+    "readinessStatus": 200,
+    "retiredEnvelopeRejected": true,
+    "runtime": {
+      "status": "passed",
+      "imageId": "sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee",
+      "localRepoDigest": "pos-core-180@sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee",
+      "remoteRegistryPublished": false,
+      "uid": 1001,
+      "rootReadonly": true,
+      "tmpWritable": true,
+      "capabilitiesEmpty": true,
+      "noNewPrivileges": true,
+      "readinessStatus": 200,
+      "readinessState": "ready",
+      "stopExitCode": 143,
+      "stopMilliseconds": 551,
+      "stopGraceSeconds": 30,
+      "forcedKill": false,
+      "logsContainSyntheticCredential": false,
+      "mutableImageRejectedBeforeChild": true,
+      "hostPortsPublished": false,
+      "productionDeployment": false
+    }
+  },
+  "limits": [
+    "No registry push or remote availability claimed",
+    "No actual production deployment or external secret-store ACL proof",
+    "Public GnuTLS self-test vectors are narrowly reviewed; arbitrary unknown secrets cannot be excluded by marker scanning",
+    "Runtime probe and rotation tests used disposable fixtures only"
+  ]
+}

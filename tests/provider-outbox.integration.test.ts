@@ -255,7 +255,15 @@ test('Actual backup restore fences queued and old running provider submissions; 
   docker(['psql','-X','-U','pos_test','-d',database,'-v','ON_ERROR_STOP=1'],readFileSync('scripts/ops/auth-restore-quarantine.sql'))
   const claimFile=join(directory,'claim.json');writeFileSync(claimFile,JSON.stringify(oldClaim),{mode:0o600,flag:'wx'})
   const result=execFileSync(process.execPath,['--require','./scripts/test-resolver.cjs','.test-build/tests/fixtures/provider-restored-worker.js'],{env:{...process.env,DATABASE_URL:url.toString(),POS_PROVIDER_RESTORE_QUEUED:queuedId,POS_PROVIDER_RESTORE_RUNNING:runningId,POS_PROVIDER_RESTORE_CLAIM_FILE:claimFile},encoding:'utf8',stdio:['pipe','pipe','pipe']})
-  assert.deepEqual(JSON.parse(result),{status:'passed',executeCalls:0,lookupCalls:2,domainFinalizations:1,economicCountsUnchanged:true})
+  const records=result.trim().split('\n').map(line=>JSON.parse(line))
+  const summaries=records.filter(row=>row.status==='passed')
+  assert.equal(summaries.length,1)
+  assert.deepEqual(summaries[0],{status:'passed',executeCalls:0,lookupCalls:2,domainFinalizations:1,economicCountsUnchanged:true})
+  for(const row of records.filter(row=>row.event==='provider_transport')) {
+    if([queuedId,runningId].includes(row.operationId))assert.equal(row.kind,'payment.lookup')
+    assert.ok(row.durationMs>=0)
+    assert.doesNotMatch(JSON.stringify(row),/externalId|requestHash|leaseToken|PRIVATE_PROVIDER/)
+  }
   assert.equal((await prisma.providerOutbox.findUniqueOrThrow({where:{intentId:queuedId}})).state,'queued')
   assert.equal((await prisma.providerOutbox.findUniqueOrThrow({where:{intentId:runningId}})).state,'running')
  }finally{if(created)docker(['dropdb','-U','pos_test',database]);rmSync(directory,{recursive:true,force:true})}

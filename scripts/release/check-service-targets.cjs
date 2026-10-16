@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {createHash}=require('node:crypto');
 const SOURCE_DIRECTORIES=['src/server','src/lib','src/app/api','prisma'];
-const SOURCE_FILES=['package.json','package-lock.json','tests/performance/core-profile.ts','tests/performance/core-measure.ts','tests/performance/core-resume-seed.ts'];
+const SOURCE_FILES=['package.json','package-lock.json','tests/performance/core-profile.ts','tests/performance/core-measure.ts','tests/performance/core-resume-seed.ts','tests/performance/retry.ts'];
 const RECOVERY_FILES=new Set(['scripts/ops/pitr/archive-wal.sh','scripts/ops/pitr/restore-wal.sh','scripts/ops/pitr/base-backup.sh','scripts/ops/pitr/prepare-restore.sh','scripts/ops/pitr/retention-plan.mjs','scripts/ops/pitr-retention.test.mjs','scripts/ops/pitr-shell.test.mjs','scripts/ops/test-pitr.mjs','ops/postgresql/pitr-policy.json','ops/postgresql/pitr.conf','docker-compose.pitr.yml','docs/operations/pitr.md']);
 function fail(code){throw new Error(code);}
 function read(root,file){
@@ -46,8 +46,16 @@ function validateServiceTargets(report,{root=process.cwd(),now=new Date()}={}){
  if(fixture.organizationId!==load.fixtureOrganizationId||fixture.dataset?.products!==50000||fixture.dataset?.saleItems!==1000000||fixture.dataset?.activeRegisters!==20)fail('FIXTURE_EVIDENCE_MISMATCH');
  const migrationFiles=Object.keys(current).filter(file=>/^prisma\/migrations\/[^/]+\/migration\.sql$/.test(file));
  if(!Array.isArray(load.databaseMigrations)||load.databaseMigrations.length!==migrationFiles.length||new Set(load.databaseMigrations.map(row=>row.migrationName)).size!==migrationFiles.length||load.databaseMigrations.some(row=>!/^[A-Za-z0-9_-]+$/.test(row.migrationName)||current['prisma/migrations/'+row.migrationName+'/migration.sql']!==row.checksum))fail('DATABASE_MIGRATIONS_NOT_CURRENT');
- if(load.version!==2||load.at!==report.measuredAt||load.dataset?.products!==50000||load.dataset?.syntheticDraftItems!==1000000||load.dataset?.activeRegisters!==20||load.concurrency!==20||load.actorRole!=='owner'||load.checkoutItemsPerSale!==1)fail('LOAD_PROFILE_INCOMPLETE');
+ if(load.version!==3||load.at!==report.measuredAt||load.dataset?.products!==50000||load.dataset?.syntheticDraftItems!==1000000||load.dataset?.activeRegisters!==20||load.concurrency!==20||load.actorRole!=='owner'||load.checkoutItemsPerSale!==1)fail('LOAD_PROFILE_INCOMPLETE');
  if(load.errors?.length!==0||load.search?.samples!==100||load.search?.attempted!==100||load.search?.failed!==0||load.search?.byStatus?.['200']!==100||Object.keys(load.search.byStatus).length!==1||load.checkout?.samples!==100||load.checkout?.attempted!==100||load.checkout?.failed!==0||load.draft?.attempted!==100||load.draft?.succeeded!==100||load.draft?.excludedFromCheckoutLatency!==true)fail('LOAD_ERRORS_OR_MISSING_SAMPLES');
+ const physical=load.physicalAttempts,policy=load.retryPolicy;
+ if(!physical||policy?.maxAttempts!==8||policy?.deadlineMs!==10000||policy?.code!=='CONCURRENT_CONFLICT'||policy?.originalKey!==true||policy?.checkoutLatencyIncludesBackoff!==true)fail('LOAD_RETRY_PROTOCOL_INVALID');
+ for(const key of ['draft','checkout']){
+  const counts=physical[key];
+  if(!counts||!Number.isSafeInteger(counts.calls)||!Number.isSafeInteger(counts.conflicts)||counts.conflicts<0||counts.failed!==counts.conflicts||counts.calls!==100+counts.conflicts||counts.retries!==counts.conflicts||counts.calls>800)fail('LOAD_PHYSICAL_ATTEMPTS_INVALID');
+ }
+ const rawDenominator=100+physical.draft.calls+physical.checkout.calls,rawFailed=physical.draft.conflicts+physical.checkout.conflicts;
+ if(load.rawErrorRate?.denominator!==rawDenominator||load.rawErrorRate?.failed!==rawFailed||load.rawErrorRate?.rate!==rawFailed/rawDenominator)fail('LOAD_RAW_ERRORS_OMITTED');
  if(load.errorRate?.denominator!==200||load.errorRate?.failed!==0||load.errorRate?.rate!==0||load.economicInvariants?.newCompletedSales!==100||load.economicInvariants?.newPayments!==100)fail('LOAD_DENOMINATOR_OR_INVARIANTS_INVALID');
  for(const [key,target] of [['search',500],['checkout',2000]])if(!Number.isFinite(load[key].p95Ms)||load[key].p95Ms<0||load[key].p95Ms>target||load[key].targetMs!==target)fail('LATENCY_TARGET_FAILED');
  if(!load.environment?.cpu||!load.environment?.postgres||!Number.isSafeInteger(load.environment?.logicalCpus)||load.environment.logicalCpus<1||!Number.isSafeInteger(load.environment?.totalMemoryBytes)||load.environment.totalMemoryBytes<1)fail('HARDWARE_NOT_RECORDED');
@@ -65,10 +73,10 @@ function validateServiceTargets(report,{root=process.cwd(),now=new Date()}={}){
  for(const reference of report.historical??[])artifact(root,reference);
  const documentation=read(root,'docs/operations/release-service-targets.md').toString();
  if(sha(Buffer.from(documentation))!==report.documentationSha256)fail('DOCUMENTATION_STALE');
- return {task:report.task,currentSearchP95Ms:load.search.p95Ms,currentCheckoutP95Ms:load.checkout.p95Ms,failed:0,denominator:200,sourceFiles:Object.keys(current).length,scope:report.scope,contractualSla:false};
+ return {task:report.task,currentSearchP95Ms:load.search.p95Ms,currentCheckoutP95Ms:load.checkout.p95Ms,failed:0,denominator:200,rawFailed,rawDenominator,sourceFiles:Object.keys(current).length,scope:report.scope,contractualSla:false};
 }
 if(require.main===module){
- try{const report=JSON.parse(read(process.cwd(),'tasks/evidence/release-service-targets-20261016.json'));console.info(JSON.stringify(validateServiceTargets(report)));}
+ try{const report=JSON.parse(read(process.cwd(),'tasks/evidence/release-service-targets-20261016-core185.json'));console.info(JSON.stringify(validateServiceTargets(report)));}
  catch(error){console.error('SERVICE_TARGETS_'+(error.message??'CHECK_FAILED'));process.exitCode=1;}
 }
 module.exports={sourceHashes,validateServiceTargets};

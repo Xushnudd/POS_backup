@@ -1,3 +1,4 @@
+import {internalProductImagePattern} from '@/lib/product-image'
 import {postCostContinuations} from '@/server/purchases/cost-continuations'
 import {assertLiveContext} from '@/server/operations'
 import {priceActor,costChangeReferences} from '@/server/catalog/prices'
@@ -23,7 +24,7 @@ const updateProductSchema = z.object({
   salePrice: amountSchema.optional(),
   costPrice: nonnegativeQuantitySchema.optional(),
   minStock: nonnegativeQuantitySchema.optional(),
-  imageUrl: z.union([z.string().url().refine(value=>/^https?:\/\//i.test(value)),z.string().regex(/^\/api\/files\/[0-9a-f-]{36}$/i)]).nullable().optional(),
+  imageUrl: z.string().regex(internalProductImagePattern).nullable().optional(),
   isActive: z.boolean().optional(),
 })
 

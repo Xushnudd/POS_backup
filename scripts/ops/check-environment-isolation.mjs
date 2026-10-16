@@ -50,7 +50,7 @@ export function checkIsolation(environments) {
   return {status:'ready_for_operator_review',environments:3,networkVerified:false}
 }
 
-function readPrivateEnvironment(path) {
+export function readPrivateEnvironment(path) {
   const fd = openSync(path,constants.O_RDONLY|constants.O_NOFOLLOW)
   try {
     const stat = fstatSync(fd)

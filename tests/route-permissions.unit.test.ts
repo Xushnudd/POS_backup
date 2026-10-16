@@ -5,7 +5,10 @@ import { join, relative } from 'node:path'
 import { assertRoutePermission, AccessError } from '@/server/auth/policy'
 import { ROUTE_PERMISSIONS, routePermissionRoles } from '@/server/auth/route-permissions'
 
-const publicPaths = new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready'])
+// The two document viewers are approved capability-only POST boundaries, not
+// session-authorized business actions. Their origin, token, tenant, expiry,
+// consent and restore fences are exercised by integration/browser tests.
+const publicPaths = new Set(['/api/auth/login','/api/auth/register','/api/auth/logout','/api/auth/invitations/accept','/api/auth/password-reset/request','/api/auth/password-reset/complete','/api/health/live','/api/health/ready','/api/receipt-view','/api/reminder-view'])
 function files(dir: string): string[] {
   return readdirSync(dir,{withFileTypes:true}).flatMap(entry => entry.isDirectory() ? files(join(dir,entry.name)) : entry.name === 'route.ts' ? [join(dir,entry.name)] : [])
 }

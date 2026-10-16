@@ -1,3 +1,4 @@
+import {isInternalProductImage} from '@/lib/product-image'
 import {Prisma} from '@prisma/client'
 import {z} from 'zod'
 import {prisma} from '@/lib/prisma'
@@ -26,7 +27,7 @@ export async function createVariant(ctx:TokenPayload,id:string,input:z.infer<typ
   const options=Object.fromEntries(input.options.map(o=>[o.name.toLowerCase(),o.value.toLowerCase()]))
   if(await tx.productVariant.findFirst({where:{rootProductId:base.id,options:{equals:options}}}))throw new AccessError(409,'VARIANT_EXISTS','Bu rang/o‘lcham kombinatsiyasi mavjud')
   await priceActor(tx,ctx,'catalog.variant')
-  const product=await tx.product.create({data:{organizationId:ctx.organizationId,categoryId:current.categoryId,brandId:current.brandId,description:current.description,name:input.name,sku:input.sku,barcode:input.barcode,unit:current.unit,salePrice:input.salePrice,costPrice:current.costPrice,minStock:current.minStock,imageUrl:current.imageUrl}})
+  const product=await tx.product.create({data:{organizationId:ctx.organizationId,categoryId:current.categoryId,brandId:current.brandId,description:current.description,name:input.name,sku:input.sku,barcode:input.barcode,unit:current.unit,salePrice:input.salePrice,costPrice:current.costPrice,minStock:current.minStock,imageUrl:isInternalProductImage(current.imageUrl)?current.imageUrl:null}})
   await tx.productVariant.update({where:{productId:product.id},data:{rootProductId:base.id,options}})
   await audit(tx,ctx,'Product',product.id,'variant_created',{rootProductId:base.id,options,reason:input.reason})
   // Cost remains protected; new SKU starts with zero stock and no money movement.

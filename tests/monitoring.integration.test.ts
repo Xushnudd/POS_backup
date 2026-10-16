@@ -8,7 +8,7 @@ import { enqueueJob } from '@/server/jobs/service'
 import { tenantMonitoring } from '@/server/monitoring/health'
 import { apiMetrics } from '@/server/monitoring/metrics'
 import { GET } from '@/app/api/monitoring/route'
-import { enqueueProviderIntentTx, claimProviderIntent, bindingKey, type ProviderBinding } from '@/server/integrations/outbox'
+import { enqueueProviderIntentTx, claimProviderIntent, executeProviderClaim, bindingKey, type ProviderBinding } from '@/server/integrations/outbox'
 import { runOperation } from '@/server/operations'
 const url = new URL(process.env.DATABASE_URL ?? '')
 if (url.hostname !== '127.0.0.1' || url.port !== '55439' || url.pathname !== '/pos_test') throw new Error('Isolated DB only')
@@ -65,4 +65,37 @@ test('Real blocked DB query and expired provider lease generate scoped alerts wi
   assert.ok(status.alerts.includes('DATABASE_SLOW_ROUND_TRIP'))
   assert.ok(status.alerts.includes('PROVIDER_LEASE_EXPIRED'))
   assert.equal(await prisma.payment.count({where:{organizationId:f.org.id}}),0)
+})
+test('Test-only rejected transport and dead job alert without leaking payloads; broken telemetry cannot alter settlement', async () => {
+  const f=await fixture()
+  const register=await prisma.register.create({data:{storeId:f.store.id,name:'Failure terminal',code:'FAIL'}})
+  const shift=await prisma.shift.create({data:{registerId:register.id,organizationUserId:f.context.organizationUserId,openingCash:0}})
+  const sale=await prisma.sale.create({data:{organizationId:f.org.id,storeId:f.store.id,registerId:register.id,shiftId:shift.id,cashierId:f.context.userId,receiptNo:randomUUID(),subtotal:'1.00',totalAmount:'1.00'}})
+  const job=await enqueueJob(f.context,{operationId:randomUUID(),type:'reconciliation',storeId:f.store.id,reason:'Synthetic failure monitoring'})
+  await prisma.backgroundJob.update({where:{id:job.id},data:{state:'dead'}})
+  const binding:ProviderBinding={supportsCompensation:false,transport:{execute:async()=>{await new Promise(resolve=>setTimeout(resolve,20));return {state:'failed',code:'PRIVATE_PROVIDER_CODE'}},lookup:async()=>{throw new Error('must not lookup')}},confirmed:async()=>{throw new Error('must not confirm')},failed:async()=>{}}
+  const registry=new Map([[bindingKey('monitor-failure-test','payment'),binding]])
+  async function enqueue() {
+    const key=randomUUID()
+    return runOperation(f.context,'monitoring.failure',key,{},tx=>enqueueProviderIntentTx(tx,f.context,{type:'monitoring.failure',key},{storeId:f.store.id,provider:'monitor-failure-test',capability:'payment',request:{businessType:'sale',businessId:sale.id,amount:'1.00',currency:'UZS'},reason:'Synthetic provider failure; not a vendor API'}))
+  }
+  const intent=await enqueue(),claim=await claimProviderIntent(registry);assert.equal(claim?.intentId,intent.id)
+  const messages:string[]=[],original=console.info
+  try {
+    console.info=(value:unknown)=>{messages.push(String(value))}
+    assert.equal((await executeProviderClaim(claim!,registry)).state,'failed')
+    const log=JSON.parse(messages.find(row=>JSON.parse(row).event==='provider_transport')!)
+    assert.equal(log.organizationId,f.org.id);assert.equal(log.operationId,intent.id)
+    assert.equal(log.kind,'payment.submit');assert.equal(log.code,'PROVIDER_FAILED');assert.ok(log.durationMs>=15)
+    assert.doesNotMatch(JSON.stringify(log),/PRIVATE_PROVIDER_CODE|businessId|amount|externalId|secret|leaseToken/)
+    await enqueue();const next=await claimProviderIntent(registry);assert.ok(next)
+    console.info=()=>{throw new Error('Synthetic log sink failure')}
+    assert.equal((await executeProviderClaim(next,registry)).state,'failed')
+  } finally {console.info=original}
+  const status=await tenantMonitoring(f.context)
+  assert.ok(status.alerts.includes('JOB_FAILURES'))
+  assert.ok(status.alerts.includes('PROVIDER_RECONCILIATION_REQUIRED'))
+  assert.equal(status.queues.providers.find(row=>row.state==='failed')?.count,'2')
+  assert.equal(await prisma.payment.count({where:{organizationId:f.org.id}}),0)
+  assert.equal(await prisma.inventoryMovement.count({where:{organizationId:f.org.id}}),0)
 })

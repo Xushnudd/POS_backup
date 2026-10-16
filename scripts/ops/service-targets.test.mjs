@@ -11,9 +11,12 @@ function fixture(run){
  const root=mkdtempSync(join(tmpdir(),'pos-service-targets-'));
  const write=(file,value)=>{mkdirSync(dirname(join(root,file)),{recursive:true});writeFileSync(join(root,file),typeof value==='string'?value:JSON.stringify(value));};
  const reference=(file,value)=>{write(file,value);return {path:file,sha256:sha(readFileSync(join(root,file)))};};
- for(const file of ['src/server/service.ts','src/lib/auth.ts','src/app/api/products/route.ts','prisma/schema.prisma','prisma/migrations/fixture/migration.sql','package.json','package-lock.json','tests/performance/core-profile.ts','tests/performance/core-measure.ts','tests/performance/core-resume-seed.ts'])write(file,'synthetic source');
+ for(const file of ['src/server/service.ts','src/lib/auth.ts','src/app/api/products/route.ts','prisma/schema.prisma','prisma/migrations/fixture/migration.sql','package.json','package-lock.json','tests/performance/core-profile.ts','tests/performance/core-measure.ts','tests/performance/core-resume-seed.ts','tests/performance/retry.ts'])write(file,'synthetic source');
  write('docs/operations/release-service-targets.md','Synthetic technical-readiness documentation');
- const load={version:2,at:now.toISOString(),environment:{cpu:'Synthetic CPU',postgres:'PostgreSQL synthetic',logicalCpus:2,totalMemoryBytes:4096},databaseMigrations:[{migrationName:'fixture',checksum:sha('synthetic source')}],dataset:{products:50000,syntheticDraftItems:1000000,activeRegisters:20},concurrency:20,actorRole:'owner',checkoutItemsPerSale:1,search:{samples:100,attempted:100,failed:0,byStatus:{200:100},p95Ms:400,targetMs:500},checkout:{samples:100,attempted:100,failed:0,p95Ms:1000,targetMs:2000},draft:{attempted:100,succeeded:100,excludedFromCheckoutLatency:true},errorRate:{failed:0,denominator:200,rate:0},economicInvariants:{newCompletedSales:100,newPayments:100},errors:[]};
+ const load={version:3,at:now.toISOString(),environment:{cpu:'Synthetic CPU',postgres:'PostgreSQL synthetic',logicalCpus:2,totalMemoryBytes:4096},databaseMigrations:[{migrationName:'fixture',checksum:sha('synthetic source')}],dataset:{products:50000,syntheticDraftItems:1000000,activeRegisters:20},concurrency:20,actorRole:'owner',checkoutItemsPerSale:1,search:{samples:100,attempted:100,failed:0,byStatus:{200:100},p95Ms:400,targetMs:500},checkout:{samples:100,attempted:100,failed:0,p95Ms:1000,targetMs:2000},draft:{attempted:100,succeeded:100,excludedFromCheckoutLatency:true},errorRate:{failed:0,denominator:200,rate:0},economicInvariants:{newCompletedSales:100,newPayments:100},errors:[]};
+ load.physicalAttempts={draft:{calls:102,conflicts:2,retries:2,failed:2},checkout:{calls:103,conflicts:3,retries:3,failed:3}};
+ load.retryPolicy={maxAttempts:8,deadlineMs:10000,code:'CONCURRENT_CONFLICT',originalKey:true,checkoutLatencyIncludesBackoff:true};
+ load.rawErrorRate={failed:5,denominator:305,rate:5/305};
  load.fixtureOrganizationId='synthetic-fixture';
  const dataset=reference('tasks/evidence/dataset.json',{organizationId:load.fixtureOrganizationId,dataset:{products:50000,saleItems:1000000,activeRegisters:20}});
  write('scripts/ops/pitr/restore-wal.sh','synthetic recovery source');
@@ -27,7 +30,7 @@ test('service-target gate accepts complete local evidence without implying uptim
  assert.equal(gate.validateServiceTargets(report,{root,now}).contractualSla,false);
 }));
 test('service-target gate rejects omitted errors, incomplete sample denominators and excessive p95',()=>{
- for(const mutation of [load=>{delete load.errors;},load=>{load.errorRate.denominator=199;},load=>{load.search.p95Ms=501;},load=>{load.checkout.failed=1;},load=>{load.economicInvariants.newPayments=99;}])fixture(({root,report,load,reference})=>{
+ for(const mutation of [load=>{delete load.errors;},load=>{load.rawErrorRate.failed=0;},load=>{load.physicalAttempts.checkout.calls=100;},load=>{load.retryPolicy.originalKey=false;},load=>{load.errorRate.denominator=199;},load=>{load.search.p95Ms=501;},load=>{load.checkout.failed=1;},load=>{load.economicInvariants.newPayments=99;}])fixture(({root,report,load,reference})=>{
   mutation(load);report.load=reference('tasks/evidence/load.json',load);assert.throws(()=>gate.validateServiceTargets(report,{root,now}),/LOAD_|LATENCY_/);
  });
 });

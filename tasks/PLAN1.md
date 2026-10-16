@@ -1226,7 +1226,7 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
 
   **Dalil:** `POS-02.08` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **POS-02.09** — Chekni qayta chiqarish, elektron chek, 58/80 mm andozalari; qayta chiqarishni belgilash.
+- [x] **POS-02.09** — Chekni qayta chiqarish, elektron chek, 58/80 mm andozalari; qayta chiqarishni belgilash.
 
   **Texnologiya:** HTML/CSS print, Next.js protected receipt, T02 barcode/QR, T08.
 
@@ -1239,6 +1239,8 @@ Qonuniy yoki shartnomaviy talab bo‘lsa, P1/P2 vazifa o‘sha mijoz uchun P0ga 
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** 58/80 mm bosma va elektron chek summalari originalga teng; reprint yangi savdo yaratmaydi va nusxa belgili.
+
+  **Qabul (2026-10-16): done.** Original mezon amaliy lokal core dalili bilan yopildi; tasdiqlanmagan vendor/server/pilot qabuli deb ko‘rsatilmaydi. [185 bosqichi protokoli](EXECUTION_STATUS.md#core185-20261016) va `tasks/evidence/core185-20261016.json`.
 
   **Dalil:** `POS-02.09` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -2041,7 +2043,7 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
 
   **Dalil:** `CRM-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **CRM-02.02** — P1: qarz muddati/kechikish hisoboti, mijozga ko‘chirma va rozilik asosida eslatma.
+- [x] **CRM-02.02** — P1: qarz muddati/kechikish hisoboti, mijozga ko‘chirma va rozilik asosida eslatma.
 
   **Texnologiya:** PostgreSQL dueAt aggregates, Node worker, T08 notification.
 
@@ -2054,6 +2056,8 @@ Xarid, inventarizatsiya va filial ombori amallari shakllangan POS mahsulotlarida
   **Mas’ul:** AI.
 
   **Bandning qabul mezoni:** Due/overdue boundary to‘g‘ri; consent yo‘q/revoked mijozga eslatma yuborilmaydi.
+
+  **Qabul (2026-10-16): done.** Original mezon amaliy lokal core dalili bilan yopildi; tasdiqlanmagan vendor/server/pilot qabuli deb ko‘rsatilmaydi. [185 bosqichi protokoli](EXECUTION_STATUS.md#core185-20261016) va `tasks/evidence/core185-20261016.json`.
 
   **Dalil:** `CRM-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -3639,7 +3643,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-01.04` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-01.05** — Image versiyasi, minimal vakolatli jarayon, xavfsiz secret saqlash va kalit aylantirish.
+- [x] **OPS-01.05** — Image versiyasi, minimal vakolatli jarayon, xavfsiz secret saqlash va kalit aylantirish.
 
   **Texnologiya:** Docker image digest/non-root, secret mounts, Node config.
 
@@ -3725,7 +3729,7 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
 
   **Dalil:** `OPS-02.01` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **OPS-02.02** — API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi.
+- [x] **OPS-02.02** — API xatolari, sekin so‘rov, baza, disk, navbat, fiskal/to‘lov xatolari monitoringi.
 
   **Texnologiya:** Node performance hooks, PostgreSQL stats, Docker host metrics, T11.
 
@@ -3738,6 +3742,8 @@ Hozirgi Next.js loyihasini saqlab, biznes hisob-kitoblarini sahifalardan ajratil
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Sun’iy API/slow DB/disk/queue/provider failure belgilangan alertni hosil qiladi.
+
+  **Qabul (2026-10-16): done.** Original mezon amaliy lokal core dalili bilan yopildi; tasdiqlanmagan vendor/server/pilot qabuli deb ko‘rsatilmaydi. [185 bosqichi protokoli](EXECUTION_STATUS.md#core185-20261016) va `tasks/evidence/core185-20261016.json`.
 
   **Dalil:** `OPS-02.02` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -4524,7 +4530,7 @@ Bu sonlar kelishish uchun taklif qilingan mezonlar. Test muhiti va o‘lchash sh
 
   **Dalil:** `LEG-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **LEG-01.06** — Integratsiya, xosting va aloqa provayderlariga uzatiladigan ma’lumotlarni hujjatlashtirish.
+- [x] **LEG-01.06** — Integratsiya, xosting va aloqa provayderlariga uzatiladigan ma’lumotlarni hujjatlashtirish.
 
   **Texnologiya:** Markdown processor registry, Prisma integration config audit.
 
@@ -4539,6 +4545,8 @@ Bu bo‘limda ma’lumot lokalizatsiyasining barcha holatlar uchun bitta umumiy 
   **Mas’ul:** AI + mahsulot egasi/tashqi mas’ul.
 
   **Bandning qabul mezoni:** Har external providerga uzatiladigan fields/purpose/region/retention/contract data-flow reyestrida.
+
+  **Qabul (2026-10-16): done.** Original mezon amaliy lokal core dalili bilan yopildi; tasdiqlanmagan vendor/server/pilot qabuli deb ko‘rsatilmaydi. [185 bosqichi protokoli](EXECUTION_STATUS.md#core185-20261016) va `tasks/evidence/core185-20261016.json`.
 
   **Dalil:** `LEG-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -4764,7 +4772,7 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
 
   **Dalil:** `RELEASE-01.05` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RELEASE-01.06** — Real backup tiklash, migratsiya va qaytish mashqi muvaffaqiyatli.
+- [x] **RELEASE-01.06** — Real backup tiklash, migratsiya va qaytish mashqi muvaffaqiyatli.
 
   **Texnologiya:** PostgreSQL restore, Prisma migration, Docker rollback drills.
 
@@ -4777,6 +4785,8 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
   **Mas’ul:** AI + zarur tashqi kirish/tasdiq uchun mahsulot egasi.
 
   **Bandning qabul mezoni:** Restore/migration/rollback mashqi release schema/image uchun o‘tgan va RPO/RTO yozilgan.
+
+  **Qabul (2026-10-16): done.** Original mezon amaliy lokal core dalili bilan yopildi; tasdiqlanmagan vendor/server/pilot qabuli deb ko‘rsatilmaydi. [185 bosqichi protokoli](EXECUTION_STATUS.md#core185-20261016) va `tasks/evidence/core185-20261016.json`.
 
   **Dalil:** `RELEASE-01.06` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
@@ -4796,7 +4806,7 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
 
   **Dalil:** `RELEASE-01.07` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
 
-- [ ] **RELEASE-01.08** — Yuklama natijalari va xizmat ko‘rsatish maqsadlari hujjatlashtirilgan.
+- [x] **RELEASE-01.08** — Yuklama natijalari va xizmat ko‘rsatish maqsadlari hujjatlashtirilgan.
 
   **Texnologiya:** Node load report va deployment service targets.
 

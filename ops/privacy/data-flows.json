@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "reviewedOn": "2026-10-16",
+  "task": "LEG-01.06",
+  "productionDeploymentVerified": false,
+  "localPublicConfiguration": {
+    "appOrigin": "https_loopback",
+    "apiOrigin": "relative_default",
+    "secretValuesLogged": false
+  },
+  "flows": [
+    {
+      "id": "first_party_backend",
+      "party": "first_party",
+      "status": "active_local",
+      "purpose": "Authorized POS API and protected internal assets",
+      "transmittedFields": [
+        "HttpOnly session cookie",
+        "authorized tenant-scoped business DTOs",
+        "protected normalized image bytes"
+      ],
+      "region": {
+        "production": null,
+        "verifiedScope": "loopback local development and disposable test resources"
+      },
+      "retention": "Versioned tenant retention configuration; no automatic irreversible deletion",
+      "contract": "First-party local execution; production hosting/contract not selected",
+      "credentialOwner": "Project operator; actual production custody remains unassigned"
+    },
+    {
+      "id": "in_person_receipt",
+      "party": "first_party",
+      "status": "active_local",
+      "purpose": "Owner-approved personal electronic receipt handover with sale-scoped explicit consent",
+      "transmittedFields": [
+        "original receipt number/time",
+        "original merchant/branch name when captured",
+        "item name/unit/quantity/price/discount/line total",
+        "subtotal/discount/tax/total and currency",
+        "original inbound payment type/amount",
+        "opaque capability in URL fragment and protected POST body",
+        "organizationId/operationId capability identity"
+      ],
+      "region": {
+        "production": null,
+        "verifiedScope": "first-party local browser/backend"
+      },
+      "retention": "Capability expires in 3600 seconds; hash/snapshot and grant/revoke audit remain under tenant retention. Restore and key-removal fence prior access.",
+      "contract": "Owner approval 2026-10-16; no SMS/e-mail vendor",
+      "credentialOwner": "Application operator via existing environment authentication key; no provider credential"
+    },
+    {
+      "id": "in_person_service_statement",
+      "party": "first_party",
+      "status": "active_local",
+      "purpose": "Owner-approved separately consented personal service reminder/statement; worker prepares, does not claim delivery",
+      "transmittedFields": [
+        "consented customer name",
+        "merchant/currency/timezone/as-of",
+        "debt/overdue/upcoming/no-due/unallocated totals",
+        "ledger date/due date/receipt/source type/amount/balance",
+        "opaque capability in URL fragment and protected POST body",
+        "organizationId/jobId capability identity"
+      ],
+      "region": {
+        "production": null,
+        "verifiedScope": "first-party local browser/backend"
+      },
+      "retention": "Job capability expires within 3600 seconds; withdrawal/contact revision checked on every publication/read; retained job/history follows tenant policy, no automatic irreversible deletion.",
+      "contract": "Owner approval 2026-10-16; no outbound messaging vendor",
+      "credentialOwner": "Application operator; existing environment authentication key"
+    },
+    {
+      "id": "legacy_remote_product_images",
+      "party": "third_party",
+      "status": "disabled",
+      "purpose": "Historical external URL metadata retained; automatic loading and new external assignments disabled by owner approval",
+      "transmittedFields": [],
+      "region": null,
+      "retention": null,
+      "contract": null,
+      "credentialOwner": "No integration credential; no approved external image host"
+    },
+    {
+      "id": "click_payment",
+      "party": "third_party",
+      "status": "blocked_external",
+      "purpose": "Future create/status/refund payment adapter",
+      "transmittedFields": [],
+      "internalBoundaryFields": [
+        "operationId",
+        "organizationId",
+        "businessType/businessId",
+        "amount/currency",
+        "external identity only when available"
+      ],
+      "region": null,
+      "retention": null,
+      "contract": null,
+      "credentialOwner": "Unassigned until official API/sandbox/contract approval"
+    },
+    {
+      "id": "fiscal_epos",
+      "party": "third_party",
+      "status": "blocked_external",
+      "purpose": "Future fiscal document submission/status",
+      "transmittedFields": [],
+      "internalBoundaryFields": [
+        "operationId",
+        "documentId",
+        "business identity"
+      ],
+      "region": null,
+      "retention": null,
+      "contract": null,
+      "credentialOwner": "Unassigned; provider/model/protocol not selected"
+    },
+    {
+      "id": "sms_email_telegram",
+      "party": "third_party",
+      "status": "blocked_external",
+      "purpose": "Future verification/reset/OTP and separately consented messaging",
+      "transmittedFields": [],
+      "internalBoundaryFields": [
+        "purpose",
+        "destination",
+        "ephemeral secret",
+        "expiresAt"
+      ],
+      "region": null,
+      "retention": null,
+      "contract": null,
+      "credentialOwner": "Unassigned; no real sender binding, no production mock"
+    },
+    {
+      "id": "hardware_vendors",
+      "party": "third_party",
+      "status": "blocked_external",
+      "purpose": "Future approved printer/scale/scanner/drawer implementations",
+      "transmittedFields": [],
+      "region": null,
+      "retention": null,
+      "contract": null,
+      "credentialOwner": "Unassigned; no assumed SDK/endpoint/protocol"
+    },
+    {
+      "id": "hosting_backup_monitoring",
+      "party": "third_party",
+      "status": "blocked_external",
+      "purpose": "Future hosting, encrypted off-site backup and external monitoring/on-call",
+      "transmittedFields": [],
+      "internalBoundaryFields": [
+        "encrypted database backup/manifest",
+        "minimal safe monitoring metadata"
+      ],
+      "region": null,
+      "retention": null,
+      "contract": null,
+      "credentialOwner": "Actual operator/key custodian/on-call not assigned"
+    }
+  ],
+  "sourceHashes": {
+    "public/sw.js": "0bec9b89275322a258f585a3b9d552274bd4841b4068e89ee86b407dc92d9825",
+    "src/app/(dashboard)/products/[id]/media/page.tsx": "b83530a8585858ae8552051bf2fba18dd3939636e1d03f952434f0eb90c684c4",
+    "src/app/api/products/[id]/route.ts": "6a67e026728eef98eb3d9aa8b4964398d6ba84d9d56df636e9f9c40d60b524ed",
+    "src/app/api/products/route.ts": "fb46e28f085577400681d357d03edec56c3d0a53665d0c2ec0aa04c50dcb90eb",
+    "src/lib/api.ts": "51c42579d9dd0b7a8d368d4d51ceac69ef45df66ef4ad2445a7f9c58ab1827f7",
+    "src/lib/product-image.ts": "2a7783c8adc958960deba38081d89ab5bb47daec0fb359a8b0c05dca4f5559ce",
+    "src/proxy.ts": "b2650fda82c61b6f38bb017c157af92caac6cb4219b081290ed64853d5624293",
+    "src/server/auth/delivery.ts": "be4b74b0c3b579183a9f9719a0946bd8ded985a5d77af6b87b3f4c3f9a167a96",
+    "src/server/catalog/variants.ts": "2be5fe2def5fe266d9bd468b88b50d5454436da9d8d73f7743eca17a02a6590f",
+    "src/server/customers/reminders.ts": "984c6e5f9ef22745a7174b4bbd4660b1d175011fb4d9105d914d0f6b77ba5aff",
+    "src/server/integrations/contracts.ts": "664b6dd46bbceaf7479529401f13e0367ebdb100845bee6ef28ba5b00115fc7e",
+    "src/server/integrations/outbox.ts": "ed8bb29b7a7abc2799cd58faf0e9b1f126229c5fac41a0beeac7e432493bc76f",
+    "src/server/sales/receipt-links.ts": "7ffc6ddaf47e7251a964adb9f57353938538c09837f2ea9f7883d49cba3c583e"
+  }
+}
