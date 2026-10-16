@@ -1,5 +1,8 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ TIN_EXISTS:{message:'Bu STIR / INN bilan tashkilot allaqachon ro‘yxatdan o‘tgan.',nextAction:'STIR / INNni tekshiring. Mavjud tashkilot uchun yangi hisob ochish o‘rniga o‘z hisobingizga kiring yoki egasidan taklif so‘rang.'},
+ EMAIL_EXISTS:{message:'Bu e-mail bilan hisob allaqachon ro‘yxatdan o‘tgan.',nextAction:'E-mailni tekshiring yoki mavjud hisobingizga kiring.'},
+ USER_EXISTS:{message:'Bu telefon raqam bilan hisob allaqachon ro‘yxatdan o‘tgan.',nextAction:'Telefon raqamini tekshiring yoki mavjud hisobingizga kiring.'},
  CUSTOMER_HAS_BALANCE:{message:'Mijozning qarz/avans qoldig‘i bor; avval uni hal qiling',nextAction:'Mijoz kartochkasida qarz va ishlatilmagan avansni tekshiring. Haqiqiy hisob-kitob yakunlanmaguncha mijozni arxivlamang.'},
  INVITATION_INVALID:{message:'Taklif eskirgan, bekor qilingan yoki ishlatilgan.',nextAction:'Biznes egasidan yangi taklif so‘rang; parol va bir martalik havolani umumiy chatga yubormang.'},
  INVITATION_ALREADY_USED:{message:'Taklif allaqachon ishlatilgan.',nextAction:'O‘z hisobingizga kiring yoki biznes egasidan a’zolik holatini tekshirishni so‘rang.'},

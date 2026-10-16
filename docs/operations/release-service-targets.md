@@ -4,7 +4,7 @@ Bu hujjat `RELEASE-01.08`ning texnik tayyorgarlik hisobotidir. Mahalliy sintetik
 
 ## Joriy qisqa yuklama profili
 
-Joriy o‘lchovning xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016-post185.json` orqali bog‘lanadi. Bu 185 bosqichidan keyingi eksport va package o‘zgarishlari bilan qayta o‘lchangan dalil; avvalgi `release-service-targets-20261016-core185.json` tarixiy holatda saqlanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
+Joriy o‘lchovning xom natijasi, hardware va manba fayllari SHA256lari `tasks/evidence/release-service-targets-20261016-registration.json` orqali bog‘lanadi. Bu ro‘yxatdan o‘tishdagi STIR/e-mail konflikti tuzatilgach yangi sintetik fixture bilan haqiqatan qayta o‘lchangan dalil; avvalgi `release-service-targets-20261016-post185.json` va `release-service-targets-20261016-core185.json` tarixiy holatda saqlanadi. Qabuldan oldin o‘lchov yakunlanishi va quyidagi read-only tekshiruv o‘tishi kerak:
 
 ```sh
 node scripts/release/check-service-targets.cjs

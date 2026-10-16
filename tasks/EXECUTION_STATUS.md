@@ -4,6 +4,8 @@ Sana: 2026-10-16. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuni
 
 Joriy original done: **185/259**. Joriy maqsad **195** hali bajarilmadi; ushbu davomda yangi original done **+0**, yana **10** ta to‘liq original qabul kerak. Oldingi190 maqsadi ham bajarilmagan. Foydalanuvchi 2026-10-16 kuni staging/mustaqil status hosti/pilot **hali tayyor emas**ligini qayta tasdiqladi. 74 ochiq bandning qabul to‘siqlari: `tasks/190_BLOCKERS.md`;195 uchun qayta tekshiruv va qabul yo‘li: `tasks/195_READINESS.md`. CI/test/yuklama dalili tuzatishlari yangi original band sifatida sanalmaydi.
 
+So‘nggi tuzatish (2026-10-16): ro‘yxatdan o‘tishda takroriy STIR/INNning500 xatosi tuzatildi;21PG/168unit/7Chromium va yangi sourcega mos yuklama dalili o‘tdi. Mahalliy app qayta yig‘ilib ishga tushirildi. Batafsil: [ro‘yxatdan o‘tish tuzatishi](#registration-fix-20261016).
+
 185 bosqichining tarixiy yakuni: baseline180 →185, **5/5 original band — POS-02.09, CRM-02.02, OPS-02.02, LEG-01.06, RELEASE-01.06**. Dalil: `tasks/evidence/core185-20261016.json`. Qolgan74 original band o‘z haqiqiy holatida; mahalliy environment rehearsal OPS-01.01ni tashqi qabul o‘rniga done qilmadi.
 
 180 bosqichining tarixiy yakuni: Foydalanuvchining **180** maqsadi bajarildi: baseline176 →180, **4/4 original band — LEG-01.05, OPS-03.03, OPS-01.05, RELEASE-01.08**. Quyidagi176 maqsadi tarixiy.  Foydalanuvchi maqsadi **176 bajarildi**:175→176, **1/1** yangi original band **RELEASE-01.12** qabul qilindi. Oldingi **175 bajarildi**: **5/5** yangi original band qabul qilindi (REP-01.11, CRM-02.04, CRM-02.03, UX-01.03, UX-01.02). Oldingi170 maqsadi bajarilgan — original INV-02.07 qabul qilindi (169→170). Baseline164dan oldingi170 maqsadi6/6: UX-01.05, INV-01.07, INV-02.06, REP-01.07, PUR-01.05 va INV-02.07. Faqat original PLAN1 bandlari sanaladi. Local core qabul real production/pilot/vendor dalili o‘rnini bosmaydi.
@@ -2753,3 +2755,64 @@ tugagach faqat o‘zimiz yaratgan disposable test DB/status resurslari tozalandi
 `pos_backup-*`, `.env`/`.env_backup` va host trust store tahrir qilinmadi.
 Katta web eksport, legal/retention, vendor/hardware/host/pilot qabul bandlari
 alohida ochiq. To‘liq dalil: `tasks/evidence/post185-fixes-20261016/validation.json`.
+
+<a id="registration-fix-20261016"></a>
+## Ro‘yxatdan o‘tish: STIR konflikti va xavfsiz rollback (2026-10-16)
+
+Foydalanuvchi so‘rovi `a29acbaa-895f-4e0b-9a28-4aca5c25b182` app logida
+`POST /api/auth/register`500 bo‘lgan. Mos DB xatosi
+`duplicate key value violates unique constraint "Organization_tin_key"`.
+Real STIR/telefon qiymatlari va credentiallar dalilga kiritilmadi.
+Baseline `f7da0ac329f5bd2d9425ea352cfb986535fbf277`, tuzatishlar ishchi daraxtda.
+
+- Bazaning noyoblik qoidasi saqlandi. Haqiqiy Prisma P2002 uchun
+  `409 TIN_EXISTS`, `409 EMAIL_EXISTS` yoki mavjud kontraktdagi
+  `400 USER_EXISTS` qaytariladi; parallel urinish ham shu qoidalardan o‘tadi.
+- TIN/e-mailning chetki bo‘sh joylari olinadi, bo‘sh ixtiyoriy qiymat NULL
+  bo‘ladi. Noto‘g‘ri type yoki e-mail400validation bo‘lib qoladi.
+- Umumiy `withApi` safe error handling ishlaydi; ichki catch kutilmagan
+  xatoni yutmaydi. UI canonical xabar va keyingi amalni Uzbek/Russian
+  dictionarydan oladi. Mavjud biznes/foydalanuvchi tafsilotlari ochilmaydi.
+- Organization, trial, user, membership, store, register, access, discount
+  policy va session uchun avvalgi atomik tranzaksiya saqlandi.
+  Late Session fault injection va parallel TIN/phone testlari qisman
+  yaratilgan yozuv qolmasligini tekshirdi. Schema/migration o‘zgarmadi.
+
+### Bajarilgan tekshiruvlar
+
+- Yangi registration7 + mavjud foundation/billing14: **21/21 PostgreSQL**.
+- **168/168 unit**, **7/7 Chromium**, **7/7 service-target gate test**.
+  Chromiumda takroriy STIR409, maydonlar/parol saqlanishi, STIRni tuzatishdan
+  keyin200 va haqiqiy authenticated dashboard/me oqimi tekshirildi.
+- Production webpack build, typecheck, o‘zgargan TS fayllar ESLint va
+  `git diff --check` o‘tdi. Dastlabki sandbox build TypeScript child-process
+  cheklovida to‘xtagan; vakolatli qayta run muvaffaqiyatli yakunlandi.
+- i18n966/0missing; claims44/7/9/5,0problem; data-flow9,0active external.
+- Mahalliy Docker development image qayta yig‘ildi; faqat app recreate
+  qilindi. App/DB/proxy healthy; HTTP `/register` va `/api/health/ready`200.
+  Ishlayotgan image ichidagi4o‘zgargan application/dictionary hash mos.
+  Real bazada faqat diagnostik agregat/log o‘qildi; test akkaunt yaratilmagan.
+
+Auth source o‘zgargani sababli CI dalili ham haqiqatan yangilandi:
+yangi50k product/1m synthetic draft/20register fixture,100cold capture,
+20owner sessions. Search p95 **300.017ms**, checkout p95 **843.721ms**;
+logical final **0/200**, physical **72/372 CONCURRENT_CONFLICT** bounded
+original-key retry bilan hal bo‘lgan;100new Sale/100Payment. Raw konfliktlar
+nol deb ko‘rsatilmaydi. Natija eski run bilan tenglashtirilmaydi yoki
+performance yaxshilandi degan da’vo qilinmaydi. Global planner override
+qo‘llanmagan; haqiqiy harness/gate bo‘yicha188migration va636sourcehash mos.
+Bu real pilot/production/WAN/vendor o‘lchovi yoki SLA emas.
+
+Fixture tayyorlashning serial bosqichi products qismida ataylab SIGTERM
+bilan to‘xtatildi; yetishmagan deterministik product/balance4worker orqali,
+1m draft mavjud resume harnessi bilan to‘ldirildi. Hech bir SQL guard
+o‘chirilmagan. Yangi CI manifest:
+`tasks/evidence/release-service-targets-20261016-registration.json`;
+avvalgi post185 va core185 dalillari o‘zgartirilmadi.
+
+Faqat ushbu ish uchun yaratilgan `pos-registration-fix-20261016` tmpfs bazasi
+olib tashlandi. `.env`/`.env_backup`, real biznes yozuvlari, trust store va
+production deployment o‘zgarmadi. Oldingi full457suite bu davomda qayta
+bajarilmadi; yangi21focused natijasi uning o‘rniga taqdim etilmaydi.
+Original done **185/259**, +0; yangi original band qabul qilinmadi.
+Dalillar: `tasks/evidence/registration-fix-20261016/validation.json`.

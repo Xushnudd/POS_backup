@@ -1,0 +1,15 @@
+✔ service-target gate accepts complete local evidence without implying uptime or contractual SLA (4.295914ms)
+✔ service-target gate rejects omitted errors, incomplete sample denominators and excessive p95 (7.954155ms)
+✔ service-target gate rejects warm products or missing first-capture evidence (2.434258ms)
+✔ service-target gate fails after source additions, evidence tampering, expiry or unsupported SLA claims (4.908784ms)
+✔ service-target gate rejects missing recovery evidence, traversal and symlink evidence (1.341921ms)
+✔ service-target gate rejects failed recovery, lost pre-target commits and stale recovery scripts (4.495847ms)
+✔ service-target gate rejects an unapplied or checksum-mismatched database migration (2.449494ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39.083082

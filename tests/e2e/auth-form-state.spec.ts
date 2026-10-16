@@ -15,6 +15,44 @@ async function account(page:import('@playwright/test').Page){
  expect((await page.request.post('/api/auth/logout',{headers:origin,data:{}})).ok()).toBe(true)
  return {phone,password}
 }
+test('duplicate STIR shows actionable guidance, preserves the form and allows correction',async({page})=>{
+ const tin='browser-'+randomUUID(),firstPhone='tin-owner-'+randomUUID(),password='test-only-password'
+ const first=await page.request.post('/api/auth/register',{headers:origin,data:{fullName:'Existing TIN owner',phone:firstPhone,password,organizationName:'Existing TIN business',tin}})
+ expect(first.status()).toBe(200)
+ const existing=(await first.json()).data
+ orgs.push(existing.organization.id);users.push(existing.user.id)
+ expect((await page.request.post('/api/auth/logout',{headers:origin,data:{}})).ok()).toBe(true)
+ await page.goto('/register')
+ const phone='tin-new-'+randomUUID(),fields=[
+  {label:'Ism va Familiya',value:'New TIN owner'},
+  {label:'Telefon raqam',value:phone},
+  {label:"Do'kon yoki Biznes nomi",value:'New TIN business'},
+  {label:'STIR / INN (ixtiyoriy)',value:tin},
+  {label:'Parol (8–72 ta belgi)',value:password},
+ ]
+ for(const field of fields)await page.getByLabel(field.label,{exact:true}).fill(field.value)
+ const failed=page.waitForResponse(response=>response.url().endsWith('/api/auth/register')&&response.request().method()==='POST')
+ await page.getByRole('button',{name:'Hisob yaratish va Boshlash',exact:true}).click()
+ expect((await failed).status()).toBe(409)
+ await expect(page.getByRole('alert').filter({hasText:'Bu STIR / INN bilan tashkilot allaqachon ro‘yxatdan o‘tgan.'}).first()).toBeVisible()
+ for(const field of fields)await expect(page.getByLabel(field.label,{exact:true})).toHaveValue(field.value)
+ expect(await db.user.count({where:{phone}})).toBe(0)
+ await expect(page).toHaveURL(/\/register$/)
+ // STIR is optional: clearing it must not create a shared empty unique value.
+ await page.getByLabel('STIR / INN (ixtiyoriy)',{exact:true}).fill('')
+ const succeeded=page.waitForResponse(response=>response.url().endsWith('/api/auth/register')&&response.request().method()==='POST')
+ await page.getByRole('button',{name:'Hisob yaratish va Boshlash',exact:true}).click()
+ const response=await succeeded
+ expect(response.status()).toBe(200)
+ const created=(await response.json()).data
+ orgs.push(created.organization.id);users.push(created.user.id)
+ await expect(page).toHaveURL(/\/dashboard$/)
+ expect(created.organization.tin).toBeNull()
+ const me=await page.request.get('/api/auth/me')
+ expect(me.status()).toBe(200)
+ expect((await me.json()).data.organization.id).toBe(created.organization.id)
+ expect((await db.organization.findUniqueOrThrow({where:{id:existing.organization.id}})).tin).toBe(tin)
+})
 for(const kind of ['login','register','forgot-password','reset-password'] as const)test(`${kind} guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure`,async({page})=>{
  const credentials=kind==='login'||kind==='register'?await account(page):null
  await page.goto('/'+kind)

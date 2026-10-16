@@ -193,13 +193,15 @@ Bu hujjat `src/app/api` ichidagi mavjud Next.js Route Handlerlarga asoslangan. B
   "fullName": "Ali Valiyev",
   "phone": "+998901234567",
   "email": "ali@example.com",
-  "password": "kamida-6-belgi",
+  "password": "kamida-8-belgi",
   "organizationName": "Ali Market",
   "tin": "123456789"
 }
 ```
 
-Majburiy maydonlar: `fullName` (kamida 2 belgi), `phone` (kamida 9 belgi), `password` (kamida 6 belgi), `organizationName` (kamida 2 belgi). Muvaffaqiyatli javob `data.token`, `data.user` va `data.organization`ni qaytaradi. Standart sozlama sifatida `UZS`, `Asia/Tashkent`, “Asosiy do‘kon”, `REG001` kodli “Kassa 1” va chegirma siyosati yaratiladi.
+Majburiy maydonlar: `fullName` (kamida 2 belgi), `phone` (kamida 9 belgi), `password` (8–72 belgi va UTF-8da72baytdan oshmasin), `organizationName` (kamida 2 belgi). Muvaffaqiyatli javob `data.token: "cookie-session"`, `data.user`, `data.organization` va `data.role: "owner"`ni qaytaradi; haqiqiy sessiya tokeni HttpOnly cookie orqali beriladi. Standart sozlama sifatida `UZS`, `Asia/Tashkent`, “Asosiy do‘kon”, `REG001` kodli “Kassa 1”, chegirma siyosati va amaldagi trial tarifi yaratiladi. Hisob/tashkilot/sessiya bitta tranzaksiyada yaratiladi.
+
+`email` va `tin` ixtiyoriy: chetki bo‘sh joylar olib tashlanadi; bo‘sh yoki faqat bo‘sh joyli string berilsa qiymat yo‘q deb olinadi (`NULL`). To‘ldirilgan STIR va e-mailning bazadagi noyoblik qoidalari saqlanadi. Xatolar: `409 TIN_EXISTS`, `409 EMAIL_EXISTS`, `400 USER_EXISTS` (telefon band), `400 VALIDATION_ERROR`. Javobda tushunarli `error.message`, `error.nextAction` va `requestId` bor; mavjud tashkilot yoki foydalanuvchining rekvizitlari qaytarilmaydi. Parallel konflikt yoki keyingi bosqich xatosida yangi tashkilot/trial/foydalanuvchi yozuvlari qisman saqlanmaydi.
 
 ### `POST /auth/login`
 

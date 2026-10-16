@@ -3987,5 +3987,11 @@
   "Muddatsiz qarz": "Задолженность без срока",
   "Taqsimlanmagan qarz": "Нераспределённая задолженность",
   "Qarz taqsimotini solishtirish kerak.": "Необходимо сверить распределение задолженности.",
-  "Shaxsan taqdim etish": "Личная передача"
+  "Shaxsan taqdim etish": "Личная передача",
+  "Bu STIR / INN bilan tashkilot allaqachon ro‘yxatdan o‘tgan.": "Организация с этим ИНН уже зарегистрирована.",
+  "STIR / INNni tekshiring. Mavjud tashkilot uchun yangi hisob ochish o‘rniga o‘z hisobingizga kiring yoki egasidan taklif so‘rang.": "Проверьте ИНН. Для существующей организации войдите в свой аккаунт или попросите владельца прислать приглашение вместо создания нового аккаунта.",
+  "Bu e-mail bilan hisob allaqachon ro‘yxatdan o‘tgan.": "Аккаунт с этой электронной почтой уже зарегистрирован.",
+  "E-mailni tekshiring yoki mavjud hisobingizga kiring.": "Проверьте электронную почту или войдите в существующий аккаунт.",
+  "Bu telefon raqam bilan hisob allaqachon ro‘yxatdan o‘tgan.": "Аккаунт с этим номером телефона уже зарегистрирован.",
+  "Telefon raqamini tekshiring yoki mavjud hisobingizga kiring.": "Проверьте номер телефона или войдите в существующий аккаунт."
 }

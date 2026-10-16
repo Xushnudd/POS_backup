@@ -1,4 +1,4 @@
-import {billingDatabaseError} from '@/server/billing/errors'
+import { Prisma } from '@prisma/client'
 import { consumeLimit } from '@/server/auth/rate-limit'
 import { newPasswordSchema } from '@/server/auth/password-policy'
 import { AccessError } from '@/server/auth/policy'
@@ -12,10 +12,10 @@ import { createSession, setSessionCookie } from '@/server/auth/session'
 const registerSchema = z.object({
   fullName: z.string().min(2),
   phone: z.string().min(9),
-  email: z.string().email().optional(),
+  email: z.preprocess(value => typeof value === 'string' ? value.trim() || undefined : value, z.string().email().optional()),
   password: newPasswordSchema,
   organizationName: z.string().min(2),
-  tin: z.string().optional(),
+  tin: z.preprocess(value => typeof value === 'string' ? value.trim() || undefined : value, z.string().optional()),
 })
 
 async function handlePOST(request: NextRequest) {
@@ -133,19 +133,17 @@ async function handlePOST(request: NextRequest) {
     return response
 
   } catch (error) {
-    const billingError=billingDatabaseError(error);if(billingError)throw billingError
-    if (error instanceof AccessError) throw error
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
-        { status: 400 }
-      )
+    // The unique indexes remain authoritative, including concurrent sign-ups.
+    // Never disclose the existing tenant/user or turn an expected conflict into500.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      const target = error.meta?.target
+      const field = Array.isArray(target) && target.length === 1 ? target[0] : null
+      if (error.meta?.modelName === 'Organization' && field === 'tin') throw new AccessError(409, 'TIN_EXISTS')
+      if (error.meta?.modelName === 'User' && field === 'email') throw new AccessError(409, 'EMAIL_EXISTS')
+      if (error.meta?.modelName === 'User' && field === 'phone') throw new AccessError(400, 'USER_EXISTS')
     }
-
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    // Shared handling supplies safe validation, billing and unexpected-error logs.
+    throw error
   }
 }
 export const POST = withApi(handlePOST, { public: true })
