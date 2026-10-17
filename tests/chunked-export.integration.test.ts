@@ -46,6 +46,7 @@ test('Large web archive is exact, private, immutable and auditable only after co
  const archive=JSON.parse(bytes.toString());assert.equal(archive.datasets.Product[0].costPrice,'1.123456');assert.equal(archive.datasets.FileAsset.length,25)
  assert.equal(archive.datasets.JobExportChunk,undefined);assert.equal(archive.datasets.Session,undefined);assert.ok(!bytes.includes(Buffer.from(foreign.org.id)));assert.ok(!bytes.includes(Buffer.from(f.token)))
  assert.equal(await prisma.auditLog.count({where:{entityId:job.id,action:'export_downloaded'}}),1)
+ assert.equal((await prisma.auditLog.findFirstOrThrow({where:{entityId:job.id,action:'export_downloaded'}})).requestId,response.headers.get('x-request-id'))
  const chunk=await prisma.jobExportChunk.findFirstOrThrow({where:{jobId:job.id}})
  await assert.rejects(prisma.jobExportChunk.update({where:{jobId_attempt_ordinal:{jobId:job.id,attempt:chunk.attempt,ordinal:chunk.ordinal}},data:{data:Buffer.from('tampered')}}))
  await assert.rejects(prisma.jobExportChunk.deleteMany({where:{jobId:job.id}}))

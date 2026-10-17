@@ -16,7 +16,7 @@ Staged bo‘laklar ham kvotada: bir tashkilotning mavjud bo‘laklari va faol in
 
 `GET /api/jobs/{id}/export?metadata=1` faqat xavfsiz filename/mime/size/sha256/expiry beradi, download auditi emas. UI tenant arxivini `.blob()`ga yig‘maydi: native browser attachment yuklashi ishlaydi. Server butun checksumni bounded o‘qish orqali tekshiradi, so‘ng har pull uchun bitta bo‘lak va yangi session/owner tekshiruvi bilan oqim beradi. HTTP body to‘liq tugagach `export_downloaded` auditi yoziladi. Abort/source/audit xatosi muvaffaqiyatli yuklash deb belgilanmaydi. Bu brauzer foydalanuvchisi diskka saqlaganini tasdiqlamaydi; server oqimi tugaganini bildiradi. Ikki active download/process,10/min va5min stream deadline saqlanadi. Range resume yo‘q: uzilgan fayl o‘sha tayyor artifactdan boshidan qayta yuklanadi, yangi job talab qilinmaydi.
 
-PC yoki worker o‘chsa snapshotni qisman davom ettirish mumkin emas. Baza saqlangan bo‘lsa30soniyalik lease tugaydi, navbat recover qilinadi, yangi lease yangi izchil snapshotni boshidan tayyorlaydi; eski bo‘laklar qayta ishlatilmaydi. Retry/expiry/authorization tugagan bo‘lsa owner ko‘rib qayta tasdiqlaydi.5min heartbeat emas: heartbeat har5soniyada, lease30soniya. Kompyuter o‘chiq paytda servis yoki worker ishlamaydi.
+PC yoki worker o‘chsa snapshotni qisman davom ettirish mumkin emas. Baza saqlangan bo‘lsa30soniyalik lease tugaydi, navbat recover qilinadi, yangi lease yangi izchil snapshotni boshidan tayyorlaydi; eski bo‘laklar qayta ishlatilmaydi. Retry/expiry/authorization tugagan bo‘lsa owner ko‘rib qayta tasdiqlaydi.Heartbeat har5soniyada, lease30soniya. Kompyuter o‘chiq paytda servis yoki worker ishlamaydi.
 
 ## Xavfsizlik va doira
 

@@ -1,0 +1,23 @@
+{
+  "recordedAt": "2026-10-17T14:23:16.297533+00:00",
+  "scope": "Local test image only; not production deployment or registry approval",
+  "image": "pos-preparation:20261017",
+  "source": [
+    {
+      "file": "src/app/api/jobs/[id]/export/route.ts",
+      "sha256": "217b499ac4c5198ed2d5ecc4aac57ebc933f8efd2759be91eaba98801c3787da",
+      "matches": true
+    },
+    {
+      "file": "src/server/jobs/export-chunks.ts",
+      "sha256": "c64176a71b26c7d9d22d5cb3bcb8981cd4b7c27b72dceca88e75170fee51928e",
+      "matches": true
+    },
+    {
+      "file": "prisma/migrations/202610170190_chunk_tenant_edges/migration.sql",
+      "sha256": "635f5bfce93fc03fb2e667ad4b007f46b5588d0dc7a60254754e4d8b891d747f",
+      "matches": true
+    }
+  ],
+  "sameImageForFourTargets": true
+}

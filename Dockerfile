@@ -18,6 +18,7 @@ COPY . .
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN node scripts/build-offline.cjs \
+    && node node_modules/typescript/bin/tsc -p tsconfig.worker.json \
     && mkdir -p /app/.next \
     && touch /app/next-env.d.ts \
     && groupadd --system --gid 1001 nodejs \

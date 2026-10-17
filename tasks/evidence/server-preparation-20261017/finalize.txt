@@ -1,0 +1,26 @@
+const fs=require('fs'),assert=require('assert/strict'),{createHash}=require('crypto'),{execFileSync}=require('child_process');
+const dir='tasks/evidence/server-preparation-20261017/';
+const read=name=>fs.readFileSync(dir+name,'utf8'),json=name=>JSON.parse(read(name));
+function suite(name){const text=read(name),result={};for(const key of ['tests','pass','fail','skipped'])result[key]=Number(text.match(new RegExp('ℹ '+key+' (\\d+)'))?.[1]);assert.ok(Number.isInteger(result.tests));return result}
+function titles(text,mark){return text.split('ℹ tests')[0].split('\n').filter(line=>line.startsWith(mark+' ')).map(line=>line.slice(2).replace(/ \([^()]+\)$/,''))}
+const full=suite('integration-full.log'),target=suite('integration-targeted-final.log'),unit=suite('unit-final.log'),ops=suite('ops-final.log'),local=suite('local-tests.log');
+assert.equal(full.tests,473);assert.equal(full.fail,5);assert.equal(target.fail,0);assert.equal(target.tests,45);assert.equal(unit.fail,0);assert.equal(unit.tests,174);assert.equal(ops.fail,0);assert.equal(local.fail,0);
+assert.equal(suite('final-stream-integration.log').fail,0);
+const failures=titles(read('integration-full.log'),'✖'),retested=new Set(titles(read('integration-targeted-final.log'),'✔'));assert.equal(failures.length,5);for(const title of failures)assert.ok(retested.has(title),title);
+assert.match(read('browser-final.log'),/3 passed/);assert.doesNotMatch(read('browser-final.log'),/\d+ failed/);assert.match(read('build-final.log'),/Compiled successfully/);assert.match(read('local-compose-build-final.log'),/Built/);
+assert.equal(json('dependency-audit-final.json').metadata.vulnerabilities.total,0);assert.ok(json('database-restart.json').survived);assert.ok(json('local-image-inspection.json').workerFilesPresent);
+const {validateServiceTargets,sourceHashes}=require(process.cwd()+'/scripts/release/check-service-targets.cjs');const manifest='tasks/evidence/release-service-targets-20261017-server-preparation.json';const serviceTargets=validateServiceTargets(JSON.parse(fs.readFileSync(manifest)));
+assert.ok(json('local-image-source-final.json').source.every(row=>row.matches));
+assert.equal(json('security-scan-final.json').findings.length,0);assert.equal(json('cleanup.json').removed,true);
+const deploymentFiles=['Dockerfile','docker-compose.yml','docker-compose.local.yml','docker-compose.release.yml','docker-compose.maintenance.yml','.dockerignore'];
+const data={recordedAt:new Date().toISOString(),sourceRevision:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),scope:'Independent local core and release preparation; no real staging/production/pilot/vendor acceptance',
+ backend:{fullInitial:full,initialFailureReasons:['Missing explicit synthetic Docker container name in restore harness','New export chunk model needed common native tenant edge/ownership triggers; fixed additively in migration190'],failedTitles:failures,finalTargeted:target,uniqueAcceptedAcrossRuns:473,singleCleanFullRun:false,finalStream:suite('final-stream-integration.log')},unit,ops,local,
+ browser:{passed:3,failed:0,actualProductionWorker:true,largeNativeDownload:true,scenarios:['tenant export enqueue lost-ACK replay and >16MiB exact download','download prerequisite plus closure/cancel MFA','1001-row XLSX/PDF export']},
+ build:{nextProduction:true,worker:true,typecheck:true,eslint:true,localImage:true,allFourLocalComposeBuildTargets:true},
+ restart:json('database-restart.json'),dependencyAudit:json('dependency-audit-final.json').metadata.vulnerabilities,dependencyScope:'production npm dependencies only; not OS/image/penetration coverage',
+ migrations:{count:190,new:['202610170189_chunked_tenant_exports','202610170190_chunk_tenant_edges'],appliedTo:'owned synthetic pos_test only',historicalMigrationsEdited:false},
+ environmentFilesModified:false,businessDatabaseChanged:false,productionDeployment:false,externalIntegrationsImplemented:false,originalPlan:{total:259,done:185,increment:0},
+ limits:{tenantExportBytes:1073741824,tenantExportRows:10000000,stagingChunkBytes:262144,artifactHours:24,downloadsPerProcess:2,streamSeconds:300,snapshotSeconds:600,largerArchivesStillRejected:true},
+ serviceTargets,cleanup:json('cleanup.json'),deploymentFileHashes:Object.fromEntries(deploymentFiles.map(file=>[file,createHash('sha256').update(fs.readFileSync(file)).digest('hex')])),sourceHashes:sourceHashes(process.cwd()),
+ artifacts:Object.fromEntries(fs.readdirSync(dir).filter(name=>fs.statSync(dir+name).isFile()&&name!=='validation.json').sort().map(name=>[name,createHash('sha256').update(fs.readFileSync(dir+name)).digest('hex')]))};
+fs.writeFileSync(dir+'validation.json',JSON.stringify(data,null,2)+'\n');console.log(JSON.stringify({validated:true,backend:473,unit:unit.tests,browser:3,productionAudit:0,sourceFiles:Object.keys(data.sourceHashes).length,serviceTargets}));

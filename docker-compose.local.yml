@@ -1,4 +1,10 @@
 # Local workstation only. Production uses explicit -f release files, not this overlay.
+x-local-image: &local-image
+  image: ${POS_LOCAL_IMAGE:-pos-app:development}
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: local-development
 x-local-database: &local-database
   # The wrapper builds the internal URL, percent-encoding these actual DB settings.
   POSTGRES_USER: ${POSTGRES_USER:-pos_user}
@@ -8,6 +14,7 @@ x-local-database: &local-database
 
 services:
   migrate:
+    <<: *local-image
     profiles: !reset []
     init: true
     environment: *local-database
@@ -15,9 +22,7 @@ services:
     volumes:
       - ./scripts/local/docker-database.cjs:/local/docker-database.cjs:ro,z
   app:
-    image: ${POS_LOCAL_IMAGE:-pos-app:development}
-    build:
-      target: local-development
+    <<: *local-image
     ports: !reset []
     environment:
       <<: *local-database
@@ -30,6 +35,7 @@ services:
       migrate:
         condition: service_completed_successfully
   jobs:
+    <<: *local-image
     environment:
       <<: *local-database
       NODE_ENV: development
@@ -38,6 +44,7 @@ services:
     volumes:
       - ./scripts/local/docker-database.cjs:/local/docker-database.cjs:ro,z
   reconciliation:
+    <<: *local-image
     environment:
       <<: *local-database
       NODE_ENV: development
