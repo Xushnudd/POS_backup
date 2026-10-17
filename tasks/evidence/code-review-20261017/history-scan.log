@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "scanned": 3670,
+  "binary": 32,
+  "blobs": 3702,
+  "bytes": 90382992,
+  "findings": [],
+  "skipped": [],
+  "complete": true,
+  "scope": "Local refs reachable blobs only; no network, reflogs, unreachable objects, LFS payloads, archives or image CVEs. File is one Git inventory path per object, not every occurrence. Credential-store paths reported without reading contents. Binary blobs excluded. Known token patterns only."
+}

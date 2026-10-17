@@ -21,3 +21,9 @@ test('Catalog storage strips cost, balance, private image URLs and description e
  const saved=minimalCatalog([product])[0];assert.equal(saved.salePrice,10);
  for(const key of ['costPrice','minStock','balance','imageUrl','description'])assert.equal(key in saved,false);
 });
+test('Cached and restored catalog retains sellable unit conversions without retaining unrelated server fields',()=>{
+ const product={id:'P',organizationId:'A',name:'Fractional item',unit:'kg',unitPrecision:6,serialTracking:true,salePrice:10,isActive:true,unitConversions:[{id:'C',tradeUnit:'pack',baseUnit:'kg',ratio:'0.125',tradePrecision:0,isActive:true,privateSupplierCost:'secret'}]} as unknown as Product;
+ const saved=minimalCatalog([product])[0];
+ assert.deepEqual(saved.unitConversions,[{id:'C',tradeUnit:'pack',baseUnit:'kg',ratio:'0.125',tradePrecision:0,isActive:true}]);
+ assert.equal(saved.unitPrecision,6);assert.equal(saved.serialTracking,true);assert.equal(JSON.stringify(saved).includes('secret'),false);
+});

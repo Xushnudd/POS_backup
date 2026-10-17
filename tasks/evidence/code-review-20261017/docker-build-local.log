@@ -1,0 +1,64 @@
+ Image pos-app:development Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.10kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.67kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24-slim
+#3 DONE 1.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 316B done
+#4 DONE 0.0s
+
+#5 [deps 1/7] FROM docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5
+#5 resolve docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 15.69MB 0.1s done
+#6 DONE 0.1s
+
+#7 [deps 2/7] RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [deps 3/7] WORKDIR /app
+#8 CACHED
+
+#9 [deps 4/7] COPY package.json package-lock.json* ./
+#9 CACHED
+
+#10 [deps 5/7] COPY prisma ./prisma/
+#10 CACHED
+
+#11 [deps 6/7] RUN npm ci --engine-strict
+#11 CACHED
+
+#12 [deps 7/7] RUN npx prisma generate
+#12 CACHED
+
+#13 [local-development 1/2] COPY . .
+#13 DONE 0.4s
+
+#14 [local-development 2/2] RUN node scripts/build-offline.cjs     && mkdir -p /app/.next     && touch /app/next-env.d.ts     && groupadd --system --gid 1001 nodejs     && useradd --system --create-home --uid 1001 --gid nodejs nextjs     && chown 1001:1001 /app /app/.next /app/next-env.d.ts /app/tsconfig.json
+#14 0.434 useradd warning: nextjs's uid 1001 is greater than SYS_UID_MAX 999
+#14 DONE 0.5s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 0.7s done
+#15 exporting manifest sha256:59a3dc21eed343e0672e56bcda75c7d35b7f02b512a6564e14947e23ec748a9f 0.0s done
+#15 exporting config sha256:279fda90d3cca33f9c01f4137a3b7c72a931778befb9d5d47ed1551df7916c1a 0.0s done
+#15 exporting attestation manifest sha256:b4e7db19805df54c120d20e1bb7bba67465d6fabf905005ded215b43f4460240 0.0s done
+#15 exporting manifest list sha256:04fca911e25fb08f46ee485e53928facbf2e141acafba4ff96f477e43d1b70ff 0.0s done
+#15 naming to docker.io/library/pos-app:development done
+#15 unpacking to docker.io/library/pos-app:development
+#15 unpacking to docker.io/library/pos-app:development 0.2s done
+#15 DONE 1.0s
+
+#16 resolving provenance for metadata file
+#16 DONE 0.0s
+ Image pos-app:development Built 

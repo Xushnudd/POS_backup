@@ -215,6 +215,8 @@ Javob: `token`, foydalanuvchi, uning birinchi faol tashkiloti va roli. Xatolar: 
 
 Body va query kerak emas. Javob: `user`, `organization`, `role`, `stores[]`. Har bir do‘kon ichida `id`, `name`, `address`, `phone` qaytariladi.
 
+`GET /api/stores?organizationId=...` egasiga tashkilotdagi barcha faol filiallar va faol kassalarni beradi; boshqa xodimga faqat joriy biriktirilgan filiallar qaytadi. Boshqa tenant IDsi rad etiladi. Eski APIlarda ham unikal indeks konflikti umumiy 500 o‘rniga `409 CONFLICT`, yo‘qolgan resurs `404 NOT_FOUND` orqali umumiy xavfsiz handlerga uzatiladi. Xatolarda requestId saqlanadi, raw DB diagnostikasi qaytarilmaydi.
+
 ## Tashkilotlar va foydalanuvchilar
 
 | Metod | Endpoint | Tavsif |
@@ -245,6 +247,8 @@ Majburiy: `name`, `phone`. `currencyCode`, `timezone`, `allowNegativeStock` mos 
 ### `PUT /organizations/:id`
 
 Quyidagi maydonlarning istalgan qismini qabul qiladi: `name`, `tin`, `phone`, `currencyCode`, `timezone`, `allowNegativeStock`, `receiptFooter`.
+
+Tashkilot yaratish va yangilashda bo‘sh/ixtiyoriy `tin` `NULL`ga normallashtiriladi; `tin: null` saqlangan STIRni tozalaydi. `receiptFooter: ""` chek footerini tozalaydi. Band STIR `409 TIN_EXISTS` qaytaradi; yangilash va audit tranzaksiyasi rollback bo‘ladi. `timezone` serverdagi Intl tanigan vaqt zonasi, `currencyCode` 3 ta katta lotin harfi bo‘lishi shart; noto‘g‘ri qiymat `400 VALIDATION_ERROR` bilan rad etiladi. Manfiy stockni yoqish ruxsati hozir mavjud emas (`allowNegativeStock: false`).
 
 ### `POST /organizations/:id/users`
 

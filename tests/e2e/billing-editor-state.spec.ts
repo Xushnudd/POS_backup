@@ -1,3 +1,4 @@
+import {localizeCodeLabel} from '../../src/i18n/messages'
 import {test,expect} from '@playwright/test'
 import {PrismaClient} from '@prisma/client'
 import {randomUUID} from 'node:crypto'
@@ -15,7 +16,7 @@ test('Invoice read failure preserves cancellation draft and blocks new commands 
  const region=page.getByRole('region',{name:'Obuna invoicelari'})
  await region.getByRole('button',{name:'Oylik invoice yaratish: oldindan ko‘rish'}).click()
  await region.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
- await expect(region.getByText('Holat: open',{exact:true})).toBeVisible()
+ await expect(region.getByText('Holat: '+localizeCodeLabel('open','uz'),{exact:true})).toBeVisible()
  await region.getByLabel('Bekor qilish sababi').fill('Keep raw cancellation draft')
  let fail=true
  await page.route('**/api/billing/invoices?*',route=>fail?route.abort('failed'):route.continue())
@@ -35,7 +36,7 @@ test('Invoice read failure preserves cancellation draft and blocks new commands 
  await region.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
  await expect.poll(()=>db.billingInvoice.count({where:{organizationId:me.organization.id,state:'cancelled'}})).toBe(1)
  await region.getByRole('button',{name:'Invoicelarni yangilash',exact:true}).click()
- await expect(region.getByText('Holat: cancelled',{exact:true})).toBeVisible()
+ await expect(region.getByText('Holat: '+localizeCodeLabel('cancelled','uz'),{exact:true})).toBeVisible()
  await expect(region.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible()
  await region.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true}).click()
  await expect(region.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toHaveCount(0)

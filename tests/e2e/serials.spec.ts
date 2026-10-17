@@ -40,6 +40,10 @@ test('Owner serial policy MFA and original lost ACK recovery; real unit warranty
  await picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check();await page.getByLabel(product.name,{exact:true}).fill('1');await page.getByRole('dialog',{name:'Tovar qaytarish',exact:true}).getByLabel('Sabab',{exact:true}).fill('Actual original serial refund');await page.getByRole('button',{name:'Qaytarishni tasdiqlash',exact:true}).click()
  await expect.poll(async()=>(await db.serialNumber.findUniqueOrThrow({where:{id:serial.id}})).state).toBe('available')
  await page.goto('/pos');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill(product.name);await page.getByRole('button',{name:product.name+' — savatga qo‘shish',exact:true}).click();await page.getByRole('button',{name:"To'lovga o'tish",exact:true}).click()
+ // A local cart reload used to strip serialTracking and hide the required picker.
+ await page.getByRole('dialog',{name:"To'lovni qabul qilish",exact:true}).getByRole('button',{name:'Bekor qilish',exact:true}).click()
+ await expect(page.getByRole('status').filter({hasText:'Savat lokal saqlandi'})).toBeVisible()
+ await page.reload();await page.getByRole('button',{name:"To'lovga o'tish",exact:true}).click()
  const payment=page.getByRole('dialog',{name:"To'lovni qabul qilish",exact:true}),checkoutPicker=payment.getByRole('group',{name:product.name+' sotiladigan seriallar (1)',exact:true})
  await checkoutPicker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check()
  let completionDropped=false;const completionKeys:string[]=[]

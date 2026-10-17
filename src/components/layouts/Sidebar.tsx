@@ -7,6 +7,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import {usePosConnection} from '@/hooks/usePosConnection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -126,6 +127,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const pathname = usePathname();
   const { role, organization } = useAuth();
+  const connection=usePosConnection();
 
   const filteredNavItems = navItems.filter((item) => {
     if (!item.roles) return true;
@@ -231,9 +233,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Footer info */}
         <div className="p-4 border-t border-slate-800 text-slate-400 text-xs flex items-center justify-between">
           <span>{tr("v1.0.0 (MVP)")}</span>
-          <span className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            {tr("Online")}</span>
+          <span role="status" aria-label={tr("Server aloqasi")} className={'inline-flex items-center gap-1.5 text-[11px] '+(connection.state==='online'?'text-emerald-400':'text-amber-300')}>
+            <span className={'w-2 h-2 rounded-full '+(connection.state==='online'?'bg-emerald-500':'bg-amber-400')} />
+            {connection.state==='online'?tr("Online"):connection.state==='checking'?tr("Aloqa tekshirilmoqda"):tr("Offline")}</span>
         </div>
       </aside>
     </>

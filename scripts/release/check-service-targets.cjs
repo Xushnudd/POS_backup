@@ -78,7 +78,7 @@ function validateServiceTargets(report,{root=process.cwd(),now=new Date()}={}){
  return {task:report.task,currentSearchP95Ms:load.search.p95Ms,currentCheckoutP95Ms:load.checkout.p95Ms,failed:0,denominator:200,rawFailed,rawDenominator,sourceFiles:Object.keys(current).length,scope:report.scope,contractualSla:false};
 }
 if(require.main===module){
- try{const report=JSON.parse(read(process.cwd(),'tasks/evidence/release-service-targets-20261016-registration.json'));console.info(JSON.stringify(validateServiceTargets(report)));}
+ try{const report=JSON.parse(read(process.cwd(),'tasks/evidence/release-service-targets-20261017-code-review.json'));console.info(JSON.stringify(validateServiceTargets(report)));}
  catch(error){console.error('SERVICE_TARGETS_'+(error.message??'CHECK_FAILED'));process.exitCode=1;}
 }
 module.exports={sourceHashes,validateServiceTargets};

@@ -32,7 +32,7 @@ test('stock threshold preserves exact immutable intent after lost ACK and reload
  await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible()
  await page.reload();await page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true}).click()
  await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toHaveCount(0)
- await expect(page.getByRole('article')).toContainText('tavsiya 8.000001 kg')
+ await expect(page.getByRole('row').filter({hasText:product.name})).toContainText('8.000001 kg')
  expect(bodies).toHaveLength(2);expect(bodies[1]).toEqual(bodies[0]);expect(bodies[0]).toMatchObject({storeId:store.id,productId:product.id,minimum:'3.000001',maximum:'10.000001'})
  const row=await db.stockThreshold.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})
  expect(row.minimum.toString()).toBe('3.000001');expect(row.maximum?.toString()).toBe('10.000001')

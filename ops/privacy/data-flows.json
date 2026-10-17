@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedOn": "2026-10-16",
+  "reviewedOn": "2026-10-17",
   "task": "LEG-01.06",
   "productionDeploymentVerified": false,
   "localPublicConfiguration": {
@@ -162,8 +162,8 @@
   "sourceHashes": {
     "public/sw.js": "0bec9b89275322a258f585a3b9d552274bd4841b4068e89ee86b407dc92d9825",
     "src/app/(dashboard)/products/[id]/media/page.tsx": "b83530a8585858ae8552051bf2fba18dd3939636e1d03f952434f0eb90c684c4",
-    "src/app/api/products/[id]/route.ts": "6a67e026728eef98eb3d9aa8b4964398d6ba84d9d56df636e9f9c40d60b524ed",
-    "src/app/api/products/route.ts": "fb46e28f085577400681d357d03edec56c3d0a53665d0c2ec0aa04c50dcb90eb",
+    "src/app/api/products/[id]/route.ts": "b2ddf8780abb1bb9e38b1f65f422b360fd7a4f769baf862f708c7db9e27ffe7b",
+    "src/app/api/products/route.ts": "1f9b0b0ac36a67e022c6dd7cfad482de13bd4bd4b38326a3134e62e4ccb9c036",
     "src/lib/api.ts": "51c42579d9dd0b7a8d368d4d51ceac69ef45df66ef4ad2445a7f9c58ab1827f7",
     "src/lib/product-image.ts": "2a7783c8adc958960deba38081d89ab5bb47daec0fb359a8b0c05dca4f5559ce",
     "src/proxy.ts": "b2650fda82c61b6f38bb017c157af92caac6cb4219b081290ed64853d5624293",
@@ -173,5 +173,6 @@
     "src/server/integrations/contracts.ts": "664b6dd46bbceaf7479529401f13e0367ebdb100845bee6ef28ba5b00115fc7e",
     "src/server/integrations/outbox.ts": "ed8bb29b7a7abc2799cd58faf0e9b1f126229c5fac41a0beeac7e432493bc76f",
     "src/server/sales/receipt-links.ts": "7ffc6ddaf47e7251a964adb9f57353938538c09837f2ea9f7883d49cba3c583e"
-  }
+  },
+  "reviewNote": "Product endpoint catch fallbacks now delegate sanitized error handling to withApi; reviewed diff leaves DTO, image and external provider behavior unchanged. No production/provider acceptance claimed."
 }

@@ -1,5 +1,11 @@
 export type ErrorGuidance={message:string;nextAction:string}
 const guidance:Record<string,ErrorGuidance>={
+ RECOUNT_REQUIRED:{message:'Farqli mahsulotlarni qayta sanang',nextAction:'Farqi bor qatorlarga ikkinchi mustaqil sanash natijasini kiriting, keyin tasdiqlashni qayta ko‘rib chiqing. Qoldiq hali o‘zgartirilmagan.'},
+ ROLE_REVISION_CHANGED:{message:'Rol o‘zgargan; yangi versiyani qayta ko‘rib chiqing',nextAction:'Draftingizni saqlang, rollar ro‘yxatini yangilang va joriy vakolatlarni qayta tekshiring. Eski versiyani ustidan yozmang.'},
+ INVALID_PIN:{message:'Kassir yoki PIN noto‘g‘ri',nextAction:'Tanlangan kassir va filialni tekshiring. PINni hech kimga yubormang; kerak bo‘lsa rahbarga murojaat qiling.'},
+ DISCREPANCY_REMAINS:{message:'Farq hali bor; tasdiqlangan tuzatish hujjatini tekshiring',nextAction:'Manba hujjatlari va haqiqiy qoldiqni solishtiring. Tafovut bartaraf bo‘lmaguncha incidentni yopmang.'},
+ RESULT_UNKNOWN:{message:'Avval asl amal natijasini tekshiring yoki qoralamani vakolat bilan bekor qiling',nextAction:'Original amal kaliti va server hujjatini tekshiring. Noaniq natijani yangi kalit bilan takrorlamang.'},
+ COST_CHANGE_FORBIDDEN:{message:'Tannarxni o‘zgartirish yoki eksport qilish uchun egasi vakolati kerak.',nextAction:'Joriy hisob vakolatini tekshiring. Natijasi noma’lum avvalgi amalni saqlab, rahbarga murojaat qiling.'},
  TIN_EXISTS:{message:'Bu STIR / INN bilan tashkilot allaqachon ro‘yxatdan o‘tgan.',nextAction:'STIR / INNni tekshiring. Mavjud tashkilot uchun yangi hisob ochish o‘rniga o‘z hisobingizga kiring yoki egasidan taklif so‘rang.'},
  EMAIL_EXISTS:{message:'Bu e-mail bilan hisob allaqachon ro‘yxatdan o‘tgan.',nextAction:'E-mailni tekshiring yoki mavjud hisobingizga kiring.'},
  USER_EXISTS:{message:'Bu telefon raqam bilan hisob allaqachon ro‘yxatdan o‘tgan.',nextAction:'Telefon raqamini tekshiring yoki mavjud hisobingizga kiring.'},

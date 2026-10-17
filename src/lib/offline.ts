@@ -34,7 +34,7 @@ function minimalDraft(value:unknown){
  const saved=value as {cart?:{customer?:Record<string,unknown>|null;items?:{product?:Record<string,unknown>}[]}}
  if(!saved.cart)return value
  const pick=(source:Record<string,unknown>,keys:string[])=>Object.fromEntries(keys.filter(k=>k in source).map(k=>[k,source[k]]))
- return {...saved,cart:{...saved.cart,customer:saved.cart.customer?pick(saved.cart.customer,['id','organizationId','fullName','phone','creditLimit','isActive']):null,items:saved.cart.items?.map(item=>({...item,product:item.product?pick(item.product,['id','organizationId','name','sku','barcode','unit','unitPrecision','salePrice','isActive']):undefined}))}}
+ return {...saved,cart:{...saved.cart,customer:saved.cart.customer?pick(saved.cart.customer,['id','organizationId','fullName','phone','creditLimit','isActive']):null,items:saved.cart.items?.map(item=>({...item,product:item.product?minimalCatalog([item.product as unknown as Product])[0]:undefined}))}}
 }
 export const saveDraft=(scope:OfflineScope,value:unknown)=>transact('drafts','readwrite',store=>store.put({id:scopeKey(scope),version:1,value:minimalDraft(value)}))
 export async function loadDraft(scope:OfflineScope){const saved=await transact<{version?:number;value:unknown}|undefined>('drafts','readonly',store=>store.get(scopeKey(scope)));if(saved?.version!==undefined&&saved.version!==1)throw new Error('Lokal savat versiyasi qo‘llab-quvvatlanmaydi');return saved?.value}
@@ -86,6 +86,12 @@ async function synchronizeBatch(scope:OfflineScope) {
  return results
 }
 
+// Read-only admission: logout must not destroy local state before the server ACK.
+// clearScope repeats the checks at deletion time, including one atomic DB check.
+export async function assertScopeCanBeCleared(scope:OfflineScope){
+ if(await hasUnresolvedCash(scope.organizationId,scope.userId,scope.deviceId))throw new Error('Hal qilinmagan offline cash ruxsati bor; original natijani tekshiring')
+ if((await pendingOperations(scope)).length)throw new Error('Sinxronlanmagan amallar bor; avval natijani tekshiring')
+}
 export async function clearScope(scope:OfflineScope) {
  if(await hasUnresolvedCash(scope.organizationId,scope.userId,scope.deviceId))throw new Error('Hal qilinmagan offline cash ruxsati bor; original natijani tekshiring')
  const db=await open()

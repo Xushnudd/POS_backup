@@ -1,0 +1,14 @@
+[WebServer] (node:84074) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 5 tests using 1 worker
+
+(node:84223) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/context-navigation.spec.ts:20:5 › Branch/register selectors verify accessible IDs, preserve selection after reload and handle server failure without changing context (3.0s)
+  ✓  2 [chromium] › tests/e2e/context-navigation.spec.ts:43:5 › Fractional cart and conversion controls survive reload; nonempty cart and held draft ACK block branch changes (3.6s)
+  ✓  3 [chromium] › tests/e2e/context-navigation.spec.ts:80:5 › Settings can clear TIN/footer and expose tax settings; sidebar reports an actual server outage (960ms)
+  ✓  4 [chromium] › tests/e2e/context-navigation.spec.ts:98:5 › Failed logout preserves a saved cart; acknowledged logout clears local scope and revokes the actual session (2.0s)
+  ✓  5 [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (6.6s)
+
+  5 passed (17.7s)

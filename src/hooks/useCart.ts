@@ -20,7 +20,7 @@ export function useCart() {
         const updated = [...prev];
         const currentItem = updated[existingIdx];
         const tradeQuantity=currentItem.tradeUnit?clientQuantitySum(currentItem.tradeQuantity??'1',quantity):undefined;
-        const newQty = tradeQuantity?Number(clientBaseQuantity(tradeQuantity,currentItem.conversionRatio??'1',product.unitPrecision??6)):currentItem.quantity + quantity;
+        const newQty = tradeQuantity?Number(clientBaseQuantity(tradeQuantity,currentItem.conversionRatio??'1',product.unitPrecision??6)):Number(clientQuantitySum(String(currentItem.quantity),quantity));
         const discountAmount=currentItem.discountPercent===undefined?currentItem.discountAmount:clientPercentage(clientLine(newQty,currentItem.unitPrice),currentItem.discountPercent);
         const lineTotal = clientLine(newQty, currentItem.unitPrice, discountAmount);
 

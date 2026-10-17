@@ -1,0 +1,9 @@
+{
+  "scope": "literal JSX href only; dynamic/external links not asserted",
+  "missing": [
+    {
+      "file": "src/app/(dashboard)/products/[id]/units/page.tsx",
+      "href": "/settings/units"
+    }
+  ]
+}

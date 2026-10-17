@@ -302,7 +302,7 @@ function ProductsEditor() {
               <tbody className="divide-y divide-gray-100">
                 {products.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50/70 transition">
-                    <td className="py-3.5 px-4 font-bold text-gray-900">{p.name}<p><Link href={`/products/${p.id}/variants`} className="text-xs text-blue-700">{tr("Variantlar")}</Link>{role!=='cashier'&&<Link href={`/products/${p.id}/media`} className="ml-2 text-xs text-blue-700">{tr("Tavsif / rasm")}</Link>}{role==='owner'&&<Link href={`/products/${p.id}/compliance`} className="ml-2 text-xs text-blue-700">{tr("Tasnif / cheklov")}</Link>}{role==='owner'&&<Link href={`/products/${p.id}/units`} className="ml-2 text-xs text-blue-700">{tr("Birlik nisbati")}</Link>}</p></td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900"><Link prefetch={false} href={`/products/${p.id}`} className="text-blue-700 underline">{p.name}</Link><p><Link href={`/products/${p.id}/variants`} className="text-xs text-blue-700">{tr("Variantlar")}</Link>{role!=='cashier'&&<Link href={`/products/${p.id}/media`} className="ml-2 text-xs text-blue-700">{tr("Tavsif / rasm")}</Link>}{role==='owner'&&<Link href={`/products/${p.id}/compliance`} className="ml-2 text-xs text-blue-700">{tr("Tasnif / cheklov")}</Link>}{role==='owner'&&<Link href={`/products/${p.id}/units`} className="ml-2 text-xs text-blue-700">{tr("Birlik nisbati")}</Link>}</p></td>
                     <td className="py-3.5 px-4">
                       <div className="font-mono text-gray-700">{p.sku}</div>
                       <div className="font-mono text-[10px] text-gray-400">{p.barcode}</div>

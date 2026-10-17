@@ -154,8 +154,8 @@ function SettingsContent() {
       await api.organizations.update(organization.id, {
         name: orgName.trim(),
         phone: orgPhone.trim(),
-        tin: orgTin.trim() || undefined,
-        receiptFooter: receiptFooter.trim() || undefined,
+        tin: orgTin.trim() || null,
+        receiptFooter: receiptFooter.trim(),
         allowNegativeStock,
       });
 
@@ -270,6 +270,7 @@ function SettingsContent() {
     <div className="space-y-6 max-w-5xl mx-auto">
       {['owner','admin'].includes(role??'')&&<a href="/settings/prices" className="underline text-blue-800">{tr("Narx darajalari va mijoz guruhlari")}</a>}
       {role==='owner'&&<a href="/settings/support" className="underline text-blue-800">{tr("Support uchun vaqtli kirish ruxsati")}</a>}
+      {role==='owner'&&<a href="/settings/taxes" className="underline text-blue-800">{tr("Soliq siyosati va stavka tarixi")}</a>}
 
       {/* Top Header */}
       <div>

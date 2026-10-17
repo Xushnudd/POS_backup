@@ -30,7 +30,7 @@ test('Catalog forms preserve unsaved data on cancel, navigation and failed save;
  const endpoint='**/api/categories/'+b.id
  await page.route(endpoint,route=>route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'CONCURRENT_CONFLICT',message:'Fixture rejected save'}})}))
  await page.getByRole('button',{name:'Saqlash',exact:true}).click()
- await expect(page.getByRole('alert').filter({hasText:'Fixture rejected save'})).toBeVisible()
+ await expect(page.getByRole('alert').filter({hasText:'Parallel amallar to‘qnashdi.'})).toBeVisible()
  await expect(page.getByLabel('Kategoriya nomi')).toHaveValue('Category confirmed B')
  await expect(page.getByRole('status').filter({hasText:'Saqlanmagan kategoriya'})).toBeVisible()
  await page.unroute(endpoint)

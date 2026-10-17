@@ -13,7 +13,7 @@ test('tax forms protect partial drafts and archive replays the original PUT once
  await page.goto('/settings/taxes');await expect(page.getByRole('button',{name:'Soliq tarixini ochish: Recovery first',exact:true})).toBeEnabled()
  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
  await page.getByLabel('Soliq profili nomi',{exact:true}).fill('A')
- await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/settings\/taxes$/);expect(prompts).toBe(1)
+ await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/settings\/taxes(?:\?|$)/);expect(prompts).toBe(1)
  await page.getByLabel('Soliq profili nomi',{exact:true}).fill('')
  await page.getByRole('button',{name:'Soliq tarixini ochish: Recovery first',exact:true}).click()
  await page.getByLabel('Soliq stavkasi foiz',{exact:true}).fill('12.34')
@@ -26,7 +26,7 @@ test('tax forms protect partial drafts and archive replays the original PUT once
   if(lost){lost=false;const response=await route.fetch();expect(response.ok()).toBe(true);entered();await gate;await route.abort('failed')}else await route.continue()
  })
  await page.getByRole('button',{name:'Soliq profilini arxivlash: Recovery first: oldindan ko‘rish',exact:true}).click()
- try{await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click()});await started;await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/settings\/taxes$/);expect(prompts).toBe(2);}finally{release()}
+ try{await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click()});await started;await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/settings\/taxes(?:\?|$)/);expect(prompts).toBe(2);}finally{release()}
  await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible()
  await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click()
  await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).toHaveCount(0)

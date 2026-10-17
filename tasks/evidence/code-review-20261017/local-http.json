@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-10-17T09:36:11.490Z",
+  "scope": "Local development read-only HTTP requests; TLS certificate validation intentionally not asserted",
+  "results": [
+    {
+      "url": "http://localhost:3000/api/health/ready",
+      "status": 200,
+      "location": null
+    },
+    {
+      "url": "http://localhost:3000/register",
+      "status": 200,
+      "location": null
+    },
+    {
+      "url": "https://localhost:3443/api/health/ready",
+      "status": 200,
+      "location": null
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{"requestId":"1db03cc6-b876-4430-9750-debfb5c268fd","organizationId":"c0e3c851-7a4d-490e-8280-1b4bf7981152","status":200,"durationMs":35,"event":"api_response"}
+{"requestId":"54130a1c-bbe4-4590-8fda-4df237eb5486","organizationId":"c0e3c851-7a4d-490e-8280-1b4bf7981152","status":200,"durationMs":9,"event":"api_response"}
+{"requestId":"4937ec3d-a3f0-4853-9163-12bb4674bf12","organizationId":"c0e3c851-7a4d-490e-8280-1b4bf7981152","status":200,"durationMs":8,"event":"api_response"}
+{"requestId":"90a71449-fe80-4822-951e-6dfc9a231c8e","organizationId":"c0e3c851-7a4d-490e-8280-1b4bf7981152","status":200,"durationMs":8,"event":"api_response"}
+{"requestId":"c53800e9-3ebd-412d-b2c4-912bf20b47a4","organizationId":"c0e3c851-7a4d-490e-8280-1b4bf7981152","status":403,"code":"TENANT_MISMATCH","durationMs":5,"event":"api_error"}
+{"requestId":"a509e596-86b7-4b08-88ec-b8b3a07c6806","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Owner sees admin-created active branches without assignment; staff lists stay scoped and revoked sessions fail (184.158668ms)
+{"requestId":"4ad9856f-9b11-480d-9124-85328abbeaf3","organizationId":"bf7ce236-6345-4271-a051-a77658920a43","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"eb238287-b255-460a-9bee-25f08f653dad","organizationId":"bf7ce236-6345-4271-a051-a77658920a43","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"e7fa1509-3ccd-4528-b407-6cd83dca7aff","organizationId":"bf7ce236-6345-4271-a051-a77658920a43","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"a0773117-728a-488c-988a-0fbcdf303034","organizationId":"bf7ce236-6345-4271-a051-a77658920a43","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"1d94ba7a-c33c-4721-a067-dbc191baa788","organizationId":"bf7ce236-6345-4271-a051-a77658920a43","status":200,"durationMs":11,"event":"api_response"}
+✔ Blank optional TINs are null across businesses and settings can clear a saved TIN and receipt footer (93.76087ms)
+{"requestId":"71c168d9-32ee-433b-bd59-1143c139474b","organizationId":"fd62bcbe-e3c6-46ff-b8c0-36e05c55c85b","status":409,"code":"TIN_EXISTS","durationMs":9,"event":"api_error"}
+{"requestId":"d2152ce6-dc38-4587-b3aa-2e81ed8b1679","organizationId":"fd62bcbe-e3c6-46ff-b8c0-36e05c55c85b","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+✔ Duplicate TIN gives actionable sanitized409 and rolls back settings/audit; staff cannot change settings (52.460017ms)
+{"requestId":"8bdea60e-302d-4d16-9687-cf42d7bbaa56","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":400,"code":"VALIDATION_ERROR","durationMs":33,"event":"api_error"}
+{"requestId":"147ff69e-bc40-469b-8b93-517149a16242","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":400,"code":"VALIDATION_ERROR","durationMs":8,"event":"api_error"}
+{"requestId":"4d7aaeeb-4b3d-4ca3-9815-6c9ddd712ba7","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":400,"code":"VALIDATION_ERROR","durationMs":8,"event":"api_error"}
+{"requestId":"17131245-e931-4c3d-8b07-4a920b9ab990","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":400,"code":"VALIDATION_ERROR","durationMs":9,"event":"api_error"}
+{"requestId":"2e3d3d9a-3530-45ad-87eb-676c81cd2bca","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"2c1d78ee-eaea-44f2-86d1-def014e6d024","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"f23db3d1-1151-4b62-8406-d1a3bfe5b146","organizationId":"76764cc4-7269-4bfc-bc46-bd1e59992e83","status":200,"durationMs":11,"event":"api_response"}
+✔ Unknown timezone and malformed currency fail validation before mutation, supported timezones remain valid (131.343995ms)
+{"requestId":"22c25407-8543-44f3-8f52-3906ab94129b","organizationId":"7459a1f1-5c7b-4162-b5c9-ab61596f5aae","status":200,"durationMs":9,"event":"api_response"}
+{"requestId":"25e40932-aab4-4a8e-bbca-3a21131a9436","organizationId":"7459a1f1-5c7b-4162-b5c9-ab61596f5aae","status":409,"code":"CONFLICT","durationMs":8,"event":"api_error"}
+✔ Duplicate register code reaches common409 handling without committing a second register or audit (32.782155ms)
+{"requestId":"7a189294-7a58-40bc-81d5-b9b90555bcde","organizationId":"79d56fe5-c5bc-4abd-b411-a42c55e4fa67","status":500,"code":"INTERNAL_ERROR","durationMs":10,"event":"api_error"}
+✔ Late settings audit failure returns sanitized500 with a request ID and rolls back the actual business update (28.576296ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 721.72824

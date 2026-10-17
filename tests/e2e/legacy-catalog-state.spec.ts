@@ -24,4 +24,10 @@ for(const kind of ['categories','units'] as const)test(kind+' draft read failure
  await expect.poll(()=>writes).toBe(1);await expect(input).toBeDisabled();await expect(page.getByRole('status').filter({hasText:'Server tasdig‘i kutilmoqda'})).toBeVisible();await page.getByRole('link',{name:'Mahsulotlarga qaytish',exact:true}).click();await expect(page).toHaveURL(new RegExp('/products/'+kind+'$'))
  await page.route(readPattern,route=>route.abort('failed'));release();await expect(page.getByRole('status').filter({hasText:isCategory?'Kategoriya serverda saqlandi':'Birlik serverda saqlandi'})).toBeVisible();await expect(page.getByRole('alert').filter({hasText:'Oxirgi ro‘yxat'})).toBeVisible();await expect(input).toHaveValue('');expect(writes).toBe(1)
  expect(isCategory?await db.category.count({where:{organizationId:me.organization.id,name}}):await db.unit.count({where:{organizationId:me.organization.id,name}})).toBe(1);expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id}})).toBe(0)
+ // A retained snapshot is valid only for the same filters/page. A failed new
+ // query must never present the old rows as the results of that new query.
+ await page.getByLabel(isCategory?'Kategoriya qidirish':'Birlik qidirish',{exact:true}).fill('Unloaded new filter')
+ await page.getByRole('button',{name:'Qidirish',exact:true}).click()
+ await expect(page.getByText('Ro‘yxat yuklanmadi; qayta yuklang.',{exact:true})).toBeVisible()
+ await expect(page.getByRole('cell',{name:oldName,exact:!isCategory})).toHaveCount(0)
 })

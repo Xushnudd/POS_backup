@@ -69,10 +69,7 @@ async function handleGET(
 
   } catch (error) {
     if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
@@ -183,10 +180,7 @@ async function handlePUT(
     if (error instanceof Error && ['INVALID_DISCOUNT', 'INVALID_AMOUNT', 'INVALID_STATUS'].includes(error.message)) {
       return NextResponse.json({ success: false, error: { code: error.message, message: 'Savdo miqdori, chegirmasi yoki holati noto‘g‘ri' } }, { status: 409 })
     }
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 export const GET = withApi(handleGET)

@@ -97,7 +97,7 @@ test('Role editor preserves discarded drafts and a known revision conflict remai
  await page.goto('/roles');
  await page.route('**/api/roles?**',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'INTERNAL_ERROR',message:'Fixture role list unavailable'}})}));
  await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
- await expect(page.getByRole('alert').filter({hasText:'Fixture role list unavailable'})).toBeVisible();
+ await expect(page.getByRole('alert').filter({hasText:'Server amalni yakunlay olmadi.'})).toBeVisible();
  await page.unroute('**/api/roles?**');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
  await page.getByRole('button',{name:'Tahrirlash',exact:true}).click();
  await page.getByLabel('GET /api/products',{exact:true}).uncheck();await page.getByLabel('GET /api/products',{exact:true}).check();
@@ -110,7 +110,7 @@ test('Role editor preserves discarded drafts and a known revision conflict remai
  await page.getByLabel('Sabab',{exact:true}).fill('Reviewed stale role edit');
  await page.route('**/api/roles/'+existing.id,route=>route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'ROLE_REVISION_CHANGED',message:'Fixture stale revision'}})}));
  await page.getByRole('button',{name:'Saqlash',exact:true}).click();
- await expect(page.getByRole('alert').filter({hasText:'Fixture stale revision'})).toBeVisible();
+ await expect(page.getByRole('alert').filter({hasText:'Rol o‘zgargan; yangi versiyani qayta ko‘rib chiqing'})).toBeVisible();
  await expect(page.getByLabel('Nom',{exact:true})).toBeEnabled();
  await expect(page.getByLabel('Nom',{exact:true})).toHaveValue('Unsaved state profile');
  await expect(page.getByRole('button',{name:'Original rol amalini tekshirish',exact:true})).toHaveCount(0);

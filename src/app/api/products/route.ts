@@ -110,10 +110,7 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 export const GET = withApi(handleGET)

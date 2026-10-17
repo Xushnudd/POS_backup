@@ -69,7 +69,7 @@ export default function CartItem({
           <button
             type="button"
             aria-label={item.product.name+" "+tr("miqdorini kamaytirish")}
-            onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',-1)):onUpdateQuantity(item.product.id, item.quantity - 1)}
+            onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',-1)):onUpdateQuantity(item.product.id, Number(clientQuantitySum(String(item.quantity),-1)))}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
             <FontAwesomeIcon icon={faMinus} className="text-[10px]" />
@@ -91,7 +91,7 @@ export default function CartItem({
           <button
             type="button"
             aria-label={item.product.name+" "+tr("miqdorini oshirish")}
-            onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',1)):onUpdateQuantity(item.product.id, item.quantity + 1)}
+            onClick={() => item.tradeUnit?changeTrade(clientQuantitySum(item.tradeQuantity??'1',1)):onUpdateQuantity(item.product.id, Number(clientQuantitySum(String(item.quantity),1)))}
             className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition active:scale-95"
           >
             <FontAwesomeIcon icon={faPlus} className="text-[10px]" />

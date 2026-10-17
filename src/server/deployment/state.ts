@@ -5,10 +5,15 @@ import {z} from 'zod'
 import {AccessError} from '../auth/policy'
 const schema=z.object({maintenance:z.boolean(),message:z.string().trim().min(3).max(500),expectedEndAt:z.iso.datetime({offset:true}).optional()}).strict()
 export type DeploymentState={maintenance:boolean;message:string;expectedEndAt?:string;release:string;configurationValid:boolean}
+// Next's DefinePlugin can replace an unconfigured deployment ID with false.
+// Never coerce that boolean into a seemingly valid "false" release label.
+export function deploymentRelease(value:unknown):string{
+ return typeof value==='string'&&/^[A-Za-z0-9._-]{1,100}$/.test(value)?value:'unversioned'
+}
 // This is operator-owned configuration, never a business-facing write API.
 // Atomic rename permits all instances/workers to observe the same drain switch.
 export async function deploymentState():Promise<DeploymentState>{
- const release=/^[A-Za-z0-9._-]{1,100}$/.test(process.env.NEXT_DEPLOYMENT_ID??'')?process.env.NEXT_DEPLOYMENT_ID!:'unversioned'
+ const release=deploymentRelease(process.env.NEXT_DEPLOYMENT_ID)
  const path=process.env.POS_DEPLOYMENT_STATE_FILE
  if(!path)return {maintenance:false,message:'',release,configurationValid:true}
  let handle:Awaited<ReturnType<typeof open>>|undefined

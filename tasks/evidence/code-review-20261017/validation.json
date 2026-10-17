@@ -1,0 +1,230 @@
+{
+  "recordedAt": "2026-10-17T09:41:57.230605+00:00",
+  "baselineRevision": "a456a5185fdaea6ba34082b5b3dac6c02f6c5f51",
+  "scope": "Local source/build and isolated synthetic PostgreSQL/Chromium review; no line-by-line universal correctness or production acceptance claim",
+  "inventory": {
+    "sourceFiles": 628,
+    "pages": 69,
+    "apiRoutes": 229,
+    "frontendTsx": 161,
+    "serverTs": 186
+  },
+  "automated": {
+    "postgresFull": {
+      "tests": 470,
+      "pass": 470,
+      "fail": 0,
+      "skipped": 0
+    },
+    "postgresTargetedAfterFinalBackendChange": {
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "skipped": 0
+    },
+    "unit": {
+      "tests": 171,
+      "pass": 171,
+      "fail": 0,
+      "skipped": 0
+    },
+    "ops": {
+      "tests": 42,
+      "pass": 42,
+      "fail": 0,
+      "skipped": 0
+    },
+    "localSecurityStatus": {
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "browser": {
+    "runs": [
+      {
+        "log": "browser-full-final.log",
+        "passed": 149,
+        "failed": 7,
+        "failedTitles": [
+          "Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely",
+          "Dashboard boundary recovers a render failure without creating an economic operation or exposing input data",
+          "Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception",
+          "Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits",
+          "Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs",
+          "Production HTTPS: durable shift correction and frozen report pagination/export",
+          "stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting"
+        ]
+      },
+      {
+        "log": "browser-focused-final.log",
+        "passed": 6,
+        "failed": 1,
+        "failedTitles": [
+          "Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception"
+        ]
+      },
+      {
+        "log": "browser-smoke-final.log",
+        "passed": 3,
+        "failed": 0,
+        "failedTitles": []
+      }
+    ],
+    "uniqueMainScenariosAcceptedAcrossRuns": 156,
+    "singleCleanFullRun": false,
+    "pricingUnavailableSeparateFreshServer": {
+      "passed": 1,
+      "failed": 0
+    },
+    "routeSmoke": {
+      "dashboard": 61,
+      "public": 8,
+      "exceptions": 0,
+      "api500": 0
+    },
+    "fixtureCleanup": "Native financial FK guard retained; own disposable database subsequently destroyed"
+  },
+  "build": {
+    "nextWebpackProduction": "passed",
+    "workerTypeScript": "passed",
+    "typecheck": "passed",
+    "eslint": "passed"
+  },
+  "releaseChecks": {
+    "i18n": {
+      "checked": 979,
+      "unreviewed": 0,
+      "missing": []
+    },
+    "claims": {
+      "copyEntries": 44,
+      "capabilities": 7,
+      "proofs": 9,
+      "surfaces": 5,
+      "problems": []
+    },
+    "dataFlows": {
+      "task": "LEG-01.06",
+      "activeThirdPartyProviders": 0,
+      "reviewedFlows": 9,
+      "sourceFiles": 13,
+      "scope": "current_local_core_and_explicitly_disabled_external_boundaries",
+      "productionDeploymentVerified": false
+    },
+    "serviceTargets": {
+      "task": "RELEASE-01.08",
+      "currentSearchP95Ms": 290.817497,
+      "currentCheckoutP95Ms": 630.0483180000001,
+      "failed": 0,
+      "denominator": 200,
+      "rawFailed": 22,
+      "rawDenominator": 322,
+      "sourceFiles": 638,
+      "scope": "local_technical_readiness",
+      "contractualSla": false
+    }
+  },
+  "performanceCaveat": {
+    "initialRunFailed": true,
+    "initialLogicalFailures": 5,
+    "initialDenominator": 168,
+    "acceptedRepeatLogicalFailures": 0,
+    "acceptedRepeatDenominator": 200,
+    "acceptedRepeatRawConflicts": 22,
+    "acceptedRepeatPhysicalCalls": 322,
+    "scope": "Fresh 50k product/1m draft item/20 register synthetic fixture; no production SLA; failed run retained"
+  },
+  "knownSecretPatternScan": {
+    "scanned": 1884,
+    "findings": [],
+    "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+  },
+  "originalPlan": {
+    "originalTotal": 259,
+    "statuses": {
+      "blocked_external": 29,
+      "done": 185,
+      "deferred": 29,
+      "in_progress": 6,
+      "todo": 10
+    },
+    "bugfixIncrement": 0
+  },
+  "environmentFilesModified": false,
+  "migrationsModified": false,
+  "businessDatabaseTestWrites": false,
+  "productionDeployment": false,
+  "externalIntegrations": "Deferred by owner; no new vendor-specific implementation",
+  "evidenceSha256": {
+    "backend-targeted-final.log": "e7c68e68b0368e4f1808dadf66604f1e9038f14b527017dcc4f36e275b3b6e76",
+    "browser-focused-final.log": "a5c452aa4e6d1a1a7e407dd8061f5e9853489b979d0d14d51a2e5e0d409c395f",
+    "browser-full-failures.json": "92a4cfcc69b6c37180ca9c7b38dbfbd9792ea5820c0929e7667f36e4434497e7",
+    "browser-full-final.log": "a50e6c015f5ec68cb27f8387ba6473dffef9efdd77f21e4f5c48738cccd64ba9",
+    "browser-full.log": "6cb214b1829cd589b6e6bd5d624c0045723b160ea421510a4291cb1991317451",
+    "browser-initial-failures.json": "f9cc323a0de27bb70eb5d8719f3246688982110fdccb065995109fbb9c0ce1b2",
+    "browser-install.log": "ae3faf892b39ed5e2432f0fe049573e586d125ac884ac02d889f780c29744c7d",
+    "browser-inventory.log": "cfeb86289d5341b357732b94e5496f9ac3533da7cb14c4afd1fe8e24927f494c",
+    "browser-pricing-final.log": "086cfb1a7fdaff6cfcf248080471c5381cef6328c09e88587d9ef45ec2f60998",
+    "browser-smoke-final.log": "a238281b01c9ffb78f7830d7babff4af70ef86a21ca79edd10cc1e7d5d47211e",
+    "browser-targeted.log": "89826fc2fb2c49185bd3f67326a176240f0507992755bc2ad890ab04f968390f",
+    "build-final.log": "024a3c0a21033d757647c0c9d9beebcbb082ddb4b424cb6dbb6c149fce47d37b",
+    "claims-final.log": "09cecfd49e7c01aaa3caf21a3c4c1db6c5b0d6b62e71af5c455fcad85fddadf0",
+    "cleanup.json": "8910539768eaf4290c1b68c2c4aa806709307ba4a004d51f01b7dd35524b1c05",
+    "dashboard-pages-rate-limited.json": "e3f32740044d6a17a91e100b2cf7da028a400ec6f84b623f1b57f8d95958a3c7",
+    "dashboard-pages-smoke.json": "3c0879d383ebc521b847d445223afe4b48163c1170d4570b263027fcc7e19e0c",
+    "data-flows-final.json": "85d197182c532e16e38fd48ff8f864931189f78e0d67b940fb4932529777f744",
+    "data-flows-final.log": "e65e3ec9a8f1fe291aaab27f694cd84f5c369c5b673f562c800d02cddfed8067",
+    "data-flows-intermediate.log": "d82f74e0e7904660434d009f5e77f98aa4b0c8bff69556c52a6920f67264499d",
+    "docker-build-local.log": "e2325eb9b41ddb121366728908ade8a83889b8e22b836e2072403f699d8ff39d",
+    "docker-start-local.log": "f0ab05bbd4d4642ccdf4aa07ce02ea428ab57d20c525d74843a6e68d69714498",
+    "history-scan.log": "c6963e4bd43af65c5bc2725f52d41ca9b8adea89ab2b9b7d3772682703c702b5",
+    "i18n-final.log": "8a508c3440c043ceb879173318b46825a8b5e116c69c6245b68d54399c20fc8d",
+    "i18n-intermediate.json": "a26bb5b25b65c6731bb6838e8144390f31d330f6e8823a827134f614fe6dd260",
+    "integration-baseline.log": "f604c0d2b17a7ba124856803175608b28afa1c0be5ff7c538cc9853e570c2384",
+    "integration-final.log": "1065f5e74a7146ec3ff320210e72966e424bb8fafc970e7b74214af8515c114a",
+    "last-failed-after-focused.json": "3c09e8117da08c8bac9b2060538f0b37c85b157f52200bc621659489163898c9",
+    "lint-baseline.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "local-http.json": "7d75295f8b1556c30e3a4b1f0c972d1b64d5d620ba42b12bdcf3163be5626051",
+    "local-image-source.json": "2f6c318566485c100be40b7ad30945799896e8441ee7d5a845030311888bd8dc",
+    "local-security-status.log": "8683e8645430623f1b818878ed5a3865041e5fb493543542c50ba76f01eb8470",
+    "measure-failed-1.log": "931d2c53390fe176d10ba7a0db357a5338fc7d0068feed11f892497aabdac7c0",
+    "measure-runner-retry.txt": "7e1ec58f61860b07bfbe28d32495d429b422243d22ff1a4e21f0890de7e278d8",
+    "measure-runner.txt": "ff178ab9aa47b7288f702213484ad7ab661580ce1980ea405e87b970a8f58a2f",
+    "measure.log": "a08793e849a6dc6b8f588ad4a981031865ebca4fd72d8aa14d8db46fe427c46e",
+    "migrations.log": "9690e6203d941d3bf4ec95336f9524bc4ea9673423467f6fddadbf4d396b9ec8",
+    "mobile-context.png": "ef3fa1c52243cc6d5d3ebe01dad2543d8e575663e6a3ad25f7931e4f94e9f807",
+    "ops-core.log": "fb5df58a6813efa0dbcceebbffacdbeccbaebe5f4316267f4774395f5522eed0",
+    "ops-final.log": "64dd6b10ec7d94eebc5a9b63c387ab78727244e64e9d93dd6e52d24af239ae45",
+    "original-status.json": "6fe99825e10259dc1ab9bf5ac4d0417bcfd761f6fa3e539530c38a53d28e41c8",
+    "pages-smoke-rate-limited.md": "7f63fc03b6f400d8bbc9282cb758bd194ff8ad009b134ee2a05ec0a5596f2ab1",
+    "performance-gate-failed-1.log": "3e48e25dd96e34a8b33e41aa7af23b2d490e0adbe604dd1709fa2c7d2dddd795",
+    "performance-gate.log": "02f74a0fa637970f0482434d09062ba21e2cce2fb70616ba211ee09464bfa383",
+    "prebuild.log": "9439d7f2558055a96e6d9a02710ff7c775a34f37a438cda6d5997ab296c4e346",
+    "prepare-runner.txt": "b4ecc4e9574ccb9db8c574d0324e7de8943cbc200bc99c5875b3d9c2f004b943",
+    "profile-vacuum.log": "03749bace89e00bc7373987623fd0f72e49ee0dd3482c987bd82e38a9e5cbcc4",
+    "public-pages-smoke.json": "c6ab022a8786d16540a2f99e94939b661cfd8c814646987c9855e71d96dc9be4",
+    "retained-financial-fixtures.json": "05a4e90f7621617969f42f836a23045d6f773d3fdbd99be58c06c08d8fb66190",
+    "security-scan.log": "0fe7a56321469053dc803294b62db2182aadac1a00d2f7a50a39529901f3a20d",
+    "seed-initial.json": "9769d5a67849dc1807acbf48005611c287604af05d352dec9a88110617d15946",
+    "seed-initial.log": "1d5fc474cf26ca86d662fe156a94920bc96fd4ccf7271f68cba64a4214c4e8cd",
+    "seed-preparation.json": "5bf8c1740ebd6d6ed742ed616519c3f9dcb517dbdf44cc72e014f1e1d5ddaeb5",
+    "seed-runner.txt": "beae414d0a87d2a2d27970e15323064b6982e00d02ee4155b46e12df68365699",
+    "seed.log": "10feda24d1606314c1b053c000ee56a2cbb1efce6de5906d3de6a2b027422acf",
+    "service-targets-final.log": "02f74a0fa637970f0482434d09062ba21e2cce2fb70616ba211ee09464bfa383",
+    "settings-targeted.log": "18e286e08d3ae6bd5cd05cff813b38600841d20e8fe69834aaae75186e5cba44",
+    "shared-error-handlers.json": "a600004648e4d9f5050637e36d58b30944e16bfaa23c5693a438b850c2f05d1d",
+    "source-inventory.json": "a29fcb12f74fb72e81c413a7d22372d7a4142a539d3b54ccfff40098d14f3925",
+    "static-link-audit-initial.json": "5a74d6ff010497605d8efa2718a2eb5c4c27eaf4f4ad3bab640a51fbf66aa635",
+    "static-link-audit.json": "226aefe4f5a32f67589afa8b679c01073d0eb4029f1019d7142ca390e3e73932",
+    "test-build-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "typecheck-baseline.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "typecheck-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit-baseline.log": "7059e54f2647e9a48bbea2f67f4fdc7d322c46bf17f2e828b8eb969a1b07ecb6",
+    "unit-final.log": "c4080d0604369f1b2f9a9a71bdf9fad28118569d6d510b098a0d0e5a42466d56",
+    "worker-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

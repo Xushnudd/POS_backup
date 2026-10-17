@@ -1,0 +1,22 @@
+✔ Local Compose derives its DB URL from POSTGRES settings and safely encodes credentials without modifying host environment (1.353777ms)
+✔ Local wrapper supplies the derived URL to the real child and forwards graceful SIGTERM (41.484023ms)
+✔ Local HTTP serves without redirects, optional TLS preserves Origin/cookies, and HMR upgrades work on both transports (115.104457ms)
+✔ deleted historical token is found without disclosing its value (27.507942ms)
+✔ historical credential store is reported by path, not content (16.22363ms)
+✔ budget exhaustion is incomplete, never a clean scan (14.196039ms)
+✔ empty history and binary exclusions have explicit results (16.527066ms)
+✔ Known token and private key findings expose type and line only (0.323822ms)
+✔ Repeated scans reset regex state and ordinary placeholders remain clean (0.200365ms)
+✔ stale and future snapshots never assert operational status (0.457299ms)
+✔ public schema rejects private fields, duplicate IDs and unknown states (0.246186ms)
+✔ incident ordering, component linkage and unresolved operational claims are enforced (0.270366ms)
+✔ HTML escapes reviewed text instead of executing markup (0.206498ms)
+✔ HTTP publication: HEAD, no private paths, no writes, atomic updates and corrupt-data fail closed (28.562407ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 289.81582

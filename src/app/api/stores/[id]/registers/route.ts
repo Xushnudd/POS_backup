@@ -50,10 +50,7 @@ async function handleGET(
   } catch (error) {
     const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
@@ -111,10 +108,7 @@ async function handlePOST(
       )
     }
 
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 export const GET = withApi(handleGET)

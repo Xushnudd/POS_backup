@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-10-17T09:40:54.444Z",
+  "complete": true,
+  "scope": "isolated Chromium route loading, not full business acceptance",
+  "routes": [
+    {
+      "path": "/forgot-password",
+      "status": 200,
+      "reached": "/forgot-password"
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "reached": "/login"
+    },
+    {
+      "path": "/register",
+      "status": 200,
+      "reached": "/register"
+    },
+    {
+      "path": "/reset-password",
+      "status": 200,
+      "reached": "/reset-password"
+    },
+    {
+      "path": "/d",
+      "status": 200,
+      "reached": "/d"
+    },
+    {
+      "path": "/invite",
+      "status": 200,
+      "reached": "/invite"
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "reached": "/"
+    },
+    {
+      "path": "/r",
+      "status": 200,
+      "reached": "/r"
+    }
+  ],
+  "browserExceptions": [],
+  "apiServerFailures": []
+}

@@ -1,10 +1,12 @@
 # Bajarish statusi
 
-Sana: 2026-10-16. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
+Sana: 2026-10-17. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
 Joriy original done: **185/259**. Joriy maqsad **195** hali bajarilmadi; ushbu davomda yangi original done **+0**, yana **10** ta to‘liq original qabul kerak. Oldingi190 maqsadi ham bajarilmagan. Foydalanuvchi 2026-10-16 kuni staging/mustaqil status hosti/pilot **hali tayyor emas**ligini qayta tasdiqladi. 74 ochiq bandning qabul to‘siqlari: `tasks/190_BLOCKERS.md`;195 uchun qayta tekshiruv va qabul yo‘li: `tasks/195_READINESS.md`. CI/test/yuklama dalili tuzatishlari yangi original band sifatida sanalmaydi.
 
-So‘nggi tuzatish (2026-10-16): ro‘yxatdan o‘tishda takroriy STIR/INNning500 xatosi tuzatildi;21PG/168unit/7Chromium va yangi sourcega mos yuklama dalili o‘tdi. Mahalliy app qayta yig‘ilib ishga tushirildi. Batafsil: [ro‘yxatdan o‘tish tuzatishi](#registration-fix-20261016).
+So‘nggi tekshiruv (2026-10-17): frontend/backend bugfix va regressiya tekshiruvi. Filial/kassa konteksti, saqlanayotgan savat himoyasi, logout, kasr miqdor, lokal katalog metadata, tashkilot sozlamalari, umumiy API xatolari, deployment statusi va sahifa havolalari tuzatildi. Tekshiruv:470PG,171unit; asosiy156Chromium ssenariysi full va qayta runlar bo‘yicha qabul;69sahifa ochilishi tekshirildi; build/lint/typecheck o‘tdi. Batafsil natijalar: [kod tekshiruvi](CODE_REVIEW_20261017.md), mashina dalillari `tasks/evidence/code-review-20261017/validation.json`. Original done hisob **185/259**, bu bugfixlar **+0**. Real production/pilot qabul deb sanalmaydi.
+
+Tarixiy tuzatish (2026-10-16): ro‘yxatdan o‘tishda takroriy STIR/INNning500 xatosi tuzatildi;21PG/168unit/7Chromium va yangi sourcega mos yuklama dalili o‘tdi. Mahalliy app qayta yig‘ilib ishga tushirildi. Batafsil: [ro‘yxatdan o‘tish tuzatishi](#registration-fix-20261016).
 
 185 bosqichining tarixiy yakuni: baseline180 →185, **5/5 original band — POS-02.09, CRM-02.02, OPS-02.02, LEG-01.06, RELEASE-01.06**. Dalil: `tasks/evidence/core185-20261016.json`. Qolgan74 original band o‘z haqiqiy holatida; mahalliy environment rehearsal OPS-01.01ni tashqi qabul o‘rniga done qilmadi.
 

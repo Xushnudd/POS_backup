@@ -11,6 +11,8 @@ export function usableCatalog(value:CachedCatalog|undefined,scope:CatalogScope,q
 }
 // IndexedDB is local convenience storage, never an authorization or payment proof.
 export function minimalCatalog(products:Product[]):Product[]{
- const keys=['id','organizationId','categoryId','name','sku','barcode','unit','unitPrecision','salePrice','isActive'] as const;
- return products.map(product=>Object.fromEntries(keys.filter(key=>key in product).map(key=>[key,product[key]])) as unknown as Product);
+ const keys=['id','organizationId','categoryId','name','sku','barcode','unit','unitPrecision','serialTracking','salePrice','isActive'] as const;
+ return products.map(product=>({...Object.fromEntries(keys.filter(key=>key in product).map(key=>[key,product[key]])),
+  ...(product.unitConversions?{unitConversions:product.unitConversions.map(row=>Object.fromEntries(['id','tradeUnit','baseUnit','ratio','isActive','tradePrecision'].filter(key=>key in row).map(key=>[key,row[key as keyof typeof row]])))}:{}),
+ }) as unknown as Product);
 }

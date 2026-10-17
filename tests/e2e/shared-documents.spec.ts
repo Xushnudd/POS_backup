@@ -57,7 +57,7 @@ test('Personal service consent prepares a real worker statement; opt-out blocks 
  const card=page.getByRole('heading',{name:'Shaxsan xizmat eslatmalari',exact:true}).locator('..').locator('..').locator('..');
  await card.getByRole('button',{name:'Yangilash',exact:true}).click();await card.getByRole('button',{name:'Ko‘chirmani tayyorlash navbatiga qo‘yish: oldindan ko‘rish',exact:true}).click();await card.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();
  await expect.poll(()=>db.backgroundJob.count({where:{organizationId:f.orgId,type:'customer_reminder'}})).toBe(1);
- execFileSync(process.execPath,['--require','./scripts/worker-resolver.cjs','.worker-build/scripts/workers/jobs.js','--once'],{env:{...process.env,APP_ORIGIN:'https://localhost:3100',AUTH_TOTP_ENABLED:'true',AUTH_CHALLENGE_SECRET:'c'.repeat(64)},stdio:'pipe',timeout:60000});
+ execFileSync(process.execPath,['--require','./scripts/worker-resolver.cjs','.worker-build/scripts/workers/jobs.js','--once'],{env:{...process.env,APP_ORIGIN:'https://localhost:3100',AUTH_TOTP_ENABLED:'true',AUTH_CHALLENGE_SECRET:process.env.AUTH_CHALLENGE_SECRET},stdio:'pipe',timeout:60000});
  await card.getByRole('button',{name:'Yangilash',exact:true}).click();const link=card.getByRole('link',{name:'Ko‘chirmani ochish',exact:true});await expect(link).toBeVisible();const url=(await link.getAttribute('href'))!;
  const anonymous=await browser.newContext({ignoreHTTPSErrors:true}),statement=await anonymous.newPage();
  try{

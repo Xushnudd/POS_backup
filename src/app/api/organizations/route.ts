@@ -1,7 +1,6 @@
-import {billingDatabaseError} from '@/server/billing/errors'
+import {organizationTin,organizationCurrency,organizationTimezone,organizationError} from '@/server/organizations/validation'
 import {assertLiveContext} from '@/server/operations'
 import { prisma } from '@/lib/prisma'
-import { AccessError } from '@/server/auth/policy'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, getRequestToken } from '@/lib/auth'
@@ -10,10 +9,10 @@ import {activeMembershipWhere} from '@/server/auth/custom-role-policy'
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2),
-  tin: z.string().optional(),
+  tin: organizationTin,
   phone: z.string().min(9),
-  currencyCode: z.string().default('UZS'),
-  timezone: z.string().default('Asia/Tashkent'),
+  currencyCode: organizationCurrency.default('UZS'),
+  timezone: organizationTimezone.default('Asia/Tashkent'),
   allowNegativeStock: z.literal(false).default(false),
   receiptFooter: z.string().optional(),
 })
@@ -67,12 +66,7 @@ async function handleGET(request: NextRequest) {
     })
 
   } catch (error) {
-    const billingError=billingDatabaseError(error);if(billingError)throw billingError
-    if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw organizationError(error)
   }
 }
 
@@ -111,19 +105,7 @@ async function handlePOST(request: NextRequest) {
     })
 
   } catch (error) {
-    const billingError=billingDatabaseError(error);if(billingError)throw billingError
-    if (error instanceof AccessError) throw error
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw organizationError(error)
   }
 }
 export const GET = withApi(handleGET)

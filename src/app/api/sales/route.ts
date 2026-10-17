@@ -93,10 +93,7 @@ async function handleGET(request: NextRequest) {
   } catch (error) {
     const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
@@ -141,10 +138,7 @@ async function handlePOST(request: NextRequest) {
       return NextResponse.json({success:false,error:{code:error.message,message:'Savdo miqdori yoki chegirmasi noto‘g‘ri'}},{status:409})
     }
 
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 export const GET = withApi(handleGET)

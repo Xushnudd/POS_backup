@@ -1,0 +1,20 @@
+{
+  "recordedAt": "2026-10-17T09:41:56.506038+00:00",
+  "resource": "pos-full-review-20261017",
+  "guardedMetadata": {
+    "image": "postgres:15-alpine",
+    "tmpfs": {
+      "/var/lib/postgresql/data": "rw"
+    },
+    "ports": {
+      "5432/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "55439"
+        }
+      ]
+    }
+  },
+  "removed": true,
+  "scope": "Only the temporary synthetic review database, including retained test finance fixtures; real app/DB untouched"
+}

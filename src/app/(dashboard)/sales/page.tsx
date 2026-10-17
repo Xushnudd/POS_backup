@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
@@ -46,7 +47,7 @@ function SalesJournal() {
 
  const {t:tr}=useTranslation();
 
-  const { organization } = useAuth();
+  const { organization,role } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
@@ -248,6 +249,7 @@ function SalesJournal() {
                       {getStatusBadge(sale.status)}
                     </td>
                     <td className="py-3.5 px-4 text-right space-x-1">
+                      <Link prefetch={false} href={'/sales/'+sale.id} className="inline-block px-2 py-1 text-blue-700 underline">{tr("Tafsilotlar")}</Link>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -256,7 +258,7 @@ function SalesJournal() {
                       >
                         {tr("Ko'rish")}</Button>
 
-                      {sale.status === 'draft' && (
+                      {role!=='cashier' && sale.status === 'draft' && (
                         <Button
                           variant="ghost"
                           size="sm"

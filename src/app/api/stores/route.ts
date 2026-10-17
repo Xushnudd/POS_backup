@@ -43,6 +43,17 @@ async function handleGET(request: NextRequest) {
       )
     }
 
+    // Owners manage every active branch, including branches created by an admin.
+    // Nonowners remain restricted to their current explicit branch assignments.
+    if (payload.role === 'owner') {
+      const stores = await db.store.findMany({
+        where: { organizationId, isActive: true },
+        include: { registers: { where: { isActive: true } } },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      })
+      return NextResponse.json({ success: true, data: stores })
+    }
+
     // Get user's accessible stores
     const organizationUser = await db.organizationUser.findFirst({
       where: {
@@ -86,10 +97,7 @@ async function handleGET(request: NextRequest) {
   } catch (error) {
     const billingError=billingDatabaseError(error);if(billingError)throw billingError
     if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
@@ -165,10 +173,7 @@ async function handlePOST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 export const GET = withApi(handleGET)

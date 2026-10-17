@@ -74,10 +74,7 @@ async function handleGET(
     if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
@@ -151,10 +148,7 @@ async function handlePUT(
       )
     }
 
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
@@ -201,10 +195,7 @@ async function handleDELETE(
     if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
     if (error instanceof AccessError) throw error
     if (error instanceof Prisma.PrismaClientKnownRequestError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 export const GET = withApi(handleGET)

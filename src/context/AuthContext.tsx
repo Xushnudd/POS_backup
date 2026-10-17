@@ -1,10 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback,useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import {confirmPageNavigation} from '@/lib/page-navigation';
-import { clearScope, deviceId } from '@/lib/offline';
+import { clearScope, deviceId,assertScopeCanBeCleared } from '@/lib/offline';
 import { AuthData, AuthUser, Organization, Role } from '@/types';
 
 interface AuthContextType {
@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const logoutFlight=useRef(false);
 
   const setAuthData = useCallback((data: AuthData) => {
     localStorage.removeItem('pos_token');
@@ -129,11 +130,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    if(!confirmPageNavigation())return;
-    if (organization?.id && user?.id) await clearScope({organizationId:organization.id,userId:user.id,deviceId:deviceId()});
-    await api.auth.logout();
-    clearAuthData();
-    router.push('/login');
+    if(logoutFlight.current||!confirmPageNavigation())return;
+    logoutFlight.current=true;
+    try{
+      const scope=organization?.id&&user?.id?{organizationId:organization.id,userId:user.id,deviceId:deviceId()}:undefined;
+      if(scope)await assertScopeCanBeCleared(scope);
+      // A failed or unacknowledged logout must not erase the recoverable cart.
+      await api.auth.logout();
+      try{if(scope)await clearScope(scope)}
+      finally{clearAuthData();router.push('/login')}
+    }finally{logoutFlight.current=false}
   };
 
   return (

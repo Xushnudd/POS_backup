@@ -39,7 +39,7 @@ export default function Totp(){
  {error&&<p role="alert">{uiMessage(error)}</p>}
  <button disabled={busy} className="underline" onClick={()=>{setError('');setVersion(v=>v+1)}}>{tr("Authenticator holatini tekshirish")}</button>
  {!status&&!error&&<p role="status">{tr("Yuklanmoqda…")}</p>}
- {status&&!status.available&&<p>{tr("Authenticator hozir mavjud emas.")}{status.recoveryAvailable?tr("Mavjud ulanishni zaxira kod bilan bekor qilish mumkin."):''}</p>}
+ {status&&!status.available&&<p>{tr("Authenticator hozir mavjud emas.")}{status.recoveryAvailable?<>{' '}{tr("Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.")}</>:''}</p>}
  {status&&(status.available||status.recoveryAvailable)&&<fieldset disabled={busy} className="space-y-3">
  <p role="status">{status.enabled?tr("Authenticator ulangan"):tr("Authenticator ulanmagan")}</p>
  {status.passwordRebindRequired&&<p>{tr("Parol o‘zgargan. Zaxira kod bilan eski ulanishni bekor qiling, keyin qayta ulang.")}</p>}

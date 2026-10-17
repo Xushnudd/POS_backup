@@ -1,4 +1,5 @@
 'use client';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
 import {useTranslation} from '@/context/LocaleContext';
@@ -177,6 +178,7 @@ export default function PosPage() {
   const [localSaveProof,setLocalSaveProof]=useState<string|null>(null);
   const localSnapshot=JSON.stringify({items,cartDiscount,cartDiscountPercent,discountReason,customer,note,serviceType});
   const [hasPendingCheckout,setHasPendingCheckout]=useState(false);
+  useUnsavedChanges(false,isProcessingPayment||!localReady||localSaveProof!==localSnapshot);
   const checkoutAttempt = useRef<{ operationId: string; payload: string; saleId?: string } | null>(null);
   useEffect(() => {
     if (!organization?.id || !user?.id) return;
@@ -467,7 +469,7 @@ export default function PosPage() {
   return (
     <div data-testid="pos-touch" className="min-h-[calc(100dvh-5rem)] lg:h-[calc(100dvh-5rem)] flex flex-col gap-4 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11">
       <PendingActions prefix="/shifts" returnPath="/pos" revision={Number(isOpenShiftModalOpen)} onDone={()=>{void refreshShift().catch(()=>notifyError('Smena natijasi tasdiqlandi; joriy holat yuklanmadi.'))}}/>
-      <div role="status" className={connection.state==='online'?'text-green-700':'bg-amber-50 text-amber-900 p-3'}>
+      <div role="status" className={'flex flex-wrap items-center gap-2 '+(connection.state==='online'?'text-green-700':'bg-amber-50 text-amber-900 p-3')}>
         <span>{connection.state==='online'?tr("Server bilan aloqa bor"):connection.state==='checking'?tr("Server aloqasi tekshirilmoqda"):tr("Server bilan aloqa yo‘q. Savat lokal saqlanadi; savdo yakunlanmaydi.")}</span>
         <Button variant="outline" onClick={connection.recheck}>{tr("Aloqani tekshirish")}</Button>
       </div>

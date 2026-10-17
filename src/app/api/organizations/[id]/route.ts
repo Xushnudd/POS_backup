@@ -1,5 +1,5 @@
 import {assertLiveContext} from '@/server/operations'
-import { AccessError } from '@/server/auth/policy'
+import {organizationTin,organizationCurrency,organizationTimezone,organizationError} from '@/server/organizations/validation'
 import { scopedPrisma } from '@/server/auth/scoped-prisma'
 import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
@@ -8,10 +8,10 @@ import { z } from 'zod'
 
 const updateOrganizationSchema = z.object({
   name: z.string().min(2).optional(),
-  tin: z.string().optional(),
+  tin: organizationTin,
   phone: z.string().min(9).optional(),
-  currencyCode: z.string().optional(),
-  timezone: z.string().optional(),
+  currencyCode: organizationCurrency.optional(),
+  timezone: organizationTimezone.optional(),
   allowNegativeStock: z.literal(false).optional(),
   receiptFooter: z.string().optional(),
 })
@@ -72,11 +72,7 @@ async function handleGET(
     })
 
   } catch (error) {
-    if (error instanceof AccessError) throw error
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw organizationError(error)
   }
 }
 
@@ -123,18 +119,7 @@ async function handlePUT(
     })
 
   } catch (error) {
-    if (error instanceof AccessError) throw error
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw organizationError(error)
   }
 }
 export const GET = withApi(handleGET)

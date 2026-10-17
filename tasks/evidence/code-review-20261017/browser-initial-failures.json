@@ -1,0 +1,126 @@
+[
+  {
+    "test": "billing-editor-state-Invoi-a020c-ks-new-commands-until-retry-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('region', { name: 'Obuna invoicelari' }).getByText('Holat: open', { exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('region', { name: 'Obuna invoicelari' }).getByText('Holat: open', { exact: true }) with timeout 10000ms\n  - waiting for getByRole('region', { name: 'Obuna invoicelari' }).getByText('Holat: open', { exact: true })"
+  },
+  {
+    "test": "catalog-unsaved-Catalog-fo-78e46-ssful-saves-reset-the-guard-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Fixture rejected save' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Fixture rejected save' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Fixture rejected save' })"
+  },
+  {
+    "test": "core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium",
+    "error": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByRole('heading', { name: 'ONLY_A', exact: true })\nExpected: 2\nReceived: 0\nTimeout:  10000ms\n\nCall log:\n  - Expect \"toHaveCount\" getByRole('heading', { name: 'ONLY_A', exact: true }) with timeout 10000ms\n  - waiting for getByRole('heading', { name: 'ONLY_A', exact: true })\n    24 × locator resolved to 0 elements\n       - unexpected value \"0\""
+  },
+  {
+    "test": "core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('status').filter({ hasText: 'Kassir yoki PIN noto‘g‘ri' })\nExpected substring: \"Kassir yoki PIN noto‘g‘ri\"\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" getByRole('status').filter({ hasText: 'Kassir yoki PIN noto‘g‘ri' }) with timeout 10000ms\n  - waiting for getByRole('status').filter({ hasText: 'Kassir yoki PIN noto‘g‘ri' })"
+  },
+  {
+    "test": "core-Finance-UI-records-in-1a565-ersal-with-durable-recovery-chromium",
+    "error": "Test timeout of 60000ms exceeded."
+  },
+  {
+    "test": "core-Maintenance-UI-preser-ab89d-restores-cash-checkout-once-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('Planned POS maintenance acceptance', { exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByText('Planned POS maintenance acceptance', { exact: true }) with timeout 10000ms\n  - waiting for getByText('Planned POS maintenance acceptance', { exact: true })"
+  },
+  {
+    "test": "core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('alert').filter({ hasText: 'Farq hali bor' })\nExpected substring: \"Farq hali bor\"\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" getByRole('alert').filter({ hasText: 'Farq hali bor' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Farq hali bor' })"
+  },
+  {
+    "test": "core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium",
+    "error": "Error: expect(page).toHaveURL(expected) failed\n\nExpected pattern: /\\/shifts$/\nReceived string:  \"https://localhost:3100/shifts?shift_corrections_page=1\"\nTimeout: 10000ms\n\nCall log:\n  - Expect \"toHaveURL\" with timeout 10000ms\n    24 × locator resolved to <html lang=\"uz\">…</html>\n       - unexpected value \"https://localhost:3100/shifts?shift_corrections_page=1\""
+  },
+  {
+    "test": "core-Production-HTTPS-offl-b70b7-original-mixed-payment-sync-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring', { exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring', { exact: true }) with timeout 10000ms\n  - waiting for getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring', { exact: true })"
+  },
+  {
+    "test": "core-Purchase-order-UI-acc-43b07-eceipt-intent-across-reload-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('Buyurtma holati: received', { exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByText('Buyurtma holati: received', { exact: true }) with timeout 10000ms\n  - waiting for getByText('Buyurtma holati: received', { exact: true })"
+  },
+  {
+    "test": "core-Reviewed-price-batch--37c0a-tays-outside-sellable-stock-chromium",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('alert').filter({ hasText: 'Test-only temporary replay denial' })\nExpected substring: \"Test-only temporary replay denial\"\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" getByRole('alert').filter({ hasText: 'Test-only temporary replay denial' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Test-only temporary replay denial' })"
+  },
+  {
+    "test": "core-Supplier-return-UI-pr-91a84-d-never-posts-a-cash-refund-chromium",
+    "error": "Error: expect(page).toHaveURL(expected) failed\n\nExpected pattern: /\\/suppliers\\/76f89bff-b804-4d6d-b494-e1bbb696d05c$/\nReceived string:  \"https://localhost:3100/suppliers/76f89bff-b804-4d6d-b494-e1bbb696d05c?supplier_credits_page=1\"\nTimeout: 10000ms\n\nCall log:\n  - Expect \"toHaveURL\" with timeout 10000ms\n    23 × locator resolved to <html lang=\"uz\">…</html>\n       - unexpected value \"https://localhost:3100/suppliers/76f89bff-b804-4d6d-b494-e1bbb696d05c?supplier_credits_page=1\""
+  },
+  {
+    "test": "core-Sync-conflict-require-1f94f-l-local-and-server-payloads-chromium",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('article').filter({ hasText: 'ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2' }).first()\nExpected substring: \"conflict\"\nReceived string:    \"sale.complete · Qo‘lda tekshirish kerak · INVALID_PAYMENTAmal: ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2Asl qoralamani tekshirish\"\nTimeout: 10000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('article').filter({ hasText: 'ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2' }).first() with timeout 10000ms\n  - waiting for getByRole('article').filter({ hasText: 'ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2' }).first()\n    2 × locator resolved to <article class=\"border p-3 bg-white\">…</article>\n      - unexpected value \"sale.complete · Javob kutilmoqda · Amal: ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2\"\n    22 × locator resolved to <article class=\"border p-3 bg-white\">…</article>\n       - unexpected value \"sale.complete · Qo‘lda tekshirish kerak · INVALID_PAYMENTAmal: ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2Asl qoralamani tekshirish\""
+  },
+  {
+    "test": "count-recovery-count-start-a0efe--quantities-and-one-posting-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'qayta sanang' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'qayta sanang' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'qayta sanang' })"
+  },
+  {
+    "test": "custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium",
+    "error": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false"
+  },
+  {
+    "test": "identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic duplicate read failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic duplicate read failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic duplicate read failure' })"
+  },
+  {
+    "test": "journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic advance read failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic advance read failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic advance read failure' })"
+  },
+  {
+    "test": "legacy-catalog-state-categ-a6112-K-keep-truthful-saved-state-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('cell', { name: 'Previous categories 052b1444bb64' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('cell', { name: 'Previous categories 052b1444bb64' }) with timeout 10000ms\n  - waiting for getByRole('cell', { name: 'Previous categories 052b1444bb64' })"
+  },
+  {
+    "test": "legacy-catalog-state-units-de94b-K-keep-truthful-saved-state-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('cell', { name: 'Previous units 4e5353d702f5', exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('cell', { name: 'Previous units 4e5353d702f5', exact: true }) with timeout 10000ms\n  - waiting for getByRole('cell', { name: 'Previous units 4e5353d702f5', exact: true })"
+  },
+  {
+    "test": "roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })"
+  },
+  {
+    "test": "sales-list-Expired-synthet-8610b-rors-retain-business-drafts-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic operational list failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic operational list failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic operational list failure' })"
+  },
+  {
+    "test": "sales-list-Inventory-balan-ae33b-in-original-business-drafts-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic inventory list failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic inventory list failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic inventory list failure' })"
+  },
+  {
+    "test": "sales-list-Main-report-and-63521-urce-cutoff-through-history-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic report list failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic report list failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic report list failure' })"
+  },
+  {
+    "test": "sales-list-Price-and-reser-f8d69-ts-survive-filters-and-Back-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic reservation list failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic reservation list failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic reservation list failure' })"
+  },
+  {
+    "test": "sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('alert', { name: 'Savdolar ro‘yxati xatosi', exact: true })\nExpected substring: \"Synthetic list failure\"\nReceived string:    \"Server amalni yakunlay olmadi. Asl natijani tekshiring. So‘rov raqamini yordam xizmatiga bering; maxfiy ma’lumot yubormang. Qayta yuklash\"\nTimeout: 10000ms\n\nCall log:\n  - Expect \"toContainText\" getByRole('alert', { name: 'Savdolar ro‘yxati xatosi', exact: true }) with timeout 10000ms\n  - waiting for getByRole('alert', { name: 'Savdolar ro‘yxati xatosi', exact: true })\n    24 × locator resolved to <div role=\"alert\" class=\"p-6 text-red-700\" aria-label=\"Savdolar ro‘yxati xatosi\">…</div>\n       - unexpected value \"Server amalni yakunlay olmadi. Asl natijani tekshiring. So‘rov raqamini yordam xizmatiga bering; maxfiy ma’lumot yubormang. Qayta yuklash\""
+  },
+  {
+    "test": "sales-list-Shift-and-finan-9ea13-ver-from-a-failed-list-read-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic finance list failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic finance list failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic finance list failure' })"
+  },
+  {
+    "test": "sales-list-Supplier-brand--e6d07-rors-never-become-zero-rows-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('alert').filter({ hasText: 'Synthetic extended failure' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('alert').filter({ hasText: 'Synthetic extended failure' }) with timeout 10000ms\n  - waiting for getByRole('alert').filter({ hasText: 'Synthetic extended failure' })"
+  },
+  {
+    "test": "shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('heading', { name: 'Shaxsan xizmat eslatmalari', exact: true }).locator('..').locator('..').locator('..').getByRole('link', { name: 'Ko‘chirmani ochish', exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('heading', { name: 'Shaxsan xizmat eslatmalari', exact: true }).locator('..').locator('..').locator('..').getByRole('link', { name: 'Ko‘chirmani ochish', exact: true }) with timeout 10000ms\n  - waiting for getByRole('heading', { name: 'Shaxsan xizmat eslatmalari', exact: true }).locator('..').locator('..').locator('..').getByRole('link', { name: 'Ko‘chirmani ochish', exact: true })"
+  },
+  {
+    "test": "tax-form-recovery-tax-form-fdd81-ginal-PUT-once-after-reload-chromium",
+    "error": "Error: expect(page).toHaveURL(expected) failed\n\nExpected pattern: /\\/settings\\/taxes$/\nReceived string:  \"https://localhost:3100/settings/taxes?tax_versions_page=1\"\nTimeout: 10000ms\n\nCall log:\n  - Expect \"toHaveURL\" with timeout 10000ms\n    23 × locator resolved to <html lang=\"uz\">…</html>\n       - unexpected value \"https://localhost:3100/settings/taxes?tax_versions_page=1\""
+  },
+  {
+    "test": "threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium",
+    "error": "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('article')\nExpected substring: \"tavsiya 8.000001 kg\"\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" getByRole('article') with timeout 10000ms\n  - waiting for getByRole('article')"
+  },
+  {
+    "test": "totp-Authenticator-UI-keep-2dd85-ers-with-all-session-logout-chromium",
+    "error": "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('region', { name: 'Authenticator', exact: true }).getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.', { exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('region', { name: 'Authenticator', exact: true }).getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.', { exact: true }) with timeout 10000ms\n  - waiting for getByRole('region', { name: 'Authenticator', exact: true }).getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.', { exact: true })"
+  }
+]
