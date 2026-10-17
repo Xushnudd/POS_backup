@@ -1825,6 +1825,8 @@ model JobExport {
  jobId String @id
  organizationId String
  data Bytes?
+ chunkCount Int @default(0)
+ chunkAttempt String?
  filename String
  mime String
  size Int
@@ -1834,6 +1836,19 @@ model JobExport {
  expiresAt DateTime
  job BackgroundJob @relation(fields:[jobId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
  @@index([organizationId,expiresAt])
+}
+
+model JobExportChunk {
+ jobId String
+ organizationId String
+ attempt String
+ ordinal Int
+ data Bytes
+ size Int
+ sha256 String
+ job BackgroundJob @relation(fields:[jobId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ @@id([jobId,attempt,ordinal])
+ @@index([organizationId])
 }
 
 model BackgroundJob {
@@ -1858,6 +1873,7 @@ model BackgroundJob {
  authorizations JobAuthorization[]
  events JobEvent[]
  exports JobExport[]
+ exportChunks JobExportChunk[]
  @@unique([id,organizationId])
  @@index([state,nextRunAt])
  @@index([organizationId,createdAt])

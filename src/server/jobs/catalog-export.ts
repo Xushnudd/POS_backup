@@ -6,6 +6,7 @@ import type {TokenPayload} from '@/lib/auth'
 import {AccessError} from '../auth/policy'
 import {assertLiveContext,audit} from '../operations'
 import {csv,numeric} from '../exports/csv'
+import {readExportChunk,verifyChunkedExport} from './export-chunks'
 export const exportFilter=z.object({search:z.string().trim().max(200).optional(),categoryId:z.string().uuid().optional(),active:z.enum(['all','active','archived']).default('all')}).strict()
 export const MAX_EXPORT_BYTES=16*1024*1024
 export async function catalogExport(organizationId:string,input:unknown,db:Pick<PrismaClient,'$transaction'>=prisma){
@@ -26,8 +27,51 @@ export async function catalogExport(organizationId:string,input:unknown,db:Pick<
   return {data,size:data.length,sha256,rowCount:rows,filename:'products-'+organizationId+'.csv',mime:'text/csv; charset=utf-8',asOf:snapshot.asOf.toISOString()}
  },{isolationLevel:'RepeatableRead',timeout:60000})
 }
-export async function readJobExport(ctx:TokenPayload,id:string){
+async function authorizedExport(tx:Prisma.TransactionClient,ctx:TokenPayload,id:string){
  if(ctx.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED')
- return prisma.$transaction(async tx=>{await assertLiveContext(tx,ctx);const row=await tx.jobExport.findFirst({where:{jobId:id,organizationId:ctx.organizationId,job:{state:'succeeded'}},include:{job:{select:{type:true}}}});if(!row)throw new AccessError(404,'NOT_FOUND');if(row.job.type==='tenant_export'&&!await tx.session.findFirst({where:{id:ctx.sessionId,organizationId:ctx.organizationId,userId:ctx.userId,authenticationMethod:'password'}}))throw new AccessError(403,'PASSWORD_SESSION_REQUIRED');if(!row.data||row.expiresAt<=new Date())throw new AccessError(410,'EXPORT_EXPIRED','Eksport faylining24soatlik muddati tugagan; yangi eksportni navbatga qo‘ying');if(row.size!==row.data.length||createHash('sha256').update(row.data).digest('hex')!==row.sha256)throw new AccessError(503,'EXPORT_CORRUPTED');await audit(tx,ctx,'BackgroundJob',id,'export_downloaded',{size:row.size,sha256:row.sha256});const {job,...file}=row;void job;return file},{isolationLevel:'RepeatableRead'})
+ await assertLiveContext(tx,ctx)
+ const row=await tx.jobExport.findFirst({where:{jobId:id,organizationId:ctx.organizationId,job:{state:'succeeded'}},select:{jobId:true,organizationId:true,filename:true,mime:true,size:true,sha256:true,rowCount:true,asOf:true,expiresAt:true,chunkCount:true,chunkAttempt:true,job:{select:{type:true}}}})
+ if(!row)throw new AccessError(404,'NOT_FOUND')
+ if(row.job.type==='tenant_export'&&!await tx.session.findFirst({where:{id:ctx.sessionId,organizationId:ctx.organizationId,userId:ctx.userId,authenticationMethod:'password'}}))throw new AccessError(403,'PASSWORD_SESSION_REQUIRED')
+ if(row.expiresAt<=new Date())throw new AccessError(410,'EXPORT_EXPIRED','Eksport faylining24soatlik muddati tugagan; yangi eksportni navbatga qo‘ying')
+ const {job,...file}=row;void job;return file
 }
-export async function pruneJobExports(){return prisma.jobExport.updateMany({where:{expiresAt:{lte:new Date()},data:{not:null}},data:{data:null}})}
+export async function jobExportMetadata(ctx:TokenPayload,id:string){
+ const file=await prisma.$transaction(tx=>authorizedExport(tx,ctx,id))
+ return {filename:file.filename,mime:file.mime,size:file.size,sha256:file.sha256,expiresAt:file.expiresAt}
+}
+export async function completeExportDownload(ctx:TokenPayload,id:string){
+ return prisma.$transaction(async tx=>{
+  const file=await authorizedExport(tx,ctx,id)
+  await audit(tx,ctx,'BackgroundJob',id,'export_downloaded',{size:file.size,sha256:file.sha256,serverStreamCompleted:true})
+ })
+}
+export async function readJobExport(ctx:TokenPayload,id:string,options:{auditDownload?:boolean;signal?:AbortSignal}={}){
+ const file=await prisma.$transaction(async tx=>{
+  const meta=await authorizedExport(tx,ctx,id)
+  const stored=meta.chunkCount?null:await tx.jobExport.findUniqueOrThrow({where:{jobId:id},select:{data:true}})
+  return {...meta,data:stored?.data??null}
+ },{isolationLevel:'RepeatableRead'})
+ if(file.chunkCount)await verifyChunkedExport(file,options.signal)
+ else if(!file.data||file.size!==file.data.length||createHash('sha256').update(file.data).digest('hex')!==file.sha256)throw new AccessError(503,'EXPORT_CORRUPTED')
+ // Direct legacy callers receive the complete bounded buffer synchronously.
+ // Chunked callers must consume the stream before claiming a completed download.
+ if(options.auditDownload!==false&&!file.chunkCount)await completeExportDownload(ctx,id)
+ return file
+}
+export async function* jobExportBytes(ctx:TokenPayload,file:Awaited<ReturnType<typeof readJobExport>>){
+ if(!file.chunkCount){
+  for(let offset=0;offset<file.data!.length;offset+=65536){await prisma.$transaction(tx=>authorizedExport(tx,ctx,file.jobId));yield file.data!.subarray(offset,offset+65536)}
+  return
+ }
+ for(let ordinal=0;ordinal<file.chunkCount;ordinal++){
+  yield await prisma.$transaction(async tx=>{await authorizedExport(tx,ctx,file.jobId);return readExportChunk(tx,file,ordinal)})
+ }
+}
+export async function pruneJobExports(){
+ return prisma.$transaction(async tx=>{
+  const result=await tx.jobExport.updateMany({where:{expiresAt:{lte:new Date()},data:{not:null}},data:{data:null}})
+  await tx.$executeRaw`DELETE FROM "JobExportChunk" c USING "BackgroundJob" j WHERE c."jobId"=j.id AND NOT EXISTS(SELECT 1 FROM "JobExport" e WHERE e."jobId"=c."jobId" AND e."chunkAttempt"=c.attempt AND e."expiresAt">clock_timestamp()) AND NOT(j.state='running' AND j."leaseToken" IS NOT DISTINCT FROM c.attempt AND j."leaseUntil">clock_timestamp() AND j."expiresAt">clock_timestamp())`
+  return result
+ },{timeout:30000})
+}

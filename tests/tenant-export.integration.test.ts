@@ -42,14 +42,14 @@ test('Tenant export uses the existing durable job, one artifact, scoped audited 
  await prisma.session.update({where:{id:other.session.id},data:{revokedAt:new Date()}})
  assert.equal((await executeJob(lease)).succeeded,false);assert.equal(await prisma.jobExport.count({where:{jobId:next.id}}),0)
 })
-test('Oversized exports fail without publishing a partial artifact or business mutation',async()=>{
+test('Buffered exports reject oversized archives while the durable worker publishes a complete chunked archive',async()=>{
  const own=await fixture(),bytes=Buffer.alloc(524288,42),sha256=createHash('sha256').update(bytes).digest('hex')
  await prisma.fileAsset.createMany({data:Array.from({length:25},(_,i)=>({id:randomUUID(),organizationId:own.org.id,productId:own.product.id,createdBy:own.user.id,name:'limit-'+i+'.webp',mime:'image/webp',size:bytes.length,sha256,width:1,height:1,data:bytes}))})
  await assert.rejects(tenantExport(own.org.id),rejected('EXPORT_TOO_LARGE'))
  const job=await enqueueJob(own.ctx,{type:'tenant_export',operationId:randomUUID(),reason:'Reviewed oversized archive failure'})
- const lease=(await claimJob())!;assert.equal(lease.id,job.id);assert.equal((await executeJob(lease)).succeeded,false)
- assert.equal(await prisma.jobExport.count({where:{jobId:job.id}}),0)
- const failed=await prisma.backgroundJob.findUniqueOrThrow({where:{id:job.id}});assert.equal(failed.state,'dead');assert.equal(failed.lastError,'EXPORT_TOO_LARGE')
+ const lease=(await claimJob())!;assert.equal(lease.id,job.id);assert.equal((await executeJob(lease)).succeeded,true)
+ const artifact=await prisma.jobExport.findUniqueOrThrow({where:{jobId:job.id}});assert.equal(artifact.data,null);assert.ok(artifact.size>16*1024*1024);assert.ok(artifact.chunkCount>1)
+ const completed=await prisma.backgroundJob.findUniqueOrThrow({where:{id:job.id}});assert.equal(completed.state,'succeeded');assert.equal(completed.lastError,null)
  assert.equal(await prisma.sale.count({where:{organizationId:own.org.id}}),0)
  assert.equal(await claimJob(),null)
 })

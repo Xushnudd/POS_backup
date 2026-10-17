@@ -10,6 +10,8 @@ test('Owner recovers original tenant export enqueue after lost ACK and downloads
  expect((await page.request.post('/api/auth/register',{headers:{Origin:'https://localhost:3100'},data:{fullName:'Archive owner',phone:'archive-'+randomUUID(),password:'test-only-password',organizationName:'Tenant archive browser'}})).ok()).toBe(true)
  const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id)
  await db.product.create({data:{organizationId:me.organization.id,name:'Exact archive item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:'0.01',costPrice:'12345678901234.123456'}})
+ const product=await db.product.findFirstOrThrow({where:{organizationId:me.organization.id}}),fileBytes=Buffer.alloc(524288,42)
+ await db.fileAsset.createMany({data:Array.from({length:25},(_,i)=>({organizationId:me.organization.id,productId:product.id,createdBy:me.user.id,name:'browser-large-'+i+'.webp',mime:'image/webp',width:1,height:1,data:fileBytes,size:fileBytes.length,sha256:createHash('sha256').update(fileBytes).digest('hex')}))})
  await page.goto('/jobs');await page.getByLabel('Fon ishining turi',{exact:true}).selectOption('tenant_export')
  await expect(page.getByText(/Parol, PIN, sessiya va tasdiqlash kodlari chiqarilmaydi/)).toBeVisible()
  await page.getByLabel('Fon ishini tasdiqlash sababi',{exact:true}).fill('Owner reviewed full tenant business archive')
@@ -30,5 +32,6 @@ test('Owner recovers original tenant export enqueue after lost ACK and downloads
  expect(archive.datasets.User[0]).not.toHaveProperty('passwordHash');expect(archive.datasets).not.toHaveProperty('Session');expect(archive.manifest.omittedModels.Session).toBeTruthy()
  for(const entry of archive.manifest.datasets){const rows=archive.datasets[entry.model];expect(rows).toHaveLength(entry.rows);expect(createHash('sha256').update(rows.map((row:unknown)=>JSON.stringify(row)+'\n').join('')).digest('hex')).toBe(entry.sha256)}
  const job=await db.backgroundJob.findFirstOrThrow({where:{organizationId:me.organization.id}}),artifact=await db.jobExport.findUniqueOrThrow({where:{jobId:job.id}})
+ expect(artifact.data).toBeNull();expect(artifact.size).toBeGreaterThan(16*1024*1024);expect(artifact.chunkCount).toBeGreaterThan(64);expect(archive.datasets.FileAsset).toHaveLength(25)
  expect(artifact.sha256).toBe(createHash('sha256').update(bytes).digest('hex'));expect(await db.auditLog.count({where:{entityId:job.id,action:'export_downloaded'}})).toBe(1);expect(await db.operation.count({where:{organizationId:me.organization.id,type:'job.enqueue'}})).toBe(1)
 })

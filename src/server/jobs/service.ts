@@ -10,7 +10,9 @@ import {assertLiveContext,audit,runOperation} from '../operations'
 import {scanOrganization} from '../monitoring/service'
 import {catalogExport,exportFilter} from './catalog-export'
 import {reportExport,reportExportSchema} from './report-export'
-import {tenantExport} from './tenant-export'
+import {streamTenantExport} from './tenant-export'
+import {MAX_EXPORT_BYTES} from './catalog-export'
+import {assertJobLease,tenantExportSink,readExportChunk,lockExportStorage,discardExportAttempt} from './export-chunks'
 export const jobSchema=z.object({operationId:z.string().uuid(),type:z.enum(['reconciliation','catalog_export','tenant_export','report_export','customer_reminder']),reminder:reminderInputSchema.optional(),filter:exportFilter.optional(),report:reportExportSchema.optional(),storeId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000)}).strict().refine(v=>v.type==='customer_reminder'?!!v.reminder&&!v.report&&!v.filter&&!v.storeId:!v.reminder&&(v.type==='report_export'?!!v.report&&!v.storeId&&!v.filter:!v.report&&(v.type==='catalog_export'?!v.storeId:v.type==='tenant_export'?!v.storeId&&!v.filter:!v.filter)),'Job payload does not match its type')
 export const retryJobSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000)}).strict()
 const payloadSchema=z.object({reminder:reminderPayloadSchema.optional(),storeId:z.string().uuid().optional(),filter:exportFilter.optional(),report:reportExportSchema.optional()}).strict()
@@ -69,7 +71,37 @@ export async function failJob(job:BackgroundJob,code:'WORK_FAILED'|'AUTHORIZATIO
  const current=await tx.backgroundJob.findUnique({where:{id:job.id}});if(!current||current.state!=='running'||current.leaseToken!==job.leaseToken)return false
  const state=code!=='WORK_FAILED'||current.attempts>=current.maxAttempts?'dead':'queued',changed=await tx.backgroundJob.update({where:{id:job.id},data:{state,leaseToken:null,leaseUntil:null,lastError:code,nextRunAt:new Date(Date.now()+1000*Math.min(300,2**current.attempts)),updatedAt:new Date()}});await event(tx,changed,state==='queued'?'retry':'dead',code);return true
  })}
+async function publishJob(tx:Prisma.TransactionClient,source:BackgroundJob,result:Prisma.InputJsonObject){
+ await liveAuthorization(tx,source,true)
+ const updated=await tx.backgroundJob.updateMany({where:{id:source.id,state:'running',generation:source.generation,leaseToken:source.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}},data:{state:'succeeded',leaseToken:null,leaseUntil:null,result,lastError:null,updatedAt:new Date()}})
+ if(updated.count!==1)throw new AccessError(409,'JOB_LEASE_LOST')
+ await event(tx,source,'succeeded');await tx.auditLog.create({data:{organizationId:source.organizationId,actorId:null,entityType:'BackgroundJob',entityId:source.id,action:'system_job_succeeded',afterData:{type:source.type,generation:source.generation,attempt:source.attempts,result}}})
+ return result
+}
+async function executeTenantExport(job:BackgroundJob){
+ await prisma.$transaction(async tx=>{await assertJobLease(tx,job);await liveAuthorization(tx,job)})
+ const sink=tenantExportSink(job,liveAuthorization)
+ const meta=await streamTenantExport(job.organizationId,sink.write)
+ const chunkCount=await sink.finish()
+ // Preserve the legacy bounded inline contract for existing small archives.
+ const inline=meta.size<=MAX_EXPORT_BYTES&&meta.rowCount<=100000
+ let data:Buffer|null=null
+ if(inline){
+  const chunks:Buffer[]=[]
+  for(let ordinal=0;ordinal<chunkCount;ordinal++)chunks.push(await readExportChunk(prisma,{jobId:job.id,organizationId:job.organizationId,chunkAttempt:job.leaseToken},ordinal))
+  data=Buffer.concat(chunks)
+ }
+ return prisma.$transaction(async tx=>{
+  await lockExportStorage(tx);await assertJobLease(tx,job);await liveAuthorization(tx,job,true)
+  await tx.jobExport.create({data:{jobId:job.id,organizationId:job.organizationId,...meta,data,chunkCount:inline?0:chunkCount,chunkAttempt:inline?null:job.leaseToken,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}})
+  const result={...meta,downloadPath:'/api/jobs/'+job.id+'/export'}
+  await publishJob(tx,job,result)
+  if(inline)await tx.jobExportChunk.deleteMany({where:{jobId:job.id,attempt:job.leaseToken!}})
+  return result
+ },{timeout:30000})
+}
 export async function executeJob(job:BackgroundJob){let active=true,inFlight:Promise<boolean>|undefined;const timer=setInterval(()=>{if(active&&!inFlight){inFlight=heartbeatJob(job).catch(()=>false);void inFlight.finally(()=>{inFlight=undefined})}},5000);try{
+ if(job.type==='tenant_export')return {succeeded:true,result:await executeTenantExport(job)}
  const result=await prisma.$transaction(async tx=>{
   const source=await tx.backgroundJob.findFirst({where:{id:job.id,state:'running',generation:job.generation,leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}}});if(!source)throw new AccessError(409,'JOB_LEASE_LOST')
   const payload=await liveAuthorization(tx,source);let result:Prisma.InputJsonObject;
@@ -83,18 +115,15 @@ export async function executeJob(job:BackgroundJob){let active=true,inFlight:Pro
    const authorization=source.type==='report_export'?await tx.jobAuthorization.findUniqueOrThrow({where:{jobId_generation:{jobId:source.id,generation:source.generation}}}):null;
    const membership=authorization?await tx.organizationUser.findUniqueOrThrow({where:{organizationId_userId:{organizationId:source.organizationId,userId:authorization.userId}},include:{userStores:true}}):null;
    const context=authorization&&membership?{userId:authorization.userId,organizationId:source.organizationId,organizationUserId:membership.id,role:membership.role,storeIds:membership.userStores.map(row=>row.storeId),sessionId:authorization.sessionId}:null;
-   const exported=source.type==='report_export'&&context&&payload.report?await reportExport(context,payload.report):source.type==='tenant_export'?await tenantExport(source.organizationId):await catalogExport(source.organizationId,payload.filter??{active:'all'});
+   const exported=source.type==='report_export'&&context&&payload.report?await reportExport(context,payload.report):await catalogExport(source.organizationId,payload.filter??{active:'all'});
    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'exports:'+source.organizationId},0))::text`;
-   const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});
+   const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,job:{type:{not:'tenant_export'}},expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});
    const scheduled=await tx.reportScheduleRun.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},result:{not:Prisma.DbNull}},_sum:{size:true}});
    if((used._sum.size??0)+(scheduled._sum.size??0)+exported.size>32*1024*1024)throw new AccessError(413,'EXPORT_QUOTA');
    const {data,...meta}=exported;await tx.jobExport.create({data:{jobId:source.id,organizationId:source.organizationId,data,...meta,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}});result={...meta,downloadPath:'/api/jobs/'+source.id+'/export'};
   }else throw new AccessError(400,'UNSUPPORTED_JOB')
-  await liveAuthorization(tx,source,true)
-  const updated=await tx.backgroundJob.updateMany({where:{id:job.id,state:'running',generation:job.generation,leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}},data:{state:'succeeded',leaseToken:null,leaseUntil:null,result,lastError:null,updatedAt:new Date()}})
-  if(updated.count!==1)throw new AccessError(409,'JOB_LEASE_LOST')
-  await event(tx,source,'succeeded');await tx.auditLog.create({data:{organizationId:source.organizationId,actorId:null,entityType:'BackgroundJob',entityId:source.id,action:'system_job_succeeded',afterData:{type:source.type,generation:source.generation,attempt:source.attempts,result}}});return result
+  return publishJob(tx,source,result)
  },{isolationLevel:'ReadCommitted',timeout:90000});return {succeeded:true,result}
  }catch(e){await failJob(job,e instanceof AccessError&&['AUTHORIZATION_CHANGED','CUSTOMER_CONSENT_REQUIRED'].includes(e.code)?'AUTHORIZATION_CHANGED':e instanceof AccessError&&e.code==='EXPORT_TOO_LARGE'?'EXPORT_TOO_LARGE':e instanceof AccessError&&e.code==='EXPORT_SCHEMA_UNREVIEWED'?'EXPORT_SCHEMA_UNREVIEWED':e instanceof AccessError&&e.code==='EXPORT_CORRUPTED'?'EXPORT_CORRUPTED':'WORK_FAILED');return {succeeded:false}}
- finally{active=false;clearInterval(timer);if(inFlight)await inFlight}
+ finally{active=false;clearInterval(timer);if(inFlight)await inFlight;if(job.type==='tenant_export')await discardExportAttempt(job)}
 }

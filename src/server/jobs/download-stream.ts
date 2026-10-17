@@ -17,3 +17,19 @@ export function exportDownloadStream(data:Uint8Array,release:()=>void,signal:Abo
   cancel(){finish()},
  })
 }
+
+// Backpressure keeps at most one DB chunk in memory. Failed or cancelled
+// streams never claim completed delivery; the browser controls disk saving.
+export function asyncExportDownloadStream(source:AsyncIterable<Uint8Array>,complete:()=>Promise<void>,release:()=>void,signal:AbortSignal){
+ const iterator=source[Symbol.asyncIterator]();let done=false,controller:ReadableStreamDefaultController<Uint8Array>,timer:ReturnType<typeof setTimeout>|undefined
+ const finish=()=>{if(done)return;done=true;if(timer)clearTimeout(timer);signal.removeEventListener('abort',abort);release()}
+ const abort=()=>{if(!done){controller.error(new Error('Download cancelled'));finish();void iterator.return?.().catch(()=>undefined)}}
+ return new ReadableStream<Uint8Array>({
+  start(value){controller=value;if(signal.aborted){abort();return}signal.addEventListener('abort',abort,{once:true});timer=setTimeout(abort,300000);timer.unref()},
+  async pull(value){
+   try{const next=await iterator.next();if(done)return;if(next.done){await complete();if(done)return;value.close();finish()}else value.enqueue(new Uint8Array(next.value))}
+   catch(error){if(!done){value.error(error);finish()}await iterator.return?.().catch(()=>undefined)}
+  },
+  async cancel(){finish();await iterator.return?.()},
+ },{highWaterMark:0})
+}

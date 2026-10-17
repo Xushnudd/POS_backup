@@ -27,7 +27,7 @@ Bu yo‘l vendor APIlarini taxmin qilishni talab qilmaydi. Mijoz ma’lumotlarig
 
 ## Core bo‘yicha ochiq ishni yashirmaslik
 
-**BIZ-02.07** katta web-eksporti va yakuniy retention/legal-hold/delete qabuli hamon ochiq. Operatorning1GiBgacha streaming fayl eksporti bor, lekin browser JobExport16MiB chegarasini yoki yopishdagi downloaded-export prerequisite’ini almashtirmaydi. Uni to‘liq web yechimga aylantirish texnik ish bo‘lib qolmoqda; yakuniy huquqiy qabul ham alohida talab qilinadi. Shuning uchun barcha mustaqil core ishlar tugadi yoki bu band done bo‘ldi degan xulosa chiqarilmaydi.
+**2026-10-17 yangilanishi:** BIZ-02.07 katta web eksporti PostgreSQL chunk storage bilan tayyorlandi; operator faylidan alohida, brauzer orqali1GiBgacha oqim va yopish prerequisite mosligi mavjud. Read-only/close/cancel core saqlanadi. Batafsil [serverga tayyorgarlik](SERVER_PREPARATION.md). Yakuniy retention/legal-hold/delete tasdig‘i alohida ochiq; original band hali185 hisobiga qo‘shimcha done bo‘lmadi. Quyidagi2026-10-16 test natijalari tarixiy; yangi natijalar alohida evidencega yoziladi.
 
 ## Shu davomda tekshirilgan dalillar
 

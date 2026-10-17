@@ -139,7 +139,7 @@ export function withApi<C>(handler: (request: NextRequest, context: C) => Promis
       }
       if(context&&(path.startsWith('/api/finance/')||path.startsWith('/api/supplier-payments')||path.startsWith('/api/supplier-invoices')||path.startsWith('/api/purchase-orders')||/^\/api\/suppliers\/[0-9a-f-]{36}\/ledger$/i.test(path)))await consumeLimit(mutation?'finance.write':'finance.read',context.organizationId+':'+context.userId,60,60000)
       const result = await handler(request, routeContext)
-      if(options.binary && result.ok && !result.headers.get('content-type')?.includes('application/json')){
+      if(options.binary && result.ok && (result.headers.get('content-disposition')?.startsWith('attachment;') || !result.headers.get('content-type')?.includes('application/json'))){
         const response=new Response(result.body,{status:result.status,headers:result.headers});
         response.headers.set('X-Request-Id',requestId);response.headers.set('Cache-Control','private, no-store');response.headers.set('X-Content-Type-Options','nosniff');response.headers.set('Content-Security-Policy',"default-src 'none'; sandbox");
         apiMetrics.record(context?.organizationId,result.status,Date.now()-started)

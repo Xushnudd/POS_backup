@@ -4,7 +4,7 @@ ADR-062 asosida migration117–118, `src/server/retention/closure.ts`, lifecycle
 
 ## Owner oqimi
 
-Avval `/jobs` orqali tenant biznes JSON eksportini tayyorlash va yuklab olish kerak. Reviewed doira va 16MiB/100000 qator chegarasi `tenant-export.md`da ko‘rsatilgan. Eksport idempotent mavjud workerda tayyorlanadi. Faol, butun artifact va shu ownerning auditli downloadi talab qilinadi. Keyin owner `/billing` yopish paneliga job ID, sabab va joriy parolini kiritadi, oqibatlarni ko‘rib tasdiqlaydi. Ochiq smena, draft savdo, unresolved provider intent yoki issued offline lease bo‘lsa avval hal qilish shart; yopish ularni yo‘qotmaydi.
+Avval `/jobs` orqali tenant biznes JSON eksportini tayyorlash va yuklab olish kerak. Reviewed doira va 1GiB/10million qator chegarasi `tenant-export.md`da ko‘rsatilgan. Eksport idempotent mavjud workerda tayyorlanadi. Faol, butun artifact va shu ownerning auditli downloadi talab qilinadi. Keyin owner `/billing` yopish paneliga job ID, sabab va joriy parolini kiritadi, oqibatlarni ko‘rib tasdiqlaydi. Ochiq smena, draft savdo, unresolved provider intent yoki issued offline lease bo‘lsa avval hal qilish shart; yopish ularni yo‘qotmaydi.
 
 Yopish onidan barcha reviewed biznes yozuvlari bloklanadi. Ko‘rish, eksport, billing, autentifikatsiya, sessiya revoke va support recovery o‘z vakolat tekshiruvlari bilan qoladi. Owner siyosatning so‘rovga olingan kunlari ichida joriy paroli bilan bekor qilishi mumkin. Bekor qilish obunani uzaytirmaydi: expired obuna read-only bo‘lib qoladi. Deadlinega aynan yetganda bekor qilish yopiladi, review_required ko‘rsatiladi. Ma’lumotlar o‘chirilmaydi; muddati tugagan so‘rovni administrator orqali avtomatik qayta ochish qo‘shilmagan.
 
@@ -28,4 +28,4 @@ Tenant FOR UPDATE close/cancelni biznes FOR SHARE guard bilan tartiblaydi. closu
 
 ## Hali ochiq qabul doirasi
 
-BIZ-02.07 butun bandi in_progress: hajm chegarasidan katta eksport arxitekturasi, yakuniy huquqiy retention/legal-hold toifalari va irreversible deletion qarorlari qoladi. Oxirgisi blocked_external. Bu core tugashi bandni yoki production release’ni avtomatik done qilmaydi. Test dalillari EXECUTION_STATUS va evidence JSONda alohida qayd etiladi.
+BIZ-02.07 butun bandi in_progress: yakuniy huquqiy retention/legal-hold toifalari va irreversible deletion qarorlari qoladi. Oxirgisi blocked_external. Bu core tugashi bandni yoki production release’ni avtomatik done qilmaydi. Test dalillari EXECUTION_STATUS va evidence JSONda alohida qayd etiladi.

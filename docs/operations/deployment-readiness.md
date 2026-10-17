@@ -69,3 +69,8 @@ Host scheduler konfiguratsiyasi tanlangan hostda operator tomonidan o‘rnatilad
 - [ ] Production deployment uchun alohida owner tasdig‘i yozilgan.
 
 Bo‘sh checkboxlar tashqi qabul bo‘lmaganini bildiradi. Hozirgi original vazifalar STATUSda blocked_external yoki core in_progress bo‘lib qoladi; checklistni hujjat yozilgani uchungina belgilamang.
+
+
+## Katta eksport va worker uzilishi (migration189/190)
+
+Tenant web eksporti PostgreSQL chunk storageda saqlanadi; alohida file mount yoki yangi tashqi servis talab qilmaydi. DB disk/WAL/backup hajmida qo‘shimcha export baytlari hisobga olinadi. [Serverga tayyorgarlik](../../tasks/SERVER_PREPARATION.md) va [tenant eksport](tenant-export.md) yangi cheklovlarni tushuntiradi. Release `--profile jobs` va `--profile monitoring` bilan ishga tushirilishi kerak; mavjud35s worker stop grace uzoq eksportni uzishi mumkin, lease recovery qisman faylni publish qilmaydi. Migration oldidan faol snapshotni tugatish yoki to‘liq to‘xtatib, lease tugaganini tekshirish zarur. Lokal kill/restart haqiqiy hosting qabuli deb belgilanmaydi.

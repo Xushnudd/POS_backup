@@ -61,7 +61,7 @@ Bu ro‘yxat bandlarni done qilmaydi yoki core kodni yakunlangan deb e’lon qil
 | BIZ-02.04 | todo | Real pilotda import/opening/qurilma/trening/go-live qabul dalili. |
 | BIZ-02.05 | todo | Mijoz bilan real opening stock/debt/cash summalari va farqlarning tasdiqlanishi. |
 | BIZ-02.06 | todo | Real eski tizimning write-stop va kelishilgan cutover sanasi/delta tekshiruvi. |
-| BIZ-02.07 | in_progress | To‘liq chiqish jarayoni, katta web eksport va yakuniy retention/legal-hold/delete tartibi; operator fayli bu qabulni almashtirmaydi. |
+| BIZ-02.07 | in_progress | 2026-10-17 katta web eksport/close-cancel core tayyor (ADR102/migration189/190). Yakuniy retention/legal-hold/delete huquqiy tasdiqlari ochiq; irreversible deletion yo‘q. |
 | LEG-01.01 | blocked_external | Vakolatli huquqiy/biznes mas’ulning data/hosting/terms/retention doirasi bo‘yicha yakuniy tasdig‘i. |
 | LEG-01.02 | blocked_external | Vakolatli huquqiy/biznes mas’ulning data/hosting/terms/retention doirasi bo‘yicha yakuniy tasdig‘i. |
 | LEG-01.03 | blocked_external | Vakolatli huquqiy/biznes mas’ulning data/hosting/terms/retention doirasi bo‘yicha yakuniy tasdig‘i. |

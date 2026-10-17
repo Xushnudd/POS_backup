@@ -57,4 +57,6 @@ export const REQUIRED_EXTENDED_MIGRATIONS = [
   '202610160186_receipt_share_operations',
   '202610160187_in_person_customer_reminders',
   '202610160188_capability_result_guards',
+  '202610170189_chunked_tenant_exports',
+  '202610170190_chunk_tenant_edges',
 ] as const;

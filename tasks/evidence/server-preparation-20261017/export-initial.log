@@ -1,0 +1,45 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"2de6ff5c-5d2b-4440-8c99-871eb4570d92","organizationId":"c6ab4f29-9b73-4de6-b67f-d907ea23043a","status":200,"durationMs":18,"event":"api_response"}
+✔ Worker catalog export traverses cursor pages once, preserves exact cost and formula protection, fences duplicates and tenant downloads (3082.186625ms)
+✔ Export filters isolate own active catalogue and revoked source cannot publish an artifact (84.491835ms)
+✔ Late worker audit failure rolls back artifact; same source retries once without publishing a partial file (80.339055ms)
+✔ Expired export erases bytes, preserves metadata/history and refuses download with 410 (50.108753ms)
+{"requestId":"5f44990d-395a-4c99-9cb8-1a5508bc0145","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"4d111346-8ecc-46f5-88f9-e7ba92e11a5a","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"8075460d-84c6-480b-a0be-3d401a783861","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"86211fde-9b1b-4548-aebc-0718b3ed1dc6","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"3c4f144d-4046-483b-8797-6d5e81f3a577","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"34f93857-f2cc-4fd5-87e4-def1e806c9b6","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"3cb05405-2893-4c56-acd0-383d68817aba","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"56782b4e-c995-4ecb-bcc6-3c2074edda3d","organizationId":"f4b82b49-b38c-4ea9-b0ca-1928b039bedf","status":200,"durationMs":16,"event":"api_response"}
+✔ Owner reauth, real downloaded export, close replay and cancellation are atomic; business guards enforce closure (738.830396ms)
+{"requestId":"24138a72-6d86-4e4a-87ea-9edbb6645509","organizationId":"918be404-0c0d-4caa-adad-9f044fc855ac","operationId":"9011595c-4f71-4575-8ba9-7c5bf812d2a2","status":200,"durationMs":32,"event":"api_response"}
+{"requestId":"5f76a9fb-c029-41ce-8fb8-a97a950a9aab","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Fresh current password, live owner and downloaded export are required, including replay; HTTP admission fails closed (269.511265ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Competing requests create one history/operation; immutable history and revision cannot be forged (255.410711ms)
+✔ Closure fences an already established Serializable snapshot; stale business entitlement cannot survive its commit (255.622636ms)
+✔ Expired cancellation window remains read-only, never deletes retained records and never grants cancellation (200.571367ms)
+✔ Late closure audit failure rolls back history, revision and operation together (190.587946ms)
+{"requestId":"433766ec-cbe0-4564-ba19-7cda0e555d5b","organizationId":"1de50299-27be-43c1-9a06-536212972801","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+✔ Open till work rejects closure without stranding shifts; actual non-owner and foreign exports cannot close (356.240791ms)
+✔ Cancelling closure does not renew an expired subscription or unblock business writes (196.403544ms)
+✔ SQL cancellation guard enforces actual wall-clock at persistence, not a backdated submitted event (1372.867052ms)
+✔ Repeated reauthentication failures are rate limited without creating a closure or exposing password data (67.977869ms)
+✔ large private export exceeds 16MiB with exact manifest, no foreign rows, and original bounded API retained (1024.05732ms)
+✔ stream keeps one snapshot while concurrent rows are added and awaits every sink write (442.492809ms)
+✔ file publication rejects nonowners, revoked sessions, public directories and overwrites (143.604253ms)
+✔ late audit failure leaves no final or partial archive (143.43439ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (301.520587ms)
+{"requestId":"16d7d395-5062-493a-afbc-7f884e7e7414","organizationId":"7079f0da-e687-45f8-b763-c3318ccfe692","status":200,"durationMs":23,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (370.371564ms)
+✔ Buffered exports reject oversized archives while the durable worker publishes a complete chunked archive (1623.994269ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (337.894984ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13386.296428

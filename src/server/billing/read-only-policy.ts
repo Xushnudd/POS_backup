@@ -117,6 +117,7 @@ export const READ_ONLY_EXEMPT_MODELS = [
   "TotpKeyRotation", // Operator-only credential re-encryption provenance.
   "VerifiedContact",
   "JobExport",
+  "JobExportChunk", // Private derived export storage, scoped through the job organization.
   "BackgroundJob",
   "JobAuthorization",
   "JobEvent",

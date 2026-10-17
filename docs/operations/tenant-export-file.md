@@ -2,8 +2,9 @@
 
 `src/server/jobs/tenant-export-file.ts` — egasi vakolat bergan operatorning lokal
 fayl eksporti. U browserdagi JobExport/download yoki tashkilotni yopish eksporti
-prerequisite’ini almashtirmaydi. Web eksportning16MiB chegarasi saqlanadi;
-BIZ-02.07ning katta web eksport va yakuniy legal/retention qabuli ochiq.
+prerequisite’ini almashtirmaydi. Web eksport ham endi1GiBgacha chunk storage bilan ishlaydi; tafsilotlar
+[tenant-export.md](tenant-export.md)da. Operator fayli alohida qoladi.
+BIZ-02.07ning yakuniy legal/retention qabuli ochiq.
 
 Avval `npm run worker:build`, so‘ng repository ildizida:
 

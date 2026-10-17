@@ -1,0 +1,116 @@
+{"requestId":"951d5500-bd45-4e41-9aaf-7b288d1b7b69","status":503,"code":"AUTH_RESTORE_REVIEW_REQUIRED","durationMs":5,"event":"api_error"}
+✔ Restore quarantine blocks old/new sessions and readiness, invalidates one-time credentials, preserves business history and requires immutable operator review (864.452919ms)
+✔ A failed restore credential sweep commits its quarantine first and rolls back credential writes until exact retry (622.399878ms)
+{"requestId":"32e1b674-2cb2-4320-87ba-e3ec436c57d2","organizationId":"128a3733-ba1a-4327-a2ed-836acc4dd379","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"b9c67fee-605a-4f5e-9873-c24b15f65a64","organizationId":"a27116a8-78bb-4072-a1b3-273fafa91c8d","status":404,"code":"NOT_FOUND","durationMs":18,"event":"api_error"}
+{"requestId":"d885f37f-7a7c-441b-b6b2-b5b59c7182b3","organizationId":"128a3733-ba1a-4327-a2ed-836acc4dd379","status":200,"durationMs":160,"event":"api_response"}
+{"requestId":"0f904e09-e822-4a43-8851-d19ae972b21e","organizationId":"128a3733-ba1a-4327-a2ed-836acc4dd379","status":200,"durationMs":150,"event":"api_response"}
+{"requestId":"54e43c0d-7a65-4ea3-b13d-20c51f7e570c","organizationId":"128a3733-ba1a-4327-a2ed-836acc4dd379","status":200,"durationMs":146,"event":"api_response"}
+{"requestId":"66e8199d-dd80-4e29-b12b-9f8fdb1364b1","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Large web archive is exact, private, immutable and auditable only after complete streaming; closure accepts it (2853.584214ms)
+{"requestId":"afaf5dc8-784e-4e77-b6e3-4a0106caf81d","organizationId":"89f14948-58b4-48a7-a866-91e08e122eab","status":404,"code":"NOT_FOUND","durationMs":14,"event":"api_error"}
+✔ A killed worker never exposes partial bytes; persisted lease recovery fences the old attempt and publishes exactly once (2129.065219ms)
+{"requestId":"9fa76e2e-c6eb-452b-9ce7-a8b8c45891ec","organizationId":"e5b5e38a-2598-444d-9bd9-c4ff60b6b155","status":410,"code":"EXPORT_EXPIRED","durationMs":13,"event":"api_error"}
+✔ Expired chunk bytes are pruned while metadata/history stays and incomplete publication is rejected natively (63.330663ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"09f2a7ce-f07f-4358-bb64-d05f77901a28","organizationId":"41f91fa6-0dd4-45a1-a75c-dceecdd092c9","status":200,"durationMs":18,"event":"api_response"}
+✔ Worker catalog export traverses cursor pages once, preserves exact cost and formula protection, fences duplicates and tenant downloads (2955.746784ms)
+✔ Export filters isolate own active catalogue and revoked source cannot publish an artifact (69.903562ms)
+✔ Late worker audit failure rolls back artifact; same source retries once without publishing a partial file (69.947075ms)
+✔ Expired export erases bytes, preserves metadata/history and refuses download with 410 (42.741855ms)
+{"requestId":"0c247568-2034-4490-b5c6-87ebda8fa720","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"d1588f61-2b85-49ba-86d9-1678eec0f2b1","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"a7567663-5ca6-4d32-8677-cdd977687fa1","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"a49f972a-4947-498e-8331-1675ff9ef927","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"8dcfbb54-ea66-4a74-8a39-640cb9c83c3b","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"2a0c461c-bc7a-4916-88c4-fa7b1a288d68","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"5fa61eb7-5624-4abf-be5d-8fd806993cc8","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"c885eff0-a474-473f-9636-5d9e0d95062a","organizationId":"84c3d340-7e07-44ee-9b5f-fba24d8b1498","status":200,"durationMs":14,"event":"api_response"}
+✔ Owner reauth, real downloaded export, close replay and cancellation are atomic; business guards enforce closure (654.817307ms)
+{"requestId":"b41f4c23-294f-4d55-ba6e-222912d9716a","organizationId":"139247c1-d4bc-4dac-93c1-94e763fdc3ba","operationId":"2d3ddf25-3e51-4899-86c7-e9ce8451cf0f","status":200,"durationMs":30,"event":"api_response"}
+{"requestId":"d4288346-d571-4d02-be77-24c9209cb30d","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Fresh current password, live owner and downloaded export are required, including replay; HTTP admission fails closed (219.858429ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Competing requests create one history/operation; immutable history and revision cannot be forged (239.574959ms)
+✔ Closure fences an already established Serializable snapshot; stale business entitlement cannot survive its commit (259.475485ms)
+✔ Expired cancellation window remains read-only, never deletes retained records and never grants cancellation (190.119839ms)
+✔ Late closure audit failure rolls back history, revision and operation together (192.96961ms)
+{"requestId":"7d03c034-345f-4f59-b508-d375ffe8a4b6","organizationId":"01e2a3de-e029-48db-a3d0-f2ab9e0d9b01","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+✔ Open till work rejects closure without stranding shifts; actual non-owner and foreign exports cannot close (348.700106ms)
+✔ Cancelling closure does not renew an expired subscription or unblock business writes (184.406218ms)
+✔ SQL cancellation guard enforces actual wall-clock at persistence, not a backdated submitted event (1340.099987ms)
+✔ Repeated reauthentication failures are rate limited without creating a closure or exposing password data (67.799801ms)
+{"requestId":"92c2347e-0b28-473c-98a8-6dd7eb82df39","status":200,"durationMs":303,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"a466450b-acc5-4829-9cbb-d14941f19849","organizationId":"c95375e2-5349-4e46-a447-0591dff96e1e","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"415800ef-c78c-42ae-9f95-28f20c4fcb30","status":200,"durationMs":256,"event":"api_response"}
+✔ Business/source/outbox commit together; rollback leaves none and unconfigured adapters stay fail-closed (783.965526ms)
+{"requestId":"5671ab46-6731-4c25-bfac-33a66f46e82d","status":200,"durationMs":242,"event":"api_response"}
+{"organizationId":"f9cada5e-a8dd-47ea-b4c5-671663d52b2d","operationId":"a1c18299-b61d-4a0d-aaa1-cb10bb7df125","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":4,"event":"provider_transport"}
+✔ Transport waits outside real DB locks; settlement/domain acknowledgement commits once (318.437361ms)
+{"requestId":"8f89e6d9-ff60-4a57-a1ee-3ce7a82c04d6","status":200,"durationMs":243,"event":"api_response"}
+{"organizationId":"5f6e58f1-cf92-41b7-9fe5-c8ea25a78b58","operationId":"e8057c81-338d-4584-b802-83021aaa02b0","kind":"payment.submit","code":"PROVIDER_UNKNOWN","durationMs":0,"event":"provider_transport"}
+{"organizationId":"5f6e58f1-cf92-41b7-9fe5-c8ea25a78b58","operationId":"e8057c81-338d-4584-b802-83021aaa02b0","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Lost acknowledgement without external ID reconciles by original key, never another execute (319.693366ms)
+{"requestId":"91246323-e498-40d1-aa2e-4df9c2662e4c","status":200,"durationMs":241,"event":"api_response"}
+{"organizationId":"e07e0342-1721-4d5e-9d99-17d44d1192f5","operationId":"41f83adb-546b-496b-9ddc-808749a736b7","kind":"payment.submit","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"e07e0342-1721-4d5e-9d99-17d44d1192f5","operationId":"41f83adb-546b-496b-9ddc-808749a736b7","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"e07e0342-1721-4d5e-9d99-17d44d1192f5","operationId":"41f83adb-546b-496b-9ddc-808749a736b7","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Changed external identity stays unknown and never posts the wrong proof (325.874132ms)
+{"requestId":"ff97a1c5-b507-414e-b37a-4074a28f3468","status":200,"durationMs":241,"event":"api_response"}
+{"organizationId":"dd141237-58db-4afb-b0d1-b018246203e3","operationId":"dc7320e9-4362-4e1d-84e6-2e67cf22b3be","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"dd141237-58db-4afb-b0d1-b018246203e3","operationId":"dc7320e9-4362-4e1d-84e6-2e67cf22b3be","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":29,"event":"provider_transport"}
+✔ Expired lease recovers only lookup; stale worker result cannot finalize or submit again (316.963058ms)
+{"requestId":"9778b559-332a-4a00-8c0a-7e4ca629cb94","status":200,"durationMs":245,"event":"api_response"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.submit","code":"PROVIDER_UNKNOWN","durationMs":10,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_UNKNOWN","durationMs":1,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_PENDING","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_NOT_FOUND","durationMs":0,"event":"provider_transport"}
+{"organizationId":"ee4e8dcc-67b2-4783-83a5-ee4c22ef345d","operationId":"e4eed138-c8c5-4c05-85eb-a48fe96a6752","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Timeout, malformed status, not-found and bounded lookup require review; owner resumes lookup only (474.07737ms)
+{"requestId":"60c26042-6a48-40cf-abf6-357fa929f4dc","status":200,"durationMs":241,"event":"api_response"}
+{"organizationId":"2d41329c-bf26-430d-8edd-8ef2862c786c","operationId":"3a3fa494-59a7-44e6-9857-b6c45ab7c9ac","kind":"payment.submit","code":"PROVIDER_FAILED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"2d41329c-bf26-430d-8edd-8ef2862c786c","operationId":"624b2ab2-8e02-4211-a908-42910418a29d","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"organizationId":"2d41329c-bf26-430d-8edd-8ef2862c786c","operationId":"fe0e5556-0c1f-45b7-ac36-9a5eae471274","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":1,"event":"provider_transport"}
+✔ Definitive failure is terminal; approved compensation is separately idempotent and linked to original proof (423.171558ms)
+{"requestId":"88734636-8104-4b9d-b482-2186db9a7233","status":200,"durationMs":256,"event":"api_response"}
+{"organizationId":"e3f2f0ab-f6c4-49ac-91bc-c2ab97386161","operationId":"1d052be4-821d-410e-a599-ee92fc0b268d","kind":"payment.submit","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+{"organizationId":"e3f2f0ab-f6c4-49ac-91bc-c2ab97386161","operationId":"1d052be4-821d-410e-a599-ee92fc0b268d","kind":"payment.lookup","code":"PROVIDER_CONFIRMED","durationMs":0,"event":"provider_transport"}
+✔ Remote confirmation plus late domain/audit failure recovers through lookup, never another charge (317.252531ms)
+{"requestId":"04b87cf7-f448-4385-a89a-6e25e5282105","status":200,"durationMs":236,"event":"api_response"}
+✔ Actual worker process crash after remote commit restarts with lookup and one domain finalization (744.233593ms)
+{"requestId":"9fc9b709-37f4-41e8-9e68-96c1b09b1788","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"c39ea22e-3d84-4c04-ba01-67b73334adeb","status":200,"durationMs":240,"event":"api_response"}
+✔ Actual backup restore fences queued and old running provider submissions; only original-ID lookup can settle once (4728.122025ms)
+✔ 1001 selected report rows survive CSV/XLSX/native PDF document in background without foreign/out-of-period rows; exact decimals and artifact fencing (1990.266615ms)
+✔ Every reviewed report uses the existing filtered CSV query for XLSX/print; arbitrary filters and cross-tenant resources cannot publish (336.486255ms)
+✔ Expired report file is unavailable; late audit rollback preserves original-key job retry and publishes only one complete artifact (367.281997ms)
+✔ Malformed native report payload fails closed rather than falling back to an unfiltered catalogue export (45.929326ms)
+✔ large private export exceeds 16MiB with exact manifest, no foreign rows, and original bounded API retained (1013.495009ms)
+✔ stream keeps one snapshot while concurrent rows are added and awaits every sink write (680.32662ms)
+✔ file publication rejects nonowners, revoked sessions, public directories and overwrites (198.94958ms)
+✔ late audit failure leaves no final or partial archive (118.40812ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (363.822492ms)
+{"requestId":"f05d51eb-d8ea-4e2e-9dc2-5544534aebd5","organizationId":"96da17e4-fd7e-4b55-ae1c-1b469aaecb96","status":200,"durationMs":16,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (370.298756ms)
+✔ Buffered exports reject oversized archives while the durable worker publishes a complete chunked archive (2129.745578ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (551.902287ms)
+✔ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (29.706004ms)
+✔ Deferred cross-tenant parent reference and direct ownership mutation fail; scoped ORM rejects foreign creates and shared models (87.166733ms)
+✔ Concurrent SKU and alias inserts have exactly one winner inside a tenant; a second tenant can use the same identifiers (56.088955ms)
+✔ Tenant recovery plans from a real isolated clone are read-only, retain current-only rows and preserve unrelated/shared-identity tenant hashes (5440.182395ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39075.750563

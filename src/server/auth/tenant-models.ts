@@ -82,6 +82,7 @@ export const TENANT_DIRECT_MODELS = [
   "OnboardingCheckpoint",
   "SaleExchange",
   "JobExport",
+  "JobExportChunk", // Private derived export storage, scoped through the job organization.
   "BackgroundJob",
   "JobAuthorization",
   "SecurityEvent",

@@ -46,8 +46,8 @@ export async function requestClosure(ctx:TokenPayload,input:z.input<typeof reque
   if(pointer.currentVersionId!==parsed.expectedPolicyVersionId)throw new AccessError(409,'RETENTION_POLICY_CHANGED')
   const now=await databaseTime(tx)
   const artifact=await tx.jobExport.findFirst({where:{jobId:parsed.exportJobId,organizationId:ctx.organizationId,job:{type:'tenant_export',state:'succeeded'},expiresAt:{gt:now}}})
-  if(!artifact?.data)throw new AccessError(409,'CLOSURE_EXPORT_REQUIRED','Avval to‘liq biznes eksportini tayyorlang va yuklab oling')
-  if(artifact.size!==artifact.data.length||createHash('sha256').update(artifact.data).digest('hex')!==artifact.sha256)throw new AccessError(503,'EXPORT_CORRUPTED')
+  if(!artifact||(!artifact.data&&!artifact.chunkCount))throw new AccessError(409,'CLOSURE_EXPORT_REQUIRED','Avval to‘liq biznes eksportini tayyorlang va yuklab oling')
+  if(artifact.data&&(artifact.size!==artifact.data.length||createHash('sha256').update(artifact.data).digest('hex')!==artifact.sha256))throw new AccessError(503,'EXPORT_CORRUPTED')
   if(!await tx.auditLog.findFirst({where:{organizationId:ctx.organizationId,actorId:ctx.userId,entityType:'BackgroundJob',entityId:parsed.exportJobId,action:'export_downloaded'}}))throw new AccessError(409,'CLOSURE_EXPORT_REQUIRED')
   // Do not strand ongoing till/provider/offline work behind a closure block.
   if(await tx.shift.count({where:{register:{store:{organizationId:ctx.organizationId}},status:'open'}})

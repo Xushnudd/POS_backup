@@ -1,0 +1,26 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const {prisma}=require(process.cwd()+'/.test-build/src/lib/prisma.js');
+const u=new URL(process.env.DATABASE_URL??'');
+assert.equal(u.protocol,'postgresql:');assert.equal(u.hostname,'127.0.0.1');assert.equal(u.port,'55439');assert.equal(u.pathname,'/pos_test');assert.equal(u.username,'pos_test');
+async function main(){
+ const orgs=await prisma.organization.findMany({where:{name:{startsWith:'Synthetic volume '}}});assert.equal(orgs.length,1);
+ const org=orgs[0],tag=org.name.slice('Synthetic volume '.length);assert.match(tag,/^[0-9a-f-]{36}$/);
+ const owner=await prisma.organizationUser.findFirstOrThrow({where:{organizationId:org.id,role:'owner'},include:{user:true}});assert.equal(owner.user.phone,tag);assert.equal(owner.user.passwordHash,'not-a-login');
+ const stores=await prisma.store.findMany({where:{organizationId:org.id}});assert.equal(stores.length,1);const storeId=stores[0].id;
+ assert.equal(await prisma.register.count({where:{storeId,isActive:true}}),20);
+ assert.equal(await prisma.sale.count({where:{organizationId:org.id,status:'completed'}}),0);
+ const before={products:await prisma.product.count({where:{organizationId:org.id}}),balances:await prisma.inventoryBalance.count({where:{storeId}})};
+ let next=0;
+ await Promise.all(Array.from({length:4},async()=>{for(;;){const batch=next++;if(batch>=500)return;const start=batch*100;
+ await prisma.$executeRaw`INSERT INTO "Product"(id,"organizationId",name,sku,barcode,unit,"salePrice","costPrice","updatedAt") SELECT md5(${tag}||':product:'||i)::uuid::text,${org.id},'Synthetic product '||lpad(i::text,5,'0'),'V-'||lpad(i::text,5,'0'),'V-'||lpad(i::text,5,'0'),'dona',100,40,NOW() FROM generate_series(${start},${start+99}) i WHERE NOT EXISTS(SELECT 1 FROM "Product" old WHERE old.id=md5(${tag}||':product:'||i)::uuid::text) ON CONFLICT(id) DO NOTHING`;
+ }}));
+ console.log('prepare: products complete');next=0;
+ await Promise.all(Array.from({length:4},async()=>{for(;;){const batch=next++;if(batch>=500)return;const start=batch*100;
+ await prisma.$executeRaw`INSERT INTO "InventoryBalance"("storeId","productId",quantity,"updatedAt") SELECT ${storeId},p.id,1000,NOW() FROM "Product" p WHERE p."organizationId"=${org.id} AND p.sku>=${'V-'+String(start).padStart(5,'0')} AND p.sku<=${'V-'+String(start+99).padStart(5,'0')} AND NOT EXISTS(SELECT 1 FROM "InventoryBalance" old WHERE old."storeId"=${storeId} AND old."productId"=p.id) ON CONFLICT("storeId","productId") DO NOTHING`;
+ }}));
+ const after={products:await prisma.product.count({where:{organizationId:org.id}}),balances:await prisma.inventoryBalance.count({where:{storeId}})};assert.equal(after.products,50000);assert.equal(after.balances,50000);
+ fs.writeFileSync('/tmp/pos-review-fixture-id',org.id,{mode:0o600});
+ fs.writeFileSync('tasks/evidence/server-preparation-20261017/seed-preparation.json',JSON.stringify({at:new Date().toISOString(),organizationId:org.id,before,after,workers:4,guardsDisabled:false,scope:'synthetic fixture setup only; not a load measurement'},null,2)+'\n',{flag:'wx'});
+ console.log(JSON.stringify({organizationId:org.id,after}));
+}
+main().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>prisma.$disconnect());
