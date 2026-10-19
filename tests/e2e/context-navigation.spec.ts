@@ -24,6 +24,19 @@ test('Branch/register selectors verify accessible IDs, preserve selection after 
  expect(typeof deployment.release).toBe('string');expect(deployment.maintenance).toBe(false)
  await expect(page.getByText('Serverning texnik xizmat holati olinmadi. Natijasi noaniq amallarni yangi kalit bilan takrorlamang.',{exact:true})).toHaveCount(0)
  await expect(page.getByLabel('Filialni almashtirish',{exact:true})).toHaveValue(f.store.id)
+ const initialRegister=await page.getByLabel('Kassani almashtirish',{exact:true}).inputValue()
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pos_active_register')??'null')?.id)).toBe(initialRegister)
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pos_active_store')??'null')?.id)).toBe(f.store.id)
+ // Database row order is not a terminal-selection contract. Even the initial
+ // automatic choice must survive a new order in the next verified response.
+ await page.route('**/api/stores?*',async route=>{
+  const response=await route.fetch(),body=await response.json()
+  body.data=body.data.map((store:{registers?:unknown[]})=>({...store,registers:store.registers?.slice().reverse()}))
+  await route.fulfill({response,json:body})
+ })
+ await page.reload();await saved(page)
+ await expect(page.getByLabel('Kassani almashtirish',{exact:true})).toHaveValue(initialRegister)
+ await page.unroute('**/api/stores?*')
  await page.getByLabel('Kassani almashtirish',{exact:true}).selectOption(f.secondRegister.id)
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pos_active_register')??'null')?.id)).toBe(f.secondRegister.id)
  await saved(page);await expect(page.getByLabel('Kassani almashtirish',{exact:true})).toHaveValue(f.secondRegister.id)
@@ -54,6 +67,10 @@ test('Fractional cart and conversion controls survive reload; nonempty cart and 
  await db.productUnitConversion.create({data:{organizationId,productId:product.id,baseUnit:'kg',tradeUnit:'pack',ratio:'0.125'}})
  await db.shift.create({data:{registerId:f.register.id,organizationUserId:f.me.user.organizationUserId,openingCash:0}})
  await page.goto('/pos');await saved(page)
+ // This scenario requires the fixture's open shift, not an unspecified first
+ // register from the API response.
+ await page.getByLabel('Kassani almashtirish',{exact:true}).selectOption(f.register.id)
+ await saved(page)
  await page.getByRole('heading',{name:product.name,exact:true}).click()
  const quantity=page.getByLabel(product.name+' miqdori',{exact:true})
  await quantity.fill('2.3');await page.getByLabel(product.name+' miqdorini kamaytirish',{exact:true}).click();await expect(quantity).toHaveValue('1.3')

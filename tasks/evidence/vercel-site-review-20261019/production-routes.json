@@ -1,0 +1,603 @@
+{
+  "recordedAt": "2026-10-19T11:04:38.476Z",
+  "base": "https://pos-backup-sooty.vercel.app",
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "reached": "/",
+      "internalError": false,
+      "heading": [
+        "Savdo, ombor va hisoblarni bir joyda boshqaring",
+        "Hozir ishlaydigan imkoniyatlar",
+        "Oylik tariflar"
+      ]
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "reached": "/login",
+      "internalError": false,
+      "heading": [
+        "Tizimga kirish"
+      ]
+    },
+    {
+      "path": "/register",
+      "status": 200,
+      "reached": "/register",
+      "internalError": false,
+      "heading": [
+        "Yangi biznesni ro'yxatdan o'tkazish"
+      ]
+    },
+    {
+      "path": "/forgot-password",
+      "status": 200,
+      "reached": "/forgot-password",
+      "internalError": false,
+      "heading": [
+        "Parolni tiklash"
+      ]
+    },
+    {
+      "path": "/reset-password",
+      "status": 200,
+      "reached": "/reset-password",
+      "internalError": false,
+      "heading": [
+        "Yangi parol"
+      ]
+    },
+    {
+      "path": "/invite",
+      "status": 200,
+      "reached": "/invite",
+      "internalError": false,
+      "heading": [
+        "Biznesga taklifni qabul qilish"
+      ]
+    },
+    {
+      "path": "/r",
+      "status": 200,
+      "reached": "/r",
+      "internalError": false,
+      "heading": [
+        "Elektron chek mavjud emas yoki muddati tugagan."
+      ]
+    },
+    {
+      "path": "/d",
+      "status": 200,
+      "reached": "/d",
+      "internalError": false,
+      "heading": [
+        "Ko‘chirma mavjud emas yoki ruxsat bekor qilingan."
+      ]
+    },
+    {
+      "path": "/archive",
+      "status": 200,
+      "reached": "/archive",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Arxiv"
+      ]
+    },
+    {
+      "path": "/audit",
+      "status": 200,
+      "reached": "/audit",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Audit tarixi"
+      ]
+    },
+    {
+      "path": "/billing",
+      "status": 200,
+      "reached": "/billing",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Tarif va obuna",
+        "Sinov davri"
+      ]
+    },
+    {
+      "path": "/customers",
+      "status": 200,
+      "reached": "/customers",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Mijozlar va Nasiya"
+      ]
+    },
+    {
+      "path": "/dashboard",
+      "status": 200,
+      "reached": "/dashboard",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Xush kelibsiz, TECHNICAL REVIEW 2026-10-19 — NO SALES!"
+      ]
+    },
+    {
+      "path": "/drafts",
+      "status": 200,
+      "reached": "/drafts",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Server qoralamalari"
+      ]
+    },
+    {
+      "path": "/finance",
+      "status": 200,
+      "reached": "/finance",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Hisoblar va biznes xarajatlari",
+        "Hisoblar"
+      ]
+    },
+    {
+      "path": "/help",
+      "status": 200,
+      "reached": "/help",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "POS yordam qo‘llanmasi",
+        "Internet yoki server javobi kelmadi"
+      ]
+    },
+    {
+      "path": "/incidents",
+      "status": 200,
+      "reached": "/incidents",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Hisob tafovutlari"
+      ]
+    },
+    {
+      "path": "/inventory",
+      "status": 200,
+      "reached": "/inventory",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Ombor boshqaruvi"
+      ]
+    },
+    {
+      "path": "/jobs",
+      "status": 200,
+      "reached": "/jobs",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Fon ishlari va qayta urinishlar"
+      ]
+    },
+    {
+      "path": "/loyalty",
+      "status": 200,
+      "reached": "/loyalty",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Bonus siyosati",
+        "Promo-kod kampaniyalari"
+      ]
+    },
+    {
+      "path": "/onboarding",
+      "status": 200,
+      "reached": "/onboarding",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Birlamchi sozlash",
+        "Asosiy do'kon"
+      ]
+    },
+    {
+      "path": "/platform",
+      "status": 200,
+      "reached": "/platform",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Platforma boshqaruvi"
+      ]
+    },
+    {
+      "path": "/pos",
+      "status": 200,
+      "reached": "/pos",
+      "internalError": false,
+      "heading": [
+        "Shuni POS"
+      ]
+    },
+    {
+      "path": "/products",
+      "status": 200,
+      "reached": "/products",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Mahsulotlar katalogi"
+      ]
+    },
+    {
+      "path": "/replenishment",
+      "status": 200,
+      "reached": "/replenishment",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Qayta buyurtma tavsiyasi"
+      ]
+    },
+    {
+      "path": "/reports",
+      "status": 200,
+      "reached": "/reports",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Tahlil va Hisobotlar"
+      ]
+    },
+    {
+      "path": "/roles",
+      "status": 200,
+      "reached": "/roles",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Rollar va vakolatlar",
+        "Xodimga biriktirish"
+      ]
+    },
+    {
+      "path": "/sales",
+      "status": 200,
+      "reached": "/sales",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Savdolar jurnali"
+      ]
+    },
+    {
+      "path": "/security",
+      "status": 200,
+      "reached": "/security",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Telefon va e-mail tasdig‘i",
+        "Authenticator"
+      ]
+    },
+    {
+      "path": "/settings",
+      "status": 200,
+      "reached": "/settings",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Tizim Sozlamalari"
+      ]
+    },
+    {
+      "path": "/shifts",
+      "status": 200,
+      "reached": "/shifts",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Kassa va Smenalar nazorati"
+      ]
+    },
+    {
+      "path": "/suppliers",
+      "status": 200,
+      "reached": "/suppliers",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Yetkazib beruvchilar"
+      ]
+    },
+    {
+      "path": "/support",
+      "status": 200,
+      "reached": "/support",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Support operator konsoli"
+      ]
+    },
+    {
+      "path": "/sync-review",
+      "status": 200,
+      "reached": "/sync-review",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Navbat va konfliktlar",
+        "Shu qurilma amallari"
+      ]
+    },
+    {
+      "path": "/tickets",
+      "status": 200,
+      "reached": "/tickets",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Yordam murojaatlari",
+        "Ichki ish tartibi loyihasi"
+      ]
+    },
+    {
+      "path": "/training",
+      "status": 200,
+      "reached": "/training",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Yangi kassir uchun mashq",
+        "Misol: mashq mahsuloti —10000 so‘m"
+      ]
+    },
+    {
+      "path": "/customers/duplicates",
+      "status": 200,
+      "reached": "/customers/duplicates",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Legacy telefon dublikatlari"
+      ]
+    },
+    {
+      "path": "/inventory/batches",
+      "status": 200,
+      "reached": "/inventory/batches",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Partiyalar va yaroqlilik",
+        "Mahsulot uchun nazorat"
+      ]
+    },
+    {
+      "path": "/inventory/counts",
+      "status": 200,
+      "reached": "/inventory/counts",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Inventarizatsiya",
+        "Yangi sanash — Asosiy do'kon"
+      ]
+    },
+    {
+      "path": "/inventory/dispositions",
+      "status": 200,
+      "reached": "/inventory/dispositions",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Brak va hisobdan chiqarish",
+        "Sahifadagi mahsulotlar bo‘yicha yig‘ma hisob"
+      ]
+    },
+    {
+      "path": "/inventory/locations",
+      "status": 200,
+      "reached": "/inventory/locations",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Ombor zonalari va rezervlar"
+      ]
+    },
+    {
+      "path": "/inventory/movements",
+      "status": 200,
+      "reached": "/inventory/movements",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Ombor harakati jurnali"
+      ]
+    },
+    {
+      "path": "/inventory/serials",
+      "status": 200,
+      "reached": "/inventory/serials",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Seriya raqamlari va kafolat",
+        "Mahsulot serial nazorati"
+      ]
+    },
+    {
+      "path": "/inventory/transfers",
+      "status": 200,
+      "reached": "/inventory/transfers",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Do'konlararo transferlar"
+      ]
+    },
+    {
+      "path": "/pos/offline",
+      "status": 200,
+      "reached": "/pos/offline",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Offline naqd ruxsatlar"
+      ]
+    },
+    {
+      "path": "/products/brands",
+      "status": 200,
+      "reached": "/products/brands",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Mahsulot brendlari"
+      ]
+    },
+    {
+      "path": "/products/categories",
+      "status": 200,
+      "reached": "/products/categories",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Kategoriyalar"
+      ]
+    },
+    {
+      "path": "/products/import",
+      "status": 200,
+      "reached": "/products/import",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Katalog importi va Excel eksporti"
+      ]
+    },
+    {
+      "path": "/products/prices",
+      "status": 200,
+      "reached": "/products/prices",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Narxlar tarixi va ommaviy o‘zgartirish",
+        "Narxlar tarixi"
+      ]
+    },
+    {
+      "path": "/products/units",
+      "status": 200,
+      "reached": "/products/units",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Mahsulot birliklari"
+      ]
+    },
+    {
+      "path": "/reports/breakdowns",
+      "status": 200,
+      "reached": "/reports/breakdowns",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Savdo kesimlari"
+      ]
+    },
+    {
+      "path": "/reports/plans",
+      "status": 200,
+      "reached": "/reports/plans",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Rejalashtirilgan hisobotlar",
+        "Yangi jadval"
+      ]
+    },
+    {
+      "path": "/reports/purchases",
+      "status": 200,
+      "reached": "/reports/purchases",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Xarid narxlari tahlili"
+      ]
+    },
+    {
+      "path": "/reports/reconciliation",
+      "status": 200,
+      "reached": "/reports/reconciliation",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Qoldiq va pul hisobini solishtirish"
+      ]
+    },
+    {
+      "path": "/reports/supplier-balances",
+      "status": 200,
+      "reached": "/reports/supplier-balances",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Supplier qarzi va to‘lov muddati"
+      ]
+    },
+    {
+      "path": "/settings/prices",
+      "status": 200,
+      "reached": "/settings/prices",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Narx darajalari va mijoz guruhlari"
+      ]
+    },
+    {
+      "path": "/settings/support",
+      "status": 200,
+      "reached": "/settings/support",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Support kirish ruxsatlari",
+        "Berilgan ruxsatlar"
+      ]
+    },
+    {
+      "path": "/settings/taxes",
+      "status": 200,
+      "reached": "/settings/taxes",
+      "internalError": false,
+      "heading": [
+        "Shuni POS",
+        "Soliq siyosati va stavka tarixi"
+      ]
+    }
+  ],
+  "errors": [],
+  "responses": [],
+  "registration": {
+    "status": 200,
+    "requestId": "c6c6fbae-809d-469a-be3a-45e6134dc078"
+  },
+  "meStatus": 200
+}

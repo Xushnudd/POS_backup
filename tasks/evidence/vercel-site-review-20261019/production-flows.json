@@ -1,0 +1,85 @@
+{
+  "login": 200,
+  "logout": 200,
+  "anonymousRedirect": "/login",
+  "views": [
+    {
+      "route": "/dashboard",
+      "width": 360,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/pos",
+      "width": 360,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/products",
+      "width": 360,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/customers",
+      "width": 360,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/settings",
+      "width": 360,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/dashboard",
+      "width": 1280,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/pos",
+      "width": 1280,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/products",
+      "width": 1280,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/customers",
+      "width": 1280,
+      "overflow": false,
+      "status": 200
+    },
+    {
+      "route": "/settings",
+      "width": 1280,
+      "overflow": false,
+      "status": 200
+    }
+  ],
+  "errors": [],
+  "failedResponses": [],
+  "worker": {
+    "supported": true,
+    "registrations": [
+      {
+        "active": true,
+        "scope": "/"
+      }
+    ]
+  },
+  "ru": {
+    "lang": "ru",
+    "heading": [
+      "Вход в систему"
+    ]
+  },
+  "afterLogout": 401
+}

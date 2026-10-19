@@ -29,6 +29,13 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+      - name: Generate isolated authentication test key
+        run: |
+          node <<'NODE'
+          const { appendFileSync } = require('node:fs');
+          const { randomBytes } = require('node:crypto');
+          appendFileSync(process.env.GITHUB_ENV, `AUTH_CHALLENGE_SECRET=${randomBytes(32).toString('hex')}\n`);
+          NODE
       - run: npm ci
       - run: npm run db:migrate
       - run: npm run security:scan:test
@@ -56,12 +63,23 @@ jobs:
       - run: npm run test:integration
         env:
           POS_TEST_PSQL_CONTAINER: ${{ job.services.postgres.id }}
+          APP_ORIGIN: http://localhost:3000
+          AUTH_TOTP_ENABLED: 'true'
       - run: npm run build
       - run: npm audit --omit=dev --audit-level=high
       - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Initialize isolated maintenance test state
+        run: |
+          node <<'NODE'
+          const { writeFileSync } = require('node:fs');
+          writeFileSync('/tmp/pos-maintenance-e2e-state.json', JSON.stringify({ maintenance: false, message: 'Isolated CI service available' }), { mode: 0o600 });
+          NODE
       - run: npm run test:e2e
         env:
           POS_E2E_ALL_BROWSERS: '1'
+          AUTH_TOTP_ENABLED: 'true'
+          AUTH_CRITICAL_MFA_REQUIRED: 'true'
+          POS_DEPLOYMENT_STATE_FILE: /tmp/pos-maintenance-e2e-state.json
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

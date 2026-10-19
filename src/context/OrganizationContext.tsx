@@ -84,6 +84,9 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
         if (currentStore) {
           setActiveStoreState(currentStore);
+          // Persist the server-verified initial choice too. A later response
+          // may enumerate registers differently; reload must keep this terminal.
+          localStorage.setItem('pos_active_store', JSON.stringify(currentStore));
 
           const savedRegisterJson = localStorage.getItem('pos_active_register');
           let currentRegister: Register | undefined;
@@ -103,7 +106,8 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
           shiftRequest.current++;setActiveShift(null);
           setActiveRegisterState(currentRegister??null);
-          if(!currentRegister)localStorage.removeItem('pos_active_register');
+          if(currentRegister)localStorage.setItem('pos_active_register', JSON.stringify(currentRegister));
+          else localStorage.removeItem('pos_active_register');
         }else{
           shiftRequest.current++;setActiveStoreState(null);setActiveRegisterState(null);setActiveShift(null);
           localStorage.removeItem('pos_active_store');localStorage.removeItem('pos_active_register');
