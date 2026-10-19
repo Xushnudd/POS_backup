@@ -29,12 +29,6 @@
     "release:claims:check": "node scripts/release/check-claims.cjs",
     "test:local-https": "node --test scripts/local/*.test.cjs"
   },
-  "onlyBuiltDependencies": [
-    "@prisma/client",
-    "@prisma/engines",
-    "prisma",
-    "unrs-resolver"
-  ],
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",
     "@fortawesome/free-regular-svg-icons": "^7.3.1",

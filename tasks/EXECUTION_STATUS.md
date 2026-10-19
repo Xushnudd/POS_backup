@@ -1,5 +1,7 @@
 # Bajarish statusi
 
+Vercel sayt tekshiruvi (2026-10-19): Production’da ruxsat berilgan alohida test hisobida registration/login/logout va 58 statik sahifa tekshirildi; 500 qayta kuzatilmadi. Lokal yangi buildda barcha 69 sahifa, kassa tanlovi, kasr birliklar va maintenance qayta tekshirildi. Dastlabki filial/kassa tanlovini saqlash va CI auth/maintenance muhiti tuzatildi. Yakuniy noyob natijalar full va qayta runlar bo‘yicha 473 PG / 157 Chromium; 174 unit / 42 ops / 5 Vercel config; build/lint/types PASS. Foydalanuvchi `main` va Production’ga chiqarishni tasdiqladi; Git deploymenti kuzatilmoqda. Original done 185/259 (+0). [Hisobot](VERCEL_SITE_REVIEW_20261019.md), dalil: `tasks/evidence/vercel-site-review-20261019/validation.json`.
+
 Sana: 2026-10-17. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
 
 Joriy original done: **185/259**. Joriy maqsad **195** hali bajarilmadi; ushbu davomda yangi original done **+0**, yana **10** ta to‘liq original qabul kerak. Oldingi190 maqsadi ham bajarilmagan. Foydalanuvchi 2026-10-16 kuni staging/mustaqil status hosti/pilot **hali tayyor emas**ligini qayta tasdiqladi. 74 ochiq bandning qabul to‘siqlari: `tasks/190_BLOCKERS.md`;195 uchun qayta tekshiruv va qabul yo‘li: `tasks/195_READINESS.md`. CI/test/yuklama dalili tuzatishlari yangi original band sifatida sanalmaydi.

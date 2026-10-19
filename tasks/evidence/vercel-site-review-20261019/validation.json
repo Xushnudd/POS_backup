@@ -1,0 +1,2993 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-19T14:25:22.561Z",
+  "scope": "Production read/navigation/authentication checks plus isolated localhost business tests; not full real-business production acceptance",
+  "productionOrigin": "https://pos-backup-sooty.vercel.app",
+  "productionDeployment": "dpl_8u7S8rnEXDJ5XAVdFTtqHC44LjRx",
+  "productionCommit": "88101efc53eb07aac6b144b97ea6178b0dd6fd9d",
+  "originalPlanDone": 185,
+  "originalPlanTotal": 259,
+  "productionTestAccount": {
+    "explicitUserConsent": true,
+    "label": "TECHNICAL REVIEW 2026-10-19 — NO SALES",
+    "salesCreated": false,
+    "paymentsCreated": false,
+    "stockMovementsCreated": false,
+    "credentialsPublished": false
+  },
+  "production": {
+    "pages": 58,
+    "registration": 200,
+    "session": 200,
+    "login": 200,
+    "logout": 200,
+    "afterLogout": 401,
+    "serverErrors": 0,
+    "browserErrors": 0,
+    "viewportChecks": 10
+  },
+  "integration": {
+    "runs": [
+      {
+        "label": "pos-review-integration.log",
+        "sha256": "73bd8050a6d00b7915d07cc64f12727a70b0a41ca7d9c81d422cbc40f11efd90",
+        "tests": 473,
+        "pass": 463,
+        "fail": 10
+      },
+      {
+        "label": "pos-review-integration-recheck.log",
+        "sha256": "4139bcab3674ece27cde98944aa9ae9df97b247a09ad69628a3b02bcd0c7ea95",
+        "tests": 42,
+        "pass": 41,
+        "fail": 1
+      },
+      {
+        "label": "pos-review-integration-final-recheck.log",
+        "sha256": "3e3b11ef611884aeeda97a70c5dc157243300843f1689110746ca966affd23e5",
+        "tests": 25,
+        "pass": 25,
+        "fail": 0
+      }
+    ],
+    "uniqueScenarios": 473,
+    "latestPass": 473,
+    "unresolved": [],
+    "singleCleanFullRun": false,
+    "scenarios": [
+      {
+        "name": "Queued OTP is encrypted, undelivered codes cannot verify, foreign session and replay fail",
+        "status": "pass"
+      },
+      {
+        "name": "Wrong attempts commit to a five-try lockout; real expiry never verifies",
+        "status": "pass"
+      },
+      {
+        "name": "Reset is one-use, encrypted and atomic; password change revokes sessions and never verifies a contact",
+        "status": "pass"
+      },
+      {
+        "name": "Step-up binds exact action, key, hash and session, and late audit rollback preserves proof for original retry",
+        "status": "pass"
+      },
+      {
+        "name": "Unconfigured production endpoints and mocks fail closed without creating or confirming an account",
+        "status": "pass"
+      },
+      {
+        "name": "Delivery failure cannot confirm a contact; competing workers send once and production never trusts mock proof",
+        "status": "pass"
+      },
+      {
+        "name": "Expired queued secret is erased without a configured provider or encryption key, retaining unverified history",
+        "status": "pass"
+      },
+      {
+        "name": "Restore quarantine blocks old/new sessions and readiness, invalidates one-time credentials, preserves business history and requires immutable operator review",
+        "status": "pass"
+      },
+      {
+        "name": "A failed restore credential sweep commits its quarantine first and rolls back credential writes until exact retry",
+        "status": "pass"
+      },
+      {
+        "name": "real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold",
+        "status": "pass"
+      },
+      {
+        "name": "tracked multi-batch transfer receive/loss/replay preserves original source and branch stock",
+        "status": "pass"
+      },
+      {
+        "name": "partial original batch return, damaged return and exact per-batch count are atomic and idempotent",
+        "status": "pass"
+      },
+      {
+        "name": "expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch",
+        "status": "pass"
+      },
+      {
+        "name": "supplier goods return targets original expired lot and receipt reversal restores no invented batch",
+        "status": "pass"
+      },
+      {
+        "name": "Batch list global expiry/code order and bounded pages retain FEFO source journals and filtered export",
+        "status": "pass"
+      },
+      {
+        "name": "Cost ledger uses exact decimals, idempotency and period identity without creating POS money",
+        "status": "pass"
+      },
+      {
+        "name": "Cost report separates currencies, estimates and partial periods; CSV exports all pages safely",
+        "status": "pass"
+      },
+      {
+        "name": "Late audit failure rolls back source cost and operation; original-key retry commits once",
+        "status": "pass"
+      },
+      {
+        "name": "New organization receives one immutable Pro trial; private billing does not cross tenants or grant platform access",
+        "status": "pass"
+      },
+      {
+        "name": "Approved plan assignment replays once; concurrent raw/API-independent creates cannot bypass quota or erase existing data",
+        "status": "pass"
+      },
+      {
+        "name": "Payment proof cannot commit without settlement; late audit failure rolls back paid invoice, period and proof together",
+        "status": "pass"
+      },
+      {
+        "name": "Expired trial denies new sale/object, preserves reads and restores paid entitlement atomically without POS cash postings",
+        "status": "pass"
+      },
+      {
+        "name": "Plan publishing requires platform admin and rolls back immutable version/current pointer/Operation on audit failure",
+        "status": "pass"
+      },
+      {
+        "name": "Cashier PIN requires password, stores only hash, switches once and cannot regain manager or other branch access",
+        "status": "pass"
+      },
+      {
+        "name": "PIN disables revoked credentials, rejects foreign identity and locks repeated wrong attempts without new sessions",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent switch consumes one source session, password rotation clears PIN and late audit failure preserves original session",
+        "status": "pass"
+      },
+      {
+        "name": "A cashier can switch to a different assigned cashier and back without gaining owner privileges",
+        "status": "pass"
+      },
+      {
+        "name": "Reviewed CSV/Excel import previews without writes, reports bad/duplicate rows, commits once and roundtrips exact owner cost/aliases",
+        "status": "pass"
+      },
+      {
+        "name": "Import rejects stale preview, actual admin/cashier/revoked source and late audit failure atomically",
+        "status": "pass"
+      },
+      {
+        "name": "Bounded XLSX preview/import handles one thousand rows without truncation or stock/money posting",
+        "status": "pass"
+      },
+      {
+        "name": "Archive filters are explicit, tenant-safe and cashier cannot read archive; zero/nonzero ledger balance controls both archive paths",
+        "status": "pass"
+      },
+      {
+        "name": "Archiving cannot overtake a concurrent debt posting holding the customer lock",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier lifecycle keeps history, paginates opt-in, validates lengths and exports all filtered rows safely",
+        "status": "pass"
+      },
+      {
+        "name": "Inventory journal and CSV preserve signed precision, local-day boundaries, stable paging and assigned-branch scope",
+        "status": "pass"
+      },
+      {
+        "name": "Shift CSV uses frozen close amounts, omits unknown open settlement and scopes to assigned branch; audit CSV is owner-only and payload-free",
+        "status": "pass"
+      },
+      {
+        "name": "Print requests are idempotent under concurrency, reject altered intent and do not change any financial/stock rows",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier, journal, shift and audit exports reject more than 10000 rows rather than truncating",
+        "status": "pass"
+      },
+      {
+        "name": "Category validation/search/sort and full CSV remain tenant/role safe beyond page 200",
+        "status": "pass"
+      },
+      {
+        "name": "Unit and barcode search/paging expose all records, stable primary order and complete safe exports",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier history and confirmed purchase totals use scoped event dates and Decimal reversals without counting drafts or other adjustments",
+        "status": "pass"
+      },
+      {
+        "name": "Stock document and transfer filtering and CSV are stable, full, signed and branch-scoped",
+        "status": "pass"
+      },
+      {
+        "name": "Stock balance CSV matches low-stock scope, preserves quantities/cost and does not truncate to its UI page",
+        "status": "pass"
+      },
+      {
+        "name": "Document and transfer CSV caps count child lines, not only parent documents; failure returns no partial content",
+        "status": "pass"
+      },
+      {
+        "name": "Large web archive is exact, private, immutable and auditable only after complete streaming; closure accepts it",
+        "status": "pass"
+      },
+      {
+        "name": "A killed worker never exposes partial bytes; persisted lease recovery fences the old attempt and publishes exactly once",
+        "status": "pass"
+      },
+      {
+        "name": "Expired chunk bytes are pruned while metadata/history stays and incomplete publication is rejected natively",
+        "status": "pass"
+      },
+      {
+        "name": "Required classification blocks posting atomically; exact configured tax and source freeze on receipt",
+        "status": "pass"
+      },
+      {
+        "name": "Ordinary goods remain sellable; marking integration fails closed without payment or stock posting",
+        "status": "pass"
+      },
+      {
+        "name": "Classification changes enforce owner, tenant, strict validation and original idempotency key",
+        "status": "pass"
+      },
+      {
+        "name": "One box sale posts twelve base units; original ratio governs partial return after catalogue changes",
+        "status": "pass"
+      },
+      {
+        "name": "Purchase box quantity uses base-unit cost, preserves document input, and stale draft cannot silently post a new ratio",
+        "status": "pass"
+      },
+      {
+        "name": "Conversion scope and precision reject foreign products, unsupported units and mixed SKU document units",
+        "status": "pass"
+      },
+      {
+        "name": "Exact barcode, alias and identifier lookup expose the same conversion metadata as catalog listing",
+        "status": "pass"
+      },
+      {
+        "name": "An allowed custom route cannot bypass assigned-branch boundaries",
+        "status": "pass"
+      },
+      {
+        "name": "Owner creates tenant-local profiles, exact replay is stable and profiles cannot elevate owner/cashier privileges",
+        "status": "pass"
+      },
+      {
+        "name": "HTTP admission honors current custom profile; editing revokes sessions and stale contexts before replay",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent role edits have one winner; deactivation blocks new sessions and preserves membership history",
+        "status": "pass"
+      },
+      {
+        "name": "Late audit failure atomically restores role revision, permissions, sessions and operation before original-key retry",
+        "status": "pass"
+      },
+      {
+        "name": "Custom role writes respect subscription read-only and source identity guards",
+        "status": "pass"
+      },
+      {
+        "name": "Advance overpayment is separate credit, partial allocation and original cash sale refunds conserve cash and debt once",
+        "status": "pass"
+      },
+      {
+        "name": "Advance source scope, archive, journal immutability and raced refunds fail closed",
+        "status": "pass"
+      },
+      {
+        "name": "Opening debt allocations never hide overpayment and revoked sessions cannot receive cash",
+        "status": "pass"
+      },
+      {
+        "name": "Actual advances HTTP enforces strict input, owner scope and exact statement cash events",
+        "status": "pass"
+      },
+      {
+        "name": "Advance cash waits on the shift without holding its customer, matching return and finance account lock order",
+        "status": "pass"
+      },
+      {
+        "name": "Purpose/channel consent is absent by default, distinct, append-only, timestamped and tenant exported",
+        "status": "pass"
+      },
+      {
+        "name": "Withdrawals invalidate queued consent, re-grants cannot revive old messages, contact edits and inactive cards fail closed",
+        "status": "pass"
+      },
+      {
+        "name": "Idempotency preserves one event; stale and parallel revisions cannot overwrite decisions",
+        "status": "pass"
+      },
+      {
+        "name": "Cross-tenant writes/read, forged role, revoked-session replay and DB-level mismatched roots are denied",
+        "status": "pass"
+      },
+      {
+        "name": "Consent HTTP validates strict payload/cursor, idempotency and anonymous/foreign access",
+        "status": "pass"
+      },
+      {
+        "name": "Expired subscriptions can withdraw consent but cannot grant; history pagination retains every original event",
+        "status": "pass"
+      },
+      {
+        "name": "Customer normalized duplicate races, scoped group pricing, settled merge and original sales/refund history preserve all financial IDs",
+        "status": "pass"
+      },
+      {
+        "name": "Customer SQL and service block merge with open debt or foreign scope; normalized identity matches SQL and a failed audit rolls merge back",
+        "status": "pass"
+      },
+      {
+        "name": "Preserved legacy duplicate diagnosis is paginated, normalized, owner-only and scoped; reviewed merge resolves the duplicate without deleting either identity",
+        "status": "pass"
+      },
+      {
+        "name": "Original customer sales history and variant lists cover global sorted pages, bounded filters and preserve original tenant amounts",
+        "status": "pass"
+      },
+      {
+        "name": "Preserved legacy duplicate global names filter only presentation, retains group size and never creates or merges customers",
+        "status": "pass"
+      },
+      {
+        "name": "Daily consented queue and concurrent worker replay prepare one exact statement; withdrawal immediately invalidates the link",
+        "status": "pass"
+      },
+      {
+        "name": "Withdrawn queued consent, stale contact, other channel and foreign tenant cannot prepare or read a reminder",
+        "status": "pass"
+      },
+      {
+        "name": "Maintenance rejects new durable writes, permits only authorized exact committed replay and lets an already admitted operation finish",
+        "status": "pass"
+      },
+      {
+        "name": "stock draft: parallel and lost-ACK replay creates one document and audit, rejects changed payload and revoked role",
+        "status": "pass"
+      },
+      {
+        "name": "transfer draft: parallel and lost-ACK replay creates one document and audit, rejects changed payload and revoked role",
+        "status": "pass"
+      },
+      {
+        "name": "Create/complete retries are exactly one business effect, conflicts reject, stock atomic",
+        "status": "pass"
+      },
+      {
+        "name": "Return disposition controls sellable stock without changing refund or duplicating replay",
+        "status": "pass"
+      },
+      {
+        "name": "Two tills competing for last unit cannot oversell",
+        "status": "pass"
+      },
+      {
+        "name": "Mixed cash/debt, partial collection, partial/full return conserve balances and replay",
+        "status": "pass"
+      },
+      {
+        "name": "Manual ledger requires a scoped open shift and replays once; closed shifts reject payments",
+        "status": "pass"
+      },
+      {
+        "name": "Checkout snapshots current weighted cost; completed history does not follow catalog edits",
+        "status": "pass"
+      },
+      {
+        "name": "Purchase weighted cost and partial transfer preserve stock through retry and excess rejection",
+        "status": "pass"
+      },
+      {
+        "name": "Revoked sessions cannot create economic effects even with a previously verified context",
+        "status": "pass"
+      },
+      {
+        "name": "DB rejects return items linked to a different sale and debt linked to a different customer",
+        "status": "pass"
+      },
+      {
+        "name": "Invitation is single-use, revocable, expires and cannot take over an existing account",
+        "status": "pass"
+      },
+      {
+        "name": "Reconciliation finds discrepancies without repairing history and keeps tenants isolated",
+        "status": "pass"
+      },
+      {
+        "name": "Units enforce fractional precision and snapshot; additional barcodes stay unique inside a tenant",
+        "status": "pass"
+      },
+      {
+        "name": "Bank debt collection never turns into an automatic cash refund",
+        "status": "pass"
+      },
+      {
+        "name": "Cancellation tombstone blocks delayed draft posting; a committed draft keeps manager-only cancellation",
+        "status": "pass"
+      },
+      {
+        "name": "Stock reversal preserves immutable history, inverse weighted cost, audit and exactly-one effect",
+        "status": "pass"
+      },
+      {
+        "name": "Failed reversal rolls back all lines; negative adjustment reversal restores stock",
+        "status": "pass"
+      },
+      {
+        "name": "Draft transfer cancellation replays once and cannot race a stock shipment",
+        "status": "pass"
+      },
+      {
+        "name": "Transit returns conserve source/destination stock and cannot exceed unreceived quantity",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent receive/return chooses a single effect for the same transit unit",
+        "status": "pass"
+      },
+      {
+        "name": "Blind count freezes selected stock; recount/approval posts exactly one linked adjustment",
+        "status": "pass"
+      },
+      {
+        "name": "Full count/cancellation and concurrent checkout preserve the count checkpoint",
+        "status": "pass"
+      },
+      {
+        "name": "Partial counts leave other SKUs available; zero-difference approval needs no stock adjustment",
+        "status": "pass"
+      },
+      {
+        "name": "Opening/adjustment/write-off debt documents are append-only, authorized and never cash",
+        "status": "pass"
+      },
+      {
+        "name": "Written-off sale debt is never treated as paid cash during partial/full returns",
+        "status": "pass"
+      },
+      {
+        "name": "Mixed paid/outstanding/written-off refund preserves all three liabilities",
+        "status": "pass"
+      },
+      {
+        "name": "A business duplicate without a committed operation remains a conflict",
+        "status": "pass"
+      },
+      {
+        "name": "Explicit debt allocations select receipts, conserve payment and reject invalid targets atomically",
+        "status": "pass"
+      },
+      {
+        "name": "Debt export rejects oversized periods before loading the entry table",
+        "status": "pass"
+      },
+      {
+        "name": "Commercial export separates mixed sale, cash collection, refund and debt without double counting",
+        "status": "pass"
+      },
+      {
+        "name": "Credit deadlines are preserved on replay and invalid deadlines leave no posting effects",
+        "status": "pass"
+      },
+      {
+        "name": "Debt aging reconciles partial settlement/write-off and isolates uncertain legacy allocation",
+        "status": "pass"
+      },
+      {
+        "name": "Checkout trusts catalog snapshots and session actor, combines repeated SKU lines",
+        "status": "pass"
+      },
+      {
+        "name": "Invalid baskets, precision, excess discounts and foreign IDs leave no draft or operation",
+        "status": "pass"
+      },
+      {
+        "name": "A failure after the first stock posting rolls back stock, snapshots, debt, payment, operation and audit",
+        "status": "pass"
+      },
+      {
+        "name": "Checkout rechecks current discount limits and closed shift before any posting",
+        "status": "pass"
+      },
+      {
+        "name": "Parallel credit checkouts cannot exceed the shared customer limit",
+        "status": "pass"
+      },
+      {
+        "name": "Parallel shift opens and direct DB inserts leave only one open till",
+        "status": "pass"
+      },
+      {
+        "name": "Posted receipt DB snapshots resist edit/delete/insert and parent cascades; linked returns remain valid",
+        "status": "pass"
+      },
+      {
+        "name": "Multi-line cent allocation and successive partial returns conserve the frozen receipt after catalog edits",
+        "status": "pass"
+      },
+      {
+        "name": "A late audit failure rolls back already-written payments and stock",
+        "status": "pass"
+      },
+      {
+        "name": "A child edit waiting for checkout cannot change the newly posted receipt",
+        "status": "pass"
+      },
+      {
+        "name": "Manual card debt collection requires proof, preserves cash, allocates original debt and replays once",
+        "status": "pass"
+      },
+      {
+        "name": "Direct manager approvals bind reviewed document amounts and cannot transfer to another document or changed replay",
+        "status": "pass"
+      },
+      {
+        "name": "Transfer partial receipt, damaged and shortage outcomes conserve sent quantity with exact immutable scoped journal",
+        "status": "pass"
+      },
+      {
+        "name": "Exchange atomically links original refund/new sale; exact net cash tender/change and concurrent original replay once",
+        "status": "pass"
+      },
+      {
+        "name": "Exchange preserves original customer debt; cheaper cash replacement has actual refund and no invented tender",
+        "status": "pass"
+      },
+      {
+        "name": "Exchange failures roll back return, stock, replacement, journal and idempotency; stale/foreign/session/role denied",
+        "status": "pass"
+      },
+      {
+        "name": "Late exchange audit failure rolls back both documents and customer credit; actual assigned admin allowed and actual cashier denied",
+        "status": "pass"
+      },
+      {
+        "name": "Protected images are normalized, tenant scoped, immutable, bounded and tombstoned without exposing bytes in JSON",
+        "status": "pass"
+      },
+      {
+        "name": "File upload rejects active formats, corrupt data, traversal, large images, missing authorization and stale expiry",
+        "status": "pass"
+      },
+      {
+        "name": "Parallel file quota and late audit failure preserve atomic asset, product link and original operation",
+        "status": "pass"
+      },
+      {
+        "name": "Category tree rejects self, descendant, foreign and parallel cycles while brand and description lifecycle preserves history",
+        "status": "pass"
+      },
+      {
+        "name": "Tenant API, draft edits, nested transfer, global totals, revoke and constraints",
+        "status": "pass"
+      },
+      {
+        "name": "Debt allocation targets paginate positive scoped balances and require owner access",
+        "status": "pass"
+      },
+      {
+        "name": "Return history is paginated, uses frozen item names and enforces sale scope",
+        "status": "pass"
+      },
+      {
+        "name": "Owner audit summary filters a timezone snapshot and omits sensitive payloads",
+        "status": "pass"
+      },
+      {
+        "name": "Session management exposes only own live sessions and revokes another session exactly once",
+        "status": "pass"
+      },
+      {
+        "name": "Password changes reject bad credentials and UTF-8 truncation; competing requests cannot overwrite",
+        "status": "pass"
+      },
+      {
+        "name": "Customer exports share an atomic format/customer budget and expose a bounded retry delay",
+        "status": "pass"
+      },
+      {
+        "name": "Report endpoints share actor/tenant throttling and reconciliation has a tighter budget",
+        "status": "pass"
+      },
+      {
+        "name": "Sale HTTP contract rejects bad input, recovers original operation and rejects changed retry",
+        "status": "pass"
+      },
+      {
+        "name": "Actual cash certificate issue/replay, original sale allocation and goods cash refund conserve liability and cash once",
+        "status": "pass"
+      },
+      {
+        "name": "Gift issuer limits/code collisions/foreign source roll back cash; native journals cannot be rewritten",
+        "status": "pass"
+      },
+      {
+        "name": "Original unused-refund terms and current spending suspension apply through the ordinary advance endpoints too",
+        "status": "pass"
+      },
+      {
+        "name": "Two independent original operations cannot spend the same gift money twice",
+        "status": "pass"
+      },
+      {
+        "name": "Zero-credit-limit customer: gift/cash checkout and duplicate original operation commit payment, stock and liability atomically",
+        "status": "pass"
+      },
+      {
+        "name": "Failed checkout keeps draft stock, credit and gift balance unchanged; original retry succeeds after stock recovery",
+        "status": "pass"
+      },
+      {
+        "name": "Assigned cashier can use only their scoped sale/customer gift; issuance remains owner-only",
+        "status": "pass"
+      },
+      {
+        "name": "Native source/currency proof and late checkout fault keep real cash, stock and liability consistent",
+        "status": "pass"
+      },
+      {
+        "name": "Actual gift HTTP uses strict inputs, safe DTO, current session and original customer-scoped sale",
+        "status": "pass"
+      },
+      {
+        "name": "Prepaid gift goods earn configured non-credit points once; an unfunded forged credit-exemption intent cannot commit",
+        "status": "pass"
+      },
+      {
+        "name": "Worker catalog export traverses cursor pages once, preserves exact cost and formula protection, fences duplicates and tenant downloads",
+        "status": "pass"
+      },
+      {
+        "name": "Export filters isolate own active catalogue and revoked source cannot publish an artifact",
+        "status": "pass"
+      },
+      {
+        "name": "Late worker audit failure rolls back artifact; same source retries once without publishing a partial file",
+        "status": "pass"
+      },
+      {
+        "name": "Expired export erases bytes, preserves metadata/history and refuses download with 410",
+        "status": "pass"
+      },
+      {
+        "name": "Actual completed jobs retain globally sorted history across all pages and expose no worker lease or authorization payload",
+        "status": "pass"
+      },
+      {
+        "name": "Actual reconciliation incidents have sorted bounded history, zero state and unchanged discrepancy sources",
+        "status": "pass"
+      },
+      {
+        "name": "Reconciliation list keeps scoped global pages, searches only public source fields and makes no stock repair",
+        "status": "pass"
+      },
+      {
+        "name": "PostgreSQL jobs claim with SKIP LOCKED, preserve immutable scoped source, fence a stale lease and heartbeat the current lease",
+        "status": "pass"
+      },
+      {
+        "name": "Bounded failure reaches visible dead-letter; manual retry creates fresh authorization once and audit failure has no duplicate effect",
+        "status": "pass"
+      },
+      {
+        "name": "Job source/session revocation fails closed; cross-tenant, actual admin/cashier and expiry never scan or expose jobs",
+        "status": "pass"
+      },
+      {
+        "name": "A slow real reconciliation receives automatic heartbeat; session revoked during work rolls back all effects",
+        "status": "pass"
+      },
+      {
+        "name": "Job quota is atomic and original replay bypasses new capacity; API rate/size/strict-kind bounds isolate actors",
+        "status": "pass"
+      },
+      {
+        "name": "Receipt-backed preview uses actual partial receipt snapshots, has no journal effect and rejects forged fields",
+        "status": "pass"
+      },
+      {
+        "name": "Preview enforces tenant, assigned branch, live role and session boundaries",
+        "status": "pass"
+      },
+      {
+        "name": "Historical correction API is owner-only, read-only, bounded and rejects forged source fields",
+        "status": "pass"
+      },
+      {
+        "name": "Receipt cost sources list only same-branch unassigned unreversed capitalised expenses and preserve original money",
+        "status": "pass"
+      },
+      {
+        "name": "Prepared receipt cost journal uses one paid source, replays once, cancels safely and never posts valuation",
+        "status": "pass"
+      },
+      {
+        "name": "Distinct concurrent keys cannot assign one expense twice; source guards and API remain scoped",
+        "status": "pass"
+      },
+      {
+        "name": "Late audit failure rolls back prepared source assignment and SQL refuses altered original receipt quantities",
+        "status": "pass"
+      },
+      {
+        "name": "Actual late-cost application and reversal preserve source documents and cash, original key replays once",
+        "status": "pass"
+      },
+      {
+        "name": "Late cost keeps original sale cost, uses corrected return cost and reports dated corrections exactly once",
+        "status": "pass"
+      },
+      {
+        "name": "Repeated fees and selective reversal retain independent paid sources and reconcile latest cost",
+        "status": "pass"
+      },
+      {
+        "name": "Stale confirmation and late audit failure roll back cost, native events and posting before exact retry",
+        "status": "pass"
+      },
+      {
+        "name": "Future owner absolute cost override journals displaced freight in original expense branch without changing old documents",
+        "status": "pass"
+      },
+      {
+        "name": "Future stock loss books only its freight share and leaves unrelated SKU valuation untouched",
+        "status": "pass"
+      },
+      {
+        "name": "Late continuation failure rolls back the originating price operation and exact retry posts once",
+        "status": "pass"
+      },
+      {
+        "name": "Future stale-draft transfer freezes active-fee cost at send and receiving after new purchase records original-branch variance once",
+        "status": "pass"
+      },
+      {
+        "name": "Future write-off already records effective issue cost and does not expense freight twice; fee reversal restores base profit",
+        "status": "pass"
+      },
+      {
+        "name": "Application endpoints bind tenant, original receipt path, owner role, strict input and paginated source journal",
+        "status": "pass"
+      },
+      {
+        "name": "Atomic exchange of a fee-bearing unit continues the original dated cost ledger without double freight",
+        "status": "pass"
+      },
+      {
+        "name": "Real sale grants one immutable original lot; split returns reverse the same original policy without extra points",
+        "status": "pass"
+      },
+      {
+        "name": "Disabled and configured credit exclusions leave financial sales unchanged without inventing reward grants",
+        "status": "pass"
+      },
+      {
+        "name": "A deferred reward audit failure rolls back the financial refund, stock and original operation together",
+        "status": "pass"
+      },
+      {
+        "name": "A settled customer alias retains one wallet and original receipt lots before and after a return",
+        "status": "pass"
+      },
+      {
+        "name": "An earn audit failure rolls back original completion, cash, stock and grant without damaging the draft",
+        "status": "pass"
+      },
+      {
+        "name": "An original signed offline cash v1 sale remains exact and does not infer a reward rule absent from its snapshot",
+        "status": "pass"
+      },
+      {
+        "name": "UZS rules are not converted or applied when the organization currency changes",
+        "status": "pass"
+      },
+      {
+        "name": "Actual card + whole-receipt promotion quote is exact, replay-safe, native posted once and full/partial returns preserve original discount",
+        "status": "pass"
+      },
+      {
+        "name": "Actual cashier permissions and native active customer checks protect preparation and posting; cancellation stays available",
+        "status": "pass"
+      },
+      {
+        "name": "Prepared campaign expires at checkout; stale policy and revoked source never consume a use or mutate the original quote",
+        "status": "pass"
+      },
+      {
+        "name": "Cancelling a prepared selection restores the exact original manual discount and does not consume promo usage",
+        "status": "pass"
+      },
+      {
+        "name": "Customer usage, revoked card/promo and foreign scope fail closed without publishing a partial discount",
+        "status": "pass"
+      },
+      {
+        "name": "Last global promo use is shared across customers; only one original checkout consumes the last slot",
+        "status": "pass"
+      },
+      {
+        "name": "Administrator stacking flags govern actual point discount; cancellation order and original refunds retain one bonus/promo journal",
+        "status": "pass"
+      },
+      {
+        "name": "Late campaign usage audit fault rolls back sale, stock and slot; original retry consumes exactly one use",
+        "status": "pass"
+      },
+      {
+        "name": "Administrator policy is explicitly configured, versioned, replay-safe and native immutable/proof protected",
+        "status": "pass"
+      },
+      {
+        "name": "Native JSON policy validator agrees with strict rules and rejects malformed money, booleans, shape and dates",
+        "status": "pass"
+      },
+      {
+        "name": "Points reduce only the reviewed receipt, debit once at checkout and split refunds restore original lots without renewing expiry",
+        "status": "pass"
+      },
+      {
+        "name": "Two prepared receipts cannot spend one wallet concurrently; the losing receipt/payment/stock remains unposted",
+        "status": "pass"
+      },
+      {
+        "name": "Cancelled point review restores original money, protects cart/customer snapshot and changed policy cannot publish a debit",
+        "status": "pass"
+      },
+      {
+        "name": "Refunded spent earnings become recovery debt; later grants clear it once through paired original transfers",
+        "status": "pass"
+      },
+      {
+        "name": "A configured full point discount and zero cash refund conserve original allocations and physical stock",
+        "status": "pass"
+      },
+      {
+        "name": "Native expiry boundary excludes real source lots without a production clock override or forged expiry update",
+        "status": "pass"
+      },
+      {
+        "name": "HTTP point interfaces remain tenant scoped, reject missing consent and use exact public strings",
+        "status": "pass"
+      },
+      {
+        "name": "Late redemption audit failure rolls back checkout and preserves one original quote for a safe retry",
+        "status": "pass"
+      },
+      {
+        "name": "Actual cashier membership can use only its own scoped receipt and remains subject to configured discount permission",
+        "status": "pass"
+      },
+      {
+        "name": "Refund clawback consumes an already available credit atomically instead of reserving it until expiry and charging debt again",
+        "status": "pass"
+      },
+      {
+        "name": "Owner monitoring exposes only own counters/queues and overdue alert, without payloads or revoked/manager access",
+        "status": "pass"
+      },
+      {
+        "name": "Real blocked DB query and expired provider lease generate scoped alerts without financial writes",
+        "status": "pass"
+      },
+      {
+        "name": "Test-only rejected transport and dead job alert without leaking payloads; broken telemetry cannot alter settlement",
+        "status": "pass"
+      },
+      {
+        "name": "negative policy cannot be enabled, forged override cannot overdraw and competing sales conserve stock",
+        "status": "pass"
+      },
+      {
+        "name": "legacy negative balance can recover but cannot deepen or move to another branch",
+        "status": "pass"
+      },
+      {
+        "name": "owner HTTP create and update reject enabling, ordinary settings remain editable",
+        "status": "pass"
+      },
+      {
+        "name": "Offline cash exact-basket quotas compete across registers, source signed scope and atomic cash/stock posting replay once",
+        "status": "pass"
+      },
+      {
+        "name": "Stale price, policy, customer, source session/role/shift reject; original conflict survives until owner actual goods/cash reconciliation",
+        "status": "pass"
+      },
+      {
+        "name": "Server expired signed lease never posts, expiry retains uncertain goods quota and unresolved cash blocks shift and requires physical reconciliation",
+        "status": "pass"
+      },
+      {
+        "name": "Offline quota is bounded across branch registers, inactive customer/staff/source revoke and late audit failure preserve original stock and pending source",
+        "status": "pass"
+      },
+      {
+        "name": "Two real registers/devices cannot simultaneously reserve the same four of five units; cashiers can use only their own source lease",
+        "status": "pass"
+      },
+      {
+        "name": "A different live owner can settle verified expired cash without impersonating a blocked original cashier; quote/cost/history remain exact and replay/refund safe",
+        "status": "pass"
+      },
+      {
+        "name": "New owner resumes ordered organization/register/import/opening/cashier/actual-sale checkpoints with exact core effects",
+        "status": "pass"
+      },
+      {
+        "name": "Onboarding scopes owner/current branch, immutable history and rollback after audit failure",
+        "status": "pass"
+      },
+      {
+        "name": "Owner reauth, real downloaded export, close replay and cancellation are atomic; business guards enforce closure",
+        "status": "pass"
+      },
+      {
+        "name": "Fresh current password, live owner and downloaded export are required, including replay; HTTP admission fails closed",
+        "status": "pass"
+      },
+      {
+        "name": "Competing requests create one history/operation; immutable history and revision cannot be forged",
+        "status": "pass"
+      },
+      {
+        "name": "Closure fences an already established Serializable snapshot; stale business entitlement cannot survive its commit",
+        "status": "pass"
+      },
+      {
+        "name": "Expired cancellation window remains read-only, never deletes retained records and never grants cancellation",
+        "status": "pass"
+      },
+      {
+        "name": "Late closure audit failure rolls back history, revision and operation together",
+        "status": "pass"
+      },
+      {
+        "name": "Open till work rejects closure without stranding shifts; actual non-owner and foreign exports cannot close",
+        "status": "pass"
+      },
+      {
+        "name": "Cancelling closure does not renew an expired subscription or unblock business writes",
+        "status": "pass"
+      },
+      {
+        "name": "SQL cancellation guard enforces actual wall-clock at persistence, not a backdated submitted event",
+        "status": "pass"
+      },
+      {
+        "name": "Repeated reauthentication failures are rate limited without creating a closure or exposing password data",
+        "status": "pass"
+      },
+      {
+        "name": "Owner sees admin-created active branches without assignment; staff lists stay scoped and revoked sessions fail",
+        "status": "pass"
+      },
+      {
+        "name": "Blank optional TINs are null across businesses and settings can clear a saved TIN and receipt footer",
+        "status": "pass"
+      },
+      {
+        "name": "Duplicate TIN gives actionable sanitized409 and rolls back settings/audit; staff cannot change settings",
+        "status": "pass"
+      },
+      {
+        "name": "Unknown timezone and malformed currency fail validation before mutation, supported timezones remain valid",
+        "status": "pass"
+      },
+      {
+        "name": "Duplicate register code reaches common409 handling without committing a second register or audit",
+        "status": "pass"
+      },
+      {
+        "name": "Late settings audit failure returns sanitized500 with a request ID and rolls back the actual business update",
+        "status": "pass"
+      },
+      {
+        "name": "Revocation between HTTP validation and CRUD transaction prevents writes and audit; manager approval cannot use stale membership",
+        "status": "pass"
+      },
+      {
+        "name": "Catalog server version is tenant-bound and changes with authoritative price/unit metadata; private response is never shared-cacheable",
+        "status": "pass"
+      },
+      {
+        "name": "Planned branch KPI reuses real cash sale/refund accounting and explicitly reports unavailable forecast history",
+        "status": "pass"
+      },
+      {
+        "name": "Planned report never accepts another tenant branch/product or a lesser role scope",
+        "status": "pass"
+      },
+      {
+        "name": "A delayed through-now occurrence retains its original cutoff and never includes later sales",
+        "status": "pass"
+      },
+      {
+        "name": "Branch and demand bounds reject a partial report; an explicitly bounded selection remains complete",
+        "status": "pass"
+      },
+      {
+        "name": "Price precedence, threshold and half-open date intervals are exact and tenant scoped; old sales and returns preserve price",
+        "status": "pass"
+      },
+      {
+        "name": "Price API allows a cashier scoped read-only quote, denies manager mutation, foreign customer/group/store and revoked live sessions",
+        "status": "pass"
+      },
+      {
+        "name": "Registration budgets reject before creating a business and new passwords cannot truncate",
+        "status": "pass"
+      },
+      {
+        "name": "Staff and invitation account entrypoints enforce the shared Unicode password boundary",
+        "status": "pass"
+      },
+      {
+        "name": "Audit DB guard rejects updates/deletes, supports actor anonymization and tenant cascade",
+        "status": "pass"
+      },
+      {
+        "name": "Full catalog/customer/report CSV exports ignore UI pagination, protect formulas and preserve scope/money",
+        "status": "pass"
+      },
+      {
+        "name": "Catalog/customer exports enforce the full-result cap before returning a partial file",
+        "status": "pass"
+      },
+      {
+        "name": "Business/source/outbox commit together; rollback leaves none and unconfigured adapters stay fail-closed",
+        "status": "pass"
+      },
+      {
+        "name": "Transport waits outside real DB locks; settlement/domain acknowledgement commits once",
+        "status": "pass"
+      },
+      {
+        "name": "Lost acknowledgement without external ID reconciles by original key, never another execute",
+        "status": "pass"
+      },
+      {
+        "name": "Changed external identity stays unknown and never posts the wrong proof",
+        "status": "pass"
+      },
+      {
+        "name": "Expired lease recovers only lookup; stale worker result cannot finalize or submit again",
+        "status": "pass"
+      },
+      {
+        "name": "Timeout, malformed status, not-found and bounded lookup require review; owner resumes lookup only",
+        "status": "pass"
+      },
+      {
+        "name": "Definitive failure is terminal; approved compensation is separately idempotent and linked to original proof",
+        "status": "pass"
+      },
+      {
+        "name": "Remote confirmation plus late domain/audit failure recovers through lookup, never another charge",
+        "status": "pass"
+      },
+      {
+        "name": "Actual worker process crash after remote commit restarts with lookup and one domain finalization",
+        "status": "pass"
+      },
+      {
+        "name": "Actual backup restore fences queued and old running provider submissions; only original-ID lookup can settle once",
+        "status": "pass"
+      },
+      {
+        "name": "Receipt identity is derived at atomic completion, survives later identity changes, replay and direct-write attacks",
+        "status": "pass"
+      },
+      {
+        "name": "Rolled-back checkout does not retain a snapshot, payment or stock mutation",
+        "status": "pass"
+      },
+      {
+        "name": "Consented receipt share retries once, preserves original decimals/identity, exposes no customer/staff/cost and revokes atomically",
+        "status": "pass"
+      },
+      {
+        "name": "Actual near-expiry capability fails after database time passes; key removal fences prior links",
+        "status": "pass"
+      },
+      {
+        "name": "HTTP share creation needs auth and consent; public bearer POST requires origin and omits capability from responses",
+        "status": "pass"
+      },
+      {
+        "name": "Every receipt capability remains manageable after the first twenty rows, with stable bounded pages",
+        "status": "pass"
+      },
+      {
+        "name": "omitted, empty and whitespace-only optional fields register distinct complete accounts",
+        "status": "pass"
+      },
+      {
+        "name": "duplicate normalized TIN returns actionable409 without disclosing or modifying the existing business",
+        "status": "pass"
+      },
+      {
+        "name": "duplicate e-mail rolls back the new organization and trial; duplicate phone keeps USER_EXISTS",
+        "status": "pass"
+      },
+      {
+        "name": "parallel sign-ups with one TIN commit exactly one complete business",
+        "status": "pass"
+      },
+      {
+        "name": "parallel sign-ups with one phone leave no orphan organization or trial",
+        "status": "pass"
+      },
+      {
+        "name": "late session failure rolls back every registration row and exposes no database diagnostics",
+        "status": "pass"
+      },
+      {
+        "name": "invalid optional field types remain validation errors with no registration side effects",
+        "status": "pass"
+      },
+      {
+        "name": "1001 selected report rows survive CSV/XLSX/native PDF document in background without foreign/out-of-period rows; exact decimals and artifact fencing",
+        "status": "pass"
+      },
+      {
+        "name": "Every reviewed report uses the existing filtered CSV query for XLSX/print; arbitrary filters and cross-tenant resources cannot publish",
+        "status": "pass"
+      },
+      {
+        "name": "Expired report file is unavailable; late audit rollback preserves original-key job retry and publishes only one complete artifact",
+        "status": "pass"
+      },
+      {
+        "name": "Malformed native report payload fails closed rather than falling back to an unfiltered catalogue export",
+        "status": "pass"
+      },
+      {
+        "name": "Mixed manual cash/card/debt refunds preview exact channels, require proof and conserve repeated partial/full refunds",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier terms and bank requisites validate, survive archive/restore, export safely and remain tenant/role scoped",
+        "status": "pass"
+      },
+      {
+        "name": "Provider provenance cannot pass the manual refund boundary even when its journal is recorded",
+        "status": "pass"
+      },
+      {
+        "name": "Staff archive preserves financial history, revokes sessions and restores only to blocked state",
+        "status": "pass"
+      },
+      {
+        "name": "Staff lifecycle denies foreign tenant, non-owner, last owner and ambiguous archive requests",
+        "status": "pass"
+      },
+      {
+        "name": "1000 receipts: global totals, cash/debt separation, historical COGS and cutoff agree across table/dashboard/CSV",
+        "status": "pass"
+      },
+      {
+        "name": "Report day boundaries include Tashkent first/last millisecond and reject malformed/future cutoffs",
+        "status": "pass"
+      },
+      {
+        "name": "All reports and exports enforce A/B tenants and administrator branch allow/deny",
+        "status": "pass"
+      },
+      {
+        "name": "Cash sources and custody withdrawals are separate and close conserves opening plus net",
+        "status": "pass"
+      },
+      {
+        "name": "Closed shift correction is linked, immutable, atomic, exactly once and contributes only to the posting shift",
+        "status": "pass"
+      },
+      {
+        "name": "Parallel returns cannot exceed original quantity and manager approval/audit remain frozen",
+        "status": "pass"
+      },
+      {
+        "name": "Sellable returns use original cost in weighted average; zero stock resets to original and replay cannot revalue twice",
+        "status": "pass"
+      },
+      {
+        "name": "Cashier shift ownership, nested cost redaction and live membership revocation are enforced by HTTP and cached service contexts",
+        "status": "pass"
+      },
+      {
+        "name": "Correction references cannot cross tenant/branch and cashiers cannot deposit or approve",
+        "status": "pass"
+      },
+      {
+        "name": "Every checkout reference rejects foreign tenants atomically, including draft updates and direct payment writes",
+        "status": "pass"
+      },
+      {
+        "name": "Tender and change snapshot conserves cash revenue and replay, while invalid tender rolls back",
+        "status": "pass"
+      },
+      {
+        "name": "Mixed cash/card and cash/debt keep applied cash, tender, customer and receipt note separate",
+        "status": "pass"
+      },
+      {
+        "name": "Sync response loss and repeated/concurrent foreground sync produce one original posting and isolate actors",
+        "status": "pass"
+      },
+      {
+        "name": "Cookie session expiry, revoke and cross-origin CSRF reject mutation before any economic effect",
+        "status": "pass"
+      },
+      {
+        "name": "Optional sale metadata rejects foreign seller and blank service without creating a draft",
+        "status": "pass"
+      },
+      {
+        "name": "Opening and signed adjustments post once, require reasons, retain approval/source and reverse atomically",
+        "status": "pass"
+      },
+      {
+        "name": "Barcode generation is actor-bound idempotent, labels are escaped and tenant-scoped",
+        "status": "pass"
+      },
+      {
+        "name": "Ownership handover requires recipient acceptance, cancels safely, expires and revokes old sessions atomically",
+        "status": "pass"
+      },
+      {
+        "name": "Parallel owner removal keeps a live owner; inactive and foreign business switches preserve old session",
+        "status": "pass"
+      },
+      {
+        "name": "Stock journal rejects mutation, missing source and zero movements while preserving posted balance",
+        "status": "pass"
+      },
+      {
+        "name": "Two opening documents cannot race into duplicate initial stock; stale ownership request cannot transfer",
+        "status": "pass"
+      },
+      {
+        "name": "Cached catalog prices, stock and role never authorize posting; private API results bypass shared caches",
+        "status": "pass"
+      },
+      {
+        "name": "Purchase price history compares original confirmed snapshots, signed reversals and scoped full exports",
+        "status": "pass"
+      },
+      {
+        "name": "Credit boundary rejects missing/inactive customer and over-limit without posting; 100000 debt adds no cash",
+        "status": "pass"
+      },
+      {
+        "name": "Register receipt counter is atomic, actor-idempotent and separate from nullable fiscal reference",
+        "status": "pass"
+      },
+      {
+        "name": "Checkout conflicts expose scoped old/new price and requested/available stock without any posting",
+        "status": "pass"
+      },
+      {
+        "name": "Unconfigured integration boundary returns a distinct sanitized HTTP state without vendor calls",
+        "status": "pass"
+      },
+      {
+        "name": "Cashier counted difference needs immutable manager approval and blocks transactions until accepted",
+        "status": "pass"
+      },
+      {
+        "name": "Zero shift difference closes without approval; pending payments and draft policies still block close",
+        "status": "pass"
+      },
+      {
+        "name": "Rejected close request resumes work; handover rejects wrong amount, stale or foreign origin",
+        "status": "pass"
+      },
+      {
+        "name": "Opening document FIFO and explicit allocations conserve payment, due buckets and statement exports",
+        "status": "pass"
+      },
+      {
+        "name": "Persistent reconciliation detects drift without repair; resolution rechecks source and is audited",
+        "status": "pass"
+      },
+      {
+        "name": "Automatic system scan detects sale-payment mismatch and preserves evidence for the responsible owner",
+        "status": "pass"
+      },
+      {
+        "name": "Branch min/max recommendations include missing balances, stay exact and deny cross-store settings",
+        "status": "pass"
+      },
+      {
+        "name": "Sync review keeps immutable source; manager resolution requires terminal proof and cannot repost",
+        "status": "pass"
+      },
+      {
+        "name": "Server saved draft survives a second device session and completes the same sale exactly once",
+        "status": "pass"
+      },
+      {
+        "name": "Audit insert failure rolls back sale, stock and payment; source actor and request correlation stay atomic",
+        "status": "pass"
+      },
+      {
+        "name": "Standard API envelopes keep decimal strings, request ID, errors, pagination and body limits consistent",
+        "status": "pass"
+      },
+      {
+        "name": "Session expiry, revoke and cookie transport enforce the browser boundary without bearer fallback",
+        "status": "pass"
+      },
+      {
+        "name": "Price batches preview atomically, preserve receipts, replay once and protect cost history/export",
+        "status": "pass"
+      },
+      {
+        "name": "Damaged return locations and write-off journals are atomic, frozen, immutable and branch scoped",
+        "status": "pass"
+      },
+      {
+        "name": "Late audit failure rolls back a reviewed price batch and the entire damaged-return location/refund",
+        "status": "pass"
+      },
+      {
+        "name": "Financial accounts transfer atomically without revenue, expense categories/reversals and gross/operating profit reconcile",
+        "status": "pass"
+      },
+      {
+        "name": "Financial transfer late audit failure rolls back both accounts, cash and operation key",
+        "status": "pass"
+      },
+      {
+        "name": "Cross-branch transfer details require access to both accounts",
+        "status": "pass"
+      },
+      {
+        "name": "All five sales breakdown dimensions reconcile original discounts, mixed tender, returns, scope and full CSV",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier invoices, advances and partial allocations conserve cash and debt through replay, races and scope guards",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier cash payment late audit failure leaves neither advance nor cash debit and retries original key once",
+        "status": "pass"
+      },
+      {
+        "name": "Purchase order two partial receipts atomically reconcile original stock, supplier invoice and payment with overreceive and replay guards",
+        "status": "pass"
+      },
+      {
+        "name": "Purchase order receipt late failure rolls back stock, weighted cost, invoice, original links and operation before exact retry",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier balance aging report reconciles invoice allocation, purchase report, customer due and frozen shift cash with cutoff and scope",
+        "status": "pass"
+      },
+      {
+        "name": "Zero-value purchase receipt conserves original quantity without inventing supplier payable or cash and rejects changed unit",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier paid returns and price credits conserve original quantity, payable and released advance without inventing cash refund",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier credit late audit failure rolls back original credit, freed allocation, stock and cost before one original retry",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier fractional partial returns conserve last cent and parallel commands cannot consume the same original quantity",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier price correction after a partial return distributes only the remaining payable across remaining goods",
+        "status": "pass"
+      },
+      {
+        "name": "Product variants keep barcode, stock, sale and return independent and preserve the original default SKU",
+        "status": "pass"
+      },
+      {
+        "name": "Variant combination uniqueness, tenant scope, cashier rights and immutable family identity are enforced",
+        "status": "pass"
+      },
+      {
+        "name": "Variant creation rolls back product, barcode, price history and operation on late audit failure",
+        "status": "pass"
+      },
+      {
+        "name": "Internal reconciliation worker explicitly isolates tenant/store scope and never creates a financial posting",
+        "status": "pass"
+      },
+      {
+        "name": "Replenishment and incident pages reject unbounded pagination and keep explicit branch filters scoped",
+        "status": "pass"
+      },
+      {
+        "name": "Inactive stock report uses positive branch stock and completed-sale activity, keeps draft/other-branch activity separate and exports all filtered rows",
+        "status": "pass"
+      },
+      {
+        "name": "Release ledger acceptance: purchase, split cash/credit sale, partial return, debt collection and closed shift reconcile with no unexplained difference",
+        "status": "pass"
+      },
+      {
+        "name": "Original disposition journal global pages and filtered export retain frozen values and never admit an explicit unassigned branch",
+        "status": "pass"
+      },
+      {
+        "name": "Replenishment search/global suggested quantity sorting covers every product and retains default minimum-only advice",
+        "status": "pass"
+      },
+      {
+        "name": "Financial report filtered search/global sorts/counts/export retain one cutoff and exact source totals across large datasets",
+        "status": "pass"
+      },
+      {
+        "name": "Main sale/product report row search and amount sorts cover all sources while period summary and complete filtered exports stay explicit",
+        "status": "pass"
+      },
+      {
+        "name": "Price history global read filters and CSV retain all original bulk postings without exposing owner costs to administrators",
+        "status": "pass"
+      },
+      {
+        "name": "Every protected HTTP handler rejects an exhausted shared budget before business work; tenants isolate and expiry permits retry",
+        "status": "pass"
+      },
+      {
+        "name": "Atomic shared counter admits only its configured concurrent capacity and returns a retry duration",
+        "status": "pass"
+      },
+      {
+        "name": "Every public authentication admission limit resists spoofed IPs; health/logout remain usable and expiry allows retry",
+        "status": "pass"
+      },
+      {
+        "name": "Declared and actual streamed body sizes enforce 413; slow ingress never runs a handler and retry remains available",
+        "status": "pass"
+      },
+      {
+        "name": "Import-specific budget precedes parser and oversized file fails without posting; public registration budget supports safe retry",
+        "status": "pass"
+      },
+      {
+        "name": "Reset issue and completion budgets deny excess attempts and permit the original intent after expiry",
+        "status": "pass"
+      },
+      {
+        "name": "Locations and reservations conserve physical stock; concurrent holds, exact reserved sale, replay and SQL corruption checks",
+        "status": "pass"
+      },
+      {
+        "name": "Expiry uses server time once, ignored expired quota does not oversell; audit failure rolls back and APIs enforce tenant/live role",
+        "status": "pass"
+      },
+      {
+        "name": "Reservation read URL contract covers released source history, bounds filters and leaves physical stock unchanged",
+        "status": "pass"
+      },
+      {
+        "name": "Owner sees safe planning data; admin/cashier do not inherit platform authority; unknown destructive switches fail validation",
+        "status": "pass"
+      },
+      {
+        "name": "Publication commits one immutable version/audit; replay uses original key and rechecks current operator authority",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent reviewed edits cannot overwrite one another; old expected version and altered payload are rejected",
+        "status": "pass"
+      },
+      {
+        "name": "Failed audit rolls back version, pointer and operation; a valid retry with the same original key then succeeds",
+        "status": "pass"
+      },
+      {
+        "name": "Direct forged version authors and expired sessions do not create policy versions",
+        "status": "pass"
+      },
+      {
+        "name": "Readiness requires the active manual-refund and supplier migration contract, without leaking dependency details",
+        "status": "pass"
+      },
+      {
+        "name": "Public document viewers require a valid capability and same-origin admission independently of session roles",
+        "status": "pass"
+      },
+      {
+        "name": "Every exported protected API handler rejects unauthenticated, foreign tenant and foreign branch requests",
+        "status": "pass"
+      },
+      {
+        "name": "Positive scoped reads cover API groups alongside exhaustive negative handler inventory",
+        "status": "pass"
+      },
+      {
+        "name": "Organization nested stores/staff and shift operator DTOs respect branch and private-field boundaries",
+        "status": "pass"
+      },
+      {
+        "name": "Keyboard identifiers preserve exact SKU/name lookup, reject ambiguity and leave barcode/camera lookup strict",
+        "status": "pass"
+      },
+      {
+        "name": "Common HTTP guard denies unreviewed endpoints and methods for every business role before handler execution",
+        "status": "pass"
+      },
+      {
+        "name": "Sales list filters, deterministic global sort, page boundaries, empty state and tenant isolation",
+        "status": "pass"
+      },
+      {
+        "name": "Catalog/customer sort and paging cover every record, preserve CSV filters and reject unsafe sorting",
+        "status": "pass"
+      },
+      {
+        "name": "Category/unit list URL sort keeps legacy defaults, filters, native order and full export",
+        "status": "pass"
+      },
+      {
+        "name": "Supplier and brand global sorting, bounded pages, zero state and filtered export share the authorized query",
+        "status": "pass"
+      },
+      {
+        "name": "Audit summary search/date sort/page and CSV retain original journals without exposing source payloads",
+        "status": "pass"
+      },
+      {
+        "name": "Inventory quantity sorting and original document/transfer chronological sorting cover all pages and preserve zero/error boundaries",
+        "status": "pass"
+      },
+      {
+        "name": "Paged shift history keeps legacy unpaged consumers; financial amounts sort in the database and filtered exports include every original posting",
+        "status": "pass"
+      },
+      {
+        "name": "Original cancelled stock counts have scoped stable pages without exposing blind expected quantities",
+        "status": "pass"
+      },
+      {
+        "name": "Owner configuration is disabled by default choice, idempotent, revision-safe and native-proof protected",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent scheduler/claims publish one private original artifact and full scoped CSV/JSON",
+        "status": "pass"
+      },
+      {
+        "name": "Missed-run policy explicitly skips old periods; stopping a grant cancels an already queued original",
+        "status": "pass"
+      },
+      {
+        "name": "Late publish audit failure rolls back the result; original retry cannot create a second occurrence",
+        "status": "pass"
+      },
+      {
+        "name": "A real elapsed lease recovers the same original run with a new nonce; stale worker cannot publish",
+        "status": "pass"
+      },
+      {
+        "name": "Persistent owner grant survives logout, but a role revoked during calculation prevents publication",
+        "status": "pass"
+      },
+      {
+        "name": "Read-only expiry preserves private exports and stopping grants, while rejecting new configuration",
+        "status": "pass"
+      },
+      {
+        "name": "Catch-up records each original period once and a stop fences every remaining queued period",
+        "status": "pass"
+      },
+      {
+        "name": "Actual login commits safe audit, new browser is a heuristic, delivery once targets only the affected account and revoked origin still delivers",
+        "status": "pass"
+      },
+      {
+        "name": "Three parallel invalid passwords persist uniform401, dedupe one secret-free warning, 6th is rate429 without a notification storm",
+        "status": "pass"
+      },
+      {
+        "name": "Session histories preserve defaultactive and true revoked/expired statuses; hooks cover logout-like bulk revocation and critical audits without changing password/PIN lifetimes",
+        "status": "pass"
+      },
+      {
+        "name": "Late login/outbox audit failure rolls back session and lastLoginAt; bounded dead delivery has no inbox residue and rejects inactive recipients",
+        "status": "pass"
+      },
+      {
+        "name": "90-day expiry removes only security metadata, audits undelivered expiry and leaves source sessions/financial holds intact; real cashier sees only own account",
+        "status": "pass"
+      },
+      {
+        "name": "Automated security polling preserves idle expiry and still rejects expired sessions; explicit session activity keeps the existing touch",
+        "status": "pass"
+      },
+      {
+        "name": "Actual serial receipt/sale/warranty/service/return/resale preserves original unit and immutable terms",
+        "status": "pass"
+      },
+      {
+        "name": "Serial selection rejects wrong original unit, double sale and fractional quantity without money or stock effects",
+        "status": "pass"
+      },
+      {
+        "name": "Exact transfer serial selection follows original unit across branches and partial receive is idempotent",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent checkouts of one serial have one winner, exact cash and one warranty",
+        "status": "pass"
+      },
+      {
+        "name": "Serial damaged and write-off returns retire the exact sold units, no available stock is invented",
+        "status": "pass"
+      },
+      {
+        "name": "Late warranty journal fault rolls back sale, serial state, money and original operation; exact retry posts once",
+        "status": "pass"
+      },
+      {
+        "name": "Serial loss reversal restores the original unit; supplier goods return retires only its original receipt serial",
+        "status": "pass"
+      },
+      {
+        "name": "Native owner policy/identity guards, branch and tenant service boundaries remain fail-closed",
+        "status": "pass"
+      },
+      {
+        "name": "Atomic serialized exchange keeps return-before-resale native order and binds a new warranty without duplicating cash",
+        "status": "pass"
+      },
+      {
+        "name": "Actual source-linked serial list global code order, pages and defaults retain original receipt provenance",
+        "status": "pass"
+      },
+      {
+        "name": "Opt-in staff pages preserve legacy complete DTO, apply global authorized sort/filter and never expose credential hashes",
+        "status": "pass"
+      },
+      {
+        "name": "All reviewed business tables have DB guards; root/child CRUD and tenant reassignment cannot bypass read-only",
+        "status": "pass"
+      },
+      {
+        "name": "Original committed replay remains available after expiry, but new operation cannot run work and revoked actor cannot replay",
+        "status": "pass"
+      },
+      {
+        "name": "Real grace deadline crossed during work rolls back business mutation and terminal operation",
+        "status": "pass"
+      },
+      {
+        "name": "Expired owner exports existing data and renews through audited billing; ordinary business writes then resume without POS cash posting",
+        "status": "pass"
+      },
+      {
+        "name": "Expired manual reservation housekeeping remains narrowly allowed while active stock writes remain denied",
+        "status": "pass"
+      },
+      {
+        "name": "Subscription row changed after a Serializable snapshot cannot supply stale write entitlement",
+        "status": "pass"
+      },
+      {
+        "name": "Expired owner can cancel only an unposted draft intent; tombstone replay stays actor/hash bound and cannot become a posting",
+        "status": "pass"
+      },
+      {
+        "name": "Tenant ticket replay creates one event; cashier reads only own submissions and platform scope never follows a business role",
+        "status": "pass"
+      },
+      {
+        "name": "Support assignment and actual reply track first response once; revoked operator cannot replay a cross-tenant result",
+        "status": "pass"
+      },
+      {
+        "name": "Resolve/reopen preserves first resolution and immutable events; raw mutation without history fails",
+        "status": "pass"
+      },
+      {
+        "name": "Late ticket audit failure rolls back ticket/event/operation; original-key retry commits exactly once",
+        "status": "pass"
+      },
+      {
+        "name": "Draft policy publication requires current platform admin and existing ticket targets remain immutable",
+        "status": "pass"
+      },
+      {
+        "name": "Support and platform admin identities never inherit business access; explicit owner consent binds tenant, actor, branches, bounded reads and audit",
+        "status": "pass"
+      },
+      {
+        "name": "Failed support read audit returns no data and fresh retry audits access; grant SQL rejects foreign branches and inactive owner",
+        "status": "pass"
+      },
+      {
+        "name": "Included/excluded/exemption and effective versions use exact server totals, scoped reference and immutable cost/tax/rounding snapshots",
+        "status": "pass"
+      },
+      {
+        "name": "Tax stale preview/completion, archive and wrong role reject without payment/stock/debt or original operation leakage",
+        "status": "pass"
+      },
+      {
+        "name": "Fractional tax and discount refunds conserve every cent and SQL rejects malformed cumulative journal",
+        "status": "pass"
+      },
+      {
+        "name": "Discount-only editing keeps repeated legacy SKU row identities and exact independent allocations",
+        "status": "pass"
+      },
+      {
+        "name": "Line and receipt percent discounts retain reason and current authorization, enforce configured boundaries and preserve refund cents",
+        "status": "pass"
+      },
+      {
+        "name": "large private export exceeds 16MiB with exact manifest, no foreign rows, and original bounded API retained",
+        "status": "pass"
+      },
+      {
+        "name": "stream keeps one snapshot while concurrent rows are added and awaits every sink write",
+        "status": "pass"
+      },
+      {
+        "name": "file publication rejects nonowners, revoked sessions, public directories and overwrites",
+        "status": "pass"
+      },
+      {
+        "name": "late audit failure leaves no final or partial archive",
+        "status": "pass"
+      },
+      {
+        "name": "Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials",
+        "status": "pass"
+      },
+      {
+        "name": "Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization",
+        "status": "pass"
+      },
+      {
+        "name": "Buffered exports reject oversized archives while the durable worker publishes a complete chunked archive",
+        "status": "pass"
+      },
+      {
+        "name": "Late success-audit failure rolls back artifact and job success; the same claimed job retries safely",
+        "status": "pass"
+      },
+      {
+        "name": "Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards",
+        "status": "pass"
+      },
+      {
+        "name": "Deferred cross-tenant parent reference and direct ownership mutation fail; scoped ORM rejects foreign creates and shared models",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent SKU and alias inserts have exactly one winner inside a tenant; a second tenant can use the same identifiers",
+        "status": "pass"
+      },
+      {
+        "name": "Tenant recovery plans from a real isolated clone are read-only, retain current-only rows and preserve unrelated/shared-identity tenant hashes",
+        "status": "pass"
+      },
+      {
+        "name": "Dry-run preserves bytes; audited apply preserves authenticator, counter and recovery; rerun writes once and works with retired key removed",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent apply is once; unaudited ciphertext/source changes and provenance edits fail closed",
+        "status": "pass"
+      },
+      {
+        "name": "Audit fault rolls back encryption; missing previous key and revoked operator never alter credentials",
+        "status": "pass"
+      },
+      {
+        "name": "Operator CLI defaults to safe counts-only check, rejects wrong target and requires explicit valid maintenance for apply",
+        "status": "pass"
+      },
+      {
+        "name": "Central critical-action policy fails closed before writes/replay even when authenticator availability is off",
+        "status": "pass"
+      },
+      {
+        "name": "Central MFA binds critical execution and replay to the approved payload and preserves late failure rollback",
+        "status": "pass"
+      },
+      {
+        "name": "A valid MFA proof never grants platform privileges; revoked platform access denies a stored-result replay",
+        "status": "pass"
+      },
+      {
+        "name": "Platform overview requires independent live admin and MFA, paginates safe tenant metadata and audits reads without storing cross-tenant results",
+        "status": "pass"
+      },
+      {
+        "name": "TOTP enrollment requires live session and fresh password; secrets never enter audit",
+        "status": "pass"
+      },
+      {
+        "name": "Five incorrect enrollment attempts commit and revoke the pending secret; foreign identity cannot confirm",
+        "status": "pass"
+      },
+      {
+        "name": "Concurrent TOTP validation accepts one proof; action/key/hash/session binding and counter replay are enforced",
+        "status": "pass"
+      },
+      {
+        "name": "Late audit failure rolls back enrollment confirmation and consumed counter/proof together",
+        "status": "pass"
+      },
+      {
+        "name": "An actual cashier PIN session cannot enroll a factor, and a second password session cannot confirm the first enrollment",
+        "status": "pass"
+      },
+      {
+        "name": "Revoking a factor invalidates unconsumed proofs in both service and direct DB approval",
+        "status": "pass"
+      },
+      {
+        "name": "Recovery codes are hashed, own-account and one-use; recovery revokes the factor and all password/PIN sessions",
+        "status": "pass"
+      },
+      {
+        "name": "Recovery audit failure rolls back code consumption, factor revocation and all-session logout",
+        "status": "pass"
+      },
+      {
+        "name": "Recovery rotation requires a fresh TOTP counter and password, replaces old codes, and status exposes only safe metadata",
+        "status": "pass"
+      },
+      {
+        "name": "Rotation audit failure preserves original backup codes and the unused TOTP counter",
+        "status": "pass"
+      },
+      {
+        "name": "After a password change, a new password session plus backup code can recover exactly once under concurrency",
+        "status": "pass"
+      },
+      {
+        "name": "HTTP TOTP is opt-in, scoped, no-store and presents only one-time provisioning/recovery DTOs",
+        "status": "pass"
+      },
+      {
+        "name": "Invalid rotation configuration makes HTTP enrollment unavailable without persisting a factor",
+        "status": "pass"
+      },
+      {
+        "name": "Member permissions require exact MFA and an operation key; approved replay does not log out a newly signed-in target",
+        "status": "pass"
+      },
+      {
+        "name": "Ownership request audit fault rolls back MFA approval; both parties require independent proof and accepted session token is never stored",
+        "status": "pass"
+      },
+      {
+        "name": "Ownership cancellation requires its own action/hash proof and leaves original owner roles unchanged",
+        "status": "pass"
+      },
+      {
+        "name": "Invitation grant requires bound MFA; concurrent replay never persists or reissues the bearer token",
+        "status": "pass"
+      },
+      {
+        "name": "HTTP staff creation binds the password privately and replays exactly one safe member result",
+        "status": "pass"
+      },
+      {
+        "name": "Owner password change requires a bound second factor and atomically invalidates all sessions without storing credentials",
+        "status": "pass"
+      },
+      {
+        "name": "Hyphenated offline policy proof binds the actual operation key and rejects a changed payload and action",
+        "status": "pass"
+      },
+      {
+        "name": "actual receipt captures cost change and movement in one transaction, replay adds no valuation event",
+        "status": "pass"
+      },
+      {
+        "name": "parallel branches receive unique committed product order, sequence does not use timestamp sorting, rollback adds no event",
+        "status": "pass"
+      },
+      {
+        "name": "legacy unjournaled balance is recorded as an unproven boundary, never silently capitalised",
+        "status": "pass"
+      },
+      {
+        "name": "actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes",
+        "status": "pass"
+      },
+      {
+        "name": "native capture alone cannot authorize an invented source or an unimplemented adjustment adapter",
+        "status": "pass"
+      },
+      {
+        "name": "organization-wide baseline preserves exact sum beyond one branch decimal capacity without breaking original cost update",
+        "status": "pass"
+      },
+      {
+        "name": "future manual owner cost approval binds the exact native event; replay adds no reference and raw changes remain unproven",
+        "status": "pass"
+      },
+      {
+        "name": "real branch transit, damage, nonstock return, approved override, adjustment and supplier withdrawal replay from original sources",
+        "status": "pass"
+      },
+      {
+        "name": "real receipt reversal has source proof and no imaginary terminal stock",
+        "status": "pass"
+      }
+    ]
+  },
+  "browser": {
+    "runs": [
+      {
+        "label": "pos-review-e2e.log",
+        "sha256": "bc6f13cedde8f7e50327791a938a18ce32c2f86a0c5d12baadcf1c3847d442bc",
+        "tests": 155,
+        "pass": 154,
+        "fail": 1
+      },
+      {
+        "label": "pos-review-e2e-final.log",
+        "sha256": "53b7ad1aba50c8e0aded2e66839e84d25f9625fcd7792ba9b9a8983bb6f6c826",
+        "tests": 7,
+        "pass": 7,
+        "fail": 0
+      },
+      {
+        "label": "pos-review-pricing-failure.log",
+        "sha256": "e02cabde285432fece10775570e25cb8a07c90136e0a963753aa8d4399518064",
+        "tests": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    ],
+    "uniqueScenarios": 157,
+    "latestPass": 157,
+    "unresolved": [],
+    "singleCleanFullRun": false,
+    "scenarios": [
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "duplicate STIR shows actionable guidance, preserves the form and allows correction",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "successful login uses authenticated role ACK and does not require a second me request",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/auth-form-state.spec.ts",
+        "name": "invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/batches.spec.ts",
+        "name": "Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/billing-editor-state.spec.ts",
+        "name": "Invoice read failure preserves cancellation draft and blocks new commands until retry",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/billing-editor-state.spec.ts",
+        "name": "Billing and retention reads preserve independent administrator drafts",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/billing-editor-state.spec.ts",
+        "name": "Platform cost lost acknowledgement replays once and cancellation keeps independent new quote draft",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/billing.spec.ts",
+        "name": "Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/brand-editor-state.spec.ts",
+        "name": "brand status lost acknowledgement preserves a separate name draft and original key retries once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/catalog-unsaved.spec.ts",
+        "name": "Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/contact-editor-state.spec.ts",
+        "name": "customer failed debt read is visibly unknown and retry restores actual ledger without false zero",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/contact-editor-state.spec.ts",
+        "name": "customers held acknowledgement admits one create and failed follow-up read keeps success",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/contact-editor-state.spec.ts",
+        "name": "suppliers held acknowledgement admits one create and failed follow-up read keeps success",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/contact-editor-state.spec.ts",
+        "name": "unconfigured delivery stays disabled after read error and real retry never creates or verifies challenge",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/context-navigation.spec.ts",
+        "name": "Branch/register selectors verify accessible IDs, preserve selection after reload and handle server failure without changing context",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/context-navigation.spec.ts",
+        "name": "Fractional cart and conversion controls survive reload; nonempty cart and held draft ACK block branch changes",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/context-navigation.spec.ts",
+        "name": "Settings can clear TIN/footer and expose tax settings; sidebar reports an actual server outage",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/context-navigation.spec.ts",
+        "name": "Failed logout preserves a saved cart; acknowledged logout clears local scope and revokes the actual session",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Landed cost UI previews partial receipts, invalidates edited results and retries without posting",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Production HTTPS: register, open shift, restore local basket and sell cash exactly once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Production HTTPS: catalog management, supplier purchase history and complete inventory exports",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Production HTTPS: durable shift correction and frozen report pagination/export",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Production HTTPS: offline server banner, browser reopen, customer/note and original mixed-payment sync",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "IndexedDB transactions isolate users/devices, preserve restart queues and forbid unsafe clear/ack races",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Checkout price/stock conflicts require review; print failure and integration failure stay separate",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Cashier shortage requires owner approval; next cashier accepts counted handover in UI",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Owner mobile dashboard and cashier touch controls remain reachable at 360, 768 and 1280 pixels",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Held server draft resumes on another authorized device and closes the original receipt once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Training is isolated from real money and keyboard-only payment modal traps and restores focus",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Sync conflict requires manager terminal proof and keeps the original local and server payloads",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Debt collection UI records exact cash/card/transfer channels with manual document proof",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Reviewed price batch survives lost acknowledgement and damaged journal stays outside sellable stock",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Finance UI records internal bank expense, transfer and exact reversal with durable recovery",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Sales breakdown UI reconciles all five dimensions and downloads full exact CSV",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Supplier ledger UI records invoice, partial cash allocation and recovers unknown advance exactly once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Variant UI creates independent color size SKU and restores the original lost creation intent once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Cashier PIN UI sets a password-protected credential and switches only to branch-scoped cashier without manager elevation",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Discount UI applies exact line and receipt percentages with reason and immutable manager authorization",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Transfer receipt UI preserves unknown partial receipt and separates damage and confirmed shortage from sellable stock",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Price tier UI recovers one scheduled rule, requires POS price review and keeps original receipt after archive",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Owner reviews a changed-price offline cash conflict, recovers lost settlement acknowledgment and confirms the original receipt once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Background jobs UI recovers enqueue and manual retry once while the real worker exhausts failures then completes scoped reconciliation",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Security history delivers a real new-browser notice and recovers a lost read acknowledgement once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Product classification owner UI stores reviewed policy and checkout rejects unavailable marking",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Catalogue export UI recovers lost enqueue acknowledgement and real worker produces an exact scoped CSV download",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Customer advance UI recovers lost receipt acknowledgement then allocates opening debt and refunds only unused cash once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Independent finance drafts share one navigation decision and busy mutation blocks context exit",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Dashboard boundary recovers a render failure without creating an economic operation or exposing input data",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/count-recovery.spec.ts",
+        "name": "count start, reading and approval survive lost ACK and reload with exact quantities and one posting",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/critical-step-up.spec.ts",
+        "name": "Critical billing UI requires MFA, cancellation has no effect and approved retry preserves the original body",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/custom-roles.spec.ts",
+        "name": "Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/customer-consent.spec.ts",
+        "name": "Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/customer-consent.spec.ts",
+        "name": "Concurrent consent revision rejection refreshes history and permits a fresh reviewed decision",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/customer-consent.spec.ts",
+        "name": "Recovered stale consent discards only a definitive rollback; unknown conflicts retain the original operation",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/customer-merge-state.spec.ts",
+        "name": "merge partial reason and selected named customer survive searches and failed history refresh",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/exchange-editor-state.spec.ts",
+        "name": "exchange preview freezes its snapshot, rejects malformed return lines and preserves a newer draft after original lost-ACK recovery",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/gift-certificates.spec.ts",
+        "name": "Owner gift policy MFA, actual cash issuance lost-ACK recovery and zero-credit-limit atomic checkout",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/identity-list.spec.ts",
+        "name": "Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/import-editor-state.spec.ts",
+        "name": "import selected file is guarded before preview and old confirmation recovery preserves a new file draft",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/inactive-stock.spec.ts",
+        "name": "Inventory inactivity selector filters branch stock and CSV uses the same selection",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/incident-recovery.spec.ts",
+        "name": "incident scan and resolution replay original intent without economic repair or clearing a newer reason",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/journal-list.spec.ts",
+        "name": "Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/journal-list.spec.ts",
+        "name": "Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/legacy-catalog-state.spec.ts",
+        "name": "categories draft read failure and one held create ACK keep truthful saved state",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/legacy-catalog-state.spec.ts",
+        "name": "units draft read failure and one held create ACK keep truthful saved state",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/localization.spec.ts",
+        "name": "Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/localization.spec.ts",
+        "name": "Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/localization.spec.ts",
+        "name": "A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/location-editor-state.spec.ts",
+        "name": "zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/loyalty-marketing.spec.ts",
+        "name": "Owner MFA card/campaign management, customer-specific exact discount and lost-ACK recovery consume one campaign use",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/loyalty-points.spec.ts",
+        "name": "Owner rule MFA, actual point grant, committed lost-ACK review recovery and refund preserve one original wallet",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/media-editor-state.spec.ts",
+        "name": "catalog draft survives failed refresh and file deletion replays its original DELETE key",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/offline-editor-state.spec.ts",
+        "name": "offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/organization-closure.spec.ts",
+        "name": "Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/pages-smoke.spec.ts",
+        "name": "Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/pages-smoke.spec.ts",
+        "name": "Every public page loads without a render exception and unauthenticated POS navigation returns to login",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/pending-tenant-scope.spec.ts",
+        "name": "pending original stock intent blocks UI tenant switch and is never replayed under another authorized business",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/permission-receipts.spec.ts",
+        "name": "Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/permission-receipts.spec.ts",
+        "name": "58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/platform.spec.ts",
+        "name": "Platform panel rejects an ordinary owner, then requires MFA for an assigned operator and shows safe service/tenant metadata",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/price-editor-state.spec.ts",
+        "name": "price and customer group drafts remain independent across ACK, metadata failure, search and pagination",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/product-editor-state.spec.ts",
+        "name": "product unit and classification drafts survive failed reads and successful retries without losing navigation protection",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/product-editor-state.spec.ts",
+        "name": "Barcode metadata failure keeps alias draft and blocks new commands until retry",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/public-claims.spec.ts",
+        "name": "Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/public-claims.spec.ts",
+        "name": "Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/receipt-cost-apply.spec.ts",
+        "name": "Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/receipt-cost-prepare.spec.ts",
+        "name": "Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/report-export.spec.ts",
+        "name": "Owner queues full filtered XLSX/PDF documents through UI, actual worker publishes and authenticated download preserves all 1001 rows",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/report-plans.spec.ts",
+        "name": "Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/request-budget.spec.ts",
+        "name": "Production HTTPS rejects an unfinished JSON body before authentication business logic and accepts a fresh retry",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/retention.spec.ts",
+        "name": "Retention settings require actual platform authority and recover original lost acknowledgement without another version",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/roles-state.spec.ts",
+        "name": "Unknown role and assignment acknowledgements retain independent immutable keys and replay once with real MFA",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/roles-state.spec.ts",
+        "name": "Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/roles-state.spec.ts",
+        "name": "Acknowledged role save remains saved when only the following list refresh fails",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/roles-state.spec.ts",
+        "name": "Failed role metadata refresh retains raw editor but blocks new role writes",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Catalog and customer URL pages reach records beyond the old truncation and keep filter state through reload",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Category/unit URL search, state and pages preserve a separate unsaved editor through read navigation",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Supplier/brand/audit applied URL state survives history and reload; business draft survives filtering and errors never become zero rows",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Inventory balances/documents and transfers keep applied filters in URL, allow error recovery and retain original business drafts",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Shift and finance URL pages reach original postings, preserve exact amounts and recover from a failed list read",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Expired synthetic job sources and actual inventory-gap scan display all URL pages without exposing worker payload; errors retain business drafts",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Cancelled count and original damaged-return pages preserve native stock/refund history and URL filters",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Archive types and replenishment global sorting retain URL history and configured minimum-only advice without stock postings",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Purchase, supplier balance and sales breakdown URL pages share exact original source cutoff and filtered totals",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Main report and reconciliation pages keep row filters separate from period cash totals and retain source cutoff through history",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/sales-list.spec.ts",
+        "name": "Price and reservation histories keep applied URL state while separate price and stock drafts survive filters and Back",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/security-ack-state.spec.ts",
+        "name": "password ACK and one critical command survive failed profile read without storing credentials",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/security-ack-state.spec.ts",
+        "name": "all-session logout admits one request and still leaves security after profile read failure",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/serials.spec.ts",
+        "name": "Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shared-command-state.spec.ts",
+        "name": "onboarding partial reason is guarded and pending organization step does not occupy the next register step",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shared-command-state.spec.ts",
+        "name": "saved catalog job recovery leaves an independent report filter and reason intact",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shared-documents.spec.ts",
+        "name": "Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shared-documents.spec.ts",
+        "name": "Personal service consent prepares a real worker statement; opt-out blocks anonymous reload",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shared-documents.spec.ts",
+        "name": "Legacy external image metadata cannot create an automatic browser request",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shared-documents.spec.ts",
+        "name": "Lost consent rejection clears only the blocked reminder attempt and permits a newly consented request",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shift-opening-recovery.spec.ts",
+        "name": "Shift opening retries failed handover loading and preserves original cash intent after lost ACK and reload",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/shift-opening-recovery.spec.ts",
+        "name": "Confirmed shift opening survives an older empty shift read and F9 cannot reopen the modal",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/stock-draft-recovery.spec.ts",
+        "name": "stock draft UI preserves exact immutable request after lost ACK and reload, replay creates no duplicate",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/stock-draft-recovery.spec.ts",
+        "name": "transfer draft UI preserves exact immutable request after lost ACK and reload, replay creates no duplicate",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/subscription-readonly.spec.ts",
+        "name": "Expired owner signs in, sees read-only, reads catalog and creates renewal invoice while business POST is rejected",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/support-policy-state.spec.ts",
+        "name": "raw support hours and separate ticket draft survive a newer policy version and failed read",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/support-policy-state.spec.ts",
+        "name": "failed operator refresh retains assignment draft and prevents submitting stale or empty assignment",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/support-tickets.spec.ts",
+        "name": "Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/tax-form-recovery.spec.ts",
+        "name": "tax forms protect partial drafts and archive replays the original PUT once after reload",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/tenant-export.spec.ts",
+        "name": "Owner recovers original tenant export enqueue after lost ACK and downloads an exact manifest from the production worker",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/threshold-recovery.spec.ts",
+        "name": "stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/ticket-editor-state.spec.ts",
+        "name": "ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/totp.spec.ts",
+        "name": "Authenticator UI keeps secrets in memory, rotates backup codes and recovers with all-session logout",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/totp.spec.ts",
+        "name": "Lost confirmation ACK recovers actual enabled status without retrieving or persisting secret codes",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/totp.spec.ts",
+        "name": "Nested staff MFA traps focus above the form; Escape cancels only proof and retry creates one member",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/totp.spec.ts",
+        "name": "Owner password form requires MFA then signs out and accepts only the new password",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/totp.spec.ts",
+        "name": "Security editors share one discard decision and pending enrollment freezes credentials and navigation",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/variant-editor-state.spec.ts",
+        "name": "variant option-only draft is guarded and successful creation stays acknowledged when list reload fails",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/core.spec.ts",
+        "name": "Maintenance UI preserves saved basket and original pending sale across drain and restores cash checkout once",
+        "status": "pass"
+      },
+      {
+        "browser": "chromium",
+        "file": "tests/e2e/public-pricing-failure.spec.ts",
+        "name": "A real uncached pricing read timeout shows no invented price or trial in either language",
+        "status": "pass"
+      }
+    ]
+  },
+  "changesSourceHashes": {
+    "src/context/OrganizationContext.tsx": "7fb574001f3c395c8715132747b21885754ef2975c1f4eac00c0eb80c0e79b16",
+    "tests/e2e/context-navigation.spec.ts": "2eb48e5dce954419c1234fa605d9a0f67c1c98988e4e0829798fdb67771b6fd7",
+    ".github/workflows/ci.yml": "e06943ffa8e99eaa036a5a8c721f84c731b9952fd765c4834dae3723429131ed",
+    "package.json": "d67b0c96054ee8d2dac33818af6c58b2410eaf1454e036e73afe0c85c9cd1906"
+  },
+  "limitations": [
+    "No authenticated access to real customer organizations",
+    "No real sales/payments/stock changes on Production",
+    "Real SMS/e-mail/payment/fiscal/hardware adapters remain deferred",
+    "Production background worker availability not accepted by web page checks",
+    "Firefox/WebKit not executed in this review",
+    "Earlier reported Internal Server Error was not reproduced; no proven historical root cause"
+  ],
+  "checks": {
+    "unit": {
+      "tests": 174,
+      "pass": 174
+    },
+    "operations": {
+      "tests": 42,
+      "pass": 42
+    },
+    "vercelConfiguration": {
+      "tests": 5,
+      "pass": 5
+    },
+    "productionBuild": "passed",
+    "lint": "passed",
+    "typecheck": "passed",
+    "workerBuild": "passed",
+    "sourceSecurityScan": "zero_findings",
+    "i18n": "979 reviewed keys, zero missing",
+    "serviceTargetsGate": "passed with restored existing measured source; no new load measurement"
+  },
+  "finalProductionCheck": {
+    "at": "2026-10-19T11:25:19.996Z",
+    "logoutStatus": 200,
+    "sessionAfterLogout": 401,
+    "checks": [
+      {
+        "path": "/",
+        "status": 200
+      },
+      {
+        "path": "/login",
+        "status": 200
+      },
+      {
+        "path": "/register",
+        "status": 200
+      },
+      {
+        "path": "/api/health/live",
+        "status": 200
+      },
+      {
+        "path": "/api/health/ready",
+        "status": 200
+      }
+    ]
+  },
+  "productionPromotion": {
+    "approval": "explicit_user_confirmation_2026-10-19",
+    "targetBranch": "main",
+    "targetOrigin": "https://pos-backup-sooty.vercel.app",
+    "status": "approved_pending_git_deployment"
+  }
+}
