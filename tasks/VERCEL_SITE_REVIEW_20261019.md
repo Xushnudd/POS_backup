@@ -1,6 +1,6 @@
 # Vercel saytini tekshirish va tuzatish
 
-Sana: 2026-10-19. Manzil: https://pos-backup-sooty.vercel.app. Tekshiruv boshlangan Production commit: `88101ef`; tuzatishlar `bugfix/deploy` ishchi branchida. Ushbu hisobot yozilgan paytda tuzatishlar Production’ga chiqarilmadi.
+Sana: 2026-10-19. Manzil: https://pos-backup-sooty.vercel.app. Tekshiruv boshlangan Production commit: `88101ef`. Tasdiqlangan tuzatishlar `main`dagi `00a8888` commit bilan Production’ga chiqarildi.
 
 ## Internal Server Error holati
 
@@ -34,10 +34,18 @@ Production’da 58 statik sahifa ochildi: `500`, render yoki JavaScript exceptio
 
 Mashina dalili: [validation.json](evidence/vercel-site-review-20261019/validation.json). Production marshrutlari va asosiy oqimlar shu papkada alohida JSON fayllarda. Birinchi muvaffaqiyatsiz runlar va keyingi qayta runlar hisoblari saqlangan.
 
+## Production’ga chiqarish natijasi
+
+Foydalanuvchi tasdig‘idan keyin `main` push qilindi. Vercel Git deploymenti `dpl_7V56jqwooJNSk7bAcG2iq1FqPAC2` **READY** bo‘ldi; `pos-backup-sooty.vercel.app` aynan shu deploymentga bog‘langani tekshirildi. Production branch `main` bo‘lib qoldi. Builddagi bazani tekshirish faqat o‘qish bilan 190/190 migration mosligini tasdiqladi.
+
+Yangi Production’da 9 sahifa `200` qaytardi. Test hisobida login/logout `200`, logoutdan keyingi sessiya `401`; dastlabki filial/kassa tanlovi saqlandi va reload’dan keyin tiklandi. Server/render/JavaScript xatosi topilmadi. Dastlabki smoke skriptida `/reports/sales` API yo‘li sahifa deb ochilib 404 olingan; haqiqiy `/reports` sahifasi bilan qayta tekshiruv o‘tdi. Bu tekshiruv input xatosi edi, ilovaga yangi route qo‘shilmadi.
+
+Chiqarish dalili: [production-release.json](evidence/vercel-site-review-20261019/production-release.json). Bu fayl tekshirilgan kod deploymentini qayd qiladi; undan keyingi hujjat commitlari shu runtime kodini o‘zgartirmaydi.
+
 ## Chegaralar va chiqarish holati
 
 Haqiqiy biznes tashkilotlarining hisoblari va ma’lumotlari bilan test qilinmadi. Platforma/supportning maxsus vakolatli oqimlari lokal testda tekshirildi; Production test egasiga platforma vakolati berilmadi. Firefox/WebKit ushbu tekshiruvda ishga tushirilmadi.
 
 SMS/e-mail, Click, fiskal va hardware adapterlari avvalgi qarorlarga muvofiq ulanmagan. Fon worker, real backup/monitoring, staging va pilot qabuli web sahifalar ochilgani bilan bajarilgan hisoblanmaydi.
 
-Foydalanuvchi 2026-10-19 kuni tuzatishlarni `main` va Vercel Production’ga chiqarishni aniq tasdiqladi. Ushbu snapshot deploydan oldingi tekshiruv natijasidir; chiqarish Git deploymenti orqali kuzatiladi. Baza migratsiyasi yoki Production environment o‘zgarishi bu tuzatishlar uchun talab qilinmaydi. Original PLAN1 hisobi **185/259**, yangi original done **+0**.
+Foydalanuvchi 2026-10-19 kuni tuzatishlarni `main` va Vercel Production’ga chiqarishni aniq tasdiqladi. Chiqarish va undan keyingi brauzer tekshiruvi yuqoridagi dalilda qayd etildi. Baza migratsiyasi yoki Production environment o‘zgarishi bu tuzatishlar uchun talab qilinmaydi. Original PLAN1 hisobi **185/259**, yangi original done **+0**.

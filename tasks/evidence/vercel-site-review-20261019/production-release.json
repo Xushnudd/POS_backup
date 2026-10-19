@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-19T14:35:07.190Z",
+  "userApprovedProductionRelease": true,
+  "codeCommit": "00a888859438779bd5ef8d042e4a6d3e26aaebf3",
+  "deployment": {
+    "id": "dpl_7V56jqwooJNSk7bAcG2iq1FqPAC2",
+    "url": "pos-backup-3y9g3uzg0-xushnudd.vercel.app",
+    "state": "READY",
+    "target": "production",
+    "sha": "00a888859438779bd5ef8d042e4a6d3e26aaebf3",
+    "branch": "main",
+    "aliases": [
+      "pos-backup-sooty.vercel.app",
+      "pos-backup-xushnudd.vercel.app"
+    ]
+  },
+  "routing": {
+    "productionBranch": "main",
+    "alias": "pos-backup-sooty.vercel.app",
+    "deploymentId": "dpl_7V56jqwooJNSk7bAcG2iq1FqPAC2",
+    "databaseReadiness": {
+      "connected": true,
+      "ready": true,
+      "applied": 190,
+      "expected": 190,
+      "code": "READY"
+    }
+  },
+  "smoke": {
+    "at": "2026-10-19T14:35:07.190Z",
+    "origin": "https://pos-backup-sooty.vercel.app",
+    "pages": [
+      {
+        "route": "/",
+        "status": 200
+      },
+      {
+        "route": "/login",
+        "status": 200
+      },
+      {
+        "route": "/register",
+        "status": 200
+      },
+      {
+        "route": "/dashboard",
+        "status": 200,
+        "internalError": false
+      },
+      {
+        "route": "/pos",
+        "status": 200,
+        "internalError": false
+      },
+      {
+        "route": "/products",
+        "status": 200,
+        "internalError": false
+      },
+      {
+        "route": "/inventory",
+        "status": 200,
+        "internalError": false
+      },
+      {
+        "route": "/reports",
+        "status": 200,
+        "internalError": false
+      },
+      {
+        "route": "/settings",
+        "status": 200,
+        "internalError": false
+      }
+    ],
+    "browserErrors": [],
+    "serverErrors": [],
+    "login": 200,
+    "selectionStored": true,
+    "selectionRestored": true,
+    "logout": 200,
+    "afterLogout": 401
+  },
+  "testScope": "Previously approved synthetic account; no sale/payment/stock mutation",
+  "initialSmokeInputCorrection": {
+    "path": "/reports/sales",
+    "status": 404,
+    "reason": "API path was mistakenly used as a page URL; corrected to the existing /reports page. No application route change was needed."
+  },
+  "schemaMutatedByBuild": false,
+  "originalPlanDoneDelta": 0
+}
