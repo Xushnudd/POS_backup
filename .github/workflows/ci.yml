@@ -52,6 +52,7 @@ jobs:
         env:
           POS_PITR_NODE_IMAGE: node:24-alpine
       - run: npm run test:local-https
+      - run: node --test scripts/vercel/environment.test.cjs
       - run: npm run test:integration
         env:
           POS_TEST_PSQL_CONTAINER: ${{ job.services.postgres.id }}

@@ -1,0 +1,130 @@
+{
+  "date": "2026-10-19",
+  "verifiedAt": "2026-10-19T10:22:24.471Z",
+  "scope": "Vercel web deployment and configuration smoke; not full POS production/pilot acceptance",
+  "causes": [
+    "APP_ORIGIN existed only in Development; preview instrumentation failed at startup",
+    "The previous Vercel DATABASE_URL referenced a database without migration history"
+  ],
+  "actions": {
+    "productionOrigin": "https://pos-backup-sooty.vercel.app",
+    "productionDatabase": "User-approved prepared Neon database",
+    "oldDatabaseDeleted": false,
+    "dataCopiedBetweenDatabases": false,
+    "oldDatabaseVariableRetainedFor": [
+      "preview"
+    ],
+    "authChallengeKey": "New private production sensitive variable; no secret in source",
+    "localDotenvChanged": false,
+    "localDatabaseChanged": false,
+    "applicationBusinessCodeChanged": false
+  },
+  "deployment": {
+    "id": "dpl_G338bCUUGmC9GdgMabZScSLTStPz",
+    "url": "https://pos-backup-5m5jl1eva-xushnudd.vercel.app",
+    "stableUrl": "https://pos-backup-sooty.vercel.app",
+    "state": "READY",
+    "cloudBuild": true,
+    "readOnlyMigrationCheck": {
+      "ready": true,
+      "applied": 190,
+      "expected": 190,
+      "checksumsMatch": true
+    }
+  },
+  "checks": {
+    "configurationAndDiagnosticTests": 5,
+    "lint": "passed",
+    "sourceSecretScan": "passed; no findings",
+    "gitDiffCheck": "passed",
+    "releaseClaims": "passed",
+    "existingLocalPerformanceEvidenceSourceGate": "passed; no new cloud performance claim",
+    "localProductionGetSmoke": {
+      "passed": true,
+      "checks": [
+        {
+          "route": "/",
+          "status": 200
+        },
+        {
+          "route": "/login",
+          "status": 200
+        },
+        {
+          "route": "/register",
+          "status": 200
+        },
+        {
+          "route": "/api/health/live",
+          "status": 200
+        },
+        {
+          "route": "/api/health/ready",
+          "status": 200
+        }
+      ],
+      "requests": "GET only",
+      "businessMutations": 0,
+      "hosting": "local production runtime using the hosted database; not a Vercel deployment"
+    },
+    "remoteSmoke": {
+      "verifiedAt": "2026-10-19T10:22:24.471Z",
+      "origin": "https://pos-backup-sooty.vercel.app",
+      "passed": true,
+      "checks": [
+        {
+          "route": "/",
+          "status": 200
+        },
+        {
+          "route": "/login",
+          "status": 200
+        },
+        {
+          "route": "/register",
+          "status": 200
+        },
+        {
+          "route": "/api/health/live",
+          "status": 200
+        },
+        {
+          "route": "/api/health/ready",
+          "status": 200
+        },
+        {
+          "route": "/api/auth/me",
+          "status": 401,
+          "code": "UNAUTHORIZED"
+        },
+        {
+          "route": "valid-empty-registration",
+          "status": 400,
+          "code": "VALIDATION_ERROR"
+        },
+        {
+          "route": "foreign-origin-rejected",
+          "status": 403,
+          "code": "CSRF_REJECTED"
+        },
+        {
+          "route": "built-static-asset",
+          "status": 200
+        }
+      ],
+      "businessAccountsOrSalesCreated": 0
+    }
+  },
+  "earlierFailure": {
+    "firstCloudDeployment": "Page GETs succeeded, readiness503 and empty registration500",
+    "readOnlyBuildGuard": "Blocked next deployment with MIGRATION_HISTORY_MISSING before the approved database switch"
+  },
+  "limits": {
+    "accountCreationHappyPathTested": false,
+    "businessAccountsOrSalesCreated": 0,
+    "backgroundWorkersStarted": false,
+    "fullProductionOrPilotAcceptance": false,
+    "originalPlanDone": 185,
+    "totalOriginalPlanTasks": 259
+  }
+}

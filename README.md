@@ -1168,6 +1168,9 @@ Ommaviy va’dalarning release imkoniyatlari va qabul dalillariga mosligi [publi
 
 Lokal Docker uchun [HTTP development qo‘llanmasi](docs/operations/local-docker-https.md): `bash scripts/local/setup-https.sh`, private envni moslash, so‘ng `docker compose up --build`. http://localhost:3000 va http://localhost:3443 HTTPSga yo‘naltirilmaydi; CA talab qilinmaydi. Alohida development image ishlaydi, production HTTPS/Secure cookie talablari saqlanadi. Eski bazani reset qilmang.
 
+Vercel web deploymenti uchun [Vercel qo‘llanmasi](docs/operations/vercel.md)ni ko‘ring: hosted DATABASE_URL, aniq production APP_ORIGIN va Node24 talab qilinadi. Build bazani read-only tekshiradi; migratsiya yoki fon workerlarni avtomatik ishga tushirmaydi.
+
+
 Mijoz kartasida tashkilot egasi elektron chek, xizmat eslatmasi va reklama roziliklarini har aloqa kanali bo‘yicha alohida qayd etadi yoki bekor qiladi. Tarix o‘zgarmaydi; bekor qilish read-only davrda ham ochiq. Unknown javob original durable amal bilan tiklanadi. [Roziliklar, dalil va keyingi dispatch contracti](docs/operations/customer-consent.md). Bu modul real SMS/e-mail/Telegram yetkazishni yoqmaydi.
 
 Release texnik tekshiruvlari: [image va kalit xavfsizligi](docs/operations/release-image-security.md), [PostgreSQL WAL/PITR](docs/operations/pitr.md), [yuklama va xizmat maqsadlari](docs/operations/release-service-targets.md). `node scripts/release/check-service-targets.cjs` joriy source, migratsiya, namuna, raw xatolar va recovery dalillarini tekshiradi. Lokal natijalar real production/pilot/SLA qabuli o‘rnini bosmaydi.
