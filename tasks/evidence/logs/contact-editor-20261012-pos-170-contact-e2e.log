@@ -1,0 +1,34 @@
+[WebServer] (node:717384) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 21 tests using 1 worker
+
+(node:717422) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (3.5s)
+  ✓   2 [chromium] › tests/e2e/contact-editor-state.spec.ts:10:5 › customer failed debt read is visibly unknown and retry restores actual ledger without false zero (955ms)
+  ✓   3 [chromium] › tests/e2e/contact-editor-state.spec.ts:17:58 › customers held acknowledgement admits one create and failed follow-up read keeps success (658ms)
+  ✓   4 [chromium] › tests/e2e/contact-editor-state.spec.ts:17:58 › suppliers held acknowledgement admits one create and failed follow-up read keeps success (641ms)
+  ✓   5 [chromium] › tests/e2e/contact-editor-state.spec.ts:26:5 › unconfigured delivery stays disabled after read error and real retry never creates or verifies challenge (777ms)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (6.6s)
+  ✓   7 [chromium] › tests/e2e/core.spec.ts:1099:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (5.6s)
+(node:718624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   8 [firefox] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (4.8s)
+  ✓   9 [firefox] › tests/e2e/contact-editor-state.spec.ts:10:5 › customer failed debt read is visibly unknown and retry restores actual ledger without false zero (1.2s)
+  ✓  10 [firefox] › tests/e2e/contact-editor-state.spec.ts:17:58 › customers held acknowledgement admits one create and failed follow-up read keeps success (824ms)
+  ✓  11 [firefox] › tests/e2e/contact-editor-state.spec.ts:17:58 › suppliers held acknowledgement admits one create and failed follow-up read keeps success (778ms)
+  ✓  12 [firefox] › tests/e2e/contact-editor-state.spec.ts:26:5 › unconfigured delivery stays disabled after read error and real retry never creates or verifies challenge (1.1s)
+  ✓  13 [firefox] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (8.7s)
+  ✓  14 [firefox] › tests/e2e/core.spec.ts:1099:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (4.9s)
+(node:719842) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 [webkit] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (4.9s)
+  ✓  16 [webkit] › tests/e2e/contact-editor-state.spec.ts:10:5 › customer failed debt read is visibly unknown and retry restores actual ledger without false zero (1.6s)
+  ✓  17 [webkit] › tests/e2e/contact-editor-state.spec.ts:17:58 › customers held acknowledgement admits one create and failed follow-up read keeps success (1.5s)
+  ✓  18 [webkit] › tests/e2e/contact-editor-state.spec.ts:17:58 › suppliers held acknowledgement admits one create and failed follow-up read keeps success (1.5s)
+  ✓  19 [webkit] › tests/e2e/contact-editor-state.spec.ts:26:5 › unconfigured delivery stays disabled after read error and real retry never creates or verifies challenge (1.4s)
+  ✓  20 [webkit] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (8.5s)
+  ✓  21 [webkit] › tests/e2e/core.spec.ts:1099:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (4.4s)
+
+  21 passed (1.1m)

@@ -1,0 +1,9 @@
+{
+  "startedAt": "2026-10-17T14:07:09.354Z",
+  "endedAt": "2026-10-17T14:07:09.782Z",
+  "code": null,
+  "signal": "SIGTERM",
+  "intentionallyStoppedAfterTwentyRegisters": true,
+  "measurement": false,
+  "scope": "isolated_synthetic_fixture_preparation"
+}

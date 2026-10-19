@@ -1,21 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {organizationTin,organizationCurrency,organizationTimezone,organizationError} from '@/server/organizations/validation'
+import {assertLiveContext} from '@/server/operations'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { withApi } from '@/server/api'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
+import {activeMembershipWhere} from '@/server/auth/custom-role-policy'
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2),
-  tin: z.string().optional(),
+  tin: organizationTin,
   phone: z.string().min(9),
-  currencyCode: z.string().default('UZS'),
-  timezone: z.string().default('Asia/Tashkent'),
-  allowNegativeStock: z.boolean().default(false),
+  currencyCode: organizationCurrency.default('UZS'),
+  timezone: organizationTimezone.default('Asia/Tashkent'),
+  allowNegativeStock: z.literal(false).default(false),
   receiptFooter: z.string().optional(),
 })
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -23,7 +27,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
     const organizationUsers = await prisma.organizationUser.findMany({
       where: {
         userId: payload.userId,
-        isActive: true,
+        ...activeMembershipWhere,
       },
       include: {
         organization: true,
@@ -62,17 +66,13 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get organizations error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw organizationError(error)
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
@@ -91,18 +91,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createOrganizationSchema.parse(body)
 
-    // Create organization
-    const organization = await prisma.organization.create({
-      data: validatedData,
-    })
-
-    // Add current user as owner
-    await prisma.organizationUser.create({
-      data: {
-        organizationId: organization.id,
-        userId: payload.userId,
-        role: 'owner',
-      },
+    const organization = await prisma.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      const organization=await tx.organization.create({data:validatedData})
+      await tx.organizationUser.create({data:{organizationId:organization.id,userId:payload.userId,role:'owner'}})
+      return organization
     })
 
     return NextResponse.json({
@@ -112,17 +105,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
-        { status: 400 }
-      )
-    }
-
-    console.error('Create organization error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw organizationError(error)
   }
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

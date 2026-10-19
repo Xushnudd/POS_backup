@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-12",
+  "timezone": "Asia/Tashkent",
+  "originalPlan": {
+    "total": 259,
+    "baselineDone": 164,
+    "done": 164,
+    "target": 170,
+    "delta": 0,
+    "completed": []
+  },
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "worktree": true,
+  "commitCreated": false,
+  "sourceSha256": {
+    "src/components/pos/OpenShiftModal.tsx": "374ad0fc8aec5ec0e8b817e1cb8dece433fc87e02e73595d21fecaff8086fdeb",
+    "src/context/OrganizationContext.tsx": "8088c6106279a95a3fcb80c6f236c88589b413468a55e00e3f3ae3925c4a230b",
+    "src/app/(dashboard)/pos/page.tsx": "76d0bfa27093e1ea389975f9f18f1851edafa033bb56cba4d3867b6fef6554cd",
+    "src/components/forms/DurableMutation.tsx": "741ae73fc5535eb0e177ff8af96f5a2f8704c3f70d9da937bc00778b7c71f8a0",
+    "src/components/forms/PendingActions.tsx": "c33ecd28f91f9f3d1bce9570df317cf044cd4b410f142490aa5ad2e4c5c8883d",
+    "tests/e2e/core.spec.ts": "074b445eec31024bb62e54ec7a992940bad7919909ea4010fc0b8aeaf4f39364",
+    "tests/e2e/shift-opening-recovery.spec.ts": "69a51f4290e2fe432be00bda4b8319e9b2ab962beda2927ebb8a3b71776253ec",
+    "src/server/finance/shifts.ts": "8f32737b56daff8e430b2ad17108b4e3e58a222e8616c754c74476a227cb6262",
+    "api.md": "94220a8e59870604096e0a7d7eb3a044868975662879b1cfdcff4d0c140b3eeb",
+    "tasks/EXECUTION_STATUS.md": "83d3ce6c4d1dd0e5e6290196b9282972b94fe0ae0a1b8f1150d9d76d92b0a154",
+    "tasks/PLAN1.md": "952313851a8f6b9c4bbfc5668503d417fe52f242363475f722379774f17c9577",
+    "prisma/schema.prisma": "133a94b492c7c9858c57c46c56c73d2ab1c630fb22fd73a755aa68bd6dbde008",
+    ".next/standalone/server.js": "5d1258714683b90e87c729268625861a0bcbe469830ad917a91e3ef2a6fae6e9"
+  },
+  "checks": {
+    "browserMatrix": {
+      "passed": 21,
+      "failed": 3,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "failure": "Business-switch test did not enroll/approve mandatory MFA"
+    },
+    "correctiveBusinessMfa": {
+      "passed": 3,
+      "failed": 0,
+      "duration": "4.6m",
+      "realCounterWait": true,
+      "bypasses": false
+    },
+    "acceptedScenarioCasesAcrossTwoRuns": 24,
+    "unit": {
+      "passed": 94,
+      "failed": 0
+    },
+    "typecheck": "pass",
+    "changedFileLint": "pass",
+    "webpackBuild": "pass",
+    "diffCheck": "pass",
+    "logsSha256": {
+      "/tmp/pos-170-shift-ui-browser-final.log": "a0ba2731781e37f6e0ac96b2a61432d118085903982175a28569214aa84d5def",
+      "/tmp/pos-170-shift-mfa-browser.log": "3b99f361e50f3ce6eaf7a0c26d916907a7cb12c895e7c19baf44068b21b8eecc",
+      "/tmp/pos-170-shift-ui-build-final.log": "7c2d274348defacd4a9b9b73cc3f3e624a033fbb2db7264437f3a18efb256f99",
+      "/tmp/pos-170-shift-ui-type-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+      "/tmp/pos-170-shift-ui-lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/tmp/pos-170-shift-mfa-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/tmp/pos-170-shift-unit.log": "928b4914ebabc35cd1553c8a93df11755c9698f0784bd4529c168ef9ab982367",
+      "/tmp/pos-170-shift-ui-regression.log": "5712b2521f95bad417888760a716ca8348ef5033f2a6064cddf8d7afe42b5a0d"
+    }
+  },
+  "invariants": [
+    "Opening request persisted before HTTP under actor/org/device scope",
+    "Exact original cash/note/key replay after server commit + ACK loss + reload",
+    "One Shift/Operation/opened audit, no Sale",
+    "Handover read failure blocks new opening until retry",
+    "Busy inputs/Escape/navigation blocked",
+    "Confirmed server shift snapshot applied only to matching register and membership",
+    "Older empty shift read invalidated, F9 cannot reopen modal",
+    "No local optimistic shift or cash mutation",
+    "Strict MFA test uses real new counters, no factor lastCounter reset or fake clock"
+  ],
+  "priorFailures": [
+    {
+      "run": "18-case regression",
+      "passed": 12,
+      "failed": 6,
+      "causes": [
+        "F9 race after close before shift read",
+        "missing second store assignment in fixture",
+        "mandatory password/member/ownership MFA omitted in old test"
+      ]
+    },
+    {
+      "run": "24-case final runtime matrix",
+      "passed": 21,
+      "failed": 3,
+      "resolution": "all3 Business cases passed in subsequent strict-MFA run"
+    }
+  ],
+  "scope": {
+    "database": "isolated 127.0.0.1:55439/pos_test",
+    "schemaChanged": false,
+    "migrationChanged": false,
+    "serverPostingChanged": false,
+    "externalIntegrationsChanged": false,
+    "productionDeployment": false
+  },
+  "remaining": [
+    "Durable stock-count start/record/submit/decide and reload recovery",
+    "PendingActions actor-scoped component remount",
+    "All editable/auth and conditional-input semantic inventory",
+    "Context/reset/retry coverage for original UX-01.05"
+  ]
+}

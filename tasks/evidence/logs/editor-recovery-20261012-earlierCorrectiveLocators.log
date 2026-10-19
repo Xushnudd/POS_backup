@@ -1,0 +1,168 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/product-editor-state.spec.ts tests/e2e/pending-tenant-scope.spec.ts
+
+[WebServer] (node:142782) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:142861) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business (2.0s)
+  ✘  2 [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.6s)
+(node:143529) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business (2.4s)
+  ✘  4 [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (2.0s)
+(node:143926) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [webkit] › tests/e2e/pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business (2.6s)
+(node:144152) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  6 [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (3.0s)
+
+
+  1) [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Qayta yuklash', exact: true }) resolved to 2 elements:
+        1) <button class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Qayta yuklash</button> aka getByRole('alert').filter({ hasText: 'Server bilan ulanish uzildi;' }).getByRole('button')
+        2) <button class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Qayta yuklash</button> aka getByRole('group').getByRole('button', { name: 'Qayta yuklash' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'Qayta yuklash', exact: true })
+
+
+      32 |  const compliancePath='/products/'+product.id+'/compliance'
+      33 |  await page.goto(compliancePath);await page.getByLabel('MXIK kodi',{exact:true}).fill('Reviewed local classification');await page.getByLabel('Tasnif o‘zgarishi sababi',{exact:true}).fill('Draft survives metadata reload')
+    > 34 |  await page.route('**/api'+compliancePath,route=>route.abort('failed'));await page.getByRole('button',{name:'Tasnifni qayta tekshirish',exact:true}).click();await expect(page.locator('p[role="alert"]')).toBeVisible();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Reviewed local classification');await expect(page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true})).toBeDisabled();await page.unroute('**/api'+compliancePath);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true})).toBeEnabled();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Reviewed local classification');
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+      35 |  // Actual POST validation error (source too short) must keep the editor mounted.
+      36 |  await page.getByLabel('MXIK tekshirilgan manbasi',{exact:true}).fill('x')
+      37 |  const classificationRejected=page.waitForResponse(response=>new URL(response.url()).pathname==='/api'+compliancePath&&response.request().method()==='POST')
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:34:537
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Qayta yuklash', exact: true }) resolved to 2 elements:
+        1) <button class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Qayta yuklash</button> aka getByRole('alert').filter({ hasText: 'Server bilan ulanish uzildi;' }).getByRole('button')
+        2) <button class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Qayta yuklash</button> aka getByRole('group').getByRole('button', { name: 'Qayta yuklash' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'Qayta yuklash', exact: true })
+
+
+      32 |  const compliancePath='/products/'+product.id+'/compliance'
+      33 |  await page.goto(compliancePath);await page.getByLabel('MXIK kodi',{exact:true}).fill('Reviewed local classification');await page.getByLabel('Tasnif o‘zgarishi sababi',{exact:true}).fill('Draft survives metadata reload')
+    > 34 |  await page.route('**/api'+compliancePath,route=>route.abort('failed'));await page.getByRole('button',{name:'Tasnifni qayta tekshirish',exact:true}).click();await expect(page.locator('p[role="alert"]')).toBeVisible();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Reviewed local classification');await expect(page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true})).toBeDisabled();await page.unroute('**/api'+compliancePath);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true})).toBeEnabled();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Reviewed local classification');
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+      35 |  // Actual POST validation error (source too short) must keep the editor mounted.
+      36 |  await page.getByLabel('MXIK tekshirilgan manbasi',{exact:true}).fill('x')
+      37 |  const classificationRejected=page.waitForResponse(response=>new URL(response.url()).pathname==='/api'+compliancePath&&response.request().method()==='POST')
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:34:537
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business 
+
+    Error: page.goto: Navigation to "https://localhost:3100/replenishment" is interrupted by another navigation to "https://localhost:3100/login"
+    Call log:
+      - navigating to "https://localhost:3100/replenishment", waiting until "load"
+
+
+      25 |  expect(bodies).toHaveLength(1);expect(await db.stockThreshold.count({where:{organizationId:other.id}})).toBe(0)
+      26 |  await page.getByLabel('Biznesni almashtirish',{exact:true}).selectOption(me.organization.id);await expect(page).toHaveURL(/\/pos$/)
+    > 27 |  await page.goto('/replenishment');await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).toHaveCount(0)
+         |             ^
+      28 |  expect(bodies).toHaveLength(2);expect(bodies[1]).toEqual(bodies[0])
+      29 |  expect(await db.operation.count({where:{organizationId:me.organization.id,type:'stock.threshold'}})).toBe(1)
+      30 |  expect(await db.auditLog.count({where:{organizationId:me.organization.id,action:'threshold_set'}})).toBe(1)
+        at /home/fedora/Developments/POS_backup/tests/e2e/pending-tenant-scope.spec.ts:27:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/pending-tenant-scope-pendi-5b14a-another-authorized-business-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/pending-tenant-scope-pendi-5b14a-another-authorized-business-webkit/error-context.md
+
+    Error Context: test-results/pending-tenant-scope-pendi-5b14a-another-authorized-business-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/pending-tenant-scope-pendi-5b14a-another-authorized-business-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/pending-tenant-scope-pendi-5b14a-another-authorized-business-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Qayta yuklash', exact: true }) resolved to 2 elements:
+        1) <button class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Qayta yuklash</button> aka getByRole('alert').filter({ hasText: 'Server bilan ulanish uzildi;' }).getByRole('button')
+        2) <button class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Qayta yuklash</button> aka getByRole('group').getByRole('button', { name: 'Qayta yuklash' })
+
+    Call log:
+      - waiting for getByRole('button', { name: 'Qayta yuklash', exact: true })
+
+
+      32 |  const compliancePath='/products/'+product.id+'/compliance'
+      33 |  await page.goto(compliancePath);await page.getByLabel('MXIK kodi',{exact:true}).fill('Reviewed local classification');await page.getByLabel('Tasnif o‘zgarishi sababi',{exact:true}).fill('Draft survives metadata reload')
+    > 34 |  await page.route('**/api'+compliancePath,route=>route.abort('failed'));await page.getByRole('button',{name:'Tasnifni qayta tekshirish',exact:true}).click();await expect(page.locator('p[role="alert"]')).toBeVisible();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Reviewed local classification');await expect(page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true})).toBeDisabled();await page.unroute('**/api'+compliancePath);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true})).toBeEnabled();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Reviewed local classification');
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+      35 |  // Actual POST validation error (source too short) must keep the editor mounted.
+      36 |  await page.getByLabel('MXIK tekshirilgan manbasi',{exact:true}).fill('x')
+      37 |  const classificationRejected=page.waitForResponse(response=>new URL(response.url()).pathname==='/api'+compliancePath&&response.request().method()==='POST')
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:34:537
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+    [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+    [webkit] › tests/e2e/pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business 
+    [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+  2 passed (17.7s)

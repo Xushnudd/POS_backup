@@ -38,6 +38,7 @@ export interface Register {
 }
 
 export interface AuthUser {
+  customRole?:{id:string;name:string;revision:number;permissions:string[]};
   id: string;
   fullName: string;
   phone: string;
@@ -63,6 +64,8 @@ export interface AuthData {
 }
 
 export interface Category {
+  parentId?: string | null;
+  parent?: {id:string;name:string}|null;
   id: string;
   organizationId?: string;
   name: string;
@@ -73,6 +76,17 @@ export interface Category {
 }
 
 export interface Product {
+  serialTracking?:boolean;
+  serialAssignments?:{id:string;code:string;warrantyId:string;startedAt:string;endsAt:string;terms:string}[];
+  batchTracking?:boolean;
+  expiryAlertDays?:number;
+  unitConversions?:{id:string;tradeUnit:string;baseUnit:string;ratio:string;isActive:boolean;tradePrecision?:number}[];
+  mxik?:string|null;mxikSource?:string|null;mxikRequired?:boolean;taxRequired?:boolean;markingRequired?:boolean;
+  taxProfileId?:string|null;
+  taxProfile?:{id:string;name:string;isActive:boolean}|null;
+  brandId?: string | null;
+  brand?: {id:string;name:string;isActive:boolean}|null;
+  description?: string;
   id: string;
   organizationId: string;
   categoryId?: string | null;
@@ -81,6 +95,7 @@ export interface Product {
   sku: string;
   barcode: string;
   unit: string;
+  unitPrecision?: number;
   salePrice: number;
   costPrice: number;
   minStock: number;
@@ -100,10 +115,11 @@ export interface InventoryBalance {
   store?: Store;
 }
 
-export type DocumentType = 'purchase' | 'adjustment' | 'transfer_out' | 'transfer_in' | 'return_in';
+export type DocumentType = 'purchase' | 'opening' | 'adjustment' | 'transfer_out' | 'transfer_in' | 'return_in' | 'reversal';
 export type DocumentStatus = 'draft' | 'confirmed';
 
 export interface StockDocumentItem {
+  conversionSnapshot?:{baseUnit:string;tradeUnit:string;ratio:string;tradeQuantity:string}|null;
   id?: string;
   stockDocumentId?: string;
   productId: string;
@@ -122,6 +138,8 @@ export interface StockDocument {
   supplier?: Supplier | null;
   documentType: DocumentType;
   documentNo: string;
+  reversalOfId?: string | null;
+  reversal?: {id:string;documentNo:string} | null;
   status: DocumentStatus;
   note?: string | null;
   createdBy: string;
@@ -136,6 +154,11 @@ export interface StockTransferItem {
   stockTransferId?: string;
   productId: string;
   product?: Product;
+  receivedQuantity?: number;
+  returnedQuantity?: number;
+  damagedQuantity?:number;
+  shortageQuantity?:number;
+  dispositions?:{id:string;disposition:'damaged'|'shortage';quantity:string;unitCost:string;reason:string;actorId:string;createdAt:string}[];
   quantity: number;
   unitCost: number;
 }
@@ -147,7 +170,7 @@ export interface StockTransfer {
   fromStore?: Store;
   toStoreId: string;
   toStore?: Store;
-  status: 'draft' | 'sent' | 'received';
+  status: 'draft' | 'sent' | 'received' | 'cancelled' | 'closed';
   note?: string | null;
   createdBy: string;
   sentAt?: string | null;
@@ -164,7 +187,7 @@ export interface Customer {
   address?: string | null;
   note?: string | null;
   creditLimit: number;
-  debt?: number;
+  debt?: number | string;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -178,6 +201,9 @@ export interface Supplier {
   tin?: string | null;
   address?: string | null;
   note?: string | null;
+  bankName?: string | null;
+  bankAccount?: string | null;
+  paymentTerms?: string | null;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -188,7 +214,7 @@ export type ShiftStatus = 'open' | 'closed';
 export interface CashMovement {
   id: string;
   shiftId: string;
-  movementType: 'cash_in' | 'cash_out';
+  movementType: 'cash_in' | 'cash_out' | 'bank_deposit' | 'collection' | 'correction_in' | 'correction_out';
   amount: number;
   reason: string;
   createdBy: string;
@@ -196,6 +222,9 @@ export interface CashMovement {
 }
 
 export interface Shift {
+  pendingClose?:{id:string;countedCash:string;expectedCash:string;difference:string;countedBy:string;reason:string;createdAt:string}|null;
+  countedBy?:string|null;approvedBy?:string|null;closeReason?:string|null;handoverFromId?:string|null;
+  cashSummary?:Record<string,string>;
   id: string;
   registerId: string;
   register?: Register;
@@ -221,11 +250,24 @@ export type SaleStatus = 'draft' | 'completed' | 'voided' | 'partially_returned'
 export type PaymentType = 'cash' | 'card' | 'transfer' | 'credit';
 
 export interface SaleItem {
+  serialTracking?:boolean;
+  serialAssignments?:{id:string;code:string;warrantyId:string;startedAt:string;endsAt:string;terms:string}[];
+  batchTracking?:boolean;
+  batchAllocations?:{batchId:string;code:string;quantity:string;expiresOn:string}[];
+  conversionSnapshot?:{baseUnit:string;tradeUnit:string;ratio:string;tradeQuantity:string}|null;
+  discountPercent?:string|null;
+  taxMode?:string;
+  taxRate?:string;
+  taxAmount?:string;
+  taxBase?:string|null;
+  payableAmount?:string|null;
+  roundingVersion?:string;
   id?: string;
   saleId?: string;
   productId: string;
   productName: string;
   sku: string;
+  unit?: string | null;
   quantity: number;
   unitPrice: number;
   discountAmount: number;
@@ -248,6 +290,8 @@ export interface Payment {
   note?: string | null;
 }
 
+export interface DebtAllocationTarget {saleId:string|null;debtOriginId?:string|null;sourceType?:string;dueAt?:string|null;legacyUnallocated?:boolean;receiptNo:string|null;balance:string}
+
 export interface CustomerDebt {
   customerId: string;
   customerName: string;
@@ -255,15 +299,43 @@ export interface CustomerDebt {
   totalDebt: number;
   remainingCredit: number;
   recentPayments: Payment[];
+  allocationTargets?: {page:number;hasMore:boolean;items:DebtAllocationTarget[]};
 }
 
+export interface AuditSummary {id:string;actorId:string|null;entityType:string;entityId:string;action:string;createdAt:string;actor:{fullName:string}|null}
+export interface SaleReturnHistory {
+  id:string;returnReceiptNo:string;returnedAt:string;status:string;refundAmount:string;reason:string|null;
+  approvedBy:string|null;approvedRole:string|null;approvedAt:string|null;
+  processor:{fullName:string};
+  items:{id:string;saleItemId:string;quantity:string;lineTotal:string;disposition:string;saleItem:{productName:string;sku:string;unit:string|null}}[];
+}
 export interface Sale {
+  giftFunding?:{code:string;amount:string};
+  receiptSnapshot?: {
+    version: 1; capturedAt: string; organizationName: string; organizationPhone: string;
+    tin: string | null; currencyCode: string; timezone: string; receiptFooter: string | null;
+    storeName: string; storeAddress: string | null; storePhone: string | null;
+    registerName: string; registerCode: string; cashierName: string;
+  } | null;
+  discountReason?:string|null;
+  discountPercent?:string|null;
+  discountApprovedBy?:string|null;
+  discountApprovedRole?:string|null;
+  discountApprovedAt?:string|null;
+  taxAmount?:string;
+  netAmount?:string|null;
+  sellerId?: string | null;
+  serviceType?: string | null;
+  cashTendered?: string | null;
+  cashChange?: string | null;
+  saleReturns?:{id:string;refundAmount:string;returnReceiptNo:string;returnedAt:string}[];
   id: string;
   organizationId: string;
   storeId: string;
   registerId: string;
   shiftId: string;
   cashierId: string;
+  cashier?:{fullName:string};
   customerId?: string | null;
   customer?: Customer | null;
   receiptNo: string;
@@ -282,11 +354,15 @@ export interface Sale {
 }
 
 export interface CartItem {
+  tradeUnit?:string;
+  tradeQuantity?:string;
+  conversionRatio?:string;
   product: Product;
   quantity: number;
   unitPrice: number;
   discountAmount: number;
   lineTotal: number;
+  discountPercent?: number;
 }
 
 export interface DashboardReportData {
@@ -308,6 +384,7 @@ export interface DashboardReportData {
 }
 
 export interface SalesReportSummary {
+  grossRevenue?:string;refundAmount?:string;cashSales?:string;cashDebtCollections?:string;cashRefunds?:string;creditSales?:string;cashPayments?:string;
   totalRevenue: number;
   totalDiscount: number;
   totalItems: number;
@@ -322,14 +399,15 @@ export interface ProductReportItem extends Product {
   profitMargin: number;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown, Summary = SalesReportSummary> {
+  catalogLease?:{version:string;issuedAt:string;expiresAt:string};
   success: boolean;
   data?: T;
   message?: string;
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
   pagination?: {
     page: number;
@@ -337,5 +415,43 @@ export interface ApiResponse<T = any> {
     total: number;
     totalPages: number;
   };
-  summary?: SalesReportSummary;
+  summary?: Summary;
+  meta?: {asOf:string;timezone:string;startDate:string|null;endDate:string|null;storeId:string|null;periodSaleCount?:number;summaryScope?:string;search?:string;sort?:string};
+}
+
+export interface OrganizationMember {
+ customRoleId?:string|null;customRoleName?:string|null;customRoleActive?:boolean|null;
+ id: string; role: Role; isActive: boolean;
+ archivedAt: string | null;
+ user: User; stores?: Store[];
+}
+
+export interface CatalogUnit {id:string;code:string;name:string;precision:number;isActive:boolean}
+export interface ProductBarcode {id:string;value:string;isPrimary:boolean}
+
+export interface StockCountReading {
+ id:string;round:number;quantity:string|number;countedBy:string;countedAt:string;
+}
+export interface StockCountLine {
+ id:string;productId:string;productName:string;sku:string;unit:string;unitChanged?:boolean;
+ expectedQuantity?:string|number;unitCost?:string|number;readings:StockCountReading[];
+}
+export interface StockCount {
+ id:string;storeId:string;scope:'full'|'partial';blind:boolean;status:'counting'|'review'|'approved'|'cancelled';
+ createdAt:string;approvedBy?:string|null;approvedAt?:string|null;adjustmentId?:string|null;reason?:string|null;
+ store?:{name:string};lines?:StockCountLine[];
+}
+
+export interface CustomerDebtDocumentInput {
+ operationId:string;kind:'opening'|'increase'|'decrease'|'write_off';amount:string;reason:string;saleId?:string;debtOriginId?:string;effectiveAt?:string;dueAt?:string;
+}
+export interface CustomerStatementEntry {
+ id:string;sourceType:string;sourceId:string;saleId:string|null;debtOriginId?:string|null;receiptNo:string|null;amount:string;balance:string;
+ effectiveAt:string;dueAt:string|null;createdAt:string;note:string|null;actorId:string|null;actorName:string|null;
+}
+export interface CustomerStatement {
+ aging:{asOf:string;overdue:string;upcoming:string;noDueDate:string;unallocated:string;debtTotal:string;creditBalance:string;requiresReconciliation:boolean};
+ customer:{id:string;fullName:string};entries:CustomerStatementEntry[];
+ summary:{openingBalance:string;increases:string;reductions:string;closingBalance:string;currentBalance:string};
+ pagination:{page:number;limit:number;total:number;totalPages:number};
 }

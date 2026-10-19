@@ -1,0 +1,601 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-16T14:41:31.501729+00:00",
+  "scope": "original_plan_acceptance_readiness_only",
+  "originalPlan": {
+    "total": 259,
+    "done": 185,
+    "open": 74,
+    "target": 195,
+    "remainingToTarget": 10,
+    "addedDone": 0,
+    "targetAchieved": false,
+    "checkboxStatusAgreement": true,
+    "openStatuses": {
+      "blocked_external": 29,
+      "deferred": 29,
+      "in_progress": 6,
+      "todo": 10
+    }
+  },
+  "constraints": {
+    "ownerConfirmedExternalResourcesNotReady": true,
+    "vendorHardwareWorkStillDeferred": true,
+    "productionDeploymentSeparatelyAuthorizedOnly": true,
+    "irreversibleDeletionNotAuthorized": true,
+    "allIndependentCoreWorkCompleted": false
+  },
+  "thisContinuation": {
+    "applicationCodeChanged": false,
+    "planCheckboxesChanged": false,
+    "envFilesOpenedOrEdited": false,
+    "businessDatabaseWritten": false,
+    "integrationUnitBrowserSuitesRerun": false,
+    "previousEvidenceArtifactHashesVerified": true,
+    "previousValidationOnlyChangedPath": [
+      "tasks/EXECUTION_STATUS.md"
+    ],
+    "changeExplanation": "EXECUTION_STATUS current target190 to195; previous protocol remains historical"
+  },
+  "checks": [
+    {
+      "command": "node scripts/release/check-service-targets.cjs",
+      "exitCode": 0,
+      "scope": "previous real local measurement validated against636 current source hashes; not new measurement"
+    },
+    {
+      "command": "node scripts/release/check-claims.cjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/release/check-data-flows.cjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/i18n/catalog.cjs check",
+      "exitCode": 0
+    }
+  ],
+  "documents": [
+    {
+      "path": "tasks/PLAN1.md",
+      "sha256": "2bb291dae4a88bd4c6ad8010ef0d4d1341f41def767c80486cd7dfe6bd6ea952"
+    },
+    {
+      "path": "tasks/EXECUTION_STATUS.md",
+      "sha256": "74146674c3e78493f2b8f1d7bfed5f5aae4410aacb6532f871be697579bf9523"
+    },
+    {
+      "path": "tasks/195_READINESS.md",
+      "sha256": "e0ab1c9e2291a3724639705cf27dea496e34ee8345e6c75b2465987e071ab448"
+    },
+    {
+      "path": "tasks/190_BLOCKERS.md",
+      "sha256": "278355623702c5c0089ff2a91b60ff77ad8f35510acac8a0a83b019b98dde5c5"
+    },
+    {
+      "path": "tasks/evidence/post185-fixes-20261016/validation.json",
+      "sha256": "28a60bfff4aadc0481cfd14b87445ad9e730989b356843b1e672fa7d8d701a65"
+    }
+  ],
+  "openOriginalBands": [
+    {
+      "id": "MKT-01.01",
+      "status": "blocked_external",
+      "title": "10–15 ta biznes egasi va 5–10 ta kassir bilan suhbat o‘tkazish.",
+      "originalAcceptance": "Anonim intervyu qaydlari 10–15 egasi va 5–10 kassirni qamraydi; savollar, sana va muammo dalillari bor.",
+      "planBlockSha256": "9a6a0afa8536b4a82c3e362920b17a5830a1c052dcc4103ba9b91e98c1800834"
+    },
+    {
+      "id": "MKT-01.02",
+      "status": "blocked_external",
+      "title": "Amaldagi kassada bir ish kunining asosiy amallarini kuzatish.",
+      "originalAcceptance": "Bir to‘liq ish kuni kuzatuv qaydi, jarayonlar ketma-ketligi va sarflangan vaqtlar mavjud.",
+      "planBlockSha256": "a4754fa85a88f93131cff007355737c46ea66067fe92f0b7627f334e51e71ef6"
+    },
+    {
+      "id": "MKT-01.03",
+      "status": "blocked_external",
+      "title": "Qaysi qurilmalar, internet, printer, tarozi va fiskal provayder ishlatilishini yozib olish.",
+      "originalAcceptance": "Har pilot uchun OS/brauzer/model/protokol/internet/provayder ustunlari to‘ldirilgan qurilma reyestri bor.",
+      "planBlockSha256": "435891d5d3b676f2f3d41d46444f57ae30d1924a37a041da2bc4418da164789a"
+    },
+    {
+      "id": "MKT-01.04",
+      "status": "blocked_external",
+      "title": "Hozirgi dasturdan ko‘chishdagi qiyinchiliklar va to‘lashga tayyor narxni tekshirish.",
+      "originalAcceptance": "Import namunalari, ko‘chish xarajatlari va to‘lashga tayyor narx javoblari taxminlardan ajratilgan.",
+      "planBlockSha256": "4b637ded0643ed28b6543eac3b9e92fea1b4d9249908af22eab34bbda007838b"
+    },
+    {
+      "id": "MKT-01.05",
+      "status": "blocked_external",
+      "title": "Eng ko‘p talab qilingan besh muammo va mahsulotning ustunligini belgilash.",
+      "originalAcceptance": "Beshta ustuvor muammo dalil soni, yechim va o‘lchanadigan foyda bilan tartiblangan.",
+      "planBlockSha256": "c972aff2f5ca0784a417b22558d5bb4b4e11668bf15eb204ddd54df9aa4f4cf9"
+    },
+    {
+      "id": "MKT-01.06",
+      "status": "blocked_external",
+      "title": "Kamida uchta pilot biznes, ularning sinov doirasi va muvaffaqiyat mezonini kelishish.",
+      "originalAcceptance": "Kamida uch biznesning kelishilgan doirasi, mas’uli va muvaffaqiyat mezonlari yozma qayd etilgan.",
+      "planBlockSha256": "6641306e0740b21881715863147319d7a9fa61539d43148fd5a6ea4682b84196"
+    },
+    {
+      "id": "SEC-02.01",
+      "status": "blocked_external",
+      "title": "HTTPS; productionda kuchli kalit majburiy, standart kalit bilan ishga tushmaslik.",
+      "originalAcceptance": "Production konfiguratsiyasi bo‘sh/kuchsiz kalitda fail-fast; HTTPS va secure cookie stagingda tekshirilgan.",
+      "planBlockSha256": "86b2979095771645a85a8ce7a869462344454e0d99adab420b68c33e1e6a3629"
+    },
+    {
+      "id": "SEC-02.03",
+      "status": "blocked_external",
+      "title": "Chiqish, barcha qurilmalardan chiqish, parol almashtirish va parol tiklash.",
+      "originalAcceptance": "Logout/global logout/password change eski sessiyalarni bekor qiladi; reset token bir marta ishlaydi.",
+      "planBlockSha256": "3b4ff5a7ddd5d31aab225faa3ca2a9d4e031678045c2df89922b5396a73b1f96"
+    },
+    {
+      "id": "SEC-02.04",
+      "status": "blocked_external",
+      "title": "Telefon/e-mail tasdiqlash, bir martalik kod muddati va urinishlar chegarasi.",
+      "originalAcceptance": "OTP muvaffaqiyat, expiry, replay va attempts limit testlaridan o‘tadi; kodlar logga chiqmaydi.",
+      "planBlockSha256": "340ccabe38faa109dca65202e66f5b654da6e5344268678fbcf588743b52e7a0"
+    },
+    {
+      "id": "RET-01.06",
+      "status": "deferred",
+      "title": "Provayder orqali refund, uning kutish/xato holati va takror so‘rovdan himoya.",
+      "originalAcceptance": "Refund pending/error/confirmed alohida; timeout/retry/callback bitta iqtisodiy refund yaratadi.",
+      "planBlockSha256": "6f56060d86ab5205c97e2e65f2979058a9f5ae49115c745f6fd7935d5074fb9a"
+    },
+    {
+      "id": "CAT-01.05",
+      "status": "in_progress",
+      "title": "Kasr bilan sotish, birlik aniqligi, tarozi barkodidan vazn/narx ajratish.",
+      "originalAcceptance": "Kg/metr kasr precisioni tekshirilgan; konfiguratsiyalangan weight barcode checksum/format xatosi rad.",
+      "planBlockSha256": "0c995c4add7364c1cf6dc412b938535dddf7552da260a5823720e1834a299831"
+    },
+    {
+      "id": "CRM-02.05",
+      "status": "deferred",
+      "title": "P2: marketing SMS/Telegram; xizmat xabari va reklama roziligini alohida boshqarish.",
+      "originalAcceptance": "Marketing va service consent alohida; opt-out keyingi jo‘natishni bloklaydi; delivery/retry dalili bor.",
+      "planBlockSha256": "df871488e79760d55ac46f62492f8013a6b208d466ff23b023cd93f08efaee54"
+    },
+    {
+      "id": "FIN-01.06",
+      "status": "deferred",
+      "title": "Karta/QR/o‘tkazma bo‘yicha provayder tushumi, komissiya va bank tushumini solishtirish.",
+      "originalAcceptance": "Provider gross/fee/net/bank match hisoblangan; mismatch aniqlanadi va noma’lum tushum confirmed emas.",
+      "planBlockSha256": "defe2924f22c5f0a4446ebc839ae92866e23e94174c5382f6a88c2f03eb7680a"
+    },
+    {
+      "id": "LOC-01.01",
+      "status": "deferred",
+      "title": "Mijoz faoliyati, soliq rejimi va savdo turiga tatbiq etiladigan amaldagi talablarni tekshirish.",
+      "originalAcceptance": "Amaldagi rasmiy manba/sana/activity/tax/sale scope bo‘yicha huquqiy xulosa mas’ul tomonidan tasdiqlangan.",
+      "planBlockSha256": "a0bafe9b800faef31affabd01047543e10f485c4e74fdbf5bf2110ac8aff726a"
+    },
+    {
+      "id": "LOC-01.02",
+      "status": "deferred",
+      "title": "Shuni POS fiskal provayderga ulanadimi yoki mustaqil virtual kassa maqomini oladimi — qaror.",
+      "originalAcceptance": "Fiskal provayder yo‘li bo‘yicha ADR va compliance doirasi bor; mustaqil virtual kassa faqat alohida tasdiq bilan.",
+      "planBlockSha256": "545b8f818083dd2c9cddafc3e94f1f9afba236c6968ebc120a5ea1809085427d"
+    },
+    {
+      "id": "LOC-01.03",
+      "status": "deferred",
+      "title": "Birinchi chiqarish uchun tegishli reestr/talablarga mos provayderni tanlash; shartnoma va test muhiti.",
+      "originalAcceptance": "Tanlangan provayderning maqomi/shartnoma/sandbox kirishi tasdiqlangan; credential hujjatda ochiq emas.",
+      "planBlockSha256": "ebb25e968234610f7ec1c268b7307f3cf684907c7efa839492f15b5986d8f998"
+    },
+    {
+      "id": "LOC-01.04",
+      "status": "deferred",
+      "title": "Savdo, qaytarish, bekor qilish, aralash to‘lov va smena bo‘yicha provider oqimlarini xaritalash.",
+      "originalAcceptance": "Sale/return/cancel/mixed payment/shift provider contract va state transition xaritasi tasdiqlangan.",
+      "planBlockSha256": "f9888792d2c4a024b4561de9bde12d2cae14cc971ebef6ba378ddcf17813ce01"
+    },
+    {
+      "id": "LOC-01.05",
+      "status": "deferred",
+      "title": "Fiskal ID, raqam, vaqt, QR va holatni saqlash; qayta chiqarishda original fiskal ma’lumotni ishlatish.",
+      "originalAcceptance": "ID/number/time/QR/status saqlangan; reprint original fiskal natijani ishlatadi.",
+      "planBlockSha256": "13aee81e154913b80b5ff526683780f683cff743b40bd188e206a4b9817fd2ae"
+    },
+    {
+      "id": "LOC-01.06",
+      "status": "deferred",
+      "title": "MXIK, birlik, soliq va zarur chek rekvizitlarini mahsulot/hujjatga qo‘shish va validatsiya qilish.",
+      "originalAcceptance": "Sandbox required fields/units/MXIK/tax validatsiyasi o‘tadi; invalid rekvizit fiskal yuborilmaydi.",
+      "planBlockSha256": "46c8cc2d88f50c488d61738b50983145887a6afdbd2b6b8c39f6c2cc3e5b480c"
+    },
+    {
+      "id": "LOC-01.07",
+      "status": "deferred",
+      "title": "Timeoutda provayder holatini tekshirish; takror fiskal chek yaratmaslik.",
+      "originalAcceptance": "Timeoutdan keyin status lookup bilan original natija topiladi; duplicate fiskal hujjat yaratilmaydi.",
+      "planBlockSha256": "bcf06fe10dce92068452a457f4bdc1295c3ad86ad18cfde21dce9869778c4b81"
+    },
+    {
+      "id": "LOC-01.08",
+      "status": "deferred",
+      "title": "Fiskal yuborish xatosini kassir va egaga ko‘rsatish; qo‘lda hal qilish/audit jarayoni.",
+      "originalAcceptance": "Fiscal error kassir/ownerga ko‘rinadi; retry/manual-resolution sabab/actor/audit bilan.",
+      "planBlockSha256": "c74ccef2f6e8b31261c5f0dacf73032bb1e33cd39d8d6618251771908257340d"
+    },
+    {
+      "id": "LOC-01.09",
+      "status": "deferred",
+      "title": "Fiskal va savdo summalarini kunlik solishtirish.",
+      "originalAcceptance": "Daily sale-fiscal totals reconciliation mos va mismatch testlaridan o‘tadi; farq ochiq qoladi.",
+      "planBlockSha256": "d44a8d25dbf85cfafa3b5f0fca05309b3e98556470bcd49abbdae343044d394d"
+    },
+    {
+      "id": "LOC-02.01",
+      "status": "deferred",
+      "title": "2D skaner va Data Matrix o‘qish; kodni mahsulot va birlik bilan bog‘lash.",
+      "originalAcceptance": "Real 2D scanner Data Matrixni o‘qiydi; exact kod mahsulot va birlikka bog‘langan.",
+      "planBlockSha256": "9291b35e62e6fd5b5dbc7c311c97d0e228ca0c5eb4c250f778452cfce324465a"
+    },
+    {
+      "id": "LOC-02.02",
+      "status": "deferred",
+      "title": "Takror, yaroqsiz yoki allaqachon sotilgan kodni nazorat qilish.",
+      "originalAcceptance": "Duplicate/invalid/sold-code rad; parallel ikki kassada bir kod ikki marta sotilmaydi.",
+      "planBlockSha256": "a2f39e977ffb73283ae76f5534a0806c129e5783db927414f2688d670770ba79"
+    },
+    {
+      "id": "LOC-02.03",
+      "status": "deferred",
+      "title": "Qabul qilish, savdo, qaytarish va hisobdan chiqarish uchun tegishli integratsiya.",
+      "originalAcceptance": "Provider talabidagi receive/sale/return/write-off sandbox oqimlari original kod izini saqlaydi.",
+      "planBlockSha256": "beaf7cb8e7263968a09d564348761ac3eb8e150df9161b2040f77590171d43a8"
+    },
+    {
+      "id": "LOC-02.04",
+      "status": "deferred",
+      "title": "Markirovka kodini fiskal jarayon bilan bog‘lash va holatlar tarixini saqlash.",
+      "originalAcceptance": "Marking event va fiscal receipt original sale bilan bog‘langan; callback/retry tarixni takrorlamaydi.",
+      "planBlockSha256": "3fe85aea0e7598dc4966b537b75512c7ba3157feb3d35c65b5a9b1c805892ab0"
+    },
+    {
+      "id": "LOC-02.05",
+      "status": "deferred",
+      "title": "Pilotdagi aniq mahsulot guruhlari bo‘yicha moslikni tasdiqlash.",
+      "originalAcceptance": "Pilot mahsulot guruhlari uchun real moslik protokoli va tegishli tashqi tasdiq bor.",
+      "planBlockSha256": "84481081379195585dc66409359a515a5f450efc4d418341a1463a4922bcffb5"
+    },
+    {
+      "id": "LOC-03.01",
+      "status": "deferred",
+      "title": "P1: tanlangan terminal/QR/to‘lov provayderi bilan pilot uchun integratsiya.",
+      "originalAcceptance": "Tanlangan real terminal/QR providerda create/status/cancel/refund sandbox va pilot payment oqimi o‘tadi.",
+      "planBlockSha256": "e422a8538d43fdb79c2a40d18805548089a3c0efa4da9c7fc0bb83eb339fba10"
+    },
+    {
+      "id": "LOC-03.02",
+      "status": "deferred",
+      "title": "Click/Payme yoki boshqa provayderlar — mijoz ehtiyoji, API va shartnoma imkoniyatiga qarab.",
+      "originalAcceptance": "Talab tanlagan har provider uchun adapter/test/contract bor; tanlanmaganlari asosli deferred.",
+      "planBlockSha256": "bd02db174a06bd6cf7d06a4c18aa2aa69aed514f8a24c710e2a15595b9aa38ad"
+    },
+    {
+      "id": "LOC-03.03",
+      "status": "deferred",
+      "title": "Imzolangan callback, serverdan holat tekshirish, dublikatdan himoya va kunlik solishtirish.",
+      "originalAcceptance": "Invalid signature rad; duplicate/late callback bitta posting; daily reconciliation mismatchni topadi.",
+      "planBlockSha256": "e66eea867c6174171cb4dc7d7f24b1bcf0f3d14d7fad0798eb3aa8393464f7b0"
+    },
+    {
+      "id": "LOC-03.04",
+      "status": "deferred",
+      "title": "“Kutilmoqda”, “tasdiqlandi”, “bekor bo‘ldi”, “qaytarildi” holatlari; noma’lum to‘lovni muvaffaqiyatli deb olmaslik.",
+      "originalAcceptance": "Pending/confirmed/cancelled/refunded transitionlar tekshirilgan; unknown payment success emas.",
+      "planBlockSha256": "ccea1eb2e4a02f28055ebbc778368fb435a790db799541819e034df799b233bb"
+    },
+    {
+      "id": "LOC-03.05",
+      "status": "deferred",
+      "title": "Karta ma’lumotlarini POS bazasida saqlamaslik; to‘lovni provayder tomonida bajarish.",
+      "originalAcceptance": "PAN/CVV/track data schema/log/network payload reyestrida saqlanmaydi; hosted provider oqimi ishlaydi.",
+      "planBlockSha256": "6fa494569ce70c92833aa1d94a5c00092cf1bfa2d1e9cd92241bd65dff06fc78"
+    },
+    {
+      "id": "LOC-03.06",
+      "status": "deferred",
+      "title": "P2: buxgalteriya/1C eksporti, EHF va bank bilan ulanish; tanlangan integratsiyaning ikki tomonlama mosligi.",
+      "originalAcceptance": "Tanlangan 1C/EHF/bank integrationning export-import va identifier/date/summa mosligi ikki tomonda tasdiqlangan.",
+      "planBlockSha256": "87eda5b99dac850b4134d41dd3c85644acd9e6e9ffeb8e1a892b73f33bcb367f"
+    },
+    {
+      "id": "OFF-02.06",
+      "status": "deferred",
+      "title": "Kartali to‘lov, markirovka va fiskal amallar offline rejimda faqat provayder/qoidalar ruxsat bergan tartibda.",
+      "originalAcceptance": "Card/marking/fiscal offline default rad; faqat yozma provider/legal ruxsatli oqim real sinovda yoqiladi.",
+      "planBlockSha256": "13c3f7ebe32ad538415c6aa83d2aab01624e8edb0b607e8bc78c11a5c835958d"
+    },
+    {
+      "id": "HW-01.01",
+      "status": "deferred",
+      "title": "USB/2D skaner, 58/80 mm printer, pul tortmasi va tanlangan elektron tarozi.",
+      "originalAcceptance": "Tanlangan scanner/printer/drawer/scale modeli real qurilmada barcode/print/open/weight ssenariysidan o‘tgan.",
+      "planBlockSha256": "27183d6c1efeb56708f6c403685d5630db1b1a3a969272c440b9ab37faefd06b"
+    },
+    {
+      "id": "HW-01.02",
+      "status": "deferred",
+      "title": "Qurilmalar ro‘yxati, OS/brauzer, ulanish usuli va ishlaydigan modellar jadvali.",
+      "originalAcceptance": "Model/OS/browser/transport/version/test date jadvali haqiqiy dalilga bog‘langan.",
+      "planBlockSha256": "6eb7102ee8a76b9fd4858e10d4d4d957da37895c77b3cdf2dcbe561ee21ff46c"
+    },
+    {
+      "id": "HW-01.03",
+      "status": "deferred",
+      "title": "Zarur bo‘lsa xavfsiz lokal printer/tarozi agenti; uni o‘rnatish va yangilash.",
+      "originalAcceptance": "Agent zarurati ADRda isbotlangan; pairing/auth/origin/update/uninstall va port access testlari o‘tadi.",
+      "planBlockSha256": "e70fa07341a78c59ebbeaa36778e551d28e8d7d7ab730c823b66829295ba3163"
+    },
+    {
+      "id": "HW-01.04",
+      "status": "deferred",
+      "title": "Windows kassasi, planshet va mobil ekranlarda real sinov.",
+      "originalAcceptance": "Tanlangan Windows/tablet/mobile matritsasida checkout/print/reconnect amaliy protokoli bor.",
+      "planBlockSha256": "d81c1740b78abf01863b59a8f9ff731e867d909cbcc32e1e7d59abaa5bf6b30f"
+    },
+    {
+      "id": "HW-01.06",
+      "status": "deferred",
+      "title": "P2: mijoz displeyi, alohida mobil ilova va ombor terminali.",
+      "originalAcceptance": "Har tanlangan customer-display/mobile/terminal uchun mustaqil scope va real qurilma acceptance bor.",
+      "planBlockSha256": "353dede1e086b7628f0991e9ba26f664c9f4c80bf44fe7f10575b62fbaa27e11"
+    },
+    {
+      "id": "OPS-01.01",
+      "status": "blocked_external",
+      "title": "Development, staging va production alohida baza/kalit bilan.",
+      "originalAcceptance": "Dev/staging/prod DB va secrets ajratilgan; test prodga yozolmaydi.",
+      "planBlockSha256": "6d4c2ce0883997d6b1bb08fa2c2cb21b4061f297d879a7a4925d03ffd67d0b11"
+    },
+    {
+      "id": "OPS-01.03",
+      "status": "blocked_external",
+      "title": "Yangi/avvalgi ilova bilan mos migratsiya, ma’lumot backfilli va qaytish rejasi.",
+      "originalAcceptance": "Expand/backfill/contract rollout eski/yangi app bilan stagingda; rollback data-losssiz yoki forward-fix bilan.",
+      "planBlockSha256": "35fea8626506317a62907d68f770270108fcbc1db077cf6709d0d61553e07eba"
+    },
+    {
+      "id": "OPS-01.04",
+      "status": "blocked_external",
+      "title": "CI: lint → turlar → test → build → staging → qabul tekshiruvi → production.",
+      "originalAcceptance": "CI lint/type/test/build/staging gate failda release qilmaydi; prod release uchun aniq ruxsat bor.",
+      "planBlockSha256": "d60bc1351ad08f62c6508096331a21e17f8ea1a4e23536736e38137b2dc983b9"
+    },
+    {
+      "id": "OPS-01.06",
+      "status": "blocked_external",
+      "title": "TLS, domen, firewall; bazani umumiy internetga ochmaslik.",
+      "originalAcceptance": "TLS/domen/firewall real stagingda; DB public port ochiq emas.",
+      "planBlockSha256": "816ea3b943853a07e11d2c5245560c4beeeb3b5b8547bcec781e7bc85ff4dd56"
+    },
+    {
+      "id": "OPS-02.05",
+      "status": "blocked_external",
+      "title": "Xatoni mas’ul xodimga yuborish va eskalatsiya; kim javob berishi aniq bo‘lishi.",
+      "originalAcceptance": "Test alert haqiqiy on-call kanaliga yetkazilgan; escalation/ack mas’uli yozma.",
+      "planBlockSha256": "f229b00fcf0359f5c493a37a1a082c5d2dc8c408bf46ca2d485445155fb2864b"
+    },
+    {
+      "id": "OPS-02.06",
+      "status": "in_progress",
+      "title": "Status sahifasi, hodisa jurnali va jiddiy hodisadan keyingi tahlil.",
+      "originalAcceptance": "Status sahifasi appdan mustaqil; incident timeline va postmortem andozasi amaliy mashqda to‘ldirilgan.",
+      "planBlockSha256": "5b222dc0bbd9ac7fb72752d9030cfb578ef17753b5ff45905ab77676459cc816"
+    },
+    {
+      "id": "OPS-03.01",
+      "status": "blocked_external",
+      "title": "Shifrlangan avtomatik backup; bazaning asosiy serveridan boshqa saqlash joyi.",
+      "originalAcceptance": "Encrypted off-host backup job ishlaydi; host yo‘qolganda backup ochiladi, unauthorized access rad.",
+      "planBlockSha256": "8f66ad76f7c0eeb8b981563daa7ffd698b99b00006bfb5d5641dc5c1aaf9bceb"
+    },
+    {
+      "id": "OPS-03.06",
+      "status": "in_progress",
+      "title": "Tiklashdan keyin provider, offline navbat va savdo holatlarini solishtirish.",
+      "originalAcceptance": "Restored DB provider/offline/outbox bilan reconcile; old job replay duplicate iqtisodiy natija yaratmaydi.",
+      "planBlockSha256": "5d271bb41913d911541b28215ec9b850ba773e817df4fe17a242d976a3b3ba8d"
+    },
+    {
+      "id": "OPS-04.01",
+      "status": "blocked_external",
+      "title": "Pilotdan katalog, savdo hajmi, kassalar va parallel so‘rovlar profilini olish.",
+      "originalAcceptance": "Pilot hajmi/kassa/request/peak o‘lchovi va test profile yozilgan; taxmin va real son ajratilgan.",
+      "planBlockSha256": "305f86280489448cc37ac05d9ec32c99046dc22091b985a0e275ff7289ef2431"
+    },
+    {
+      "id": "QA-01.06",
+      "status": "todo",
+      "title": "Provider sandbox, timeout, noto‘g‘ri imzo, takror/kechikkan callback testlari.",
+      "originalAcceptance": "Sandbox timeout/bad signature/duplicate/late callback natijalari ledger bilan mos; real sandbox yo‘q bo‘lsa blocked.",
+      "planBlockSha256": "1315187a4ed526959878e5d6cc3b44a0e8f142b0bc8492c71d1fce2dfacdcbff"
+    },
+    {
+      "id": "QA-01.07",
+      "status": "in_progress",
+      "title": "Offline/reconnect, printer uzilishi, brauzer yopilishi va server restart sinovlari.",
+      "originalAcceptance": "Offline/reconnect/print failure/browser close/server restart suite lost/duplicate operations yo‘qligini tekshiradi.",
+      "planBlockSha256": "c66ebcd9385330317840c746e2f02301c731775ac155ed0285ac97eeb0096db7"
+    },
+    {
+      "id": "QA-01.08",
+      "status": "in_progress",
+      "title": "Paket xavfsizligi, secret scanning va stagingda xavfsizlik tekshiruvi.",
+      "originalAcceptance": "Dependency/secret/image/staging scan dalili; unresolved critical/high real findings release gate bloklaydi.",
+      "planBlockSha256": "e0ce975bf2ecd92f48a10e8b691f0349adacb95faf38b63f8338aaffd4f65d9f"
+    },
+    {
+      "id": "BIZ-02.03",
+      "status": "blocked_external",
+      "title": "Kassir/egasi uchun murojaat, diagnostika, javob muddati va favqulodda aloqa.",
+      "originalAcceptance": "Ticket/diagnostic/SLA/emergency contact mavjud; demo murojaat javob/eskalatsiya oqimidan o‘tadi.",
+      "planBlockSha256": "381ba27b79eef53be415c4bae14199f31fe1afa9940cbf6e2a59a68057da651b"
+    },
+    {
+      "id": "BIZ-02.04",
+      "status": "todo",
+      "title": "Mijozni o‘rnatish: import, boshlang‘ich qoldiq/qarz, qurilmalar, trening va ishga tushirish.",
+      "originalAcceptance": "Har pilot import/opening balance/device/training/cutover checklistni real yakunlagan.",
+      "planBlockSha256": "f70e1114c6bbc31e88585af74b7a717f8668bc1307edcb0a4b7f83d39d9d424d"
+    },
+    {
+      "id": "BIZ-02.05",
+      "status": "todo",
+      "title": "Ishga tushirishdan oldingi hisobni imzolangan/kelishilgan solishtirish bilan tasdiqlash.",
+      "originalAcceptance": "Opening stock/debt/cash totals mijoz bilan solishtirilgan va tasdiqlangan; farqlar hal etilgan.",
+      "planBlockSha256": "066e981ddcbb24f491f986d002e46824865f3bce30e4e0bce5eca596d7598652"
+    },
+    {
+      "id": "BIZ-02.06",
+      "status": "todo",
+      "title": "Mavjud dasturdan ko‘chirishda ikki marta savdo yuritmaslik va o‘tish sanasini belgilash.",
+      "originalAcceptance": "Cutover time va eski tizim write-stop qaydi; bir davrda ikki tizimdan duplicate posting yo‘q.",
+      "planBlockSha256": "8fd9527d89cda642a9be8110c142452c0a1bfc1f8c346bd243a1c27e31d9346b"
+    },
+    {
+      "id": "BIZ-02.07",
+      "status": "in_progress",
+      "title": "Xizmatdan chiqishda to‘liq ma’lumot eksporti va saqlash/o‘chirish tartibi.",
+      "originalAcceptance": "Authorized full export mashqi o‘tadi; retention/legal hold/delete tartibi tasdiqli va tenant isolation saqlanadi.",
+      "planBlockSha256": "73b15c1cccbd038c42385066fac72effae52524cf57dcc1e384e39891e333b2a"
+    },
+    {
+      "id": "LEG-01.01",
+      "status": "blocked_external",
+      "title": "Mijoz/xodim telefonlari, savdo va qarz tarixining maqsadi, kirishlari va saqlash muddatini belgilash.",
+      "originalAcceptance": "Data inventory purpose/access/retention/controller bilan; business owner va huquqiy mas’ul tasdiqlagan.",
+      "planBlockSha256": "51cb22062b9c52685781d97c7695564bbb63e5e6bbaf365f713f48a9970fcf7f"
+    },
+    {
+      "id": "LEG-01.02",
+      "status": "blocked_external",
+      "title": "Amaldagi shaxsga doir ma’lumotlar, saqlash joyi va reestr talablarini tegishli ma’lumot toifasi uchun tekshirish; hostingni shu tekshiruvdan keyin tanlash.",
+      "originalAcceptance": "Current official law/source/date/category/region/register xulosasi bor; production hosting shunga mos tanlangan.",
+      "planBlockSha256": "8c55887eaf9cfbc7982f61746f1d96a08766caeff3186208304e44bb471aaea5"
+    },
+    {
+      "id": "LEG-01.03",
+      "status": "blocked_external",
+      "title": "Maxfiylik siyosati, foydalanish shartlari, xizmat shartnomasi va javobgarlik chegarasi.",
+      "originalAcceptance": "Privacy/terms/service contract/javobgarlik hujjatlari huquqiy tekshiruvdan o‘tgan; draftni final deb belgilamaslik.",
+      "planBlockSha256": "2d2a2032d7485149b63d1fe3d33722696968a7da5277b48510ae6b6fc6ff1e17"
+    },
+    {
+      "id": "LEG-01.04",
+      "status": "blocked_external",
+      "title": "Qonun talab qiladigan moliyaviy yozuvlarni saqlash bilan shaxsiy ma’lumotni o‘chirish talabini moslashtirish.",
+      "originalAcceptance": "Retention/legal hold/delete/anonymize policy moliyaviy tarixni saqlaydi; sinov tenantda amaliy tekshiruv bor.",
+      "planBlockSha256": "c6bc0271a188439f38aa53f942e31172dcf9c34e739217ed39ba7507e30da190"
+    },
+    {
+      "id": "PILOT-01.01",
+      "status": "blocked_external",
+      "title": "Kamida uchta biznesda kelishilgan savdo hajmi va qurilmalar bilan sinash.",
+      "originalAcceptance": "Kamida 3 real biznes uchun scope/hajm/qurilma/mas’ul/test boshlanishi va kelishuv dalili bor.",
+      "planBlockSha256": "b76ad61e023a6de25f999aa769ba9e0370d918346f4d012f14c312f6932d1c8c"
+    },
+    {
+      "id": "PILOT-01.02",
+      "status": "blocked_external",
+      "title": "Kamida ikki hafta odatiy savdo; oy/davr yopilishi ssenariysini ham alohida tekshirish.",
+      "originalAcceptance": "Kamida 14 kun real kundalik savdo jurnali va alohida month-end/period-close sinovi mavjud.",
+      "planBlockSha256": "4a27b1362e6ee4d8f7edbe620bc7651d910e15964170ab149ccfa77b8967c9c6"
+    },
+    {
+      "id": "PILOT-01.03",
+      "status": "blocked_external",
+      "title": "Har kuni savdo, pul, qarz, qoldiq va fiskal/to‘lov natijalarini solishtirish.",
+      "originalAcceptance": "Har pilot kunida sale/cash/debt/stock/fiscal/payment reconcile dalili; farqlar sabab va resolution bilan.",
+      "planBlockSha256": "522844b1a83ea8818243736d2e4a6f009c184c482910c99f48c781033bf415ea"
+    },
+    {
+      "id": "PILOT-01.04",
+      "status": "blocked_external",
+      "title": "Qaytarish, nasiya undirish, transfer, internet/printer uzilishi real yoki boshqariladigan sinovda bajarilishi.",
+      "originalAcceptance": "Return/collection/transfer/network/print failure har biri real yoki boshqariladigan pilot protokolida o‘tgan.",
+      "planBlockSha256": "920a6e5c621f74348506fa1f65f94a0cda44981224372d9a6fe2a9df65c074ba"
+    },
+    {
+      "id": "PILOT-01.05",
+      "status": "blocked_external",
+      "title": "Kassir va egasi fikri, yordam murojaatlari va sarflangan vaqtni qayd qilish.",
+      "originalAcceptance": "Cashier/owner feedback, tickets va time metrics yig‘ilgan; ustuvor tuzatishlar trackerga bog‘langan.",
+      "planBlockSha256": "55372eec49a69c0f411af5dba699d57797bf18fbcec4de961c057bcd2ba4d673"
+    },
+    {
+      "id": "PILOT-01.06",
+      "status": "blocked_external",
+      "title": "Ma’lumot yo‘qolishi, ruxsatsiz kirish va hal qilinmagan pul farqi bo‘lmasligi.",
+      "originalAcceptance": "Pilot bo‘yicha data-loss/unauthorized access/unresolved money mismatch nol; incident dalillari ko‘rib chiqilgan.",
+      "planBlockSha256": "c76f2c1cba7a2f8a13a6479e6ef64c71e3368506b525453470c15c6c4f99198e"
+    },
+    {
+      "id": "RELEASE-01.01",
+      "status": "todo",
+      "title": "Chiqarish doirasidagi barcha P0 va zarur P1 vazifalar yopilgan.",
+      "originalAcceptance": "Scope manifestdagi barcha required P0/P1 done; blocked/in-progress required task yo‘q; deferred alohida.",
+      "planBlockSha256": "eea12cd09b4fe96a380ddc346f3df20812a06c99d7cce5d618a3fe93d4b48bc0"
+    },
+    {
+      "id": "RELEASE-01.02",
+      "status": "todo",
+      "title": "Muhim hisob/ruxsat ssenariylari avtomatik va amaliy sinovdan o‘tgan.",
+      "originalAcceptance": "Business/security avtomatik va amaliy test dalillari aynan release commitiga bog‘langan.",
+      "planBlockSha256": "297fb01508da65c755826bf4e727f6deb49ee08ccf2f7ba495c5d8411874c30c"
+    },
+    {
+      "id": "RELEASE-01.04",
+      "status": "todo",
+      "title": "Fiscal/markirovka talabi tegishli mijozlar uchun bajarilgan.",
+      "originalAcceptance": "Applicable fiscal/marking compliance va provider real tasdiqlari bor; sandbox-only final emas.",
+      "planBlockSha256": "9263eb175639e52e6aa7d35ba00cfe215036e796ba05ecde547c45d9c21f71d7"
+    },
+    {
+      "id": "RELEASE-01.05",
+      "status": "todo",
+      "title": "Tanlangan qurilmalar sinovdan o‘tgan va moslik ro‘yxati e’lon qilingan.",
+      "originalAcceptance": "Tanlangan real device matritsasi acceptance dalili bilan e’lon qilingan.",
+      "planBlockSha256": "910fc0db0dc2a2d617cc4962c731742a22916b3d4d4c43abd6462adb55a059ac"
+    },
+    {
+      "id": "RELEASE-01.07",
+      "status": "blocked_external",
+      "title": "Kuzatish, ogohlantirish va javobgar yordam xodimi mavjud.",
+      "originalAcceptance": "External monitoring/test alert/on-call mas’uli tayyor va real kanal tekshirilgan.",
+      "planBlockSha256": "3cb69dfe6feb01a7f3711f62ab62e0fc8fce922e6c8d1fbbf39bbdce74de2ac8"
+    },
+    {
+      "id": "RELEASE-01.09",
+      "status": "blocked_external",
+      "title": "Import, boshlang‘ich hisob, trening va onboarding qo‘llanmasi tayyor.",
+      "originalAcceptance": "Import/opening account/training/onboarding qo‘llanmasi pilot foydalanuvchida tekshirilgan.",
+      "planBlockSha256": "c68cba365c0a9229738bcbe65fcbe72fb6ffb578afaac41345850c4bcac2fb5d"
+    },
+    {
+      "id": "RELEASE-01.10",
+      "status": "todo",
+      "title": "Xizmat shartlari, maxfiylik, tarif va eksport/o‘chirish siyosati tayyor.",
+      "originalAcceptance": "Huquqiy tasdiqli terms/privacy/tarif/export/delete policy amaldagi versiya bilan.",
+      "planBlockSha256": "d9519da6e5366f3e3f71fdb283cd198af2e9e27f0478e9182c3b7ff86b3fdc1e"
+    },
+    {
+      "id": "RELEASE-01.11",
+      "status": "todo",
+      "title": "Pilotta ochiq kritik yoki yuqori darajadagi xatolar qolmagan.",
+      "originalAcceptance": "Pilotdagi unresolved critical/high findings nol; severity va resolution qaydlari bor.",
+      "planBlockSha256": "e60cdbd9d39e73f72f720d2cde8c44c80fc70d1a517c49999e74d70b91ba2660"
+    }
+  ]
+}

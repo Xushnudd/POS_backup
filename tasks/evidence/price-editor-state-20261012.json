@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browserRegression": {
+      "passed": 9,
+      "failed": 0,
+      "seconds": 48.5
+    },
+    "finalDraftBrowser": {
+      "passed": 3,
+      "failed": 0,
+      "seconds": 13.2
+    },
+    "projects": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "build": "pass",
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "behavior": [
+    "Price rule/group create/assignment inputs live inside immutable mutation; no conditional unmount during posting",
+    "Each ACK resets only its own draft; independent price and assignment drafts survive group creation",
+    "Metadata failure preserves last rows and drafts; new mutations blocked until retry",
+    "Customer search and group pagination retain another editor selected IDs with explicit current-selection options",
+    "Owner/admin/organization/user/active-branch remount prevents hidden old-branch draft submission"
+  ],
+  "limits": [
+    "No new original done; remaining UX-01.05 editors open",
+    "Repeated final3 required because two selection visibility assertions were added while initial9 run was in progress; all three projects used final test source in verified run"
+  ],
+  "logs": {
+    "browser": "tasks/evidence/logs/price-editor-state-20261012-browser.log",
+    "verifiedDraftBrowser": "tasks/evidence/logs/price-editor-state-20261012-verifiedDraftBrowser.log",
+    "build": "tasks/evidence/logs/price-editor-state-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/price-editor-state-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/price-editor-state-20261012-lint.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/settings/prices/page.tsx": "55e00e8c8cdd88d60c708928f5f8d187bfbe23875bbb2d1edefe55b1761fe952",
+    "tests/e2e/price-editor-state.spec.ts": "b066d7aedb70b81b80c68e15531126a85ea895f44f9bcf6f8f96c9f514b6a462",
+    "tests/e2e/core.spec.ts": "a258dc30ce670ae7e669b1c98325590eb2724fc2b6b4b70be8f9bd2303f804ed",
+    "tasks/evidence/logs/price-editor-state-20261012-browser.log": "132d053585b8d8a73b6b482a78655d2fa83f4e86f11cb3e2463797eaf8c75471",
+    "tasks/evidence/logs/price-editor-state-20261012-verifiedDraftBrowser.log": "8626f59f7c32d31cdc083a561f40a5bd121393f922243c77ea5973925535eeaa",
+    "tasks/evidence/logs/price-editor-state-20261012-build.log": "4a5cad5cdfa30f1d004395b12c038d070d1671eee16f9448c24a86d4f7b991f5",
+    "tasks/evidence/logs/price-editor-state-20261012-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "tasks/evidence/logs/price-editor-state-20261012-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

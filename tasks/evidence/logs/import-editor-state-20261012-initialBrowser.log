@@ -1,0 +1,196 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/import-editor-state.spec.ts tests/e2e/core.spec.ts --grep import selected file|Catalog CSV import
+
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:225528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.3s)
+(node:225769) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (1.9s)
+(node:225943) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [firefox] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.4s)
+(node:226259) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (2.8s)
+(node:226610) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [webkit] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.5s)
+(node:227210) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:225490) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  6 [webkit] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (2.7s)
+
+
+  1) [chromium] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected substring: "Import serverda tasdiqlandi"
+    Error: strict mode violation: getByRole('status') resolved to 2 elements:
+        1) <aside role="status" class="mb-3 border border-amber-500 bg-amber-50 p-3 text-amber-950">…</aside> aka getByRole('status').filter({ hasText: 'Serverning texnik xizmat' })
+        2) <aside role="status" class="mb-4 rounded border p-3">…</aside> aka getByText('Sinov davri faol. Tarif va')
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 10000ms
+      - waiting for getByRole('status')
+
+
+      1156 | test('Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values',async({page})=>{
+      1157 |  const origin={Origin:'https://localhost:3100'},phone='998'+Date.now();phones.push(phone);expect((await page.request.post('/api/auth/register',{headers:origin,data:{fullName:'Catalog import owner',phone,password:'test-only-password',organizationName:'Reviewed catalog importer'}})).ok()).toBe(true);const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);
+    > 1158 |  await page.goto('/products');await page.getByRole('link',{name:'CSV / Excel import va eksport',exact:true}).click();const bytes=Buffer.from('name,sku,barcode,unit,salePrice,costPrice,minStock\r\nImported browser item,BROWSER-001,0001001,dona,1.01,0.333333,1\r\nRejected duplicate,BROWSER-001,0001002,dona,1.01,0,0\r\n');await page.getByLabel('Katalog fayli',{exact:true}).setInputFiles({name:'catalog.csv',mimeType:'text/csv',buffer:bytes});await page.getByRole('button',{name:'Importni oldindan ko‘rish',exact:true}).click();await expect(page.getByText('Jami2; yaroqli1; xatoli/dublikat1. Faqat yaroqli qatorlar qo‘shiladi.',{exact:true})).toBeVisible();expect(await db.product.count({where:{organizationId:me.organization.id}})).toBe(0);await expect(page.getByRole('cell',{name:'Faylda takror SKU',exact:true})).toBeVisible();await page.getByLabel('Katalog import sababi',{exact:true}).fill('Owner reviewed original import file errors');await page.getByRole('button',{name:'Yaroqli katalog qatorlarini qo‘shish: oldindan ko‘rish',exact:true}).click();let dropped=false;await page.route('**/api/catalog-import',async route=>{if(!dropped){dropped=true;const result=await route.fetch();expect(result.ok()).toBe(true);await route.abort('failed')}else await route.continue()});await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('status')).toContainText('Import serverda tasdiqlandi');expect(await db.product.count({where:{organizationId:me.organization.id}})).toBe(1);expect(await db.auditLog.count({where:{organizationId:me.organization.id,action:'catalog_imported'}})).toBe(1);expect(await db.operation.count({where:{organizationId:me.organization.id,type:'catalog.import'}})).toBe(1);
+           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ^
+      1159 |  const downloadEvent=page.waitForEvent('download');await page.getByRole('button',{name:'Katalog Excel yuklash',exact:true}).click();const download=await downloadEvent;expect(download.suggestedFilename()).toMatch(/\.xlsx$/);const path=await download.path();expect(path).toBeTruthy();const ExcelJS=(await import('exceljs')).default,book=new ExcelJS.Workbook();await book.xlsx.load(readFileSync(path!) as never);expect(book.worksheets[0].getRow(2).getCell(8).value).toBe('1.01');expect(book.worksheets[0].getRow(2).getCell(9).value).toBe('0.333333');expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.payment.count({where:{organizationId:me.organization.id}})).toBe(0)
+      1160 | });
+      1161 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1158:1611
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-chromium/error-context.md
+
+    Error Context: test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected substring: "Import serverda tasdiqlandi"
+    Error: strict mode violation: getByRole('status') resolved to 2 elements:
+        1) <aside role="status" class="mb-3 border border-amber-500 bg-amber-50 p-3 text-amber-950">…</aside> aka getByRole('status').filter({ hasText: 'Serverning texnik xizmat' })
+        2) <aside role="status" class="mb-4 rounded border p-3">…</aside> aka getByText('Sinov davri faol. Tarif va')
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 10000ms
+      - waiting for getByRole('status')
+
+
+      1156 | test('Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values',async({page})=>{
+      1157 |  const origin={Origin:'https://localhost:3100'},phone='998'+Date.now();phones.push(phone);expect((await page.request.post('/api/auth/register',{headers:origin,data:{fullName:'Catalog import owner',phone,password:'test-only-password',organizationName:'Reviewed catalog importer'}})).ok()).toBe(true);const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);
+    > 1158 |  await page.goto('/products');await page.getByRole('link',{name:'CSV / Excel import va eksport',exact:true}).click();const bytes=Buffer.from('name,sku,barcode,unit,salePrice,costPrice,minStock\r\nImported browser item,BROWSER-001,0001001,dona,1.01,0.333333,1\r\nRejected duplicate,BROWSER-001,0001002,dona,1.01,0,0\r\n');await page.getByLabel('Katalog fayli',{exact:true}).setInputFiles({name:'catalog.csv',mimeType:'text/csv',buffer:bytes});await page.getByRole('button',{name:'Importni oldindan ko‘rish',exact:true}).click();await expect(page.getByText('Jami2; yaroqli1; xatoli/dublikat1. Faqat yaroqli qatorlar qo‘shiladi.',{exact:true})).toBeVisible();expect(await db.product.count({where:{organizationId:me.organization.id}})).toBe(0);await expect(page.getByRole('cell',{name:'Faylda takror SKU',exact:true})).toBeVisible();await page.getByLabel('Katalog import sababi',{exact:true}).fill('Owner reviewed original import file errors');await page.getByRole('button',{name:'Yaroqli katalog qatorlarini qo‘shish: oldindan ko‘rish',exact:true}).click();let dropped=false;await page.route('**/api/catalog-import',async route=>{if(!dropped){dropped=true;const result=await route.fetch();expect(result.ok()).toBe(true);await route.abort('failed')}else await route.continue()});await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('status')).toContainText('Import serverda tasdiqlandi');expect(await db.product.count({where:{organizationId:me.organization.id}})).toBe(1);expect(await db.auditLog.count({where:{organizationId:me.organization.id,action:'catalog_imported'}})).toBe(1);expect(await db.operation.count({where:{organizationId:me.organization.id,type:'catalog.import'}})).toBe(1);
+           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ^
+      1159 |  const downloadEvent=page.waitForEvent('download');await page.getByRole('button',{name:'Katalog Excel yuklash',exact:true}).click();const download=await downloadEvent;expect(download.suggestedFilename()).toMatch(/\.xlsx$/);const path=await download.path();expect(path).toBeTruthy();const ExcelJS=(await import('exceljs')).default,book=new ExcelJS.Workbook();await book.xlsx.load(readFileSync(path!) as never);expect(book.worksheets[0].getRow(2).getCell(8).value).toBe('1.01');expect(book.worksheets[0].getRow(2).getCell(9).value).toBe('0.333333');expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.payment.count({where:{organizationId:me.organization.id}})).toBe(0)
+      1160 | });
+      1161 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1158:1611
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-firefox/error-context.md
+
+    Error Context: test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected substring: "Import serverda tasdiqlandi"
+    Error: strict mode violation: getByRole('status') resolved to 2 elements:
+        1) <aside role="status" class="mb-3 border border-amber-500 bg-amber-50 p-3 text-amber-950">…</aside> aka getByRole('status').filter({ hasText: 'Serverning texnik xizmat' })
+        2) <aside role="status" class="mb-4 rounded border p-3">…</aside> aka getByText('Sinov davri faol. Tarif va')
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 10000ms
+      - waiting for getByRole('status')
+
+
+      1156 | test('Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values',async({page})=>{
+      1157 |  const origin={Origin:'https://localhost:3100'},phone='998'+Date.now();phones.push(phone);expect((await page.request.post('/api/auth/register',{headers:origin,data:{fullName:'Catalog import owner',phone,password:'test-only-password',organizationName:'Reviewed catalog importer'}})).ok()).toBe(true);const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);
+    > 1158 |  await page.goto('/products');await page.getByRole('link',{name:'CSV / Excel import va eksport',exact:true}).click();const bytes=Buffer.from('name,sku,barcode,unit,salePrice,costPrice,minStock\r\nImported browser item,BROWSER-001,0001001,dona,1.01,0.333333,1\r\nRejected duplicate,BROWSER-001,0001002,dona,1.01,0,0\r\n');await page.getByLabel('Katalog fayli',{exact:true}).setInputFiles({name:'catalog.csv',mimeType:'text/csv',buffer:bytes});await page.getByRole('button',{name:'Importni oldindan ko‘rish',exact:true}).click();await expect(page.getByText('Jami2; yaroqli1; xatoli/dublikat1. Faqat yaroqli qatorlar qo‘shiladi.',{exact:true})).toBeVisible();expect(await db.product.count({where:{organizationId:me.organization.id}})).toBe(0);await expect(page.getByRole('cell',{name:'Faylda takror SKU',exact:true})).toBeVisible();await page.getByLabel('Katalog import sababi',{exact:true}).fill('Owner reviewed original import file errors');await page.getByRole('button',{name:'Yaroqli katalog qatorlarini qo‘shish: oldindan ko‘rish',exact:true}).click();let dropped=false;await page.route('**/api/catalog-import',async route=>{if(!dropped){dropped=true;const result=await route.fetch();expect(result.ok()).toBe(true);await route.abort('failed')}else await route.continue()});await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('status')).toContainText('Import serverda tasdiqlandi');expect(await db.product.count({where:{organizationId:me.organization.id}})).toBe(1);expect(await db.auditLog.count({where:{organizationId:me.organization.id,action:'catalog_imported'}})).toBe(1);expect(await db.operation.count({where:{organizationId:me.organization.id,type:'catalog.import'}})).toBe(1);
+           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ^
+      1159 |  const downloadEvent=page.waitForEvent('download');await page.getByRole('button',{name:'Katalog Excel yuklash',exact:true}).click();const download=await downloadEvent;expect(download.suggestedFilename()).toMatch(/\.xlsx$/);const path=await download.path();expect(path).toBeTruthy();const ExcelJS=(await import('exceljs')).default,book=new ExcelJS.Workbook();await book.xlsx.load(readFileSync(path!) as never);expect(book.worksheets[0].getRow(2).getCell(8).value).toBe('1.01');expect(book.worksheets[0].getRow(2).getCell(9).value).toBe('0.333333');expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.payment.count({where:{organizationId:me.organization.id}})).toBe(0)
+      1160 | });
+      1161 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1158:1611
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-webkit/error-context.md
+
+    Error Context: test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Catalog-CSV-import-pr-84b7b--exports-exact-Excel-values-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values 
+    [firefox] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values 
+    [webkit] › tests/e2e/core.spec.ts:1156:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values 
+  3 passed (19.8s)

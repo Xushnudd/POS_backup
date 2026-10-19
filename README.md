@@ -2,6 +2,16 @@
 
 Kichik va o‘rta bizneslar uchun brauzerda ishlovchi savdo va ombor boshqaruvi tizimi. MVPning vazifasi: kassada savdoni tez rasmiylashtirish, qoldiqni aniq yuritish va egaga kunlik moliyaviy ko‘rinish berish.
 
+Amaldagi ishlab chiqish holati [EXECUTION_STATUS.md](tasks/EXECUTION_STATUS.md)da yuritiladi. Egasi `/products/import` orqali CSV/XLSXni oldindan tekshiradi, xato qatorlarni ko‘radi va yaroqli yangi mahsulotlarni tasdiqlaydi; mavjud narx/qoldiq avtomatik almashtirilmaydi. `/onboarding` har filialning haqiqiy import, tasdiqlangan boshlang‘ich qoldiq, kassir va odatiy savdo bosqichlarini qayta davom ettirish imkonini beradi. `/training` mashqi haqiqiy pul/qoldiqka ta’sir qilmaydi.
+
+Chek oynasida mijoz roziligi bilan bir soatlik elektron chek QR/havolasi yaratiladi va bekor qilinadi. Egasi mijoz kartasida alohida shaxsan xizmat roziligini qayd etib, qarz ko‘chirmasini mavjud worker navbatiga qo‘yadi. Bu SMS/e-mail yetkazish yoki fiskal/hardware integratsiyasi emas; [ishlatish va xavfsizlik tartibi](docs/operations/shared-documents.md). Mahsulot rasmlari faqat protected ichki upload orqali ko‘rsatiladi; eski tashqi URL metadata saqlanadi, avtomatik yuklanmaydi. [Ma’lumot oqimlari reyestri](docs/operations/provider-data-flows.md) current first-party va disabled vendor chegaralarini ko‘rsatadi.
+
+Savdo sahifasidagi “Tovar almashtirish” owner/admin uchun original qaytarish va yangi savdoni bir tranzaksiyada bog‘laydi. Naqd/nasiya farqi oldindan ko‘riladi; haqiqiy berilgan naqd va qaytim ikkala savdoda ko‘rinadi. Yetarli qoldiq yoki nasiya limiti bo‘lmasa qaytarish ham yozilmaydi. Noma’lum javobda saqlangan original amalni tekshiring. Bu oqim ichki naqd/nasiya uchun; real fiskal/Click/hardware integratsiyalari hozir ulanmagan.
+
+`/security` hisobning90kunlik xavfsizlik/sessiya tarixini, shubhali kirish xabarlarini va o‘qilganlik holatini ko‘rsatadi. Bildirishnoma ichki inboxga jobs worker orqali atomik yetkaziladi; yetkazish xatosiga auditli cheklangan retry bor. Background badge sessiya idle muddatini uzaytirmaydi. 085/086 migration va worker ishga tushirish tartibi [OPERATIONS_RUNBOOK.md](tasks/OPERATIONS_RUNBOOK.md)da.
+
+Owner `/jobs`da ichki hisob solishtirishni fon navbatiga qo‘yadi, xatoli ish tarixini ko‘radi va sabab bilan qayta tasdiqlaydi. `npm run worker:build`dan keyin `npm run worker:jobs` navbatni bajaradi; productionda worker ham alohida ishga tushiriladi. Uchta cheklangan urinish, lease/heartbeat va original idempotency kaliti duplicate natijani himoya qiladi. Batafsil ishga tushirish va tiklash tartibi [OPERATIONS_RUNBOOK.md](tasks/OPERATIONS_RUNBOOK.md)da.
+
 ## MVP doirasi
 
 | Modul | MVPda bo‘ladi | Natija |
@@ -988,3 +998,181 @@ NEXT_PUBLIC_DATE_FORMAT=DD.MM.YYYY
 - Dark mode implementation
 - Custom themes support
 - Widget system for dashboard
+
+### Core POS holati — 2026-10-06
+
+Amaldagi implementation va qolgan ishlar [EXECUTION_STATUS.md](tasks/EXECUTION_STATUS.md), API contractlar [api.md](api.md)da yuritiladi. Coreda shaxsiy sessiyalar/parol boshqaruvi, audit tarixi, mahsulot/mijoz/kategoriya arxivi va tiklash, yetkazib beruvchi kartalari, filtrlangan ombor jurnali, bounded CSV eksportlari, POS tezkor tugmalari va58/80mm browser receipt/PDF mavjud. Mijozning qarz/avans qoldig‘i bor bo‘lsa arxivlash bloklanadi. Supplier/ombor/smena/audit CSV hamda idempotent print-request auditi qo‘shildi. Kategoriya boshqaruvi, birlik/barkod paginatsiyasi, supplier kontakt kartasi va filialga cheklangan xarid tarixi/yig‘indisi bor. Kategoriya/birlik/barkod, ombor hujjati/transfer/qoldiq eksportlari to‘liq filtrlangan, cap10000 bilan; xarid qiymati supplier qarzi yoki pul to‘lovi emas. Real Click, fiskal va hardware integratsiyalari hali ulanmagan.
+
+Production yangilashda yangi image ishga tushishidan oldin `npm run db:migrate` (`prisma migrate deploy`) bajariladi. Readiness `202610060016_audit_history_guards` migration tugaganini tekshiradi.016 AuditLog UPDATE/DELETEni taqiqlaydi; developmentdagi `migrate dev` yoki `db push` production deploy o‘rnida ishlatilmaydi. Haqiqiy biznes bazasiga bu ish davomida migration qo‘llanmagan.
+
+Oldingi 20 ta ish bosqichi tekshiruvlari:57 integratsion,11 unit va2 production HTTPS browser scenario; typecheck/lint/build o‘tgan. Fresh/legacy17 migration va encrypted backup/restore avvalgi bosqichda tekshirilgan; ushbu 20 ta ish schema/migrationni o‘zgartirmaydi. Bu pilot, production hosting yoki butun PLAN1 qabul shartlari yakunlangani degani emas.
+
+### Savdo tarixi va xavfsiz regressiya testlari
+
+Completed chekni yashirin tahrirlash yoki o‘chirish DB darajasida bloklanadi. Tuzatish uchun original savdodan qaytarish oqimini oching; sabab va original qatorlar saqlanadi. Katalogdagi keyingi narx/tannarx o‘zgarishi original chek va qaytarish qiymatini almashtirmaydi. Mahsulot, mijoz va katalog tarixini saqlash uchun arxivlashdan foydalaning. Checkout oldingi qoralama chegirmasini joriy vakolat bilan qayta tekshiradi; siyosat o‘zgargan bo‘lsa savatni qayta ko‘rib chiqing. Takror mahsulot qatorlari bitta qatorga birlashtiriladi, birlik aniqligi har kirish qatorida tekshiriladi.
+
+Deploymentdan oldin mavjud `npm run db:migrate` yo‘li yangi `202610060017_sale_history` va `202610060018_sale_item_lock` migratsiyalarini qo‘llashi kerak. Build migratsiya o‘rnini bosmaydi. Mahsulot/store/shift/register hard-delete cascade bilan posted tarixni yo‘qotishga urinish ham rad etiladi; public delete oqimi qo‘shilmagan.
+
+`npm run test:integration` faqat `127.0.0.1:55439`, `pos_test` bazasi va `pos_test` foydalanuvchisini qabul qiladi. Guard compilation va connectiondan oldin ishlaydi, noto‘g‘ri URL qiymatini logga chiqarmaydi. Test fayllaridagi alohida guardlar ham shu bazani tekshiradi. Migration smoke test fresh va legacy fixture uchun vaqtinchalik bazalar yaratib o‘chiradi. Real biznes bazasi yoki uning credentiallarini test buyrug‘iga bermang.
+
+2026-10-06 yakuniy qabul: aynan10 ta PLAN1 bandi done — POS-01.01/.02/.03/.04/.05/.07/.08, FIN-01.01, FIN-02.03, QA-01.02. 68/68 real PostgreSQL,11/11 unit,2/2 production HTTPS scenario; typecheck/lint/build o‘tdi. Fresh/legacy19 migration va encrypted backup/restore ham shu bosqichda qayta tekshirildi. Har bir bandning qabul dalili tasks/EXECUTION_STATUS.md oxirgi bo‘limida.
+
+## Moliyaviy core: qo‘shimcha15 band (2026-10-06)
+
+“Smenalar”da cash manbalari alohida ko‘rinadi: savdo, qarz undirish, refund, qo‘lda kirim/chiqim, bankka topshirish va inkassatsiya. Yopilgan smenadagi xatoni original hisobni tahrirlab tuzatish mumkin emas. Owner/admin shu filialdagi yangi ochiq smenaga sababli tuzatish hujjatini yozadi; original expected/counted/difference va audit tarixi saqlanadi. Bankka topshirish tashqi bank tasdig‘i degani emas. Unknown cash/correction request reloadga chidamli IndexedDB intentda qoladi; aynan original requestni qayta tekshirish/yuborish kerak.
+
+Hisobot sahifasi global chek soni va moliyaviy jamilarni barcha matching yozuvdan oladi; sahifalash ularni qisqartirmaydi. Naqd savdo, qarz undirish, cash refund va nasiya alohida. Sahifalar/CSV/dashboard havolasi bir cutoff bilan ochiladi; yangi savdolarni qo‘shish uchun “Yangilash”. Sana biznesning timezoneida hisoblanadi. Cutoff event/createdAt bo‘yicha filtr; tarixiy katalog yoki durable DB snapshot emas. Dashboard stock/open shift soni joriy holat. Mahsulot tannarxi original sale snapshotidan olinadi.
+
+Return historydan HTML qaytarma chek nusxasi yuklanadi. Manager sababi, actor/approval va original chek havolasi saqlanadi; fiskal/printer integratsiyasi yo‘q. Sellable qaytarish original tannarx bilan vaznli o‘rtachani yangilaydi; zero stockda original cost, damaged/write-offda available valuation o‘zgarmaydi. Manfiy stock avval reconciliation talab qiladi.
+
+Deployment uchun yangi uchta versioned migratsiya: `202610060019_finance_history`, `202610060020_correction_cash_link`, `202610060021_return_approval_check`. Backup va staging tekshiruvidan keyin existing `npm run db:migrate` yo‘lini qo‘llang; build schema migratsiyasini bajarmaydi. Real biznes bazasiga bu ish jarayonida tegilmagan. Batafsil API contracti api.mdda; task qabul protokoli tasks/EXECUTION_STATUS.mdda. Real Click/fiscal/E-POS/hardware adapterlar keyingi alohida integratsiya doirasida qoladi.
+
+Yakuniy qabul:15 ta PLAN1 ID done, jami25→40. PostgreSQL integration78/78, unit14/14, production HTTPS Chromium3/3; typecheck/lint/build va fresh/legacy22 migration hamda encrypted backup/restore o‘tdi. QA-01.03 (to‘liq ko‘p brauzerli acceptance) bu15 orasida emas. Bu lokal qabul dalili butun tizim production release/pilot tayyorligini anglatmaydi.
+
+## Savat, uzilish va haqiqiy naqd hisob (2026-10-06)
+
+POS server readiness asosida aloqa holatini ko‘rsatadi. Uzilishda savat saqlanadi, savdoni yakunlash bloklanadi; aloqa GET probe orqali chegaralangan backoff bilan tekshiriladi. Mijoz, chek izohi va optional xizmat turi oynani yopib qayta ochganda ham o‘z user/business/device savatidan tiklanadi. Yangi savatlarda keraksiz customer kontaktlari/nested data va katalog tannarxi lokal saqlanmaydi.
+
+Naqd modalda mijoz bergan haqiqiy pulni kiriting. Aralash to‘lovda cash/card(ichki qo‘lda qayd)/credit qismlari va berilgan naqd pul alohida. Server qaytimni hisoblab chekda saqlaydi; tender tushumga qo‘shilmaydi. Masalan100000chek/120000tender →20000qaytim va100000cash receipt. Legacy tender unknown NULL; tarix taxmin qilinmaydi. Click/terminal API settlement ulanmagan.
+
+Natijasi noma’lum savdoda “Natijani tekshirish” asl server yozuvini topadi. “Navbatni sinxronlash” persisted original commandlarni operator ko‘rsatmasi bilan yuboradi; yangi receipt/payment yaratib dublikatlamaydi. Pending/conflict navbat bilan logout/clear bloklanadi. Boshqa tabdagi kechikkan javob terminal amalni qayta ochmaydi; sync/clear atomic IndexedDB transactionlarida. Bu rezervli offline sale emas: signed lease/stock quota hali alohida vazifa.
+
+Deploymentdagi yangi additive migratsiyalar: `202610060022_cash_tender`, `202610060023_sale_metadata`; jami24. Existing `npm run db:migrate`ni staging/backup protokoli bilan alohida qo‘llang; build migratsiyani almashtirmaydi. Yangi ilova readiness oxirgi schema contract tayyor bo‘lmaguncha503. Lokal testlarda real biznes DBga tegilmadi.
+
+Keyingi10 band qabul qilindi, jami done40→50. Final real PostgreSQL83/83, unit15/15, HTTPS Chromium5/5; typecheck/lint/build, fresh/legacy24 migration va encrypted backup/restore o‘tdi. Individual qabul/versiya dalili tasks/EXECUTION_STATUS.md oxirgi bo‘limida.
+
+### Boshlang‘ich qoldiq, etiketka va egalikni topshirish
+
+Ombor hujjatlari oynasida **Boshlang‘ich qoldiq** turi mavjud: yangi filial/mahsulotning avvalgi harakatsiz qoldig‘ini sabab bilan kiriting, keyin manager tasdiqlaydi. Keyingi sanash farqi uchun **Tuzatish** tanlang: manfiy miqdor kamomad, musbat miqdor qo‘shimcha qoldiq. Sabab majburiy, nol/takror mahsulot qatori rad. Tasdiqlangan harakatni almashtirib o‘chirish o‘rniga qarshi hujjat ishlatiladi. Eski movement jurnalini bazaning o‘zi ham o‘zgartirishdan himoyalaydi.
+
+Mahsulot tafsilotidagi barkodlar oynasida **Ichki barkod yaratish** va **Etiketka** bor. Nusxa soni 1–100; yuklangan HTML faylni brauzerda ochib print/PDF qilish mumkin. Andoza 80×35 mm, Code128 encoder bwip-js; decoder testlari yetakchi nollar va ASCII belgilar saqlanishini tekshiradi. Printer, uning transporti va fizik bosma sifati hali tasdiqlangan hardware integratsiyasi sifatida va’da qilinmaydi.
+
+Sozlamalar → Xodimlarda **Egalikni topshirish** qabul qiluvchiga 24 soatlik so‘rov yuboradi. So‘rov yuborilganda rollar o‘zgarmaydi. Qabul qiluvchi headerdagi so‘rovni qabul qilgandan keyin yangi owner, avvalgi owner admin bo‘ladi. Ikki accountning eski biznes sessiyalari bekor qilinadi; yangi owner davom etish uchun yangilangan cookie oladi. So‘rovni ikki ishtirokchi ham bekor qilishi mumkin. Oxirgi ownerni bloklash/demote qilish himoyasi saqlangan.
+
+Biznes almashtirish savat/filial/terminal/smena holatlarini joriy biznesga moslaydi. A biznesning lokal savati B biznesga o‘tmaydi; A ga qaytganda tiklanadi. Narx, stock va vakolat serverda jonli qayta tekshiriladi, API javoblari `private, no-store`.
+
+Yangi additive/versioned migratsiyalar 024 va 025, jami26. Builddan alohida `npm run db:migrate` staging/backup protokoli bilan bajariladi; readiness025siz503. O‘zgarishlar faqat izolyatsiyalangan local test bazasida tekshirildi, productionga deploy qilinmadi. +50 vazifa so‘rovi hali yakunlangan deb ko‘rsatilmaydi; individual qabul holati tasks/EXECUTION_STATUS.mdda.
+
+### Xarid narxlarini mahsulot va supplier bo‘yicha taqqoslash
+
+Hisobotlar → **Xarid narxlari tahlili** orqali narx tarixi yoki mahsulot/supplier taqqoslashni oching. Yetkazib beruvchi va mahsulotni nom orqali qidirib tanlang, filial/davrni belgilang va **Xaridni filtrlash**ni bosing. Jami barcha mos hujjatlardan, jadval esa sahifalangan qatorlardan hisoblanadi. CSV barcha mos qatorlarni oladi; juda katta natijada filtrni toraytirish kerak.
+
+Narxlar tasdiqlangan xarid hujjatidan olinadi, katalogning keyinchalik o‘zgargan tannarxidan emas. Bekor qiluvchi qarshi hujjat xarid qiymatini kamaytiradi; qoralama xarid hisobga kirmaydi. O‘rtacha narx miqdor bilan vaznlangan, birinchi/oxirgi va minimal/maksimal narxlar purchase qatorlariga tegishli. Eski tasdiq sanasi yo‘q hujjatlar alohida belgi bilan ko‘rsatiladi. Bu supplierga to‘langan pul yoki qarz hisobi emas.
+
+Nasiya bo‘yicha qabul testi: 100000 savdo → debt100000, revenue100000, cash0. Mijozsiz/faol bo‘lmagan mijoz/limitdan yuqori nasiya postingdan oldin rad etiladi. Parallel limit himoyasi saqlangan. Yangi schema, migration, provider yoki hardware integratsiyasi qo‘shilmadi.
+
+Xodimlar boshqaruvi: Sozlamalar → Xodimlar bo‘limida rol/filialni tahrirlash, vaqtincha bloklash, arxivlash va arxivdan tiklash mavjud. Arxivlash savdo tarixini saqlaydi va sessiyalarni bekor qiladi. Tiklash xodimni bloklangan holatda qaytaradi; vakolatlarni tekshirib alohida faollashtirish kerak. Migration `202610060026_member_archive`ni deploydan oldin qo‘llang.
+
+POS konfliktni mahsulot va eski/yangi qiymatlar bilan ko‘rsatadi. Eski urinish bekor qilingach narxlarni yangilash va qayta to‘lov tasdig‘i bor. Real printer adapterisiz browser print/PDF ishlaydi; chop etish xatosi savdoni qayta yaratmaydi.
+
+Smenadagi har qanday naqd farq uchun sabab va manager tasdig‘i talab qilinadi (limit0). Kassir so‘rovi pending paytda savdo/pul yozuvi bloklanadi. Rahbar Shifts ekranida tasdiqlaydi yoki qayta sanashga qaytaradi. Keyingi kassir smena ochishda oldingi sanalgan pulni topshirish sifatida qabul qilishi mumkin. Boshlang‘ich qarz hujjatlari endi individual FIFO/explicit to‘lovga bog‘lanadi; muddati ham alohida hisoblanadi. Eski noma’lum taqsimotlar taxmin qilinmaydi. Deploydan oldin additive migration027ni qo‘llang.
+
+Browser tekshiruvi: odatiy `npm run test:e2e` Chromium; `POS_E2E_ALL_BROWSERS=1 npm run test:e2e` Chromium/Firefox/WebKit. CI uchala browserni `playwright install --with-deps chromium firefox webkit` bilan tayyorlaydi va failure screenshot/trace saqlaydi. 360/768/1280px touch/mobile acceptance bor. Test bazasi faqat isolated pos_test bo‘lishi kerak.
+
+Server qoralamasi va tiklash: POSda **Qoralamani serverda saqlash** savdoni hali yakunlamaydi. `/drafts`dan ayni hisobning faol kassa/smena qoralamasi boshqa qurilmada ochiladi; explicit “Tanlangan server qoralamasini ochish” va qayta tasdiqlash talab etiladi. Yangi Sale yaratilmaydi. Faqat buzilgan qurilmada qolgan lokal savat cloud backup hisoblanmaydi. `/sync-review` pending/conflict/synced/rejected holatlarini va asl saqlangan payloadni ko‘rsatadi. Owner terminal result yoki authorized void dalilisiz server konfliktini yashira olmaydi. Review economic posting emas.
+
+`/incidents` ombor jurnali, sale-payment, returns va shift tafovutlarini saqlaydi; mas’ul biznes egasi/filial rahbari. `/replenishment` filial+mahsulot min/max chegaralari va exact tavsiya (max−qoldiq; maxsiz minimumgacha) beradi; buyurtma/rezervni o‘zi yaratmaydi. Avtomatik worker: `npm run worker:build`, so‘ng sozlangan muhitda `npm run worker:reconcile -- --once` yoki interval rejimi. Docker image worker artifactini saqlaydi; compose `monitoring` profili uni internal DB bilan yuritadi. Worker har organizationni alohida transaction/lockda tekshiradi, faqat incident/system audit yozadi. Productionda migratsiya jobi avval bajariladi; worker web build yoki migration bilan avtomatik ishga tushmaydi. Graceful SIGTERM va minimum60s interval, default5min. `api_response/api_error` JSON loglari request/tenant/operation correlation va duration beradi; payload, parol, phone/email, cookie yoki raw error logga kirmaydi.
+
+Yordam: `/help` internet/server, original receipt reprint, qurilma tiklash, vakolat/konflikt va katalog validatsiyasini tushuntiradi. Bulk import hali yoqilmaganligi aniq yozilgan. `/training` yangi kassir uchun izolyatsiyalangan interactive mashq; demo mahsulot/pul real bazaga yozilmaydi. Owner/admin home `/dashboard`, cashier `/pos`; server DTO vakolatli draft/shift/incident/conflict counts bilan muhim holatlarni ko‘rsatadi.
+
+Release mashqi: `bash scripts/ops/test-release-drill.sh` faqat isolated pos_test va vaqtinchalik fresh/legacy/restore DBlarda ishlaydi: migrate, encrypted backup/restore, RELEASE_BASE bilan tanlangan (default HEAD^) oldingi Git source bilan yangi additive schema ustida exactly-once checkout. Elapsed/app rollback seconds va fixture RPO loss0 qayd etiladi. Bu local controlled environment dalili; real hosting RPO/RTO yoki pilot SLA kafolati emas. API chegaralari [reyestrda](tasks/API_ACCESS_MATRIX.md); yakuniy task dalillari [statusda](tasks/EXECUTION_STATUS.md).
+
+Packaged worker qabul: isolated `pos-plan-test-db` tayyor va `docker build -t pos-app:twenty-test .` bajarilgach, `node scripts/ops/test-worker.mjs`. Ikki bir martalik scan va uchinchi recurring scan bitta durable incidentni yangilashi, system audit va stock/paymentga tegmasligi tekshiriladi. Owned recurring worker SIGTERM bilan exit0 yopiladi; fixture yakunda tozalanadi.
+
+
+POS tezkor mahsulotlari mahalliy brauzerda organization/user/register bo‘yicha saqlanadi (maksimum12 ta, faqat IDlar). Mahsulot tanlashda serverdan hozirgi narx/vakolat tekshiriladi. F2 — qidiruv fokus, F4 — qidiruvni tozalash, F9 — to‘lov, Escape — modalni yopish. Keyboard-wedge skaner Enter yuborganda exact primary/additional barcode server lookup ishlaydi; barkod topilmasa aniq SKU yoki nom izlanadi. Kamera faqat barkod izlaydi. Eski debounced natija ishlatilmaydi; qidiruv tugamaguncha F9 va to‘lov yopiq. Maxsus scanner hardware driveri qo‘shilmagan.
+
+Bank qaytarmasi: original qo‘lda qayd etilgan payment uchun manager avval server previewni ko‘radi, so‘ng tashqarida haqiqatan qaytarilgan summa hujjatini qayd etadi. Preview o‘zgarsa yoki bank hujjati ishlatilgan bo‘lsa return transaction rad etiladi. Click/fiskal/vendor integratsiyasi yo‘q.
+
+`bash scripts/ops/test-release-drill.sh` fresh/legacy migratsiya, shifrlangan backup/empty-db restore va eski app bilan checkout/replayni isolated test muhitida tekshiradi. Restore qabulida `scripts/ops/verify-restored-app.mjs` haqiqiy app handlerlari orqali debt/countni o‘qiydi; iqtisodiy row count o‘zgarmaydi. Fixture RPO/RTO natijasi haqiqiy hosting SLA yoki offsite backup scheduler kafolati emas.
+
+
+### Narxlar va qaytarilgan brak hisobi
+
+Menyudagi **Narxlar tarixi** sahifasida mahsulotlarni toping, yangi narx va sabab kiriting, **Oldindan ko‘rish** orqali tekshiring va tasdiqlang. Har tasdiq 100 mahsulotgacha atomic; o‘zgargan eski narx batchni bekor qiladi. Tannarxni qo‘lda tahrirlash, uning tarixini ko‘rish va katalog/history eksporti biznes egasiga tegishli. Adminning mahsulot tahririda tannarx readonly; narxlar Decimal satr sifatida yuboriladi. Eski cheklar o‘zgarmaydi. Javob yo‘qolganda sahifani qayta ochib **Original amalni qayta tekshirish**ni bosing — yangi amal bilan almashtirmang.
+
+**Brak va hisobdan chiqarish** sahifasi qaytarilgan sotilmaydigan tovarlarni alohida ko‘rsatadi. Brak filialning alohida joylashuvi/qoldig‘ida, hisobdan chiqarilgan mahsulot esa disposal jurnalida qoladi. Ular sotiladigan ombor qoldig‘iga qo‘shilmaydi. Jadval va CSV original chek nomi/SKU/tannarxini saqlaydi; admin faqat biriktirilgan filiallarni ko‘radi. Brakni ta’mirlash/release va umumiy rezerv boshqaruvi alohida ochiq reja bandlari.
+
+
+### Ichki xarajat va hisoblar
+
+Owner/admin `/finance` orqali ichki hisob balanslari, sababli biznes xarajatlari, hisoblararo teng debit/credit o‘tkazmalar va original hujjatga qarshi qaytarish hujjatini yuritadi. Hisob/toifa yaratish owner-only. Naqd balans mavjud smena kitobidan olinadi; bank/provider kitobi qo‘lda qayd etilgan ichki hisobdir. Ichki o‘tkazma savdo tushumiga kirmaydi.
+
+Yalpi foyda va operatsion foyda alohida ko‘rsatiladi; hisobot ichki boshqaruv uchun. Har amal oldindan ko‘riladi va tasdiqlanadi; noma’lum javobda original kalit/payload lokal saqlanib, sahifa yangilanganda qayta tekshiriladi. Vendor-specific bank/Click/fiskal/hardware integratsiyasi qo‘shilmagan. Contract va cheklovlar `api.md` ichidagi “Ichki moliyaviy hisoblar” bo‘limida.
+
+
+`/reports/breakdowns` mahsulot, kategoriya, kassir, filial va to‘lov kanali bo‘yicha sof savdoni ko‘rsatadi. Davr qaytarmalari va tarixiy tannarx hisobga olinadi; barcha kesimlar jami umumiy sof savdoga mosligi serverda tekshiriladi. Exact Decimal qiymatlar, pagination va full CSV mavjud. To‘lov kesimi pul oqimi emas: keyingi qarz undirish va ichki o‘tkazmalar savdo tushumiga qayta qo‘shilmaydi.
+
+Supplier kartasida tekshirilgan xarid hisob-fakturasi, invoicega qisman to‘lov, alohida avans va avansni keyin taqsimlash mavjud. Naqd chiqim smena journalida, bank/provayder chiqimi operator tasdiqlagan haqiqiy hujjat bilan yoziladi. Vendor API ishlatilmaydi. Noaniq javobdan keyin original intent tiklanadi. Eski xaridlar avtomatik qarz hisoblanmaydi; qarz/avans nol bo‘lmasdan arxivlash mumkin emas. API kontrakti `api.md`da.
+
+Supplier kartasidagi xarid buyurtmasi qisman qabul qilinadi: original qator→receipt→stock→invoice→payment allocation bog‘lanishi saqlanadi. Qabul bitta tranzaksiyada, unknown javob original kalit bilan tekshiriladi. Supplier qarzi/muddati hisoboti alohida Sidebar sahifasida; eski ro‘yxatga olinmagan xaridni unpaid deb taxmin qilmaydi.
+
+Katalog brendlari `/products/brands`, tavsif va himoyalangan rasm `/products/:id/media`da boshqariladi. Static PNG/JPEG/WebP512KiBgacha sanitizatsiya qilinadi; bytes va immutable metadata existing PostgreSQL durable volume/encrypted backupda saqlanadi. `POS_FILE_QUOTA_BYTES` optional default104857600 (100MiB), valid1..1073741824; noto‘g‘ri sozlama503. Expired image o‘qilmaydi, explicit deletion bytes/linkni tozalaydi; tarix qoladi. Arbitrary document/video upload qo‘shilmadi. Nonce CSP uchun Next layout dynamic; private HTML/public cachega berilmaydi. Migration052..055 staging/backup tartibida alohida deploy qilinadi; local fixture sinov real hosting acceptance emas. ADR-035 va API contractsni ko‘ring.
+
+`/security`da kassir o‘z paroli bilan 6 raqamli PINni sozlaydi; faol filialga tayinlangan kassirga tez almashish mavjud. PIN session faqat kassir/bitta filial/8soat; rahbarga o‘tish yoki biznes almashtirish uchun parol login kerak. PIN yoki rol/filial vakolati bekor bo‘lsa eski session ishlamaydi; parol rotatsiyasi barcha PIN va sessionsni bekor qiladi. Sinxronlanmagan amallar bilan UI switch bloklanadi; oldingi actorning saqlangan savati yo‘qolmaydi. Migration056 additive, alohida staging/migration tartibi bilan. ADR-036.
+
+Soliq core sozlamalari `/settings/taxes`da: biznes kiritadigan included/excluded/exempt profil, o‘zgarmas sanali stavka tarixi, mahsulot bilan bog‘lash `/products/:id/media`da. POS to‘lov oldidan `/sales/preview` server hisobini ko‘rsatadi; eskirgan narx/soliq bilan posting rad. Yangi cheklarda historical cost, receipt discount, tax base/amount, payable va `money-half-up-2-v1` saqlanadi; partial/final refund original snapshotdan centsni saqlaydi. Hisobot gross/paymentni saqlaydi, foyda soliqsiz revenue va tarixiy costdan. Legacy receiptga tax to‘qib backfill qilinmaydi. Rasmiy fiskal/provider implementatsiyasi qo‘shilmadi.
+
+POS qator va butun chek chegirmasi summa/foiz bilan, configured thresholdda sabab majburiy; manager o‘z faol hisobida tasdiqlaydi, actor/role/policy/date saqlanadi. Savat foiz/sababi restartdan keyin tiklanadi; lokal saqlanish indikatori commitdan keyin ko‘rsatiladi. Migration057..059 builddan alohida staging/backup tartibida qo‘llanadi. Barcha hisoblar serverda Decimal bilan, clientda fixed-point BigInt bilan.
+
+Backup v1: `scripts/ops/backup.sh` uchun `POS_BACKUP_APP_VERSION` (aniq image digest/release ID) va `POS_SECRET_RECOVERY_REFERENCE` (alohida himoyalangan secret nusxasining locatori) majburiy. Yangi `.bundle-v1.dump.gpg` bilan `.manifest.gpg` va ikki `.sha256` birga saqlanadi; manifest dump SHA256iga bog‘langan, file bytes/business hujjatlar DBning shu pg_dump snapshotida. Env to‘liq ko‘chirilmaydi: faqat APP_ORIGIN/POS_FILE_QUOTA_BYTES/RECONCILE_INTERVAL_MS allowlisti. `RESTORE_CONFIGURATION_DIRECTORY` optional private0700 katalogga review uchun600 JSON chiqaradi; runtime konfiguratsiyasini avtomatik yoqmaydi. Eski `.dump.gpg` tiklash mosligi saqlangan, ular konfiguratsiya manifestiga ega deb ko‘rsatilmaydi.
+
+Secret nusxasi alohida: `scripts/ops/backup-secrets.sh` faqat explicit `POS_SECRET_BACKUP_FILE`ni qabul qiladi (operatorga tegishli regular file,0600/0400,1..1MiB, symlink rad), recipient GPG bilan shifrlaydi. `.env` auto-discovery yo‘q. Secret filename/locatorni manifest recovery referenceiga kiriting, secret qiymatlarini kiritmang. Tiklashda uning checksumini tekshirib, GPG bilan alohida private joyga decrypt qiling; deploymentga operator o‘z secret manager tartibida ulaydi. Fixture sinovi haqiqiy secret/offsite scheduler/production recovery mavjudligini anglatmaydi.
+
+PWA HTTPSda `/manifest.webmanifest` va `/sw.js` orqali ishlaydi; brauzerning o‘rnatish menyusi bilan qurilmaga qo‘shiladi (iOS: Share → Add to Home Screen). Worker faqat `/pwa/`dagi uchta public shell/icon faylini cache qiladi. Private API, shaxsiy sahifa HTML, receipt, file va Next chunklar cachega tushmaydi. Server uzilganda yangi oynaga shaxsiy ma’lumotsiz aloqa sahifasi chiqadi. Ochiq POSda oxirgi 50 mahsulotli qidiruv sahifasi IndexedDBda organization/user/device/register bo‘yicha saqlanadi; server-issued content version va 5 daqiqalik TTL bor. Tannarx/qoldiq/rasm/PIN/token bu katalogga kirmaydi; boshqa qidiruv offline to‘liq katalog deb ko‘rsatilmaydi. Expiry/clock rollback/ruxsat xatosida lokal fallback rad. Checkout faqat online server quote va transaction validationdan keyin. Yangi worker ochiq oynalarni majburan almashtirmaydi: pending amallarni saqlab, barcha POS oynalarini yopishdan so‘ng yangi versiya faollashadi. Bu offline to‘lov yoki hardware/fiskal integratsiya emas.
+
+Support kirishi: biznes egasi `/settings/support`da explicit PlatformOperatorni, filiallarni, ma’lumot turini va1–60min muddatni tasdiqlaydi. Operator `/support`da faqat berilgan read-only doirani ko‘radi; har read/known deny biznes auditiga yoziladi. Egasi revoke qilsa yoki muddat tugasa keyingi so‘rov bloklanadi, eski ochiq sessiya bypass bermaydi. Platforma admini ham avtomatik owner emas. Operator ro‘yxatini trusted infratuzilma boshqaruvi `PlatformOperator(userId,role,isActive)` orqali provision qiladi; mavjud aktiv User identityga bog‘langan, `role` faqat `support` yoki `platform_admin`. Birlamchi staff tayinlash POS business APIga ochilmagan; productionda infrastruktura change approval/audit jarayoni bilan boshqariladi. Secret yoki real staff hisob bu ishlovda yaratilmadi. Bu readonly diagnostic support core; tarif/platforma managementning qolgan doirasi BIZ-02.01da ochiq.
+
+Narx darajalari `/settings/prices`da: chakana, ulgurji, guruh va individual mijoz narxi; filial, minimal miqdor va kuchga kirish/tugash sanasi. Mijoz/guruh/ulgurji/chakana ustuvorligi aniq; overlapping qoida rad etiladi. POS joriy server narxini review qiladi; tarixiy chek va qaytarma o‘z price/cost/tax snapshotini saqlaydi. Barcha filial narxini egasi, o‘z filiali narxini administrator boshqaradi.
+
+Mijoz valid telefoni normalizatsiya qilinadi va faol tenant kartalarida dublikatdan himoyalanadi. Eski ambiguous kartalar avtomatik tanlanmaydi/o‘chirilmaydi: egasi `/customers/duplicates` orqali ko‘radi. `/customers/:id/history` original cheklar/qisman qaytarmalar va bog‘langan kartalarni ko‘rsatadi; qoralama va qarzi yopilgan source reviewed durable merge bilan inactive alias bo‘ladi, moliyaviy hujjatlar original IDlarda qoladi. Ochiq qarz ko‘chirilmaydi, avval original ledgerda yakunlanadi. Guruh yangi savdo narx darajasini belgilaydi, eski receiptni o‘zgartirmaydi.
+
+Receipt/history/FK indekslari066–073da har biri alohida `CREATE INDEX CONCURRENTLY` migration. Ularni boshqa migration bilan umumiy SQL transactionga o‘ramang. Live rolloutdan oldin staging restore + yangi/legacy migration drill talab qilinadi. Agar concurrent build uzilsa, migration log va `pg_index.indisvalid`ni tekshiring; faqat o‘sha failed, invalid indeksni operator nazoratida `DROP INDEX CONCURRENTLY` qilib, failed migrationni rolled-back qayd etib asl SQLni qayta qo‘llang. Applied migration checksumlari tahrirlanmaydi. Bu repodagi tekshiruvlar isolated test DB uchun; real deployment qilinmagan.
+
+Ombor `/inventory/locations`: zonaga ajratish, exact rezerv, bo‘shatish va tanlangan qoralamani rezerv bilan naqd sotish. Fizik, rezerv, mavjud, zonaga biriktirilmagan va brak alohida; oddiy POS boshqa rezervni yechmaydi. `worker:reconcile` organization-scoped expired manual holdsni100tadan immutable journal bilan yakunlaydi. Migration074/075 eski qoldiqni qayta yozmaydi. Katalog cache o‘zi offline savdo ruxsati emas; offline naqd oqimi quyida.
+
+
+Offline naqd: POSda aniq savatni serverda qoralama qilib saqlang, `/pos/offline`da o‘z filial/kassa/smenangiz uchun ruxsat oling. Default o‘chiq; egasi filialning jami hal qilinmagan summasi limitini va30–300soniya muddatni tasdiqlaydi. Ruxsat aynan bitta savat va bitta naqd to‘lovga; nasiya/karta yoki boshqa savat offline qabul qilinmaydi. Qurilmadagi ticket unlock iborasi bilan shifrlanadi; ibora serverga yuborilmaydi. `/pwa/cash.html` real tarmoq uzilishida ochiladi, bir ticket ikki tabda takroran ishlatilmaydi. Aloqa qaytganda shu sahifada original natijani sinxronlang, noma’lum natijada yangi pul olmang.
+
+Expiry yoki narx/sessiya/smena konflikti original amalni yo‘qotmaydi. Noma’lum tovar rezervi avtomatik bo‘shamaydi, shiftclose/count ham cheklanadi. Egasi `/pos/offline`da haqiqiy tovar/pul qaytarilganini qayd etib draftni bekor qiladi yoki tovar berilgan va cash shu smenaga haqiqatan olinganini dalil bilan tekshirib asl savdoni qayd etadi. Ikkinchi yo‘l original narx/soliq/tannarxni saqlaydi, hisobga olish serverning hozirgi vaqti bilan; actual owner audit/pul qabul qiluvchi, original cashier tarixi saqlanadi. Committed sale qaytarilishi oddiy refund orqali. Bloklangan xodim haqidagi yangi qaror offline qurilmaga darhol yetmaydi; qisqa muddat, summa va stock rezervi xavfni cheklaydi. Tashqi Click/fiskal/hardware bu oqimga ulanmagan.
+
+
+Katta owner katalog eksporti `/jobs` sahifasida “Katalog CSV eksporti” sifatida tasdiqlanadi. Mavjud `worker:jobs` ayni organization-scoped filtered snapshotni cursor500 bilan chiqaradi:100000qator/16MiB perfile/32MiB organization activeartifact. Tannarx owner fayliga kiradi; formula-safe CSV va exact Decimal strings. Fayl24soat owner authenticated download bilan olinadi, so‘ng worker uning baytlarini o‘chirib tarix/metadatani saqlaydi. Sinxron eksportlarning10000cap’i saqlanadi. Worker build va service alohida ishga tushirilishi shart; vendor API/hardware ulanmaydi.
+
+Mijoz kartasidagi **Mijoz avansi** egasiga haqiqiy naqd kirimni alohida saqlash, uni tanlangan savdo/boshlang‘ich qarzga ajratish va ishlatilmagan qoldiqni qaytarish imkonini beradi. Har amal oldindan ko‘riladi va original kalit bilan lokal saqlanadi; javob yo‘qolsa asl amal tekshiriladi. Avans qarzni yashirin manfiy balansga aylantirmaydi. Avans qoldig‘i bo‘lgan karta arxivlanmaydi/birlashtirilmaydi. Bank/Click avansi integratsiya tasdig‘isiz bajarilmaydi.
+
+Boshqariladigan yangilash uchun [maintenance qo‘llanmasi](docs/operations/maintenance.md) va `scripts/ops/set-maintenance.mjs` bor. Operatorning read-only mount qilingan katalogidagi flag yangi durable core amallarini va workerning yangi cyclelarini pauza qiladi; admitted/committed amallar va lokal savat/navbat saqlanadi. Readiness drain503, dashboard notice va original-key recovery bor. Native Nextdeployment protection uchun build/runtime `NEXT_DEPLOYMENT_ID` bir xil bo‘lishi kerak; real host routing va barcha non-durable writes uchun release discipline alohida tekshiriladi.
+
+### Tashkilot biznes ma’lumotlarini eksport qilish
+
+Egasi `/jobs` orqali barcha filiallarning reviewed biznes JSON eksportini oldindan ko‘rib, navbatga qo‘yishi mumkin. Manifest qatorlar soni va SHA256larni beradi; credential/internal proof toifalari ochiq chiqarib tashlangan. Mavjud worker kerak;100000qator/16MiB limit,24soat yuklab olish muddati. Bu database backup yoki tashkilotni yopish amali emas. [Eksport contracti](docs/operations/tenant-export.md).
+
+### Bitta tashkilot uchun recovery rejasi
+
+`npm run worker:tenant-recovery-plan` offline recovered copy va current targetni read-only snapshotlarda solishtiradi. Private0600 reja missing/changed/current-only yozuvlar va FKlarni review uchun chiqaradi; avtomatik import, overwrite yoki delete qilmaydi. Operator parametrlari, cheklovlar va isolated qabul [tenant recovery qo‘llanmasida](docs/operations/tenant-recovery.md). Haqiqiy production recovery alohida operator ruxsati va tekshiruvini talab qiladi.
+
+
+MVP schemasidan migratsiya uchun read-only baseline/ledger CLI va takrorlanadigan dump/restore/backfill/fresh/rollback rehearsal [migration dataset qo‘llanmasida](docs/operations/migration-dataset-readiness.md). `bash scripts/ops/test-migration-dataset.sh` faqat vaqtinchalik isolated bazalarni ishlatadi. Real customer/staging/production migration va uning tasdig‘i alohida rollout darvozasi.
+
+Tenant modellarning scope/insert/native FK guardlari: [tenant model contract](docs/operations/tenant-model-scope.md). To‘liq filtrlangan CSV/XLSX va browser print-to-PDF eksportini `/jobs` orqali navbatga qo‘yish: [hisobot eksporti](docs/operations/report-exports.md). Real staging/production/pilot va vendor integratsiyalari ushbu lokal qabuldan alohida.
+
+Stress/soak va mahalliy restart qabul tartibi: [operatsion protokol](docs/operations/stress-soak.md). `--smoke` original OPS-04.06 qabulini almashtirmaydi.
+
+Ichki bonus, chegirma kartasi, promo-kod va sovg‘a sertifikati administrator `/loyalty`da sozlaydigan immutable siyosat bilan ishlaydi. Mijoz kartasida karta/haqiqiy cash-backed sertifikat beriladi; saqlangan mijozli qoralamada kassir server tasdiqlagan karta/promo/bonus yoki sertifikatni ishlatadi. Unknown javobda original durable amal tiklanadi. Sertifikat majburiyati oddiy avans bilan ikki marta jamlanmaydi; checkout/refund asl pul manbasini saqlaydi. [Qoidalar va operatsion qo‘llanma](docs/operations/loyalty-marketing.md). Native migrations174–179 yangi binarydan avval qo‘llanadi; actual rollout/operator/backup tasdig‘i alohida. Real Click/fiskal/hardware/SMS integratsiyasi qo‘shilmagan.
+
+Ro‘yxat, hisobot va original jurnallarning URL/paging hamda financial draft chegaralari: [qamrov xaritasi](docs/operations/list-query-coverage.md). UX-01.03 lokal core dalili: [manifest](tasks/evidence/list-journals-20261015.json).
+
+Interfeys o‘zbek lotin va rus tillarida ishlaydi. Sarlavha yoki modal ichidagi `UZ / RU` tanlovi savat, kiritilgan summa, sana va javobi kutilayotgan original amallarni saqlaydi. Til afzalligi qurilmada saqlanadi; foydalanuvchi va original chek ma’lumotlari tarjima qilinmaydi. [Tarjima, exact pul/sana, xatolar va offline qo‘llanmasi](docs/operations/localization.md). Yangi matn uchun ikkala JSON dictionaryni yangilang va `npm run i18n:check`ni bajaring.
+
+Ommaviy va’dalarning release imkoniyatlari va qabul dalillariga mosligi [public claim qo‘llanmasida](docs/operations/public-release-claims.md). `npm run release:claims:check` typed matnlar, ikki tarjima, original qabul bandlari, dalil/source SHA va integratsiya cheklovlarini tekshiradi. Trial konfiguratsiyasi yuklanmasa sahifa uni va’da qilmaydi; tariflar DBdan olinadi.
+
+Lokal Docker uchun [HTTP development qo‘llanmasi](docs/operations/local-docker-https.md): `bash scripts/local/setup-https.sh`, private envni moslash, so‘ng `docker compose up --build`. http://localhost:3000 va http://localhost:3443 HTTPSga yo‘naltirilmaydi; CA talab qilinmaydi. Alohida development image ishlaydi, production HTTPS/Secure cookie talablari saqlanadi. Eski bazani reset qilmang.
+
+Vercel web deploymenti uchun [Vercel qo‘llanmasi](docs/operations/vercel.md)ni ko‘ring: hosted DATABASE_URL, aniq production APP_ORIGIN va Node24 talab qilinadi. Build bazani read-only tekshiradi; migratsiya yoki fon workerlarni avtomatik ishga tushirmaydi.
+
+Git integratsiyasida `main` — Production, `develop` — alohida baza va kalitli Preview. `develop` pushlari https://pos-backup-git-develop-xushnudd.vercel.app manzilini yangilaydi; Preview uchun Vercel akkauntiga kirish talab qilinishi mumkin.
+
+
+Mijoz kartasida tashkilot egasi elektron chek, xizmat eslatmasi va reklama roziliklarini har aloqa kanali bo‘yicha alohida qayd etadi yoki bekor qiladi. Tarix o‘zgarmaydi; bekor qilish read-only davrda ham ochiq. Unknown javob original durable amal bilan tiklanadi. [Roziliklar, dalil va keyingi dispatch contracti](docs/operations/customer-consent.md). Bu modul real SMS/e-mail/Telegram yetkazishni yoqmaydi.
+
+Release texnik tekshiruvlari: [image va kalit xavfsizligi](docs/operations/release-image-security.md), [PostgreSQL WAL/PITR](docs/operations/pitr.md), [yuklama va xizmat maqsadlari](docs/operations/release-service-targets.md). `node scripts/release/check-service-targets.cjs` joriy source, migratsiya, namuna, raw xatolar va recovery dalillarini tekshiradi. Lokal natijalar real production/pilot/SLA qabuli o‘rnini bosmaydi.

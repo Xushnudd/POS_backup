@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-15",
+  "scope": "Local workstation Compose bugfix; not a new original PLAN1 acceptance or external production deployment.",
+  "reportedError": {
+    "phase": "migrate after successful image build",
+    "code": "P1001",
+    "target": "localhost:5432",
+    "postgresRecovery": "Completed in supplied log; database ready before failed migration connection."
+  },
+  "rootCause": "Local overlay inherited host-development DATABASE_URL. Inside the migration container localhost is not the db service.",
+  "fix": "Local-only Node wrapper derives percent-encoded DATABASE_URL from the same POSTGRES_* inputs as db; app/migrate/jobs/reconciliation all use it. Wrapper preserves child exit and graceful signals. Shared read-only SELinux bind uses z.",
+  "verification": {
+    "testsPassed": 3,
+    "testsFailed": 0,
+    "eslintExit": 0,
+    "shellSyntaxExit": 0,
+    "composeUpBuildWaitExit": 0,
+    "migrationExit": 0,
+    "migrationTarget": "db:5432",
+    "appliedMigrations": 179,
+    "pendingMigrations": 0,
+    "appHealthy": true,
+    "databaseHealthy": true,
+    "httpsProxyHealthy": true,
+    "actualWrapperDatabaseConnection": true,
+    "renderedConfigLocalServicesIgnoreDeliberatelyInvalidHostURL": 4,
+    "explicitBaseStillUsesOperatorURL": true,
+    "httpsHome": 200,
+    "httpsReadiness": 200,
+    "validOriginEmptyRegistration": {
+      "status": 400,
+      "code": "VALIDATION_ERROR"
+    },
+    "invalidOriginEmptyRegistration": {
+      "status": 403,
+      "code": "CSRF_REJECTED"
+    },
+    "tlsValidation": "Explicit trusted local certificate; no TLS verification bypass in HTTP smoke."
+  },
+  "constraints": {
+    "hostEnvEdited": false,
+    "rolePasswordChanged": false,
+    "schemaChanged": false,
+    "newMigrationFiles": 0,
+    "dataReset": false,
+    "sourceTestAccountCreated": false,
+    "productionBaseComposeChanged": false,
+    "secretValuesLogged": false
+  },
+  "sourceSha256": {
+    "docker-compose.local.yml": "087af00465c4c86730f13981aeb4a21b101929a346872abd8facb17f3d194203",
+    "scripts/local/docker-database.cjs": "1d33550eaadac5fcafac6de9f6371f41b4b497e1ea1dc249a1960207e19b894e",
+    "scripts/local/docker-database.test.cjs": "4f460d2d14217ad36a67eb865a5c788b2f82dbdb92d6dc2147b23162c0e6768f",
+    "scripts/local/setup-https.sh": "16a88e6695d08f6543c78bb6bd988d931ed00c15d38b4eb4951e4e4549a88770",
+    "package.json": "b4289834b95cb54b2649f2936272086f1e5a8ad5419f3f90dd0086e107a23eea",
+    ".env.example": "f60382c26960588b2514ad9ae656e394c3922f37b14e57a33282b473c2016893",
+    "docs/operations/local-docker-https.md": "e63680224b7b914d630413c4927ca46e5ee930c7e84a99ac817b380d8d0ea847"
+  },
+  "artifactSha256": {
+    "tasks/evidence/local-docker-db-target-20261015/regression-tests.log": "f6b1695e319c4e8f8143f378038a6f40234aab032902f7d446cd3ec7aed2af88",
+    "tasks/evidence/local-docker-db-target-20261015/compose-build.log": "3ee8a692f5d5a638016c232a146cf86fc975b9c79cc18134539993f1b73a1893"
+  }
+}

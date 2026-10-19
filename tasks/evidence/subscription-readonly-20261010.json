@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-10T12:24:06.377544+00:00",
+  "sourceCommit": "975427bcbba849c25a9e120509135115d90393d2",
+  "workingTree": true,
+  "task": "BIZ-02.07",
+  "status": "in_progress",
+  "coreAccepted": "subscription read-only; organization closure not implemented",
+  "originalDoneCurrent": 154,
+  "requestedAdditional": 20,
+  "acceptedAdditional": 1,
+  "remainingTarget": 19,
+  "newOriginalDoneThisCheckpoint": 0,
+  "businessTableGuards": 74,
+  "reviewedModelCount": 106,
+  "gates": {
+    "fullIntegration114": {
+      "pass": 267,
+      "total": 267,
+      "durationMs": 360104.804931
+    },
+    "fullIntegration115": {
+      "pass": 268,
+      "total": 268,
+      "durationMs": 357454.755656,
+      "stage": "Before116 narrow unposted-draft cancellation compatibility exception and its new test"
+    },
+    "final116FocusedIntegration": {
+      "pass": 58,
+      "total": 58,
+      "durationMs": 21101.769372,
+      "suites": [
+        "readonly",
+        "billing",
+        "reservations",
+        "economic"
+      ]
+    },
+    "unit": {
+      "pass": 66,
+      "total": 66,
+      "files": 28,
+      "durationMs": 1324.397921
+    },
+    "productionHttpsBrowsers": {
+      "pass": 9,
+      "total": 9,
+      "durationSeconds": 18.2,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "productionBuild": "PASS",
+    "workerBuild": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "freshAndLegacyMigrations": 116,
+    "gitDiffCheck": "PASS"
+  },
+  "verified": [
+    "root/child CRUD and expired tenant reassignment blocked",
+    "HTTP database guard maps to409",
+    "original committed actor/hash replay after expiry",
+    "revoked actor and altered payload rejected",
+    "wall-clock grace crossing rolls back business and terminal operation",
+    "expired owner export and authorized manual-bank billing renewal",
+    "no POS cash payment from SaaS renewal",
+    "manual expired reservation cleanup preserves physical stock",
+    "Serializable subscription tuple changed after snapshot forces retry",
+    "exact cancelled sale.create tombstone only, no posting",
+    "exception operation type cannot bypass business table guards"
+  ],
+  "failedEarlierRuns": [
+    "Initial product HTTP test returned500 because legacy route swallowed UnknownRequestError; four handlers now propagate it to the shared mapper; final58 and9browser pass"
+  ],
+  "remaining": [
+    "owner reauthenticated organization closure/cancellation",
+    "closure lifecycle write guard",
+    "legal hold/category approval and irreversible deletion",
+    "exports beyond documented artifact limits"
+  ],
+  "sourcesSha256": {
+    "src/server/operations.ts": "763bb7a81588acdd95844ec7c0d26edda679af65156f5d6be79e71a4c6ea12d1",
+    "src/server/billing/read-only-policy.ts": "a5f3256e37bd13c6aa9ca45306ce112e403be8e3a3e32054b8b08198da927c64",
+    "src/server/billing/phase.ts": "358733595e5faad92963a88934748def0e7446a777329efaf9ff95c20df7e03c",
+    "src/server/billing/service.ts": "c29ef225d5b0b6dce43cc31bae03ac58aced1b41be2768dd8224fc97c366e6db",
+    "src/server/billing/errors.ts": "6737175dad1e5acbd8a4eab86d6a0983a110ce49e1048e51e0480c6936c9577b",
+    "src/lib/error-guidance.ts": "396adaef97a6060b61e57d927767eef967dc6cf49e0005ba933bef3318ba56f5",
+    "src/app/(dashboard)/billing/page.tsx": "a04d7e1fc88fc0cf232783236a0985731e010b5f54d696f708bc3f84a9e44d12",
+    "src/app/api/products/route.ts": "5fac6416059ed6aa91a253057983aa1e0f97aec24869bf8e010b21adff4ccc5e",
+    "src/app/api/products/[id]/route.ts": "faf9506cfe373fce4158e2810f459fd4909ee053aa61e8b54cfcae15a66c1c47",
+    "src/app/api/categories/route.ts": "8d2d36c7624b6f85eb0334c25d028e6f1171a8042195ce19b2262a930f39cb19",
+    "src/app/api/categories/[id]/route.ts": "8bc4c699409924a7b0490f3ea2f51625063d1d555158d8f238f94b5f607813d1",
+    "src/app/api/health/ready/route.ts": "83b7485016024b4ccefe806536dc33468c610a04c0c64e9e2564545f47079fca",
+    "scripts/ops/test-migrations.sh": "95c2d0f201aa1d9b8c64951b52123db93d150b463e52830c5dbe50a937a6bafb",
+    "tests/subscription-readonly.unit.test.ts": "aa06d57e8b9293d1300725aaf89de1473977c45c193b9e7e7b9b94abcf5351bf",
+    "tests/subscription-readonly.integration.test.ts": "26857339d11caa26ac26582f18cc6bc99d64ea42e11d3cd5a3fd5e6d6a09103e",
+    "tests/billing.integration.test.ts": "1c3e0260a328c452a96311dc6bc15af5f61e554fd1a9a9e71d1131111a069c70",
+    "tests/e2e/subscription-readonly.spec.ts": "8e4440e6f4c010f983447a74cc7f19ef67b2a189160eeff8953b7b7095c05965",
+    "docs/operations/subscription-read-only.md": "d8404e417cef5ee66c2dd7ba7be71a71df648639158c1c4ba6e67d51bf36d10e",
+    "prisma/migrations/202610100113_subscription_read_only/migration.sql": "1a99f07bdd8b0aeec5e9b221b21b16d678a5343ba60ff435d40cba4b78677e92",
+    "prisma/migrations/202610100114_read_only_housekeeping_scope/migration.sql": "8a3528803b97979d94bb0f4870b27222cb65abdafb5b6fbee6cbb1b912178682",
+    "prisma/migrations/202610100115_subscription_snapshot_lock/migration.sql": "caf670004aba757df621988cc1ae9c17235ca85a18f5fd33b05d00d09312f76a",
+    "prisma/migrations/202610100116_read_only_draft_cancellation/migration.sql": "f5dbae97d7a3e1bb562b16f746844211c5ef0107934c37fb5a07ad639be5be61"
+  },
+  "logsSha256": {
+    "/tmp/pos-readonly-full.log": "1bf85e41fc2b4b269c925e35831800664bd46df1f4b685eab017aad82e6339ea",
+    "/tmp/pos-readonly-full-115.log": "6e4f97426b5c4876108d8c9aaf83d54c698fcf1832b64cc68db90e961308e6e0",
+    "/tmp/pos-readonly-focused-116.log": "067d4f89d2288ed00c0baac43797e6f170fc558d414d4da11d34094ee3326a2f",
+    "/tmp/pos-readonly-unit-116.log": "d7407d1870df5a767ab5f425055c1859bc3c42e64f3814ce507fa824b3282f91",
+    "/tmp/pos-readonly-browser.log": "209b78692cfd4b543e49c6dc75e3b3838e01f303975d1bec8dd8bc16783725e4",
+    "/tmp/pos-readonly-build-116.log": "2403cbf0c90a1e682b699a835050d08d8fb185574c41b70b29c463d71bb711ef",
+    "/tmp/pos-readonly-worker-final.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-readonly-lint-final.log": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+    "/tmp/pos-readonly-type-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-readonly-migrations-116.log": "c619cf2d14b540182e4dbf40021681394389dc762a403859ec16550915d32eb2"
+  },
+  "liveProductionDatabaseChanged": false,
+  "deployed": false,
+  "vendorHardwareImplemented": false,
+  "automaticBusinessDeletion": false
+}

@@ -1,0 +1,35 @@
+✔ real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold (775.910197ms)
+✔ tracked multi-batch transfer receive/loss/replay preserves original source and branch stock (381.673291ms)
+✔ partial original batch return, damaged return and exact per-batch count are atomic and idempotent (635.855571ms)
+✖ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (3130.870235ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5489.424392
+
+✖ failing tests:
+
+test at .test-build/tests/batches.integration.test.js:109:22
+✖ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (3130.870235ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    Comparison {
+  +   code: 'SESSION_CHANGED'
+  -   code: 'STORE_NOT_FOUND'
+    }
+  
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/batches.integration.test.js:136:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AccessError],
+    expected: [Object],
+    operator: 'rejects',
+    diff: 'simple'
+  }

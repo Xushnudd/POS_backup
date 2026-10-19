@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-12",
+  "tasks": [
+    "PUR-01.05",
+    "INV-01.07"
+  ],
+  "status": "in_progress",
+  "original_done": 165,
+  "original_total": 259,
+  "target": 170,
+  "original_done_delta": 0,
+  "head": "f9ef36a34df3ae346fe3013dd22c6dc33ec9e795",
+  "working_tree": true,
+  "production_deployment": false,
+  "input": "Isolated local pos_test; real receipt/order/sale/return/session/tenant; synthetic legacy133 dump and dedicated throwaway restore databases",
+  "expected": "Authoritative native order and zero-stock boundary; original source snapshots match; exact stock/COGS/rounding charge split; no historical document edits or financial posting",
+  "actual": {
+    "receipt_charge": "20.00",
+    "remaining_quantity": "7",
+    "inventory_correction": "7.999999",
+    "cogs_correction": "12",
+    "rounding_correction": "0.000001",
+    "sale_corrections": [
+      "8",
+      "6"
+    ],
+    "linked_return_correction": "-2",
+    "original_document_costs_unchanged": true,
+    "invented_source_rejected": true,
+    "manual_cost_override_rejected": true,
+    "legacy_stock_rejected": true,
+    "global_baseline_quantity": "199999999999999.999998"
+  },
+  "checks": {
+    "unit": {
+      "passed": 114,
+      "failed": 0
+    },
+    "postgres": {
+      "passed": 60,
+      "failed": 0,
+      "critical_mfa_required": false,
+      "note": "Core financial fixtures; browser corrective run uses actual enrolled MFA."
+    },
+    "migrations": {
+      "count": 138,
+      "fresh": true,
+      "synthetic133_upgrade": true,
+      "repeat": true,
+      "actual_full_dump_restore": true,
+      "no_legacy_order_backfill": true
+    },
+    "browser_initial": {
+      "passed": 138,
+      "failed": 15,
+      "skipped": 3,
+      "duration": "18.4m"
+    },
+    "browser_corrective": {
+      "passed": 15,
+      "failed": 0,
+      "duration": "49.3s",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "actual_enrolled_mfa": true,
+      "fixes": [
+        "Actual offline module dependency imports",
+        "Two-step shift review and confirmation",
+        "Scoped PIN status locator",
+        "Actual UI MFA policy approval",
+        "Actual API bound MFA policy proof"
+      ]
+    },
+    "typecheck": "pass",
+    "changed_lint": "pass",
+    "worker_build": "pass",
+    "next_build": "Webpack pass",
+    "source_scan": {
+      "scanned": 1075,
+      "findings": 0,
+      "scope": "Working tree tracked/nonignored source; no credential stores, git history or container image scan"
+    }
+  },
+  "initial_failures_preserved": [
+    "Actual sale fixture treated serialized amount as Decimal (4/5 PG), corrected String value",
+    "Export model-shape review gate blocked after mistaken raw schema file hash (55/60 PG,112/114 unit), restored actual reviewed Prisma DMMF shape hash",
+    "Wrong npm script build:worker; correct worker:build succeeded",
+    "Initial browser stale fixture failures retained; 3 maintenance skips remain untested"
+  ],
+  "open_requirements": [
+    "Immutable inventory/COGS correction posting and reports",
+    "Prepare/apply UI",
+    "Transfer/adjustment/reversal/damaged/negative source adapters",
+    "Explicit legacy reconciliation without guessed timestamp order",
+    "Background costing for histories beyond bounded inline preview"
+  ],
+  "logs": [
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-final-pg.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-final-unit.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-final-build.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-final-lint.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-final-worker.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-138-type.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-valuation-138-drill.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-scan.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-valuation-e2e.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-core-corrective-e2e.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-pg.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-138-pg.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-138-unit.log",
+    "tasks/evidence/logs/valuation-source-preview-20261012-source-138-worker.log"
+  ],
+  "source_sha256": {
+    "prisma/schema.prisma": "7d1ca82f9bff713423fe223711cc1dc190c898a85e6d65ecff339f2590cb674c",
+    "src/server/inventory/cost-replay.ts": "dcd0753589042adbe1d568287873408c640f77970fa8258e3c44d69e3b30bca2",
+    "src/server/inventory/valuation-history.ts": "70f019524f460091b3aa32478ca689b1216b3153d0f72b18f76c76da4a29dbee",
+    "src/server/inventory/valuation-sources.ts": "d16f6a76f9b4639bf5a9f00af4b508ced1906ee2ba2671f44395bf9d9d0685eb",
+    "src/server/purchases/receipt-cost-correction-preview.ts": "eeedc92b8c04250068741641ac9e5298ab065ca42fc2dbed955dc4dbb39956b3",
+    "src/app/api/stock-documents/[id]/cost-correction-preview/route.ts": "b0fa5b59d1a68555a43308dab46a5778a39d3df4cc4fbb64b314f20855bf7593",
+    "src/server/auth/route-permissions.ts": "2f26015c1c15c26eaf681f699f47e1aa15a0bf7cbcb3bc2f800843a4b69cdb1b",
+    "src/server/jobs/tenant-export-contract.ts": "f2d99a7c9fe12fbc2a6fe6e3b7deee0780ba9fc4bfb4c03588fbdd248c768f4e",
+    "tests/valuation-order.integration.test.ts": "630167bfcbc8795bba0f9d764104bcd9ba71b78b1ada3edeb086e7fcad5d0947",
+    "tests/cost-replay.unit.test.ts": "b9809f06c2a0132a36888f9b8f9224eb7114087ca08a5e0d1c0bfde1d3fd5b12",
+    "tests/landed-cost.integration.test.ts": "b501470d7e27556fa8a6c5547cd545d2e46f068f7975b5fadf77f7ec8109f1bc",
+    "tests/e2e/core.spec.ts": "12c8e17c31b282b90f9eee3ca2af2ec979a5358696179f82dc7ef6017b8248e9",
+    "scripts/ops/test-valuation-migrations.sh": "7f19b2390f7056d814d6fd0585c7c69e0644ca671309fc27aa4bc4c1af190d84",
+    "docs/operations/landed-cost.md": "be3a184b35f584820d7cdc5fb464838c168fad253c5359cdb074a5c86d95dba5",
+    "api.md": "6b5b73acebad972f66e04985cd83731e60af77cef903bb7790b9670ba2dccaab",
+    "prisma/migrations/202610120134_inventory_valuation_order/migration.sql": "97ed5c0b4e87e50459beb7f6ee3ed323873850ed20142dea471722d06f0ed401",
+    "prisma/migrations/202610120135_inventory_valuation_capture_guards/migration.sql": "41b7e06fd47e93792d27f9958d99e9acc3bb77af05225cc30e85c88e7a823927",
+    "prisma/migrations/202610120136_inventory_valuation_baseline/migration.sql": "bce02871dc2327a05b3c39d55b1cbda7bd956ef4fab2cc7535b2e69b8fccfed9",
+    "prisma/migrations/202610120137_inventory_valuation_capture_lookup/migration.sql": "bec3faef0ceb67ca73eafb4ad1c61794e97f4e4f6ee6fdfb655b25e2824ad009",
+    "prisma/migrations/202610120138_inventory_valuation_global_quantity/migration.sql": "e4a4181dc485f5c58ec5bbf4b0d34b1de17301740ebfd9f222b611e9e8d1761c"
+  }
+}

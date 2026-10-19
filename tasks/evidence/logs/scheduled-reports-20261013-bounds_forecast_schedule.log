@@ -1,0 +1,24 @@
+✔ Moving-average demand baseline measures exact rolling-origin accuracy, not leaked training data (7.363966ms)
+✔ Weekday demand baseline is measured against recurring weekdays with exact quantities (1.652241ms)
+✔ Missing history, invalid dates, gaps and negative observed quantities cannot produce a fabricated forecast (1.88125ms)
+✔ Planned branch KPI reuses real cash sale/refund accounting and explicitly reports unavailable forecast history (694.422011ms)
+✔ Planned report never accepts another tenant branch/product or a lesser role scope (219.420255ms)
+✔ A delayed through-now occurrence retains its original cutoff and never includes later sales (194.255809ms)
+✔ Branch and demand bounds reject a partial report; an explicitly bounded selection remains complete (876.151065ms)
+✔ Business-local daily/weekly/monthly cadence preserves strict boundaries and year/month transitions (21.260406ms)
+✔ Owner configuration is disabled by default choice, idempotent, revision-safe and native-proof protected (260.519357ms)
+✔ Concurrent scheduler/claims publish one private original artifact and full scoped CSV/JSON (306.521715ms)
+✔ Missed-run policy explicitly skips old periods; stopping a grant cancels an already queued original (95.995146ms)
+✔ Late publish audit failure rolls back the result; original retry cannot create a second occurrence (2365.857066ms)
+✔ A real elapsed lease recovers the same original run with a new nonce; stale worker cannot publish (32242.24774ms)
+✔ Persistent owner grant survives logout, but a role revoked during calculation prevents publication (233.271435ms)
+✔ Read-only expiry preserves private exports and stopping grants, while rejecting new configuration (168.379353ms)
+✔ Catch-up records each original period once and a stop fences every remaining queued period (172.081771ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39949.591005

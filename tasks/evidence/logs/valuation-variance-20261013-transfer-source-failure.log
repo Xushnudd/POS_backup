@@ -1,0 +1,35 @@
+✔ actual receipt captures cost change and movement in one transaction, replay adds no valuation event (417.104131ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ parallel branches receive unique committed product order, sequence does not use timestamp sorting, rollback adds no event (218.649239ms)
+✔ legacy unjournaled balance is recorded as an unproven boundary, never silently capitalised (70.713442ms)
+✔ actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes (377.689576ms)
+✔ native capture alone cannot authorize an invented source or an unimplemented adjustment adapter (98.63405ms)
+✔ organization-wide baseline preserves exact sum beyond one branch decimal capacity without breaking original cost update (48.405336ms)
+✔ future manual owner cost approval binds the exact native event; replay adds no reference and raw changes remain unproven (86.653621ms)
+✖ real branch transit, damage, nonstock return, approved override, adjustment and supplier withdrawal replay from original sources (246.739886ms)
+✔ real receipt reversal has source proof and no imaginary terminal stock (175.492387ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2257.00676
+
+✖ failing tests:
+
+test at .test-build/tests/valuation-order.integration.test.js:211:22
+✖ real branch transit, damage, nonstock return, approved override, adjustment and supplier withdrawal replay from original sources (246.739886ms)
+  AccessError: Original tannarx manbasi yoki miqdori joriy jurnalga mos emas
+      at reject (/home/fedora/Developments/POS_backup/.test-build/src/server/inventory/valuation-facts.js:10:27)
+      at readProductValuationFacts (/home/fedora/Developments/POS_backup/.test-build/src/server/inventory/valuation-facts.js:122:17)
+      at async Proxy._transactionWithCallback (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:8000)
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/valuation-order.integration.test.js:226:19)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    status: 409,
+    code: 'COST_SOURCE_RECONCILIATION_REQUIRED',
+    retryAfterSeconds: undefined,
+    details: undefined
+  }

@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-11",
+  "task": "SEC-02.06",
+  "status": "in_progress",
+  "head": "97ded93d1c62c4a4180607d6686bf82395701ee2",
+  "originalDone": 156,
+  "batchDone": 2,
+  "batchTarget": 20,
+  "scope": "20 action MFA policy, private staff credential binding, one-time invitation grant, ownership proof, nested dialog priority",
+  "checks": {
+    "unitFiles": 33,
+    "focusedIntegration": "28/28",
+    "browsers": "9/9 Chromium Firefox WebKit",
+    "productionBuild": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "secretScan": {
+      "files": 789,
+      "findings": 0
+    },
+    "fullIntegration": "311/311"
+  },
+  "pending": [
+    "restored credential invalidation",
+    "remaining dangerous mutation inventory/acceptance"
+  ],
+  "productionChanges": false,
+  "sourceSHA256": {
+    "src/server/auth/critical-actions.ts": "99d9fa4c2d13547f1cf799e24223acd706d4b119ed5d8786c3f6ed899c7d77a6",
+    "src/server/auth/credential-binding.ts": "40c8d663f2bf4895485fd72187003b4f6a73b746a24d03b76a3377540313d469",
+    "src/server/users/service.ts": "16daab9f0ef19a9e2a4f641df6567d7818799f0e9329b9e9397a663dfc15b47c",
+    "src/server/users/invitations.ts": "3b3c4362169fd340ea95d3c4cad1947feb1214e5222dbfe1831b5b1c867da12f",
+    "src/app/api/organizations/[id]/users/route.ts": "e868cbab2083b91f30bc24f2a3764afc04cc9d31ec372ee68533e0339753310f",
+    "src/app/api/organizations/[id]/transfer-ownership/route.ts": "b6ca93dfcfc57ee26aaa7d985444795fad80176a10a9d5478cb44300289240a6",
+    "src/app/api/ownership-transfers/[id]/route.ts": "3c23d493d6250213eddc8873228570da3ed5e6b4654d2222e9c5fac4794578a4",
+    "src/components/ui/Modal.tsx": "4b4420cd048ce3a4e4f031b1399ae1276318c1451c21d59644ea967cb84e0666",
+    "src/components/security/CriticalStepUp.tsx": "265851da2812a6d9b127257247d37cf22a37d7e8bb9fd6064fa9ac467c2712d3",
+    "src/app/(dashboard)/settings/page.tsx": "09df4ec863cab721ab8a32a261fc1c6df2d20fefb590fb25768f80c81abd9411",
+    "src/app/(dashboard)/roles/page.tsx": "c5f0caf16997acbe233c0cee7c04cea5f8f30ae3a0eddbca98aadabaf5dc6767",
+    "src/lib/api.ts": "21c5b5e93ebcc04e532b05efb148ec0ac4d5bce11e6fd12d5fadf779ec0dff11",
+    "tests/totp.integration.test.ts": "c377c3e83ce7b9f7e1a3c35855ec794a089e36a4f301c76b71e8e64472de4100",
+    "tests/e2e/totp.spec.ts": "3e362a7b48a2e2e72f40342999b1bd5ef771f6b225946092f7e973cd10ba987a"
+  },
+  "logSHA256": {
+    "/tmp/pos-grants-unit.log": "dc30e4c0770ee650e2dbfc339d20b10a7d305b3c68216aa4faa033a7c9280af7",
+    "/tmp/pos-grants-focused-final.log": "a710bad108f62e9d7291029bb7a28cb67bb15b7ed497b5f6c9e86776cf3adf13",
+    "/tmp/pos-grants-browser.log": "ed3593982b59f0db2531044281885a5b81097f61f04f346eee5f73c4ced7f070",
+    "/tmp/pos-grants-build.log": "3466a9fc26ef413f0f921a3b860862ca6479c9b72dff9ed5d6265b582c17c4a5",
+    "/tmp/pos-grants-typecheck-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-grants-full-lint.log": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+    "/tmp/pos-grants-secret-scan.log": "a729e69bdf8481ecfb95c539894aef009da6e790a2eef08c67f61528a47aacbe",
+    "/tmp/pos-grants-full-integration.log": "4a5be9b2ac91be5370cb8059a612571c03a78062e4523faeeb39c98d3ebcd067"
+  }
+}

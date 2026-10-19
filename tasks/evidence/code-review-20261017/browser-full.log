@@ -1,0 +1,1509 @@
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 154 tests using 1 worker
+
+(node:98153) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓    1 [chromium] › tests/e2e/auth-form-state.spec.ts:18:5 › duplicate STIR shows actionable guidance, preserves the form and allows correction (1.7s)
+  ✓    2 [chromium] › tests/e2e/auth-form-state.spec.ts:56:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.0s)
+  ✓    3 [chromium] › tests/e2e/auth-form-state.spec.ts:56:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (832ms)
+  ✓    4 [chromium] › tests/e2e/auth-form-state.spec.ts:56:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (382ms)
+  ✓    5 [chromium] › tests/e2e/auth-form-state.spec.ts:56:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (460ms)
+  ✓    6 [chromium] › tests/e2e/auth-form-state.spec.ts:92:5 › successful login uses authenticated role ACK and does not require a second me request (1.4s)
+  ✓    7 [chromium] › tests/e2e/auth-form-state.spec.ts:104:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (637ms)
+  ✓    8 [chromium] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (8.2s)
+  ✘    9 [chromium] › tests/e2e/billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (10.9s)
+(node:99331) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   10 [chromium] › tests/e2e/billing-editor-state.spec.ts:46:5 › Billing and retention reads preserve independent administrator drafts (1.5s)
+  ✓   11 [chromium] › tests/e2e/billing-editor-state.spec.ts:84:5 › Platform cost lost acknowledgement replays once and cancellation keeps independent new quote draft (10.0s)
+  ✓   12 [chromium] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (1.8s)
+  ✓   13 [chromium] › tests/e2e/brand-editor-state.spec.ts:8:5 › brand status lost acknowledgement preserves a separate name draft and original key retries once (1.3s)
+  ✘   14 [chromium] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (10.9s)
+(node:100581) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   15 [chromium] › tests/e2e/contact-editor-state.spec.ts:10:5 › customer failed debt read is visibly unknown and retry restores actual ledger without false zero (1.1s)
+  ✓   16 [chromium] › tests/e2e/contact-editor-state.spec.ts:17:58 › customers held acknowledgement admits one create and failed follow-up read keeps success (813ms)
+  ✓   17 [chromium] › tests/e2e/contact-editor-state.spec.ts:17:58 › suppliers held acknowledgement admits one create and failed follow-up read keeps success (757ms)
+  ✓   18 [chromium] › tests/e2e/contact-editor-state.spec.ts:26:5 › unconfigured delivery stays disabled after read error and real retry never creates or verifies challenge (840ms)
+  ✓   19 [chromium] › tests/e2e/context-navigation.spec.ts:20:5 › Branch/register selectors verify accessible IDs, preserve selection after reload and handle server failure without changing context (3.0s)
+  ✓   20 [chromium] › tests/e2e/context-navigation.spec.ts:46:5 › Fractional cart and conversion controls survive reload; nonempty cart and held draft ACK block branch changes (3.4s)
+  ✓   21 [chromium] › tests/e2e/context-navigation.spec.ts:83:5 › Settings can clear TIN/footer and expose tax settings; sidebar reports an actual server outage (982ms)
+  ✓   22 [chromium] › tests/e2e/context-navigation.spec.ts:101:5 › Failed logout preserves a saved cart; acknowledged logout clears local scope and revokes the actual session (1.8s)
+  ✓   23 [chromium] › tests/e2e/core.spec.ts:46:5 › Landed cost UI previews partial receipts, invalidates edited results and retries without posting (2.6s)
+  ✓   24 [chromium] › tests/e2e/core.spec.ts:125:5 › Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests (1.3s)
+  ✓   25 [chromium] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (20.4s)
+  ✓   26 [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (6.5s)
+  ✘   27 [chromium] › tests/e2e/core.spec.ts:567:5 › Production HTTPS: durable shift correction and frozen report pagination/export (11.6s)
+(node:102606) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   28 [chromium] › tests/e2e/core.spec.ts:606:5 › Production HTTPS: offline server banner, browser reopen, customer/note and original mixed-payment sync (16.4s)
+(node:103085) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   29 [chromium] › tests/e2e/core.spec.ts:631:5 › IndexedDB transactions isolate users/devices, preserve restart queues and forbid unsafe clear/ack races (450ms)
+  ✘   30 [chromium] › tests/e2e/core.spec.ts:662:5 › Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely (12.6s)
+(node:103438) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   31 [chromium] › tests/e2e/core.spec.ts:716:5 › Checkout price/stock conflicts require review; print failure and integration failure stay separate (20.1s)
+  ✓   32 [chromium] › tests/e2e/core.spec.ts:752:5 › Cashier shortage requires owner approval; next cashier accepts counted handover in UI (5.8s)
+  ✓   33 [chromium] › tests/e2e/core.spec.ts:780:5 › Owner mobile dashboard and cashier touch controls remain reachable at 360, 768 and 1280 pixels (3.8s)
+  ✓   34 [chromium] › tests/e2e/core.spec.ts:799:5 › Held server draft resumes on another authorized device and closes the original receipt once (3.9s)
+  ✘   35 [chromium] › tests/e2e/core.spec.ts:819:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (11.8s)
+(node:105837) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   36 [chromium] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (3.0s)
+  ✘   37 [chromium] › tests/e2e/core.spec.ts:859:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (11.8s)
+(node:106312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   38 [chromium] › tests/e2e/core.spec.ts:882:5 › Debt collection UI records exact cash/card/transfer channels with manual document proof (2.0s)
+  ✘   39 [chromium] › tests/e2e/core.spec.ts:902:5 › Reviewed price batch survives lost acknowledgement and damaged journal stays outside sellable stock (11.7s)
+(node:106882) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   40 [chromium] › tests/e2e/core.spec.ts:925:5 › Finance UI records internal bank expense, transfer and exact reversal with durable recovery (1.0m)
+(node:110655) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   41 [chromium] › tests/e2e/core.spec.ts:944:5 › Sales breakdown UI reconciles all five dimensions and downloads full exact CSV (1.5s)
+  ✓   42 [chromium] › tests/e2e/core.spec.ts:959:5 › Supplier ledger UI records invoice, partial cash allocation and recovers unknown advance exactly once (2.5s)
+  ✘   43 [chromium] › tests/e2e/core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (12.2s)
+(node:112366) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   44 [chromium] › tests/e2e/core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (11.4s)
+(node:113181) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   45 [chromium] › tests/e2e/core.spec.ts:1007:5 › Variant UI creates independent color size SKU and restores the original lost creation intent once (1.5s)
+  ✓   46 [chromium] › tests/e2e/core.spec.ts:1016:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (2.3s)
+  ✘   47 [chromium] › tests/e2e/core.spec.ts:1026:5 › Cashier PIN UI sets a password-protected credential and switches only to branch-scoped cashier without manager elevation (12.8s)
+(node:114489) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   48 [chromium] › tests/e2e/core.spec.ts:1032:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (6.7s)
+  ✓   49 [chromium] › tests/e2e/core.spec.ts:1039:5 › Discount UI applies exact line and receipt percentages with reason and immutable manager authorization (1.9s)
+  ✓   50 [chromium] › tests/e2e/core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache (1.2s)
+  ✓   51 [chromium] › tests/e2e/core.spec.ts:1073:5 › Transfer receipt UI preserves unknown partial receipt and separates damage and confirmed shortage from sellable stock (1.6s)
+  ✓   52 [chromium] › tests/e2e/core.spec.ts:1085:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (3.0s)
+  ✓   53 [chromium] › tests/e2e/core.spec.ts:1100:5 › Price tier UI recovers one scheduled rule, requires POS price review and keeps original receipt after archive (7.3s)
+  ✓   54 [chromium] › tests/e2e/core.spec.ts:1106:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact (4.7s)
+  ✓   55 [chromium] › tests/e2e/core.spec.ts:1116:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (4.2s)
+  ✓   56 [chromium] › tests/e2e/core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash (3.8s)
+  ✓   57 [chromium] › tests/e2e/core.spec.ts:1137:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (2.7s)
+  ✓   58 [chromium] › tests/e2e/core.spec.ts:1143:5 › Owner reviews a changed-price offline cash conflict, recovers lost settlement acknowledgment and confirms the original receipt once (2.8s)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   59 [chromium] › tests/e2e/core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (1.7s)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   60 [chromium] › tests/e2e/core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order (5.6s)
+  ✓   61 [chromium] › tests/e2e/core.spec.ts:1180:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once (2.0s)
+  ✓   62 [chromium] › tests/e2e/core.spec.ts:1187:5 › Background jobs UI recovers enqueue and manual retry once while the real worker exhausts failures then completes scoped reconciliation (3.1s)
+  ✓   63 [chromium] › tests/e2e/core.spec.ts:1194:5 › Security history delivers a real new-browser notice and recovers a lost read acknowledgement once (4.2s)
+  ✓   64 [chromium] › tests/e2e/core.spec.ts:1249:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (1.2s)
+  ✓   65 [chromium] › tests/e2e/core.spec.ts:1262:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (6.2s)
+  ✓   66 [chromium] › tests/e2e/core.spec.ts:1273:5 › Catalogue export UI recovers lost enqueue acknowledgement and real worker produces an exact scoped CSV download (1.5s)
+  ✓   67 [chromium] › tests/e2e/core.spec.ts:1278:5 › Customer advance UI recovers lost receipt acknowledgement then allocates opening debt and refunds only unused cash once (2.1s)
+  ✘   68 [chromium] › tests/e2e/core.spec.ts:1299:5 › Maintenance UI preserves saved basket and original pending sale across drain and restores cash checkout once (11.6s)
+(node:118370) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   69 [chromium] › tests/e2e/core.spec.ts:1327:5 › Independent finance drafts share one navigation decision and busy mutation blocks context exit (1.7s)
+  ✓   70 [chromium] › tests/e2e/core.spec.ts:1359:5 › Dashboard boundary recovers a render failure without creating an economic operation or exposing input data (714ms)
+  ✘   71 [chromium] › tests/e2e/count-recovery.spec.ts:8:5 › count start, reading and approval survive lost ACK and reload with exact quantities and one posting (12.5s)
+(node:120008) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   72 [chromium] › tests/e2e/critical-step-up.spec.ts:9:5 › Critical billing UI requires MFA, cancellation has no effect and approved retry preserves the original body (1.5s)
+  ✘   73 [chromium] › tests/e2e/custom-roles.spec.ts:8:5 › Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits (404ms)
+(node:120632) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   74 [chromium] › tests/e2e/customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event (1.7s)
+  ✓   75 [chromium] › tests/e2e/customer-consent.spec.ts:55:5 › Concurrent consent revision rejection refreshes history and permits a fresh reviewed decision (1.1s)
+  ✓   76 [chromium] › tests/e2e/customer-consent.spec.ts:69:5 › Recovered stale consent discards only a definitive rollback; unknown conflicts retain the original operation (1.7s)
+  ✓   77 [chromium] › tests/e2e/customer-merge-state.spec.ts:8:5 › merge partial reason and selected named customer survive searches and failed history refresh (2.9s)
+  ✓   78 [chromium] › tests/e2e/exchange-editor-state.spec.ts:8:5 › exchange preview freezes its snapshot, rejects malformed return lines and preserves a newer draft after original lost-ACK recovery (1.9s)
+  ✓   79 [chromium] › tests/e2e/gift-certificates.spec.ts:8:5 › Owner gift policy MFA, actual cash issuance lost-ACK recovery and zero-credit-limit atomic checkout (4.3s)
+  ✘   80 [chromium] › tests/e2e/identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources (18.9s)
+(node:123126) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:98081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   81 [chromium] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (1.8s)
+  ✓   82 [chromium] › tests/e2e/inactive-stock.spec.ts:9:5 › Inventory inactivity selector filters branch stock and CSV uses the same selection (809ms)
+  ✓   83 [chromium] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (1.3s)
+  ✘   84 [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (16.0s)
+(node:124616) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   85 [chromium] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (6.7s)
+  ✘   86 [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state (10.7s)
+(node:125879) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   87 [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state (10.9s)
+(node:127346) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   88 [chromium] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (640ms)
+  ✓   89 [chromium] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (412ms)
+  ✓   90 [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (6.2s)
+  ✓   91 [chromium] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (3.3s)
+  ✓   92 [chromium] › tests/e2e/loyalty-marketing.spec.ts:8:5 › Owner MFA card/campaign management, customer-specific exact discount and lost-ACK recovery consume one campaign use (1.0m)
+  ✓   93 [chromium] › tests/e2e/loyalty-points.spec.ts:8:5 › Owner rule MFA, actual point grant, committed lost-ACK review recovery and refund preserve one original wallet (3.2s)
+  ✓   94 [chromium] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (1.4s)
+  ✓   95 [chromium] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (1.5s)
+  ✓   96 [chromium] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (22.4s)
+  ✓   97 [chromium] › tests/e2e/pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business (1.8s)
+  ✓   98 [chromium] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (653ms)
+  ✓   99 [chromium] › tests/e2e/permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change (1.1s)
+  ✓  100 [chromium] › tests/e2e/platform.spec.ts:9:5 › Platform panel rejects an ordinary owner, then requires MFA for an assigned operator and shows safe service/tenant metadata (1.2s)
+  ✓  101 [chromium] › tests/e2e/price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination (3.0s)
+  ✓  102 [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (2.0s)
+  ✓  103 [chromium] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (801ms)
+  ✓  104 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (972ms)
+  ✓  105 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (911ms)
+  ✓  106 [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (3.4s)
+  ✓  107 [chromium] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (3.8s)
+  ✓  108 [chromium] › tests/e2e/report-export.spec.ts:10:5 › Owner queues full filtered XLSX/PDF documents through UI, actual worker publishes and authenticated download preserves all 1001 rows (5.1s)
+  ✓  109 [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (1.9s)
+  ✓  110 [chromium] › tests/e2e/request-budget.spec.ts:3:5 › Production HTTPS rejects an unfinished JSON body before authentication business logic and accepts a fresh retry (10.1s)
+  ✓  111 [chromium] › tests/e2e/retention.spec.ts:9:5 › Retention settings require actual platform authority and recover original lost acknowledgement without another version (16.3s)
+  ✓  112 [chromium] › tests/e2e/roles-state.spec.ts:37:5 › Unknown role and assignment acknowledgements retain independent immutable keys and replay once with real MFA (2.3s)
+  ✘  113 [chromium] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result (10.6s)
+(node:138872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  114 [chromium] › tests/e2e/roles-state.spec.ts:123:5 › Acknowledged role save remains saved when only the following list refresh fails (1.5s)
+  ✓  115 [chromium] › tests/e2e/roles-state.spec.ts:140:5 › Failed role metadata refresh retains raw editor but blocks new role writes (865ms)
+  ✘  116 [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (11.5s)
+(node:139742) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  117 [chromium] › tests/e2e/sales-list.spec.ts:54:5 › Catalog and customer URL pages reach records beyond the old truncation and keep filter state through reload (2.9s)
+  ✓  118 [chromium] › tests/e2e/sales-list.spec.ts:76:5 › Category/unit URL search, state and pages preserve a separate unsaved editor through read navigation (1.7s)
+  ✘  119 [chromium] › tests/e2e/sales-list.spec.ts:100:5 › Supplier/brand/audit applied URL state survives history and reload; business draft survives filtering and errors never become zero rows (11.2s)
+(node:141060) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  120 [chromium] › tests/e2e/sales-list.spec.ts:129:5 › Inventory balances/documents and transfers keep applied filters in URL, allow error recovery and retain original business drafts (12.5s)
+(node:141877) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  121 [chromium] › tests/e2e/sales-list.spec.ts:151:5 › Shift and finance URL pages reach original postings, preserve exact amounts and recover from a failed list read (14.1s)
+(node:143498) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  122 [chromium] › tests/e2e/sales-list.spec.ts:167:5 › Expired synthetic job sources and actual inventory-gap scan display all URL pages without exposing worker payload; errors retain business drafts (11.6s)
+(node:145046) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  123 [chromium] › tests/e2e/sales-list.spec.ts:190:5 › Cancelled count and original damaged-return pages preserve native stock/refund history and URL filters (4.6s)
+  ✓  124 [chromium] › tests/e2e/sales-list.spec.ts:206:5 › Archive types and replenishment global sorting retain URL history and configured minimum-only advice without stock postings (2.7s)
+  ✓  125 [chromium] › tests/e2e/sales-list.spec.ts:224:5 › Purchase, supplier balance and sales breakdown URL pages share exact original source cutoff and filtered totals (5.2s)
+  ✘  126 [chromium] › tests/e2e/sales-list.spec.ts:250:5 › Main report and reconciliation pages keep row filters separate from period cash totals and retain source cutoff through history (14.9s)
+(node:147457) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  127 [chromium] › tests/e2e/sales-list.spec.ts:277:5 › Price and reservation histories keep applied URL state while separate price and stock drafts survive filters and Back (15.9s)
+(node:147943) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  128 [chromium] › tests/e2e/security-ack-state.spec.ts:11:5 › password ACK and one critical command survive failed profile read without storing credentials (3.4s)
+  ✓  129 [chromium] › tests/e2e/security-ack-state.spec.ts:20:5 › all-session logout admits one request and still leaves security after profile read failure (777ms)
+  ✓  130 [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (6.4s)
+  ✓  131 [chromium] › tests/e2e/shared-command-state.spec.ts:9:5 › onboarding partial reason is guarded and pending organization step does not occupy the next register step (1.1s)
+  ✓  132 [chromium] › tests/e2e/shared-command-state.spec.ts:21:5 › saved catalog job recovery leaves an independent report filter and reason intact (975ms)
+  ✓  133 [chromium] › tests/e2e/shared-documents.spec.ts:18:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke (2.1s)
+  ✘  134 [chromium] › tests/e2e/shared-documents.spec.ts:48:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload (11.7s)
+(node:149666) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  135 [chromium] › tests/e2e/shared-documents.spec.ts:69:5 › Legacy external image metadata cannot create an automatic browser request (823ms)
+  ✓  136 [chromium] › tests/e2e/shared-documents.spec.ts:76:5 › Lost consent rejection clears only the blocked reminder attempt and permits a newly consented request (1.7s)
+  ✓  137 [chromium] › tests/e2e/shift-opening-recovery.spec.ts:8:5 › Shift opening retries failed handover loading and preserves original cash intent after lost ACK and reload (1.2s)
+  ✓  138 [chromium] › tests/e2e/shift-opening-recovery.spec.ts:55:5 › Confirmed shift opening survives an older empty shift read and F9 cannot reopen the modal (919ms)
+  ✓  139 [chromium] › tests/e2e/stock-draft-recovery.spec.ts:8:53 › stock draft UI preserves exact immutable request after lost ACK and reload, replay creates no duplicate (1.1s)
+  ✓  140 [chromium] › tests/e2e/stock-draft-recovery.spec.ts:8:53 › transfer draft UI preserves exact immutable request after lost ACK and reload, replay creates no duplicate (1.1s)
+  ✓  141 [chromium] › tests/e2e/subscription-readonly.spec.ts:8:5 › Expired owner signs in, sees read-only, reads catalog and creates renewal invoice while business POST is rejected (886ms)
+  ✓  142 [chromium] › tests/e2e/support-policy-state.spec.ts:11:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (13.1s)
+  ✓  143 [chromium] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (951ms)
+  ✓  144 [chromium] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.1s)
+  ✘  145 [chromium] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (11.1s)
+(node:151173) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  146 [chromium] › tests/e2e/tenant-export.spec.ts:9:5 › Owner recovers original tenant export enqueue after lost ACK and downloads an exact manifest from the production worker (2.0s)
+  ✘  147 [chromium] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting (11.7s)
+(node:151678) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  148 [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.3s)
+  ✘  149 [chromium] › tests/e2e/totp.spec.ts:9:5 › Authenticator UI keeps secrets in memory, rotates backup codes and recovers with all-session logout (12.1s)
+(node:152751) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  150 [chromium] › tests/e2e/totp.spec.ts:49:5 › Lost confirmation ACK recovers actual enabled status without retrieving or persisting secret codes (1.3s)
+  ✓  151 [chromium] › tests/e2e/totp.spec.ts:67:5 › Nested staff MFA traps focus above the form; Escape cancels only proof and retry creates one member (2.1s)
+  ✓  152 [chromium] › tests/e2e/totp.spec.ts:95:5 › Owner password form requires MFA then signs out and accepts only the new password (3.1s)
+  ✓  153 [chromium] › tests/e2e/totp.spec.ts:118:5 › Security editors share one discard decision and pending enrollment freezes credentials and navigation (1.2s)
+  ✓  154 [chromium] › tests/e2e/variant-editor-state.spec.ts:8:5 › variant option-only draft is guarded and successful creation stays acknowledged when list reload fails (1.0s)
+
+
+  1) [chromium] › tests/e2e/billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Obuna invoicelari' }).getByText('Holat: open', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: 'Obuna invoicelari' }).getByText('Holat: open', { exact: true }) with timeout 10000ms
+      - waiting for getByRole('region', { name: 'Obuna invoicelari' }).getByText('Holat: open', { exact: true })
+
+
+      16 |  await region.getByRole('button',{name:'Oylik invoice yaratish: oldindan ko‘rish'}).click()
+      17 |  await region.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+    > 18 |  await expect(region.getByText('Holat: open',{exact:true})).toBeVisible()
+         |                                                             ^
+      19 |  await region.getByLabel('Bekor qilish sababi').fill('Keep raw cancellation draft')
+      20 |  let fail=true
+      21 |  await page.route('**/api/billing/invoices?*',route=>fail?route.abort('failed'):route.continue())
+        at /home/fedora/Developments/POS_backup/tests/e2e/billing-editor-state.spec.ts:18:61
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Invoi-a020c-ks-new-commands-until-retry-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/billing-editor-state-Invoi-a020c-ks-new-commands-until-retry-chromium/error-context.md
+
+    Error Context: test-results/billing-editor-state-Invoi-a020c-ks-new-commands-until-retry-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Invoi-a020c-ks-new-commands-until-retry-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/billing-editor-state-Invoi-a020c-ks-new-commands-until-retry-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Fixture rejected save' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Fixture rejected save' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Fixture rejected save' })
+
+
+      31 |  await page.route(endpoint,route=>route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'CONCURRENT_CONFLICT',message:'Fixture rejected save'}})}))
+      32 |  await page.getByRole('button',{name:'Saqlash',exact:true}).click()
+    > 33 |  await expect(page.getByRole('alert').filter({hasText:'Fixture rejected save'})).toBeVisible()
+         |                                                                                  ^
+      34 |  await expect(page.getByLabel('Kategoriya nomi')).toHaveValue('Category confirmed B')
+      35 |  await expect(page.getByRole('status').filter({hasText:'Saqlanmagan kategoriya'})).toBeVisible()
+      36 |  await page.unroute(endpoint)
+        at /home/fedora/Developments/POS_backup/tests/e2e/catalog-unsaved.spec.ts:33:82
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/catalog-unsaved-Catalog-fo-78e46-ssful-saves-reset-the-guard-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/catalog-unsaved-Catalog-fo-78e46-ssful-saves-reset-the-guard-chromium/error-context.md
+
+    Error Context: test-results/catalog-unsaved-Catalog-fo-78e46-ssful-saves-reset-the-guard-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/catalog-unsaved-Catalog-fo-78e46-ssful-saves-reset-the-guard-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/catalog-unsaved-Catalog-fo-78e46-ssful-saves-reset-the-guard-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/core.spec.ts:567:5 › Production HTTPS: durable shift correction and frozen report pagination/export 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/shifts$/
+    Received string:  "https://localhost:3100/shifts?shift_corrections_page=1"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        24 × locator resolved to <html lang="uz">…</html>
+           - unexpected value "https://localhost:3100/shifts?shift_corrections_page=1"
+
+
+      575 |  page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else await dialog.dismiss();})
+      576 |  await page.getByLabel('Original yopilgan smena',{exact:true}).selectOption(original.id);await page.getByLabel('Tuzatish summasi',{exact:true}).fill('3.50');await page.getByLabel('Tuzatish sababi',{exact:true}).fill('Browser count correction')
+    > 577 |  await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/shifts$/);await expect(page.getByLabel('Tuzatish summasi',{exact:true})).toHaveValue('3.50')
+          |                                                                                ^
+      578 |  let originalInput='',retryInput='',posts=0
+      579 |  await page.route('**/api/shifts/*/corrections',async route=>{if(route.request().method()==='POST'){posts++;originalInput=route.request().postData()??'';await route.fetch();await route.abort()}else await route.continue()})
+      580 |  await page.getByRole('button',{name:'Tuzatishni yozish',exact:true}).evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click()});await expect.poll(()=>db.shiftCorrection.count({where:{originalShiftId:original.id}})).toBe(1)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:577:80
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › tests/e2e/core.spec.ts:606:5 › Production HTTPS: offline server banner, browser reopen, customer/note and original mixed-payment sync 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring', { exact: true }) with timeout 10000ms
+      - waiting for getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring', { exact: true })
+
+
+      623 |  await reopened.getByRole('button',{name:"To'lovga o'tish",exact:true}).click();await reopened.getByRole('button',{name:'Aralash',exact:true}).click();await reopened.getByLabel('Naqd',{exact:true}).fill('1e3');await reopened.getByRole('button',{name:/Savdoni yakunlash/}).click();await expect(reopened.getByText('Aralash to‘lov jami chek summasiga teng bo‘lishi kerak',{exact:true})).toBeVisible();expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);await reopened.getByLabel('Naqd',{exact:true}).fill('60000');await reopened.getByLabel('Karta (qo‘lda qayd)',{exact:true}).fill('0');await reopened.getByLabel('Nasiya',{exact:true}).fill('40000');await reopened.getByLabel('Aralash to‘lovda berilgan naqd pul',{exact:true}).fill('80000')
+      624 |  await reopened.route('**/api/sales/*/complete',async route=>{await route.fetch();await route.abort()});await reopened.getByRole('button',{name:/Savdoni yakunlash/}).click();await expect.poll(()=>db.sale.count({where:{organizationId:me.organization.id,status:'completed'}})).toBe(1)
+    > 625 |  await reopened.reload();await expect(reopened.getByRole('button',{name:'Navbatni sinxronlash',exact:true})).toBeEnabled();await reopened.getByTitle('Tizimdan chiqish',{exact:true}).click();await expect(reopened.getByText('Sinxronlanmagan amallar bor; avval natijani tekshiring',{exact:true})).toBeVisible();await expect(reopened).toHaveURL(/\/pos$/);await reopened.getByRole('button',{name:'Navbatni sinxronlash',exact:true}).click();await expect(reopened.getByRole('button',{name:'Natijani tekshirish',exact:true})).not.toBeVisible()
+          |                                                                                                                                                                                                                                                                                                       ^
+      626 |  const sale=await db.sale.findFirstOrThrow({where:{organizationId:me.organization.id},include:{payments:true}});expect(sale.sellerId).toBe(me.user.id);expect(sale.serviceType).toBe('Yetkazish');expect(sale.customerId).toBe(customer.id);expect(sale.note).toBe('Browser delivery note');expect(sale.cashTendered?.toString()).toBe('80000');expect(sale.cashChange?.toString()).toBe('20000');expect(sale.payments.length).toBe(2)
+      627 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toString()).toBe('40000');expect(await db.inventoryMovement.count({where:{sourceId:sale.id}})).toBe(1)
+      628 |  await expect(reopened.locator('#printable-receipt')).toContainText('Browser delivery note');await expect(reopened.locator('#printable-receipt')).toContainText('Qaytim:')
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:625:295
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-offl-b70b7-original-mixed-payment-sync-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-offl-b70b7-original-mixed-payment-sync-chromium/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-offl-b70b7-original-mixed-payment-sync-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-offl-b70b7-original-mixed-payment-sync-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-offl-b70b7-original-mixed-payment-sync-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › tests/e2e/core.spec.ts:662:5 › Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('heading', { name: 'ONLY_A', exact: true })
+    Expected: 2
+    Received: 0
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('heading', { name: 'ONLY_A', exact: true }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'ONLY_A', exact: true })
+        24 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      677 |  await expect(page.getByRole('heading',{name:'ONLY_B',exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'ONLY_A',exact:true})).toHaveCount(0);await expect(page.getByText("Savat bo'sh",{exact:true})).toBeVisible()
+      678 |  await page.getByLabel('Biznesni almashtirish').selectOption(me.organization.id)
+    > 679 |  await expect(page.getByRole('heading',{name:'ONLY_A',exact:true})).toHaveCount(2);await expect(page.getByRole('button',{name:"To'lovga o'tish"})).toBeEnabled()
+          |                                                                     ^
+      680 |  expect((await page.request.get(`/api/stores?organizationId=${me.organization.id}`)).ok()).toBe(true)
+      681 |  for(const method of ['POST','PUT','PATCH','DELETE'])expect((await page.request.fetch('/api/inventory/balances',{method,headers:{Origin:'https://localhost:3100'},data:{storeId:first.id,productId:a.id,quantity:999}})).status()).toBe(405)
+      682 |  const generated=await page.request.post(`/api/products/${a.id}/barcodes/generate`,{headers:{Origin:'https://localhost:3100'},data:{operationId:randomUUID()}});expect(generated.ok()).toBe(true)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:679:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium/error-context.md
+
+    Error Context: test-results/core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [chromium] › tests/e2e/core.spec.ts:819:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Farq hali bor' })
+    Expected substring: "Farq hali bor"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('alert').filter({ hasText: 'Farq hali bor' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Farq hali bor' })
+
+
+      824 |  await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}})
+      825 |  await page.goto('/incidents');await page.getByRole('button',{name:'Hisoblarni solishtirish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('article')).toContainText('Ombor qoldig‘i');await expect(page.getByRole('article')).toContainText('Jiddiy')
+    > 826 |  await page.getByLabel('Yopish sababi',{exact:true}).fill('Checked in browser');await page.getByRole('button',{name:'Tuzatilganini tekshirib yopish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Farq hali bor'})).toContainText('Farq hali bor')
+          |                                                                                                                                                                                                                                                                                                                                                  ^
+      827 |  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('2')
+      828 |  await page.getByLabel('Yopish sababi',{exact:true}).fill('');await page.goto('/replenishment');await page.getByLabel('Qoldiq filiali',{exact:true}).selectOption(store.id);await page.getByLabel('Mahsulot qidirish',{exact:true}).fill('Alert item');await page.getByLabel('Mahsulot',{exact:true}).selectOption(product.id);await page.getByLabel('Minimal qoldiq',{exact:true}).fill('3');await page.getByLabel('Maksimal qoldiq',{exact:true}).fill('10');await page.getByRole('button',{name:'Chegaralarni saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('article')).toContainText('tavsiya 8 dona')
+      829 |  await page.goto('/help');await expect(page.getByRole('heading',{name:'Internet yoki server javobi kelmadi'})).toBeVisible();await expect(page.getByRole('heading',{name:'Chek chop etilmadi'})).toBeVisible();await expect(page.getByRole('heading',{name:'Katalog va import xatolari'})).toBeVisible();await page.getByRole('link',{name:'Navbatni tekshirish',exact:true}).click();await expect(page.getByRole('heading',{name:'Navbat va konfliktlar',exact:true})).toBeVisible()
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:826:338
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium/error-context.md
+
+    Error Context: test-results/core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [chromium] › tests/e2e/core.spec.ts:859:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('article').filter({ hasText: 'ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2' }).first()
+    Expected substring: "conflict"
+    Received string:    "sale.complete · Qo‘lda tekshirish kerak · INVALID_PAYMENTAmal: ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2Asl qoralamani tekshirish"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('article').filter({ hasText: 'ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2' }).first() with timeout 10000ms
+      - waiting for getByRole('article').filter({ hasText: 'ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2' }).first()
+        2 × locator resolved to <article class="border p-3 bg-white">…</article>
+          - unexpected value "sale.complete · Javob kutilmoqda · Amal: ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2"
+        22 × locator resolved to <article class="border p-3 bg-white">…</article>
+           - unexpected value "sale.complete · Qo‘lda tekshirish kerak · INVALID_PAYMENTAmal: ca3cfe43-70e4-48f0-85b3-9afb5fecc1e2Asl qoralamani tekshirish"
+
+
+      871 |   await new Promise<void>((resolve,reject)=>{const tx=database.transaction('operations','readwrite');tx.objectStore('operations').add({id,scope:{organizationId,userId,deviceId:localStorage.getItem('pos_device_id')},type:'sale.complete',payload,state:'pending',createdAt:new Date().toISOString()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)});database.close()
+      872 |  },{id,payload,organizationId:me.organization.id,userId:me.user.id})
+    > 873 |  await page.goto('/sync-review');await page.getByRole('button',{name:'Asl kalitlar bilan sinxronlash',exact:true}).click();await expect(page.getByRole('article').filter({hasText:id}).first()).toContainText('conflict')
+          |                                                                                                                                                                                                 ^
+      874 |  const review=await db.syncReview.findFirstOrThrow({where:{organizationId:me.organization.id,operationId:id}});expect(review.payload).toEqual(payload)
+      875 |  await page.getByLabel('Konflikt ko‘rib chiqish sababi',{exact:true}).fill('Original draft reviewed');await page.getByRole('button',{name:'Terminal natija dalili bilan hal qilish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Avval asl amal natijasini tekshiring'})).toContainText('Avval asl amal natijasini tekshiring')
+      876 |  expect((await page.request.post(`/api/sales/${draft.id}/void`,{headers:{Origin:'https://localhost:3100'},data:{}})).ok()).toBe(true)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:873:193
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Sync-conflict-require-1f94f-l-local-and-server-payloads-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Sync-conflict-require-1f94f-l-local-and-server-payloads-chromium/error-context.md
+
+    Error Context: test-results/core-Sync-conflict-require-1f94f-l-local-and-server-payloads-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Sync-conflict-require-1f94f-l-local-and-server-payloads-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Sync-conflict-require-1f94f-l-local-and-server-payloads-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [chromium] › tests/e2e/core.spec.ts:902:5 › Reviewed price batch survives lost acknowledgement and damaged journal stays outside sellable stock 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Test-only temporary replay denial' })
+    Expected substring: "Test-only temporary replay denial"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('alert').filter({ hasText: 'Test-only temporary replay denial' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Test-only temporary replay denial' })
+
+
+      913 |  let lost=false,deniedRetry=false;
+      914 |  await page.route('**/api/products/prices',async route=>{const request=route.request();if(request.method()==='POST'&&!request.postDataJSON().preview&&!lost){lost=true;const response=await route.fetch();expect(response.ok()).toBe(true);await route.abort();}else if(request.method()==='POST'&&!request.postDataJSON().preview&&!deniedRetry){deniedRetry=true;await route.fulfill({status:403,json:{success:false,error:{code:'COST_CHANGE_FORBIDDEN',message:'Test-only temporary replay denial'}}});}else await route.continue();});
+    > 915 |  await page.getByRole('button',{name:'Narxlarni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish'})).toBeEnabled();await page.reload();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish'})).toBeEnabled();await page.getByRole('button',{name:'Original amalni qayta tekshirish'}).click();await expect(page.getByRole('alert').filter({hasText:'Test-only temporary replay denial'})).toContainText('Test-only temporary replay denial');await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish'})).toBeEnabled();await page.reload();await page.getByRole('button',{name:'Original amalni qayta tekshirish'}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish'})).not.toBeVisible();
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      916 |  expect((await db.product.findUniqueOrThrow({where:{id:product.id}})).salePrice.toString()).toBe('125.5');expect(await db.productPriceHistory.count({where:{productId:product.id,source:'catalog.bulk'}})).toBe(1);expect((await db.saleItem.findUniqueOrThrow({where:{id:sale.items[0].id}})).unitPrice.toString()).toBe('100');
+      917 |  await page.getByLabel('Narx maydoni').selectOption('costPrice');await page.getByLabel('O‘zgartirish sababi').fill('Exact six-decimal cost review');await page.getByLabel('Yangi narx Reviewed journal item',{exact:true}).fill('90071992547409.123456');await page.getByRole('button',{name:'Oldindan ko‘rish',exact:true}).click();await expect(page.getByRole('heading',{name:'Tasdiqlashdan oldin tekshiring'})).toBeVisible();await page.getByRole('button',{name:'Narxlarni tasdiqlash',exact:true}).click();await expect(page.getByRole('heading',{name:'Tasdiqlashdan oldin tekshiring'})).not.toBeVisible();expect((await db.product.findUniqueOrThrow({where:{id:product.id}})).costPrice.toString()).toBe('90071992547409.123456');expect((await db.saleItem.findUniqueOrThrow({where:{id:sale.items[0].id}})).unitCost.toString()).toBe('40');
+      918 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:915:465
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Reviewed-price-batch--37c0a-tays-outside-sellable-stock-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Reviewed-price-batch--37c0a-tays-outside-sellable-stock-chromium/error-context.md
+
+    Error Context: test-results/core-Reviewed-price-batch--37c0a-tays-outside-sellable-stock-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Reviewed-price-batch--37c0a-tays-outside-sellable-stock-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Reviewed-price-batch--37c0a-tays-outside-sellable-stock-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [chromium] › tests/e2e/core.spec.ts:925:5 › Finance UI records internal bank expense, transfer and exact reversal with durable recovery 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for locator('article').filter({ hasText: 'Actual rent payment' }).getByRole('button', { name: 'Qarshi hujjat yaratish', exact: true })
+
+
+      936 |  await page.getByLabel('To‘lov hisobi',{exact:true}).selectOption(primary.id);await page.getByLabel('Xarajat toifasi',{exact:true}).selectOption(category.id);await page.getByLabel('Xarajat summasi',{exact:true}).fill('10.25');await page.getByLabel('Xarajat sababi',{exact:true}).fill('Actual rent payment');await confirm('Xarajat');await expect(page.getByText('Operatsion foyda: -10.25',{exact:true})).toBeVisible();
+      937 |  await page.getByLabel('Qaysi hisobdan',{exact:true}).selectOption(primary.id);await page.getByLabel('Qaysi hisobga',{exact:true}).selectOption(secondary.id);await page.getByLabel('O‘tkazma summasi',{exact:true}).fill('20.05');await page.getByLabel('O‘tkazma sababi',{exact:true}).fill('Actual manual transfer');await confirm('Ichki o‘tkazma');await expect(page.getByText('Secondary manual bank: 20.05 · bank · Ichki jurnal',{exact:true})).toBeVisible();await expect(page.getByText('Operatsion foyda: -10.25',{exact:true})).toBeVisible();
+    > 938 |  const expense=page.locator('article').filter({hasText:'Actual rent payment'});await expense.getByRole('button',{name:'Qarshi hujjat yaratish',exact:true}).click();await page.getByLabel('Qarshi hujjat sababi',{exact:true}).fill('Rent payment correction');
+          |                                                                                                                                                             ^
+      939 |  let dropped=false;await page.route('**/api/finance/documents/*/reverse',async route=>{const response=await route.fetch();if(!dropped&&response.ok()){dropped=true;await route.abort('failed');}else await route.fulfill({response});});
+      940 |  await confirm('Qarshi hujjat');await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).toBeVisible();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).not.toBeVisible();await expect(page.getByText('Operatsion foyda: 0',{exact:true})).toBeVisible();
+      941 |  expect(await db.financialDocument.count({where:{organizationId:me.organization.id,kind:'expense_reversal'}})).toBe(1);await expect(page.getByText('Primary manual bank: 79.95 · bank · Ichki jurnal',{exact:true})).toBeVisible();
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:938:157
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Finance-UI-records-in-1a565-ersal-with-durable-recovery-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Finance-UI-records-in-1a565-ersal-with-durable-recovery-chromium/error-context.md
+
+    Error Context: test-results/core-Finance-UI-records-in-1a565-ersal-with-durable-recovery-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Finance-UI-records-in-1a565-ersal-with-durable-recovery-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Finance-UI-records-in-1a565-ersal-with-durable-recovery-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [chromium] › tests/e2e/core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Buyurtma holati: received', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Buyurtma holati: received', { exact: true }) with timeout 10000ms
+      - waiting for getByText('Buyurtma holati: received', { exact: true })
+
+
+      984 |  await page.goto('/suppliers/'+supplier.id);await page.getByLabel('Buyurtma filiali',{exact:true}).selectOption(store.id);await page.getByLabel('Buyurtma raqami',{exact:true}).fill('UI-ORDER-FIVE');await page.getByLabel('Buyurtma sababi',{exact:true}).fill('Actual purchase five units');await page.getByLabel('Mahsulot',{exact:true}).selectOption(product.id);await page.getByLabel('Buyurtma miqdori 1',{exact:true}).fill('5');await page.getByLabel('Buyurtma xarid narxi 1',{exact:true}).fill('10.25');
+      985 |  const confirm=async(label:string)=>{await page.getByRole('button',{name:label+': oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();};await confirm('Xarid buyurtmasi');await page.getByRole('button',{name:'UI-ORDER-FIVE · '+store.name,exact:true}).click();await expect(page.getByText('Buyurtma holati: ordered',{exact:true})).toBeVisible();await page.getByLabel('Qabul miqdori 1',{exact:true}).fill('2');await page.getByLabel('Qabul invoice raqami',{exact:true}).fill('UI-RECEIPT-TWO');await page.getByLabel('Qabul sababi',{exact:true}).fill('First two units received');await confirm('Buyurtmani qabul qilish');await expect(page.getByText('Buyurtma holati: partial',{exact:true})).toBeVisible();await expect(page.getByText('To‘lanmagan qarz: 20.5',{exact:true})).toBeVisible();
+    > 986 |  await page.getByLabel('Qabul miqdori 1',{exact:true}).fill('3');await page.getByLabel('Qabul invoice raqami',{exact:true}).fill('UI-RECEIPT-THREE');await page.getByLabel('Qabul sababi',{exact:true}).fill('Remaining three actual units');let lost=false;await page.route('**/api/purchase-orders/*/receive',async route=>{const response=await route.fetch();if(!lost&&response.ok()){lost=true;await route.abort('failed');}else await route.fulfill({response});});await confirm('Buyurtmani qabul qilish');await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).not.toBeVisible();await page.getByRole('button',{name:'UI-ORDER-FIVE · '+store.name,exact:true}).click();await expect(page.getByText('Buyurtma holati: received',{exact:true})).toBeVisible();await expect(page.getByText('To‘lanmagan qarz: 51.25',{exact:true})).toBeVisible();
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ^
+      987 |  const order=await db.purchaseOrder.findFirstOrThrow({where:{supplierId:supplier.id}});expect(await db.purchaseReceipt.count({where:{orderId:order.id}})).toBe(2);expect(await db.supplierInvoice.count({where:{supplierId:supplier.id}})).toBe(2);expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toString()).toBe('5');expect((await db.purchaseReceiptLine.count({where:{receipt:{orderId:order.id}}}))).toBe(2);
+      988 |  await page.goto('/reports/supplier-balances');await expect(page.getByText('To‘lanmagan qarz: 51.25',{exact:true})).toBeVisible();await expect(page.getByText('Muddatsiz: 51.25',{exact:true})).toBeVisible();const download=page.waitForEvent('download');await page.getByRole('button',{name:'Supplier balansini CSV yuklash',exact:true}).click();expect((await download).suggestedFilename()).toBe('supplier-balances.csv');
+      989 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:986:987
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Purchase-order-UI-acc-43b07-eceipt-intent-across-reload-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Purchase-order-UI-acc-43b07-eceipt-intent-across-reload-chromium/error-context.md
+
+    Error Context: test-results/core-Purchase-order-UI-acc-43b07-eceipt-intent-across-reload-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Purchase-order-UI-acc-43b07-eceipt-intent-across-reload-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Purchase-order-UI-acc-43b07-eceipt-intent-across-reload-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [chromium] › tests/e2e/core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/suppliers\/76f89bff-b804-4d6d-b494-e1bbb696d05c$/
+    Received string:  "https://localhost:3100/suppliers/76f89bff-b804-4d6d-b494-e1bbb696d05c?supplier_credits_page=1"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        23 × locator resolved to <html lang="uz">…</html>
+           - unexpected value "https://localhost:3100/suppliers/76f89bff-b804-4d6d-b494-e1bbb696d05c?supplier_credits_page=1"
+
+
+      994 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss();}});
+      995 |  await page.goto('/suppliers/'+supplier.id);await page.getByLabel('Supplier qaytarish invoice',{exact:true}).selectOption(receipt.invoice.id);await expect(page.getByLabel('Supplier qaytarish miqdori 1',{exact:true})).toBeVisible();await page.getByLabel('Supplier qaytarish invoice',{exact:true}).selectOption(receipt.invoice.id);await page.getByLabel('Supplier qaytarish miqdori 1',{exact:true}).fill('1');await page.getByLabel('Supplier credit sababi',{exact:true}).fill('One actual original unit returned');
+    > 996 |  await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(new RegExp('/suppliers/'+supplier.id+'$'));
+          |                                                                                ^
+      997 |  await page.getByLabel('Supplier credit turi',{exact:true}).selectOption('price_correction');await expect(page.getByLabel('Supplier credit turi',{exact:true})).toHaveValue('goods_return');await expect(page.getByLabel('Supplier qaytarish miqdori 1',{exact:true})).toHaveValue('1');expect(prompts).toBe(2);
+      998 |  let entered!:()=>void,release!:()=>void,previews=0;const started=new Promise<void>(resolve=>{entered=resolve}),gate=new Promise<void>(resolve=>{release=resolve});
+      999 |  const previewPath='**/api/supplier-invoices/'+receipt.invoice.id+'/credits';
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:996:80
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Supplier-return-UI-pr-91a84-d-never-posts-a-cash-refund-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Supplier-return-UI-pr-91a84-d-never-posts-a-cash-refund-chromium/error-context.md
+
+    Error Context: test-results/core-Supplier-return-UI-pr-91a84-d-never-posts-a-cash-refund-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Supplier-return-UI-pr-91a84-d-never-posts-a-cash-refund-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Supplier-return-UI-pr-91a84-d-never-posts-a-cash-refund-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [chromium] › tests/e2e/core.spec.ts:1026:5 › Cashier PIN UI sets a password-protected credential and switches only to branch-scoped cashier without manager elevation 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status').filter({ hasText: 'Kassir yoki PIN noto‘g‘ri' })
+    Expected substring: "Kassir yoki PIN noto‘g‘ri"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('status').filter({ hasText: 'Kassir yoki PIN noto‘g‘ri' }) with timeout 10000ms
+      - waiting for getByRole('status').filter({ hasText: 'Kassir yoki PIN noto‘g‘ri' })
+
+
+      1027 |  const phone='998'+Date.now();phones.push(phone);const origin={Origin:'https://localhost:3100'};expect((await page.request.post('/api/auth/register',{headers:origin,data:{fullName:'PIN owner',phone,password:'test-only-password',organizationName:'PIN UI business'}})).ok()).toBe(true);const me=(await (await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);const store=await db.store.findFirstOrThrow({where:{organizationId:me.organization.id}}),hidden=await db.store.create({data:{organizationId:me.organization.id,name:'PIN other branch'}});const {default:bcrypt}=await import('bcryptjs');const cashierPhone='998'+Date.now()+'1';phones.push(cashierPhone);const cashier=await db.user.create({data:{fullName:'PIN browser cashier',phone:cashierPhone,passwordHash:await bcrypt.hash('test-only-password',12)}});users.push(cashier.id);const membership=await db.organizationUser.create({data:{organizationId:me.organization.id,userId:cashier.id,role:'cashier',userStores:{create:[{storeId:store.id},{storeId:hidden.id}]}}});
+      1028 |  const cashierContext=await browser.newContext({ignoreHTTPSErrors:true});try{expect((await cashierContext.request.post('https://localhost:3100/api/auth/login',{headers:origin,data:{phone:cashierPhone,password:'test-only-password'}})).ok()).toBe(true);const cashierPage=await cashierContext.newPage();await cashierPage.goto('https://localhost:3100/security');await cashierPage.getByLabel('PIN sozlash uchun parol',{exact:true}).fill('test-only-password');await cashierPage.getByLabel('Yangi kassir PIN',{exact:true}).fill('654321');await cashierPage.getByRole('button',{name:'Kassir PINni saqlash',exact:true}).click();await expect(cashierPage.getByRole('status').filter({hasText:'PIN saqlandi'})).toHaveText('PIN saqlandi');expect(await bcrypt.compare('654321',(await db.organizationUser.findUniqueOrThrow({where:{id:membership.id}})).pinHash!)).toBe(true);}finally{await cashierContext.close();}
+    > 1029 |  await page.goto('/security');await page.getByLabel('Almashiladigan kassir',{exact:true}).selectOption(membership.id);await page.getByLabel('Almashish PIN',{exact:true}).fill('000000');await page.getByRole('button',{name:'PIN bilan kassirni almashtirish',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Kassir yoki PIN noto‘g‘ri'})).toContainText('Kassir yoki PIN noto‘g‘ri');await page.getByLabel('Almashish PIN',{exact:true}).fill('654321');await page.getByRole('button',{name:'PIN bilan kassirni almashtirish',exact:true}).click();await page.waitForURL('**/pos');const current=(await (await page.request.get('/api/auth/me')).json()).data;expect(current.user.id).toBe(cashier.id);expect(current.role).toBe('cashier');expect(current.stores.map((s:{id:string})=>s.id)).toEqual([store.id]);const stores=(await (await page.request.get('/api/stores?organizationId='+me.organization.id)).json()).data;expect(stores.map((s:{id:string})=>s.id)).toEqual([store.id]);expect((await page.request.post('/api/products',{headers:origin,data:{}})).status()).toBe(403);await db.organizationUser.update({where:{id:membership.id},data:{role:'admin'}});expect((await page.request.get('/api/auth/me')).status()).toBe(401);
+           |                                                                                                                                                                                                                                                                                                                                                                          ^
+      1030 | });
+      1031 |
+      1032 | test('Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes',async({page})=>{
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1029:362
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium/error-context.md
+
+    Error Context: test-results/core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Cashier-PIN-UI-sets-a-af9eb-r-without-manager-elevation-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [chromium] › tests/e2e/core.spec.ts:1299:5 › Maintenance UI preserves saved basket and original pending sale across drain and restores cash checkout once 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Planned POS maintenance acceptance', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Planned POS maintenance acceptance', { exact: true }) with timeout 10000ms
+      - waiting for getByText('Planned POS maintenance acceptance', { exact: true })
+
+
+      1310 |   await expect.poll(()=>page.evaluate(async()=>{const request=indexedDB.open('shuni-pos-local-v1'),database=await new Promise<IDBDatabase>((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)}),values=await new Promise<{value:{cart:{items:unknown[]}}}[]>(resolve=>{const query=database.transaction('drafts').objectStore('drafts').getAll();query.onsuccess=()=>resolve(query.result)});database.close();return values.some(v=>v.value.cart.items.length===1)})).toBe(true)
+      1311 |   state(true);expect((await page.request.get('/api/health/ready')).status()).toBe(503);expect((await page.request.post('/api/sales/'+sale.id+'/complete',{headers:origin,data:completion})).status()).toBe(200)
+    > 1312 |   await page.reload();await expect(page.getByText('Planned POS maintenance acceptance',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:"To'lovga o'tish",exact:true})).toBeDisabled()
+           |                                                                                                       ^
+      1313 |   state(false);await page.reload();await expect(page.getByRole('button',{name:"To'lovga o'tish",exact:true})).toBeEnabled();await page.getByRole('button',{name:"To'lovga o'tish",exact:true}).click();await page.getByRole('button',{name:'Naqd pul',exact:true}).click();await page.getByLabel("Mijoz bergan naqd pul (so'm)").fill('100.25')
+      1314 |   // The operator drains between a successful quote/probe and the actual write.
+      1315 |   let interrupted=false;await page.route('**/api/sales',async route=>{if(route.request().method()==='POST'&&!interrupted){interrupted=true;state(true)}await route.continue()})
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1312:103
+
+    PrismaClientKnownRequestError: 
+    Invalid `db.organization.deleteMany()` invocation in
+    /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:42:24
+
+      39 test.afterAll(async()=>{
+      40  const accounts=await db.user.findMany({where:{phone:{in:phones}},include:{organizationUsers:true}})
+      41  users.push(...accounts.map(user=>user.id));orgs.push(...accounts.flatMap(user=>user.organizationUsers.map(member=>member.organizationId)))
+    → 42  await db.organization.deleteMany(
+    Foreign key constraint violated: `CustomerAdvanceRefund_documentId_fkey (index)`
+
+      40 |  const accounts=await db.user.findMany({where:{phone:{in:phones}},include:{organizationUsers:true}})
+      41 |  users.push(...accounts.map(user=>user.id));orgs.push(...accounts.flatMap(user=>user.organizationUsers.map(member=>member.organizationId)))
+    > 42 |  await db.organization.deleteMany({where:{id:{in:orgs}}})
+         |                        ^
+      43 |  await db.user.deleteMany({where:{id:{in:users}}})
+      44 |  await db.$disconnect()
+      45 | })
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:42:24
+        at $n.handleRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:7315)
+        at $n.handleAndLogRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6623)
+        at $n.request (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6307)
+        at l (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:9633)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:42:2
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Maintenance-UI-preser-ab89d-restores-cash-checkout-once-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Maintenance-UI-preser-ab89d-restores-cash-checkout-once-chromium/error-context.md
+
+    Error Context: test-results/core-Maintenance-UI-preser-ab89d-restores-cash-checkout-once-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Maintenance-UI-preser-ab89d-restores-cash-checkout-once-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Maintenance-UI-preser-ab89d-restores-cash-checkout-once-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [chromium] › tests/e2e/count-recovery.spec.ts:8:5 › count start, reading and approval survive lost ACK and reload with exact quantities and one posting 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'qayta sanang' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'qayta sanang' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'qayta sanang' })
+
+
+      56 |  await page.getByLabel('Tasdiqlash yoki bekor qilish sababi',{exact:true}).fill('Double counted exact quantity')
+      57 |  await page.getByRole('button',{name:'Farqni tasdiqlash',exact:true}).click()
+    > 58 |  await expect(page.getByRole('alert').filter({hasText:'qayta sanang'})).toBeVisible()
+         |                                                                         ^
+      59 |  await expect(page.getByRole('button',{name:'Oldingi amalni qayta tekshirish',exact:true})).toHaveCount(0)
+      60 |  await quantity.fill('5.000001')
+      61 |  await page.getByRole('button',{name:'Sanalgan miqdorlarni saqlash',exact:true}).click()
+        at /home/fedora/Developments/POS_backup/tests/e2e/count-recovery.spec.ts:58:73
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/count-recovery-count-start-a0efe--quantities-and-one-posting-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/count-recovery-count-start-a0efe--quantities-and-one-posting-chromium/error-context.md
+
+    Error Context: test-results/count-recovery-count-start-a0efe--quantities-and-one-posting-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/count-recovery-count-start-a0efe--quantities-and-one-posting-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/count-recovery-count-start-a0efe--quantities-and-one-posting-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [chromium] › tests/e2e/custom-roles.spec.ts:8:5 › Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      11 |  const phone='roles-staff-'+randomUUID()
+      12 |  const staffResult=await page.request.post(`/api/organizations/${me.organization.id}/users`,{headers:{Origin:'https://localhost:3100'},data:{fullName:'Observer staff',phone,password,role:'admin'}})
+    > 13 |  expect(staffResult.ok()).toBe(true);const staff=(await staffResult.json()).data;users.push(staff.user.id)
+         |                           ^
+      14 |  await page.goto('/roles');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click()
+      15 |  await page.getByRole('button',{name:'Kuzatuvchi namunasi',exact:true}).click()
+      16 |  await page.getByLabel('Sabab',{exact:true}).fill('Explicit owner review for observer')
+        at /home/fedora/Developments/POS_backup/tests/e2e/custom-roles.spec.ts:13:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium/error-context.md
+
+    Error Context: test-results/custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) [chromium] › tests/e2e/identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic duplicate read failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic duplicate read failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic duplicate read failure' })
+
+
+      24 |  await page.goto('/customers/duplicates?sort=name_desc&page=3');await expect(page.locator('article')).toHaveCount(3);await expect(page.locator('article').last()).toContainText('Browser legacy 000');await page.reload();await expect(page.locator('article')).toHaveCount(3);
+      25 |  await page.getByLabel('Dublikat karta nomi qidirish',{exact:true}).fill('Browser legacy 042');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('article')).toHaveCount(1);await expect(page.locator('article')).toContainText('43 karta');await page.goBack();await expect(page.locator('article')).toHaveCount(3);
+    > 26 |  let fail=true;await page.route('**/api/customer-merges?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic duplicate read failure'}}})}else await route.continue()});await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic duplicate read failure'})).toBeVisible();await expect(page.getByText('Faol valid telefon dublikati topilmadi.',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('article')).toHaveCount(3);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      27 |  expect(String((await db.payment.aggregate({where:{sale:{organizationId:me.organization.id}},_sum:{amount:true}}))._sum.amount)).toBe('210');expect((await db.customer.findUniqueOrThrow({where:{id:customer.id}})).mergedIntoId).toBeNull();
+      28 | });
+      29 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/identity-list.spec.ts:26:417
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/error-context.md
+
+    Error Context: test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic advance read failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic advance read failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic advance read failure' })
+
+
+      18 |  await page.goto('/customers/'+customer.id+'?ledger_page=3&customer_sales_page=3');const ledger=page.getByRole('heading',{name:'Mijoz qarz ko‘chirmasi',exact:true}).locator('..'),sales=page.getByRole('heading',{name:'Mijoz savdolari va qaytarishlari',exact:true}).locator('..');await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(sales.locator('tbody tr')).toHaveCount(3);await page.reload();await expect(ledger.locator('tbody tr')).toHaveCount(3);
+      19 |  await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('Retained unposted debt document');await ledger.getByRole('button',{name:'Oldingi',exact:true}).click();await expect(ledger.locator('tbody tr')).toHaveCount(20);await page.goBack();await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(page.getByLabel('Qarz hujjati sababi',{exact:true})).toHaveValue('Retained unposted debt document');await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('');
+    > 20 |  await page.getByLabel('Avans sababi',{exact:true}).fill('Retained unposted advance reason');let fail=true;await page.route('**/api/customers/'+customer.id+'/advances?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic advance read failure'}}})}else await route.continue()});await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic advance read failure'})).toBeVisible();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toHaveCount(0);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained unposted advance reason');await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toBeVisible();
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+      22 |  await page.getByLabel('Avans sababi',{exact:true}).fill('');await page.unroute('**/api/customers/'+customer.id+'/advances?**');
+      23 |  const accountsResponse=await page.request.get('/api/finance/accounts');expect(accountsResponse.ok()).toBe(true);const cashAccount=(await accountsResponse.json()).data.find((account:{kind:string;registerId:string})=>account.kind==='cash'&&account.registerId===register.id)??await post('/api/finance/accounts',{storeId:store.id,registerId:register.id,name:'Original cash advance account',kind:'cash',openingBalance:'0',reason:'Actual explicit native cash account source'});expect(cashAccount).toBeTruthy();
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:20:531
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('cell', { name: 'Previous categories 052b1444bb64' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('cell', { name: 'Previous categories 052b1444bb64' }) with timeout 10000ms
+      - waiting for getByRole('cell', { name: 'Previous categories 052b1444bb64' })
+
+
+      17 |  await input.fill(name);if(!isCategory)await page.getByLabel('Kod',{exact:true}).fill('new_'+suffix)
+      18 |  const readPattern='**/api/'+kind+'?**'
+    > 19 |  await page.route(readPattern,route=>route.abort('failed'));await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Oxirgi ro‘yxat'})).toBeVisible();await expect(input).toHaveValue(name);await expect(page.getByRole('button',{name:'Saqlash',exact:true})).toBeDisabled();await expect(page.getByRole('cell',{name:oldName,exact:!isCategory})).toBeVisible()
+         |                                                                                                                                                                                                                                                                                                                                                                                                                           ^
+      20 |  await page.unroute(readPattern);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlash',exact:true})).toBeEnabled();await expect(input).toHaveValue(name)
+      21 |  let writes=0,release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve})
+      22 |  await page.route('**/api/'+kind,async route=>{if(route.request().method()!=='POST')return route.continue();writes++;const response=await route.fetch();expect(response.ok()).toBe(true);await held;await route.fulfill({response})})
+        at /home/fedora/Developments/POS_backup/tests/e2e/legacy-catalog-state.spec.ts:19:411
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/legacy-catalog-state-categ-a6112-K-keep-truthful-saved-state-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/legacy-catalog-state-categ-a6112-K-keep-truthful-saved-state-chromium/error-context.md
+
+    Error Context: test-results/legacy-catalog-state-categ-a6112-K-keep-truthful-saved-state-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/legacy-catalog-state-categ-a6112-K-keep-truthful-saved-state-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/legacy-catalog-state-categ-a6112-K-keep-truthful-saved-state-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('cell', { name: 'Previous units 4e5353d702f5', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('cell', { name: 'Previous units 4e5353d702f5', exact: true }) with timeout 10000ms
+      - waiting for getByRole('cell', { name: 'Previous units 4e5353d702f5', exact: true })
+
+
+      17 |  await input.fill(name);if(!isCategory)await page.getByLabel('Kod',{exact:true}).fill('new_'+suffix)
+      18 |  const readPattern='**/api/'+kind+'?**'
+    > 19 |  await page.route(readPattern,route=>route.abort('failed'));await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Oxirgi ro‘yxat'})).toBeVisible();await expect(input).toHaveValue(name);await expect(page.getByRole('button',{name:'Saqlash',exact:true})).toBeDisabled();await expect(page.getByRole('cell',{name:oldName,exact:!isCategory})).toBeVisible()
+         |                                                                                                                                                                                                                                                                                                                                                                                                                           ^
+      20 |  await page.unroute(readPattern);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlash',exact:true})).toBeEnabled();await expect(input).toHaveValue(name)
+      21 |  let writes=0,release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve})
+      22 |  await page.route('**/api/'+kind,async route=>{if(route.request().method()!=='POST')return route.continue();writes++;const response=await route.fetch();expect(response.ok()).toBe(true);await held;await route.fulfill({response})})
+        at /home/fedora/Developments/POS_backup/tests/e2e/legacy-catalog-state.spec.ts:19:411
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/legacy-catalog-state-units-de94b-K-keep-truthful-saved-state-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/legacy-catalog-state-units-de94b-K-keep-truthful-saved-state-chromium/error-context.md
+
+    Error Context: test-results/legacy-catalog-state-units-de94b-K-keep-truthful-saved-state-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/legacy-catalog-state-units-de94b-K-keep-truthful-saved-state-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/legacy-catalog-state-units-de94b-K-keep-truthful-saved-state-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) [chromium] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+
+
+       98 |  await page.route('**/api/roles?**',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'INTERNAL_ERROR',message:'Fixture role list unavailable'}})}));
+       99 |  await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+    > 100 |  await expect(page.getByRole('alert').filter({hasText:'Fixture role list unavailable'})).toBeVisible();
+          |                                                                                          ^
+      101 |  await page.unroute('**/api/roles?**');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+      102 |  await page.getByRole('button',{name:'Tahrirlash',exact:true}).click();
+      103 |  await page.getByLabel('GET /api/products',{exact:true}).uncheck();await page.getByLabel('GET /api/products',{exact:true}).check();
+        at /home/fedora/Developments/POS_backup/tests/e2e/roles-state.spec.ts:100:90
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/error-context.md
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert', { name: 'Savdolar ro‘yxati xatosi', exact: true })
+    Expected substring: "Synthetic list failure"
+    Received string:    "Server amalni yakunlay olmadi. Asl natijani tekshiring. So‘rov raqamini yordam xizmatiga bering; maxfiy ma’lumot yubormang. Qayta yuklash"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('alert', { name: 'Savdolar ro‘yxati xatosi', exact: true }) with timeout 10000ms
+      - waiting for getByRole('alert', { name: 'Savdolar ro‘yxati xatosi', exact: true })
+        24 × locator resolved to <div role="alert" class="p-6 text-red-700" aria-label="Savdolar ro‘yxati xatosi">…</div>
+           - unexpected value "Server amalni yakunlay olmadi. Asl natijani tekshiring. So‘rov raqamini yordam xizmatiga bering; maxfiy ma’lumot yubormang. Qayta yuklash"
+
+
+      32 |     else await route.continue();
+      33 |   });
+    > 34 |   await page.getByRole('button',{name:'Yangilash',exact:true}).click();await expect(page.getByRole('alert',{name:'Savdolar ro‘yxati xatosi',exact:true})).toContainText('Synthetic list failure');
+         |                                                                                                                                                           ^
+      35 |   await expect(page.getByText('Savdolar topilmadi',{exact:true})).toHaveCount(0);
+      36 |   await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      37 |   await page.unroute('**/api/sales?**');
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:34:155
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) [chromium] › tests/e2e/sales-list.spec.ts:100:5 › Supplier/brand/audit applied URL state survives history and reload; business draft survives filtering and errors never become zero rows 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic extended failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic extended failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic extended failure' })
+
+
+      116 |   await page.getByRole('button',{name:'Filtrlarni tozalash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      117 |   await page.route('**/api/'+(path==='/suppliers'?'suppliers':'brands')+'?**',route=>route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic extended failure'}}}));
+    > 118 |   await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic extended failure'})).toBeVisible();
+          |                                                                                                                                                                 ^
+      119 |   await expect(page.getByText(path==='/suppliers'?'Yetkazib beruvchi topilmadi.':'Brend topilmadi.',{exact:true})).toHaveCount(0);
+      120 |   await page.unroute('**/api/'+(path==='/suppliers'?'suppliers':'brands')+'?**');await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      121 |  }
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:118:161
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Supplier-brand--e6d07-rors-never-become-zero-rows-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Supplier-brand--e6d07-rors-never-become-zero-rows-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Supplier-brand--e6d07-rors-never-become-zero-rows-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Supplier-brand--e6d07-rors-never-become-zero-rows-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Supplier-brand--e6d07-rors-never-become-zero-rows-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) [chromium] › tests/e2e/sales-list.spec.ts:129:5 › Inventory balances/documents and transfers keep applied filters in URL, allow error recovery and retain original business drafts 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic inventory list failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic inventory list failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic inventory list failure' })
+
+
+      142 |  await page.getByLabel('Hujjat raqamini qidirish',{exact:true}).fill('NO-SUCH-DOCUMENT');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(0);await page.getByRole('button',{name:'Filtrlarni tozalash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      143 |  let fail=true;await page.route('**/api/stock-documents?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic inventory list failure'}}});}else await route.continue();});
+    > 144 |  await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic inventory list failure'})).toBeVisible();await expect(page.getByText('Hujjatlar topilmadi',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);await page.unroute('**/api/stock-documents?**');
+          |                                                                                                                                                                      ^
+      145 |  await page.goto('/inventory/transfers?sort=oldest&page=3');await expect(page.locator('tbody tr')).toHaveCount(3);await page.reload();await expect(page.locator('tbody tr')).toHaveCount(3);
+      146 |  await page.getByLabel('Transfer izohi yoki filial qidirish',{exact:true}).fill('BROWSER-TRANSFER-000');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await expect(page).toHaveURL(/search=BROWSER-TRANSFER-000/);await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);
+      147 |  await page.getByLabel('Transfer holati filtri',{exact:true}).selectOption('sent');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByText('Transferlar topilmadi',{exact:true})).toBeVisible();await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);await expect(page.getByLabel('Transfer holati filtri',{exact:true})).toHaveValue('');
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:144:166
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Inventory-balan-ae33b-in-original-business-drafts-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Inventory-balan-ae33b-in-original-business-drafts-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Inventory-balan-ae33b-in-original-business-drafts-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Inventory-balan-ae33b-in-original-business-drafts-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Inventory-balan-ae33b-in-original-business-drafts-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) [chromium] › tests/e2e/sales-list.spec.ts:151:5 › Shift and finance URL pages reach original postings, preserve exact amounts and recover from a failed list read 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic finance list failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic finance list failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic finance list failure' })
+
+
+      161 |  await page.goto('/finance?kind=expense&sort=amount_desc&page=2');await expect(page.locator('tbody tr')).toHaveCount(1);await expect(page.locator('tbody tr')).toContainText('BROWSER-FINANCE-001');await page.reload();await expect(page.locator('tbody tr')).toHaveCount(1);
+      162 |  await page.getByLabel('Hisob nomi',{exact:true}).fill('Retained unsaved bank draft');await page.getByLabel('Moliyaviy hujjat sababi qidirish',{exact:true}).fill('BROWSER-FINANCE-021');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await expect(page.locator('tbody tr')).toContainText('BROWSER-FINANCE-021');await expect(page.getByLabel('Hisob nomi',{exact:true})).toHaveValue('Retained unsaved bank draft');await page.goBack();await expect(page.locator('tbody tr')).toContainText('BROWSER-FINANCE-001');
+    > 163 |  let fail=true;await page.route('**/api/finance/documents?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic finance list failure'}}});}else await route.continue();});await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic finance list failure'})).toBeVisible();await expect(page.getByText('Hujjatlar yo‘q.',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await page.unroute('**/api/finance/documents?**');
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      164 |  expect(String((await db.accountEntry.aggregate({where:{accountId:account.id},_sum:{amount:true}}))._sum.amount)).toBe('769');
+      165 | });
+      166 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:163:417
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Shift-and-finan-9ea13-ver-from-a-failed-list-read-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Shift-and-finan-9ea13-ver-from-a-failed-list-read-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Shift-and-finan-9ea13-ver-from-a-failed-list-read-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Shift-and-finan-9ea13-ver-from-a-failed-list-read-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Shift-and-finan-9ea13-ver-from-a-failed-list-read-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  25) [chromium] › tests/e2e/sales-list.spec.ts:167:5 › Expired synthetic job sources and actual inventory-gap scan display all URL pages without exposing worker payload; errors retain business drafts 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic operational list failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic operational list failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic operational list failure' })
+
+
+      182 |  await page.goto('/jobs?state=cancelled&sort=oldest&page=3');await expect(page.locator('article')).toHaveCount(3);await page.reload();await expect(page.locator('article')).toHaveCount(3);
+      183 |  await page.getByLabel('Fon ishini tasdiqlash sababi',{exact:true}).fill('Retained unsaved internal work reason');await page.getByLabel('Fon ishining holati',{exact:true}).selectOption('queued');await expect(page.getByText('Bu filtrda fon ishi yo‘q.',{exact:true})).toBeVisible();await page.goBack();await expect(page.locator('article')).toHaveCount(3);await expect(page.getByLabel('Fon ishini tasdiqlash sababi',{exact:true})).toHaveValue('Retained unsaved internal work reason');await page.getByLabel('Fon ishini tasdiqlash sababi',{exact:true}).fill('');
+    > 184 |  let fail=true;await page.route('**/api/jobs?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic operational list failure'}}});}else await route.continue();});await page.getByRole('button',{name:'Fon ishlarini yangilash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Server amalni yakunlay olmadi.'})).toBeVisible();await expect(page.getByText('Bu filtrda fon ishi yo‘q.',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('article')).toHaveCount(3);await page.unroute('**/api/jobs?**');
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                      ^
+      185 |  await page.goto('/incidents?state=open&sort=oldest&page=3');await expect(page.locator('article')).toHaveCount(3);await page.reload();await expect(page.locator('article')).toHaveCount(3);
+      186 |  await page.getByLabel('Yopish sababi',{exact:true}).fill('Retained unsaved discrepancy reason');await page.getByLabel('Tafovut holati',{exact:true}).selectOption('resolved');await expect(page.getByText('Ushbu holatda tafovut yo‘q.',{exact:false})).toBeVisible();await page.goBack();await expect(page.locator('article')).toHaveCount(3);await expect(page.getByLabel('Yopish sababi',{exact:true})).toHaveValue('Retained unsaved discrepancy reason');
+      187 |  expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id}})).toBe(0);expect(await db.inventoryBalance.count({where:{storeId:store.id,quantity:'2'}})).toBe(43);
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:184:422
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Expired-synthet-8610b-rors-retain-business-drafts-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Expired-synthet-8610b-rors-retain-business-drafts-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Expired-synthet-8610b-rors-retain-business-drafts-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Expired-synthet-8610b-rors-retain-business-drafts-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Expired-synthet-8610b-rors-retain-business-drafts-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  26) [chromium] › tests/e2e/sales-list.spec.ts:250:5 › Main report and reconciliation pages keep row filters separate from period cash totals and retain source cutoff through history 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic report list failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic report list failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic report list failure' })
+
+
+      270 |  await page.goto('/reports/reconciliation?kind=inventory&search=Main+reconcile+gap&sort=expected_desc&page=3');await expect(page.locator('tbody tr')).toHaveCount(3);await page.reload();await expect(page.locator('tbody tr')).toHaveCount(3);
+      271 |  await page.getByLabel('Tekshiruv mahsuloti, chek yoki ID qidirish',{exact:true}).fill('Main reconcile gap 042');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);
+    > 272 |  let fail=true;await page.route('**/api/reports/reconciliation?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic report list failure'}}});}else await route.continue();});await page.getByRole('button',{name:'Qayta tekshirish',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Server amalni yakunlay olmadi.'})).toBeVisible();await expect(page.getByText('Tanlangan filtrda tafovut yo‘q.',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(3);await page.unroute('**/api/reports/reconciliation?**');
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                       ^
+      273 |  expect(String((await db.payment.aggregate({where:{sale:{organizationId:me.organization.id}},_sum:{amount:true}}))._sum.amount)).toBe('231');
+      274 | });
+      275 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:272:423
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Main-report-and-63521-urce-cutoff-through-history-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Main-report-and-63521-urce-cutoff-through-history-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Main-report-and-63521-urce-cutoff-through-history-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Main-report-and-63521-urce-cutoff-through-history-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Main-report-and-63521-urce-cutoff-through-history-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  27) [chromium] › tests/e2e/sales-list.spec.ts:277:5 › Price and reservation histories keep applied URL state while separate price and stock drafts survive filters and Back 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Synthetic reservation list failure' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Synthetic reservation list failure' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Synthetic reservation list failure' })
+
+
+      290 |  await page.getByLabel('Zona nomi',{exact:true}).fill('Retained unsubmitted physical zone');await page.getByLabel('Rezerv sababi yoki ID qidirish',{exact:true}).fill('Reservation browser 020');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('article')).toHaveCount(1);await page.goBack();await expect(page.locator('article')).toHaveCount(1);await expect(page.getByLabel('Zona nomi',{exact:true})).toHaveValue('Retained unsubmitted physical zone');
+      291 |  await page.getByLabel('Rezerv holati',{exact:true}).selectOption('active');await expect(page.getByText('Bu filtrda rezerv topilmadi.',{exact:true})).toBeVisible();await page.goBack();await expect(page.locator('article')).toHaveCount(1);
+    > 292 |  let fail=true;await page.route('**/api/inventory/locations?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic reservation list failure'}}});}else await route.continue();});await page.getByRole('button',{name:'Ombor ma’lumotini qayta yuklash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Server amalni yakunlay olmadi.'})).toBeVisible();await expect(page.getByText('Bu filtrda rezerv topilmadi.',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Ombor ma’lumotini qayta yuklash',exact:true}).click();await expect(page.locator('article')).toHaveCount(1);await page.unroute('**/api/inventory/locations?**');
+          |                                                                                                                                                                                                                                                                                                                                                                                                                                                             ^
+      293 |  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:products[0].id}}})).quantity.toFixed()).toBe('1');expect(await db.inventoryMovement.count({where:{organizationId:me.organization.id}})).toBe(0);
+      294 |  void history;
+      295 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:292:445
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Price-and-reser-f8d69-ts-survive-filters-and-Back-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Price-and-reser-f8d69-ts-survive-filters-and-Back-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Price-and-reser-f8d69-ts-survive-filters-and-Back-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Price-and-reser-f8d69-ts-survive-filters-and-Back-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Price-and-reser-f8d69-ts-survive-filters-and-Back-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  28) [chromium] › tests/e2e/shared-documents.spec.ts:48:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Shaxsan xizmat eslatmalari', exact: true }).locator('..').locator('..').locator('..').getByRole('link', { name: 'Ko‘chirmani ochish', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Shaxsan xizmat eslatmalari', exact: true }).locator('..').locator('..').locator('..').getByRole('link', { name: 'Ko‘chirmani ochish', exact: true }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Shaxsan xizmat eslatmalari', exact: true }).locator('..').locator('..').locator('..').getByRole('link', { name: 'Ko‘chirmani ochish', exact: true })
+
+
+      59 |  await expect.poll(()=>db.backgroundJob.count({where:{organizationId:f.orgId,type:'customer_reminder'}})).toBe(1);
+      60 |  execFileSync(process.execPath,['--require','./scripts/worker-resolver.cjs','.worker-build/scripts/workers/jobs.js','--once'],{env:{...process.env,APP_ORIGIN:'https://localhost:3100',AUTH_TOTP_ENABLED:'true',AUTH_CHALLENGE_SECRET:'c'.repeat(64)},stdio:'pipe',timeout:60000});
+    > 61 |  await card.getByRole('button',{name:'Yangilash',exact:true}).click();const link=card.getByRole('link',{name:'Ko‘chirmani ochish',exact:true});await expect(link).toBeVisible();const url=(await link.getAttribute('href'))!;
+         |                                                                                                                                                                   ^
+      62 |  const anonymous=await browser.newContext({ignoreHTTPSErrors:true}),statement=await anonymous.newPage();
+      63 |  try{
+      64 |   await statement.goto(url);await expect(statement.getByRole('heading',{name:'Mijoz qarz ko‘chirmasi',exact:true})).toBeVisible();await expect(statement.getByText('Muddati o‘tgan qarz: 1.01',{exact:true})).toBeVisible();await expect(statement.locator('tbody tr')).toHaveCount(1);
+        at /home/fedora/Developments/POS_backup/tests/e2e/shared-documents.spec.ts:61:163
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/error-context.md
+
+    Error Context: test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  29) [chromium] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/settings\/taxes$/
+    Received string:  "https://localhost:3100/settings/taxes?tax_versions_page=1"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        23 × locator resolved to <html lang="uz">…</html>
+           - unexpected value "https://localhost:3100/settings/taxes?tax_versions_page=1"
+
+
+      27 |  })
+      28 |  await page.getByRole('button',{name:'Soliq profilini arxivlash: Recovery first: oldindan ko‘rish',exact:true}).click()
+    > 29 |  try{await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).evaluate(button=>{(button as HTMLButtonElement).click();(button as HTMLButtonElement).click()});await started;await page.locator('a[href="/dashboard"]').first().click();await expect(page).toHaveURL(/\/settings\/taxes$/);expect(prompts).toBe(2);}finally{release()}
+         |                                                                                                                                                                                                                                                                       ^
+      30 |  await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible()
+      31 |  await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click()
+      32 |  await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).toHaveCount(0)
+        at /home/fedora/Developments/POS_backup/tests/e2e/tax-form-recovery.spec.ts:29:263
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/tax-form-recovery-tax-form-fdd81-ginal-PUT-once-after-reload-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/tax-form-recovery-tax-form-fdd81-ginal-PUT-once-after-reload-chromium/error-context.md
+
+    Error Context: test-results/tax-form-recovery-tax-form-fdd81-ginal-PUT-once-after-reload-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tax-form-recovery-tax-form-fdd81-ginal-PUT-once-after-reload-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tax-form-recovery-tax-form-fdd81-ginal-PUT-once-after-reload-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  30) [chromium] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('article')
+    Expected substring: "tavsiya 8.000001 kg"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('article') with timeout 10000ms
+      - waiting for getByRole('article')
+
+
+      33 |  await page.reload();await page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true}).click()
+      34 |  await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toHaveCount(0)
+    > 35 |  await expect(page.getByRole('article')).toContainText('tavsiya 8.000001 kg')
+         |                                          ^
+      36 |  expect(bodies).toHaveLength(2);expect(bodies[1]).toEqual(bodies[0]);expect(bodies[0]).toMatchObject({storeId:store.id,productId:product.id,minimum:'3.000001',maximum:'10.000001'})
+      37 |  const row=await db.stockThreshold.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})
+      38 |  expect(row.minimum.toString()).toBe('3.000001');expect(row.maximum?.toString()).toBe('10.000001')
+        at /home/fedora/Developments/POS_backup/tests/e2e/threshold-recovery.spec.ts:35:42
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium/error-context.md
+
+    Error Context: test-results/threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31) [chromium] › tests/e2e/totp.spec.ts:9:5 › Authenticator UI keeps secrets in memory, rotates backup codes and recovers with all-session logout 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Authenticator', exact: true }).getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: 'Authenticator', exact: true }).getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.', { exact: true }) with timeout 10000ms
+      - waiting for getByRole('region', { name: 'Authenticator', exact: true }).getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.', { exact: true })
+
+
+      38 |  await page.route('**/api/auth/totp',async route=>{const actual=await route.fetch(),body=await actual.json();body.data.available=false;await route.fulfill({response:actual,json:body})})
+      39 |  await section.getByRole('button',{name:'Authenticator holatini tekshirish',exact:true}).click()
+    > 40 |  await expect(section.getByText('Authenticator hozir mavjud emas. Mavjud ulanishni zaxira kod bilan bekor qilish mumkin.',{exact:true})).toBeVisible()
+         |                                                                                                                                          ^
+      41 |  await expect(section.getByRole('button',{name:'Zaxira kodlarni yangilash',exact:true})).toBeDisabled()
+      42 |  await section.getByLabel('Authenticator uchun joriy parol',{exact:true}).fill(password)
+      43 |  await section.getByLabel('Authenticatorni tiklash uchun zaxira kod',{exact:true}).fill(replacement)
+        at /home/fedora/Developments/POS_backup/tests/e2e/totp.spec.ts:40:138
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/totp-Authenticator-UI-keep-2dd85-ers-with-all-session-logout-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/totp-Authenticator-UI-keep-2dd85-ers-with-all-session-logout-chromium/error-context.md
+
+    Error Context: test-results/totp-Authenticator-UI-keep-2dd85-ers-with-all-session-logout-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/totp-Authenticator-UI-keep-2dd85-ers-with-all-session-logout-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/totp-Authenticator-UI-keep-2dd85-ers-with-all-session-logout-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31 failed
+    [chromium] › tests/e2e/billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry 
+    [chromium] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard 
+    [chromium] › tests/e2e/core.spec.ts:567:5 › Production HTTPS: durable shift correction and frozen report pagination/export 
+    [chromium] › tests/e2e/core.spec.ts:606:5 › Production HTTPS: offline server banner, browser reopen, customer/note and original mixed-payment sync 
+    [chromium] › tests/e2e/core.spec.ts:662:5 › Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely 
+    [chromium] › tests/e2e/core.spec.ts:819:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs 
+    [chromium] › tests/e2e/core.spec.ts:859:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads 
+    [chromium] › tests/e2e/core.spec.ts:902:5 › Reviewed price batch survives lost acknowledgement and damaged journal stays outside sellable stock 
+    [chromium] › tests/e2e/core.spec.ts:925:5 › Finance UI records internal bank expense, transfer and exact reversal with durable recovery 
+    [chromium] › tests/e2e/core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload 
+    [chromium] › tests/e2e/core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund 
+    [chromium] › tests/e2e/core.spec.ts:1026:5 › Cashier PIN UI sets a password-protected credential and switches only to branch-scoped cashier without manager elevation 
+    [chromium] › tests/e2e/core.spec.ts:1299:5 › Maintenance UI preserves saved basket and original pending sale across drain and restores cash checkout once 
+    [chromium] › tests/e2e/count-recovery.spec.ts:8:5 › count start, reading and approval survive lost ACK and reload with exact quantities and one posting 
+    [chromium] › tests/e2e/custom-roles.spec.ts:8:5 › Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits 
+    [chromium] › tests/e2e/identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources 
+    [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+    [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state 
+    [chromium] › tests/e2e/legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state 
+    [chromium] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+    [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+    [chromium] › tests/e2e/sales-list.spec.ts:100:5 › Supplier/brand/audit applied URL state survives history and reload; business draft survives filtering and errors never become zero rows 
+    [chromium] › tests/e2e/sales-list.spec.ts:129:5 › Inventory balances/documents and transfers keep applied filters in URL, allow error recovery and retain original business drafts 
+    [chromium] › tests/e2e/sales-list.spec.ts:151:5 › Shift and finance URL pages reach original postings, preserve exact amounts and recover from a failed list read 
+    [chromium] › tests/e2e/sales-list.spec.ts:167:5 › Expired synthetic job sources and actual inventory-gap scan display all URL pages without exposing worker payload; errors retain business drafts 
+    [chromium] › tests/e2e/sales-list.spec.ts:250:5 › Main report and reconciliation pages keep row filters separate from period cash totals and retain source cutoff through history 
+    [chromium] › tests/e2e/sales-list.spec.ts:277:5 › Price and reservation histories keep applied URL state while separate price and stock drafts survive filters and Back 
+    [chromium] › tests/e2e/shared-documents.spec.ts:48:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload 
+    [chromium] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload 
+    [chromium] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting 
+    [chromium] › tests/e2e/totp.spec.ts:9:5 › Authenticator UI keeps secrets in memory, rotates backup codes and recovers with all-session logout 
+  123 passed (15.0m)

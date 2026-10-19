@@ -1,0 +1,5 @@
+{
+  "scope": "literal JSX href only; dynamic/external/API/asset links not asserted",
+  "checked": 101,
+  "missing": []
+}

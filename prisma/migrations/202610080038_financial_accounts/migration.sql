@@ -1,0 +1,40 @@
+CREATE TABLE "FinancialAccount" (id TEXT PRIMARY KEY,"organizationId" TEXT NOT NULL REFERENCES "Organization"(id) ON DELETE CASCADE,"storeId" TEXT NOT NULL REFERENCES "Store"(id),"registerId" TEXT UNIQUE REFERENCES "Register"(id),name TEXT NOT NULL CHECK(length(btrim(name)) BETWEEN 1 AND 200),kind TEXT NOT NULL CHECK(kind IN ('cash','bank','provider')),"isActive" BOOLEAN NOT NULL DEFAULT TRUE,"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,CHECK((kind='cash')=("registerId" IS NOT NULL)));
+CREATE INDEX "FinancialAccount_organizationId_storeId_kind_idx" ON "FinancialAccount"("organizationId","storeId",kind);
+CREATE TABLE "ExpenseCategory" (id TEXT PRIMARY KEY,"organizationId" TEXT NOT NULL REFERENCES "Organization"(id) ON DELETE CASCADE,name TEXT NOT NULL CHECK(length(btrim(name)) BETWEEN 1 AND 200),treatment TEXT NOT NULL DEFAULT 'operating' CHECK(treatment IN ('operating','capitalised')),"isActive" BOOLEAN NOT NULL DEFAULT TRUE,UNIQUE("organizationId",name));
+CREATE TABLE "FinancialDocument" (id TEXT PRIMARY KEY,"organizationId" TEXT NOT NULL REFERENCES "Organization"(id) ON DELETE CASCADE,"storeId" TEXT NOT NULL REFERENCES "Store"(id),kind TEXT NOT NULL CHECK(kind IN ('opening','expense','expense_reversal','transfer','transfer_reversal','supplier_payment','supplier_refund','customer_advance','customer_refund')),amount NUMERIC(14,2) NOT NULL CHECK(amount>0),reason TEXT NOT NULL CHECK(length(btrim(reason)) BETWEEN 3 AND 2000),"actorId" TEXT NOT NULL REFERENCES "User"(id),"categoryId" TEXT REFERENCES "ExpenseCategory"(id),"reversalOfId" TEXT UNIQUE REFERENCES "FinancialDocument"(id),"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,CHECK((kind IN ('expense','expense_reversal'))=("categoryId" IS NOT NULL)),CHECK((kind IN ('expense_reversal','transfer_reversal'))=("reversalOfId" IS NOT NULL)));
+CREATE INDEX "FinancialDocument_organizationId_storeId_createdAt_id_idx" ON "FinancialDocument"("organizationId","storeId","createdAt",id);
+CREATE TABLE "AccountEntry" (id TEXT PRIMARY KEY,"organizationId" TEXT NOT NULL REFERENCES "Organization"(id) ON DELETE CASCADE,"accountId" TEXT NOT NULL REFERENCES "FinancialAccount"(id),"documentId" TEXT NOT NULL REFERENCES "FinancialDocument"(id) ON DELETE CASCADE,amount NUMERIC(14,2) NOT NULL CHECK(amount<>0),"cashMovementId" TEXT UNIQUE REFERENCES "CashMovement"(id),"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE("documentId","accountId"));
+CREATE INDEX "AccountEntry_organizationId_accountId_createdAt_id_idx" ON "AccountEntry"("organizationId","accountId","createdAt",id);
+CREATE FUNCTION finance_scope() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
+ IF TG_TABLE_NAME='FinancialAccount' THEN
+ IF NOT EXISTS(SELECT 1 FROM "Store" s WHERE s.id=NEW."storeId" AND s."organizationId"=NEW."organizationId") OR (NEW."registerId" IS NOT NULL AND NOT EXISTS(SELECT 1 FROM "Register" WHERE id=NEW."registerId" AND "storeId"=NEW."storeId")) THEN RAISE EXCEPTION 'Account scope mismatch'; END IF;
+ IF TG_OP='UPDATE' AND (OLD."organizationId",OLD."storeId",OLD."registerId",OLD.kind) IS DISTINCT FROM (NEW."organizationId",NEW."storeId",NEW."registerId",NEW.kind) THEN RAISE EXCEPTION 'Account identity is immutable'; END IF;
+ ELSIF TG_TABLE_NAME='ExpenseCategory' THEN
+ IF TG_OP='UPDATE' AND (OLD."organizationId",OLD.treatment) IS DISTINCT FROM (NEW."organizationId",NEW.treatment) THEN RAISE EXCEPTION 'Category accounting identity is immutable'; END IF;
+ ELSIF TG_TABLE_NAME='FinancialDocument' THEN
+ IF NOT EXISTS(SELECT 1 FROM "Store" WHERE id=NEW."storeId" AND "organizationId"=NEW."organizationId") OR NOT EXISTS(SELECT 1 FROM "OrganizationUser" WHERE "organizationId"=NEW."organizationId" AND "userId"=NEW."actorId") OR (NEW."categoryId" IS NOT NULL AND NOT EXISTS(SELECT 1 FROM "ExpenseCategory" WHERE id=NEW."categoryId" AND "organizationId"=NEW."organizationId")) THEN RAISE EXCEPTION 'Financial document scope mismatch'; END IF;
+ ELSE
+ PERFORM id FROM "FinancialAccount" WHERE id=NEW."accountId" FOR UPDATE;
+ IF NOT EXISTS(SELECT 1 FROM "FinancialAccount" a JOIN "FinancialDocument" d ON d.id=NEW."documentId" WHERE a.id=NEW."accountId" AND a."organizationId"=NEW."organizationId" AND d."organizationId"=NEW."organizationId") THEN RAISE EXCEPTION 'Account entry scope mismatch'; END IF;
+ IF NEW."cashMovementId" IS NOT NULL AND NOT EXISTS(SELECT 1 FROM "FinancialAccount" a JOIN "CashMovement" c ON c.id=NEW."cashMovementId" JOIN "Shift" s ON s.id=c."shiftId" WHERE a.id=NEW."accountId" AND a.kind='cash' AND a."registerId"=s."registerId" AND c.amount=abs(NEW.amount) AND c."movementType"=CASE WHEN NEW.amount>0 THEN 'cash_in' ELSE 'cash_out' END) THEN RAISE EXCEPTION 'Cash posting mismatch'; END IF;
+ IF (SELECT kind='cash' FROM "FinancialAccount" WHERE id=NEW."accountId")<>(NEW."cashMovementId" IS NOT NULL) THEN RAISE EXCEPTION 'Cash posting required'; END IF;
+ END IF;
+ RETURN NEW; END $$;
+CREATE TRIGGER financial_account_scope BEFORE INSERT OR UPDATE ON "FinancialAccount" FOR EACH ROW EXECUTE FUNCTION finance_scope();
+CREATE TRIGGER expense_category_scope BEFORE INSERT OR UPDATE ON "ExpenseCategory" FOR EACH ROW EXECUTE FUNCTION finance_scope();
+CREATE TRIGGER financial_document_scope BEFORE INSERT ON "FinancialDocument" FOR EACH ROW EXECUTE FUNCTION finance_scope();
+CREATE TRIGGER account_entry_scope BEFORE INSERT ON "AccountEntry" FOR EACH ROW EXECUTE FUNCTION finance_scope();
+CREATE TRIGGER financial_document_immutable BEFORE UPDATE OR DELETE ON "FinancialDocument" FOR EACH ROW EXECUTE FUNCTION stock_journal_immutable();
+CREATE TRIGGER account_entry_immutable BEFORE UPDATE OR DELETE ON "AccountEntry" FOR EACH ROW EXECUTE FUNCTION stock_journal_immutable();
+CREATE FUNCTION finance_balanced() RETURNS trigger LANGUAGE plpgsql AS $$ DECLARE d RECORD; n INT; net NUMERIC; positive NUMERIC; negative NUMERIC; BEGIN
+ SELECT * INTO d FROM "FinancialDocument" WHERE id=CASE WHEN TG_TABLE_NAME='FinancialDocument' THEN NEW.id ELSE NEW."documentId" END;
+ IF NOT FOUND THEN RETURN NULL; END IF;
+ SELECT count(*),COALESCE(sum(amount),0),COALESCE(sum(amount) FILTER(WHERE amount>0),0),COALESCE(-sum(amount) FILTER(WHERE amount<0),0) INTO n,net,positive,negative FROM "AccountEntry" WHERE "documentId"=d.id;
+ IF d.kind IN ('transfer','transfer_reversal') THEN IF n<>2 OR net<>0 OR positive<>d.amount OR negative<>d.amount THEN RAISE EXCEPTION 'Unbalanced transfer'; END IF;
+ ELSE IF n<>1 OR abs(net)<>d.amount OR (d.kind IN ('expense','supplier_payment','customer_refund') AND net>=0) OR (d.kind IN ('opening','expense_reversal','supplier_refund','customer_advance') AND net<=0) THEN RAISE EXCEPTION 'Invalid financial posting'; END IF; END IF;
+ IF d."reversalOfId" IS NOT NULL AND NOT EXISTS(SELECT 1 FROM "FinancialDocument" original WHERE original.id=d."reversalOfId" AND original."organizationId"=d."organizationId" AND original."storeId"=d."storeId" AND original.amount=d.amount AND d.kind=original.kind||'_reversal' AND original."categoryId" IS NOT DISTINCT FROM d."categoryId") THEN RAISE EXCEPTION 'Invalid original reversal'; END IF;
+ IF d."reversalOfId" IS NOT NULL AND EXISTS(SELECT 1 FROM "AccountEntry" old LEFT JOIN "AccountEntry" posted ON posted."documentId"=d.id AND posted."accountId"=old."accountId" WHERE old."documentId"=d."reversalOfId" AND (posted.id IS NULL OR posted.amount<>-old.amount)) THEN RAISE EXCEPTION 'Reversal postings mismatch'; END IF;
+ IF EXISTS(SELECT 1 FROM "FinancialAccount" a WHERE a.kind<>'cash' AND a.id IN(SELECT "accountId" FROM "AccountEntry" WHERE "documentId"=d.id) AND (SELECT COALESCE(sum(amount),0) FROM "AccountEntry" WHERE "accountId"=a.id)<0) THEN RAISE EXCEPTION 'Insufficient account funds'; END IF;
+ RETURN NULL; END $$;
+CREATE CONSTRAINT TRIGGER financial_document_balanced AFTER INSERT ON "FinancialDocument" DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION finance_balanced();
+CREATE CONSTRAINT TRIGGER account_entry_balanced AFTER INSERT ON "AccountEntry" DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION finance_balanced();

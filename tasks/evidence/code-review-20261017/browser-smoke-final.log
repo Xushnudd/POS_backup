@@ -1,0 +1,12 @@
+[WebServer] (node:239469) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:239523) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:1285:5 › Customer advance UI recovers lost receipt acknowledgement then allocates opening debt and refunds only unused cash once (2.5s)
+  ✓  2 [chromium] › tests/e2e/pages-smoke.spec.ts:49:5 › Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception (1.5m)
+  ✓  3 [chromium] › tests/e2e/pages-smoke.spec.ts:67:5 › Every public page loads without a render exception and unauthenticated POS navigation returns to login (3.7s)
+
+  3 passed (1.7m)

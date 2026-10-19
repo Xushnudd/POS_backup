@@ -1,0 +1,59 @@
+✔ One box sale posts twelve base units; original ratio governs partial return after catalogue changes (268.566248ms)
+{"requestId":"3062aaeb-5727-45c2-8a62-69e00183b48b","organizationId":"29b90daa-289b-496b-930f-201c37da1633","status":200,"durationMs":31,"event":"api_response"}
+✔ Purchase box quantity uses base-unit cost, preserves document input, and stale draft cannot silently post a new ratio (159.563044ms)
+✔ Conversion scope and precision reject foreign products, unsupported units and mixed SKU document units (105.419408ms)
+{"requestId":"122886f6-21d0-4af4-9298-06db6c3f081d","organizationId":"14f19bd5-6f02-4e0a-952b-f815bb1aec31","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"fece51c9-d609-4214-bed3-e5aa82fef0eb","organizationId":"14f19bd5-6f02-4e0a-952b-f815bb1aec31","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"28059e2c-55aa-43f0-a72f-77c6f469d814","organizationId":"14f19bd5-6f02-4e0a-952b-f815bb1aec31","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"78e7d33e-713d-45f9-b4e3-9b4a6e61f638","organizationId":"14f19bd5-6f02-4e0a-952b-f815bb1aec31","status":200,"durationMs":17,"event":"api_response"}
+✔ Exact barcode, alias and identifier lookup expose the same conversion metadata as catalog listing (108.991518ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Price precedence, threshold and half-open date intervals are exact and tenant scoped; old sales and returns preserve price (690.688251ms)
+{"requestId":"883cda5c-f597-4d6e-afff-3fc1420d0154","organizationId":"c54128d7-5690-4100-934e-c203f1397465","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"e0a3c7b1-8283-4731-b9c0-da1ad5bc4331","organizationId":"c54128d7-5690-4100-934e-c203f1397465","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"f973b547-dbd9-4056-9afd-8b589e354fee","organizationId":"c54128d7-5690-4100-934e-c203f1397465","status":404,"code":"NOT_FOUND","durationMs":10,"event":"api_error"}
+{"requestId":"58bdab1b-13d5-4f56-9887-34a65c78e906","organizationId":"c54128d7-5690-4100-934e-c203f1397465","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"ce2f3e15-e2c9-48fa-ad33-1c96144aaa71","organizationId":"c54128d7-5690-4100-934e-c203f1397465","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"d484e383-4484-4aed-83d8-8f5dcb6f2e45","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Price API allows a cashier scoped read-only quote, denies manager mutation, foreign customer/group/store and revoked live sessions (200.115009ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Locations and reservations conserve physical stock; concurrent holds, exact reserved sale, replay and SQL corruption checks (683.240896ms)
+{"requestId":"8df0a132-12e2-49e1-bebb-a5475aa90cea","organizationId":"f92210fa-466b-4abd-a766-757945cf6039","status":404,"code":"NOT_FOUND","durationMs":13,"event":"api_error"}
+{"requestId":"1fcf7de2-eed4-45b1-8767-f699c1c851ea","organizationId":"f92210fa-466b-4abd-a766-757945cf6039","status":403,"code":"FORBIDDEN","durationMs":6,"event":"api_error"}
+{"requestId":"049eadf2-9af0-419a-b8a1-26b1b4e2b23a","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Expiry uses server time once, ignored expired quota does not oversell; audit failure rolls back and APIs enforce tenant/live role (220.88317ms)
+{"requestId":"de7ecd63-2d1b-40ee-b891-421927d5af78","organizationId":"fbc7e458-96cf-4caf-9226-77b95470f511","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"a715db59-bd0b-4dd4-b781-6dab44c596c3","organizationId":"fbc7e458-96cf-4caf-9226-77b95470f511","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"c00d7b6a-aa9d-4ed0-b4f4-01a35b9c7ef8","organizationId":"fbc7e458-96cf-4caf-9226-77b95470f511","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"48ba4d60-0995-4fc2-a2e6-aa67eb5fe461","organizationId":"fbc7e458-96cf-4caf-9226-77b95470f511","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"cd18e23b-1564-458f-8835-53fde29c077f","organizationId":"fbc7e458-96cf-4caf-9226-77b95470f511","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"ca8e60c9-6360-4937-b725-bfd4289ea1b5","organizationId":"fbc7e458-96cf-4caf-9226-77b95470f511","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"d9fa4556-7927-438d-844a-266d5dada5ea","organizationId":"99156434-41e5-4be7-9632-971c60622540","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"cbf1308c-4c0b-4254-a009-8e2483e6af7c","organizationId":"99156434-41e5-4be7-9632-971c60622540","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"ac41a076-9337-4524-bc5e-a031e9698e77","organizationId":"99156434-41e5-4be7-9632-971c60622540","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"c5b6bb73-a6c9-487d-991c-bd1e1debc6e8","organizationId":"99156434-41e5-4be7-9632-971c60622540","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"c8e25cc7-515d-4657-b340-33da27a43680","organizationId":"99156434-41e5-4be7-9632-971c60622540","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"2db79564-4b7d-4148-b213-89ca31897edb","organizationId":"99156434-41e5-4be7-9632-971c60622540","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"29641269-f302-442c-b3b0-dddd393c6ec1","organizationId":"0ab565bc-bf77-497c-a397-1bd281643176","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"0918c8e3-cc0f-4c93-9493-170cfbcc9047","organizationId":"0ab565bc-bf77-497c-a397-1bd281643176","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"2680e9ae-67d9-47e1-9a90-3795952f602d","organizationId":"0ab565bc-bf77-497c-a397-1bd281643176","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"2cc9107e-d8d5-49a1-b233-a18ade82b820","organizationId":"0ab565bc-bf77-497c-a397-1bd281643176","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"0d2699a9-35c3-4405-acbf-91af24df4e15","organizationId":"0ab565bc-bf77-497c-a397-1bd281643176","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"310aaaf8-c0d5-4251-b6a2-b005dd788446","organizationId":"0ab565bc-bf77-497c-a397-1bd281643176","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"536f84ab-5ef9-46b3-848f-ddf8b99bc2d4","organizationId":"cdd99c30-cae5-4bdb-9fdf-395f1da85bbe","status":404,"code":"NOT_FOUND","durationMs":11,"event":"api_error"}
+✔ Included/excluded/exemption and effective versions use exact server totals, scoped reference and immutable cost/tax/rounding snapshots (1030.373092ms)
+{"requestId":"08b07a71-c12e-4f9f-b261-6f552b88903a","organizationId":"2ed04379-6b4b-4476-888e-8e16ca35c557","status":200,"durationMs":25,"event":"api_response"}
+✔ Tax stale preview/completion, archive and wrong role reject without payment/stock/debt or original operation leakage (182.603442ms)
+✔ Fractional tax and discount refunds conserve every cent and SQL rejects malformed cumulative journal (252.288001ms)
+{"requestId":"01a32332-e290-405a-b571-c6c2691b81ac","organizationId":"abadafff-36c9-4da8-8dcc-9008a21354e9","status":200,"durationMs":30,"event":"api_response"}
+✔ Discount-only editing keeps repeated legacy SKU row identities and exact independent allocations (77.643334ms)
+✔ Line and receipt percent discounts retain reason and current authorization, enforce configured boundaries and preserve refund cents (263.925095ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8332.549678

@@ -1,0 +1,40 @@
+{"requestId":"5d8c3c32-b60a-4179-8d7d-5242817b7c8b","organizationId":"28bb0e32-5968-4b97-a4f8-715a704702b5","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"0148d041-3832-4f9e-94d7-8ba6e600524a","organizationId":"26b5efdd-8de9-457c-a049-b004efbe9b82","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"8f88f8a2-86bf-44b0-a7ad-68c05762a0ed","organizationId":"28bb0e32-5968-4b97-a4f8-715a704702b5","status":403,"code":"FORBIDDEN","durationMs":7,"event":"api_error"}
+{"requestId":"cfad43a1-5a16-4141-a6c6-ae3bc6c22f32","organizationId":"28bb0e32-5968-4b97-a4f8-715a704702b5","status":403,"code":"FORBIDDEN","durationMs":11,"event":"api_error"}
+{"requestId":"991bad9f-dc80-46b0-9eae-9d4a263d0ede","organizationId":"26b5efdd-8de9-457c-a049-b004efbe9b82","status":404,"code":"NOT_FOUND","durationMs":10,"event":"api_error"}
+{"requestId":"51031222-0ac9-47c5-9ff7-ca4edf79ee24","organizationId":"28bb0e32-5968-4b97-a4f8-715a704702b5","status":400,"durationMs":12,"code":"VALIDATION_ERROR","event":"api_response"}
+✔ Protected images are normalized, tenant scoped, immutable, bounded and tombstoned without exposing bytes in JSON (356.637413ms)
+{"requestId":"d271d4ad-c513-46d6-b013-b487e063a1fd","organizationId":"9ea475f1-070b-4308-8971-a76225147347","status":400,"code":"VALIDATION_ERROR","durationMs":40,"event":"api_error"}
+{"requestId":"8cbeb2ee-8c72-40bc-a30f-6e04d8a80441","organizationId":"9ea475f1-070b-4308-8971-a76225147347","status":415,"code":"FILE_TYPE_UNSUPPORTED","durationMs":52,"event":"api_error"}
+{"requestId":"c8632c96-65fa-4dcf-b733-3b1b295e3bcb","organizationId":"9ea475f1-070b-4308-8971-a76225147347","status":400,"code":"FILE_IMAGE_INVALID","durationMs":58,"event":"api_error"}
+{"requestId":"a9e63082-c648-4388-97f8-f0b3c4a2d37a","organizationId":"9ea475f1-070b-4308-8971-a76225147347","status":413,"code":"PAYLOAD_TOO_LARGE","durationMs":12,"event":"api_error"}
+{"requestId":"7d09c160-2970-4896-a117-09339e610b08","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+✔ File upload rejects active formats, corrupt data, traversal, large images, missing authorization and stale expiry (417.043751ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Parallel file quota and late audit failure preserve atomic asset, product link and original operation (303.822637ms)
+{"requestId":"76f2d919-0f87-4ae1-9253-436917b87997","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"0b6e2f6b-fafb-4351-a0fe-521e536aecae","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"eb92ee24-abfc-4344-9884-66bdd128bd59","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":409,"code":"CATEGORY_CYCLE","durationMs":12,"event":"api_error"}
+{"requestId":"982c6654-730b-470e-bb60-079e4d540771","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":409,"code":"CATEGORY_CYCLE","durationMs":11,"event":"api_error"}
+{"requestId":"9fad3992-46dc-4879-b321-48a73004c49a","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"0529c07f-b96e-424f-87de-3a361e4c8d6c","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"48bc857b-b929-432d-91f9-cd1b1de7b828","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":409,"code":"CATEGORY_CYCLE","durationMs":19,"event":"api_error"}
+{"requestId":"8ca1d2eb-632d-4a59-8006-158b8f088b31","organizationId":"7d338e41-7d52-4732-a238-1b1818e5e18a","status":200,"durationMs":36,"event":"api_response"}
+✔ Category tree rejects self, descendant, foreign and parallel cycles while brand and description lifecycle preserves history (307.923411ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Consented receipt share retries once, preserves original decimals/identity, exposes no customer/staff/cost and revokes atomically (509.058542ms)
+✔ Actual near-expiry capability fails after database time passes; key removal fences prior links (2266.129085ms)
+{"requestId":"25a7e72f-ceac-43c3-b986-e7abae3167c0","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+{"requestId":"af8cc727-16cf-4b0c-9d38-870dd64329d4","organizationId":"bcb092a5-13ce-4f4e-a7b3-a9a5a1767285","operationId":"4aa5fac9-e89b-4fa3-b06c-24fc747572e5","status":200,"durationMs":57,"event":"api_response"}
+{"requestId":"6b632c5e-2d4f-4681-bf42-ca44b914874d","status":200,"durationMs":5,"event":"api_response"}
+{"requestId":"2df4fb1b-d613-4e6e-895b-8b3074b49cfe","status":403,"code":"CSRF_REJECTED","durationMs":0,"event":"api_error"}
+✔ HTTP share creation needs auth and consent; public bearer POST requires origin and omits capability from responses (252.694531ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4867.276093

@@ -1,0 +1,11 @@
+✔ Local Compose derives its DB URL from POSTGRES settings and safely encodes credentials without modifying host environment (0.715203ms)
+✔ Local wrapper supplies the derived URL to the real child and forwards graceful SIGTERM (39.468098ms)
+✔ Local HTTP serves without redirects, optional TLS preserves Origin/cookies, and HMR upgrades work on both transports (163.740892ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 205.986281

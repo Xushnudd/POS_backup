@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-15",
+  "scope": "Local workstation wrong-protocol URL fix; original done count remains176/259.",
+  "before": {
+    "http3443": "Empty reply",
+    "https3443": 200
+  },
+  "change": "Local3443 TCP acceptor replays initial bytes to native HTTPS parser or HTTP redirect parser. Only TLS forwards to app. HTTP requests on3000 and3443 return308 to fixed HTTPS origin with path/query preserved.",
+  "tests": {
+    "regressionPassed": 3,
+    "regressionFailed": 0,
+    "fragmentedHttpFirstByte": true,
+    "plaintextPostNotForwarded": true,
+    "hostInjectionCannotChangeRedirectOrigin": true,
+    "httpsCsrfAndSecureCookiePreserved": true,
+    "eslintExit": 0,
+    "shellSyntaxExit": 0,
+    "actualHttp3443Home": {
+      "redirect": 308,
+      "finalHttps": 200
+    },
+    "actualHttp3443Register": {
+      "finalHttps": 200
+    },
+    "actualHttp3000Home": {
+      "finalHttps": 200
+    },
+    "httpsReadiness": 200,
+    "strictHttpProbeTls": "Explicit trusted local certificate",
+    "chromium": {
+      "http3443HomeRendersAfterHttpsRedirect": true,
+      "http3443RegisterFormRendersAfterHttpsRedirect": true,
+      "certificateException": "isolated test context only"
+    },
+    "proxyRestartAndComposeWaitExit": 0
+  },
+  "unchanged": {
+    "databaseRecords": true,
+    "databaseSchema": true,
+    "privateEnv": true,
+    "localCertificate": true,
+    "csrfPolicy": true,
+    "userBrowserSystemTrust": true
+  },
+  "sourceSha256": {
+    "scripts/local/https-proxy.cjs": "815a90ff932d76cd86d28f3812a74d3d329c1f82031ff352ebf3ce63b00678dd",
+    "scripts/local/https-proxy.test.cjs": "0848e3efb122070ffd2848e1a9af56fd1a37a8111bcadd21ad94759dac1a3bbb",
+    "scripts/local/setup-https.sh": "f2465f34de918f589a2bda67c57514201b38c514d8a789773ed1ba502bf8725a",
+    "docs/operations/local-docker-https.md": "13d176cb1438113a6d00f90a2fab7c1d649546506de82cfbddb945374f5bb578",
+    "README.md": "bc5e29c9c3e1992234ffbe1c2b2d3428b623b45379d7eb29d7ed2a1f59b42405"
+  },
+  "artifactSha256": {
+    "tasks/evidence/local-http3443-20261015/regression-tests.log": "3f628cad43eebedd6897d905fd3b8f0a9aa39f65f9e2f5970ab73da42e6d3f2d"
+  }
+}

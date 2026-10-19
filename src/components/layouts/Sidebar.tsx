@@ -1,9 +1,13 @@
 'use client';
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import {usePosConnection} from '@/hooks/usePosConnection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -17,6 +21,7 @@ import {
   faChartLine,
   faGear,
   faTimes,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
@@ -34,6 +39,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {href:'/roles',label:'Rollar va vakolatlar',icon:faUsers,roles:['owner']},
+  {href:'/platform',label:'Platforma boshqaruvi',icon:faGear,roles:['owner','admin']},
+  {href:'/tickets',label:'Yordam murojaatlari',icon:faReceipt},
+  {href:'/billing',label:'Tarif va obuna',icon:faReceipt},
+  {href:'/onboarding',label:'Birlamchi sozlash',icon:faGear,roles:['owner']},
+  {href:'/jobs',label:'Fon ishlari',icon:faGear,roles:['owner']},
   {
     href: '/pos',
     label: 'POS Kassa',
@@ -86,11 +97,37 @@ const navItems: NavItem[] = [
     icon: faGear,
     roles: ['owner'],
   },
+  {href:'/products/categories',label:'Kategoriyalar',icon:faBoxesStacked,roles:['owner','admin']},
+  {href:'/archive',label:'Arxiv',icon:faBoxesStacked,roles:['owner','admin']},
+  {href:'/suppliers',label:'Yetkazib beruvchilar',icon:faUsers,roles:['owner','admin']},
+  {href:'/reports/supplier-balances',label:'Supplier qarzi hisoboti',icon:faChartLine,roles:['owner','admin']},
+  {href:'/reports/breakdowns',label:'Savdo kesimlari',icon:faChartLine,roles:['owner','admin']},
+  {href:'/finance',label:'Hisoblar va xarajatlar',icon:faChartLine,roles:['owner','admin']},
+  {href:'/loyalty',label:'Bonus siyosati',icon:faChartLine,roles:['owner']},
+  {href:'/products/prices',label:'Narxlar tarixi',icon:faBoxesStacked,roles:['owner','admin']},
+  {href:'/inventory/dispositions',label:'Brak va hisobdan chiqarish',icon:faWarehouse,roles:['owner','admin']},
+  {href:'/inventory/movements',label:'Ombor jurnali',icon:faWarehouse,roles:['owner','admin']},
+  {href:'/audit',label:'Audit tarixi',icon:faClockRotateLeft,roles:['owner']},
+  {href:'/drafts',label:'Server qoralamalari',icon:faReceipt},
+  {href:'/sync-review',label:'Navbat va konfliktlar',icon:faClockRotateLeft},
+  {href:'/incidents',label:'Hisob tafovutlari',icon:faTriangleExclamation,roles:['owner','admin']},
+  {href:'/replenishment',label:'Qayta buyurtma',icon:faWarehouse,roles:['owner','admin']},
+  {href:'/help',label:'Yordam',icon:faUsers},
+  {href:'/training',label:'Kassir mashqi',icon:faCashRegister},
+  {href:'/security',label:'Faol sessiyalar',icon:faClockRotateLeft},
 ];
+const navItemsSource=navItems;
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+ const {locale:mapLocale}=useTranslation();
+
+ const navItems=localizeOwnedLabels(navItemsSource,mapLocale);
+
+ const {t:tr}=useTranslation();
+
   const pathname = usePathname();
   const { role, organization } = useAuth();
+  const connection=usePosConnection();
 
   const filteredNavItems = navItems.filter((item) => {
     if (!item.roles) return true;
@@ -115,7 +152,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Brand header */}
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
-          <Link href="/dashboard" className="flex items-center gap-3">
+          <Link href="/dashboard" prefetch={false} className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-emerald-500 to-blue-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-emerald-500/20">
               S
             </div>
@@ -124,12 +161,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 Shuni <span className="text-emerald-400">POS</span>
               </h1>
               <p className="text-[10px] text-slate-400 truncate max-w-[130px]">
-                {organization?.name || 'Savdo tizimi'}
+                {organization?.name || tr("Savdo tizimi")}
               </p>
             </div>
           </Link>
 
           <button
+            aria-label={tr("Menyuni yopish")}
             onClick={onClose}
             className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
           >
@@ -143,13 +181,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             const isActive =
               item.href === '/dashboard'
                 ? pathname === '/dashboard' || pathname === '/'
-                : pathname.startsWith(item.href);
+                : item.href==='/inventory'?pathname==='/inventory':pathname.startsWith(item.href);
 
             if (item.highlight) {
               return (
                 <div key={item.href} className="pb-2 pt-1">
                   <Link
                     href={item.href}
+                    prefetch={false}
                     onClick={onClose}
                     className={`flex items-center gap-3 px-3.5 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${
                       isActive
@@ -168,6 +207,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
@@ -192,11 +232,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Footer info */}
         <div className="p-4 border-t border-slate-800 text-slate-400 text-xs flex items-center justify-between">
-          <span>v1.0.0 (MVP)</span>
-          <span className="inline-flex items-center gap-1.5 text-emerald-400 text-[11px]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Online
-          </span>
+          <span>{tr("v1.0.0 (MVP)")}</span>
+          <span role="status" aria-label={tr("Server aloqasi")} className={'inline-flex items-center gap-1.5 text-[11px] '+(connection.state==='online'?'text-emerald-400':'text-amber-300')}>
+            <span className={'w-2 h-2 rounded-full '+(connection.state==='online'?'bg-emerald-500':'bg-amber-400')} />
+            {connection.state==='online'?tr("Online"):connection.state==='checking'?tr("Aloqa tekshirilmoqda"):tr("Offline")}</span>
         </div>
       </aside>
     </>

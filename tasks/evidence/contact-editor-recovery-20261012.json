@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "original_done": 164,
+  "original_total": 259,
+  "target": 170,
+  "original_delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 21,
+      "failed": 0,
+      "duration": "1.1m",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "cases": [
+        "Nonzero debt GET fails visibly unknown and retry restores7.25ledger",
+        "Held customer create ACK and failed follow-up GET",
+        "Held supplier create ACK and failed follow-up GET",
+        "Real unconfigured delivery GET fail/retry creates zero challenges/verified contacts",
+        "Existing catalogue unsaved navigation/context/account/decimal guards",
+        "Existing full catalogue/supplier inventory exports",
+        "Existing normalized customer phone/group/merge and partial refund history"
+      ]
+    },
+    "build": "Webpack PASS",
+    "typecheck": "PASS",
+    "changed_lint": "PASS"
+  },
+  "invariants": [
+    "Customer read response uses newest request only; no stale search results overwrite later state.",
+    "Debt read failure is not shown as0 or collectible confirmed debt.",
+    "Negative net ledger is displayed as advance rather than zero.",
+    "Identity writes admit one request and ACK remains saved after follow-up read failure.",
+    "Contact challenges are not auto resent; account verification requires actual verified=true server response.",
+    "Provider not selected: challenge0, verifiedContact0; no production mock verification."
+  ],
+  "source_sha256": {
+    "src/hooks/useAcknowledgedMutation.ts": "c3452b18c7cf1cb75f693d9f1f19071518e6dc5a51cff09aac2f5820056a0703",
+    "src/app/(dashboard)/customers/page.tsx": "bf7533ed29da7468fd2eebe0938311297e5dddf7f40cb59b707dc0be02154f75",
+    "src/app/(dashboard)/suppliers/page.tsx": "70b07beb7ff4db24c6c2a6bfea86a852cd1d5453d994ec9af9622d4cd01e8af4",
+    "src/components/security/ContactVerification.tsx": "4061951beb7cfe09b6d90f94c63c6391117e733ed5650df93ed199281313bfef",
+    "tests/e2e/contact-editor-state.spec.ts": "ceafdfbdf9e21952d5afbee5a1f16ca8c9791e5317c49eb5f9c41e8389122234"
+  },
+  "logs": [
+    "tasks/evidence/logs/contact-editor-20261012-pos-170-contact-e2e.log",
+    "tasks/evidence/logs/contact-editor-20261012-pos-170-contact-build.log",
+    "tasks/evidence/logs/contact-editor-20261012-pos-170-contact-final-type.log",
+    "tasks/evidence/logs/contact-editor-20261012-pos-170-contact-final-lint.log"
+  ],
+  "limits": [
+    "Negative advance branch reviewed/typechecked, not a new dedicated browser case in this acceptance.",
+    "Identity legacy endpoints do not gain server operation-key idempotency or automatic unknown-result retry.",
+    "No delivery provider, hardware/vendor or production deployment.",
+    "Original UX-01.05 remains open."
+  ]
+}

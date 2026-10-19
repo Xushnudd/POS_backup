@@ -1,0 +1,19 @@
+[WebServer] (node:428865) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:428903) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (3.9s)
+  ✓  2 [chromium] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (4.4s)
+(node:429583) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (5.1s)
+  ✓  4 [firefox] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (4.5s)
+(node:431577) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.5s)
+  ✓  6 [webkit] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (5.2s)
+
+  6 passed (30.5s)

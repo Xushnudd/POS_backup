@@ -1,0 +1,155 @@
+Listing tests:
+  [chromium] › auth-form-state.spec.ts:18:5 › duplicate STIR shows actionable guidance, preserves the form and allows correction
+  [chromium] › auth-form-state.spec.ts:56:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure
+  [chromium] › auth-form-state.spec.ts:56:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure
+  [chromium] › auth-form-state.spec.ts:56:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure
+  [chromium] › auth-form-state.spec.ts:56:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure
+  [chromium] › auth-form-state.spec.ts:92:5 › successful login uses authenticated role ACK and does not require a second me request
+  [chromium] › auth-form-state.spec.ts:104:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request
+  [chromium] › batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery
+  [chromium] › billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry
+  [chromium] › billing-editor-state.spec.ts:46:5 › Billing and retention reads preserve independent administrator drafts
+  [chromium] › billing-editor-state.spec.ts:84:5 › Platform cost lost acknowledgement replays once and cancellation keeps independent new quote draft
+  [chromium] › billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing
+  [chromium] › brand-editor-state.spec.ts:8:5 › brand status lost acknowledgement preserves a separate name draft and original key retries once
+  [chromium] › catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard
+  [chromium] › contact-editor-state.spec.ts:10:5 › customer failed debt read is visibly unknown and retry restores actual ledger without false zero
+  [chromium] › contact-editor-state.spec.ts:17:58 › customers held acknowledgement admits one create and failed follow-up read keeps success
+  [chromium] › contact-editor-state.spec.ts:17:58 › suppliers held acknowledgement admits one create and failed follow-up read keeps success
+  [chromium] › contact-editor-state.spec.ts:26:5 › unconfigured delivery stays disabled after read error and real retry never creates or verifies challenge
+  [chromium] › context-navigation.spec.ts:20:5 › Branch/register selectors verify accessible IDs, preserve selection after reload and handle server failure without changing context
+  [chromium] › context-navigation.spec.ts:43:5 › Fractional cart and conversion controls survive reload; nonempty cart and held draft ACK block branch changes
+  [chromium] › context-navigation.spec.ts:80:5 › Settings can clear TIN/footer and expose tax settings; sidebar reports an actual server outage
+  [chromium] › core.spec.ts:46:5 › Landed cost UI previews partial receipts, invalidates edited results and retries without posting
+  [chromium] › core.spec.ts:125:5 › Manual bank refund UI previews exact channels and journals confirmed settlement once without provider requests
+  [chromium] › core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once
+  [chromium] › core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports
+  [chromium] › core.spec.ts:567:5 › Production HTTPS: durable shift correction and frozen report pagination/export
+  [chromium] › core.spec.ts:606:5 › Production HTTPS: offline server banner, browser reopen, customer/note and original mixed-payment sync
+  [chromium] › core.spec.ts:631:5 › IndexedDB transactions isolate users/devices, preserve restart queues and forbid unsafe clear/ack races
+  [chromium] › core.spec.ts:662:5 › Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely
+  [chromium] › core.spec.ts:716:5 › Checkout price/stock conflicts require review; print failure and integration failure stay separate
+  [chromium] › core.spec.ts:752:5 › Cashier shortage requires owner approval; next cashier accepts counted handover in UI
+  [chromium] › core.spec.ts:780:5 › Owner mobile dashboard and cashier touch controls remain reachable at 360, 768 and 1280 pixels
+  [chromium] › core.spec.ts:799:5 › Held server draft resumes on another authorized device and closes the original receipt once
+  [chromium] › core.spec.ts:819:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs
+  [chromium] › core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus
+  [chromium] › core.spec.ts:859:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads
+  [chromium] › core.spec.ts:882:5 › Debt collection UI records exact cash/card/transfer channels with manual document proof
+  [chromium] › core.spec.ts:902:5 › Reviewed price batch survives lost acknowledgement and damaged journal stays outside sellable stock
+  [chromium] › core.spec.ts:925:5 › Finance UI records internal bank expense, transfer and exact reversal with durable recovery
+  [chromium] › core.spec.ts:944:5 › Sales breakdown UI reconciles all five dimensions and downloads full exact CSV
+  [chromium] › core.spec.ts:959:5 › Supplier ledger UI records invoice, partial cash allocation and recovers unknown advance exactly once
+  [chromium] › core.spec.ts:981:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload
+  [chromium] › core.spec.ts:991:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund
+  [chromium] › core.spec.ts:1007:5 › Variant UI creates independent color size SKU and restores the original lost creation intent once
+  [chromium] › core.spec.ts:1016:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely
+  [chromium] › core.spec.ts:1026:5 › Cashier PIN UI sets a password-protected credential and switches only to branch-scoped cashier without manager elevation
+  [chromium] › core.spec.ts:1032:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes
+  [chromium] › core.spec.ts:1039:5 › Discount UI applies exact line and receipt percentages with reason and immutable manager authorization
+  [chromium] › core.spec.ts:1046:5 › Real PWA worker › PWA private catalog uses scoped bounded TTL, expires offline and keeps API and receipts out of shared cache
+  [chromium] › core.spec.ts:1073:5 › Transfer receipt UI preserves unknown partial receipt and separates damage and confirmed shortage from sellable stock
+  [chromium] › core.spec.ts:1085:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation
+  [chromium] › core.spec.ts:1100:5 › Price tier UI recovers one scheduled rule, requires POS price review and keeps original receipt after archive
+  [chromium] › core.spec.ts:1106:5 › Customer identity UI normalizes duplicate phones, assigns a price group and recovers settled merge while original partial refund history remains intact
+  [chromium] › core.spec.ts:1116:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement
+  [chromium] › core.spec.ts:1124:5 › Real offline cash worker › Offline signed cash basket reloads privately, rejects altered quantity and two-tab replay, then reconnects once with exact stock and cash
+  [chromium] › core.spec.ts:1137:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect
+  [chromium] › core.spec.ts:1143:5 › Owner reviews a changed-price offline cash conflict, recovers lost settlement acknowledgment and confirms the original receipt once
+  [chromium] › core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values
+  [chromium] › core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order
+  [chromium] › core.spec.ts:1180:5 › Exchange UI reviews exact net cash and recovers original lost acknowledgement with linked real return and replacement once
+  [chromium] › core.spec.ts:1187:5 › Background jobs UI recovers enqueue and manual retry once while the real worker exhausts failures then completes scoped reconciliation
+  [chromium] › core.spec.ts:1194:5 › Security history delivers a real new-browser notice and recovers a lost read acknowledgement once
+  [chromium] › core.spec.ts:1249:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking
+  [chromium] › core.spec.ts:1262:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt
+  [chromium] › core.spec.ts:1273:5 › Catalogue export UI recovers lost enqueue acknowledgement and real worker produces an exact scoped CSV download
+  [chromium] › core.spec.ts:1278:5 › Customer advance UI recovers lost receipt acknowledgement then allocates opening debt and refunds only unused cash once
+  [chromium] › core.spec.ts:1299:5 › Maintenance UI preserves saved basket and original pending sale across drain and restores cash checkout once
+  [chromium] › core.spec.ts:1327:5 › Independent finance drafts share one navigation decision and busy mutation blocks context exit
+  [chromium] › core.spec.ts:1359:5 › Dashboard boundary recovers a render failure without creating an economic operation or exposing input data
+  [chromium] › count-recovery.spec.ts:8:5 › count start, reading and approval survive lost ACK and reload with exact quantities and one posting
+  [chromium] › critical-step-up.spec.ts:9:5 › Critical billing UI requires MFA, cancellation has no effect and approved retry preserves the original body
+  [chromium] › custom-roles.spec.ts:8:5 › Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits
+  [chromium] › customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event
+  [chromium] › customer-consent.spec.ts:55:5 › Concurrent consent revision rejection refreshes history and permits a fresh reviewed decision
+  [chromium] › customer-consent.spec.ts:69:5 › Recovered stale consent discards only a definitive rollback; unknown conflicts retain the original operation
+  [chromium] › customer-merge-state.spec.ts:8:5 › merge partial reason and selected named customer survive searches and failed history refresh
+  [chromium] › exchange-editor-state.spec.ts:8:5 › exchange preview freezes its snapshot, rejects malformed return lines and preserves a newer draft after original lost-ACK recovery
+  [chromium] › gift-certificates.spec.ts:8:5 › Owner gift policy MFA, actual cash issuance lost-ACK recovery and zero-credit-limit atomic checkout
+  [chromium] › identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources
+  [chromium] › import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft
+  [chromium] › inactive-stock.spec.ts:9:5 › Inventory inactivity selector filters branch stock and CSV uses the same selection
+  [chromium] › incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason
+  [chromium] › journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero
+  [chromium] › journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft
+  [chromium] › legacy-catalog-state.spec.ts:8:55 › categories draft read failure and one held create ACK keep truthful saved state
+  [chromium] › legacy-catalog-state.spec.ts:8:55 › units draft read failure and one held create ACK keep truthful saved state
+  [chromium] › localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request
+  [chromium] › localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash
+  [chromium] › localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement
+  [chromium] › location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh
+  [chromium] › loyalty-marketing.spec.ts:8:5 › Owner MFA card/campaign management, customer-specific exact discount and lost-ACK recovery consume one campaign use
+  [chromium] › loyalty-points.spec.ts:8:5 › Owner rule MFA, actual point grant, committed lost-ACK review recovery and refund preserve one original wallet
+  [chromium] › media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key
+  [chromium] › offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft
+  [chromium] › organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth
+  [chromium] › pending-tenant-scope.spec.ts:8:5 › pending original stock intent blocks UI tenant switch and is never replayed under another authorized business
+  [chromium] › permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects
+  [chromium] › permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change
+  [chromium] › platform.spec.ts:9:5 › Platform panel rejects an ordinary owner, then requires MFA for an assigned operator and shows safe service/tenant metadata
+  [chromium] › price-editor-state.spec.ts:8:5 › price and customer group drafts remain independent across ACK, metadata failure, search and pagination
+  [chromium] › product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection
+  [chromium] › product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry
+  [chromium] › public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata
+  [chromium] › public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata
+  [chromium] › receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal
+  [chromium] › receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory
+  [chromium] › report-export.spec.ts:10:5 › Owner queues full filtered XLSX/PDF documents through UI, actual worker publishes and authenticated download preserves all 1001 rows
+  [chromium] › report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule
+  [chromium] › request-budget.spec.ts:3:5 › Production HTTPS rejects an unfinished JSON body before authentication business logic and accepts a fresh retry
+  [chromium] › retention.spec.ts:9:5 › Retention settings require actual platform authority and recover original lost acknowledgement without another version
+  [chromium] › roles-state.spec.ts:37:5 › Unknown role and assignment acknowledgements retain independent immutable keys and replay once with real MFA
+  [chromium] › roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result
+  [chromium] › roles-state.spec.ts:123:5 › Acknowledged role save remains saved when only the following list refresh fails
+  [chromium] › roles-state.spec.ts:140:5 › Failed role metadata refresh retains raw editor but blocks new role writes
+  [chromium] › sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data
+  [chromium] › sales-list.spec.ts:54:5 › Catalog and customer URL pages reach records beyond the old truncation and keep filter state through reload
+  [chromium] › sales-list.spec.ts:76:5 › Category/unit URL search, state and pages preserve a separate unsaved editor through read navigation
+  [chromium] › sales-list.spec.ts:100:5 › Supplier/brand/audit applied URL state survives history and reload; business draft survives filtering and errors never become zero rows
+  [chromium] › sales-list.spec.ts:129:5 › Inventory balances/documents and transfers keep applied filters in URL, allow error recovery and retain original business drafts
+  [chromium] › sales-list.spec.ts:151:5 › Shift and finance URL pages reach original postings, preserve exact amounts and recover from a failed list read
+  [chromium] › sales-list.spec.ts:167:5 › Expired synthetic job sources and actual inventory-gap scan display all URL pages without exposing worker payload; errors retain business drafts
+  [chromium] › sales-list.spec.ts:190:5 › Cancelled count and original damaged-return pages preserve native stock/refund history and URL filters
+  [chromium] › sales-list.spec.ts:206:5 › Archive types and replenishment global sorting retain URL history and configured minimum-only advice without stock postings
+  [chromium] › sales-list.spec.ts:224:5 › Purchase, supplier balance and sales breakdown URL pages share exact original source cutoff and filtered totals
+  [chromium] › sales-list.spec.ts:250:5 › Main report and reconciliation pages keep row filters separate from period cash totals and retain source cutoff through history
+  [chromium] › sales-list.spec.ts:277:5 › Price and reservation histories keep applied URL state while separate price and stock drafts survive filters and Back
+  [chromium] › security-ack-state.spec.ts:11:5 › password ACK and one critical command survive failed profile read without storing credentials
+  [chromium] › security-ack-state.spec.ts:20:5 › all-session logout admits one request and still leaves security after profile read failure
+  [chromium] › serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked
+  [chromium] › shared-command-state.spec.ts:9:5 › onboarding partial reason is guarded and pending organization step does not occupy the next register step
+  [chromium] › shared-command-state.spec.ts:21:5 › saved catalog job recovery leaves an independent report filter and reason intact
+  [chromium] › shared-documents.spec.ts:18:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke
+  [chromium] › shared-documents.spec.ts:48:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload
+  [chromium] › shared-documents.spec.ts:69:5 › Legacy external image metadata cannot create an automatic browser request
+  [chromium] › shared-documents.spec.ts:76:5 › Lost consent rejection clears only the blocked reminder attempt and permits a newly consented request
+  [chromium] › shift-opening-recovery.spec.ts:8:5 › Shift opening retries failed handover loading and preserves original cash intent after lost ACK and reload
+  [chromium] › shift-opening-recovery.spec.ts:55:5 › Confirmed shift opening survives an older empty shift read and F9 cannot reopen the modal
+  [chromium] › stock-draft-recovery.spec.ts:8:53 › stock draft UI preserves exact immutable request after lost ACK and reload, replay creates no duplicate
+  [chromium] › stock-draft-recovery.spec.ts:8:53 › transfer draft UI preserves exact immutable request after lost ACK and reload, replay creates no duplicate
+  [chromium] › subscription-readonly.spec.ts:8:5 › Expired owner signs in, sees read-only, reads catalog and creates renewal invoice while business POST is rejected
+  [chromium] › support-policy-state.spec.ts:11:5 › raw support hours and separate ticket draft survive a newer policy version and failed read
+  [chromium] › support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment
+  [chromium] › support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies
+  [chromium] › tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload
+  [chromium] › tenant-export.spec.ts:9:5 › Owner recovers original tenant export enqueue after lost ACK and downloads an exact manifest from the production worker
+  [chromium] › threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting
+  [chromium] › ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft
+  [chromium] › totp.spec.ts:9:5 › Authenticator UI keeps secrets in memory, rotates backup codes and recovers with all-session logout
+  [chromium] › totp.spec.ts:49:5 › Lost confirmation ACK recovers actual enabled status without retrieving or persisting secret codes
+  [chromium] › totp.spec.ts:67:5 › Nested staff MFA traps focus above the form; Escape cancels only proof and retry creates one member
+  [chromium] › totp.spec.ts:95:5 › Owner password form requires MFA then signs out and accepts only the new password
+  [chromium] › totp.spec.ts:118:5 › Security editors share one discard decision and pending enrollment freezes credentials and navigation
+  [chromium] › variant-editor-state.spec.ts:8:5 › variant option-only draft is guarded and successful creation stays acknowledged when list reload fails
+Total: 153 tests in 58 files

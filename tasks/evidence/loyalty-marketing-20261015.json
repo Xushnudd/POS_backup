@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-15",
+  "task": "CRM-02.03",
+  "originalCount": {
+    "before": 172,
+    "after": 173,
+    "target": 175
+  },
+  "version": {
+    "head": "e41124bcbfc31e8b20410c6b0288ad419668e979",
+    "worktree": "uncommitted; no deployment",
+    "models": 136,
+    "migrations": 179
+  },
+  "acceptance": [
+    {
+      "input": "Cash-backed assigned gift100; gift70 + cash30 goods checkout; real dump/restore",
+      "expected": "Issue is advance liability, not second sale revenue; one allocation; remaining liability30; immutable original source",
+      "actual": "PASS"
+    },
+    {
+      "input": "Card10percent + fixed campaign20 on300; duplicate prepare/checkout and split returns",
+      "expected": "Discount50 / cash250; one campaign use; refunds83.33 +166.67; original source/quota retained",
+      "actual": "PASS"
+    },
+    {
+      "input": "Last campaign slot concurrent original checkouts, late audit fault then original retry",
+      "expected": "One winner; failed transaction rolls back payment, stock and usage",
+      "actual": "PASS"
+    },
+    {
+      "input": "Actual cashier permission0 then20percent, archived customer, native status bypass, expired campaign, changed policy",
+      "expected": "Invalid quote/post rejected, no partial financial effect; original cancellation remains available",
+      "actual": "PASS"
+    },
+    {
+      "input": "Current points stacking disabled/enabled and cancellation/refund",
+      "expected": "Configured stacking only; ordered cancellation; original wallet preserved",
+      "actual": "PASS"
+    },
+    {
+      "input": "Real owner forms/MFA and committed lost ACK/reload in Chromium/Firefox/WebKit",
+      "expected": "One original issue/quote/checkout; no new intent after ambiguous ACK",
+      "actual": "6/6PASS"
+    },
+    {
+      "input": "Fresh179, synthetic133 upgrade twice, actual card/promo/gift/points source journals dump/restore",
+      "expected": "All canonical source hashes unchanged; wallet6 and gift liability30; native immutability retained",
+      "actual": "PASS local throwaway only"
+    }
+  ],
+  "validation": {
+    "postgresql": "140 distinct acceptance/regression cases: 132 other cases passed in recorded cohort; corrected marketing file rerun8/8 passed. Initial cohort139/140 failed only incorrect expected CUSTOMER_NOT_FOUND code; superseded assertion retained in log, not represented as a single140/140 run.",
+    "unit": "52 isolated files PASS",
+    "browser": "6/6 PASS across3 engines on final loyalty binary",
+    "migrationRestore": "179 fresh + synthetic133 upgrade/repeat + actual journals restore PASS",
+    "type": "PASS",
+    "worker": "PASS",
+    "lint": "PASS zero warnings",
+    "build": "PASS webpack",
+    "scan": "1423 source files, zero findings"
+  },
+  "boundaries": [
+    "Whole-receipt campaign only; product-targeted promotions are explicitly rejected.",
+    "Gift assigned customer funding; goods refund follows original cash advance refund contract, no duplicate gift credit.",
+    "Online loyalty redemption; existing signed offline cash preserved.",
+    "No vendor/hardware/delivery/server/pilot/real production acceptance.",
+    "Concurrent unrelated UX list changes are not accepted by this loyalty manifest."
+  ],
+  "sourceSha256": {
+    "prisma/migrations/202610140174_gift_certificates/migration.sql": "cb8ad73b2a0246600814693051c7cd6cf7ddec3f442c9a9bef593eeb4a7124ea",
+    "prisma/migrations/202610140175_gift_source_currency/migration.sql": "ae6292eeb5acd842fa11d68dd0c55e652f5552d4ac48e15cafaa62e6e45adcb3",
+    "prisma/migrations/202610140176_gift_checkout_source/migration.sql": "843d74740ffbcff3b156039b886d1d848bca9aa2eafac111b9aaee4d74911843",
+    "prisma/migrations/202610140177_loyalty_cards_promotions/migration.sql": "98c6e894de6c3a569394e8355207ebd6e7cdaafcac5931bb40539d16ce92e810",
+    "prisma/migrations/202610140178_loyalty_benefit_source_guards/migration.sql": "833bcc9ca5d044468874dd34eec3d1ce2c4920a6198aa1327644740d3c60cef1",
+    "prisma/migrations/202610150179_loyalty_active_customer/migration.sql": "6c5363d2c4afb8dd0c99dd71c3e491b48ab791e769fcca7c5de94c6ad96c19ce",
+    "prisma/schema.prisma": "6d9eba2ff26a4751ab8e206138c4c80bb0f842b51504b1661388407a9ef24c2e",
+    "scripts/ops/loyalty-restore-fixture.cjs": "4d761adfd820faafcdbf08e4cf4d26ce720925768ac74d3ba1853074a64320bc",
+    "scripts/ops/test-valuation-migrations.sh": "e1b61e691f6bcc22718b53f4e3a605239e55dfd3a01eeb2e3b5807a83359aa5f",
+    "src/components/customers/CustomerGifts.tsx": "0a082d1cd3c3140d324e1738aef30aa13816faf37beb214d6e04be8d18eef4bb",
+    "src/components/customers/MarketingManager.tsx": "3347bd4c005847813242d6ec29eb6b85de63c6959719eac5e156c2a9c26e6d16",
+    "src/components/customers/SaleBenefits.tsx": "f5b5eec9527927ee1eb81174b069a972c56ff952c5b1c48ca46ac2b7616d4bbb",
+    "src/components/customers/SaleGift.tsx": "9c44ea2c4332befa43d1ca19d25c78bc5632e5c27c9810d891f88e210344a5f7",
+    "src/server/customers/advances.ts": "63ab5f657a6eb1da7f1eb69268f0544fd13de52cd76cf8b412ff33c3f150a3ea",
+    "src/server/deployment/required-migrations.ts": "31d8ea29e27a706c2e99588a4e25d7c180d0761bf2ed1f3c9648b13673df6c34",
+    "src/server/loyalty/benefits.ts": "1fe6fa992c652a5068963425cc2799f0bb7c7d5f5e3126f5f8c06988d2bc1b23",
+    "src/server/loyalty/calculations.ts": "7d899c94aab0db65bc9de3476cd5caf9e228309187c1246a00d9934cd44b739d",
+    "src/server/loyalty/errors.ts": "e866a9c50cc1004ab1886c60893fd0c1ea63cee366500f92cff077a70449d85f",
+    "src/server/loyalty/gift-ledger.ts": "e8783ada7019f8f6370ba3d7d330b9cd9f77e9a5e5736e23a817539cadd1b1a2",
+    "src/server/loyalty/gift-presentation.ts": "90e4f72350add18210724b01bf444f4d7d249b824345d62d3ed7bbd7a694cbf9",
+    "src/server/loyalty/gifts.ts": "493e7bcff98b2917279a27d121e8319669d33b8dc4c67ede61c4f18825173ced",
+    "src/server/loyalty/http-context.ts": "c377778683ac10147236a5c500aa6bf4eacd3a2dc60027742232160c8b155256",
+    "src/server/loyalty/lots.ts": "235388c418700b75f2cfb2dbd18a7c4842d34127ea2c61f799dbcb64ab25efee",
+    "src/server/loyalty/marketing.ts": "4ff7d98f7798c4c862823968f09e9e61a0ba8a2f6693ba79529f54c57a08acdf",
+    "src/server/loyalty/policy.ts": "7dbafae359a8ff4e1d296a806da7966341067219da02d94087244143ca2e2d6c",
+    "src/server/loyalty/redemption.ts": "263113b3711a4ff9e455aaa44221433d68a9d67626c92540cec721a420bc1051",
+    "src/server/loyalty/wallet.ts": "c1cafeb57f88c1c06503034fcd097bc32aca6c8da95f076baeed852552cf0016",
+    "src/server/sales/service.ts": "8ab5b37c9b1e93aba764416f425cdc4d02aa501941208b9e5f849b021aab3ecc",
+    "tests/e2e/gift-certificates.spec.ts": "edbafe4796110078f7da9da5a1c5b2400f1cbaa2d843fcd4a9ae5c4b41ddd1d7",
+    "tests/e2e/loyalty-marketing.spec.ts": "8ac27b1c4ac465d7c8723ccfcafa19e8de00b788634fd6ae0ec2950d9e7d1329",
+    "tests/gift-certificates.integration.test.ts": "849e752d045f81e6ba0a19a055de2528c5e373b211221c018a8b54233282db93",
+    "tests/loyalty-marketing.integration.test.ts": "ddfa513fe5794657dbcf72176aeb605ad234e3daac4159ba877b6350fa1d70c3"
+  },
+  "artifactSha256": {
+    "tasks/evidence/loyalty-marketing-20261015/browser-final6.log": "e128f73acaaaafdefd24262501e8b3fa3d3da66a00e9c5d9d7e7b5aca118ac3e",
+    "tasks/evidence/loyalty-marketing-20261015/build.log": "2a933f2371fec87e9e1afe02853aa7b3cd26bbb1b4c09645f389cfae6341397e",
+    "tasks/evidence/loyalty-marketing-20261015/lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/loyalty-marketing-20261015/marketing-final8.log": "73744555f93a35ebf3f625072c8cf6a4fa580e72fbaebf0d37979c43b5773882",
+    "tasks/evidence/loyalty-marketing-20261015/regression-with-superseded-assertion.log": "50059576bd02acb9f8b99a199a30178a2f949ae9610f10f7a44e804dab084533",
+    "tasks/evidence/loyalty-marketing-20261015/restore179.log": "1a90ab2ef951cdc9ec031edddf8c6adea8069e97c11c9b53469150f90f2c6d7b",
+    "tasks/evidence/loyalty-marketing-20261015/source-scan.json": "f851a6fd9032cc9eb49d5d840928b77ae3064c009ba43dff76bb155e908d40be",
+    "tasks/evidence/loyalty-marketing-20261015/type.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/loyalty-marketing-20261015/unit52.log": "39cce463d85a0fb19506ec82cb18896e31ccc42692bf52a49f30184f8ff1ca41",
+    "tasks/evidence/loyalty-marketing-20261015/worker.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

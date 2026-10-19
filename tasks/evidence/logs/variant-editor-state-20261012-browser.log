@@ -1,0 +1,23 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/variant-editor-state.spec.ts tests/e2e/core.spec.ts --grep variant option-only draft|Variant UI creates
+
+[WebServer] (node:192683) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:192761) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:999:5 › Variant UI creates independent color size SKU and restores the original lost creation intent once (1.4s)
+  ✓  2 [chromium] › tests/e2e/variant-editor-state.spec.ts:8:5 › variant option-only draft is guarded and successful creation stays acknowledged when list reload fails (1.0s)
+(node:192979) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/core.spec.ts:999:5 › Variant UI creates independent color size SKU and restores the original lost creation intent once (1.9s)
+  ✓  4 [firefox] › tests/e2e/variant-editor-state.spec.ts:8:5 › variant option-only draft is guarded and successful creation stays acknowledged when list reload fails (1.4s)
+(node:193377) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/core.spec.ts:999:5 › Variant UI creates independent color size SKU and restores the original lost creation intent once (2.2s)
+  ✓  6 [webkit] › tests/e2e/variant-editor-state.spec.ts:8:5 › variant option-only draft is guarded and successful creation stays acknowledged when list reload fails (2.3s)
+
+  6 passed (13.7s)

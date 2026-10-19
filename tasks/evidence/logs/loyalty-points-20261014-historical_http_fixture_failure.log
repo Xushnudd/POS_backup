@@ -1,0 +1,39 @@
+✔ Points reduce only the reviewed receipt, debit once at checkout and split refunds restore original lots without renewing expiry (479.138855ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Two prepared receipts cannot spend one wallet concurrently; the losing receipt/payment/stock remains unposted (381.223868ms)
+✔ Cancelled point review restores original money, protects cart/customer snapshot and changed policy cannot publish a debit (513.618618ms)
+✔ Refunded spent earnings become recovery debt; later grants clear it once through paired original transfers (413.531649ms)
+✔ A configured full point discount and zero cash refund conserve original allocations and physical stock (198.897939ms)
+✔ Native expiry boundary excludes real source lots without a production clock override or forged expiry update (142.681954ms)
+{"requestId":"f8234a9a-8997-4bc2-b9c4-7760672c3a27","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✖ HTTP point interfaces remain tenant scoped, reject missing consent and use exact public strings (257.973565ms)
+✔ Late redemption audit failure rolls back checkout and preserves one original quote for a safe retry (217.287231ms)
+✔ Every protected exported action has an explicit reviewed permission entry, without stale entries (11.249734ms)
+✔ Security-sensitive roles, static routes and unknown methods fail closed independently of the matrix inventory (0.403539ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3174.626805
+
+✖ failing tests:
+
+test at .test-build/tests/loyalty-redemption.integration.test.js:182:25
+✖ HTTP point interfaces remain tenant scoped, reject missing consent and use exact public strings (257.973565ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  401 !== 404
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/loyalty-redemption.integration.test.js:187:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

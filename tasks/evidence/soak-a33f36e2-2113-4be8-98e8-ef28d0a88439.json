@@ -1,0 +1,160 @@
+{
+  "runId": "a33f36e2-2113-4be8-98e8-ef28d0a88439",
+  "mode": "smoke",
+  "startedAt": "2026-10-11T18:16:15.297Z",
+  "profile": {
+    "synthetic": true,
+    "normalRegisters": 20,
+    "stressConcurrentCheckouts": 40,
+    "waveIntervalMs": 30000,
+    "normalStressMinutes": null,
+    "normalSoakMinutes": null,
+    "referencePeak": "20 simultaneous checkouts every 30 seconds; PLAN1 synthetic profile, not measured pilot demand",
+    "database": "isolated pos_test on loopback:55439; shared historical test dataset",
+    "transport": "private loopback HTTP; HTTPS origin/cookie policy retained, no external traffic"
+  },
+  "hardware": {
+    "platform": "linux",
+    "kernel": "7.2.8-200.fc44.x86_64",
+    "node": "v24.18.0",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "memoryBytes": 33467367424
+  },
+  "phases": [
+    {
+      "name": "stress",
+      "concurrentCheckouts": 40,
+      "startAt": "2026-10-11T18:16:16.199Z",
+      "endedAt": "2026-10-11T18:16:31.204Z",
+      "durationMs": 15004.936987000001,
+      "requestedDurationMs": 15000,
+      "waves": 1,
+      "requests": 171,
+      "p50Ms": 369.967979,
+      "p95Ms": 731.411153,
+      "p99Ms": 798.4284190000001,
+      "maxMs": 834.6117710000001
+    },
+    {
+      "name": "soak",
+      "concurrentCheckouts": 20,
+      "startAt": "2026-10-11T18:16:31.819Z",
+      "endedAt": "2026-10-11T18:17:50.149Z",
+      "durationMs": 78330.241786,
+      "requestedDurationMs": 15000,
+      "waves": 2,
+      "requests": 170,
+      "p50Ms": 202.2391889999999,
+      "p95Ms": 401.35863400000017,
+      "p99Ms": 428.4936420000013,
+      "maxMs": 450.48867099999916
+    }
+  ],
+  "samples": [
+    {
+      "at": "2026-10-11T18:16:20.803Z",
+      "phase": "stress",
+      "pid": 1800951,
+      "rssBytes": 308142080,
+      "virtualBytes": 3587198976,
+      "cpuUserTicks": 570,
+      "cpuSystemTicks": 72,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614023143424,
+      "database": {
+        "bytes": "1718844775",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:16:34.883Z",
+      "phase": "soak",
+      "pid": 1802159,
+      "rssBytes": 230338560,
+      "virtualBytes": 3502661632,
+      "cpuUserTicks": 353,
+      "cpuSystemTicks": 43,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614018244608,
+      "database": {
+        "bytes": "1719237991",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:17:50.147Z",
+      "phase": "soak",
+      "pid": 1802159,
+      "rssBytes": 203214848,
+      "virtualBytes": 3463700480,
+      "cpuUserTicks": 665,
+      "cpuSystemTicks": 78,
+      "readBytes": 0,
+      "writeBytes": 0,
+      "diskFreeBytes": 614011199488,
+      "database": {
+        "bytes": "1719475559",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    }
+  ],
+  "restarts": [
+    {
+      "signal": "SIGKILL",
+      "outcome": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "recoveryMs": 612.4431919999988,
+      "replayedSaleId": "453c814c-ceac-4e29-9ee1-1799379baa17"
+    },
+    {
+      "signal": "SIGTERM",
+      "outcome": {
+        "code": 143,
+        "signal": null
+      },
+      "recoveryMs": 630.3249389999983,
+      "replayedSaleId": "12813df6-d88d-4355-8dfa-736d3f1fae01"
+    }
+  ],
+  "requests": {
+    "successful": 244,
+    "retryable": 101,
+    "networkUnknown": 0,
+    "byStatus": {
+      "200": 244,
+      "409": 88,
+      "429": 13
+    }
+  },
+  "accepted": false,
+  "fixture": {
+    "organizationId": "8e825639-f780-4c57-b567-486c0f8bc272",
+    "registers": 20,
+    "initialStockPerProduct": 100000
+  },
+  "invariants": {
+    "completedSales": 80,
+    "saleItems": 80,
+    "payments": 80,
+    "saleMovements": 80,
+    "cashAmount": "80.80",
+    "duplicates": 0,
+    "missingCommands": 0,
+    "stockChecks": 20
+  },
+  "endedAt": "2026-10-11T18:17:50.807Z"
+}

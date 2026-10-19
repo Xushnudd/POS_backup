@@ -1,0 +1,154 @@
+{
+  "date": "2026-10-13",
+  "gitHead": "55eeeda66acdb86a4c442b5f5fc16d7ebee45297",
+  "dirtyWorkspace": true,
+  "commitCreated": false,
+  "scope": "Local synthetic checkpoint; original PUR-01.05/CAT-01.05 not done",
+  "originalDone": 168,
+  "originalTotal": 259,
+  "target": 170,
+  "newOriginalDone": 0,
+  "decisions": [
+    "ADR081",
+    "ADR085",
+    "ADR086"
+  ],
+  "checks": {
+    "unit": {
+      "passed": 128,
+      "failed": 0,
+      "includesSyntheticScaleParser": 4
+    },
+    "postgres": {
+      "passed": 91,
+      "failed": 0,
+      "includesLandedCostCases": 11,
+      "database": "127.0.0.1:55439/pos_test only"
+    },
+    "type": "PASS",
+    "lint": "PASS, zero warnings",
+    "worker": "PASS",
+    "webpackProductionBuild": "PASS, local only",
+    "migration": {
+      "freshCount": 154,
+      "legacyBaseline": 133,
+      "cloneUpgradeRepeat": "PASS",
+      "valuationBatchDumpRestore": "PASS",
+      "applicationRowsDumpRestore": "NOT RUN"
+    },
+    "scanner": {
+      "scanned": 1202,
+      "findings": 0,
+      "scope": "working tree only; credential stores not opened; git history/container images not scanned"
+    }
+  },
+  "expectedActual": [
+    {
+      "scenario": "apply/replay/reverse actual paid expense",
+      "expected": "one application for original key; no new cash/FinancialDocument; original receipt cost2 unchanged; reversal currentcost2",
+      "actual": "PASS"
+    },
+    {
+      "scenario": "sale then late fee then linked return",
+      "expected": "SaleItem original2; current issue cost used for return; cogs4.00 then0.00 and reversal0.00; product report and CSV agree",
+      "actual": "PASS"
+    },
+    {
+      "scenario": "two independent paid fees, selectively reverse first then second",
+      "expected": "remaining2 UZS fee leaves each3-unit SKU cost2.333333; second reversal restores2; immutable4 headers",
+      "actual": "PASS"
+    },
+    {
+      "scenario": "stale hash and late AuditLog fault then simultaneous same-key retry",
+      "expected": "stale rejected; fault rolls back cost/events/header/operation; retry one header",
+      "actual": "PASS"
+    },
+    {
+      "scenario": "scale parser synthetic approved format only",
+      "expected": "exact1.234 quantity and0012 productCode; unknown/unapproved/ambiguous/checksum invalid/unavailable/exception/zero/malformed rejected",
+      "actual": "PASS; not real hardware proof"
+    }
+  ],
+  "remaining": [
+    "Future transfer/loss/manual-cost/supplier-withdrawal value-continuation journals and report reconciliation",
+    "Public apply/reversal endpoints and durable UI/MFA/lost-ACK acceptance",
+    "Expanded source-forgery/races and actual application-row dump/restore",
+    "INV-02.07 serial/warranty original task",
+    "Approved real scale model/format and real checkout integration acceptance"
+  ],
+  "externalActions": {
+    "productionDeployment": false,
+    "realProviderHardwareIntegration": false,
+    "pilotAcceptance": false
+  },
+  "logs": {
+    "unit": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-unit.log",
+      "sha256": "2f46217225068ec6bae509d9f2fd51d57ff92f69ee4ab495db3f812c3d50d2af"
+    },
+    "postgres": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-postgres.log",
+      "sha256": "7e63e3be3d4c8b67b238dc74d204fc5c5442371b6e65299228effd45d1f7c478"
+    },
+    "landed-repeated-rollback": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-landed-repeated-rollback.log",
+      "sha256": "64b9610d0df8be5d275f51840c417614d3204c0f459578416b916bd88f83e6a7"
+    },
+    "type": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-type.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-build.log",
+      "sha256": "f1560450e65b66a57f87c1a9521004d0776d2ea52913ac62b04f553a78ab1a70"
+    },
+    "migration-rehearsal": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-migration-rehearsal.log",
+      "sha256": "b058da16e97006a7db323b95dce0b50efc0c42924fc822ac23ce6b6c770fb972"
+    },
+    "scanner": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-scanner.log",
+      "sha256": "2fa913877d6f1a3a678529b5a23b4d56f79ab9a909247dc3122366426a96cb57"
+    },
+    "initial-pg-failures": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-initial-pg-failures.log",
+      "sha256": "23350c98e453acabe4c798043418ef18864a37567862cb4aaedc90d107336273"
+    },
+    "decimal-assertion-failure": {
+      "path": "tasks/evidence/logs/cost-applications-20261013-decimal-assertion-failure.log",
+      "sha256": "0fd840bcdffc095c977ab74dd09f6bd90500687d7abff41731bc277dd785a709"
+    }
+  },
+  "sourceSha256": {
+    "prisma/schema.prisma": "fcaff78bc0751f91e3950647369757ff517378b72edccc32cb8d84ec627cf137",
+    "src/server/purchases/cost-applications.ts": "53c42c53a55b3d3cc17349da4a94ae1c4043cf843787925c2f33347a1702d545",
+    "src/server/purchases/cost-application-contract.ts": "a9c98148e6d56a8d9849f16c76190402eac7ff265a698f8714ea9376720287cc",
+    "src/server/purchases/receipt-cost-plans.ts": "fe2cd54f54413e419ac2109fc61da6968f46565cc9a8de5d46468f848bb5e1e3",
+    "src/server/inventory/valuation-facts.ts": "5b6ee8383b6754b1db65e676066ae38b7ef0f08cda05e5e6be3e499d182dca57",
+    "src/server/inventory/valuation-replay.ts": "5dd521e19200d563ba4eb6f5353f37a27d61aa2979251fb63581d3f4e0a20844",
+    "src/server/inventory/effective-issue-cost.ts": "d863ad0b8fe2499b25f8f36abb4d420c18753a4e0af78f45df6993505d1cd6bd",
+    "src/server/returns/service.ts": "5591956549ffe224fd8d4afcf2f556ea6759ec49377363c899bd8539c2857663",
+    "src/server/reports/profit.ts": "c6b4d1bc0a8f6e4c4ff9c4715e3c2b3c053e38ed2402ac43c7afeb74c7e86bdd",
+    "src/server/exports/queries/reports-products.ts": "831b728c779909c2f2fde4956d555cce5298824c5088b748aaf819de80fee41a",
+    "src/server/catalog/prices.ts": "8629b0fcb9ed64587ed27fc63474fbda1f0a33722dc464948c9c2819d0e24b58",
+    "src/server/catalog/barcodes/scale-parser.ts": "10d6eb5d2807364d32ff9e1ae0276a9b37286a80ee0352b400f94a639e2c2ec4",
+    "tests/landed-cost.integration.test.ts": "e46d3c67d84f256a029f42a90f1a7d37aae06d29e3edbc98d53accf918cadc52",
+    "tests/scale-parser.unit.test.ts": "ce45a8f130e1ffd1f3150a17562212ef9646cc5bf2746d3de0ad7c242f8b939b",
+    "docs/operations/receipt-cost-applications.md": "8393cb2fc7332cbf761f6f46065c74eda66dc3eede47d17e37fd41d58570e421",
+    "docs/operations/scale-barcode-boundary.md": "bc108e75cd6ab33894906574520a0217115e9e0cbdf565fc9911c0e594451b8a",
+    "prisma/migrations/202610130149_receipt_cost_applications/migration.sql": "b8917f0c7f3e0ab31135a53699b6f3ac387a88d45128558644ca96fbad32288e",
+    "prisma/migrations/202610130150_cost_application_tenant/migration.sql": "83faf36d78bfd4d74142023bcd9e4e2ff1808f45de64d0384dd69fd4426bebc5",
+    "prisma/migrations/202610130151_cost_application_sources/migration.sql": "8a4a4140c9a90ecd33e0a3444c143f01e251a02935fab357babac897530a8b6d",
+    "prisma/migrations/202610130152_cost_posting_timestamp_precision/migration.sql": "56c5be3e308a8d4d82f7dd2a2bb2c394ffdff7076abcc1c9df85344f9c1bbd8d",
+    "prisma/migrations/202610130153_return_effective_cost_source/migration.sql": "57927e3c21de36a6765cd3bb6003554d16f7d1b9158bbca9adee581c66853937",
+    "prisma/migrations/202610130154_cost_application_offline_guard/migration.sql": "ad0094f3a2b618a6a2709de2f41e1bab3e619c9648af63e21779a8dd7c241946"
+  }
+}

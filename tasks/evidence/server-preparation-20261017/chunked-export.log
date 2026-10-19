@@ -1,0 +1,19 @@
+{"requestId":"0132b151-6de2-4552-9bc9-b6949c400cbc","organizationId":"90a8c343-1802-4925-affc-4db6498dcc97","status":200,"durationMs":38,"event":"api_response"}
+{"requestId":"ee7eefd4-27b7-42a9-998a-057472ae1327","organizationId":"6edf8b10-83bc-4bd2-b43a-a6099475aa6a","status":404,"code":"NOT_FOUND","durationMs":21,"event":"api_error"}
+{"requestId":"8e130680-183f-449f-9497-7f6d43150f84","organizationId":"90a8c343-1802-4925-affc-4db6498dcc97","status":200,"durationMs":163,"event":"api_response"}
+{"requestId":"54d7db0b-388b-4425-b703-77a5bbc77a02","organizationId":"90a8c343-1802-4925-affc-4db6498dcc97","status":200,"durationMs":163,"event":"api_response"}
+{"requestId":"a2231abb-9c28-4aa2-a2cd-045d7acbb47b","organizationId":"90a8c343-1802-4925-affc-4db6498dcc97","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"36c8201f-2d2f-4c91-8928-bbe8bbcfd377","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Large web archive is exact, private, immutable and auditable only after complete streaming; closure accepts it (3059.648191ms)
+{"requestId":"397082c7-0f15-4115-8952-0ebda48f7054","organizationId":"328d4884-a287-45cb-ad05-60f45fffb660","status":404,"code":"NOT_FOUND","durationMs":20,"event":"api_error"}
+✔ A killed worker never exposes partial bytes; persisted lease recovery fences the old attempt and publishes exactly once (1988.510005ms)
+{"requestId":"c6d705ae-a4b8-4ad0-855f-31207f6c29d6","organizationId":"2e45d34c-afa6-44fe-ba18-c55abacded18","status":410,"code":"EXPORT_EXPIRED","durationMs":13,"event":"api_error"}
+✔ Expired chunk bytes are pruned while metadata/history stays and incomplete publication is rejected natively (72.453684ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5499.069501

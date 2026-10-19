@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 9,
+      "failed": 0,
+      "seconds": 22.1,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "cases": [
+        "invalid invitation dirty/busy/same-tick submit preserves credentials on actual server rejection",
+        "threshold immutable original-key lost-ACK and reload, exact3.000001/10.000001, one operation/audit, no stock movement",
+        "legacy monitoring-to-threshold-to-help regression before later incidents rewrite"
+      ]
+    },
+    "webpackBuild": "pass",
+    "typecheck": "pass",
+    "changedLint": "pass"
+  },
+  "logs": {
+    "browser": "tasks/evidence/logs/threshold-invite-20261012-browser.log",
+    "build": "tasks/evidence/logs/threshold-invite-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/threshold-invite-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/threshold-invite-20261012-lint.log"
+  },
+  "limits": [
+    "Incidents rewrite and its adapted core monitoring test occurred after this acceptance; not covered here",
+    "Full UX-01.05 parent remains open, no new original done",
+    "Successful real invitation delivery/provider not claimed"
+  ],
+  "sha256": {
+    "src/app/(dashboard)/replenishment/page.tsx": "03d14340292d680f73203eb75bc87b189a9fe127380f7522f025f2f861aab1b6",
+    "src/app/invite/page.tsx": "934a60feec665f81fd2f5e8edcd0ec762431689b0b57002e84a28378ac88d919",
+    "tests/e2e/threshold-recovery.spec.ts": "f82865649ec3bbec38efd809ae3479c29ddef4ef86557ff7a259e5e75775f4fa",
+    "tests/e2e/auth-form-state.spec.ts": "5c2f54abae6704eb1c10dd324caace7e8c463630fa199616331d024840518607",
+    "tasks/evidence/logs/threshold-invite-20261012-browser.log": "a34b2d3e599dd903da364b366fb1e9b4122e414b936923f13bd0950cdde86391",
+    "tasks/evidence/logs/threshold-invite-20261012-build.log": "f1fc760316be090eeee952219d80bc9fdf2287c2b3f0194afaccf19f8b5a982f",
+    "tasks/evidence/logs/threshold-invite-20261012-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "tasks/evidence/logs/threshold-invite-20261012-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

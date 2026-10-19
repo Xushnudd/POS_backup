@@ -1,0 +1,55 @@
+✔ Reward rules require explicit administrator choices and exact UZS integer points (4.131758ms)
+✔ Cumulative partial refunds reverse one original grant without rounding abuse or a negative spendable wallet (0.84932ms)
+✔ Promotion math retains cents, configured maximum and half-open validity boundaries (1.253285ms)
+✔ Expired grants are unavailable, refund recovery clears once, and original FIFO allocations retain exact point identities (0.417307ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Real sale grants one immutable original lot; split returns reverse the same original policy without extra points (537.105837ms)
+✔ Disabled and configured credit exclusions leave financial sales unchanged without inventing reward grants (247.499718ms)
+✔ A deferred reward audit failure rolls back the financial refund, stock and original operation together (173.018134ms)
+✔ A settled customer alias retains one wallet and original receipt lots before and after a return (335.048129ms)
+✔ An earn audit failure rolls back original completion, cash, stock and grant without damaging the draft (151.458213ms)
+✔ An original signed offline cash v1 sale remains exact and does not infer a reward rule absent from its snapshot (177.298128ms)
+✔ UZS rules are not converted or applied when the organization currency changes (111.906339ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Administrator policy is explicitly configured, versioned, replay-safe and native immutable/proof protected (245.002468ms)
+✔ Native JSON policy validator agrees with strict rules and rejects malformed money, booleans, shape and dates (5.785772ms)
+✔ Points reduce only the reviewed receipt, debit once at checkout and split refunds restore original lots without renewing expiry (608.224605ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Two prepared receipts cannot spend one wallet concurrently; the losing receipt/payment/stock remains unposted (393.62839ms)
+✔ Cancelled point review restores original money, protects cart/customer snapshot and changed policy cannot publish a debit (317.58691ms)
+✔ Refunded spent earnings become recovery debt; later grants clear it once through paired original transfers (429.418287ms)
+✔ A configured full point discount and zero cash refund conserve original allocations and physical stock (243.851896ms)
+✔ Native expiry boundary excludes real source lots without a production clock override or forged expiry update (119.277861ms)
+{"requestId":"7e6b827f-0bea-48e4-8674-db883093243c","organizationId":"76fe232d-e449-4f61-9411-92f3db853c36","status":404,"code":"NOT_FOUND","durationMs":12,"event":"api_error"}
+{"requestId":"800d1f60-7cd3-4846-ab67-ef653ae937da","organizationId":"3a41b822-c023-4bc8-80e1-dd123effaa62","status":400,"code":"VALIDATION_ERROR","durationMs":20,"event":"api_error"}
+{"requestId":"8c572815-77a0-4e5a-a215-0360c8a516e9","organizationId":"3a41b822-c023-4bc8-80e1-dd123effaa62","operationId":"aee83a21-5d7d-4972-a033-77f58c0d1c14","status":200,"durationMs":48,"event":"api_response"}
+{"requestId":"2adf7162-1d55-4e6f-943e-aa2aec67801f","organizationId":"3a41b822-c023-4bc8-80e1-dd123effaa62","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"a8ccb277-ea4d-4be6-873f-9068098568c4","organizationId":"76fe232d-e449-4f61-9411-92f3db853c36","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+✔ HTTP point interfaces remain tenant scoped, reject missing consent and use exact public strings (336.312087ms)
+✔ Late redemption audit failure rolls back checkout and preserves one original quote for a safe retry (220.355872ms)
+{"requestId":"5718e407-0759-4417-9ec9-d5c9f49587cb","organizationId":"604abbd2-2211-4690-8c2a-348d2ed027e0","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+✔ Actual cashier membership can use only its own scoped receipt and remains subject to configured discount permission (223.20727ms)
+✔ Refund clawback consumes an already available credit atomically instead of reserving it until expiry and charging debt again (387.209373ms)
+{"requestId":"18b4d930-62f7-4a75-866d-fcaa088e9221","organizationId":"5d3a2abf-2804-44bf-aea9-06926b704ff2","status":409,"code":"SUBSCRIPTION_EXPIRED","durationMs":33,"event":"api_error"}
+{"requestId":"83d3d667-ae96-4a8a-a43b-897dbfec21b1","organizationId":"5d3a2abf-2804-44bf-aea9-06926b704ff2","status":200,"durationMs":15,"event":"api_response"}
+✔ All reviewed business tables have DB guards; root/child CRUD and tenant reassignment cannot bypass read-only (261.160233ms)
+✔ Original committed replay remains available after expiry, but new operation cannot run work and revoked actor cannot replay (79.994528ms)
+✔ Real grace deadline crossed during work rolls back business mutation and terminal operation (2085.12654ms)
+✔ Expired owner exports existing data and renews through audited billing; ordinary business writes then resume without POS cash posting (502.428973ms)
+✔ Expired manual reservation housekeeping remains narrowly allowed while active stock writes remain denied (1290.581004ms)
+✔ Subscription row changed after a Serializable snapshot cannot supply stale write entitlement (67.890343ms)
+✔ Expired owner can cancel only an unposted draft intent; tombstone replay stays actor/hash bound and cannot become a posting (150.110786ms)
+✔ Every Prisma model has one reviewed tenant export decision and secret fields are excluded (1.752285ms)
+✔ A new scalar field blocks exports until explicitly reviewed, even on an existing model (1.455635ms)
+✔ Every model has one explicit root; child roots are required schema relations, never implicit globals (1.994177ms)
+✔ Child scopes retain branch and cashier restrictions through every parent (0.187693ms)
+✔ Insert roots are explicit, nested organization connects cannot bypass scope and parent checks are required (0.500151ms)
+✔ Global product valuation order is owner-only and cannot be forged through generic tenant inserts (0.183499ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11818.153401

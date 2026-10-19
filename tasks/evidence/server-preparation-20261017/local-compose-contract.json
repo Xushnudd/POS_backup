@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-17T14:10:18.676537+00:00",
+  "scope": "Synthetic environment rendering only; not a deployment or secret-store audit",
+  "sameImageAndBuild": [
+    {
+      "service": "app",
+      "image": "pos-preparation:20261017",
+      "target": "local-development"
+    },
+    {
+      "service": "migrate",
+      "image": "pos-preparation:20261017",
+      "target": "local-development"
+    },
+    {
+      "service": "jobs",
+      "image": "pos-preparation:20261017",
+      "target": "local-development"
+    },
+    {
+      "service": "reconciliation",
+      "image": "pos-preparation:20261017",
+      "target": "local-development"
+    }
+  ],
+  "realEnvironmentOpened": false
+}

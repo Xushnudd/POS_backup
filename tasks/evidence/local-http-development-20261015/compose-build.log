@@ -1,0 +1,525 @@
+ Image pos-app:local Building 
+ Image pos-app:development Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.12kB done
+#1 DONE 0.0s
+
+#2 [migrate internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.19kB done
+#2 DONE 0.0s
+
+#3 [app internal] load metadata for docker.io/library/node:24-slim
+#3 DONE 1.9s
+
+#4 [app internal] load .dockerignore
+#4 transferring context: 316B done
+#4 DONE 0.0s
+
+#5 [app deps 1/7] FROM docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5
+#5 resolve docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 0.0s done
+#5 DONE 0.0s
+
+#6 [app internal] load build context
+#6 transferring context: 223.37kB 0.1s done
+#6 transferring context: 223.37kB 0.1s done
+#6 DONE 0.1s
+
+#7 [migrate builder 3/7] WORKDIR /app
+#7 CACHED
+
+#8 [app deps 2/7] RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+
+#9 [app deps 5/7] COPY prisma ./prisma/
+#9 CACHED
+
+#10 [app deps 4/7] COPY package.json package-lock.json* ./
+#10 CACHED
+
+#11 [app deps 6/7] RUN npm ci --engine-strict
+#11 CACHED
+
+#12 [migrate builder 2/7] RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+#12 CACHED
+
+#13 [app deps 3/7] WORKDIR /app
+#13 CACHED
+
+#14 [migrate builder 4/7] COPY --from=deps /app/node_modules ./node_modules
+#14 CACHED
+
+#15 [migrate deps 7/7] RUN npx prisma generate
+#15 CACHED
+
+#16 [app local-development 1/2] COPY . .
+#16 ...
+
+#17 [migrate builder 5/7] COPY . .
+#17 DONE 0.3s
+
+#16 [app local-development 1/2] COPY . .
+#16 DONE 0.3s
+
+#18 [app local-development 2/2] RUN node scripts/build-offline.cjs     && mkdir -p /app/.next     && touch /app/next-env.d.ts     && groupadd --system --gid 1001 nodejs     && useradd --system --create-home --uid 1001 --gid nodejs nextjs     && chown 1001:1001 /app /app/.next /app/next-env.d.ts /app/tsconfig.json
+#18 0.512 useradd warning: nextjs's uid 1001 is greater than SYS_UID_MAX 999
+#18 DONE 0.6s
+
+#19 [migrate builder 6/7] RUN npm run worker:build
+#19 0.451 
+#19 0.451 > frontend@0.1.0 worker:build
+#19 0.451 > tsc -p tsconfig.worker.json
+#19 0.451 
+#19 4.023 npm notice
+#19 4.023 npm notice New major version of npm available! 11.19.1 -> 12.2.0
+#19 4.023 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#19 4.023 npm notice To update run: npm install -g npm@12.2.0
+#19 4.023 npm notice
+#19 DONE 4.1s
+
+#20 [migrate builder 7/7] RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
+#20 0.215 
+#20 0.215 > frontend@0.1.0 prebuild
+#20 0.215 > node scripts/build-offline.cjs
+#20 0.215 
+#20 0.438 
+#20 0.438 > frontend@0.1.0 build
+#20 0.438 > next build
+#20 0.438 
+#20 0.667 ▲ Next.js 16.3.8 (Turbopack)
+#20 0.682 ✓ Running next.config.ts took 15ms
+#20 0.690 
+#20 0.723   Creating an optimized production build ...
+#20 ...
+
+#21 [app] exporting to image
+#21 exporting layers
+#21 ...
+
+#20 [migrate builder 7/7] RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
+#20 7.324 ✓ Compiled successfully in 6.5s
+#20 7.325   Running TypeScript ...
+#20 16.81   Finished TypeScript in 9.5s ...
+#20 16.81   Collecting page data using 19 workers ...
+#20 18.18   Generating static pages using 19 workers (0/179) ...
+#20 18.22   Generating static pages using 19 workers (44/179) 
+#20 18.29   Generating static pages using 19 workers (89/179) 
+#20 18.34   Generating static pages using 19 workers (134/179) 
+#20 18.38 ✓ Generating static pages using 19 workers (179/179) in 202ms
+#20 18.39   Finalizing page optimization ...
+#20 18.75 
+#20 18.75 Route (app)
+#20 18.75 ┌ ƒ /
+#20 18.75 ├ ƒ /_not-found
+#20 18.75 ├ ƒ /api/audit
+#20 18.75 ├ ƒ /api/auth/challenges
+#20 18.75 ├ ƒ /api/auth/challenges/verify
+#20 18.75 ├ ƒ /api/auth/change-password
+#20 18.75 ├ ƒ /api/auth/delivery
+#20 18.75 ├ ƒ /api/auth/invitations/accept
+#20 18.75 ├ ƒ /api/auth/login
+#20 18.75 ├ ƒ /api/auth/logout
+#20 18.75 ├ ƒ /api/auth/logout-all
+#20 18.75 ├ ƒ /api/auth/me
+#20 18.75 ├ ƒ /api/auth/password-reset/complete
+#20 18.75 ├ ƒ /api/auth/password-reset/request
+#20 18.75 ├ ƒ /api/auth/pin
+#20 18.75 ├ ƒ /api/auth/pin-switch
+#20 18.75 ├ ƒ /api/auth/register
+#20 18.75 ├ ƒ /api/auth/security
+#20 18.75 ├ ƒ /api/auth/security/read
+#20 18.75 ├ ƒ /api/auth/security/retry
+#20 18.75 ├ ƒ /api/auth/sessions
+#20 18.75 ├ ƒ /api/auth/totp
+#20 18.75 ├ ƒ /api/auth/totp/confirm
+#20 18.75 ├ ƒ /api/auth/totp/enroll
+#20 18.75 ├ ƒ /api/auth/totp/proof
+#20 18.75 ├ ƒ /api/auth/totp/recover
+#20 18.75 ├ ƒ /api/auth/totp/rotate
+#20 18.75 ├ ƒ /api/billing
+#20 18.75 ├ ƒ /api/billing/assign
+#20 18.75 ├ ƒ /api/billing/cancel
+#20 18.75 ├ ƒ /api/billing/closure
+#20 18.75 ├ ƒ /api/billing/costs
+#20 18.75 ├ ƒ /api/billing/costs/[id]/cancel
+#20 18.75 ├ ƒ /api/billing/invoices
+#20 18.75 ├ ƒ /api/billing/invoices/[id]/cancel
+#20 18.75 ├ ƒ /api/billing/payments
+#20 18.75 ├ ƒ /api/billing/plans
+#20 18.75 ├ ƒ /api/billing/retention
+#20 18.75 ├ ƒ /api/brands
+#20 18.75 ├ ƒ /api/brands/[id]
+#20 18.75 ├ ƒ /api/catalog-import
+#20 18.75 ├ ƒ /api/catalog-import/export
+#20 18.75 ├ ƒ /api/catalog-import/preview
+#20 18.75 ├ ƒ /api/categories
+#20 18.75 ├ ƒ /api/categories/[id]
+#20 18.75 ├ ƒ /api/customer-groups
+#20 18.75 ├ ƒ /api/customer-groups/assign
+#20 18.75 ├ ƒ /api/customer-merges
+#20 18.75 ├ ƒ /api/customers
+#20 18.75 ├ ƒ /api/customers/[id]
+#20 18.75 ├ ƒ /api/customers/[id]/advances
+#20 18.75 ├ ƒ /api/customers/[id]/debt
+#20 18.75 ├ ƒ /api/customers/[id]/history
+#20 18.75 ├ ƒ /api/customers/[id]/ledger
+#20 18.75 ├ ƒ /api/customers/[id]/points
+#20 18.75 ├ ƒ /api/deployment/status
+#20 18.75 ├ ƒ /api/exchanges
+#20 18.75 ├ ƒ /api/exchanges/preview
+#20 18.75 ├ ƒ /api/files
+#20 18.75 ├ ƒ /api/files/[id]
+#20 18.75 ├ ƒ /api/finance/accounts
+#20 18.75 ├ ƒ /api/finance/categories
+#20 18.75 ├ ƒ /api/finance/documents
+#20 18.75 ├ ƒ /api/finance/documents/[id]/reverse
+#20 18.75 ├ ƒ /api/finance/expenses
+#20 18.75 ├ ƒ /api/finance/transfers
+#20 18.75 ├ ƒ /api/health/live
+#20 18.75 ├ ƒ /api/health/ready
+#20 18.75 ├ ƒ /api/incidents
+#20 18.75 ├ ƒ /api/incidents/[id]
+#20 18.75 ├ ƒ /api/integration-operations
+#20 18.75 ├ ƒ /api/integration-operations/[id]/lookup
+#20 18.75 ├ ƒ /api/inventory/balances
+#20 18.75 ├ ƒ /api/inventory/batches
+#20 18.75 ├ ƒ /api/inventory/batches/count/[productId]
+#20 18.75 ├ ƒ /api/inventory/batches/policy
+#20 18.75 ├ ƒ /api/inventory/batches/sources
+#20 18.75 ├ ƒ /api/inventory/dispositions
+#20 18.75 ├ ƒ /api/inventory/locations
+#20 18.75 ├ ƒ /api/inventory/locations/move
+#20 18.75 ├ ƒ /api/inventory/movements
+#20 18.75 ├ ƒ /api/inventory/position
+#20 18.75 ├ ƒ /api/inventory/reservations
+#20 18.75 ├ ƒ /api/inventory/reservations/[id]/release
+#20 18.75 ├ ƒ /api/inventory/serials
+#20 18.75 ├ ƒ /api/inventory/serials/[id]/history
+#20 18.75 ├ ƒ /api/inventory/serials/policy
+#20 18.75 ├ ƒ /api/inventory/serials/service
+#20 18.75 ├ ƒ /api/inventory/thresholds
+#20 18.75 ├ ƒ /api/jobs
+#20 18.75 ├ ƒ /api/jobs/[id]/events
+#20 18.75 ├ ƒ /api/jobs/[id]/export
+#20 18.75 ├ ƒ /api/jobs/[id]/retry
+#20 18.75 ├ ƒ /api/loyalty/gifts
+#20 18.75 ├ ƒ /api/loyalty/marketing
+#20 18.75 ├ ƒ /api/loyalty/policy
+#20 18.75 ├ ƒ /api/monitoring
+#20 18.75 ├ ƒ /api/offline-cash
+#20 18.75 ├ ƒ /api/offline-cash/[id]
+#20 18.75 ├ ƒ /api/offline-cash/[id]/cancel
+#20 18.75 ├ ƒ /api/offline-cash/[id]/settle
+#20 18.75 ├ ƒ /api/offline-cash/policy
+#20 18.75 ├ ƒ /api/onboarding
+#20 18.75 ├ ƒ /api/operations
+#20 18.75 ├ ƒ /api/operations/cancel
+#20 18.75 ├ ƒ /api/operations/handover
+#20 18.75 ├ ƒ /api/operations/overview
+#20 18.75 ├ ƒ /api/organizations
+#20 18.75 ├ ƒ /api/organizations/[id]
+#20 18.75 ├ ƒ /api/organizations/[id]/invitations
+#20 18.75 ├ ƒ /api/organizations/[id]/invitations/[invitationId]
+#20 18.75 ├ ƒ /api/organizations/[id]/transfer-ownership
+#20 18.75 ├ ƒ /api/organizations/[id]/users
+#20 18.75 ├ ƒ /api/organizations/[id]/users/[userId]
+#20 18.75 ├ ƒ /api/organizations/switch
+#20 18.75 ├ ƒ /api/ownership-transfers
+#20 18.75 ├ ƒ /api/ownership-transfers/[id]
+#20 18.75 ├ ƒ /api/payments
+#20 18.75 ├ ƒ /api/payments/credit
+#20 18.75 ├ ƒ /api/platform/overview
+#20 18.75 ├ ƒ /api/price-rules
+#20 18.75 ├ ƒ /api/price-rules/[id]/archive
+#20 18.75 ├ ƒ /api/price-rules/quote
+#20 18.75 ├ ƒ /api/products
+#20 18.75 ├ ƒ /api/products/[id]
+#20 18.75 ├ ƒ /api/products/[id]/barcodes
+#20 18.75 ├ ƒ /api/products/[id]/barcodes/[barcodeId]
+#20 18.75 ├ ƒ /api/products/[id]/barcodes/generate
+#20 18.75 ├ ƒ /api/products/[id]/barcodes/labels
+#20 18.75 ├ ƒ /api/products/[id]/compliance
+#20 18.75 ├ ƒ /api/products/[id]/units
+#20 18.75 ├ ƒ /api/products/[id]/variants
+#20 18.75 ├ ƒ /api/products/prices
+#20 18.75 ├ ƒ /api/purchase-orders
+#20 18.75 ├ ƒ /api/purchase-orders/[id]
+#20 18.75 ├ ƒ /api/purchase-orders/[id]/receipts
+#20 18.75 ├ ƒ /api/purchase-orders/[id]/receive
+#20 18.75 ├ ƒ /api/registers/[id]
+#20 18.75 ├ ƒ /api/reports/breakdowns
+#20 18.75 ├ ƒ /api/reports/dashboard
+#20 18.75 ├ ƒ /api/reports/plans
+#20 18.75 ├ ƒ /api/reports/plans/[id]/runs
+#20 18.75 ├ ƒ /api/reports/plans/[id]/stop
+#20 18.75 ├ ƒ /api/reports/plans/preview
+#20 18.75 ├ ƒ /api/reports/plans/runs/[id]/export
+#20 18.75 ├ ƒ /api/reports/products
+#20 18.75 ├ ƒ /api/reports/profit
+#20 18.75 ├ ƒ /api/reports/purchases
+#20 18.75 ├ ƒ /api/reports/reconciliation
+#20 18.75 ├ ƒ /api/reports/replenishment
+#20 18.75 ├ ƒ /api/reports/sales
+#20 18.75 ├ ƒ /api/reports/supplier-balances
+#20 18.75 ├ ƒ /api/roles
+#20 18.75 ├ ƒ /api/roles/[id]
+#20 18.75 ├ ƒ /api/sales
+#20 18.75 ├ ƒ /api/sales/[id]
+#20 18.75 ├ ƒ /api/sales/[id]/benefits
+#20 18.75 ├ ƒ /api/sales/[id]/benefits/cancel
+#20 18.75 ├ ƒ /api/sales/[id]/complete
+#20 18.75 ├ ƒ /api/sales/[id]/gift
+#20 18.75 ├ ƒ /api/sales/[id]/points
+#20 18.75 ├ ƒ /api/sales/[id]/points/cancel
+#20 18.75 ├ ƒ /api/sales/[id]/print-requests
+#20 18.75 ├ ƒ /api/sales/[id]/returns
+#20 18.75 ├ ƒ /api/sales/[id]/returns/preview
+#20 18.75 ├ ƒ /api/sales/[id]/void
+#20 18.75 ├ ƒ /api/sales/preview
+#20 18.75 ├ ƒ /api/settings/discounts
+#20 18.75 ├ ƒ /api/shifts
+#20 18.75 ├ ƒ /api/shifts/[id]
+#20 18.75 ├ ƒ /api/shifts/[id]/cash-movements
+#20 18.75 ├ ƒ /api/shifts/[id]/close-rejection
+#20 18.75 ├ ƒ /api/shifts/[id]/corrections
+#20 18.75 ├ ƒ /api/stock-counts
+#20 18.75 ├ ƒ /api/stock-counts/[id]
+#20 18.75 ├ ƒ /api/stock-counts/[id]/approve
+#20 18.75 ├ ƒ /api/stock-counts/[id]/cancel
+#20 18.75 ├ ƒ /api/stock-counts/[id]/submit
+#20 18.75 ├ ƒ /api/stock-documents
+#20 18.75 ├ ƒ /api/stock-documents/[id]
+#20 18.75 ├ ƒ /api/stock-documents/[id]/confirm
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-correction-preview
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-plans
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/application-preview
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/applications
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/apply
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/cancel
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/reverse
+#20 18.75 ├ ƒ /api/stock-documents/[id]/cost-sources
+#20 18.75 ├ ƒ /api/stock-documents/[id]/landed-cost-preview
+#20 18.75 ├ ƒ /api/stock-documents/[id]/reverse
+#20 18.75 ├ ƒ /api/stores
+#20 18.75 ├ ƒ /api/stores/[id]
+#20 18.75 ├ ƒ /api/stores/[id]/registers
+#20 18.75 ├ ƒ /api/supplier-invoices/[id]
+#20 18.75 ├ ƒ /api/supplier-invoices/[id]/credits
+#20 18.75 ├ ƒ /api/supplier-payments
+#20 18.75 ├ ƒ /api/supplier-payments/[id]/allocate
+#20 18.75 ├ ƒ /api/supplier-payments/[id]/allocations
+#20 18.75 ├ ƒ /api/suppliers
+#20 18.75 ├ ƒ /api/suppliers/[id]
+#20 18.75 ├ ƒ /api/suppliers/[id]/ledger
+#20 18.75 ├ ƒ /api/suppliers/[id]/purchase-totals
+#20 18.75 ├ ƒ /api/suppliers/[id]/purchases
+#20 18.75 ├ ƒ /api/support/grants
+#20 18.75 ├ ƒ /api/support/grants/[id]/revoke
+#20 18.75 ├ ƒ /api/support/grants/[id]/view
+#20 18.75 ├ ƒ /api/support/operators
+#20 18.75 ├ ƒ /api/support/policy
+#20 18.75 ├ ƒ /api/support/tickets
+#20 18.75 ├ ƒ /api/support/tickets/[id]
+#20 18.75 ├ ƒ /api/support/tickets/[id]/commands
+#20 18.75 ├ ƒ /api/support/tickets/operators
+#20 18.75 ├ ƒ /api/sync
+#20 18.75 ├ ƒ /api/sync/reviews
+#20 18.75 ├ ƒ /api/sync/reviews/[id]
+#20 18.75 ├ ƒ /api/taxes
+#20 18.75 ├ ƒ /api/taxes/[id]
+#20 18.75 ├ ƒ /api/taxes/[id]/versions
+#20 18.75 ├ ƒ /api/transfers
+#20 18.75 ├ ƒ /api/transfers/[id]/cancel
+#20 18.75 ├ ƒ /api/transfers/[id]/receive
+#20 18.75 ├ ƒ /api/transfers/[id]/return
+#20 18.75 ├ ƒ /api/transfers/[id]/send
+#20 18.75 ├ ƒ /api/units
+#20 18.75 ├ ƒ /api/units/[id]
+#20 18.75 ├ ƒ /archive
+#20 18.75 ├ ƒ /audit
+#20 18.75 ├ ƒ /billing
+#20 18.75 ├ ƒ /customers
+#20 18.75 ├ ƒ /customers/[id]
+#20 18.75 ├ ƒ /customers/[id]/history
+#20 18.75 ├ ƒ /customers/duplicates
+#20 18.75 ├ ƒ /dashboard
+#20 18.75 ├ ƒ /drafts
+#20 18.75 ├ ƒ /finance
+#20 18.75 ├ ƒ /forgot-password
+#20 18.75 ├ ƒ /help
+#20 18.75 ├ ƒ /incidents
+#20 18.75 ├ ƒ /inventory
+#20 18.75 ├ ƒ /inventory/batches
+#20 18.75 ├ ƒ /inventory/counts
+#20 18.75 ├ ƒ /inventory/dispositions
+#20 18.75 ├ ƒ /inventory/locations
+#20 18.75 ├ ƒ /inventory/movements
+#20 18.75 ├ ƒ /inventory/serials
+#20 18.75 ├ ƒ /inventory/transfers
+#20 18.75 ├ ƒ /invite
+#20 18.75 ├ ƒ /jobs
+#20 18.75 ├ ƒ /login
+#20 18.75 ├ ƒ /loyalty
+#20 18.75 ├ ƒ /manifest.webmanifest
+#20 18.75 ├ ƒ /onboarding
+#20 18.75 ├ ƒ /platform
+#20 18.75 ├ ƒ /pos
+#20 18.75 ├ ƒ /pos/offline
+#20 18.75 ├ ƒ /products
+#20 18.75 ├ ƒ /products/[id]
+#20 18.75 ├ ƒ /products/[id]/compliance
+#20 18.75 ├ ƒ /products/[id]/media
+#20 18.75 ├ ƒ /products/[id]/units
+#20 18.75 ├ ƒ /products/[id]/variants
+#20 18.75 ├ ƒ /products/brands
+#20 18.75 ├ ƒ /products/categories
+#20 18.75 ├ ƒ /products/import
+#20 18.75 ├ ƒ /products/prices
+#20 18.75 ├ ƒ /products/units
+#20 18.75 ├ ƒ /register
+#20 18.75 ├ ƒ /replenishment
+#20 18.75 ├ ƒ /reports
+#20 18.75 ├ ƒ /reports/breakdowns
+#20 18.75 ├ ƒ /reports/plans
+#20 18.75 ├ ƒ /reports/purchases
+#20 18.75 ├ ƒ /reports/reconciliation
+#20 18.75 ├ ƒ /reports/supplier-balances
+#20 18.75 ├ ƒ /reset-password
+#20 18.75 ├ ƒ /roles
+#20 18.75 ├ ƒ /sales
+#20 18.75 ├ ƒ /sales/[id]
+#20 18.75 ├ ƒ /sales/[id]/exchange
+#20 18.75 ├ ƒ /security
+#20 18.75 ├ ƒ /settings
+#20 18.75 ├ ƒ /settings/prices
+#20 18.75 ├ ƒ /settings/support
+#20 18.75 ├ ƒ /settings/taxes
+#20 18.75 ├ ƒ /shifts
+#20 18.75 ├ ƒ /suppliers
+#20 18.75 ├ ƒ /suppliers/[id]
+#20 18.75 ├ ƒ /support
+#20 18.75 ├ ƒ /sync-review
+#20 18.75 ├ ƒ /tickets
+#20 18.75 ├ ƒ /tickets/[id]
+#20 18.75 └ ƒ /training
+#20 18.75 
+#20 18.75 
+#20 18.75 ƒ Proxy (Middleware)
+#20 18.75 
+#20 18.75 ƒ  (Dynamic)  server-rendered on demand
+#20 18.75 
+#20 ...
+
+#21 [app] exporting to image
+#21 exporting layers 22.4s done
+#21 exporting manifest sha256:2bfa535b125dfc823a323c98b7c6483b64542e1b33640a4e95ce2e104f3303dd 0.0s done
+#21 exporting config sha256:2d3c9cefbdbdb07ba260404c8179302d09472b60e962dc0ba8b38923090e7969 0.0s done
+#21 exporting attestation manifest sha256:399c1f06fe12979018b875196402a2d7e072c4a22e985e3c823d6eefed51fe49 0.0s done
+#21 ...
+
+#20 [migrate builder 7/7] RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
+#20 DONE 19.0s
+
+#21 [app] exporting to image
+#21 exporting manifest list sha256:d40c2571d9f109414d644c5d9344a8c27391ac84dbf5d905fbb4f86146a26f2f 0.0s done
+#21 naming to docker.io/library/pos-app:development done
+#21 unpacking to docker.io/library/pos-app:development
+#21 ...
+
+#7 [migrate builder 3/7] WORKDIR /app
+#7 CACHED
+
+#22 [migrate runner  4/13] COPY --from=builder /app/.next/standalone ./
+#22 DONE 0.7s
+
+#21 [app] exporting to image
+#21 ...
+
+#23 [migrate runner  5/13] COPY --from=builder /app/.next/static ./.next/static
+#23 DONE 0.2s
+
+#24 [migrate runner  6/13] COPY --from=builder /app/public ./public
+#24 DONE 0.1s
+
+#21 [app] exporting to image
+#21 ...
+
+#25 [migrate runner  7/13] COPY --from=builder /app/.worker-build ./.worker-build
+#25 DONE 0.1s
+
+#26 [migrate runner  8/13] COPY --from=builder /app/scripts/worker-resolver.cjs ./scripts/worker-resolver.cjs
+#26 DONE 0.1s
+
+#27 [migrate runner  9/13] COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+#27 DONE 0.1s
+
+#21 [app] exporting to image
+#21 ...
+
+#28 [migrate runner 10/13] COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+#28 DONE 0.2s
+
+#29 [migrate runner 11/13] COPY --from=builder /app/prisma ./prisma
+#29 DONE 0.2s
+
+#21 [app] exporting to image
+#21 ...
+
+#30 [migrate runner 12/13] COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+#30 DONE 0.2s
+
+#31 [migrate runner 13/13] RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nextjs     && chown -R nextjs:nodejs /app
+#31 0.142 useradd warning: nextjs's uid 1001 is greater than SYS_UID_MAX 999
+#31 DONE 0.4s
+
+#21 [app] exporting to image
+#21 unpacking to docker.io/library/pos-app:development 4.3s done
+#21 DONE 26.9s
+
+#32 [app] resolving provenance for metadata file
+#32 DONE 0.0s
+
+#33 [migrate] exporting to image
+#33 exporting layers 5.0s done
+#33 exporting manifest sha256:81e9a5a1588aa261950564cdda6eba51a70ab5e86080df8af59aa7c62c841aae 0.0s done
+#33 exporting config sha256:b773e22f9e17808aabb3123d856ba38fdf27bbbf205447dc0ed48e03c6025f99 0.0s done
+#33 exporting attestation manifest sha256:4fd7bef39629d4c3ed614019d74110c16d413d714e33ec1fbaef44ae51001c33 0.0s done
+#33 exporting manifest list sha256:7f7442434c69c484b23454f728242895dc96a872cae6f96cc87a246b3afca486 0.0s done
+#33 naming to docker.io/library/pos-app:local
+#33 naming to docker.io/library/pos-app:local done
+#33 unpacking to docker.io/library/pos-app:local
+#33 unpacking to docker.io/library/pos-app:local 2.2s done
+#33 DONE 7.4s
+
+#34 [migrate] resolving provenance for metadata file
+#34 DONE 0.0s
+ Image pos-app:local Built 
+ Image pos-app:development Built 
+ Container pos_backup-db-1 Running 
+ Container pos_backup-migrate-1 Recreate 
+ Container pos_backup-migrate-1 Recreated 
+ Container pos_backup-app-1 Recreate 
+ Container pos_backup-app-1 Recreated 
+ Container pos_backup-local-https-1 Recreate 
+ Container pos_backup-local-https-1 Recreated 
+ Container pos_backup-db-1 Waiting 
+ Container pos_backup-db-1 Healthy 
+ Container pos_backup-migrate-1 Starting 
+ Container pos_backup-migrate-1 Started 
+ Container pos_backup-db-1 Waiting 
+ Container pos_backup-migrate-1 Waiting 
+ Container pos_backup-db-1 Healthy 
+ Container pos_backup-migrate-1 Exited 
+ Container pos_backup-app-1 Starting 
+ Container pos_backup-app-1 Started 
+ Container pos_backup-app-1 Waiting 
+ Container pos_backup-app-1 Healthy 
+ Container pos_backup-local-https-1 Starting 
+ Container pos_backup-local-https-1 Started 
+ Container pos_backup-db-1 Waiting 
+ Container pos_backup-migrate-1 Waiting 
+ Container pos_backup-app-1 Waiting 
+ Container pos_backup-local-https-1 Waiting 
+ Container pos_backup-app-1 Healthy 
+ Container pos_backup-migrate-1 Exited 
+ Container pos_backup-db-1 Healthy 
+ Container pos_backup-local-https-1 Healthy 

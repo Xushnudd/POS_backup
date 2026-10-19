@@ -1,0 +1,42 @@
+{
+  "task": "RELEASE-01.12",
+  "status": "supporting_core_evidence",
+  "date": "2026-10-15",
+  "head": "047c49ec363ec2b80bd303dc3dedc6297cf18114",
+  "workingTree": true,
+  "postgresCases": 100,
+  "postgresFiles": [
+    "foundation",
+    "catalog-purchase",
+    "catalog-import",
+    "onboarding",
+    "billing",
+    "reports-finance",
+    "receipt-identity"
+  ],
+  "sourceSha256": {
+    "src/server/auth/policy.ts": "ceb7f2be3cfc2e974a8af65e92de990c4b172011c20f8da2e05142f838ed85b3",
+    "src/server/billing/invoices.ts": "de1c6caaebcb37e7016e7cf51b0847e70ad149c7ff0b2578194026466994ecae",
+    "src/server/billing/public-pricing.ts": "e0ec9665ec47c5b7dc462dc9171eee914fef8c4c27a897667a5bbb32bb6e8e0c",
+    "src/server/billing/service.ts": "75628ca8100cb04521b6eb5a707796bf53a21c016cee96c2f648644e840ac44a",
+    "src/server/catalog/imports.ts": "f79f69225a433c4b1976d4ae3fb098ae568156e39185b449600504871d545e07",
+    "src/server/catalog/service.ts": "39a042bdf1c7d76e3934b45a6433c67e0045be8f8e2fba93735439b1e3ccadb8",
+    "src/server/inventory/counts.ts": "38bfc1b70ac2acb1f0c4d54b3eff170444509b1f62887a09c1c2bb7742c18d2f",
+    "src/server/inventory/documents.ts": "20a8e011286ccad10f3b1f35a87c3e285b9fe86ee89f1e99865d8f41adf21acd",
+    "src/server/onboarding/service.ts": "792bb2da2be882d596e787be679c3977d01e2283070e4fb4c58f17d63f9b8c09",
+    "src/server/reports/financial.ts": "5eeafa8ebbe1f86394661b1e96dcba183d4012213c2882efd450eaf8d672df9e",
+    "src/server/returns/service.ts": "12640edb5ae06a685d7f7e228c57f554dcf3d7d624709db2edbd204e1bf9e856",
+    "src/server/sales/service.ts": "8ab5b37c9b1e93aba764416f425cdc4d02aa501941208b9e5f849b021aab3ecc",
+    "tests/billing.integration.test.ts": "1c3e0260a328c452a96311dc6bc15af5f61e554fd1a9a9e71d1131111a069c70",
+    "tests/catalog-import.integration.test.ts": "a54b3d884efb3da00cefcd025db2afc66dfaa2b6001a3131c80ab601494c3379",
+    "tests/catalog-purchase.integration.test.ts": "1128241ae470b2b1db28fb215661e86da66a3bbbbb071af955fd979d013fdc61",
+    "tests/foundation.integration.test.ts": "cc9ffd69ec58b2dec954429682f766c9df5d8e32cb2442266e9fb1d301fa3258",
+    "tests/onboarding.integration.test.ts": "233f674f0c422206580c83ac7ee47dfebc38cb41b7382b2e2c30a0951d600eb7",
+    "tests/receipt-identity.integration.test.ts": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052",
+    "tests/reports-finance.integration.test.ts": "312ec37d220f63262425cc96f872aacb4feddb7c6864be9f508397902c0f80da"
+  },
+  "log": "tasks/evidence/public-claims-20261015/core-pg.log",
+  "logSha256": "940da14fda28726b4f6ed0ef52886458ff3d8c76bbc5426f8e77ab7056e36abf",
+  "command": "DATABASE_URL=<isolated127.0.0.1:55439/pos_test> NODE_ENV=test AUTH_CRITICAL_MFA_REQUIRED=false node --require ./scripts/test-resolver.cjs --test --test-concurrency=1 <seven listed .test-build/tests/*.integration.test.js>",
+  "scope": "Actual local business-service/HTTP rehearsal only. Supports bounded public claims; not whole release, pilot, production, external provider or hardware acceptance."
+}

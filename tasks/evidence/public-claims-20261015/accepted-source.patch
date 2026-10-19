@@ -1,0 +1,1897 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index b11b7c2..1786b6d 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -33,6 +33,7 @@ jobs:
+       - run: npm run security:scan
+       - run: npm run lint
+       - run: npm run i18n:check
++      - run: npm run release:claims:check
+       - run: npm run typecheck
+       - run: npm run worker:build
+       - run: npm test
+diff --git a/README.md b/README.md
+index 6f1da26..552822f 100644
+--- a/README.md
++++ b/README.md
+@@ -1161,3 +1161,5 @@ Ichki bonus, chegirma kartasi, promo-kod va sovg‘a sertifikati administrator `
+ Ro‘yxat, hisobot va original jurnallarning URL/paging hamda financial draft chegaralari: [qamrov xaritasi](docs/operations/list-query-coverage.md). UX-01.03 lokal core dalili: [manifest](tasks/evidence/list-journals-20261015.json).
+ 
+ Interfeys o‘zbek lotin va rus tillarida ishlaydi. Sarlavha yoki modal ichidagi `UZ / RU` tanlovi savat, kiritilgan summa, sana va javobi kutilayotgan original amallarni saqlaydi. Til afzalligi qurilmada saqlanadi; foydalanuvchi va original chek ma’lumotlari tarjima qilinmaydi. [Tarjima, exact pul/sana, xatolar va offline qo‘llanmasi](docs/operations/localization.md). Yangi matn uchun ikkala JSON dictionaryni yangilang va `npm run i18n:check`ni bajaring.
++
++Ommaviy va’dalarning release imkoniyatlari va qabul dalillariga mosligi [public claim qo‘llanmasida](docs/operations/public-release-claims.md). `npm run release:claims:check` typed matnlar, ikki tarjima, original qabul bandlari, dalil/source SHA va integratsiya cheklovlarini tekshiradi. Trial konfiguratsiyasi yuklanmasa sahifa uni va’da qilmaydi; tariflar DBdan olinadi.
+diff --git a/docs/operations/localization.md b/docs/operations/localization.md
+index 9940d15..6123ffd 100644
+--- a/docs/operations/localization.md
++++ b/docs/operations/localization.md
+@@ -20,7 +20,7 @@
+ 
+ ## Pul, miqdor va sana
+ 
+-`src/i18n/format.ts` display projection hisoblanadi. Pul avval mavjud exact fixed-point yordamchi orqali BigInt minor birlikka olinadi, so‘ng `Intl.NumberFormat` bilan guruhlanadi. `9007199254740993.01` kabi Number safe integerdan katta decimal string ham yo‘qotilmaydi. UZ ko‘rinishi `12.50 so‘m`, RU ko‘rinishi `12,50 сум`. Moliyaviy hisoblash serverning mavjud Decimal contractida qoladi.
++`src/i18n/format.ts` display projection hisoblanadi. Pul avval mavjud exact fixed-point yordamchi orqali BigInt minor birlikka olinadi, so‘ng `Intl.NumberFormat` bilan guruhlanadi. `formatToParts` orqali minglik ajratgich har ikkala tilda oddiy bo‘shliqqa keltiriladi: Node va brauzer ICU versiyasi farq qilsa ham `249 000` ko‘rinishi saqlanadi. `9007199254740993.01` kabi Number safe integerdan katta decimal string ham yo‘qotilmaydi. UZ ko‘rinishi `12.50 so‘m`, RU ko‘rinishi `12,50 сум`. Moliyaviy hisoblash serverning mavjud Decimal contractida qoladi.
+ 
+ Formalar va requestlar canonical nuqtali decimalni saqlaydi: `12.50`, `0.125`; RU input yordam matni shu talabni tushuntiradi. Yetakchi nolli barkod stringligicha qoladi. Ko‘rinadigan umumiy quantity formatter mavjud uch xonali aniqlikni saqlaydi; original source/unit-conversion ma’lumoti alohida o‘z aniqligida ko‘rsatiladi.
+ 
+@@ -38,7 +38,9 @@ Sale chekidagi yorliqlar, pul va sana tanlangan tilda; original organization/bra
+ 
+ `src/offline/static-locale.ts` faqat `data-i18n` bilan belgilangan owned elementlarni tarjima qiladi. `cash-screen.ts` tanlangan lease, unlock inputi, tender va original encrypted ticketni saqlaydi. Cookie afzalligi bo‘lmasa localStorage afzalligi ishlaydi; storage yopiq bo‘lsa joriy sahifada til o‘zgartirish ishlashda davom etadi.
+ 
+-`node scripts/build-offline.cjs` ayni dictionary va formatterdan public ES modullarni yaratadi. Service worker `shuni-public-shell-v3` ostida faqat 12 ta ochiq shell assetini cache qiladi. Authenticated HTML, API, chek, private fayl va financial ma’lumotlar umumiy cachega kiritilmaydi. `skipWaiting`/`clients.claim` bilan faol kassani majburiy yangilash yo‘q. Source/dictionary o‘zgargach offline assetlarni qayta generatsiya qiling.
++`node scripts/build-offline.cjs` ayni dictionary va formatterdan public ES modullarni yaratadi. Service worker `shuni-public-shell-v4` ostida faqat 12 ta ochiq shell assetini cache qiladi. Authenticated HTML, API, chek, private fayl va financial ma’lumotlar umumiy cachega kiritilmaydi. `skipWaiting`/`clients.claim` bilan faol kassani majburiy yangilash yo‘q. Source/dictionary o‘zgargach offline assetlarni qayta generatsiya qiling.
++
++`RELEASE-01.12` davomida topilgan Node/brauzer pul formatlash farqining tuzatishi public formatterga ham tarqalishi uchun cache versiyasi `v3`dan `v4`ga ko‘tarildi. Yangi worker odatdagi xavfsiz activationni kutadi; faollashganda faqat eski `shuni-public-shell-*` cachelarini, jumladan `v3`ni o‘chiradi. Joriy `v4` va boshqa ilovalar cachelari saqlanadi. Bu keyingi tuzatish avvalgi `localization-20261015.json` qabul dalilini qayta yozmaydi; uning tekshiruvi `RELEASE-01.12` dalillarida alohida ko‘rsatiladi.
+ 
+ ## Tekshirish va dalil
+ 
+diff --git a/package.json b/package.json
+index 79dddcd..f5742e5 100644
+--- a/package.json
++++ b/package.json
+@@ -13,7 +13,7 @@
+     "db:migrate": "prisma migrate deploy",
+     "test": "node scripts/test.cjs",
+     "test:integration": "node scripts/test.cjs --integration",
+-    "test:e2e": "playwright test",
++    "test:e2e": "playwright test && playwright test --config=playwright.pricing-failure.config.ts",
+     "worker:build": "tsc -p tsconfig.worker.json",
+     "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js",
+     "prebuild": "node scripts/build-offline.cjs",
+@@ -22,7 +22,8 @@
+     "security:scan:test": "node --test scripts/security/scan.test.mjs",
+     "worker:totp-rekey": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/totp-rekey.js",
+     "test:ops": "node --test --test-isolation=none scripts/ops/*.test.mjs",
+-    "worker:tenant-recovery-plan": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/tenant-recovery-plan.js"
++    "worker:tenant-recovery-plan": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/tenant-recovery-plan.js",
++    "release:claims:check": "node scripts/release/check-claims.cjs"
+   },
+   "dependencies": {
+     "@fortawesome/free-brands-svg-icons": "^7.3.1",
+diff --git a/playwright.config.ts b/playwright.config.ts
+index ec38413..517990d 100644
+--- a/playwright.config.ts
++++ b/playwright.config.ts
+@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
+ const connection=new URL(process.env.DATABASE_URL??'postgresql://invalid/invalid')
+ if (connection.hostname!=='127.0.0.1' || connection.pathname!=='/pos_test') throw new Error('Browser E2E requires the isolated localhost pos_test DB')
+ export default defineConfig({
+- testDir:'./tests/e2e',fullyParallel:false,workers:1,forbidOnly:Boolean(process.env.CI),retries:0,
++ testDir:'./tests/e2e',testIgnore:['**/public-pricing-failure.spec.ts'],fullyParallel:false,workers:1,forbidOnly:Boolean(process.env.CI),retries:0,
+  timeout:60000,expect:{timeout:10000},reporter:'list',
+  // Lost-ack fault injection uses page.route, which service workers can bypass.
+  // Dedicated PWA scenarios explicitly enable and test the real worker instead.
+diff --git a/public/pwa/format.js b/public/pwa/format.js
+index dfed351..d74f1fa 100644
+--- a/public/pwa/format.js
++++ b/public/pwa/format.js
+@@ -1,7 +1,9 @@
+ import { fixed } from './money.js';
+ import { INTL_LOCALES } from './locale.js';
+ function grouped(value, locale) {
+-    return new Intl.NumberFormat(INTL_LOCALES[locale], { numberingSystem: 'latn', maximumFractionDigits: 0 }).format(value).replace(/[\u00a0\u202f]/g, ' ');
++    // ICU releases disagree on the Uzbek grouping character. Normalize the
++    // semantic group parts so SSR, every browser and the offline shell agree.
++    return new Intl.NumberFormat(INTL_LOCALES[locale], { numberingSystem: 'latn', maximumFractionDigits: 0 }).formatToParts(value).map(part => part.type === 'group' ? ' ' : part.value).join('');
+ }
+ function decimalText(value, scale, locale) {
+     const negative = value < BigInt(0), absolute = negative ? -value : value, power = BigInt(10) ** BigInt(scale);
+diff --git a/public/sw.js b/public/sw.js
+index 4c85c7a..83888f0 100644
+--- a/public/sw.js
++++ b/public/sw.js
+@@ -1,5 +1,5 @@
+ /* Public shell only. Never cache HTML from the application, APIs, files or receipts. */
+-const CACHE='shuni-public-shell-v3';
++const CACHE='shuni-public-shell-v4';
+ const PUBLIC=['/pwa/offline.html','/pwa/icon-192.png','/pwa/icon-512.png','/pwa/cash.html','/pwa/cash-crypto.js','/pwa/cash-store.js','/pwa/cash-screen.js','/pwa/locale.js','/pwa/money.js','/pwa/format.js','/pwa/messages.js','/pwa/static-locale.js'];
+ self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(PUBLIC)))});
+ // Deliberately no skipWaiting/clients.claim: an update cannot replace a live checkout.
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index e3723b6..a1a4736 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,3 +1,4 @@
++import {PUBLIC_COPY} from '@/release/public-copy';
+ import type { Metadata } from 'next';
+ import {headers,cookies} from 'next/headers';
+ import {translate} from '@/i18n/messages';
+@@ -7,7 +8,7 @@ import { AppProviders } from '@/context/AppProviders';
+ 
+ export async function generateMetadata():Promise<Metadata>{
+  const locale=normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+- return {title:translate('Shuni POS — Savdo va ombor boshqaruvi tizimi',locale),description:translate('Kichik va o‘rta bizneslar uchun brauzerda ishlovchi zamonaviy POS savdo va ombor tizimi.',locale)};
++ return {title:translate(PUBLIC_COPY.rootTitle,locale),description:translate(PUBLIC_COPY.rootDescription,locale)};
+ }
+ 
+ 
+diff --git a/src/app/manifest.ts b/src/app/manifest.ts
+index 3e065b1..0c3c22b 100644
+--- a/src/app/manifest.ts
++++ b/src/app/manifest.ts
+@@ -1,5 +1,6 @@
++import {PUBLIC_COPY} from '@/release/public-copy';
+ import {cookies} from 'next/headers';
+ import {LOCALE_COOKIE,normalizeLocale} from '@/i18n/locale';
+ import {translate} from '@/i18n/messages';
+ import type {MetadataRoute} from 'next';
+-export default async function manifest():Promise<MetadataRoute.Manifest>{const locale=normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);return {id:'/',name:'Shuni POS',short_name:'Shuni POS',description:translate('Savdo va ombor boshqaruvi',locale),lang:locale,start_url:'/pos',scope:'/',display:'standalone',background_color:'#ffffff',theme_color:'#1e40af',icons:[{src:'/pwa/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/pwa/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'}]};}
++export default async function manifest():Promise<MetadataRoute.Manifest>{const locale=normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);return {id:'/',name:'Shuni POS',short_name:'Shuni POS',description:translate(PUBLIC_COPY.manifestDescription,locale),lang:locale,start_url:'/pos',scope:'/',display:'standalone',background_color:'#ffffff',theme_color:'#1e40af',icons:[{src:'/pwa/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/pwa/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'}]};}
+diff --git a/src/app/page.tsx b/src/app/page.tsx
+index 45b05ad..264495e 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -1,3 +1,4 @@
++import {PUBLIC_COPY} from '@/release/public-copy';
+ import LandingContent from '@/components/landing/LandingContent'
+ import type {Metadata} from 'next';
+ import {cookies} from 'next/headers';
+@@ -7,7 +8,7 @@ import { publicPricing } from '@/server/billing/public-pricing'
+ export const dynamic='force-dynamic'
+ export async function generateMetadata():Promise<Metadata>{
+  const locale=normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+- return {title:translate('Shuni POS — savdo, ombor va obuna',locale),description:translate('Naqd savdo, ombor, qaytarish, nasiya va hisobotlar. Tasdiqlangan tariflar va hozirgi integratsiya chegaralari.',locale)};
++ return {title:translate(PUBLIC_COPY.landingTitle,locale),description:translate(PUBLIC_COPY.landingDescription,locale)};
+ }
+ export default async function LandingPage(){
+  const plans=await publicPricing().catch(()=>null);
+diff --git a/src/components/landing/LandingContent.tsx b/src/components/landing/LandingContent.tsx
+index 97935ff..f8a50ea 100644
+--- a/src/components/landing/LandingContent.tsx
++++ b/src/components/landing/LandingContent.tsx
+@@ -1,4 +1,5 @@
+ 'use client';
++import {PUBLIC_COPY} from '@/release/public-copy';
+ import {useTranslation} from '@/context/LocaleContext';
+ 
+ import Link from 'next/link';
+@@ -7,19 +8,19 @@ export default function LandingContent({plans}:{plans:PublicPlan[]|null}){
+  const {t:tr,formatMoney}=useTranslation();
+ 
+  const trial=plans?.find(plan=>plan.isTrial);
+- return <div className="min-h-screen bg-slate-50 text-slate-900"><header className="border-b bg-white"><nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-6 p-6" aria-label={tr("Asosiy navigatsiya")}><Link href="/" className="text-xl font-bold">Shuni POS</Link><a href="#features">{tr("Imkoniyatlar")}</a><a href="#prices">{tr("Tariflar")}</a><a href="#devices">{tr("Moslik")}</a><Link href="/login" className="ml-auto underline">{tr("Kirish")}</Link></nav></header>
+- <main><section className="mx-auto max-w-6xl px-6 py-20"><h1 className="max-w-3xl text-4xl font-bold leading-tight">{tr("Savdo, ombor va hisoblarni bir joyda boshqaring")}</h1><p className="my-6 max-w-3xl text-lg">{tr("Naqd savdo, mijoz qarzi, xarid, qaytarish va smena hisoblari uchun POS. Tashkilot va filiallar bo‘yicha vakolatlar bilan ishlang.")}</p>
+- {trial&&<p className="mb-6">{tr("Yangi tashkilot uchun")}{' '}{trial.trialDays} {tr("kunlik")}{' '}{trial.name} {tr("sinovi. Sinovdan so‘ng")}{' '}{trial.graceDays} {tr("kun imtiyozli muddat.")}</p>}
+- <Link href="/register" className="inline-block rounded bg-emerald-700 px-6 py-3 font-semibold text-white">{tr("Sinovni boshlash")}</Link><Link href="/pos" className="ml-6 underline">{tr("POSni ochish")}</Link>
+- </section><section id="features" className="mx-auto max-w-6xl px-6 py-12"><h2 className="mb-6 text-2xl font-bold">{tr("Hozir ishlaydigan imkoniyatlar")}</h2><div className="grid gap-6 md:grid-cols-3">
+- <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr("Savdo va mijoz hisobi")}</h3><p className="mt-3">{tr("Naqd savdo, chegirma, qisman qaytarish, nasiya va mijoz ko‘chirmasi. Karta yoki bank yozuvi qo‘lda tasdiqlanadi.")}</p></article>
+- <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr("Ombor va xarid")}</h3><p className="mt-3">{tr("Mahsulot va barkod katalogi, kirim, ombor harakati, filiallararo ko‘chirish va inventarizatsiya.")}</p></article>
+- <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr("Smena va hisobot")}</h3><p className="mt-3">{tr("Smena ochish/yopish, naqd pul jurnali, savdo va qarz hisobotlari, filtrlangan CSV eksport.")}</p></article>
+- </div></section><section id="prices" className="bg-slate-900 px-6 py-16 text-white"><div className="mx-auto max-w-6xl"><h2 className="mb-6 text-2xl font-bold">{tr("Oylik tariflar")}</h2>
+- {!plans&&<p role="status">{tr("Tariflar vaqtincha yuklanmadi. Keyinroq qayta oching; taxminiy narx ko‘rsatilmaydi.")}</p>}
+- <div className="grid gap-6 md:grid-cols-3">{plans?.map(plan=><article key={plan.code} className="rounded border border-slate-600 p-6"><h3 className="text-xl font-semibold">{plan.name}</h3><p className="my-4 text-3xl font-bold">{plan.currency==='UZS'?formatMoney(plan.monthlyPrice):plan.monthlyPrice+' '+plan.currency}{tr('/oy')}</p><ul className="mb-6 space-y-2"><li>{plan.branchLimit} {tr("filial")}</li><li>{tr("Tashkilot bo‘yicha")}{' '}{plan.registerLimit} {tr("kassa")}</li><li>{tr("Jami")}{' '}{plan.staffLimit} {tr("xodim")}</li></ul><Link className="underline" href="/register">{tr("Ro‘yxatdan o‘tish")}</Link></article>)}</div>
+- <p className="mt-6">{tr("Limitlar tashkilot bo‘yicha jami; arxivlangan yozuvlar ham hisoblanadi. Obuna tugaganda mavjud ma’lumotlar o‘chirilmaydi. Yakuniy invoice joriy tarif versiyasi bo‘yicha tasdiqlanadi.")}</p></div></section>
+- <section id="devices" className="mx-auto max-w-6xl px-6 py-12"><h2 className="text-2xl font-bold">{tr("Brauzer, qurilmalar va integratsiyalar")}</h2><p className="mt-4">{tr("Asosiy oqimlar Chromium, Firefox va WebKit dvigatellarida avtomatik tekshiriladi. Barkodni klaviatura sifatida kiritish qo‘llanadi.")}</p><p className="mt-3">{tr("58/80 mm brauzer chek andozalari ichki, fiskal bo‘lmagan nusxa uchun. Real printer, tarozi, maxsus skanner va cash drawer modellari hali tasdiqlanmagan.")}</p><p className="mt-3">{tr("Real Click, fiskalizatsiya va E-POS integratsiyalari hali ulanmagan. To‘liq offline to‘lov yoki fizik uskunalar mosligi va’da qilinmaydi.")}</p></section>
+- <section className="mx-auto max-w-6xl px-6 py-12"><h2 className="text-2xl font-bold">{tr("Boshlash va yordam")}</h2><p className="mt-4">{tr("Hisob yarating, tashkilot va kassani sozlang, katalogni import qiling va boshlang‘ich qoldiqni tekshiring. Ilovadagi yordam va kassir mashqi ish tartibini tushuntiradi.")}</p><div className="mt-4 flex gap-6"><Link href="/onboarding" className="underline">{tr("Birlamchi sozlash")}</Link><Link href="/help" className="underline">{tr("Foydalanish qo‘llanmasi")}</Link></div></section>
+- </main><footer className="border-t p-6 text-center">{tr("Shuni POS · SaaS oylik obuna. Mahsulot imkoniyatlari ushbu sahifadagi doira bilan cheklangan.")}</footer></div>
++ return <div className="min-h-screen bg-slate-50 text-slate-900"><header className="border-b bg-white"><nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-6 p-6 pt-16 sm:pt-6 sm:pr-40" aria-label={tr(PUBLIC_COPY.navigationLabel)}><Link href="/" className="text-xl font-bold">Shuni POS</Link><a href="#features">{tr(PUBLIC_COPY.featuresNavigation)}</a><a href="#prices">{tr(PUBLIC_COPY.pricesNavigation)}</a><a href="#devices">{tr(PUBLIC_COPY.compatibilityNavigation)}</a><Link href="/login" className="ml-auto underline">{tr(PUBLIC_COPY.login)}</Link></nav></header>
++ <main><section className="mx-auto max-w-6xl px-6 py-20"><h1 className="max-w-3xl text-4xl font-bold leading-tight">{tr(PUBLIC_COPY.heroTitle)}</h1><p className="my-6 max-w-3xl text-lg">{tr(PUBLIC_COPY.heroDescription)}</p>
++ {trial&&<p className="mb-6">{tr(PUBLIC_COPY.trialOrganization)}{' '}{trial.trialDays} {tr(PUBLIC_COPY.trialDays)}{' '}{trial.name} {tr(PUBLIC_COPY.trialAfter)}{' '}{trial.graceDays} {tr(PUBLIC_COPY.graceDays)}</p>}
++ <Link href="/register" className="inline-block rounded bg-emerald-700 px-6 py-3 font-semibold text-white">{tr(trial?PUBLIC_COPY.startTrial:PUBLIC_COPY.register)}</Link><Link href="/pos" className="ml-6 underline">{tr(PUBLIC_COPY.openPos)}</Link>
++ </section><section id="features" className="mx-auto max-w-6xl px-6 py-12"><h2 className="mb-6 text-2xl font-bold">{tr(PUBLIC_COPY.featuresTitle)}</h2><div className="grid gap-6 md:grid-cols-3">
++ <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr(PUBLIC_COPY.salesTitle)}</h3><p className="mt-3">{tr(PUBLIC_COPY.salesDescription)}</p></article>
++ <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr(PUBLIC_COPY.inventoryTitle)}</h3><p className="mt-3">{tr(PUBLIC_COPY.inventoryDescription)}</p></article>
++ <article className="rounded border bg-white p-6"><h3 className="text-xl font-semibold">{tr(PUBLIC_COPY.shiftsTitle)}</h3><p className="mt-3">{tr(PUBLIC_COPY.shiftsDescription)}</p></article>
++ </div></section><section id="prices" className="bg-slate-900 px-6 py-16 text-white"><div className="mx-auto max-w-6xl"><h2 className="mb-6 text-2xl font-bold">{tr(PUBLIC_COPY.pricesTitle)}</h2>
++ {!plans&&<p role="status">{tr(PUBLIC_COPY.pricesUnavailable)}</p>}
++ <div className="grid gap-6 md:grid-cols-3">{plans?.map(plan=><article key={plan.code} className="rounded border border-slate-600 p-6"><h3 className="text-xl font-semibold">{plan.name}</h3><p className="my-4 text-3xl font-bold">{plan.currency==='UZS'?formatMoney(plan.monthlyPrice):plan.monthlyPrice+' '+plan.currency}{tr(PUBLIC_COPY.pricePeriod)}</p><ul className="mb-6 space-y-2"><li>{plan.branchLimit} {tr(PUBLIC_COPY.branchLimit)}</li><li>{tr(PUBLIC_COPY.organizationLimit)}{' '}{plan.registerLimit} {tr(PUBLIC_COPY.registerLimit)}</li><li>{tr(PUBLIC_COPY.totalLimit)}{' '}{plan.staffLimit} {tr(PUBLIC_COPY.staffLimit)}</li></ul><Link className="underline" href="/register">{tr(PUBLIC_COPY.register)}</Link></article>)}</div>
++ <p className="mt-6">{tr(PUBLIC_COPY.subscriptionConditions)}</p></div></section>
++ <section id="devices" className="mx-auto max-w-6xl px-6 py-12"><h2 className="text-2xl font-bold">{tr(PUBLIC_COPY.compatibilityTitle)}</h2><p className="mt-4">{tr(PUBLIC_COPY.browserCompatibility)}</p><p className="mt-3">{tr(PUBLIC_COPY.hardwareLimitations)}</p><p className="mt-3">{tr(PUBLIC_COPY.integrationLimitations)}</p></section>
++ <section className="mx-auto max-w-6xl px-6 py-12"><h2 className="text-2xl font-bold">{tr(PUBLIC_COPY.helpTitle)}</h2><p className="mt-4">{tr(PUBLIC_COPY.onboardingDescription)}</p><div className="mt-4 flex gap-6"><Link href="/onboarding" className="underline">{tr(PUBLIC_COPY.onboarding)}</Link><Link href="/help" className="underline">{tr(PUBLIC_COPY.help)}</Link></div></section>
++ </main><footer className="border-t p-6 text-center">{tr(PUBLIC_COPY.footer)}</footer></div>
+ }
+diff --git a/src/context/LocaleContext.tsx b/src/context/LocaleContext.tsx
+index 224ce39..5160bfd 100644
+--- a/src/context/LocaleContext.tsx
++++ b/src/context/LocaleContext.tsx
+@@ -1,4 +1,5 @@
+ 'use client';
++import {PUBLIC_COPY} from '@/release/public-copy';
+ import {createContext,useCallback,useContext,useEffect,useMemo,useState,type ReactNode} from 'react';
+ import {LOCALE_COOKIE,normalizeLocale,type Locale} from '@/i18n/locale';
+ import {translate,translateKnownLabel,localizeOwnedMessage,localizeCodeLabel,type MessageKey,type MessageValues} from '@/i18n/messages';
+@@ -16,7 +17,7 @@ export function LocaleProvider({initialLocale,children}:{initialLocale:Locale;ch
+   setState(next);
+  },[]);
+  useEffect(()=>{
+-  document.title=translate(window.location.pathname==='/'?'Shuni POS — savdo, ombor va obuna':'Shuni POS — Savdo va ombor boshqaruvi tizimi',locale);
++  document.title=translate(window.location.pathname==='/'?PUBLIC_COPY.landingTitle:PUBLIC_COPY.rootTitle,locale);
+  },[locale]);
+  useEffect(()=>{
+   const changed=(event:StorageEvent)=>{if(event.key!==LOCALE_COOKIE||event.newValue===null)return;const next=normalizeLocale(event.newValue);document.documentElement.lang=next;setState(next)};
+diff --git a/src/i18n/format.ts b/src/i18n/format.ts
+index f8dee3f..fc38548 100644
+--- a/src/i18n/format.ts
++++ b/src/i18n/format.ts
+@@ -1,7 +1,9 @@
+ import {fixed} from '@/lib/money';
+ import {INTL_LOCALES,type Locale} from './locale';
+ function grouped(value:bigint,locale:Locale){
+- return new Intl.NumberFormat(INTL_LOCALES[locale],{numberingSystem:'latn',maximumFractionDigits:0}).format(value).replace(/[\u00a0\u202f]/g,' ');
++ // ICU releases disagree on the Uzbek grouping character. Normalize the
++ // semantic group parts so SSR, every browser and the offline shell agree.
++ return new Intl.NumberFormat(INTL_LOCALES[locale],{numberingSystem:'latn',maximumFractionDigits:0}).formatToParts(value).map(part=>part.type==='group'?' ':part.value).join('');
+ }
+ function decimalText(value:bigint,scale:number,locale:Locale){
+  const negative=value<BigInt(0),absolute=negative?-value:value,power=BigInt(10)**BigInt(scale);
+diff --git a/tasks/DECISIONS.md b/tasks/DECISIONS.md
+index 473c40e..fc0b7ad 100644
+--- a/tasks/DECISIONS.md
++++ b/tasks/DECISIONS.md
+@@ -666,3 +666,14 @@ UX-01.02 mavjud typed JSON dictionaries, React Context va Intl bilan bajariladi;
+ Typed owned yorliqlar, ro‘yxatdan o‘tgan static jadvallar va error guidance tarjima qilinadi. User/entity/original document matni, request code/Decimal/ISO/date cutoff, permission, key va payload tarjima qilinmaydi. BigInt minor-unit + Intl display Number safe-integer limitini chetlab o‘tadi; branch timezone va Gregorian sana semantikasi saqlanadi. Frozen original review va noaniq print urinishining markup/body/key snapshoti original turadi. Bu foydalanuvchi ma’lumotini avtomatik qayta yozish siyosati emas.
+ 
+ Offline public shell ayni dictionary/formatter modullarini build qiladi. Explicit static annotatsiyalar va locale event faqat ko‘rinishni yangilaydi; encrypted cash ticket, unlock/tender va pending original operation saqlanadi. Public-only cache v3 explicit12 assetdan iborat; private HTML/API/receipt kiritilmaydi, faol kassani majburiy takeover yo‘q. Unknown browser/API diagnostikasi reviewed UI guidance bilan ko‘rsatiladi, original ApiError metadata o‘zgarmaydi. Katalogning CI tekshiruvi va source-owned tables registry keyingi qo‘shimchalarda qamrovni saqlaydi. Qabul dalili va test chegaralari `tasks/evidence/localization-20261015.json`da; real vendor/hosting/hardware/pilot bundan alohida.
++
++
++## ADR-095 — Ommaviy va’da, qabul dalili va haqiqiy mavjudlik (2026-10-15)
++
++RELEASE-01.12 mavjud TypeScript, Node crypto/AST, typed JSON va CI bilan bajariladi; yangi platforma kerak emas. Public render faqat typed PUBLIC_COPY kalitlarini oladi, private review xaritasi bundle yoki mijoz UIga kirmaydi.44 source-owned matn,5 render manbasi,4 display runtime va7 bounded capability aniq hash bilan ko‘rib chiqiladi. Imkoniyat qabul qilingan original ID va immutable dalilga bog‘lanadi; actual xizmat/test source anchorlari fresh100 PostgreSQL holatining attestasiyasiga mos. Tarixiy partial dalil butun original qabul deb ko‘rsatilmaydi. Hash ma’no auditini almashtirmaydi; CI avtomatik review yoki hash yangilash qilmaydi.
++
++Tarif qiymatlari real DB versiyasidan;60s cache va fresh invoice contracti saqlanadi. Null/empty/no-trial holatda trial CTA yoki taxminiy narx yo‘q. Haqiqiy uncached DB read timeout testiga alohida Playwright config va fresh server kerak; npm/CI uni asosiy browser cohortdan keyin mustaqil jarayonda ishlatadi. Mock yoki cache bypass bilan xizmat xususiyati o‘zgartirilmaydi.
++
++Native Chromium sinovi Node/ICU va browser Uzbek grouping farqini ko‘rsatdi. Intl.formatToPartsdagi faqat group qismlari oddiy bo‘shliqqa almashtirildi; BigInt minor-unit, exact hisob, request Decimal va original hujjat o‘zgarmaydi. Public offline asset qayta build qilinadi, cache v4 yangi baytlarni oladi; faol kassaga majburiy takeover va private cache yo‘q.
++
++Visible Click/fiscal/E-POS/hardware va cheklangan offline chegaralari qoladi. Local candidate release qabulini real server, pilot, vendor yoki fizik qurilma tasdig‘i deb talqin qilish mumkin emas; ular foydalanuvchi belgilagan tashqi gate’larda qoladi. Asl PLAN1 hisobini faqat shu bandning yakuniy acceptance dalili oshiradi.
+diff --git a/tasks/EXECUTION_STATUS.md b/tasks/EXECUTION_STATUS.md
+index a2868cc..e277ffa 100644
+--- a/tasks/EXECUTION_STATUS.md
++++ b/tasks/EXECUTION_STATUS.md
+@@ -2,7 +2,7 @@
+ 
+ Sana: 2026-10-15. Barcha PLAN1 bandlari quyida kuzatiladi. Kod mavjudligi yakuniy qabul dalili emas. Oldingi foundation kodi mavjud `9594e50` commitda; keyingi o‘zgarishlar ishchi daraxtda. Avtomatik commit yaratilmaydi.
+ 
+-Joriy original done: **175/259**. Foydalanuvchi maqsadi **175 bajarildi**: **5/5** yangi original band qabul qilindi (REP-01.11, CRM-02.04, CRM-02.03, UX-01.03, UX-01.02). Oldingi170 maqsadi bajarilgan — original INV-02.07 qabul qilindi (169→170). Baseline164dan oldingi170 maqsadi6/6: UX-01.05, INV-01.07, INV-02.06, REP-01.07, PUR-01.05 va INV-02.07. Faqat original PLAN1 bandlari sanaladi. Local core qabul real production/pilot/vendor dalili o‘rnini bosmaydi.
++Joriy original done: **176/259**. Foydalanuvchi maqsadi **176 bajarildi**:175→176, **1/1** yangi original band **RELEASE-01.12** qabul qilindi. Oldingi **175 bajarildi**: **5/5** yangi original band qabul qilindi (REP-01.11, CRM-02.04, CRM-02.03, UX-01.03, UX-01.02). Oldingi170 maqsadi bajarilgan — original INV-02.07 qabul qilindi (169→170). Baseline164dan oldingi170 maqsadi6/6: UX-01.05, INV-01.07, INV-02.06, REP-01.07, PUR-01.05 va INV-02.07. Faqat original PLAN1 bandlari sanaladi. Local core qabul real production/pilot/vendor dalili o‘rnini bosmaydi.
+ 
+ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sanaladi. Alohida core subtask, yangi ID, migration, test yoki qisman qabul +20 hisobini oshirmaydi. Bandning to‘liq qabul mezoni bajarilgandagina uning original checkboxi va statusi `done`ga o‘tadi; tashqi resurs talab qiladigan qabul mezoni chetlab o‘tilmaydi.
+ 
+@@ -275,7 +275,7 @@ Foydalanuvchi hisob qoidasini tasdiqladi: **faqat original PLAN1 bandlari** sana
+ | RELEASE-01.09 | CORE-1 | blocked_external | Import, boshlang‘ich hisob, trening va onboarding qo‘llanmasi tayyor. | — | Real muhit/operator/pilot tasdiqlanmagan (2026-10-11 user qarori); core tayyorgarlik deployment-readiness.md da, haqiqiy qabul yo‘q |
+ | RELEASE-01.10 | CORE-1 | todo | Xizmat shartlari, maxfiylik, tarif va eksport/o‘chirish siyosati tayyor. | — | — |
+ | RELEASE-01.11 | CORE-1 | todo | Pilotta ochiq kritik yoki yuqori darajadagi xatolar qolmagan. | — | — |
+-| RELEASE-01.12 | CORE-1 | todo | Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi. | — | — |
++| RELEASE-01.12 | CORE-1 | done |44 typed public matn →7 capability/9 immutable dalil;5 render/4 runtime source pin; haqiqiy DB tarif/trial va ko‘rinadigan unavailable chegaralari |161 unit,100 PG;33 native browser+3 fresh-server timeout PASS;6 public qayta360/1280px PASS; public-claims-release-20261015.json, ADR095 | Claim/source o‘zgarsa review/proofni yangilash; real production/pilot/vendor/hardware gate’lari alohida |
+ | MODEL-01 | CORE-1 | todo | PLAN1 jadvali, 1-qator/bosqich | — | — |
+ | MODEL-02 | CORE-1 | todo | PLAN1 jadvali, 2-qator/bosqich | — | — |
+ | MODEL-03 | CORE-1 | todo | PLAN1 jadvali, 3-qator/bosqich | — | — |
+@@ -2536,3 +2536,25 @@ Real local cash fixture: `Saqlash` mahsuloti va yetakchi nolli barkod,0.125kg,12
+ **Yakuniy tekshiruvlar:**155/155 unit case,53 source fayl;88/88 PostgreSQL case,4 source fayl; **bitta yakuniy72/72 native run**, har Chromium/Firefox/WebKitda24. Native guruhlar har engine uchun6 auth+2 product draft,3 locale va13 existing POS/receipt case. Type/test compile/worker,0warning source lint va so‘nggi E2E lint, offline/webpack build, catalog va source scan PASS. Historical33/48 cohortlar bu72ga qo‘shilmadi. Oldingi stale React Compiler label, invitation guidance, selector/legacy display expectation va mobil transform kutish failures saqlangan. WebKitdagi bir oldingi fetch pageError navigationdan15ms keyin kuzatilgan; test active supplier rowni kutadi, hech qanday pageerror filter yoki retry qo‘shilmagan. Yakuniy WebKit full cash case ham asl errors=[] assertion bilan PASS.
+ 
+ Dalillar: `tasks/evidence/localization-20261015.json`, uning yonidagi hashed loglar, uch engine screenshotlari va accepted-source.patch; contract `docs/operations/localization.md`, ADR094. Source `a2de5a8`+uncommitted tree; AI commit yo‘q. SQL/schema/migration o‘zgarishi va real deployment yo‘q. Faqat isolated pos_test va local production-mode HTTPS binary sinovdan o‘tdi; tashqi server/domen/backup/monitoring/pilot, hardware va provider qabuliga tenglashtirilmaydi. Ular oldingi foydalanuvchi cheklovlari bo‘yicha alohida qoladi.
++
++
++### RELEASE-01.12 original qabul —176/259 (2026-10-15)
++
++Foydalanuvchining176 maqsadi bitta yangi original bilan bajarildi:175→176. Faqat RELEASE-01.12 checkboxi qabul qilindi; yordamchi test, proof registry yoki subtask original hisobini oshirmaydi.
++
++Contract: ommaviy sahifa, root/landing metadata, manifest tavsifi va til almashtirish sarlavhasi44 typed PUBLIC_COPY kalitidan keladi. Private PUBLIC_CLAIMS review xaritasi7 capabilityni qabul qilingan original IDlar,9 immutable dalil va actual source-attested xizmat/test hashlariga bog‘laydi.5 render va4 display runtime fingerprinti, ikki dictionary wording hashi, unaccepted original, forged proof, olib tashlangan boundary, inline/dynamic promise va eski dictionary importi CI’da rad etiladi. Hash tekshiruvi ma’no reviewini almashtirmaydi.
++
++Narx, limit va trial/grace joriy DB versiyasidan;60s public cache va invoice fresh-version contracti saqlanadi. Null/empty/no-trial holatda taxminiy narx/trial CTA yo‘q. Haqiqiy isolated DB transaction locki bilan uncached read timeout uch engineda ikkala tilda tekshirildi; tarif mutatsiyasi yoki cache bypass yo‘q. Default Playwright config timeout faylini asosiy cohortdan ajratadi; npm/CI uni dedicated config bilan yangi serverda yuritadi. Real Click/fiscal/E-POS va fizik hardware yo‘qligi, chekning ichki nefiskal nusxa ekanligi va to‘liq offline kafolati yo‘qligi ko‘rinadi.
++
++Native testda topilgan Node/Chromium ICU249 000/249,000 farqi Intl.formatToParts group normalizatsiyasi bilan tuzatildi. BigInt, minor birlik, Decimal request, transaction, stock va original body/key o‘zgarmadi. Generated PWA formatter va public-only cache v4 tekshirildi; private API/receipt cache yoki faol kassaga majburiy takeover qo‘shilmadi. Rasmdagi login/til boshqaruvi ustma-ust kelishi kichik responsive header joylashuvi bilan tuzatildi.
++
++Tekshirilgan natijalar:
++
++- Test compile,161/161 unit (53 source unit fayli), worker build, ESLint, i18n953/0 missing, claim gate44/7/9/5/0 va read-only source security scan0 findings PASS.
++- 179 migration joriy isolated PostgreSQLda actual7 fayl/100 holat PASS: foundation, catalog-purchase, catalog-import, onboarding, billing, reports-finance, receipt-identity. Xizmat/source hashlari `public-claims-core-20261015.json`da. Schema/SQL/migration o‘zgarishi yo‘q.
++- Node24/Next16.3.8 production-mode build PASS. Lokal HTTPSda Chromium/Firefox/WebKit bo‘yicha33/33 native core holati PASS: billing lost-ACK, cash single-effect, katalog/xarid/CSV, trening, scoped PWA cache, signed offline cash, import/onboarding va role revocation. Bu cohort build `uv0lMUEl_Un4FTvC3Pd9P`da, oxirgi header spacingdan oldin; iqtisodiy/runtime/PWA manbalari ayni.
++- Yakuniy headerli buildda6/6 public Uz/Ru holati360/1280pxda qayta PASS: barcha wording, DB narx/limit/trial, metadata/manifest, generated offline formatter, login clickability/no-overlap va horizontal overflow. Keyin dedicated fresh-server timeout3/3 PASS. Jami36 unique browser holati;6 public qayta bajarilgan,42 executionni42 unique deb hisoblamaymiz.
++
++Dastlabki27 browser urinishida ICU va oldingi supplier filter selector xatolari bo‘lgan, jarayon to‘xtatilgan; bu urinish PASS deb ko‘rsatilmaydi. `browser-initial-failed.log` saqlangan. Supplier testi hozirgi search label/Qidirish amaliga moslandi; asl DB/CSV/stock assertionlari saqlandi. Keyingi33 cohort to‘liq PASS. Desktop/mobile public rasmlari va unavailable rasmlari saqlandi, yakuniy Uz desktop/Ru mobile/Ru fallback ko‘rib chiqildi.
++
++Dalil: `tasks/evidence/public-claims-release-20261015.json`, hashed loglar/rasmlar va accepted-source.patch; qo‘llanma `docs/operations/public-release-claims.md`, ADR095. Source `047c49e`+uncommitted accepted patch; AI commit yo‘q. API/DB schema o‘zgarmagani uchun yangi migration yoki fresh/legacy migration rehearsal talab etilmadi. Public copy/wiring uchun yangi endpoint, vendor adapter yoki audit business mutation qo‘shilmadi. Real deploy/host/domen, real backup/monitoring, pilot, huquqiy yoki provider/hardware qabul dalili yaratilmagan; tegishli original bandlar oldingi cheklovlarda qoladi. Keyingi original faqat uning haqiqiy qabul mezoni va tashqi shartlari asosida tanlanadi.
+diff --git a/tasks/PLAN1.md b/tasks/PLAN1.md
+index 13aaa3d..63f5014 100644
+--- a/tasks/PLAN1.md
++++ b/tasks/PLAN1.md
+@@ -4860,7 +4860,7 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
+ 
+   **Dalil:** `RELEASE-01.11` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+ 
+-- [ ] **RELEASE-01.12** — Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi.
++- [x] **RELEASE-01.12** — Bozorga va’da qilinadigan har funksiya haqiqatan shu release’da ishlaydi.
+ 
+   **Texnologiya:** Release capability registry va Next.js marketing.
+ 
+@@ -4876,6 +4876,8 @@ Aniq muddat jamoa, provayderga kirish va pilot talablaridan keyin belgilanadi. H
+ 
+   **Dalil:** `RELEASE-01.12` task yozuvida tekshirilgan kirish, kutilgan/haqiqiy natija, test buyrug‘i yoki amaliy protokol, artefakt yo‘li va commit/versiya ko‘rsatiladi. “Status va umumiy tugallanish qoidasi” ham majburiy.
+ 
++  **Qabul (2026-10-15):**44 typed public matn va ikki tarjima7 capability/9 immutable dalilga xaritalandi;5 render va4 display runtime fingerprinti CI’da fail-closed. Faol bo‘lmagan integratsiya/hardware/offline chegaralari ko‘rinadi. Tarif/trial faqat joriy DBdan; unavailable/no-trial CTA narx yoki sinovni uydirmaydi.161 unit,100 native PostgreSQL holati,33 core browser holati va alohida fresh-server3 timeout holati PASS; header joylashuvidan keyin6 public holat360/1280pxda qayta PASS (takror6 alohida original yoki unique case hisoblanmaydi). ICU grouping va public-only PWA v4 regressiyasi tekshirildi. Build/lint/worker/i18n/source scan o‘tdi. Dalil: `tasks/evidence/public-claims-release-20261015.json`, source `047c49e`+hashed accepted-source.patch, ADR095. API/schema/migration o‘zgarmadi. Bu band shu local candidate ommaviy va’dalari haqidagi acceptance; real pilot/deployment/vendor/hardware gate’lari ochiq. Original hisob175→176.
++
+ ### 19. Har bir vazifani qanday yuritamiz?
+ 
+ Yuqoridagi har bir ID alohida task/issuega ajratiladi. Unda quyidagilar yoziladi:
+diff --git a/tests/e2e/billing.spec.ts b/tests/e2e/billing.spec.ts
+index a810bf1..df78f61 100644
+--- a/tests/e2e/billing.spec.ts
++++ b/tests/e2e/billing.spec.ts
+@@ -1,6 +1,8 @@
+ import { test, expect } from '@playwright/test'
+ import { PrismaClient } from '@prisma/client'
+ import { randomUUID,createHash } from 'node:crypto'
++import {formatLocaleMoney} from '../../src/i18n/format'
++import {localizeCodeLabel} from '../../src/i18n/messages'
+ const url=new URL(process.env.DATABASE_URL??'')
+ if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.pathname!=='/pos_test')throw new Error('Isolated test DB only')
+ const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+@@ -8,9 +10,9 @@ test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}})
+ test('Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing',async({page})=>{
+  await page.goto('/')
+  const pricing=page.locator('#prices')
+- await expect(pricing.getByText('99000.00 UZS/oy',{exact:true})).toBeVisible()
+- await expect(pricing.getByText('249000.00 UZS/oy',{exact:true})).toBeVisible()
+- await expect(pricing.getByText('499000.00 UZS/oy',{exact:true})).toBeVisible()
++ const publicPlans=await db.billingPlan.findMany({where:{isActive:true},include:{currentVersion:true},orderBy:{code:'asc'}})
++ expect(publicPlans.length).toBeGreaterThan(0)
++ for(const plan of publicPlans){const version=plan.currentVersion;await expect(pricing.getByRole('article').filter({has:page.getByRole('heading',{name:version.name,exact:true})}).getByText((version.currency==='UZS'?formatLocaleMoney(version.monthlyPrice.toFixed(2),'uz'):version.monthlyPrice.toFixed(2)+' '+version.currency)+'/oy',{exact:true})).toBeVisible()}
+  await expect(page.getByText('100+ do\'konlar bizni tanlagan',{exact:true})).toHaveCount(0)
+  await expect(page.getByText('Cheksiz kassalar',{exact:true})).toHaveCount(0)
+  await expect(page.getByRole('heading',{name:'Brauzer, qurilmalar va integratsiyalar'})).toBeVisible()
+@@ -21,7 +23,8 @@ test('Billing displays DB prices/Pro trial and recovers lost invoice acknowledge
+  await page.goto('/billing')
+  await expect(page.getByRole('heading',{name:'Tarif va obuna',exact:true})).toBeVisible()
+  await expect(page.getByText('Amaldagi tarif: Pro')).toBeVisible()
+- await expect(page.getByText('99000 UZS/oy',{exact:true})).toBeVisible()
++ const start=publicPlans.find(plan=>plan.code==='start')!.currentVersion
++ await expect(page.getByText((start.currency==='UZS'?formatLocaleMoney(start.monthlyPrice.toFixed(2),'uz'):start.monthlyPrice.toFixed(2)+' '+start.currency)+'/oy',{exact:true})).toBeVisible()
+  await expect(page.getByRole('button',{name:'Tarifni tahrirlash'})).toHaveCount(0)
+  let lost=false,originalKey=''
+  await page.route('**/api/billing/invoices',async route=>{
+@@ -54,6 +57,6 @@ test('Billing displays DB prices/Pro trial and recovers lost invoice acknowledge
+  await invoices.getByLabel('Bekor qilish sababi').fill('Invoice unpaid; no bank transfer made')
+  await invoices.getByRole('button',{name:'To‘lanmagan invoiceni bekor qilish: oldindan ko‘rish'}).click()
+  await invoices.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+- await expect(invoices.getByText('Holat: cancelled',{exact:true})).toBeVisible()
++ await expect(invoices.getByText('Holat: '+localizeCodeLabel('cancelled','uz'),{exact:true})).toBeVisible()
+  expect((await db.billingInvoice.findUniqueOrThrow({where:{id:invoice.id}})).state).toBe('cancelled')
+ })
+diff --git a/tests/e2e/core.spec.ts b/tests/e2e/core.spec.ts
+index 08d1ed8..5fa0cde 100644
+--- a/tests/e2e/core.spec.ts
++++ b/tests/e2e/core.spec.ts
+@@ -555,7 +555,7 @@ test('Production HTTPS: catalog management, supplier purchase history and comple
+  await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).not.toContain('BROWSER-DRAFT')
+  await page.getByLabel('Xarid tahlili ko‘rinishi',{exact:true}).selectOption('comparison');await page.getByRole('button',{name:'Xaridni filtrlash',exact:true}).click();await expect(page.getByRole('columnheader',{name:'Vaznli o‘rtacha',exact:true})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).toContain('2.000000')
+  await page.goto('/suppliers');await page.getByRole('row').filter({hasText:'Browser history supplier'}).getByRole('button',{name:'Tahrirlash',exact:true}).click();await page.getByLabel('Bank nomi',{exact:true}).fill('Browser bank');await page.getByLabel('Bank hisob raqami',{exact:true}).fill('browser-opaque-account');await page.getByLabel('To‘lov va yetkazish shartlari',{exact:true}).fill('30 days after acceptance');await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();await page.getByRole('link',{name:'Browser history supplier',exact:true}).click();await expect(page.getByText('Bank: Browser bank',{exact:true})).toBeVisible();await expect(page.getByText('Hisob raqami: browser-opaque-account',{exact:true})).toBeVisible();await expect(page.getByText('To‘lov va yetkazish shartlari: 30 days after acceptance',{exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Yetkazib beruvchi kartasi',exact:true})).toBeVisible();await expect(page.getByText('Sof xarid qiymati: 4 UZS',{exact:true})).toBeVisible();await expect(page.getByText('Supplierga to‘langan pul yoki qarz hisobi emas;',{exact:false})).toBeVisible();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();const historyCsv=await downloadText('Supplier tarixini CSV yuklash');expect(historyCsv).toContain('BROWSER-REVERSED');expect(historyCsv).toContain('"-2.000000"')
+- await page.getByLabel('Hujjat raqami',{exact:true}).fill('CURRENT');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toHaveCount(1);expect((await downloadText('Supplier tarixini CSV yuklash')).includes('BROWSER-DRAFT')).toBe(false)
++ await page.getByLabel('Supplier kirim hujjati raqami qidirish',{exact:true}).fill('CURRENT');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toHaveCount(1);expect((await downloadText('Supplier tarixini CSV yuklash')).includes('BROWSER-DRAFT')).toBe(false)
+  await page.goto('/inventory');await page.getByLabel('Mahsulot, SKU yoki barkod',{exact:true}).fill('catalog');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await page.getByText('Faqat kam qolganlar',{exact:true}).click();await expect(page.getByRole('row').filter({hasText:'Browser catalog product'})).toBeVisible();const balanceCsv=await downloadText('Qoldiqlarni CSV yuklash');expect(balanceCsv).toContain('"2.000000","3.000000","1.000000","2.000000","4.00"')
+  await page.getByRole('button',{name:'Hujjatlar (Kirim/Tuzatish)',exact:false}).click();await page.getByLabel('Hujjat raqamini qidirish',{exact:true}).fill('BROWSER');await page.getByLabel('Hujjat holati filtri',{exact:true}).selectOption('confirmed');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();expect(await downloadText('Hujjatlarni CSV yuklash')).toContain('BROWSER-CURRENT')
+  const destination=await db.store.create({data:{organizationId:org,name:'Browser transfer destination'}})
+diff --git a/tests/localization.unit.test.ts b/tests/localization.unit.test.ts
+index f0009dd..dd570a1 100644
+--- a/tests/localization.unit.test.ts
++++ b/tests/localization.unit.test.ts
+@@ -15,7 +15,7 @@ test('Both owned dictionaries have complete nonempty typed keys and identical na
+ });
+ test('Intl display keeps exact cents beyond Number safe integer and leaves canonical source and form strings unchanged',()=>{
+  const source='9007199254740993.01',body={amount:'12.50',quantity:'0.125',barcode:'0012345678901',operationId:'original-key'},before=JSON.stringify(body);
+- assert.equal(formatLocaleMoney(source,'uz'),'9 007 199 254 740 993.01 so‘m');assert.equal(formatLocaleMoney(source,'ru'),'9 007 199 254 740 993,01 сум');assert.equal(formatLocaleMoney('-0.01','ru'),'-0,01 сум');assert.equal(formatLocaleMoney('1.50','ru'),'1,50 сум');assert.equal(formatLocaleNumber('100000000000.125','ru'),'100 000 000 000,125');assert.equal(formatLocaleNumber('-0.0005','ru'),'-0,001');assert.equal(JSON.stringify(body),before);
++ assert.equal(formatLocaleMoney(source,'uz'),'9 007 199 254 740 993.01 so‘m');assert.equal(formatLocaleMoney(source,'ru'),'9 007 199 254 740 993,01 сум');assert.equal(formatLocaleMoney('249000','uz'),'249 000 so‘m');assert.equal(formatLocaleMoney('249000','ru'),'249 000 сум');assert.equal(formatLocaleMoney('-0.01','ru'),'-0,01 сум');assert.equal(formatLocaleMoney('1.50','ru'),'1,50 сум');assert.equal(formatLocaleNumber('100000000000.125','ru'),'100 000 000 000,125');assert.equal(formatLocaleNumber('-0.0005','ru'),'-0,001');assert.equal(JSON.stringify(body),before);
+ });
+ test('Language does not change instant, Gregorian date, branch timezone or filter boundary semantics',()=>{
+  const instant='2026-10-14T20:30:00.000Z';
+diff --git a/tests/marketing.unit.test.ts b/tests/marketing.unit.test.ts
+index eace826..9fb040c 100644
+--- a/tests/marketing.unit.test.ts
++++ b/tests/marketing.unit.test.ts
+@@ -1,13 +1,60 @@
+-import { test } from 'node:test'
+-import assert from 'node:assert/strict'
+-import { readFileSync } from 'node:fs'
+-test('Public claims map to accepted original capabilities and contain no obsolete invented pricing/popularity claims', () => {
+- const evidence=JSON.parse(readFileSync('tasks/evidence/marketing-capabilities-20261010.json','utf8')) as {features:Record<string,string[]>}
+- const plan=readFileSync('tasks/PLAN1.md','utf8')
+- for(const ids of Object.values(evidence.features))for(const id of ids)assert.ok(plan.includes('- [x] **'+id+'**'),'Unaccepted marketing capability '+id)
+- const source=readFileSync('src/app/page.tsx','utf8')+'\n'+readFileSync('src/components/landing/LandingContent.tsx','utf8')
+- assert.doesNotMatch(source,/100\+|Cheksiz kassalar|Shaxsiy menejer|Eng ommabop|25000|50000/)
+- assert.match(source,/publicPricing/)
+- assert.match(source,/fiskal bo‘lmagan/)
+- assert.match(source,/hali ulanmagan/)
+-})
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFileSync} from 'node:fs';
++import {createRequire} from 'node:module';
++import {createElement} from 'react';
++import {renderToStaticMarkup} from 'react-dom/server';
++import LandingContent from '@/components/landing/LandingContent';
++import {LocaleProvider} from '@/context/LocaleContext';
++import {PUBLIC_COPY} from '@/release/public-copy';
++import {translate} from '@/i18n/messages';
++import type {PublicPlan} from '@/server/billing/public-pricing';
++const requireSource=createRequire(process.cwd()+'/package.json');
++const {check,COPY,REGISTRY}=requireSource('./scripts/release/check-claims.cjs') as {check:(root:string,overrides?:Record<string,string>)=>{copyEntries:number;capabilities:number;problems:{code:string}[]};COPY:string;REGISTRY:string};
++const read=(file:string)=>readFileSync(file,'utf8');
++const registry=()=>JSON.parse(read(REGISTRY));
++const codes=(overrides:Record<string,string>)=>check(process.cwd(),overrides).problems.map(problem=>problem.code);
++const landing='src/components/landing/LandingContent.tsx';
++test('Every public claim, metadata and bilingual review maps to accepted source-attested capabilities without publishing review internals',()=>{
++ const result=check(process.cwd());assert.deepEqual(result.problems,[]);assert.equal(result.copyEntries,Object.keys(PUBLIC_COPY).length);assert.equal(result.capabilities,7);
++ assert.doesNotMatch(read(landing),/tasks\/evidence|PUBLIC_CLAIMS|sourceSha256/);
++});
++test('A new or inline public promise cannot bypass the explicit copy/surface review',()=>{
++ assert.ok(codes({[COPY]:read(COPY).replace('PUBLIC_COPY={',"PUBLIC_COPY={\n undeclaredClick:'Saqlash',")}).includes('UNREVIEWED_COPY'));
++ const changed=read(landing).replace('tr(PUBLIC_COPY.heroTitle)',"tr('Real Click ishlaydi')");
++ const errors=codes({[landing]:changed});assert.ok(errors.includes('PUBLIC_SURFACE_REVIEW_REQUIRED'));assert.ok(errors.includes('UNREGISTERED_TRANSLATION'));
++ assert.ok(codes({[landing]:read(landing).replace('PUBLIC_COPY.heroTitle',"PUBLIC_COPY['heroTitle']")}).includes('DYNAMIC_PUBLIC_COPY_FORBIDDEN'));
++});
++test('A changed Russian promise or forged evidence requires review rather than silently reusing acceptance',()=>{
++ const ru=JSON.parse(read('src/dictionary/ui.ru.json'));ru[PUBLIC_COPY.salesDescription]='Real Click: guaranteed';
++ assert.ok(codes({'src/dictionary/ui.ru.json':JSON.stringify(ru)}).includes('TEXT_REVIEW_REQUIRED'));
++ const review=registry();review.proofs.localization.sha256='0'.repeat(64);
++ assert.ok(codes({[REGISTRY]:JSON.stringify(review)}).includes('PROOF_HASH_CHANGED'));
++});
++test('Deferred originals and modified economic source invalidate a published capability proof',()=>{
++ const review=registry();review.groups.checkout.originalIds.push('LOC-03.02');
++ assert.ok(codes({[REGISTRY]:JSON.stringify(review)}).includes('UNACCEPTED_ORIGINAL'));
++ const file='src/server/sales/service.ts';assert.ok(codes({[file]:read(file)+'\n// changed economic source\n'}).includes('CAPABILITY_SOURCE_CHANGED'));
++ const formatter='src/i18n/format.ts';assert.ok(codes({[formatter]:read(formatter)+'\n// changed public display runtime\n'}).includes('PUBLIC_RUNTIME_REVIEW_REQUIRED'));
++});
++test('Removing an integration boundary or importing obsolete marketing copy fails the public gate',()=>{
++ const without=read(landing).replace('tr(PUBLIC_COPY.integrationLimitations)','tr(PUBLIC_COPY.hardwareLimitations)');
++ const result=codes({[landing]:without});assert.ok(result.includes('CLAIM_BOUNDARY_MISSING'));assert.ok(result.includes('UNAVAILABLE_BOUNDARY_MISSING'));
++ assert.ok(codes({[landing]:read(landing)+"\nimport oldCopy from '@/dictionary/ru.json';\n"}).includes('INACTIVE_MARKETING_DICTIONARY_IMPORTED'));
++});
++const render=(locale:'uz'|'ru',plans:PublicPlan[]|null)=>renderToStaticMarkup(createElement(LocaleProvider,{initialLocale:locale} as Parameters<typeof LocaleProvider>[0],createElement(LandingContent,{plans})));
++const escape=(value:string)=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;'}[char]!));
++test('Unavailable or empty pricing renders no invented tariff or trial promise in either language',()=>{
++ for(const locale of ['uz','ru'] as const)for(const plans of [null,[]]){
++  const html=render(locale,plans),priceSection=html.split('id="prices"')[1].split('</section>')[0];
++  assert.ok(!html.includes(escape(translate(PUBLIC_COPY.startTrial,locale))));
++  assert.ok(!priceSection.includes(translate(PUBLIC_COPY.pricePeriod,locale)));
++  assert.ok(html.includes(escape(translate(PUBLIC_COPY.integrationLimitations,locale))));
++  assert.equal(html.includes(escape(translate(PUBLIC_COPY.pricesUnavailable,locale))),plans===null);
++ }
++});
++test('Actual plan fields remain data, exact money and escaped names; no-trial configuration changes the CTA',()=>{
++ const plan:PublicPlan={code:'reviewed',name:'Saqlash <script>not-code</script>',monthlyPrice:'123456.75',currency:'UZS',branchLimit:2,registerLimit:4,staffLimit:8,isTrial:true,trialDays:11,graceDays:3};
++ const before=JSON.stringify(plan),html=render('ru',[plan]);assert.ok(html.includes('Saqlash &lt;script&gt;not-code&lt;/script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('Сохранить'));assert.ok(html.includes('123 456,75 сум'));assert.ok(html.includes('11'));assert.ok(html.includes('3'));assert.equal(JSON.stringify(plan),before);
++ const noTrial=render('ru',[{...plan,isTrial:false}]);assert.ok(!noTrial.includes(escape(translate(PUBLIC_COPY.startTrial,'ru'))));assert.ok(noTrial.includes(escape(translate(PUBLIC_COPY.register,'ru'))));
++});
+diff --git a/tests/pwa-worker.unit.test.ts b/tests/pwa-worker.unit.test.ts
+index 3198e62..e1354b6 100644
+--- a/tests/pwa-worker.unit.test.ts
++++ b/tests/pwa-worker.unit.test.ts
+@@ -3,10 +3,10 @@ test('Public PWA worker waits safely for update and never caches private request
+  type Event={request?:Request;waitUntil:(p:Promise<unknown>)=>void;respondWith:(p:Promise<Response>)=>void};
+  const handlers:Record<string,(e:Event)=>void>={},stored=new Map<string,Response>(),deleted:string[]=[];let skipped=false,claimed=false,offline=false,wait:Promise<unknown>|undefined,response:Promise<Response>|undefined;
+  const cache={addAll:async(paths:string[])=>{for(const p of paths)stored.set(p,new Response('public:'+p))},match:async(p:string)=>stored.get(p)?.clone()};
+- runInNewContext(readFileSync('public/sw.js','utf8'),{URL,Response,self:{location:{origin:'https://pos.invalid'},skipWaiting:()=>{skipped=true},clients:{claim:()=>{claimed=true}},addEventListener:(name:string,handler:(e:Event)=>void)=>{handlers[name]=handler}},caches:{open:async()=>cache,keys:async()=>['shuni-public-shell-v0','shuni-public-shell-v1','shuni-public-shell-v2','another-app-cache'],delete:async(key:string)=>{deleted.push(key)}},fetch:async()=>{if(offline)throw new Error('network outage');return new Response('private server HTML')}});
++ runInNewContext(readFileSync('public/sw.js','utf8'),{URL,Response,self:{location:{origin:'https://pos.invalid'},skipWaiting:()=>{skipped=true},clients:{claim:()=>{claimed=true}},addEventListener:(name:string,handler:(e:Event)=>void)=>{handlers[name]=handler}},caches:{open:async()=>cache,keys:async()=>['shuni-public-shell-v0','shuni-public-shell-v1','shuni-public-shell-v2','shuni-public-shell-v3','shuni-public-shell-v4','another-app-cache'],delete:async(key:string)=>{deleted.push(key)}},fetch:async()=>{if(offline)throw new Error('network outage');return new Response('private server HTML')}});
+  const event=(request?:Request):Event=>({request,waitUntil:p=>{wait=p},respondWith:p=>{response=p}});
+  handlers.install(event());await wait;assert.deepEqual([...stored.keys()],['/pwa/offline.html','/pwa/icon-192.png','/pwa/icon-512.png','/pwa/cash.html','/pwa/cash-crypto.js','/pwa/cash-store.js','/pwa/cash-screen.js','/pwa/locale.js','/pwa/money.js','/pwa/format.js','/pwa/messages.js','/pwa/static-locale.js']);assert.equal(skipped,false);assert.equal(claimed,false);
+- handlers.activate(event());await wait;assert.deepEqual(deleted,['shuni-public-shell-v0','shuni-public-shell-v1','shuni-public-shell-v2']);
++ handlers.activate(event());await wait;assert.deepEqual(deleted,['shuni-public-shell-v0','shuni-public-shell-v1','shuni-public-shell-v2','shuni-public-shell-v3']);
+  for(const path of ['/api/sales','/api/files/private','/_next/static/private.js','/pwa/offline.html?private=yes']){response=undefined;handlers.fetch(event(new Request('https://pos.invalid'+path)));assert.equal(response,undefined);}
+  const navigation=new Request('https://pos.invalid/pos');Object.defineProperty(navigation,'mode',{value:'navigate'});handlers.fetch(event(navigation));assert.equal(await(await response!).text(),'private server HTML');assert.equal(stored.size,12);
+  offline=true;handlers.fetch(event(navigation));assert.equal(await(await response!).text(),'public:/pwa/offline.html');assert.equal(stored.size,12);
+diff --git a/playwright.pricing-failure.config.ts b/playwright.pricing-failure.config.ts
+new file mode 100644
+index 0000000..5eac29c
+--- /dev/null
++++ b/playwright.pricing-failure.config.ts
+@@ -0,0 +1,10 @@
++import {defineConfig} from '@playwright/test';
++import main from './playwright.config';
++
++// The successful public-pricing cache lives for60 seconds. The real timeout
++// scenario requires a fresh process, not a shortened production cache policy.
++export default defineConfig({
++ ...main,
++ testMatch:'**/public-pricing-failure.spec.ts',
++ testIgnore:[],
++});
+diff --git a/src/release/public-copy.ts b/src/release/public-copy.ts
+new file mode 100644
+index 0000000..329f5fe
+--- /dev/null
++++ b/src/release/public-copy.ts
+@@ -0,0 +1,50 @@
++import type {MessageKey} from '@/i18n/messages';
++
++/** Source-owned public wording. Operational proof and review records stay
++ * outside the product bundle; tenant-provided prices and names stay dynamic. */
++export const PUBLIC_COPY={
++ navigationLabel:'Asosiy navigatsiya',
++ featuresNavigation:'Imkoniyatlar',
++ pricesNavigation:'Tariflar',
++ compatibilityNavigation:'Moslik',
++ login:'Kirish',
++ heroTitle:'Savdo, ombor va hisoblarni bir joyda boshqaring',
++ heroDescription:'Naqd savdo, mijoz qarzi, xarid, qaytarish va smena hisoblari uchun POS. Tashkilot va filiallar bo‘yicha vakolatlar bilan ishlang.',
++ trialOrganization:'Yangi tashkilot uchun',
++ trialDays:'kunlik',
++ trialAfter:'sinovi. Sinovdan so‘ng',
++ graceDays:'kun imtiyozli muddat.',
++ startTrial:'Sinovni boshlash',
++ openPos:'POSni ochish',
++ featuresTitle:'Hozir ishlaydigan imkoniyatlar',
++ salesTitle:'Savdo va mijoz hisobi',
++ salesDescription:'Naqd savdo, chegirma, qisman qaytarish, nasiya va mijoz ko‘chirmasi. Karta yoki bank yozuvi qo‘lda tasdiqlanadi.',
++ inventoryTitle:'Ombor va xarid',
++ inventoryDescription:'Mahsulot va barkod katalogi, kirim, ombor harakati, filiallararo ko‘chirish va inventarizatsiya.',
++ shiftsTitle:'Smena va hisobot',
++ shiftsDescription:'Smena ochish/yopish, naqd pul jurnali, savdo va qarz hisobotlari, filtrlangan CSV eksport.',
++ pricesTitle:'Oylik tariflar',
++ pricesUnavailable:'Tariflar vaqtincha yuklanmadi. Keyinroq qayta oching; taxminiy narx ko‘rsatilmaydi.',
++ pricePeriod:'/oy',
++ branchLimit:'filial',
++ organizationLimit:'Tashkilot bo‘yicha',
++ registerLimit:'kassa',
++ totalLimit:'Jami',
++ staffLimit:'xodim',
++ register:'Ro‘yxatdan o‘tish',
++ subscriptionConditions:'Limitlar tashkilot bo‘yicha jami; arxivlangan yozuvlar ham hisoblanadi. Obuna tugaganda mavjud ma’lumotlar o‘chirilmaydi. Yakuniy invoice joriy tarif versiyasi bo‘yicha tasdiqlanadi.',
++ compatibilityTitle:'Brauzer, qurilmalar va integratsiyalar',
++ browserCompatibility:'Asosiy oqimlar Chromium, Firefox va WebKit dvigatellarida avtomatik tekshiriladi. Barkodni klaviatura sifatida kiritish qo‘llanadi.',
++ hardwareLimitations:'58/80 mm brauzer chek andozalari ichki, fiskal bo‘lmagan nusxa uchun. Real printer, tarozi, maxsus skanner va cash drawer modellari hali tasdiqlanmagan.',
++ integrationLimitations:'Real Click, fiskalizatsiya va E-POS integratsiyalari hali ulanmagan. To‘liq offline to‘lov yoki fizik uskunalar mosligi va’da qilinmaydi.',
++ helpTitle:'Boshlash va yordam',
++ onboardingDescription:'Hisob yarating, tashkilot va kassani sozlang, katalogni import qiling va boshlang‘ich qoldiqni tekshiring. Ilovadagi yordam va kassir mashqi ish tartibini tushuntiradi.',
++ onboarding:'Birlamchi sozlash',
++ help:'Foydalanish qo‘llanmasi',
++ footer:'Shuni POS · SaaS oylik obuna. Mahsulot imkoniyatlari ushbu sahifadagi doira bilan cheklangan.',
++ landingTitle:'Shuni POS — savdo, ombor va obuna',
++ landingDescription:'Naqd savdo, ombor, qaytarish, nasiya va hisobotlar. Tasdiqlangan tariflar va hozirgi integratsiya chegaralari.',
++ rootTitle:'Shuni POS — Savdo va ombor boshqaruvi tizimi',
++ rootDescription:'Kichik va o‘rta bizneslar uchun brauzerda ishlovchi zamonaviy POS savdo va ombor tizimi.',
++ manifestDescription:'Savdo va ombor boshqaruvi',
++} as const satisfies Record<string,MessageKey>;
+diff --git a/scripts/release/check-claims.cjs b/scripts/release/check-claims.cjs
+new file mode 100644
+index 0000000..d5e6f54
+--- /dev/null
++++ b/scripts/release/check-claims.cjs
+@@ -0,0 +1,73 @@
++/* Read-only release gate. Reviews are explicit, never inferred from a checkbox
++ * or silently refreshed. Public bundles contain wording, not proof internals. */
++const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),ts=require('typescript');
++const COPY='src/release/public-copy.ts',REGISTRY='tasks/release/PUBLIC_CLAIMS.json';
++const SURFACES=['src/components/landing/LandingContent.tsx','src/app/page.tsx','src/app/layout.tsx','src/app/manifest.ts','src/context/LocaleContext.tsx'];
++const RUNTIME_SOURCES=['src/i18n/messages.ts','src/i18n/locale.ts','src/i18n/format.ts','src/lib/money.ts'];
++const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
++function copyKeys(source){
++ const ast=ts.createSourceFile(COPY,source,ts.ScriptTarget.Latest,true),result={};
++ function unwrap(node){while(ts.isAsExpression(node)||ts.isSatisfiesExpression(node)||ts.isParenthesizedExpression(node))node=node.expression;return node;}
++ function visit(node){if(ts.isVariableDeclaration(node)&&node.name.getText(ast)==='PUBLIC_COPY'&&node.initializer){const object=unwrap(node.initializer);if(!ts.isObjectLiteralExpression(object))throw Error('COPY_MUST_BE_LITERAL');for(const field of object.properties){if(!ts.isPropertyAssignment(field)||!ts.isStringLiteral(field.initializer))throw Error('COPY_MUST_BE_STATIC');const id=field.name.getText(ast).replace(/^['"]|['"]$/g,'');if(Object.hasOwn(result,id))throw Error('COPY_DUPLICATE');result[id]=field.initializer.text;}}ts.forEachChild(node,visit);}visit(ast);return result;
++}
++function check(root=process.cwd(),overrides={}){
++ const problems=[],read=file=>Object.hasOwn(overrides,file)?overrides[file]:fs.readFileSync(path.join(root,file),'utf8');
++ const report=(code,file,id)=>problems.push({code,file,...(id?{id}:{})});
++ const registry=JSON.parse(read(REGISTRY)),copy=copyKeys(read(COPY)),uz=JSON.parse(read('src/dictionary/ui.uz.json')),ru=JSON.parse(read('src/dictionary/ui.ru.json'));
++ const originalIds=new Set([...read('tasks/PLAN1.md').matchAll(/^- \[[ x]\] \*\*([A-Z]+-\d+\.\d+)\*\*/gm)].map(match=>match[1]));
++ const accepted=new Set([...read('tasks/PLAN1.md').matchAll(/^- \[x\] \*\*([A-Z]+-\d+\.\d+)\*\*/gm)].map(match=>match[1]));
++ if(registry.schemaVersion!==1)report('UNSUPPORTED_REGISTRY',REGISTRY);
++ for(const file of RUNTIME_SOURCES)if(digest(read(file))!==registry.runtimeSha256?.[file])report('PUBLIC_RUNTIME_REVIEW_REQUIRED',file);
++ const proofData={};for(const [id,proof] of Object.entries(registry.proofs??{})){
++  if(!/^tasks\/evidence\/[a-z0-9-]+\.json$/.test(proof.file)){report('UNSAFE_PROOF_PATH',REGISTRY,id);continue;}
++  const text=read(proof.file);if(digest(text)!==proof.sha256)report('PROOF_HASH_CHANGED',proof.file,id);proofData[id]=JSON.parse(text);
++ }
++ for(const [id,group] of Object.entries(registry.groups??{})){
++  if(!group.originalIds?.length||!group.proofs?.length||!Object.keys(group.sourceAnchors??{}).length)report('INCOMPLETE_CAPABILITY_PROOF',REGISTRY,id);
++  for(const task of group.originalIds??[])if(!accepted.has(task))report('UNACCEPTED_ORIGINAL',REGISTRY,task);
++  for(const proof of group.proofs??[])if(!proofData[proof])report('MISSING_PROOF',REGISTRY,proof);
++  for(const [file,anchor] of Object.entries(group.sourceAnchors??{})){
++   if(!/^src\/server\/[a-zA-Z0-9/_-]+\.ts$|^tests\/[a-zA-Z0-9_-]+\.(?:integration|unit)\.test\.ts$/.test(file)){report('UNSAFE_SOURCE_ANCHOR',REGISTRY,id);continue;}
++   if(digest(read(file))!==anchor.sha256)report('CAPABILITY_SOURCE_CHANGED',file,id);
++   const attested=proofData[anchor.proof]?.sourceSha256?.[file];
++   if(attested!==anchor.sha256)report('SOURCE_NOT_ATTESTED',file,id);
++  }
++ }
++ const usage={};
++ for(const file of SURFACES){
++  const source=read(file),ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),used=new Set();
++  if(digest(source)!==registry.surfaceSha256?.[file])report('PUBLIC_SURFACE_REVIEW_REQUIRED',file);
++  function refs(node){const ids=[];function walk(child){if(ts.isPropertyAccessExpression(child)&&child.expression.getText(ast)==='PUBLIC_COPY')ids.push(child.name.text);ts.forEachChild(child,walk);}walk(node);return ids;}
++  function visit(node){
++   if(ts.isPropertyAccessExpression(node)&&node.expression.getText(ast)==='PUBLIC_COPY'){const id=node.name.text;used.add(id);if(!Object.hasOwn(copy,id))report('UNKNOWN_PUBLIC_COPY',file,id);}
++   if(ts.isElementAccessExpression(node)&&node.expression.getText(ast)==='PUBLIC_COPY')report('DYNAMIC_PUBLIC_COPY_FORBIDDEN',file);
++   if(ts.isCallExpression(node)&&['tr','translate'].includes(node.expression.getText(ast))&&!refs(node.arguments[0]??node).length&&!(file==='src/context/LocaleContext.tsx'&&node.arguments[0]?.getText(ast)==='key'))report('UNREGISTERED_TRANSLATION',file);
++   if(file!=='src/context/LocaleContext.tsx'&&ts.isJsxText(node)){const value=node.getText(ast).replace(/\s+/g,' ').trim();if(/[\p{L}]/u.test(value)&&value!=='Shuni POS')report('UNREGISTERED_RENDERED_TEXT',file);}
++   if(ts.isPropertyAssignment(node)&&['title','description'].includes(node.name.getText(ast))&&ts.isStringLiteral(node.initializer))report('UNREGISTERED_METADATA',file);
++   if(ts.isJsxAttribute(node)&&['aria-label','title','alt','label','placeholder'].includes(node.name.getText(ast))&&node.initializer&&ts.isStringLiteral(node.initializer)&&/[\p{L}]/u.test(node.initializer.text))report('UNREGISTERED_DISPLAY_ATTRIBUTE',file);
++   if(file==='src/components/landing/LandingContent.tsx'&&ts.isImportDeclaration(node)&&!['@/release/public-copy','@/context/LocaleContext','next/link','@/server/billing/public-pricing'].includes(node.moduleSpecifier.text))report('UNAUDITED_PUBLIC_COMPONENT_IMPORT',file);
++   ts.forEachChild(node,visit);
++  }visit(ast);usage[file]=used;
++ }
++ for(const [id,key] of Object.entries(copy)){
++  const entry=registry.copy?.[id];if(!entry){report('UNREVIEWED_COPY',COPY,id);continue;}
++  if(!['claim','boundary','neutral'].includes(entry.kind))report('INVALID_COPY_KIND',REGISTRY,id);
++  if(!entry.surfaces?.length)report('COPY_SURFACE_REQUIRED',REGISTRY,id);
++  for(const file of entry.surfaces??[])if(!usage[file]?.has(id))report('REQUIRED_COPY_NOT_RENDERED',file,id);
++  for(const file of SURFACES)if(usage[file].has(id)&&!entry.surfaces?.includes(file))report('UNREVIEWED_COPY_SURFACE',file,id);
++  for(const [locale,dict] of Object.entries({uz,ru}))if(typeof dict[key]!=='string'||!dict[key].trim()||digest(dict[key])!==entry.textSha256?.[locale])report('TEXT_REVIEW_REQUIRED',REGISTRY,id+':'+locale);
++  if(entry.kind==='claim'&&!entry.groups?.length)report('CLAIM_WITHOUT_CAPABILITY',REGISTRY,id);
++  for(const group of entry.groups??[])if(!registry.groups?.[group])report('UNKNOWN_CAPABILITY',REGISTRY,group);
++  for(const boundary of entry.requiredBoundaries??[])if(registry.copy?.[boundary]?.kind!=='boundary'||!usage[SURFACES[0]].has(boundary))report('CLAIM_BOUNDARY_MISSING',REGISTRY,id);
++ }
++ for(const id of Object.keys(registry.copy??{}))if(!Object.hasOwn(copy,id))report('STALE_COPY_REVIEW',REGISTRY,id);
++ for(const unavailable of registry.unavailable??[]){
++  if(registry.copy?.[unavailable.notice]?.kind!=='boundary'||!usage[SURFACES[0]].has(unavailable.notice))report('UNAVAILABLE_BOUNDARY_MISSING',REGISTRY,unavailable.id);
++  if(!unavailable.originalIds?.length)report('UNAVAILABLE_SOURCE_REQUIRED',REGISTRY,unavailable.id);
++  for(const original of unavailable.originalIds??[]){if(!originalIds.has(original))report('UNKNOWN_ORIGINAL',REGISTRY,original);if(accepted.has(original))report('UNAVAILABLE_SCOPE_NEEDS_REVIEW',REGISTRY,original);}
++ }
++ function walk(directory){for(const entry of fs.readdirSync(path.join(root,directory),{withFileTypes:true})){const file=directory+'/'+entry.name;if(entry.isDirectory())walk(file);else if(/\.[cm]?[jt]sx?$/.test(file)&&/(?:from\s*|import\s*\(|require\s*\()\s*['"][^'"]*dictionary\/(?:uz|ru)(?:\.json)?['"]/.test(read(file)))report('INACTIVE_MARKETING_DICTIONARY_IMPORTED',file);}}walk('src');
++ return {copyEntries:Object.keys(copy).length,capabilities:Object.keys(registry.groups??{}).length,proofs:Object.keys(proofData).length,surfaces:SURFACES.length,problems};
++}
++module.exports={check,copyKeys,digest,COPY,REGISTRY,SURFACES,RUNTIME_SOURCES};
++if(require.main===module){try{const result=check();process.stdout.write(JSON.stringify(result,null,2)+'\n');process.exitCode=result.problems.length?1:0;}catch{console.error('Public claim review failed: missing or malformed local review/proof source');process.exitCode=2;}}
+diff --git a/tests/e2e/public-claims.spec.ts b/tests/e2e/public-claims.spec.ts
+new file mode 100644
+index 0000000..eb56e1a
+--- /dev/null
++++ b/tests/e2e/public-claims.spec.ts
+@@ -0,0 +1,85 @@
++import {test,expect} from '@playwright/test';
++import {PrismaClient} from '@prisma/client';
++import {PUBLIC_COPY} from '../../src/release/public-copy';
++import {translate} from '../../src/i18n/messages';
++import {formatLocaleMoney} from '../../src/i18n/format';
++
++const connection=new URL(process.env.DATABASE_URL??'');
++if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw Error('Public claims require the isolated DB');
++const db=new PrismaClient();
++test.afterAll(async()=>{await db.$disconnect()});
++
++// These are metadata/accessibility-only values or the separate unavailable
++// branch, rather than body text on a page with configured active plans.
++const nonBodyKeys=new Set<keyof typeof PUBLIC_COPY>([
++ 'navigationLabel','pricesUnavailable','landingTitle','landingDescription',
++ 'rootTitle','rootDescription','manifestDescription',
++]);
++const plans=()=>db.billingPlan.findMany({where:{isActive:true},include:{currentVersion:true},orderBy:{code:'asc'}});
++
++for(const locale of ['uz','ru'] as const){
++ test(`Public claims in ${locale} match reviewed wording, current DB prices/trial/limits and localized metadata`,async({page,context},testInfo)=>{
++  const tr=(key:(typeof PUBLIC_COPY)[keyof typeof PUBLIC_COPY])=>translate(key,locale);
++  const current=await plans();
++  expect(current.length,'The isolated database must have configured plans').toBeGreaterThan(0);
++  // Read shared configuration only: no edits, cache invalidation or shortened
++  // TTL. Invoice policy and pricing-cache expiry are covered independently.
++  const before=JSON.stringify(current);
++  await context.addCookies([{name:'pos_locale',value:locale,url:'https://localhost:3100',secure:true,sameSite:'Lax'}]);
++  await page.goto('/');
++  await expect(page.locator('html')).toHaveAttribute('lang',locale);
++  await expect(page.getByRole('heading',{name:tr(PUBLIC_COPY.heroTitle),exact:true})).toBeVisible();
++  await expect(page.getByRole('navigation',{name:tr(PUBLIC_COPY.navigationLabel),exact:true})).toBeVisible();
++  for(const [key,copy] of Object.entries(PUBLIC_COPY)){
++   if(!nonBodyKeys.has(key as keyof typeof PUBLIC_COPY))await expect(page.locator('body'),`Reviewed public copy: ${locale}/${key}`).toContainText(tr(copy));
++  }
++  await expect(page).toHaveTitle(tr(PUBLIC_COPY.landingTitle));
++  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content',tr(PUBLIC_COPY.landingDescription));
++  const pricing=page.locator('#prices'),cards=pricing.getByRole('article');
++  await expect(cards).toHaveCount(current.length);
++  for(const [index,plan] of current.entries()){
++   const version=plan.currentVersion,card=cards.nth(index);
++   await expect(card.getByRole('heading',{name:version.name,exact:true})).toBeVisible();
++   const price=version.currency==='UZS'?formatLocaleMoney(version.monthlyPrice.toFixed(2),locale):version.monthlyPrice.toFixed(2)+' '+version.currency;
++   await expect(card.getByText(price+tr(PUBLIC_COPY.pricePeriod),{exact:true})).toBeVisible();
++   await expect(card.getByText(`${version.branchLimit} ${tr(PUBLIC_COPY.branchLimit)}`,{exact:true})).toBeVisible();
++   await expect(card.getByText(`${tr(PUBLIC_COPY.organizationLimit)} ${version.registerLimit} ${tr(PUBLIC_COPY.registerLimit)}`,{exact:true})).toBeVisible();
++   await expect(card.getByText(`${tr(PUBLIC_COPY.totalLimit)} ${version.staffLimit} ${tr(PUBLIC_COPY.staffLimit)}`,{exact:true})).toBeVisible();
++  }
++  const trial=current.find(plan=>plan.isTrial)?.currentVersion;
++  expect(trial,'Trial configuration is required by this acceptance fixture').toBeDefined();
++  await expect(page.getByText(`${tr(PUBLIC_COPY.trialOrganization)} ${trial!.trialDays} ${tr(PUBLIC_COPY.trialDays)} ${trial!.name} ${tr(PUBLIC_COPY.trialAfter)} ${trial!.graceDays} ${tr(PUBLIC_COPY.graceDays)}`,{exact:true})).toBeVisible();
++  await expect(page.getByText(tr(PUBLIC_COPY.pricesUnavailable),{exact:true})).toHaveCount(0);
++  // Execute the actual generated PWA module in each browser engine as well.
++  // Different ICU versions may choose a comma for Uzbek grouping; our public
++  // SSR/client/offline contract uses an ordinary space in both locales.
++  const offlineMoney=await page.evaluate(async(language)=>{
++   const asset='/pwa/format.js';
++   const formatter=await import(/* webpackIgnore: true */ asset);
++   return formatter.formatLocaleMoney('249000.00',language);
++  },locale);
++  expect(offlineMoney).toBe(locale==='uz'?'249 000 so‘m':'249 000 сум');
++  for(const width of [1280,360]){
++   await page.setViewportSize({width,height:780});
++   const login=page.getByRole('link',{name:tr(PUBLIC_COPY.login),exact:true});
++   const language=page.getByRole('combobox',{name:translate('Til',locale),exact:true}).locator('..');
++   await login.click({trial:true});
++   const link=await login.boundingBox(),switcher=await language.boundingBox();
++   expect(link).not.toBeNull();expect(switcher).not.toBeNull();
++   const intersects=link!.x<switcher!.x+switcher!.width&&link!.x+link!.width>switcher!.x&&link!.y<switcher!.y+switcher!.height&&link!.y+link!.height>switcher!.y;
++   expect(intersects,'Language control must not obscure the public login link').toBe(false);
++   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
++   await page.screenshot({path:testInfo.outputPath(`public-${locale}-${width}.png`),fullPage:true});
++  }
++  await page.setViewportSize({width:1280,height:780});
++  await page.screenshot({path:testInfo.outputPath(`public-${locale}.png`),fullPage:true});
++  const manifest=await page.request.get('/manifest.webmanifest');
++  expect(manifest.ok()).toBe(true);
++  expect(await manifest.json()).toMatchObject({name:'Shuni POS',short_name:'Shuni POS',description:tr(PUBLIC_COPY.manifestDescription),lang:locale,start_url:'/pos',scope:'/'});
++  // Public login inherits root metadata, while the landing page overrides it.
++  await page.goto('/login');
++  await expect(page).toHaveTitle(tr(PUBLIC_COPY.rootTitle));
++  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content',tr(PUBLIC_COPY.rootDescription));
++  expect(JSON.stringify(await plans()),'Public reads must not mutate shared plans').toBe(before);
++ });
++}
+diff --git a/tests/e2e/public-pricing-failure.spec.ts b/tests/e2e/public-pricing-failure.spec.ts
+new file mode 100644
+index 0000000..7121c58
+--- /dev/null
++++ b/tests/e2e/public-pricing-failure.spec.ts
+@@ -0,0 +1,27 @@
++import {test,expect} from '@playwright/test';
++import {PrismaClient} from '@prisma/client';
++import {PUBLIC_COPY} from '../../src/release/public-copy';
++import {translate} from '../../src/i18n/messages';
++const connection=new URL(process.env.DATABASE_URL??'');
++if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw Error('Isolated pricing failure DB required');
++const db=new PrismaClient();
++test.afterAll(async()=>{await db.$disconnect()});
++// Run this file alone against a fresh e2e server: a successful earlier public
++// request is intentionally allowed to use the real60s configuration cache.
++test('A real uncached pricing read timeout shows no invented price or trial in either language',async({page,context})=>{
++ await db.$transaction(async tx=>{
++  await tx.$executeRaw`LOCK TABLE "BillingPlan" IN ACCESS EXCLUSIVE MODE`;
++  for(const locale of ['uz','ru'] as const){
++   await context.addCookies([{name:'pos_locale',value:locale,url:'https://localhost:3100',secure:true,sameSite:'Lax'}]);
++   await page.goto('/');
++   await expect(page.getByRole('status')).toContainText(translate(PUBLIC_COPY.pricesUnavailable,locale));
++   await expect(page.locator('#prices').getByRole('article')).toHaveCount(0);
++   await expect(page.getByRole('link',{name:translate(PUBLIC_COPY.startTrial,locale),exact:true})).toHaveCount(0);
++   await expect(page.getByRole('link',{name:translate(PUBLIC_COPY.register,locale),exact:true})).toBeVisible();
++   await expect(page.getByText(translate(PUBLIC_COPY.integrationLimitations,locale),{exact:true})).toBeVisible();
++   await page.screenshot({path:test.info().outputPath('pricing-unavailable-'+locale+'.png')});
++  }
++ },{maxWait:5000,timeout:20000});
++ // The lock was transactional and is gone: the test does not mutate plans.
++ expect(await db.billingPlan.count({where:{isActive:true}})).toBeGreaterThan(0);
++});
+diff --git a/tasks/release/PUBLIC_CLAIMS.json b/tasks/release/PUBLIC_CLAIMS.json
+new file mode 100644
+index 0000000..cdcea80
+--- /dev/null
++++ b/tasks/release/PUBLIC_CLAIMS.json
+@@ -0,0 +1,1027 @@
++{
++  "schemaVersion": 1,
++  "scope": "Reviewed source-owned wording of a local candidate release; no production/pilot, uptime, legal, vendor or physical-device certification.",
++  "proofs": {
++    "localization": {
++      "file": "tasks/evidence/localization-20261015.json",
++      "sha256": "f064575f56eee40a8d4fe56330a56b55f8ac27661f37d56d8bf7b277ea378b69",
++      "purpose": "Fresh local unit/PG/native-browser cases and source fingerprints; no deployment or hardware certification."
++    },
++    "ledger": {
++      "file": "tasks/evidence/release-ledger-20261011.json",
++      "sha256": "1cd3c6ccf1d57e68c4603963855fe837811c0741c6b8a6953856a24e18d212fd",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "lists": {
++      "file": "tasks/evidence/list-journals-20261015.json",
++      "sha256": "2b121a1b5bcbb9845395c61f37edff4c2ac6853e44fa0288002b8783a3992302",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "billing": {
++      "file": "tasks/evidence/saas-core-20261010.json",
++      "sha256": "5700c16a01b3d8060d3a984e92736430b3d2839c6e07b09c1c350511745f0287",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "readonly": {
++      "file": "tasks/evidence/subscription-readonly-20261010.json",
++      "sha256": "cb402c89939aa484a0297adc5d9769deb222141cdac08f9545a0973465699376",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "permission": {
++      "file": "tasks/evidence/permission-receipt-20261010.json",
++      "sha256": "2f59ef9285a12cf6979c3e1c539cce73714185563874bd902ec31bb19026b7c4",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "editors": {
++      "file": "tasks/evidence/ux-final-20261012.json",
++      "sha256": "7e94e732a570028f8cb5f2793f046defb1f82f0c4d78ac1f51a4a10769591700",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "import": {
++      "file": "tasks/evidence/import-editor-state-20261012.json",
++      "sha256": "0e8214f28af43e3a6abb1e06e2cae2093d1ca98d06cc474cd2fc971e3bc84e50",
++      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
++    },
++    "currentCore": {
++      "file": "tasks/evidence/public-claims-core-20261015.json",
++      "sha256": "818e1f2b9ca0d49142b906f7c993198ebf789e0227bec9c8fadb12ab1533f848",
++      "purpose": "Fresh100-case native PostgreSQL acceptance including actual guided onboarding/catalog import and all listed bounded capability services; no deployment/pilot claim."
++    }
++  },
++  "groups": {
++    "checkout": {
++      "originalIds": [
++        "POS-02.03",
++        "POS-02.04",
++        "POS-02.06",
++        "RET-01.01",
++        "RET-01.05",
++        "CRM-01.07"
++      ],
++      "proofs": [
++        "ledger",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Exact cash/credit/discount/refund/customer statement. Bank/card records require manual proof and are not provider settlement.",
++      "sourceAnchors": {
++        "src/server/sales/service.ts": {
++          "proof": "currentCore",
++          "sha256": "8ab5b37c9b1e93aba764416f425cdc4d02aa501941208b9e5f849b021aab3ecc"
++        },
++        "src/server/returns/service.ts": {
++          "proof": "currentCore",
++          "sha256": "12640edb5ae06a685d7f7e228c57f554dcf3d7d624709db2edbd204e1bf9e856"
++        },
++        "tests/reports-finance.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "312ec37d220f63262425cc96f872aacb4feddb7c6864be9f508397902c0f80da"
++        }
++      }
++    },
++    "tenantRoles": {
++      "originalIds": [
++        "SEC-01.01",
++        "SEC-01.02",
++        "SEC-01.03",
++        "SEC-01.04",
++        "SEC-01.06"
++      ],
++      "proofs": [
++        "permission",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Server-side tenant/branch/session/role scope. No broad platform support access or real-device certification.",
++      "sourceAnchors": {
++        "src/server/auth/policy.ts": {
++          "proof": "currentCore",
++          "sha256": "ceb7f2be3cfc2e974a8af65e92de990c4b172011c20f8da2e05142f838ed85b3"
++        },
++        "tests/receipt-identity.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052"
++        }
++      }
++    },
++    "inventory": {
++      "originalIds": [
++        "CAT-01.01",
++        "CAT-01.02",
++        "PUR-01.01",
++        "PUR-01.02",
++        "INV-01.01",
++        "INV-01.04",
++        "INV-02.01",
++        "INV-02.03"
++      ],
++      "proofs": [
++        "lists",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Catalog and ordinary barcodes, source stock/purchases, transfers and counts. No scale/hardware format assumption.",
++      "sourceAnchors": {
++        "src/server/catalog/service.ts": {
++          "proof": "currentCore",
++          "sha256": "39a042bdf1c7d76e3934b45a6433c67e0045be8f8e2fba93735439b1e3ccadb8"
++        },
++        "src/server/inventory/documents.ts": {
++          "proof": "currentCore",
++          "sha256": "20a8e011286ccad10f3b1f35a87c3e285b9fe86ee89f1e99865d8f41adf21acd"
++        },
++        "src/server/inventory/counts.ts": {
++          "proof": "currentCore",
++          "sha256": "38bfc1b70ac2acb1f0c4d54b3eff170444509b1f62887a09c1c2bb7742c18d2f"
++        },
++        "tests/catalog-purchase.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "1128241ae470b2b1db28fb215661e86da66a3bbbbb071af955fd979d013fdc61"
++        }
++      }
++    },
++    "reports": {
++      "originalIds": [
++        "FIN-01.02",
++        "FIN-01.03",
++        "REP-01.04",
++        "REP-01.06",
++        "REP-01.08",
++        "REP-01.09"
++      ],
++      "proofs": [
++        "ledger",
++        "lists",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Shift cash journals and bounded filtered reports/CSV with source cutoff and permission rules.",
++      "sourceAnchors": {
++        "src/server/reports/financial.ts": {
++          "proof": "currentCore",
++          "sha256": "5eeafa8ebbe1f86394661b1e96dcba183d4012213c2882efd450eaf8d672df9e"
++        },
++        "tests/reports-finance.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "312ec37d220f63262425cc96f872aacb4feddb7c6864be9f508397902c0f80da"
++        }
++      }
++    },
++    "subscription": {
++      "originalIds": [
++        "BIZ-01.01",
++        "BIZ-01.02",
++        "BIZ-01.03",
++        "BIZ-01.04",
++        "BIZ-01.05"
++      ],
++      "proofs": [
++        "billing",
++        "readonly",
++        "editors",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Actual current DB plan price/aggregate limits/trial/grace and manual invoice. No hardcoded price, deletion or Click charge. Public configuration cache60s; invoice revalidates current version.",
++      "sourceAnchors": {
++        "src/server/billing/public-pricing.ts": {
++          "proof": "currentCore",
++          "sha256": "e0ec9665ec47c5b7dc462dc9171eee914fef8c4c27a897667a5bbb32bb6e8e0c"
++        },
++        "src/server/billing/service.ts": {
++          "proof": "currentCore",
++          "sha256": "75628ca8100cb04521b6eb5a707796bf53a21c016cee96c2f648644e840ac44a"
++        },
++        "src/server/billing/invoices.ts": {
++          "proof": "currentCore",
++          "sha256": "de1c6caaebcb37e7016e7cf51b0847e70ad149c7ff0b2578194026466994ecae"
++        },
++        "tests/billing.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "1c3e0260a328c452a96311dc6bc15af5f61e554fd1a9a9e71d1131111a069c70"
++        }
++      }
++    },
++    "browserReceipts": {
++      "originalIds": [
++        "UX-01.02",
++        "POS-02.05",
++        "CAT-01.02",
++        "OFF-01.03"
++      ],
++      "proofs": [
++        "permission",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Native Chromium/Firefox/WebKit engine tests, keyboard barcode and58/80mm nonfiscal browser copies. POS-02.09 electronic delivery remains incomplete, not advertised.",
++      "sourceAnchors": {
++        "tests/receipt-identity.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052"
++        }
++      }
++    },
++    "onboarding": {
++      "originalIds": [
++        "UX-01.01",
++        "UX-01.08",
++        "UX-01.09",
++        "CAT-01.08",
++        "INV-01.02"
++      ],
++      "proofs": [
++        "editors",
++        "import",
++        "localization",
++        "currentCore"
++      ],
++      "description": "Bounded reviewed import, opening stock document, guided setup/help and isolated cashier training; no external delivery promise.",
++      "sourceAnchors": {
++        "src/server/onboarding/service.ts": {
++          "proof": "currentCore",
++          "sha256": "792bb2da2be882d596e787be679c3977d01e2283070e4fb4c58f17d63f9b8c09"
++        },
++        "src/server/catalog/imports.ts": {
++          "proof": "currentCore",
++          "sha256": "f79f69225a433c4b1976d4ae3fb098ae568156e39185b449600504871d545e07"
++        },
++        "tests/onboarding.integration.test.ts": {
++          "proof": "currentCore",
++          "sha256": "233f674f0c422206580c83ac7ee47dfebc38cb41b7382b2e2c30a0951d600eb7"
++        }
++      }
++    }
++  },
++  "copy": {
++    "navigationLabel": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "9a53d7c596127a33b94b465c7b8b8aef19653d51da63404c43415318c5bb4382",
++        "ru": "8fff0bba4454d28d6acd28aee587187982a6e69ee8f21b96c9cd8c899d0aa942"
++      }
++    },
++    "featuresNavigation": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "0449e8344de33e5e3b36ce1460428b3b91b71e14fa34fa1c647a011216989507",
++        "ru": "04afc09e60bdc004125c1607d212ffc9ae1b0dd17a2e260cb7a7cb57006a8fb8"
++      }
++    },
++    "pricesNavigation": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "54a5c22dc81c94bce7077ce8ad0779c70f196558261ff344b70358889b166ddd",
++        "ru": "b2fbb44bb3e3e62b370a1c08863bdd89e174711e0ce8f92c854d17a56580dadb"
++      }
++    },
++    "compatibilityNavigation": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "bc68fbcfa4c73243699c83fda274534a0e57317dbc2a0bbf4f017abae68fb3c0",
++        "ru": "79b5bfb4673a1ee69f351d0d0ec457d8c50a3a85a31776b91e4b3f2e7dbb0586"
++      }
++    },
++    "login": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "a07a860dcea0e0a21ab4f85f601324c1df969266e3a54bad70e9af88e94cadcf",
++        "ru": "8fc9ab2eeb38ad7a5ee16c668e0b80d52041249411f886b28981e93ff32d52b9"
++      }
++    },
++    "heroTitle": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory",
++        "reports"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "eda81b2eaca93da1809e0a8a54900c30bfa7e67bc762609a823fd99e420d4a97",
++        "ru": "6e120f9fbcf2c0782a43fb8bac5791558a2465629fabdb22810a46202b971329"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "heroDescription": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory",
++        "reports",
++        "tenantRoles"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "2768015c896466ecc036471520f1336ac230021c0221c4f9ff2bb64c90f5363e",
++        "ru": "a4bf3172b28f3d734ad5687e0ca7e1d98631736254420c850635101265b4152b"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "trialOrganization": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "975d9302d95b7423ef5b140fcd9abef11eabbd94d47546ff02c4baf715742eed",
++        "ru": "88ccea9e25b941dda518b921f13c236e4eeb5a7d23de5aea5094e5e2b30c9d81"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "trialDays": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "b805b25dbd76af5054446fc20f42d957f8ee08595641e58ca7e622b2fbc13338",
++        "ru": "c27d559b169947b2c1d612d3f2788c168a3a316d5e68a54822d450bcf34fbba5"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "trialAfter": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "bef4815feb1dac3c91f4e54cee918e313977e24c3ce20c6d7820e71c35cc7b20",
++        "ru": "778593e54ac5006b804a6672899db44a0b9625f1ce5ddbefc79f65bbb078cdc6"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "graceDays": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "bb6a63ebf1c5b8864d2a6845521a92455081a98b49d63b784bd09b98c3cfa6bc",
++        "ru": "d93064596e6b64171ebd758e1c84e2240ccf620c6c1d66676ed1c7c97ae46dc9"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "startTrial": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "28ce37b5e0e07832f527664149c20e8de827a192396a84f00acceef02cbdbafb",
++        "ru": "dc75d57f78dfda6790bcf567113e9747f58c0a6ad38157a798a50bc1f7ed219d"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "openPos": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "d73abe69bfb909662a31c306561f824cd6c309eea0bd146dcd07fb07ced543f4",
++        "ru": "1fcea3521025befd6635788a5fbf236056ed638dbf4054bb1460e3f23d4cf5b8"
++      }
++    },
++    "featuresTitle": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory",
++        "reports"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "c0a976169fcb6036ba663d8bc912980ef01d9d264ac7d9633bf8be7ae30fbbd4",
++        "ru": "bfe053b07da163c9af29b40587105007cff318b75f33ee22dadf6d4b92d61d54"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "salesTitle": {
++      "kind": "claim",
++      "groups": [
++        "checkout"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "86286a5523482ecbe91b124877ab34ee79cfce812699f2aad7383388a518dfed",
++        "ru": "c24d5bd1a4a07b1edae9ea51db5686b3e879e04d71682fe7af9607d90f971ab8"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "salesDescription": {
++      "kind": "claim",
++      "groups": [
++        "checkout"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "c11a6b46bba9b9e20203ea748092ee361237cb9328101e98313c0b1b67a2e955",
++        "ru": "11104d13765b2bd8a245cfc6f24961794d150d3f6131c9b6826e826edf1558dc"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "inventoryTitle": {
++      "kind": "claim",
++      "groups": [
++        "inventory"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "970c096ccea5f20613985ded481c8cbdd90c8cf15a994563a55557f1aeb8fb9e",
++        "ru": "b7e96436cf6eb11f5e0e51ca0772e0056f0d3bc6fea1e09fa9f774df04b10f14"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "inventoryDescription": {
++      "kind": "claim",
++      "groups": [
++        "inventory"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "6a9f2e19f543e732a8f1831649e4c32007c7420e6661ef9901685046467b414b",
++        "ru": "d85b3db9f4d8ed0d49992e14d9ca7807f6d87f93ddcc05f1437620ab304b6983"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "shiftsTitle": {
++      "kind": "claim",
++      "groups": [
++        "reports"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "d84737e247918135aa8b460d7384e02b5f7fcd7aec650046edb507d5ce40ca4c",
++        "ru": "cd819383d15d75b1173618f44360dcb61fbc4a7fdebc596f16e34a6a3f9ed509"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "shiftsDescription": {
++      "kind": "claim",
++      "groups": [
++        "reports"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "1cde4cb2477b14e4cda26efa1050c2fb0f8a9c8ddaa00329c8952ae06f6072b6",
++        "ru": "19d4011fea59cd2691d9a70be524a0b40daa3b9f50920ee680916e5c4a0d09cc"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "pricesTitle": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "3565ba27c362327b7c45690b71a85f995b4aa2eef18d25c7ef0dd97a8f2c99b8",
++        "ru": "242cd1d65177cf1a3324431a37b79f8fcd82a273448d36f6e3dd28ea80c83956"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "pricesUnavailable": {
++      "kind": "boundary",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "23496e1a1479e2cc3082528037fcd3ba49663169b2ac270b6cdebf82941cdb22",
++        "ru": "5ae7c8989933b036cf95a6ad387864791cb8cbb5443fc6a7a634039997995e76"
++      }
++    },
++    "pricePeriod": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "d31f59d339b2ed68f5b9398fe8318b17f7fc9dccead5ced39e3d9d07d1c1f0e4",
++        "ru": "972d542877647eefa4e7c8c7e361aebc5baea00792e22c09e89dd2f8f0eb78b0"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "branchLimit": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "75b7b899754e50abbc4b4087668f1b6a34cb73e83128e18382f49db198be7318",
++        "ru": "bd741dcb524ab5321a6df394ae5843de9c1fd91f09c59fa1b707d11e8440eed3"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "organizationLimit": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "4cf9643d52c53af478addce3daee20976fa280f2a104bc8dea899562dd58d058",
++        "ru": "11574d55d96465828d89c33788031a99ce8004839d10c20bf7cd834189f76a50"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "registerLimit": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "08df682b4bf764b5cc5b5bdbf7070f12123086e443e4ebb0b2a6e6f451ae98fc",
++        "ru": "4a5c0f2f717bcd8c223a102740e236851db5ee2e39fa5bc6af73d1a9eb695d1e"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "totalLimit": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "4b08733b27a497b0c3c6af7b9cfd90d5c4d53d56b6fd9f3815e455b15368a920",
++        "ru": "3d1a7abf6f2b3219f584e4bdfae238771ab2007c0968ef43afe5b0776314b6b9"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "staffLimit": {
++      "kind": "claim",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "8196bdd44ee39d7ee3c29445820b052120e1c5ac24957eda84fbe22f9371709e",
++        "ru": "8e6ee7b540284004186cb03145ff6e129bc1615ea5e39ee7193cd53b9d356f1b"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "register": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "baa79db90b9ad43ba3d69f41e7823d3de4ec493279ff028048aa4671da5ae49d",
++        "ru": "9d91b7f27006ee4aff6cde08e41395b56d2fa3f7ffbfaa74e570775ab00d8936"
++      }
++    },
++    "subscriptionConditions": {
++      "kind": "boundary",
++      "groups": [
++        "subscription"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "dfe65c77f07767efcbdbe7bf8912dfceafbe25696fecaf7e24dc3f4631d90661",
++        "ru": "a84ce9a955bbc2e08bba30cbbda14b0a9cedb2046b38069b02c5fccd425e88a7"
++      }
++    },
++    "compatibilityTitle": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "99ed273d7b2d9d95a1389f80252cb53f6dd7505747c02f1b2c67ffb166a0e1a3",
++        "ru": "bcee7e1dd28343ff3cac2254aa75a123a8a5f9b7de28660cf3e3e0a3b5189ccf"
++      }
++    },
++    "browserCompatibility": {
++      "kind": "claim",
++      "groups": [
++        "browserReceipts"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "38eb8d3b455cf91d9d8343a491cea9cd5796044911693a349cfd51a7c80bdab3",
++        "ru": "c1509d2f34af01e477b487e398797809c0d5fff790454fcf88289bf46f98e25a"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "hardwareLimitations": {
++      "kind": "boundary",
++      "groups": [
++        "browserReceipts"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "36f6cb44dd9a2199517cb96f56280c78325df30f4c3a5460c2e2997a99c0594d",
++        "ru": "4da23f040970279843202ed426fa25c6a3e42c1160ed4b53a68fb5df83fb2b7b"
++      }
++    },
++    "integrationLimitations": {
++      "kind": "boundary",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "ffd14f93ff173c03fe602e0bc83f05bc8647cc04ed0ce8b8ab5e3211a5e8dd0d",
++        "ru": "8549595880f911f798edc185e441b5a795f0eb26482803daef7c0ed6f24aa077"
++      }
++    },
++    "helpTitle": {
++      "kind": "neutral",
++      "groups": [],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "8a0aec92a16ecc0c79c54477e1d857c3cfbceb67f9492cd942ce0ed132be0782",
++        "ru": "468a635797d612ab99984ae858743257d9ced24bf788e37269426d1f5e6e55bc"
++      }
++    },
++    "onboardingDescription": {
++      "kind": "claim",
++      "groups": [
++        "onboarding"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "4b28505968ce99377c7f7df3bfac13173295056052d290b9a79afc49921964e2",
++        "ru": "49b25e724cada948760453539d07f1c79b0f4d5f3b094bcd8dcb7dfe7a24f02d"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "onboarding": {
++      "kind": "claim",
++      "groups": [
++        "onboarding"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "74a69adebb9aadf98f0aff69899d03f36388350c6588afa6ca063a29de248ddc",
++        "ru": "59df96d35ad11c16639cc35ab86f5a8903ab62d7e2367fd308c29a750d398919"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "help": {
++      "kind": "claim",
++      "groups": [
++        "onboarding"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "2ae94f5032431ccd860837f6b5ba9a33fc259c8e4c1df2b8d3f3056f5f52080d",
++        "ru": "06655b56cf0bb322f677077e1f76df0ac4ad84fff0101a292513a1d09ca7b9fc"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "footer": {
++      "kind": "claim",
++      "groups": [
++        "subscription",
++        "checkout",
++        "inventory",
++        "reports"
++      ],
++      "surfaces": [
++        "src/components/landing/LandingContent.tsx"
++      ],
++      "textSha256": {
++        "uz": "0d06297b07d5ce9ddfc70922cbd4ae1907874bf15e187627e59f4b382392337b",
++        "ru": "cf9cd13bcf71a490eddeac65b0a3e14482257ea62e3d82a9f46ea9573cca30c9"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "landingTitle": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory",
++        "subscription"
++      ],
++      "surfaces": [
++        "src/app/page.tsx",
++        "src/context/LocaleContext.tsx"
++      ],
++      "textSha256": {
++        "uz": "2f170351754badc4f2f349095dd400bda49eb9c01fc8bb71077e1df8cacf2ef8",
++        "ru": "5cb19124606d03d5b8cf1dbc251eb50d947ca2506d8207fed89f963b88af7683"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "landingDescription": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory",
++        "reports",
++        "subscription"
++      ],
++      "surfaces": [
++        "src/app/page.tsx"
++      ],
++      "textSha256": {
++        "uz": "e2e10a693e3fd7261ae848979e7cfdc2f9023e16c536692a71ccc772c37bdb0b",
++        "ru": "c53bfab8a357d61a2dac94c971b0b8ba31c352013582d2d3a7940c71594e39ea"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "rootTitle": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory"
++      ],
++      "surfaces": [
++        "src/app/layout.tsx",
++        "src/context/LocaleContext.tsx"
++      ],
++      "textSha256": {
++        "uz": "ac5cee3cd9fa3687d514e69628d4f855e14af811152fea90a749133ee31a689f",
++        "ru": "24b918320037a07f2da7afa55f4c6e05729add3056ccb8e75aae830fae2f61ae"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "rootDescription": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory"
++      ],
++      "surfaces": [
++        "src/app/layout.tsx"
++      ],
++      "textSha256": {
++        "uz": "2b6c7cb0c317ce7f56b8d3f593d1eaf61be9eaec422e1c65eb9899573c4cd88b",
++        "ru": "2e92486ef2c30506a5cdde9e764d12ac96a2e585f1de849c6987f571ad4215f1"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    },
++    "manifestDescription": {
++      "kind": "claim",
++      "groups": [
++        "checkout",
++        "inventory"
++      ],
++      "surfaces": [
++        "src/app/manifest.ts"
++      ],
++      "textSha256": {
++        "uz": "6f79cc5327bef05b2b7b68f83ad36923ac25ae20c0f690b82ac97ecb953e4f47",
++        "ru": "29727e73e5b6ffca309885117a65d9cbe83c3c1dbb2365a161daee2d1fe0ece1"
++      },
++      "requiredBoundaries": [
++        "hardwareLimitations",
++        "integrationLimitations",
++        "subscriptionConditions"
++      ]
++    }
++  },
++  "unavailable": [
++    {
++      "id": "click",
++      "notice": "integrationLimitations",
++      "originalIds": [
++        "LOC-03.02"
++      ]
++    },
++    {
++      "id": "fiscal_epos",
++      "notice": "integrationLimitations",
++      "originalIds": [
++        "LOC-01.04",
++        "RELEASE-01.04"
++      ]
++    },
++    {
++      "id": "hardware_models",
++      "notice": "hardwareLimitations",
++      "originalIds": [
++        "RELEASE-01.05"
++      ]
++    },
++    {
++      "id": "provider_offline",
++      "notice": "integrationLimitations",
++      "originalIds": [
++        "OFF-02.06"
++      ]
++    }
++  ],
++  "surfaceSha256": {
++    "src/components/landing/LandingContent.tsx": "b82fdca30124eabb6390972ab31eb245e822f2ca8bb57443f10f85ff443771b8",
++    "src/app/page.tsx": "e22027bd10fa5668cf9207699ebcb41ff58cb8b0d7e3157bcf074c63ff8e5489",
++    "src/app/layout.tsx": "37ff0b8dd2934a40ff35191b5f7beea6f5634194465e4db392dbaf582ac33a63",
++    "src/app/manifest.ts": "11bb57ada6e4e617ac32d20443f0e142f3c43107857de981cfd022e87b2b7423",
++    "src/context/LocaleContext.tsx": "cb25f7bba0d141816c2406ffb04b3d46022db3c4e35cc685bd7282439cbf8797"
++  },
++  "runtimeSha256": {
++    "src/i18n/messages.ts": "548ee22b6d1b7f2be283f9dccd5b24398492c2578de9429ce38ec1cfd199e486",
++    "src/i18n/locale.ts": "d8b5f47edeb1317d2a65de5adab7b868e5a338f80d68de76e1d2d3a0e5e6d6f7",
++    "src/i18n/format.ts": "c673fa684b0455015bfd6004b3462dac4939d3929508c5681727adadeaff0ba3",
++    "src/lib/money.ts": "19ceb74a777c4688b015c7617f483d43265c81c054d67a62f280a4bd9056224b"
++  }
++}
+diff --git a/docs/operations/public-release-claims.md b/docs/operations/public-release-claims.md
+new file mode 100644
+index 0000000..2d7465e
+--- /dev/null
++++ b/docs/operations/public-release-claims.md
+@@ -0,0 +1,46 @@
++# Ommaviy va’dalar va qabul dalillari
++
++`RELEASE-01.12` ommaviy sahifadagi va’dalar ayni nomzod versiyada ishlaydigan imkoniyatga mos bo‘lishini tekshiradi. Bu band real pilot, server yoki production deployment tasdig‘i emas. Ularga tegishli original bandlar va egasining alohida deployment tasdig‘i saqlanadi.
++
++## Qaysi matn tekshiriladi?
++
++`src/release/public-copy.ts` sahifa, navigatsiya, tarif izohlari, footer, HTML metadata, manifest tavsifi va til almashtirilgandagi hujjat sarlavhasining44 ta source-owned matnini belgilaydi. Har kalit mavjud Uz/Ru dictionaryning typed kalitidir. Brend nomi identifikator; administrator kiritgan tarif nomlari va joriy DB qiymatlari foydalanuvchi ma’lumoti sifatida saqlanadi.
++
++`tasks/release/PUBLIC_CLAIMS.json` mijozga yuborilmaydigan review xaritasidir. Har matn `claim`, `boundary` yoki `neutral` sifatida ko‘rib chiqilgan. Yetti imkoniyat guruhi mavjud: savdo/qaytarish/mijoz hisobi, tenant/filial vakolatlari, katalog/ombor/xarid, smena/hisobot, obuna, browser/ichki chek va onboarding. Har guruhda qabul qilingan original PLAN1 IDlari, immutable dalil fayllari va tekshirilgan xizmat/test manbalarining SHA256lari bor.
++
++Oldingi dalillar o‘z doirasi bilan ishlatiladi. Masalan, BIZ-02.07 retention/read-only core dalili butun yopish/o‘chirish bandi qabul qilingan degani emas. Ichki58/80mm browser nusxasi POS-02.09dagi elektron yetkazish tugaganini anglatmaydi. Yangi `public-claims-core-20261015.json`100 ta haqiqiy isolated PostgreSQL holatini, jumladan onboarding va katalog importini alohida qayd qiladi.
++
++## Tarif va mavjudlik
++
++Narx, valyuta, filial/kassa/xodim limiti, trial tarifi va trial/grace kunlari DBning joriy versiyasidan olinadi. Ommaviy configuration cache60 soniya; invoice joriy versiyani alohida tekshiradi. Sahifa narx yangilanishi darhol ko‘rinishini yoki qat’iy abadiy trial muddatini va’da qilmaydi.
++
++Tarif o‘qilishi muvaffaqiyatsiz bo‘lsa, narx kartalari va trial va’dasi chiqarilmaydi; xabar va oddiy ro‘yxatdan o‘tish havolasi ko‘rsatiladi. Faol trial bo‘lmagan konfiguratsiyada ham CTA “Ro‘yxatdan o‘tish” bo‘ladi. Tarif nomi tarjima qilinmaydi va HTML sifatida bajarilmaydi.
++
++Pul `BigInt` va `Intl.formatToParts` bilan ko‘rsatiladi. ICU versiyalari o‘zbekcha minglik ajratgichini har xil tanlashi mumkin; faqat `group` qismlari bir xil bo‘shliqqa normallashtiriladi. SSR, browser va standalone offline ekran shu formatterdan foydalanadi. Minor birliklar, canonical request sonlari va moliyaviy hisoblash o‘zgarmaydi.
++
++## Chegaralar ko‘rinadigan bo‘lishi kerak
++
++Karta/bank yozuvi qo‘lda tasdiqlanishi, chekning fiskal bo‘lmagan browser nusxasi ekanligi, real Click/fiskal/E-POS ulanmaganligi va real hardware modellari tasdiqlanmaganligi ochiq yoziladi. Browser engine testi aniq printer, tarozi yoki boshqa model sertifikati emas. To‘liq offline to‘lov kafolati, cheksiz limit, uydirma mijozlar soni yoki rasmiy tasdiqlanmagan SLA reklama qilinmaydi.
++
++## CI va o‘zgarish tartibi
++
++`npm run release:claims:check` faqat o‘qiydi. U quyidagilarda xato beradi:
++
++- Ro‘yxatsiz matn, dinamik public-copy kaliti yoki yangi ko‘rib chiqilmagan public komponent importi paydo bo‘lsa.
++- Matnning istalgan tildagi review hashi yoki besh public render manbasining fingerprinti o‘zgarsa.
++- Tarjima, locale, pul formatteri yoki exact-money yordamchisining ko‘rib chiqilgan runtime manbasi o‘zgarsa.
++- Va’da qabul qilinmagan original bandga bog‘lansa, dalil yetishmasa yoki hash mos kelmasa.
++- Tegishli iqtisodiy xizmat/test manbasi attested versiyadan o‘zgarsa.
++- Zarur cheklov matni renderdan olib tashlansa yoki eski faol bo‘lmagan marketing dictionary qayta import qilinsa.
++
++Yangi matn qo‘shishda uning ma’nosini, mavjud funksiyani, qabul bandlarini va doirasini review qiling. Typed copy va ikki tarjimani yangilang; mos haqiqiy testni bajaring va yangi dalilni saqlang; keyin review xaritasini aniq yangilang. Eski qabul faylini yangi natijaga moslab qayta yozmang. CI avtomatik “approve/update hashes” qilmaydi. SHA tekshiruvi matnning ma’nosini o‘zi isbotlamaydi: capability mapping va dalil doirasini reviewer tekshiradi.
++
++## Qayta tekshirish
++
++Node unit sinovlari reviewga kiritilmagan va’da, o‘zgargan ruscha matn, qalbaki hash, deferred band, o‘zgargan biznes manbasi va olib tashlangan cheklovni rad etadi. React SSR holatlari null/bo‘sh/no-trial tarif va escape qilingan `Saqlash` nomini tekshiradi.
++
++`public-claims.spec.ts` haqiqiy lokal HTTPS sahifasini ikkala tilda DB qiymatlari, metadata va manifest bilan solishtiradi; generatsiya qilingan `/pwa/format.js` ham uch browser engineda bajariladi. Public-only worker cache v4 yangi formatter assetini oladi; faol kassaga majburiy takeover qilinmaydi, private cache qo‘shilmaydi.
++
++`public-pricing-failure.spec.ts` **alohida fresh test serverida** ishlatiladi: isolated DBdagi `BillingPlan` jadvali transaction locki ostida haqiqiy o‘qish timeoutiga uchraydi. Ikkala tilda taxminiy narx/trial chiqmasligi tekshiriladi; transaction tugashi lockni olib tashlaydi, tariflar o‘zgartirilmaydi. Default Playwright config bu faylni chiqarib tashlaydi; `npm run test:e2e` odatiy cohort tugagach `playwright.pricing-failure.config.ts` orqali yangi server bilan alohida ishga tushiradi. Faqat shu holat uchun buyruq: `npx playwright test --config=playwright.pricing-failure.config.ts`. Uni oldin muvaffaqiyatli public-pricing so‘rovi ishlagan serverga qo‘shmang:60s cache xizmatning to‘g‘ri mavjud xususiyatidir.
++
++Yakuniy versiya, buyruqlar, natijalar va hashlar `tasks/evidence/public-claims-release-20261015.json`da saqlanadi. Faqat local production-mode build va isolated DB sinovlari; real publish yoki deployment bajarilmaydi.
+diff --git a/tasks/evidence/public-claims-core-20261015.json b/tasks/evidence/public-claims-core-20261015.json
+new file mode 100644
+index 0000000..b154871
+--- /dev/null
++++ b/tasks/evidence/public-claims-core-20261015.json
+@@ -0,0 +1,42 @@
++{
++  "task": "RELEASE-01.12",
++  "status": "supporting_core_evidence",
++  "date": "2026-10-15",
++  "head": "047c49ec363ec2b80bd303dc3dedc6297cf18114",
++  "workingTree": true,
++  "postgresCases": 100,
++  "postgresFiles": [
++    "foundation",
++    "catalog-purchase",
++    "catalog-import",
++    "onboarding",
++    "billing",
++    "reports-finance",
++    "receipt-identity"
++  ],
++  "sourceSha256": {
++    "src/server/auth/policy.ts": "ceb7f2be3cfc2e974a8af65e92de990c4b172011c20f8da2e05142f838ed85b3",
++    "src/server/billing/invoices.ts": "de1c6caaebcb37e7016e7cf51b0847e70ad149c7ff0b2578194026466994ecae",
++    "src/server/billing/public-pricing.ts": "e0ec9665ec47c5b7dc462dc9171eee914fef8c4c27a897667a5bbb32bb6e8e0c",
++    "src/server/billing/service.ts": "75628ca8100cb04521b6eb5a707796bf53a21c016cee96c2f648644e840ac44a",
++    "src/server/catalog/imports.ts": "f79f69225a433c4b1976d4ae3fb098ae568156e39185b449600504871d545e07",
++    "src/server/catalog/service.ts": "39a042bdf1c7d76e3934b45a6433c67e0045be8f8e2fba93735439b1e3ccadb8",
++    "src/server/inventory/counts.ts": "38bfc1b70ac2acb1f0c4d54b3eff170444509b1f62887a09c1c2bb7742c18d2f",
++    "src/server/inventory/documents.ts": "20a8e011286ccad10f3b1f35a87c3e285b9fe86ee89f1e99865d8f41adf21acd",
++    "src/server/onboarding/service.ts": "792bb2da2be882d596e787be679c3977d01e2283070e4fb4c58f17d63f9b8c09",
++    "src/server/reports/financial.ts": "5eeafa8ebbe1f86394661b1e96dcba183d4012213c2882efd450eaf8d672df9e",
++    "src/server/returns/service.ts": "12640edb5ae06a685d7f7e228c57f554dcf3d7d624709db2edbd204e1bf9e856",
++    "src/server/sales/service.ts": "8ab5b37c9b1e93aba764416f425cdc4d02aa501941208b9e5f849b021aab3ecc",
++    "tests/billing.integration.test.ts": "1c3e0260a328c452a96311dc6bc15af5f61e554fd1a9a9e71d1131111a069c70",
++    "tests/catalog-import.integration.test.ts": "a54b3d884efb3da00cefcd025db2afc66dfaa2b6001a3131c80ab601494c3379",
++    "tests/catalog-purchase.integration.test.ts": "1128241ae470b2b1db28fb215661e86da66a3bbbbb071af955fd979d013fdc61",
++    "tests/foundation.integration.test.ts": "cc9ffd69ec58b2dec954429682f766c9df5d8e32cb2442266e9fb1d301fa3258",
++    "tests/onboarding.integration.test.ts": "233f674f0c422206580c83ac7ee47dfebc38cb41b7382b2e2c30a0951d600eb7",
++    "tests/receipt-identity.integration.test.ts": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052",
++    "tests/reports-finance.integration.test.ts": "312ec37d220f63262425cc96f872aacb4feddb7c6864be9f508397902c0f80da"
++  },
++  "log": "tasks/evidence/public-claims-20261015/core-pg.log",
++  "logSha256": "940da14fda28726b4f6ed0ef52886458ff3d8c76bbc5426f8e77ab7056e36abf",
++  "command": "DATABASE_URL=<isolated127.0.0.1:55439/pos_test> NODE_ENV=test AUTH_CRITICAL_MFA_REQUIRED=false node --require ./scripts/test-resolver.cjs --test --test-concurrency=1 <seven listed .test-build/tests/*.integration.test.js>",
++  "scope": "Actual local business-service/HTTP rehearsal only. Supports bounded public claims; not whole release, pilot, production, external provider or hardware acceptance."
++}

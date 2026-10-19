@@ -1,0 +1,53 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"a82976fc-cb97-4cbd-8f1c-5882e42fda28","organizationId":"afbf1e4d-c871-41b0-8c5a-e14d90c16257","status":200,"durationMs":40,"event":"api_response"}
+✔ Worker catalog export traverses cursor pages once, preserves exact cost and formula protection, fences duplicates and tenant downloads (4982.666124ms)
+✔ Export filters isolate own active catalogue and revoked source cannot publish an artifact (129.818922ms)
+✔ Late worker audit failure rolls back artifact; same source retries once without publishing a partial file (129.960082ms)
+✔ Expired export erases bytes, preserves metadata/history and refuses download with 410 (74.815101ms)
+✔ PostgreSQL jobs claim with SKIP LOCKED, preserve immutable scoped source, fence a stale lease and heartbeat the current lease (304.00529ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Bounded failure reaches visible dead-letter; manual retry creates fresh authorization once and audit failure has no duplicate effect (342.774742ms)
+✔ Job source/session revocation fails closed; cross-tenant, actual admin/cashier and expiry never scan or expose jobs (230.108955ms)
+✔ A slow real reconciliation receives automatic heartbeat; session revoked during work rolls back all effects (7107.07104ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"1b600c0c-a1d4-4fc3-a2b8-3aee76285a16","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","operationId":"ff05600e-fff6-4dfa-b7e8-2d7b3fe02a81","status":200,"durationMs":47,"event":"api_response"}
+{"requestId":"6d2aef8b-2477-4580-bedd-809af82147a6","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","operationId":"d9b69dfa-6260-4aa9-a9fd-3395cd5ebac6","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"ee494c1a-0712-47cd-8b49-080f70d6b4bf","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","operationId":"6c68e279-8455-4123-ac15-c4f9570ca227","status":200,"durationMs":40,"event":"api_response"}
+{"requestId":"5eac4a7b-0172-4376-89b9-6e95ee8227d2","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","operationId":"ff4a0e87-603b-46e1-b6f7-088061ef4872","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"3fead03a-b3ec-4274-8f4a-fb4b04b73181","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","operationId":"c9b1ba2d-acff-47e8-b06d-db9303081f26","status":200,"durationMs":40,"event":"api_response"}
+{"requestId":"594c2433-fcb5-4ea1-a7e4-2fcca3e81aff","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","status":429,"code":"RATE_LIMITED","durationMs":20,"event":"api_error"}
+{"requestId":"0dedd192-0573-4864-a191-961ebade4926","organizationId":"8c2866fe-d363-415b-a88c-1309559b79d1","status":413,"code":"PAYLOAD_TOO_LARGE","durationMs":13,"event":"api_error"}
+{"requestId":"c431effe-9252-4eb5-b32e-4480e9a4cfe4","organizationId":"efc47d21-4c4f-4cb5-a0d0-a25dbb1fde24","status":400,"code":"VALIDATION_ERROR","durationMs":21,"event":"api_error"}
+✔ Job quota is atomic and original replay bypasses new capacity; API rate/size/strict-kind bounds isolate actors (894.161351ms)
+✔ Planned branch KPI reuses real cash sale/refund accounting and explicitly reports unavailable forecast history (755.847588ms)
+✔ Planned report never accepts another tenant branch/product or a lesser role scope (225.231216ms)
+✔ A delayed through-now occurrence retains its original cutoff and never includes later sales (198.040088ms)
+✔ 1001 selected report rows survive CSV/XLSX/native PDF document in background without foreign/out-of-period rows; exact decimals and artifact fencing (3941.983971ms)
+✔ Every reviewed report uses the existing filtered CSV query for XLSX/print; arbitrary filters and cross-tenant resources cannot publish (548.943394ms)
+✔ Expired report file is unavailable; late audit rollback preserves original-key job retry and publishes only one complete artifact (215.803643ms)
+✔ Malformed native report payload fails closed rather than falling back to an unfiltered catalogue export (70.795586ms)
+✔ Owner configuration is disabled by default choice, idempotent, revision-safe and native-proof protected (247.482818ms)
+✔ Concurrent scheduler/claims publish one private original artifact and full scoped CSV/JSON (220.129141ms)
+✔ Missed-run policy explicitly skips old periods; stopping a grant cancels an already queued original (90.283229ms)
+✔ Late publish audit failure rolls back the result; original retry cannot create a second occurrence (2359.159959ms)
+✔ A real elapsed lease recovers the same original run with a new nonce; stale worker cannot publish (32238.839124ms)
+✔ Persistent owner grant survives logout, but a role revoked during calculation prevents publication (222.489615ms)
+✔ Read-only expiry preserves private exports and stopping grants, while rejecting new configuration (159.621942ms)
+✔ Catch-up records each original period once and a stop fences every remaining queued period (165.251923ms)
+{"requestId":"169d5080-5352-4ad0-aba8-cf4cccb48b16","organizationId":"2d7fe718-b5d2-4f62-9b4a-e5e8244662e7","status":409,"code":"SUBSCRIPTION_EXPIRED","durationMs":55,"event":"api_error"}
+{"requestId":"4977433d-c2a1-4669-97f0-ac7fe39802c5","organizationId":"2d7fe718-b5d2-4f62-9b4a-e5e8244662e7","status":200,"durationMs":31,"event":"api_response"}
+✔ All reviewed business tables have DB guards; root/child CRUD and tenant reassignment cannot bypass read-only (377.393122ms)
+✔ Original committed replay remains available after expiry, but new operation cannot run work and revoked actor cannot replay (105.114223ms)
+✔ Real grace deadline crossed during work rolls back business mutation and terminal operation (2076.077721ms)
+✔ Expired owner exports existing data and renews through audited billing; ordinary business writes then resume without POS cash posting (539.323329ms)
+✔ Expired manual reservation housekeeping remains narrowly allowed while active stock writes remain denied (1228.366705ms)
+✔ Subscription row changed after a Serializable snapshot cannot supply stale write entitlement (69.315866ms)
+✔ Expired owner can cancel only an unposted draft intent; tombstone replay stays actor/hash bound and cannot become a posting (127.19381ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84159.089352

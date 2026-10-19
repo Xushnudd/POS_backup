@@ -1,0 +1,336 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/incident-recovery.spec.ts tests/e2e/tax-form-recovery.spec.ts tests/e2e/product-editor-state.spec.ts tests/e2e/core.spec.ts --grep incident scan and resolution|tax forms protect|product unit and classification drafts|Owner sees durable inventory alert|Sync conflict requires manager terminal proof|Owner consent UI recovers|Configured tax UI|Product classification owner UI|Box conversion owner recovery
+
+[WebServer] (node:111500) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 27 tests using 1 worker
+
+(node:111794) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.2s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (1.9s)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (6.5s)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (2.9s)
+  ✘   5 [chromium] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (838ms)
+(node:112899) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:1254:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (6.5s)
+  ✓   7 [chromium] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (1.4s)
+  ✘   8 [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.2m)
+(node:117295) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [chromium] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (1.3s)
+(node:117461) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [firefox] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (4.2s)
+  ✓  11 [firefox] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.4s)
+  ✓  12 [firefox] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.3s)
+  ✓  13 [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (4.0s)
+  ✘  14 [firefox] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (1.1s)
+(node:119126) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 [firefox] › tests/e2e/core.spec.ts:1254:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (7.2s)
+  ✓  16 [firefox] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.1s)
+  ✘  17 [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.1m)
+(node:122730) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  18 [firefox] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (2.0s)
+(node:123100) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 [webkit] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.5s)
+  ✓  20 [webkit] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (3.1s)
+  ✓  21 [webkit] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.9s)
+  ✓  22 [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (6.8s)
+  ✘  23 [webkit] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (1.6s)
+(node:125105) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  24 [webkit] › tests/e2e/core.spec.ts:1254:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (7.3s)
+  ✓  25 [webkit] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.2s)
+  ✘  26 [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.1m)
+(node:130111) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  27 [webkit] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (2.2s)
+
+
+  1) [chromium] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected substring: "Owner supplied source reference"
+    Error: strict mode violation: getByRole('status') resolved to 4 elements:
+        1) <aside role="status" class="mb-3 border border-amber-500 bg-amber-50 p-3 text-amber-950">…</aside> aka getByRole('status').filter({ hasText: 'Serverning texnik xizmat' })
+        2) <aside role="status" class="mb-4 rounded border p-3">…</aside> aka getByText('Sinov davri faol. Tarif va')
+        3) <p role="status">Saqlanmagan o‘zgarishlar bor.</p> aka getByText('Saqlanmagan o‘zgarishlar bor.')
+        4) <div role="status">…</div> aka getByText('Amalni tekshiringMXIK: Owner')
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 10000ms
+      - waiting for getByRole('status')
+
+
+      1246 |  const shift=await db.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Classification item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}});
+      1247 |  await page.goto(`/products/${product.id}/compliance`);await page.getByLabel('MXIK kodi',{exact:true}).fill('Owner supplied code');await page.getByLabel('MXIK tekshirilgan manbasi',{exact:true}).fill('Owner supplied source reference');await page.getByLabel('MXIK majburiy',{exact:true}).check();await page.getByLabel('Markirovka majburiy',{exact:true}).check();await page.getByLabel('Tasnif o‘zgarishi sababi',{exact:true}).fill('Owner confirmed classification');
+    > 1248 |  await page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true}).click();await expect(page.getByRole('status')).toContainText('Owner supplied source reference');await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect.poll(async()=> (await db.product.findUniqueOrThrow({where:{id:product.id}})).markingRequired).toBe(true);
+           |                                                                                                                                       ^
+      1249 |  await page.reload();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Owner supplied code');await expect(page.getByLabel('Markirovka majburiy',{exact:true})).toBeChecked();
+      1250 |  const draft=(await (await page.request.post('/api/sales',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}})).json()).data;
+      1251 |  const blocked=await page.request.post(`/api/sales/${draft.id}/complete`,{headers:{Origin:'https://localhost:3100'},data:{operationId:randomUUID(),payments:[{paymentType:'cash',amount:100}]}});expect(blocked.status()).toBe(503);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.auditLog.count({where:{entityId:product.id,action:'classification_updated'}})).toBe(1);
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1248:135
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-chromium/error-context.md
+
+    Error Context: test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Asosiy birliklar soni', { exact: true })
+        - locator resolved to <input id="_r_2g_" type="text" value="invalid" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("12")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        138 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      20 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      21 |  await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('Original reviewed box draft')
+    > 22 |  await page.getByLabel('Asosiy birliklar soni',{exact:true}).fill('12')
+         |                                                              ^
+      23 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      24 |  await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('')
+      25 |  await expect(page.getByRole('button',{name:'Nisbatni tanlash',exact:true})).toBeEnabled()
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:22:62
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [firefox] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected substring: "Owner supplied source reference"
+    Error: strict mode violation: getByRole('status') resolved to 4 elements:
+        1) <aside role="status" class="mb-3 border border-amber-500 bg-amber-50 p-3 text-amber-950">…</aside> aka getByRole('status').filter({ hasText: 'Serverning texnik xizmat' })
+        2) <aside role="status" class="mb-4 rounded border p-3">…</aside> aka getByText('Sinov davri faol. Tarif va')
+        ...
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 10000ms
+      - waiting for getByRole('status')
+
+
+      1246 |  const shift=await db.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Classification item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}});
+      1247 |  await page.goto(`/products/${product.id}/compliance`);await page.getByLabel('MXIK kodi',{exact:true}).fill('Owner supplied code');await page.getByLabel('MXIK tekshirilgan manbasi',{exact:true}).fill('Owner supplied source reference');await page.getByLabel('MXIK majburiy',{exact:true}).check();await page.getByLabel('Markirovka majburiy',{exact:true}).check();await page.getByLabel('Tasnif o‘zgarishi sababi',{exact:true}).fill('Owner confirmed classification');
+    > 1248 |  await page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Amalni tekshiring'})).toContainText('Owner supplied source reference');await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect.poll(async()=> (await db.product.findUniqueOrThrow({where:{id:product.id}})).markingRequired).toBe(true);
+           |                                                                                                                                       ^
+      1249 |  await page.reload();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Owner supplied code');await expect(page.getByLabel('Markirovka majburiy',{exact:true})).toBeChecked();
+      1250 |  const draft=(await (await page.request.post('/api/sales',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}})).json()).data;
+      1251 |  const blocked=await page.request.post(`/api/sales/${draft.id}/complete`,{headers:{Origin:'https://localhost:3100'},data:{operationId:randomUUID(),payments:[{paymentType:'cash',amount:100}]}});expect(blocked.status()).toBe(503);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.auditLog.count({where:{entityId:product.id,action:'classification_updated'}})).toBe(1);
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1248:135
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-firefox/error-context.md
+
+    Error Context: test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Asosiy birliklar soni', { exact: true })
+        - locator resolved to <input id="_r_2g_" type="text" value="invalid" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("12")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        124 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      20 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      21 |  await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('Original reviewed box draft')
+    > 22 |  await page.getByLabel('Asosiy birliklar soni',{exact:true}).fill('12')
+         |                                                              ^
+      23 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      24 |  await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('')
+      25 |  await expect(page.getByRole('button',{name:'Nisbatni tanlash',exact:true})).toBeEnabled()
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:22:62
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [webkit] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('status')
+    Expected substring: "Owner supplied source reference"
+    Error: strict mode violation: getByRole('status') resolved to 4 elements:
+        1) <aside role="status" class="mb-3 border border-amber-500 bg-amber-50 p-3 text-amber-950">…</aside> aka getByRole('status').filter({ hasText: 'Serverning texnik xizmat' })
+        2) <aside role="status" class="mb-4 rounded border p-3">…</aside> aka getByText('Sinov davri faol. Tarif va')
+        3) <p role="status">Saqlanmagan o‘zgarishlar bor.</p> aka getByText('Saqlanmagan o‘zgarishlar bor.')
+        4) <div role="status">…</div> aka getByText('Amalni tekshiringMXIK: Owner')
+
+    Call log:
+      - Expect "toContainText" getByRole('status') with timeout 10000ms
+      - waiting for getByRole('status')
+
+
+      1246 |  const shift=await db.shift.create({data:{registerId:register.id,organizationUserId:member.id,openingCash:0}}),product=await db.product.create({data:{organizationId:me.organization.id,name:'Classification item',sku:randomUUID(),barcode:randomUUID(),unit:'dona',salePrice:100,costPrice:40}});await db.inventoryBalance.create({data:{storeId:store.id,productId:product.id,quantity:2}});
+      1247 |  await page.goto(`/products/${product.id}/compliance`);await page.getByLabel('MXIK kodi',{exact:true}).fill('Owner supplied code');await page.getByLabel('MXIK tekshirilgan manbasi',{exact:true}).fill('Owner supplied source reference');await page.getByLabel('MXIK majburiy',{exact:true}).check();await page.getByLabel('Markirovka majburiy',{exact:true}).check();await page.getByLabel('Tasnif o‘zgarishi sababi',{exact:true}).fill('Owner confirmed classification');
+    > 1248 |  await page.getByRole('button',{name:'Tasnifni saqlash: oldindan ko‘rish',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Amalni tekshiring'})).toContainText('Owner supplied source reference');await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect.poll(async()=> (await db.product.findUniqueOrThrow({where:{id:product.id}})).markingRequired).toBe(true);
+           |                                                                                                                                       ^
+      1249 |  await page.reload();await expect(page.getByLabel('MXIK kodi',{exact:true})).toHaveValue('Owner supplied code');await expect(page.getByLabel('Markirovka majburiy',{exact:true})).toBeChecked();
+      1250 |  const draft=(await (await page.request.post('/api/sales',{headers:{Origin:'https://localhost:3100'},data:{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,operationId:randomUUID(),items:[{productId:product.id,quantity:1}]}})).json()).data;
+      1251 |  const blocked=await page.request.post(`/api/sales/${draft.id}/complete`,{headers:{Origin:'https://localhost:3100'},data:{operationId:randomUUID(),payments:[{paymentType:'cash',amount:100}]}});expect(blocked.status()).toBe(503);expect(await db.payment.count({where:{saleId:draft.id}})).toBe(0);expect(await db.auditLog.count({where:{entityId:product.id,action:'classification_updated'}})).toBe(1);
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1248:135
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-webkit/error-context.md
+
+    Error Context: test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Product-classificatio-46abf-rejects-unavailable-marking-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Asosiy birliklar soni', { exact: true })
+        - locator resolved to <input id="_r_2g_" type="text" value="invalid" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("12")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        125 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      20 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      21 |  await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('Original reviewed box draft')
+    > 22 |  await page.getByLabel('Asosiy birliklar soni',{exact:true}).fill('12')
+         |                                                              ^
+      23 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      24 |  await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('')
+      25 |  await expect(page.getByRole('button',{name:'Nisbatni tanlash',exact:true})).toBeEnabled()
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:22:62
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6 failed
+    [chromium] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking 
+    [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+    [firefox] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking 
+    [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+    [webkit] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking 
+    [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+  21 passed (5.4m)

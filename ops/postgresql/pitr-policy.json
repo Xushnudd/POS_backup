@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "retentionDays": 30,
+  "baseBackupIntervalHours": 24,
+  "archiveTimeoutSeconds": 60,
+  "automaticDeletion": false,
+  "walRetention": "all-from-oldest-retained-base-start-including-boundary-backup",
+  "repositoryDirectoryMode": "0700",
+  "repositoryFileMode": "0600",
+  "recoveryTargetAction": "pause",
+  "notes": "Technical backup window only; financial/legal retention is separate. Plan only: no automatic irreversible deletion. Production encrypted off-host storage and operator deployment require separate acceptance."
+}

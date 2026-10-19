@@ -1,0 +1,64 @@
+import {parseListQuery,purchaseReportSorts} from '@/lib/list-query'
+import {NextResponse} from "next/server"
+import {Prisma} from "@prisma/client"
+import {z} from "zod"
+import {prisma} from "@/lib/prisma"
+import {AccessError} from "@/server/auth/policy"
+import {assertLiveContext} from "@/server/operations"
+import {dateRange} from "@/server/reports/dates"
+import {pagination,exporting,exportCap} from "@/server/catalog/queries"
+import {csv,numeric} from "@/server/exports/csv"
+import type {NextRequest} from 'next/server'
+import type {TokenPayload} from '@/lib/auth'
+// Shared authorized query. HTTP authentication remains in the route wrapper.
+export async function queryReportsPurchases(context:TokenPayload,request:NextRequest) {
+ if(context.role==='cashier')throw new AccessError(403,'FORBIDDEN')
+ const q=request.nextUrl.searchParams,view=z.enum(['history','comparison']).parse(q.get('view')??'history')
+ let parsed;try{parsed=parseListQuery(q,purchaseReportSorts,'default')}catch(error){throw new AccessError(400,error instanceof Error?error.message:'INVALID_FILTER')}
+ const {page,limit,skip,sort,search}=parsed,isExport=await exporting(q,context,'purchase.report.export')
+ const result=await prisma.$transaction(async tx=>{
+  await assertLiveContext(tx,context)
+  const org=await tx.organization.findUniqueOrThrow({where:{id:context.organizationId},select:{timezone:true,currencyCode:true}})
+  const range=dateRange(q.get('from'),q.get('to'),org.timezone),supplierId=q.get('supplierId'),productId=q.get('productId'),storeId=q.get('storeId')
+  const supplied=q.get('asOf'),asOf=supplied?new Date(z.iso.datetime({offset:true}).parse(supplied)):new Date()
+  if(asOf.getTime()>Date.now())throw new AccessError(400,'INVALID_REPORT_CUTOFF')
+  const scope=context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND d."storeId" IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`
+  const cte=Prisma.sql`WITH history_source AS (
+   SELECT i.id AS "lineId",d.id AS "documentId",d."documentNo",d."documentType",d."reversalOfId",d."supplierId",s.name AS "supplierName",d."storeId",st.name AS "storeName",i."productId",p.name AS "productName",p.unit,
+   COALESCE(d."confirmedAt",d."createdAt") AS "eventAt",(d."confirmedAt" IS NULL) AS "legacyDate",i.quantity,i."unitCost",ROUND(i.quantity*i."unitCost",2) AS value
+   FROM "StockDocument" d JOIN "StockDocumentItem" i ON i."stockDocumentId"=d.id JOIN "Product" p ON p.id=i."productId" JOIN "Store" st ON st.id=d."storeId" LEFT JOIN "Supplier" s ON s.id=d."supplierId"
+   WHERE d."organizationId"=${context.organizationId} AND d.status='confirmed' ${scope}
+   AND (d."documentType"='purchase' OR (d."documentType"='reversal' AND EXISTS(SELECT 1 FROM "StockDocument" original WHERE original.id=d."reversalOfId" AND original."organizationId"=${context.organizationId} AND original."documentType"='purchase')))
+   AND d."createdAt"<=${asOf} AND COALESCE(d."confirmedAt",d."createdAt")<=${asOf}
+   ${range.gte?Prisma.sql`AND COALESCE(d."confirmedAt",d."createdAt")>=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND COALESCE(d."confirmedAt",d."createdAt")<${range.lt}`:Prisma.empty}
+   ${supplierId?Prisma.sql`AND d."supplierId"=${supplierId}`:Prisma.empty} ${productId?Prisma.sql`AND i."productId"=${productId}`:Prisma.empty} ${storeId?Prisma.sql`AND d."storeId"=${storeId}`:Prisma.empty}
+   UNION ALL
+   SELECT ci.id,c.id AS "documentId",'CREDIT-'||c.id AS "documentNo",CASE WHEN c.kind='goods_return' THEN 'supplier_return' ELSE 'supplier_price_correction' END AS "documentType",d.id AS "reversalOfId",d."supplierId",s.name AS "supplierName",d."storeId",st.name AS "storeName",si."productId",p.name AS "productName",p.unit,c."createdAt" AS "eventAt",false AS "legacyDate",-ci.quantity AS quantity,si."unitCost",-ci.amount AS value
+   FROM "SupplierCredit" c JOIN "SupplierCreditItem" ci ON ci."creditId"=c.id JOIN "SupplierInvoice" inv ON inv.id=c."invoiceId" JOIN "StockDocument" d ON d.id=inv."stockDocumentId" JOIN "StockDocumentItem" si ON si.id=ci."stockDocumentItemId" JOIN "Product" p ON p.id=si."productId" JOIN "Store" st ON st.id=d."storeId" LEFT JOIN "Supplier" s ON s.id=d."supplierId"
+   WHERE d."organizationId"=${context.organizationId} ${scope} AND c."createdAt"<=${asOf}
+   ${range.gte?Prisma.sql`AND c."createdAt">=${range.gte}`:Prisma.empty} ${range.lt?Prisma.sql`AND c."createdAt"<${range.lt}`:Prisma.empty}
+   ${supplierId?Prisma.sql`AND d."supplierId"=${supplierId}`:Prisma.empty} ${productId?Prisma.sql`AND si."productId"=${productId}`:Prisma.empty} ${storeId?Prisma.sql`AND d."storeId"=${storeId}`:Prisma.empty}
+
+  ), history AS (SELECT * FROM history_source ${search?Prisma.sql`WHERE ("productName" ILIKE ${'%'+search+'%'} OR "supplierName" ILIKE ${'%'+search+'%'} OR "documentNo" ILIKE ${'%'+search+'%'})`:Prisma.empty})`
+  const selected=view==='history'?Prisma.sql`SELECT * FROM history`:Prisma.sql`SELECT "productId","productName",unit,"supplierId","supplierName",
+   COALESCE(SUM(quantity) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseQuantity",-COALESCE(SUM(quantity) FILTER(WHERE "documentType"<>'purchase'),0) AS "reversedQuantity",SUM(quantity) AS "netQuantity",
+   MIN("unitCost") FILTER(WHERE "documentType"='purchase') AS "minPrice",MAX("unitCost") FILTER(WHERE "documentType"='purchase') AS "maxPrice",
+   ROUND(SUM(quantity*"unitCost") FILTER(WHERE "documentType"='purchase')/NULLIF(SUM(quantity) FILTER(WHERE "documentType"='purchase'),0),6) AS "averagePrice",
+   (ARRAY_AGG("unitCost" ORDER BY "eventAt","lineId") FILTER(WHERE "documentType"='purchase'))[1] AS "firstPrice",(ARRAY_AGG("unitCost" ORDER BY "eventAt" DESC,"lineId" DESC) FILTER(WHERE "documentType"='purchase'))[1] AS "latestPrice",
+   COALESCE(SUM(value) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseValue",-COALESCE(SUM(value) FILTER(WHERE "documentType"<>'purchase'),0) AS "reversalValue",SUM(value) AS "netPurchaseValue"
+   FROM history GROUP BY "productId","productName",unit,"supplierId","supplierName"`
+  const [count]=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`${cte} SELECT COUNT(*) AS count FROM (${selected}) result`),total=Number(count.count)
+  if(isExport)exportCap(total)
+  const primary=sort==='name_asc'?Prisma.sql`r."productName" ASC`:sort==='name_desc'?Prisma.sql`r."productName" DESC`:sort==='value_asc'?(view==='history'?Prisma.sql`r.value ASC`:Prisma.sql`r."netPurchaseValue" ASC`):sort==='value_desc'?(view==='history'?Prisma.sql`r.value DESC`:Prisma.sql`r."netPurchaseValue" DESC`):(view==='history'?Prisma.sql`r."eventAt" DESC`:Prisma.sql`r."productId" ASC`);
+  const tie=view==='history'?Prisma.sql`r."lineId" DESC`:Prisma.sql`r."productId",r."supplierId" NULLS FIRST`;
+  const rows=await tx.$queryRaw<Record<string,unknown>[]>(Prisma.sql`${cte} SELECT * FROM (${selected}) r ORDER BY ${primary},${tie} ${isExport?Prisma.empty:Prisma.sql`LIMIT ${limit} OFFSET ${skip}`}`);
+  const [summary]=await tx.$queryRaw<{purchaseValue:Prisma.Decimal;reversalValue:Prisma.Decimal;netPurchaseValue:Prisma.Decimal}[]>(Prisma.sql`${cte} SELECT COALESCE(SUM(value) FILTER(WHERE "documentType"='purchase'),0) AS "purchaseValue",-COALESCE(SUM(value) FILTER(WHERE "documentType"<>'purchase'),0) AS "reversalValue",COALESCE(SUM(value),0) AS "netPurchaseValue" FROM history`)
+  const meta={asOf:asOf.toISOString(),timezone:org.timezone,currency:org.currencyCode,basis:'confirmation_event_with_explicit_legacy_created_at',names:'current_catalog',view,search,sort}
+  if(isExport){
+   const columns=view==='history'?['lineId','documentId','documentNo','documentType','reversalOfId','eventAt','legacyDate','storeId','storeName','supplierId','supplierName','productId','productName','unit','quantity','unitCost','value']:['productId','productName','unit','supplierId','supplierName','purchaseQuantity','reversedQuantity','netQuantity','minPrice','maxPrice','averagePrice','firstPrice','latestPrice','purchaseValue','reversalValue','netPurchaseValue']
+   return {success:true,data:{filename:'purchase-'+view+'.csv',content:csv([columns,...rows.map(row=>columns.map(key=>{const value=row[key];return value instanceof Prisma.Decimal?numeric(value,key.endsWith('Value')||key==='value'?2:6):value instanceof Date?value.toISOString():value}))]),summary,meta}}
+  }
+  return {success:true,data:{rows,summary,meta},pagination:pagination(page,limit,total)}
+ },{isolationLevel:'RepeatableRead',timeout:15000})
+ return NextResponse.json(result)
+}

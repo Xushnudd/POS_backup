@@ -1,0 +1,1 @@
+PASS: encrypted restore, migration, actual image rollback/forward, exact retries, external-process outage and real disk alerts. Evidence: /home/fedora/Developments/POS_backup/tasks/evidence/release-images-20261016.json

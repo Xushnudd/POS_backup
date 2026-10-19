@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-16T08:42:30.013Z",
+  "scope": "local_native_and_oci_synthetic_process_drill",
+  "node": "v24.21.0",
+  "engine": "podman",
+  "imageId": "7194bd8c9d0c52313549c2eed24e62fa71ba150d7b87de4d40630d80ca4dc235",
+  "native": "pass",
+  "container": "pass",
+  "independentDuringSyntheticOutage": true,
+  "nonRoot": true,
+  "readOnly": true,
+  "healthcheck": "pass",
+  "events": [
+    {
+      "at": "2026-10-16T08:42:29.535Z",
+      "phase": "investigating",
+      "message": "Sintetik xizmat to‘xtatildi; holat sahifasi tekshirilmoqda."
+    },
+    {
+      "at": "2026-10-16T08:42:29.549Z",
+      "phase": "identified",
+      "message": "Sabab: mashq davomida alohida test jarayoniga SIGTERM yuborildi."
+    },
+    {
+      "at": "2026-10-16T08:42:29.672Z",
+      "phase": "monitoring",
+      "message": "Test jarayoni qayta ishga tushdi; HTTP javobi tekshirildi."
+    },
+    {
+      "at": "2026-10-16T08:42:29.678Z",
+      "phase": "resolved",
+      "message": "Sintetik xizmat qayta ochildi. Real POS yoki hosting sinovi emas."
+    }
+  ],
+  "sources": {
+    "ops/status/server.mjs": "709aed120c8f4d5323c81c133a8f1a1ddb201713ed9232823af88683727d6f82",
+    "ops/status/status.mjs": "eff8ff551d75df7e7bf5cc4c19d25e2917db7f5c0bbd754fecde42d0b3b71ace",
+    "ops/status/Dockerfile": "9d30bb8aacb6a0862f34ec85bb2efbe9bbd561cc9e009959a4ffad0428ddafe2",
+    "ops/status/style.css": "feb8a7a84f78a8bda3dc0423a10d4decb12fc9333c20d2a802a17e765d439720",
+    "docker-compose.status.yml": "f8d018e991fae94ac81d35eaa2379f020008aedd5ca07125df0222cd6710ed5c",
+    "scripts/status/drill.mjs": "df027d75e3382178f27309445aeb678135a319d5f04bf8a275e75bee04dd0a4d",
+    "scripts/status/status.test.mjs": "3956c0fc822b11cbf16674be1e152fc4104c51469cb4fceca6845b5cfab95306"
+  },
+  "limits": [
+    "No actual remote hosting/domain/TLS or real POS outage.",
+    "Linux Node24 and Podman tested; Windows/macOS and Docker Engine not executed.",
+    "No business data or existing done feature tested or changed."
+  ]
+}

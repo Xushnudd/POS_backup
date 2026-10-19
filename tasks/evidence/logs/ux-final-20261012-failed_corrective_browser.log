@@ -1,0 +1,174 @@
+[WebServer] (node:790158) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 30 tests using 1 worker
+
+(node:790211) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (1.7s)
+  ✓   2 [chromium] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (1.2s)
+  ✓   3 [chromium] › tests/e2e/billing.spec.ts:8:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (1.5s)
+  ✓   4 [chromium] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (17.3s)
+  ✓   5 [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (2.0s)
+  ✓   6 [chromium] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (860ms)
+  ✓   7 [chromium] › tests/e2e/roles-state.spec.ts:37:5 › Unknown role and assignment acknowledgements retain independent immutable keys and replay once with real MFA (2.5s)
+  ✘   8 [chromium] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result (687ms)
+(node:791882) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [chromium] › tests/e2e/roles-state.spec.ts:123:5 › Acknowledged role save remains saved when only the following list refresh fails (1.5s)
+  ✓  10 [chromium] › tests/e2e/roles-state.spec.ts:140:5 › Failed role metadata refresh retains raw editor but blocks new role writes (878ms)
+(node:792098) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [firefox] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.6s)
+  ✓  12 [firefox] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (1.5s)
+  ✓  13 [firefox] › tests/e2e/billing.spec.ts:8:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.0s)
+  ✓  14 [firefox] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (13.9s)
+  ✓  15 [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (2.9s)
+  ✓  16 [firefox] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (1.1s)
+  ✓  17 [firefox] › tests/e2e/roles-state.spec.ts:37:5 › Unknown role and assignment acknowledgements retain independent immutable keys and replay once with real MFA (3.2s)
+  ✘  18 [firefox] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result (791ms)
+(node:793350) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 [firefox] › tests/e2e/roles-state.spec.ts:123:5 › Acknowledged role save remains saved when only the following list refresh fails (2.3s)
+  ✓  20 [firefox] › tests/e2e/roles-state.spec.ts:140:5 › Failed role metadata refresh retains raw editor but blocks new role writes (1.2s)
+(node:793742) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  21 [webkit] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.3s)
+  ✓  22 [webkit] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (2.1s)
+  ✓  23 [webkit] › tests/e2e/billing.spec.ts:8:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.5s)
+  ✓  24 [webkit] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (9.5s)
+  ✓  25 [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (3.3s)
+  ✓  26 [webkit] › tests/e2e/product-editor-state.spec.ts:46:5 › Barcode metadata failure keeps alias draft and blocks new commands until retry (1.5s)
+  ✓  27 [webkit] › tests/e2e/roles-state.spec.ts:37:5 › Unknown role and assignment acknowledgements retain independent immutable keys and replay once with real MFA (3.7s)
+  ✘  28 [webkit] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result (1.3s)
+(node:795444) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  29 [webkit] › tests/e2e/roles-state.spec.ts:123:5 › Acknowledged role save remains saved when only the following list refresh fails (2.3s)
+  ✓  30 [webkit] › tests/e2e/roles-state.spec.ts:140:5 › Failed role metadata refresh retains raw editor but blocks new role writes (1.7s)
+
+
+  1) [chromium] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+    Expected: visible
+    Error: strict mode violation: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) resolved to 2 elements:
+        1) <p role="alert">Fixture role list unavailable Asl natijani tekshi…</p> aka getByText('Fixture role list unavailable').first()
+        2) <p role="alert">Fixture role list unavailable Asl natijani tekshi…</p> aka getByText('Fixture role list unavailable').nth(1)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+
+
+       98 |  await page.route('**/api/roles?**',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'INTERNAL_ERROR',message:'Fixture role list unavailable'}})}));
+       99 |  await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+    > 100 |  await expect(page.getByRole('alert').filter({hasText:'Fixture role list unavailable'})).toBeVisible();
+          |                                                                                          ^
+      101 |  await page.unroute('**/api/roles?**');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+      102 |  await page.getByRole('button',{name:'Tahrirlash',exact:true}).click();
+      103 |  await page.getByLabel('GET /api/products',{exact:true}).uncheck();await page.getByLabel('GET /api/products',{exact:true}).check();
+        at /home/fedora/Developments/POS_backup/tests/e2e/roles-state.spec.ts:100:90
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/error-context.md
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+    Expected: visible
+    Error: strict mode violation: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) resolved to 2 elements:
+        1) <p role="alert">Fixture role list unavailable Asl natijani tekshi…</p> aka getByText('Fixture role list unavailable').first()
+        2) <p role="alert">Fixture role list unavailable Asl natijani tekshi…</p> aka getByText('Fixture role list unavailable').nth(1)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+
+
+       98 |  await page.route('**/api/roles?**',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'INTERNAL_ERROR',message:'Fixture role list unavailable'}})}));
+       99 |  await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+    > 100 |  await expect(page.getByRole('alert').filter({hasText:'Fixture role list unavailable'})).toBeVisible();
+          |                                                                                          ^
+      101 |  await page.unroute('**/api/roles?**');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+      102 |  await page.getByRole('button',{name:'Tahrirlash',exact:true}).click();
+      103 |  await page.getByLabel('GET /api/products',{exact:true}).uncheck();await page.getByLabel('GET /api/products',{exact:true}).check();
+        at /home/fedora/Developments/POS_backup/tests/e2e/roles-state.spec.ts:100:90
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-firefox/error-context.md
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+    Expected: visible
+    Error: strict mode violation: getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) resolved to 2 elements:
+        1) <p role="alert">Fixture role list unavailable Asl natijani tekshi…</p> aka getByText('Fixture role list unavailable').first()
+        2) <p role="alert">Fixture role list unavailable Asl natijani tekshi…</p> aka getByText('Fixture role list unavailable').nth(1)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Fixture role list unavailable' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Fixture role list unavailable' })
+
+
+       98 |  await page.route('**/api/roles?**',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({success:false,error:{code:'INTERNAL_ERROR',message:'Fixture role list unavailable'}})}));
+       99 |  await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+    > 100 |  await expect(page.getByRole('alert').filter({hasText:'Fixture role list unavailable'})).toBeVisible();
+          |                                                                                          ^
+      101 |  await page.unroute('**/api/roles?**');await page.getByRole('button',{name:'Rollarni yuklash',exact:true}).click();
+      102 |  await page.getByRole('button',{name:'Tahrirlash',exact:true}).click();
+      103 |  await page.getByLabel('GET /api/products',{exact:true}).uncheck();await page.getByLabel('GET /api/products',{exact:true}).check();
+        at /home/fedora/Developments/POS_backup/tests/e2e/roles-state.spec.ts:100:90
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-webkit/error-context.md
+
+    Error Context: test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/roles-state-Role-editor-pr-ad118-thout-a-fake-pending-result-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+    [firefox] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+    [webkit] › tests/e2e/roles-state.spec.ts:95:5 › Role editor preserves discarded drafts and a known revision conflict remains editable without a fake pending result 
+  27 passed (1.6m)

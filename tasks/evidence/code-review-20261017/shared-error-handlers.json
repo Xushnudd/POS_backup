@@ -1,0 +1,101 @@
+{
+  "scope": "Only existing catch(error) generic500 fallbacks forward to withApi; explicit business/validation errors retained",
+  "changes": [
+    {
+      "file": "src/app/api/auth/login/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/auth/me/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/categories/[id]/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/categories/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/customers/[id]/debt/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/customers/[id]/route.ts",
+      "replacedCatchFallbacks": 3
+    },
+    {
+      "file": "src/app/api/customers/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/organizations/[id]/users/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/payments/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/products/[id]/route.ts",
+      "replacedCatchFallbacks": 3
+    },
+    {
+      "file": "src/app/api/products/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/registers/[id]/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/sales/[id]/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/sales/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/shifts/[id]/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/shifts/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/stock-documents/[id]/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/stock-documents/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/stores/[id]/registers/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/stores/[id]/route.ts",
+      "replacedCatchFallbacks": 3
+    },
+    {
+      "file": "src/app/api/stores/route.ts",
+      "replacedCatchFallbacks": 2
+    },
+    {
+      "file": "src/app/api/suppliers/[id]/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/suppliers/route.ts",
+      "replacedCatchFallbacks": 1
+    },
+    {
+      "file": "src/app/api/transfers/route.ts",
+      "replacedCatchFallbacks": 1
+    }
+  ]
+}

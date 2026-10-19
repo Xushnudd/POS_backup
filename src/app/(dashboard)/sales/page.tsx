@@ -1,12 +1,22 @@
 'use client';
+import Link from 'next/link';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import {useTranslation} from '@/context/LocaleContext';
+
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import {useSearchParams} from 'next/navigation';
+import {parseSalesListQuery} from '@/lib/sales-list-query';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import Pagination from '@/components/ui/Pagination';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
 import { api } from '@/lib/api';
 import { Sale } from '@/types';
-import { formatMoney, formatDate } from '@/lib/format';
+
+import DataTable from '@/components/ui/DataTable';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -21,31 +31,65 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function SalesPage() {
-  const { organization } = useAuth();
+ const {t:tr}=useTranslation();
+
+  const {organization,user,role}=useAuth();
+  const {activeStore}=useOrganization();
+  return <Suspense fallback={<LoadingSpinner text={tr("Savdolar yuklanmoqda...")} />}>
+    <SalesJournal key={[organization?.id,user?.id,role,activeStore?.id].join(':')} />
+  </Suspense>;
+}
+
+function SalesJournal() {
+ const {message:uiMessage}=useTranslation();
+
+ const {formatDate,formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
+  const { organization,role } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
   const [sales, setSales] = useState<Sale[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const params=useSearchParams();
+  let query:ReturnType<typeof parseSalesListQuery>|undefined;
+  try {query=parseSalesListQuery(params);} catch { /* Render an explicit invalid-filter state below. */ }
+  const selectedStatus=query?.status??'',page=query?.page??1;
+  const search=query?.search??'',sort=query?.sort??'newest',limit=query?.limit??20;
+  const invalidQuery=!query;
+  const changeQuery=useCallback((changes:Record<string,string>)=>{
+    const next=new URLSearchParams(params.toString());
+    for(const [key,value] of Object.entries(changes)){
+      if(value)next.set(key,value);else next.delete(key);
+    }
+    window.history.pushState(null,'',window.location.pathname+(next.size?'?'+next.toString():'')+window.location.hash);
+  },[params]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [loadError,setLoadError]=useState('');
+  const requestSequence=useRef({value:0});
+  const organizationId=organization?.id,storeId=activeStore?.id;
 
   // Selected sale for receipt preview
   const [previewSale, setPreviewSale] = useState<Sale | null>(null);
 
   const loadSales = useCallback(async () => {
-    if (!organization?.id) return;
+    if (!organizationId || invalidQuery) return;
+    const sequence=++requestSequence.current.value;
     setIsLoading(true);
+    setLoadError('');
     try {
       const res = await api.sales.list({
-        organizationId: organization.id,
-        storeId: activeStore?.id,
+        organizationId,
+        storeId,
         status: selectedStatus || undefined,
         page,
-        limit: 20,
+        limit,search,sort,
       });
 
+      if(sequence!==requestSequence.current.value)return;
+      if(!res.data)throw new Error('Savdolar natijasi mavjud emas');
       if (res.data) {
         setSales(res.data);
         if (res.pagination) {
@@ -53,14 +97,16 @@ export default function SalesPage() {
         }
       }
     } catch (err: unknown) {
-      console.error('Error loading sales:', err);
+      if(sequence===requestSequence.current.value){setSales([]);setLoadError(displayErrorMessage(err,'Savdolarni yuklab bo‘lmadi'));}
     } finally {
-      setIsLoading(false);
+      if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization, activeStore, selectedStatus, page]);
+  }, [organizationId, storeId, selectedStatus, page, limit, search, sort, invalidQuery]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadSales);
+    const sequence=requestSequence.current;let cancelled=false;
+    void Promise.resolve().then(()=>{if(!cancelled)return loadSales();});
+    return ()=>{cancelled=true;sequence.value++;};
   }, [loadSales]);
 
   const handleVoidSale = async (saleId: string) => {
@@ -71,21 +117,21 @@ export default function SalesPage() {
       notifySuccess('Savdo muvaffaqiyatli bekor qilindi');
       loadSales();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Savdoni bekor qilishda xatolik');
+      notifyError(displayErrorMessage(err,'Savdoni bekor qilishda xatolik'));
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="success" size="sm">Yakunlangan</Badge>;
+        return <Badge variant="success" size="sm">{tr("Yakunlangan")}</Badge>;
       case 'draft':
-        return <Badge variant="warning" size="sm">Qoralama</Badge>;
+        return <Badge variant="warning" size="sm">{tr("Qoralama")}</Badge>;
       case 'voided':
-        return <Badge variant="danger" size="sm">Bekor qilingan</Badge>;
+        return <Badge variant="danger" size="sm">{tr("Bekor qilingan")}</Badge>;
       case 'partially_returned':
       case 'returned':
-        return <Badge variant="purple" size="sm">Qaytarilgan</Badge>;
+        return <Badge variant="purple" size="sm">{tr("Qaytarilgan")}</Badge>;
       default:
         return <Badge variant="neutral" size="sm">{status}</Badge>;
     }
@@ -97,11 +143,9 @@ export default function SalesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Savdolar jurnali
-          </h1>
+            {tr("Savdolar jurnali")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Barcha amalga oshirilgan va qoralama savdolar tarixi va cheklar
-          </p>
+            {tr("Barcha amalga oshirilgan va qoralama savdolar tarixi va cheklar")}</p>
         </div>
 
         <Button
@@ -109,24 +153,22 @@ export default function SalesPage() {
           onClick={loadSales}
           leftIcon={<FontAwesomeIcon icon={faRotateLeft} />}
         >
-          Yangilash
-        </Button>
+          {tr("Yangilash")}</Button>
       </div>
 
       {/* Filter Tabs */}
       <Card padding={false} className="p-3">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
           {[
-            { id: '', label: 'Barcha savdolar' },
-            { id: 'completed', label: 'Yakunlangan' },
-            { id: 'draft', label: 'Qoralama' },
-            { id: 'voided', label: 'Bekor qilingan' },
+            { id: '', label: tr("Barcha savdolar") },
+            { id: 'completed', label: tr("Yakunlangan") },
+            { id: 'draft', label: tr("Qoralama") },
+            { id: 'voided', label: tr("Bekor qilingan") },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => {
-                setSelectedStatus(tab.id);
-                setPage(1);
+                changeQuery({status:tab.id,page:'1'});
               }}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                 selectedStatus === tab.id
@@ -138,32 +180,46 @@ export default function SalesPage() {
             </button>
           ))}
         </div>
+        <form key={search} className="mt-3 flex flex-wrap items-end gap-3" onSubmit={event=>{
+          event.preventDefault();const data=new FormData(event.currentTarget);
+          changeQuery({search:String(data.get('search')??'').trim(),page:'1'});
+        }}>
+          <Input name="search" label={tr("Chek yoki mijoz qidirish")} defaultValue={search} maxLength={200} />
+          <Button type="submit" disabled={isLoading&&!invalidQuery}>{tr("Qidirish")}</Button>
+          <Select label={tr("Savdolarni saralash")} value={sort} onChange={event=>changeQuery({sort:event.target.value,page:'1'})}
+            options={[{value:'newest',label:tr("Yangi savdolar avval")},{value:'oldest',label:tr("Eski savdolar avval")},
+              {value:'amount_desc',label:tr("Summa: kattadan kichikka")},{value:'amount_asc',label:tr("Summa: kichikdan kattaga")},
+              {value:'receipt',label:tr("Chek raqami bo‘yicha")}]} />
+          <Button variant="outline" onClick={()=>changeQuery({search:'',status:'',sort:'',page:'',limit:''})}>{tr("Filtrlarni tozalash")}</Button>
+        </form>
       </Card>
 
       {/* Sales Table */}
       <Card padding={false}>
-        {isLoading ? (
+        {invalidQuery ? <div role="alert" aria-label={tr("Savdolar ro‘yxati xatosi")} className="p-6 text-red-700">{tr("URL dagi filtr yoki sahifa noto‘g‘ri. Filtrlarni tozalab qayta urinib ko‘ring.")}</div>
+        : loadError ? <div role="alert" aria-label={tr("Savdolar ro‘yxati xatosi")} className="p-6 text-red-700">{uiMessage(loadError)} <Button onClick={loadSales}>{tr("Qayta yuklash")}</Button></div>
+        : isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <LoadingSpinner size="lg" text="Savdolar yuklanmoqda..." />
+            <LoadingSpinner size="lg" text={tr("Savdolar yuklanmoqda...")} />
           </div>
         ) : sales.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
             <FontAwesomeIcon icon={faReceipt} className="text-4xl text-gray-300 mb-3" />
-            <p className="text-base font-bold text-gray-700">Savdolar topilmadi</p>
-            <p className="text-xs text-gray-400 mt-1">Ushbu parametr bo&apos;yicha savdo yozuvlari mavjud emas</p>
+            <p className="text-base font-bold text-gray-700">{tr("Savdolar topilmadi")}</p>
+            <p className="text-xs text-gray-400 mt-1">{tr("Ushbu parametr bo'yicha savdo yozuvlari mavjud emas")}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <DataTable>
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Chek №</th>
-                  <th className="py-3.5 px-4">Sana va vaqt</th>
-                  <th className="py-3.5 px-4">Mijoz</th>
-                  <th className="py-3.5 px-4 text-center">Tovarlar</th>
-                  <th className="py-3.5 px-4 text-right">Summa</th>
-                  <th className="py-3.5 px-4 text-center">Holat</th>
-                  <th className="py-3.5 px-4 text-right">Amallar</th>
+                  <th className="py-3.5 px-4">{tr("Chek №")}</th>
+                  <th className="py-3.5 px-4">{tr("Sana va vaqt")}</th>
+                  <th className="py-3.5 px-4">{tr("Mijoz")}</th>
+                  <th className="py-3.5 px-4 text-center">{tr("Tovarlar")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Summa")}</th>
+                  <th className="py-3.5 px-4 text-center">{tr("Holat")}</th>
+                  <th className="py-3.5 px-4 text-right">{tr("Amallar")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -181,12 +237,11 @@ export default function SalesPage() {
                           {sale.customer.fullName}
                         </span>
                       ) : (
-                        <span className="text-gray-400">Mijozsiz</span>
+                        <span className="text-gray-400">{tr("Mijozsiz")}</span>
                       )}
                     </td>
                     <td className="py-3.5 px-4 text-center font-semibold text-gray-700">
-                      {sale.items?.length || 0} ta
-                    </td>
+                      {sale.items?.length || 0} {tr("ta")}</td>
                     <td className="py-3.5 px-4 text-right font-black text-gray-900">
                       {formatMoney(sale.totalAmount)}
                     </td>
@@ -194,16 +249,16 @@ export default function SalesPage() {
                       {getStatusBadge(sale.status)}
                     </td>
                     <td className="py-3.5 px-4 text-right space-x-1">
+                      <Link prefetch={false} href={'/sales/'+sale.id} className="inline-block px-2 py-1 text-blue-700 underline">{tr("Tafsilotlar")}</Link>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setPreviewSale(sale)}
                         leftIcon={<FontAwesomeIcon icon={faEye} />}
                       >
-                        Ko&apos;rish
-                      </Button>
+                        {tr("Ko'rish")}</Button>
 
-                      {sale.status === 'draft' && (
+                      {role!=='cashier' && sale.status === 'draft' && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -211,43 +266,21 @@ export default function SalesPage() {
                           className="text-red-600 hover:bg-red-50 hover:text-red-700"
                           leftIcon={<FontAwesomeIcon icon={faBan} />}
                         >
-                          Bekor qilish
-                        </Button>
+                          {tr("Bekor qilish")}</Button>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </DataTable>
           </div>
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-between text-xs">
-            <span className="text-gray-500">
-              Sahifa {page} / {totalPages}
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                Oldingi
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-              >
-                Keyingi
-              </Button>
-            </div>
-          </div>
-        )}
+        {!invalidQuery&&!loadError&&<div className="p-4 border-t border-gray-100">
+          <Pagination page={page} pages={totalPages} busy={isLoading} onPage={value=>changeQuery({page:String(value)})} />
+          {!isLoading&&page>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
+        </div>}
       </Card>
 
       {/* Receipt Modal */}

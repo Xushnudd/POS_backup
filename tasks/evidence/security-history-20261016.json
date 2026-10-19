@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "scanned": 3576,
+  "binary": 31,
+  "blobs": 3607,
+  "bytes": 85081487,
+  "findings": [],
+  "skipped": [],
+  "complete": true,
+  "scope": "Local refs reachable blobs only; no network, reflogs, unreachable objects, LFS payloads, archives or image CVEs. File is one Git inventory path per object, not every occurrence. Credential-store paths reported without reading contents. Binary blobs excluded. Known token patterns only.",
+  "recordedAt": "2026-10-16T08:55:52.735897+00:00",
+  "sourceHead": "c45ec1a6aced755e6ab5cd8562cf9dbec801f63f",
+  "shallow": false,
+  "tests": {
+    "focused": 4,
+    "passed": 4
+  },
+  "sourceHashes": {
+    "scripts/security/history-scan.mjs": "a6ebc6a074ee0434aae28eed8930e974feeb034d0d6833964d4be61305adedc3",
+    "scripts/security/history-scan.test.mjs": "af5e85345054da8624758c31e1c0d0311c6fa06328b00ac333424d72649c1ca0",
+    "scripts/security/scan.mjs": "fc3ac72647548b402a978401f91c346899084e305ccdb8787d55cb70d02ccfb4"
+  },
+  "originalTaskDone": false
+}

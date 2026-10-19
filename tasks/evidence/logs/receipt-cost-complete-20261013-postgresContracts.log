@@ -1,0 +1,32 @@
+✔ real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold (776.701879ms)
+✔ tracked multi-batch transfer receive/loss/replay preserves original source and branch stock (424.644345ms)
+✔ partial original batch return, damaged return and exact per-batch count are atomic and idempotent (341.977802ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"event":"batch_acceptance_profile","receipts":54,"expiredRows":53,"elapsedMs":2377}
+✔ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (2412.124184ms)
+✔ supplier goods return targets original expired lot and receipt reversal restores no invented batch (304.423633ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ negative policy cannot be enabled, forged override cannot overdraw and competing sales conserve stock (514.193553ms)
+✔ legacy negative balance can recover but cannot deepen or move to another branch (95.541887ms)
+{"requestId":"1499b28f-f106-448d-8ea5-7c2e59f721c0","organizationId":"929c5247-8b55-4205-93d9-8918aa28a12d","status":400,"durationMs":27,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"4ee43026-5574-4838-80f0-aab092061e3a","organizationId":"929c5247-8b55-4205-93d9-8918aa28a12d","status":400,"durationMs":14,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"4f97aac0-6eb9-4378-b43d-1eb762072967","organizationId":"929c5247-8b55-4205-93d9-8918aa28a12d","status":200,"durationMs":20,"event":"api_response"}
+✔ owner HTTP create and update reject enabling, ordinary settings remain editable (134.56636ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (261.207247ms)
+{"requestId":"c5cfdde2-dd48-4997-9301-68cf55b8bdd6","organizationId":"28357cc1-b7f7-4553-8084-1925d451ff7e","status":200,"durationMs":52,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (435.309724ms)
+✔ Oversized exports fail without publishing a partial artifact or business mutation (736.276024ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (368.864789ms)
+✔ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (8.15314ms)
+✔ Deferred cross-tenant parent reference and direct ownership mutation fail; scoped ORM rejects foreign creates and shared models (88.320443ms)
+✔ Concurrent SKU and alias inserts have exactly one winner inside a tenant; a second tenant can use the same identifiers (37.12537ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8104.114246

@@ -10,6 +10,57 @@ datasource db {
 
 // Organization and Auth
 model Organization {
+ loyaltyCards LoyaltyCard[]
+ loyaltyPromotions LoyaltyPromotion[]
+ loyaltyBenefits LoyaltyBenefitSelection[]
+ giftCheckouts GiftCheckout[]
+ giftCertificates GiftCertificate[]
+  loyaltyRedemptions LoyaltyRedemption[]
+  loyaltyRecoveryTransfers LoyaltyRecoveryTransfer[]
+  loyaltyLots LoyaltyPointLot[]
+  loyaltyEntries LoyaltyPointEntry[]
+  loyaltyPolicies LoyaltyPolicyVersion[]
+ reportSchedules ReportSchedule[]
+ reportScheduleRuns ReportScheduleRun[]
+ serialNumbers SerialNumber[]
+ serialEvents SerialEvent[]
+ warranties Warranty[]
+ warrantyServices WarrantyService[]
+
+ costContinuations ReceiptCostContinuation[]
+ costApplications ReceiptCostApplication[]
+ valuationSequences InventoryValuationSequence[]
+ valuationEvents InventoryValuationEvent[]
+
+ customRoles CustomRole[]
+ closureRevision Int @default(0)
+ closureRequests OrganizationClosure[]
+ supportTickets SupportTicket[]
+ integrationCosts IntegrationCost[]
+ billingInvoices BillingInvoice[]
+ billingPayments BillingPayment[]
+ subscription OrganizationSubscription?
+ providerIntents ProviderIntent[]
+ receiptCostPlans ReceiptCostPlan[]
+ customerAdvances CustomerAdvance[]
+  securityEvents SecurityEvent[]
+  backgroundJobs BackgroundJob[]
+  jobAuthorizations JobAuthorization[]
+  exchanges SaleExchange[]
+  onboardingCheckpoints OnboardingCheckpoint[]
+  priceRules         PriceRule[]
+  customerGroups     CustomerGroup[]
+  supportGrants      SupportGrant[]
+  taxProfiles TaxProfile[]
+  brands Brand[]
+  files FileAsset[]
+  purchaseOrders PurchaseOrder[]
+  supplierInvoices SupplierInvoice[]
+  supplierPayments SupplierPayment[]
+  financialAccounts FinancialAccount[]
+  expenseCategories ExpenseCategory[]
+  financialDocuments FinancialDocument[]
+  accountEntries AccountEntry[]
   id               String   @id @default(uuid())
   name             String
   tin              String?  @unique
@@ -20,6 +71,16 @@ model Organization {
   receiptFooter    String?
   createdAt        DateTime @default(now())
   
+  priceHistory     ProductPriceHistory[]
+  damageLocations DamageLocation[]
+  dispositions ReturnDispositionEntry[]
+  stockCounts      StockCount[]
+  units            Unit[]
+  productBarcodes  ProductBarcode[]
+  invitations      Invitation[]
+  operations       Operation[]
+  debtEntries      DebtEntry[]
+  sessions         Session[]
   users            OrganizationUser[]
   stores           Store[]
   categories       Category[]
@@ -32,9 +93,52 @@ model Organization {
   payments         Payment[]
   discountPolicies DiscountPolicy[]
   auditLogs        AuditLog[]
+  ownershipTransfers OwnershipTransfer[]
+  shiftCorrections ShiftCorrection[]
+  incidents Incident[]
+  syncReviews SyncReview[]
+  stockThresholds StockThreshold[]
 }
 
 model User {
+ loyaltyCards LoyaltyCard[]
+ loyaltyPromotions LoyaltyPromotion[]
+ loyaltyBenefits LoyaltyBenefitSelection[]
+ giftCheckouts GiftCheckout[]
+ giftCertificates GiftCertificate[]
+  loyaltyRedemptions LoyaltyRedemption[]
+  publishedLoyaltyPolicies LoyaltyPolicyVersion[]
+ costContinuations ReceiptCostContinuation[]
+ costApplications ReceiptCostApplication[]
+ valuationEvents InventoryValuationEvent[] @relation("ValuationEventActor")
+
+ createdCustomRoles CustomRole[] @relation("CustomRoleCreator")
+ totpFactors TotpFactor[]
+ totpProofs TotpProof[]
+ requestedSupportTickets SupportTicket[] @relation("SupportTicketRequester")
+ assignedSupportTickets SupportTicket[] @relation("SupportTicketAssignee")
+ supportTicketEvents SupportTicketEvent[]
+ authChallenges AuthChallenge[]
+ verifiedContacts VerifiedContact[]
+ billingInvoices BillingInvoice[]
+ billingPayments BillingPayment[]
+ createdIntegrationCosts IntegrationCost[] @relation("IntegrationCostCreator")
+ cancelledIntegrationCosts IntegrationCost[] @relation("IntegrationCostCanceller")
+ billingPlanVersions BillingPlanVersion[]
+ providerIntents ProviderIntent[]
+ createdReceiptCostPlans ReceiptCostPlan[] @relation("ReceiptCostCreator")
+ cancelledReceiptCostPlans ReceiptCostPlan[] @relation("ReceiptCostCanceller")
+  securityEvents SecurityEvent[]
+  jobAuthorizations JobAuthorization[]
+  exchanges SaleExchange[]
+  onboardingCheckpoints OnboardingCheckpoint[]
+  platformOperator      PlatformOperator?
+  approvedSupportGrants SupportGrant[]      @relation("SupportApprover")
+  financialDocuments FinancialDocument[]
+  resolvedIncidents Incident[]
+  syncSources SyncReview[] @relation("SyncActor")
+  resolvedSyncReviews SyncReview[] @relation("SyncResolver")
+  assignedSales Sale[] @relation("SaleSeller")
   id             String   @id @default(uuid())
   fullName       String
   phone          String   @unique
@@ -44,6 +148,8 @@ model User {
   lastLoginAt    DateTime?
   createdAt      DateTime @default(now())
   
+  invitations    Invitation[]
+  sessions       Session[]
   organizationUsers OrganizationUser[]
   createdStockDocuments    StockDocument[] @relation("CreatedBy")
   confirmedStockDocuments  StockDocument[] @relation("ConfirmedBy")
@@ -53,16 +159,23 @@ model User {
   voidedSales             Sale[] @relation("VoidedBy")
   payments                Payment[] @relation("ReceivedBy")
   saleReturns             SaleReturn[] @relation("ProcessedBy")
+  dispositionEntries ReturnDispositionEntry[] @relation("DispositionActor")
   auditLogs               AuditLog[]
   inventoryMovements      InventoryMovement[] @relation("InventoryMovementCreator")
+  shiftCorrections        ShiftCorrection[]
 }
 
 model OrganizationUser {
+ reportScheduleGrants ReportSchedule[]
+  customRoleId   String?
+  customRole     CustomRole? @relation(fields:[customRoleId,organizationId],references:[id,organizationId],onDelete:NoAction,onUpdate:NoAction,map:"custom_role_tenant_fk")
+  pinHash String?
   id             String   @id @default(uuid())
   organizationId String
   userId         String
   role           String   // owner, admin, cashier
   isActive       Boolean  @default(true)
+  archivedAt     DateTime?
   createdAt      DateTime @default(now())
   
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -71,9 +184,45 @@ model OrganizationUser {
   shifts         Shift[]
   
   @@unique([organizationId, userId])
+  @@index([customRoleId])
+}
+
+model CustomRole {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ baseRole String
+ permissions String[]
+ revision Int @default(1)
+ isActive Boolean @default(true)
+ createdBy String
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ creator User @relation("CustomRoleCreator",fields:[createdBy],references:[id],onDelete:Restrict)
+ members OrganizationUser[]
+ @@unique([id,organizationId])
+ @@unique([organizationId,name])
+ @@index([organizationId,isActive])
 }
 
 model Store {
+ costContinuations ReceiptCostContinuation[]
+ costApplications ReceiptCostApplication[]
+ valuationEvents InventoryValuationEvent[]
+
+ providerIntents ProviderIntent[]
+ receiptCostPlans ReceiptCostPlan[]
+  exchanges SaleExchange[]
+  onboardingCheckpoints OnboardingCheckpoint[]
+  purchaseOrders PurchaseOrder[]
+  supplierInvoices SupplierInvoice[]
+  supplierPayments SupplierPayment[]
+  financialAccounts FinancialAccount[]
+  financialDocuments FinancialDocument[]
+  damageLocations DamageLocation[]
+  incidents Incident[]
+  stockThresholds StockThreshold[]
   id             String   @id @default(uuid())
   organizationId String
   name           String
@@ -86,6 +235,8 @@ model Store {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userStores     UserStore[]
   registers      Register[]
+  stockCounts    StockCount[]
+  stockFreezes   StockFreeze[]
   stockDocuments StockDocument[]
   inventoryBalances InventoryBalance[]
   inventoryMovements InventoryMovement[]
@@ -93,6 +244,7 @@ model Store {
   toStockTransfers   StockTransfer[] @relation("ToStore")
   sales          Sale[]
   payments       Payment[]
+  dispositionEntries ReturnDispositionEntry[]
 }
 
 model UserStore {
@@ -105,7 +257,38 @@ model UserStore {
   @@unique([organizationUserId, storeId])
 }
 
+model ReceiptCostPlan {
+ costContinuations ReceiptCostContinuation[]
+ applications ReceiptCostApplication[]
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ stockDocumentId String
+ expenseDocumentId String
+ amount Decimal @db.Decimal(14,2)
+ method String
+ status String @default("prepared")
+ snapshot Json
+ reason String
+ createdBy String
+ createdAt DateTime @default(now())
+ cancelledBy String?
+ cancelledAt DateTime?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ stockDocument StockDocument @relation(fields:[stockDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ expenseDocument FinancialDocument @relation(fields:[expenseDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ creator User @relation("ReceiptCostCreator",fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ canceller User? @relation("ReceiptCostCanceller",fields:[cancelledBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
+ @@index([organizationId,storeId,stockDocumentId,createdAt,id])
+ // Active expense uniqueness is a partial index in migration096.
+}
+
 model Register {
+  financialAccount FinancialAccount?
+  receiptSequence Decimal @default(0) @db.Decimal(20, 0)
   id        String   @id @default(uuid())
   storeId   String
   name      String
@@ -122,6 +305,9 @@ model Register {
 
 // Catalog
 model Category {
+  parentId String?
+  parent Category? @relation("CategoryTree",fields:[parentId],references:[id],onDelete:NoAction)
+  children Category[] @relation("CategoryTree")
   id             String   @id @default(uuid())
   organizationId String
   name           String
@@ -137,16 +323,50 @@ model Category {
 }
 
 model Product {
+ serialTracking Boolean @default(false)
+ warrantyDays Int @default(0)
+ warrantyTerms String @default("")
+
+ serialNumbers SerialNumber[]
+ serialEvents SerialEvent[]
+ warranties Warranty[]
+ warrantyServices WarrantyService[]
+
+ costContinuations ReceiptCostContinuation[]
+ batchTracking Boolean @default(false)
+ expiryAlertDays Int @default(30)
+ batches InventoryBatch[]
+ valuationSequence InventoryValuationSequence?
+ valuationEvents InventoryValuationEvent[]
+
+  unitConversions ProductUnitConversion[]
+  mxik String?
+  mxikSource String?
+  mxikRequired Boolean @default(false)
+  taxRequired Boolean @default(false)
+  markingRequired Boolean @default(false)
+  priceRules         PriceRule[]
+  taxProfileId String?
+  taxProfile TaxProfile? @relation(fields:[taxProfileId],references:[id],onDelete:NoAction)
+  brandId String?
+  brand Brand? @relation(fields:[brandId],references:[id],onDelete:NoAction)
+  description String @default("")
+  files FileAsset[]
+  variant ProductVariant? @relation("VariantStock")
+  variants ProductVariant[] @relation("VariantRoot")
+  purchaseOrderItems PurchaseOrderItem[]
+  priceHistory ProductPriceHistory[]
+  stockThresholds StockThreshold[]
   id             String   @id @default(uuid())
   organizationId String
   categoryId     String?
   name           String
-  sku            String   @unique
-  barcode        String   @unique
+  sku            String
+  barcode        String
   unit           String   // dona, kg, litr, etc.
   salePrice      Decimal  @db.Decimal(14, 2)
-  costPrice      Decimal  @db.Decimal(14, 2)
-  minStock       Decimal  @db.Decimal(14, 3) @default(0)
+  costPrice      Decimal  @db.Decimal(20, 6)
+  minStock           Decimal               @default(0) @db.Decimal(20, 6)
   imageUrl       String?
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
@@ -154,22 +374,41 @@ model Product {
   
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   category       Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  countLines     StockCountLine[]
+  stockFreezes   StockFreeze[]
+  barcodes       ProductBarcode[]
   stockDocumentItems StockDocumentItem[]
   stockTransferItems   StockTransferItem[]
   inventoryMovements   InventoryMovement[]
   inventoryBalances    InventoryBalance[]
   saleItems             SaleItem[]
   saleReturnItems       SaleReturnItem[]
+  dispositionEntries ReturnDispositionEntry[]
+
+  @@unique([id,organizationId])
+  @@unique([organizationId, sku])
+  @@unique([organizationId, barcode])
 }
 
 model Customer {
+  consentRevision Int @default(0)
+  consentEvents ConsentEvent[]
+ loyaltyBenefits LoyaltyBenefitSelection[]
+ loyaltyCards LoyaltyCard[]
+  loyaltyLots LoyaltyPointLot[]
+ advances CustomerAdvance[]
+  canonicalPhone String?
+  mergedIntoId String?
+  groupId        String?
+  group          CustomerGroup? @relation(fields: [groupId], references: [id], onDelete: NoAction)
+  priceRules     PriceRule[]
   id             String   @id @default(uuid())
   organizationId String
   fullName       String
   phone          String
   address        String?
   note           String?
-  creditLimit    Decimal  @db.Decimal(14, 2) @default(0)
+  creditLimit    Decimal        @default(0) @db.Decimal(14, 2)
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -177,11 +416,36 @@ model Customer {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   sales          Sale[]
   payments       Payment[]
+  debtEntries    DebtEntry[]
   
   @@index([phone])
 }
 
+model ConsentEvent {
+  id String @id @default(uuid())
+  organizationId String
+  customerId String
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  revision Int
+  purpose String
+  channel String
+  granted Boolean
+  source String
+  evidenceRef String
+  policyVersion String
+  createdBy String
+  customerVersion DateTime
+  customerRevision Int @default(-1)
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, revision])
+  @@index([organizationId, customerId, purpose, channel, revision])
+}
+
 model Supplier {
+  purchaseOrders PurchaseOrder[]
+  supplierInvoices SupplierInvoice[]
+  supplierPayments SupplierPayment[]
   id             String   @id @default(uuid())
   organizationId String
   name           String
@@ -189,6 +453,9 @@ model Supplier {
   tin            String?
   address        String?
   note           String?
+  bankName       String?
+  bankAccount    String?
+  paymentTerms   String?
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -199,12 +466,18 @@ model Supplier {
 
 // Inventory
 model StockDocument {
+ receiptCostPlans ReceiptCostPlan[]
+  purchaseReceipt PurchaseReceipt?
+  supplierInvoice SupplierInvoice?
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
   supplierId     String?
   documentType   String   // purchase, adjustment, transfer_out, transfer_in, return_in
   documentNo     String
+  reversalOfId   String? @unique
+  reversalOf     StockDocument? @relation("DocumentReversal", fields: [reversalOfId], references: [id], onDelete: NoAction)
+  reversal       StockDocument? @relation("DocumentReversal")
   status         String   @default("draft") // draft, confirmed
   note           String?
   createdBy      String
@@ -217,15 +490,22 @@ model StockDocument {
   supplier       Supplier?    @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   creator        User         @relation("CreatedBy", fields: [createdBy], references: [id])
   confirmer      User?        @relation("ConfirmedBy", fields: [confirmedBy], references: [id])
+  stockCount     StockCount?
   items          StockDocumentItem[]
 }
 
 model StockDocumentItem {
+ serialInput Json?
+
+ batchInput Json?
+  conversionSnapshot Json?
+ supplierCreditItems SupplierCreditItem[]
+  purchaseReceiptLine PurchaseReceiptLine?
   id              String   @id @default(uuid())
   stockDocumentId String
   productId       String
-  quantity        Decimal  @db.Decimal(14, 3)
-  unitCost        Decimal  @db.Decimal(14, 2)
+  quantity        Decimal  @db.Decimal(20, 6)
+  unitCost        Decimal  @db.Decimal(20, 6)
   note            String?
   createdAt       DateTime @default(now())
   
@@ -234,13 +514,16 @@ model StockDocumentItem {
 }
 
 model InventoryMovement {
+ batchEntries InventoryBatchEntry[]
+ valuationEvent InventoryValuationEvent?
+
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
   productId      String
   movementType   String   // sale, return, stock_document
-  quantityDelta  Decimal  @db.Decimal(14, 3)
-  unitCost       Decimal  @db.Decimal(14, 2)
+  quantityDelta  Decimal  @db.Decimal(20, 6)
+  unitCost       Decimal  @db.Decimal(20, 6)
   sourceType     String   // sale, return, stock_document
   sourceId       String
   occurredAt     DateTime @default(now())
@@ -250,18 +533,20 @@ model InventoryMovement {
   store          Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   creator        User         @relation("InventoryMovementCreator", fields: [createdBy], references: [id])
+  @@index([productId,sourceType,sourceId],map:"InventoryMovement_batch_source_idx")
 }
 
 model InventoryBalance {
   storeId   String
   productId String
-  quantity  Decimal @db.Decimal(14, 3) @default(0)
+  quantity  Decimal  @default(0) @db.Decimal(20, 6)
   updatedAt DateTime @updatedAt
   
   store    Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   
   @@id([storeId, productId])
+  @@index([productId])
 }
 
 model StockTransfer {
@@ -284,18 +569,83 @@ model StockTransfer {
 }
 
 model StockTransferItem {
+ serialInput Json?
+
+ issueUnitCostSnapshot Decimal? @db.Decimal(20,6)
   id              String   @id @default(uuid())
   stockTransferId String
   productId       String
-  quantity        Decimal  @db.Decimal(14, 3)
-  unitCost        Decimal  @db.Decimal(14, 2)
+  receivedQuantity Decimal @default(0) @db.Decimal(20, 6)
+  returnedQuantity Decimal @default(0) @db.Decimal(20, 6)
+  damagedQuantity  Decimal @default(0) @db.Decimal(20, 6)
+  shortageQuantity Decimal @default(0) @db.Decimal(20, 6)
+  quantity        Decimal  @db.Decimal(20, 6)
+  unitCost        Decimal  @db.Decimal(20, 6)
   
   stockTransfer   StockTransfer @relation(fields: [stockTransferId], references: [id], onDelete: Cascade)
   product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dispositions  TransferDispositionEntry[]
+}
+
+model TransferDispositionEntry {
+ batchDispositions InventoryBatchDisposition[]
+  id             String            @id @default(uuid())
+  organizationId String
+  storeId        String
+  productId      String
+  itemId         String
+  operationId    String
+  disposition    String
+  quantity       Decimal           @db.Decimal(20, 6)
+  unitCost       Decimal           @db.Decimal(20, 6)
+  productName    String
+  sku            String
+  unit           String
+  reason         String
+  actorId        String
+  createdAt      DateTime          @default(now())
+  item           StockTransferItem @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([itemId, operationId, disposition])
+  @@index([organizationId, storeId, createdAt, id])
+}
+
+model PlatformOperator {
+  userId    String         @id
+  role      String
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  grants    SupportGrant[]
+}
+
+model SupportGrant {
+  id             String           @id @default(uuid())
+  organizationId String
+  operatorUserId String
+  approvedBy     String
+  reason         String
+  scopes         String[]
+  storeIds       String[]
+  createdAt      DateTime         @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  revokedBy      String?
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  operator       PlatformOperator @relation(fields: [operatorUserId], references: [userId], onDelete: NoAction, onUpdate: NoAction)
+  approver       User             @relation("SupportApprover", fields: [approvedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([organizationId, createdAt, id])
+  @@index([operatorUserId, expiresAt])
 }
 
 // Sales and POS
 model Shift {
+  pendingClose Json?
+  countedBy String?
+  approvedBy String?
+  closeReason String?
+  handoverFromId String? @unique
   id               String   @id @default(uuid())
   registerId       String
   organizationUserId String
@@ -313,11 +663,14 @@ model Shift {
   cashMovements    CashMovement[]
   sales            Sale[]
   payments         Payment[]
+  corrections      ShiftCorrection[] @relation("OriginalShift")
+  postedCorrections ShiftCorrection[] @relation("PostingShift")
   
   @@index([organizationUserId])
 }
 
 model CashMovement {
+  accountEntry AccountEntry?
   id           String   @id @default(uuid())
   shiftId      String
   movementType String   // cash_in, cash_out
@@ -328,9 +681,46 @@ model CashMovement {
   
   shift        Shift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   creator      User  @relation(fields: [createdBy], references: [id])
+  correction   ShiftCorrection?
+}
+
+model ShiftCorrection {
+  id               String @id @default(uuid())
+  organizationId   String
+  originalShiftId  String
+  postingShiftId   String
+  cashMovementId   String @unique
+  amount           Decimal @db.Decimal(14, 2)
+  reason           String
+  createdBy        String
+  createdAt        DateTime @default(now())
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  originalShift    Shift @relation("OriginalShift", fields: [originalShiftId], references: [id], onDelete: Cascade)
+  postingShift     Shift @relation("PostingShift", fields: [postingShiftId], references: [id], onDelete: Cascade)
+  cashMovement     CashMovement @relation(fields: [cashMovementId], references: [id], onDelete: Cascade)
+  creator          User @relation(fields: [createdBy], references: [id])
+
+  @@index([organizationId, originalShiftId, createdAt])
 }
 
 model Sale {
+ loyaltyBenefits LoyaltyBenefitSelection[]
+ giftCheckout GiftCheckout?
+  loyaltyRedemptions LoyaltyRedemption[]
+  loyaltyRecoveryTransfers LoyaltyRecoveryTransfer[]
+  loyaltyLot LoyaltyPointLot?
+  receiptSnapshot Json?
+  originalExchanges SaleExchange[] @relation("ExchangeOriginal")
+  replacementExchange SaleExchange? @relation("ExchangeReplacement")
+  discountPercent Decimal? @db.Decimal(5,2)
+  discountReason String?
+  discountApprovedBy String?
+  discountApprovedRole String?
+  discountApprovedAt DateTime?
+  discountPolicySnapshot Json?
+  taxAmount Decimal @default(0) @db.Decimal(14,2)
+  netAmount Decimal? @db.Decimal(14,2)
+  fiscalReceiptNo String?
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
@@ -341,8 +731,13 @@ model Sale {
   receiptNo      String
   status         String   @default("draft") // draft, completed, voided, partially_returned, returned
   subtotal       Decimal  @db.Decimal(14, 2)
-  discountAmount Decimal  @db.Decimal(14, 2) @default(0)
+  discountAmount         Decimal   @default(0) @db.Decimal(14, 2)
   totalAmount    Decimal  @db.Decimal(14, 2)
+  cashTendered   Decimal? @db.Decimal(14, 2)
+  cashChange     Decimal? @db.Decimal(14, 2)
+  sellerId       String?
+  serviceType    String?
+  seller         User? @relation("SaleSeller", fields: [sellerId], references: [id])
   note           String?
   completedAt    DateTime?
   voidedAt       DateTime?
@@ -361,27 +756,48 @@ model Sale {
   saleReturns    SaleReturn[]
   
   @@unique([registerId, receiptNo])
+  @@index([customerId,completedAt])
 }
 
 model SaleItem {
+  conversionSnapshot Json?
+  complianceSnapshot Json?
+  priceRuleId     String?
+  priceRule       PriceRule?         @relation(fields: [priceRuleId], references: [id], onDelete: NoAction)
+  priceSnapshot   Json?
+  discountPercent Decimal? @db.Decimal(5,2)
+  taxVersionId String?
+  taxVersion TaxProfileVersion? @relation(fields:[taxVersionId],references:[id],onDelete:NoAction)
+  taxMode String @default("unconfigured")
+  taxRate Decimal @default(0) @db.Decimal(5,2)
+  taxBase Decimal? @db.Decimal(14,2)
+  taxAmount Decimal @default(0) @db.Decimal(14,2)
+  payableAmount Decimal? @db.Decimal(14,2)
+  roundingVersion String @default("legacy-unspecified")
   id             String   @id @default(uuid())
   saleId         String
   productId      String
   productName    String
   sku            String
-  quantity       Decimal  @db.Decimal(14, 3)
+  unit           String?  // Legacy receipts did not snapshot a unit.
+  quantity       Decimal  @db.Decimal(20, 6)
   unitPrice      Decimal  @db.Decimal(14, 2)
-  discountAmount Decimal  @db.Decimal(14, 2) @default(0)
+  discountAmount  Decimal            @default(0) @db.Decimal(14, 2)
   lineTotal      Decimal  @db.Decimal(14, 2)
-  unitCost       Decimal  @db.Decimal(14, 2)
+  unitCost       Decimal  @db.Decimal(20, 6)
+  receiptDiscount Decimal            @default(0) @db.Decimal(14, 2)
   createdAt      DateTime @default(now())
   
   sale           Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
   product        Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   saleReturnItems SaleReturnItem[]
+  @@index([saleId,productId])
+  @@index([productId])
+  @@index([priceRuleId])
 }
 
 model Payment {
+  sourceType     String @default("manual") // manual journal versus a future trusted provider posting
   id             String   @id @default(uuid())
   organizationId String
   storeId        String
@@ -389,6 +805,7 @@ model Payment {
   saleId         String?
   customerId     String?
   paymentType    String   // cash, card, transfer, credit
+  status         String   @default("recorded") // manual/cash record, never an implied provider confirmation
   direction      String   // in, out
   amount         Decimal  @db.Decimal(14, 2)
   referenceNo    String?
@@ -403,9 +820,14 @@ model Payment {
   sale           Sale?        @relation(fields: [saleId], references: [id], onDelete: Cascade)
   customer       Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   receiver       User         @relation("ReceivedBy", fields: [receivedBy], references: [id])
+  @@index([saleId])
+  @@index([shiftId,paymentType,status])
 }
 
 model SaleReturn {
+  loyaltyRecoveryTransfers LoyaltyRecoveryTransfer[]
+  loyaltyEntries LoyaltyPointEntry[]
+  exchange SaleExchange?
   id              String   @id @default(uuid())
   saleId          String
   returnReceiptNo String
@@ -415,33 +837,48 @@ model SaleReturn {
   processedBy     String
   returnedAt      DateTime @default(now())
   createdAt       DateTime @default(now())
+  approvedBy      String?
+  approvedRole    String?
+  approvedAt      DateTime?
   
   sale            Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   processor       User     @relation("ProcessedBy", fields: [processedBy], references: [id])
   items           SaleReturnItem[]
+  @@index([saleId,returnedAt])
 }
 
 model SaleReturnItem {
+ unitCostSnapshot Decimal? @db.Decimal(20,6)
+ costApplicationId String?
+ costApplication ReceiptCostApplication? @relation(fields:[costApplicationId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  taxAmount Decimal @default(0) @db.Decimal(14,2)
+  taxBase Decimal? @db.Decimal(14,2)
+  discountAmount Decimal @default(0) @db.Decimal(14,2)
   id              String   @id @default(uuid())
   saleReturnId    String
   saleItemId      String
   productId       String
-  quantity        Decimal  @db.Decimal(14, 3)
+  quantity        Decimal  @db.Decimal(20, 6)
   unitPrice       Decimal  @db.Decimal(14, 2)
   lineTotal       Decimal  @db.Decimal(14, 2)
+  disposition     String @default("sellable") // sellable, damaged, write_off
   
   saleReturn      SaleReturn @relation(fields: [saleReturnId], references: [id], onDelete: Cascade)
   saleItem        SaleItem   @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
   product         Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dispositionEntry ReturnDispositionEntry?
+  @@index([saleReturnId])
+  @@index([saleItemId])
+  @@index([productId])
 }
 
 // Control and Service
 model DiscountPolicy {
   id                       String   @id @default(uuid())
   organizationId           String
-  cashierMaxPercent        Decimal  @db.Decimal(5, 2) @default(0)
-  adminMaxPercent          Decimal  @db.Decimal(5, 2) @default(100)
-  requireReasonFromPercent Decimal  @db.Decimal(5, 2) @default(10)
+  cashierMaxPercent        Decimal  @default(0) @db.Decimal(5, 2)
+  adminMaxPercent          Decimal  @default(100) @db.Decimal(5, 2)
+  requireReasonFromPercent Decimal  @default(10) @db.Decimal(5, 2)
   isActive                 Boolean  @default(true)
   updatedAt                DateTime @updatedAt
   
@@ -449,6 +886,7 @@ model DiscountPolicy {
 }
 
 model AuditLog {
+ costContinuations ReceiptCostContinuation[]
   id          String   @id @default(uuid())
   organizationId String
   actorId     String?
@@ -458,6 +896,7 @@ model AuditLog {
   beforeData  Json?
   afterData   Json?
   ipAddress   String?
+  requestId   String?
   createdAt   DateTime @default(now())
   
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -465,4 +904,1832 @@ model AuditLog {
   
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([organizationId, createdAt(sort: Desc), id], map: "AuditLog_organization_created_id")
+}
+
+// Opaque tokens are only sent through an HttpOnly cookie; only SHA-256 is stored.
+model Session {
+  jobAuthorizations JobAuthorization[]
+  authenticationMethod String @default("password")
+  pinStoreId String?
+  id             String @id @default(uuid())
+  tokenHash      String @unique
+  userId         String
+  organizationId String
+  expiresAt      DateTime
+  idleExpiresAt  DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model Operation {
+ costContinuations ReceiptCostContinuation[]
+ providerIntents ProviderIntent[]
+  actorId        String?
+  id             String @id @default(uuid())
+  organizationId String
+  type           String
+  key            String
+  payloadHash    String
+  state          String @default("completed")
+  result         Json
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, type, key])
+  @@index([organizationId, createdAt])
+}
+
+model ProviderIntent {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ actorId String
+ sourceType String
+ sourceKey String
+ provider String
+ capability String
+ request Json
+ requestHash String
+ state String @default("awaiting")
+ compensatesId String? @unique
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ source Operation @relation(fields:[organizationId,sourceType,sourceKey],references:[organizationId,type,key],onDelete:NoAction,onUpdate:NoAction)
+ original ProviderIntent? @relation("ProviderCompensation",fields:[compensatesId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ compensation ProviderIntent? @relation("ProviderCompensation")
+ outbox ProviderOutbox?
+ events ProviderEvent[]
+
+ @@unique([organizationId,sourceType,sourceKey,provider,capability], map: "ProviderIntent_organizationId_sourceType_sourceKey_provider_cap")
+ @@index([organizationId,storeId,createdAt,id])
+}
+
+model ProviderOutbox {
+ intentId String @id
+ state String @default("queued")
+ mode String @default("submit")
+ generation Int @default(0)
+ submitAttempts Int @default(0)
+ lookupAttempts Int @default(0)
+ nextRunAt DateTime @default(now())
+ leaseToken String?
+ leaseUntil DateTime?
+ externalId String?
+ resultCode String?
+ updatedAt DateTime @default(now())
+ intent ProviderIntent @relation(fields:[intentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
+ @@index([state,nextRunAt])
+}
+
+model ProviderEvent {
+ id String @id @default(uuid())
+ intentId String
+ event String
+ generation Int
+ code String?
+ createdAt DateTime @default(now())
+ intent ProviderIntent @relation(fields:[intentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
+ @@index([intentId,createdAt,id])
+}
+
+model DebtEntry {
+ advanceAllocation CustomerAdvanceAllocation?
+  debtOriginId String?
+  actorId        String?
+  effectiveAt    DateTime @default(now())
+  dueAt          DateTime?
+  saleId         String?
+  id             String @id @default(uuid())
+  organizationId String
+  customerId     String
+  sourceType     String
+  sourceId       String
+  amount         Decimal @db.Decimal(14, 2)
+  note           String?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer       Customer @relation(fields: [customerId], references: [id], onDelete: NoAction)
+
+  @@unique([organizationId, sourceType, sourceId])
+  @@index([debtOriginId])
+  @@index([customerId, createdAt])
+}
+
+model RateLimit {
+ key String @id
+ attempts Int @default(0)
+ expiresAt DateTime
+
+ @@index([expiresAt])
+}
+
+model Invitation {
+  id             String @id @default(uuid())
+  organizationId String
+  phone          String
+  role           String
+  storeIds       Json
+  tokenHash      String @unique
+  invitedBy      String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  inviter        User @relation(fields:[invitedBy],references:[id])
+
+  @@index([organizationId,createdAt])
+}
+
+model Unit {
+ conversionBase ProductUnitConversion[] @relation("ConversionBaseUnit")
+ conversionTrade ProductUnitConversion[] @relation("ConversionTradeUnit")
+ id             String @id @default(uuid())
+ organizationId String
+ code           String
+ name           String
+ precision      Int
+ isActive       Boolean @default(true)
+ organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
+ @@unique([organizationId,code])
+}
+
+model ProductBarcode {
+ id             String @id @default(uuid())
+ organizationId String
+ productId      String
+ value          String
+ isPrimary      Boolean @default(false)
+ createdAt      DateTime @default(now())
+ organization   Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product        Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+
+ @@unique([organizationId,value])
+ @@index([productId])
+}
+
+model StockCount {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ scope String
+ blind Boolean @default(true)
+ status String @default("counting")
+ createdBy String
+ createdAt DateTime @default(now())
+ submittedAt DateTime?
+ approvedBy String?
+ approvedAt DateTime?
+ reason String?
+ adjustmentId String? @unique
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ adjustment StockDocument? @relation(fields:[adjustmentId],references:[id],onDelete:NoAction)
+ lines StockCountLine[]
+ freezes StockFreeze[]
+
+ @@index([organizationId,storeId,status])
+}
+
+model StockCountLine {
+ id String @id @default(uuid())
+ countId String
+ productId String
+ productName String
+ sku String
+ unit String
+ expectedQuantity Decimal @db.Decimal(20,6)
+ unitCost Decimal @db.Decimal(20,6)
+ count StockCount @relation(fields:[countId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ readings StockCountReading[]
+
+ @@unique([countId,productId])
+}
+
+model StockCountReading {
+ id String @id @default(uuid())
+ lineId String
+ round Int
+ quantity Decimal @db.Decimal(20,6)
+ countedBy String
+ countedAt DateTime @default(now())
+ line StockCountLine @relation(fields:[lineId],references:[id],onDelete:Cascade)
+
+ @@unique([lineId,round])
+}
+
+model StockFreeze {
+ storeId String
+ productId String
+ countId String
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ count StockCount @relation(fields:[countId],references:[id],onDelete:Cascade)
+
+ @@id([storeId,productId])
+ @@index([countId])
+}
+
+model OwnershipTransfer {
+ id String @id @default(uuid())
+ organizationId String
+ fromMembershipId String
+ toMembershipId String
+ state String @default("pending")
+ expiresAt DateTime
+ acceptedAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
+ @@index([organizationId,state])
+}
+
+model Incident {
+ store Store? @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ resolver User? @relation(fields:[resolvedBy],references:[id],onDelete:SetNull)
+ id String @id @default(uuid())
+ organizationId String
+ storeId String?
+ kind String
+ entityKey String
+ severity String @default("warning")
+ state String @default("open")
+ evidence Json
+ detectedAt DateTime @default(now())
+ lastSeenAt DateTime @default(now())
+ resolvedAt DateTime?
+ resolvedBy String?
+ resolutionReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
+ @@unique([organizationId,kind,entityKey])
+ @@index([organizationId,state,storeId])
+}
+
+model SyncReview {
+ actor User @relation("SyncActor",fields:[actorId],references:[id])
+ resolver User? @relation("SyncResolver",fields:[resolvedBy],references:[id],onDelete:SetNull)
+ id String @id @default(uuid())
+ organizationId String
+ actorId String
+ operationId String
+ commandType String
+ payload Json
+ payloadHash String
+ code String
+ state String @default("conflict")
+ result Json?
+ createdAt DateTime @default(now())
+ resolvedAt DateTime?
+ resolvedBy String?
+ reason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
+ @@unique([organizationId,commandType,operationId])
+ @@index([organizationId,state])
+}
+
+model StockThreshold {
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ minimum Decimal @db.Decimal(20,6)
+ maximum Decimal @db.Decimal(20,6)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+
+ @@unique([storeId,productId])
+ @@index([organizationId,storeId])
+}
+
+model ProductPriceHistory {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ field String
+ oldValue Decimal? @db.Decimal(20,6)
+ newValue Decimal @db.Decimal(20,6)
+ productName String
+ sku String
+ actorId String?
+ source String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
+ @@index([organizationId,productId,createdAt,id])
+}
+
+model DamageLocation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String @unique
+ name String @default("Brak qaytarmalari")
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ entries ReturnDispositionEntry[]
+}
+
+model ReturnDispositionEntry {
+ batchDispositions InventoryBatchDisposition[]
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ returnItemId String @unique
+ locationId String?
+ disposition String
+ quantity Decimal @db.Decimal(20,6)
+ unitCost Decimal @db.Decimal(20,6)
+ productName String
+ sku String
+ unit String?
+ actorId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ location DamageLocation? @relation(fields:[locationId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ returnItem SaleReturnItem @relation(fields:[returnItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation("DispositionActor",fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
+ @@index([organizationId,storeId,disposition,createdAt,id])
+}
+
+model FinancialAccount {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ registerId String? @unique
+ name String
+ kind String
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ register Register? @relation(fields:[registerId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ entries AccountEntry[]
+
+ @@index([organizationId,storeId,kind])
+}
+
+model ExpenseCategory {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ treatment String @default("operating")
+ isActive Boolean @default(true)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ documents FinancialDocument[]
+
+ @@unique([organizationId,name])
+}
+
+model FinancialDocument {
+ receiptCostPlans ReceiptCostPlan[]
+ customerAdvance CustomerAdvance?
+ customerAdvanceRefund CustomerAdvanceRefund?
+  supplierPayment SupplierPayment?
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ kind String
+ amount Decimal @db.Decimal(14,2)
+ reason String
+ actorId String
+ categoryId String?
+ reversalOfId String? @unique
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ category ExpenseCategory? @relation(fields:[categoryId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ original FinancialDocument? @relation("FinancialReversal",fields:[reversalOfId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ reversal FinancialDocument? @relation("FinancialReversal")
+ entries AccountEntry[]
+
+ @@index([organizationId,storeId,createdAt,id])
+}
+
+model AccountEntry {
+ id String @id @default(uuid())
+ organizationId String
+ accountId String
+ documentId String
+ amount Decimal @db.Decimal(14,2)
+ cashMovementId String? @unique
+ cashMovement CashMovement? @relation(fields:[cashMovementId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ account FinancialAccount @relation(fields:[accountId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
+ @@unique([documentId,accountId])
+ @@index([organizationId,accountId,createdAt,id])
+}
+
+model SupplierInvoice {
+ credits SupplierCredit[]
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ supplierId String
+ stockDocumentId String @unique
+ amount Decimal @db.Decimal(14,2)
+ referenceNo String
+ reason String
+ dueAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ supplier Supplier @relation(fields:[supplierId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ stockDocument StockDocument @relation(fields:[stockDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ allocations SupplierAllocation[]
+
+ @@unique([organizationId,supplierId,referenceNo])
+ @@index([organizationId,storeId,supplierId,createdAt])
+}
+
+model SupplierPayment {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ supplierId String
+ financialDocumentId String @unique
+ referenceNo String?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ supplier Supplier @relation(fields:[supplierId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ financialDocument FinancialDocument @relation(fields:[financialDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ allocations SupplierAllocation[]
+
+ @@unique([organizationId,referenceNo])
+ @@index([organizationId,storeId,supplierId,createdAt])
+}
+
+model SupplierAllocation {
+ releases SupplierAllocationRelease[]
+ id String @id @default(uuid())
+ invoiceId String
+ paymentId String
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ invoice SupplierInvoice @relation(fields:[invoiceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ payment SupplierPayment @relation(fields:[paymentId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
+ @@index([invoiceId])
+ @@index([paymentId])
+}
+
+model PurchaseOrder {
+  id String @id @default(uuid())
+  organizationId String
+  storeId String
+  supplierId String
+  referenceNo String
+  reason String
+  createdBy String
+  createdAt DateTime @default(now())
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  supplier Supplier @relation(fields:[supplierId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  items PurchaseOrderItem[]
+  receipts PurchaseReceipt[]
+
+  @@unique([organizationId,referenceNo])
+  @@index([organizationId,storeId,supplierId,createdAt])
+}
+
+model PurchaseOrderItem {
+  id String @id @default(uuid())
+  orderId String
+  productId String
+  productName String
+  unit String
+  quantity Decimal @db.Decimal(20,6)
+  unitCost Decimal @db.Decimal(20,6)
+  order PurchaseOrder @relation(fields:[orderId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  product Product @relation(fields:[productId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  receiptLines PurchaseReceiptLine[]
+
+  @@unique([orderId,productId])
+}
+
+model PurchaseReceipt {
+  id String @id @default(uuid())
+  orderId String
+  stockDocumentId String @unique
+  createdAt DateTime @default(now())
+  order PurchaseOrder @relation(fields:[orderId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  stockDocument StockDocument @relation(fields:[stockDocumentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  lines PurchaseReceiptLine[]
+
+  @@index([orderId,createdAt])
+}
+
+model PurchaseReceiptLine {
+  id String @id @default(uuid())
+  receiptId String
+  orderItemId String
+  stockDocumentItemId String @unique
+  receipt PurchaseReceipt @relation(fields:[receiptId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  orderItem PurchaseOrderItem @relation(fields:[orderItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  stockDocumentItem StockDocumentItem @relation(fields:[stockDocumentItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
+  @@unique([receiptId,orderItemId])
+  @@index([orderItemId])
+}
+
+model SupplierCredit {
+ id String @id @default(uuid())
+ invoiceId String
+ kind String
+ amount Decimal @db.Decimal(14,2)
+ reason String
+ createdBy String
+ createdAt DateTime @default(now())
+ invoice SupplierInvoice @relation(fields:[invoiceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ items SupplierCreditItem[]
+ releases SupplierAllocationRelease[]
+
+ @@index([invoiceId,createdAt])
+}
+
+model SupplierCreditItem {
+ id String @id @default(uuid())
+ creditId String
+ stockDocumentItemId String
+ quantity Decimal @db.Decimal(20,6)
+ amount Decimal @db.Decimal(14,2)
+ credit SupplierCredit @relation(fields:[creditId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ stockDocumentItem StockDocumentItem @relation(fields:[stockDocumentItemId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+
+ @@unique([creditId,stockDocumentItemId])
+ @@index([stockDocumentItemId])
+}
+
+model SupplierAllocationRelease {
+ id String @id @default(uuid())
+ allocationId String
+ creditId String
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ allocation SupplierAllocation @relation(fields:[allocationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ credit SupplierCredit @relation(fields:[creditId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+
+ @@unique([creditId,allocationId])
+ @@index([allocationId])
+}
+
+// Each SKU remains the stock key; this relation groups independently sellable SKUs.
+model ProductVariant {
+  organizationId String
+  productId String @id
+  rootProductId String
+  options Json @db.JsonB
+  combinationKey String @default(dbgenerated())
+  product Product @relation("VariantStock", fields: [productId], references: [id], onDelete: Cascade)
+  root Product @relation("VariantRoot", fields: [rootProductId], references: [id], onDelete: NoAction)
+
+  @@unique([rootProductId, combinationKey])
+}
+
+model FileAsset {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ createdBy String
+ name String
+ mime String
+ size Int
+ sha256 String
+ width Int
+ height Int
+ data Bytes?
+ createdAt DateTime @default(now())
+ expiresAt DateTime?
+ deletedAt DateTime?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+
+ @@index([organizationId,productId,createdAt])
+}
+
+model Brand {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ products Product[]
+
+ @@unique([organizationId,name])
+}
+
+model TaxProfile {
+  id String @id @default(uuid())
+  organizationId String
+  name String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  versions TaxProfileVersion[]
+  products Product[]
+
+  @@unique([organizationId,name])
+}
+
+model TaxProfileVersion {
+  id String @id @default(uuid())
+  profileId String
+  organizationId String
+  mode String
+  rate Decimal @db.Decimal(5,2)
+  exemptionReason String?
+  effectiveAt DateTime
+  createdAt DateTime @default(now())
+  createdBy String
+  profile TaxProfile @relation(fields:[profileId],references:[id],onDelete:Cascade)
+  saleItems SaleItem[]
+
+  @@unique([profileId,effectiveAt])
+  @@index([organizationId,effectiveAt])
+}
+
+model CustomerGroup {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customers      Customer[]
+  priceRules     PriceRule[]
+
+  @@unique([organizationId, name])
+}
+
+model PriceRule {
+  id              String         @id @default(uuid())
+  organizationId  String
+  productId       String
+  kind            String
+  storeId         String?
+  customerId      String?
+  groupId         String?
+  minimumQuantity Decimal        @default(1) @db.Decimal(20, 6)
+  unitPrice       Decimal        @db.Decimal(14, 2)
+  startsAt        DateTime
+  endsAt          DateTime?
+  archivedAt      DateTime?
+  reason          String
+  createdBy       String
+  createdAt       DateTime       @default(now())
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product         Product        @relation(fields: [productId], references: [id], onDelete: NoAction)
+  customer        Customer?      @relation(fields: [customerId], references: [id], onDelete: NoAction)
+  group           CustomerGroup? @relation(fields: [groupId], references: [id], onDelete: NoAction)
+  saleItems       SaleItem[]
+
+  @@index([organizationId, productId, startsAt])
+}
+
+model StockLocation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ name String
+ isActive Boolean @default(true)
+ createdAt DateTime @default(now())
+ @@unique([storeId,name])
+ @@index([organizationId,storeId])
+}
+model LocationBalance {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ locationId String
+ quantity Decimal @db.Decimal(20,6) @default(0)
+ @@unique([locationId,productId])
+ @@index([storeId,productId])
+}
+model LocationEntry {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ locationId String
+ quantityDelta Decimal @db.Decimal(20,6)
+ sourceType String
+ sourceId String
+ unit String
+ reason String
+ actorId String
+ createdAt DateTime @default(now())
+ @@index([locationId,productId,createdAt])
+ @@index([organizationId,storeId,productId])
+}
+model StockReservation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ registerId String?
+ userId String
+ sessionId String
+ deviceId String?
+ kind String @default("manual")
+ status String @default("active")
+ expiresAt DateTime
+ reason String
+ createdAt DateTime @default(now())
+ @@index([organizationId,storeId,status,expiresAt])
+}
+model ReservationItem {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ reservationId String
+ productId String
+ locationId String?
+ quantity Decimal @db.Decimal(20,6)
+ remainingQuantity Decimal @db.Decimal(20,6)
+ unit String
+ @@unique([reservationId,productId])
+ @@index([storeId,productId])
+}
+model ReservationEntry {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ itemId String
+ quantity Decimal @db.Decimal(20,6)
+ kind String
+ operationKey String
+ saleId String?
+ actorId String?
+ reason String
+ createdAt DateTime @default(now())
+ @@unique([itemId,operationKey])
+ @@index([organizationId,storeId,createdAt])
+}
+
+model OfflineCashPolicy {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String @unique
+ enabled Boolean @default(false)
+ maxAmount Decimal @db.Decimal(14,2)
+ ttlSeconds Int
+ reason String
+ updatedBy String
+ updatedAt DateTime @default(now())
+ @@index([organizationId,storeId])
+}
+model OfflineCashLease {
+ id String @id
+ organizationId String
+ storeId String
+ registerId String
+ shiftId String
+ saleId String
+ userId String
+ sessionId String
+ deviceId String
+ cashOperationId String @unique
+ state String @default("issued")
+ payload Json
+ publicKey Json
+ signature String
+ payloadHash String
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ settlementProof Json?
+ settledBy String?
+ settledAt DateTime?
+ cancellationProof Json?
+ cancelledBy String?
+ cancelledAt DateTime?
+ @@index([organizationId,storeId,state])
+ @@index([saleId,state])
+ @@index([shiftId,state])
+}
+
+model OnboardingCheckpoint {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ step String
+ proof Json
+ confirmedBy String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction)
+ actor User @relation(fields:[confirmedBy],references:[id],onDelete:NoAction)
+ @@unique([organizationId,storeId,step])
+}
+
+model SaleExchange {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ originalSaleId String
+ saleReturnId String @unique
+ replacementSaleId String @unique
+ actorId String
+ cashDifference Decimal @db.Decimal(14,2)
+ debtDifference Decimal @db.Decimal(14,2)
+ cashTendered Decimal @db.Decimal(14,2)
+ cashChange Decimal @db.Decimal(14,2)
+ settlementSnapshot Json
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction)
+ originalSale Sale @relation("ExchangeOriginal",fields:[originalSaleId],references:[id],onDelete:NoAction)
+ saleReturn SaleReturn @relation(fields:[saleReturnId],references:[id],onDelete:NoAction)
+ replacementSale Sale @relation("ExchangeReplacement",fields:[replacementSaleId],references:[id],onDelete:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction)
+ @@index([organizationId,storeId,createdAt])
+}
+
+// Explicit owner grant, independent of the owner's browser session lifetime.
+model ReportSchedule {
+ id String @id @default(uuid())
+ organizationId String
+ name String
+ enabled Boolean @default(false)
+ revision Int @default(1)
+ configuration Json
+ grantMembershipId String
+ timezone String
+ currency String
+ nextRunAt DateTime?
+ blockedCode String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ grant OrganizationUser @relation(fields:[grantMembershipId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ runs ReportScheduleRun[]
+ @@unique([id,organizationId])
+ @@index([enabled,nextRunAt])
+ @@index([organizationId,createdAt])
+}
+model ReportScheduleRun {
+ id String @id @default(uuid())
+ organizationId String
+ scheduleId String
+ revision Int
+ scheduledFor DateTime
+ definition Json
+ state String @default("queued")
+ attempts Int @default(0)
+ leaseToken String?
+ leaseUntil DateTime?
+ nextAttemptAt DateTime @default(now())
+ lastError String?
+ result Json?
+ size Int @default(0)
+ createdAt DateTime @default(now())
+ finishedAt DateTime?
+ expiresAt DateTime
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ schedule ReportSchedule @relation(fields:[scheduleId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ @@unique([scheduleId,revision,scheduledFor])
+ @@index([organizationId,createdAt])
+ @@index([state,nextAttemptAt])
+ @@index([expiresAt])
+}
+
+model JobExport {
+ jobId String @id
+ organizationId String
+ data Bytes?
+ chunkCount Int @default(0)
+ chunkAttempt String?
+ filename String
+ mime String
+ size Int
+ sha256 String
+ rowCount Int
+ asOf DateTime
+ expiresAt DateTime
+ job BackgroundJob @relation(fields:[jobId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ @@index([organizationId,expiresAt])
+}
+
+model JobExportChunk {
+ jobId String
+ organizationId String
+ attempt String
+ ordinal Int
+ data Bytes
+ size Int
+ sha256 String
+ job BackgroundJob @relation(fields:[jobId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ @@id([jobId,attempt,ordinal])
+ @@index([organizationId])
+}
+
+model BackgroundJob {
+ id String @id @default(uuid())
+ organizationId String
+ type String
+ payload Json
+ state String @default("queued")
+ generation Int @default(0)
+ attempts Int @default(0)
+ maxAttempts Int @default(3)
+ nextRunAt DateTime @default(now())
+ leaseToken String?
+ leaseUntil DateTime?
+ heartbeatAt DateTime?
+ lastError String?
+ result Json?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @default(now())
+ expiresAt DateTime
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ authorizations JobAuthorization[]
+ events JobEvent[]
+ exports JobExport[]
+ exportChunks JobExportChunk[]
+ @@unique([id,organizationId])
+ @@index([state,nextRunAt])
+ @@index([organizationId,createdAt])
+}
+model JobAuthorization {
+ id String @id @default(uuid())
+ organizationId String
+ jobId String
+ generation Int
+ userId String
+ sessionId String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ job BackgroundJob @relation(fields:[jobId],references:[id],onDelete:Cascade)
+ user User @relation(fields:[userId],references:[id],onDelete:NoAction)
+ session Session @relation(fields:[sessionId],references:[id],onDelete:NoAction)
+ @@unique([jobId,generation])
+}
+model JobEvent {
+ id String @id @default(uuid())
+ jobId String
+ event String
+ attempt Int
+ generation Int
+ code String?
+ createdAt DateTime @default(now())
+ job BackgroundJob @relation(fields:[jobId],references:[id],onDelete:Cascade)
+ @@index([jobId,createdAt])
+}
+
+// Account-only security history. No credentials or raw client metadata enter these tables.
+model SecurityEvent {
+  id String @id @default(uuid())
+  organizationId String
+  userId String
+  type String
+  suspicious Boolean @default(false)
+  sourceSessionId String?
+  sourceAuditLogId String? @unique
+  clientHash String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  outbox SecurityNoticeOutbox?
+  notice SecurityNotice?
+  @@index([userId,createdAt(sort:Desc),id])
+  @@index([expiresAt])
+}
+model SecurityNoticeOutbox {
+  id String @id @default(uuid())
+  eventId String @unique
+  state String @default("pending")
+  dedupeKey String @unique
+  attempts Int @default(0)
+  maxAttempts Int @default(3)
+  nextRunAt DateTime @default(now())
+  lastError String?
+  createdAt DateTime @default(now())
+  deliveredAt DateTime?
+  event SecurityEvent @relation(fields:[eventId],references:[id],onDelete:Cascade)
+  @@index([state,nextRunAt])
+}
+model SecurityNotice {
+  id String @id @default(uuid())
+  eventId String @unique
+  createdAt DateTime @default(now())
+  readAt DateTime?
+  event SecurityEvent @relation(fields:[eventId],references:[id],onDelete:Cascade)
+}
+
+
+model ProductUnitConversion {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ baseUnit String
+ tradeUnit String
+ ratio Decimal @db.Decimal(14,6)
+ isActive Boolean @default(true)
+ updatedAt DateTime @updatedAt
+ product Product @relation(fields:[productId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ base Unit @relation("ConversionBaseUnit",fields:[organizationId,baseUnit],references:[organizationId,code],onDelete:NoAction,onUpdate:NoAction)
+ trade Unit @relation("ConversionTradeUnit",fields:[organizationId,tradeUnit],references:[organizationId,code],onDelete:NoAction,onUpdate:NoAction)
+ @@unique([productId,tradeUnit])
+ @@index([organizationId,tradeUnit])
+}
+
+// Immutable cash advance journals; migration094 also enforces exact source and budget.
+model CustomerAdvance {
+ giftCertificate GiftCertificate?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ allocations CustomerAdvanceAllocation[]
+ refunds CustomerAdvanceRefund[]
+ id String @id @default(uuid())
+ organizationId String
+ customerId String
+ documentId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ @@index([organizationId,customerId,createdAt,id],map:"CustomerAdvance_customer_idx")
+}
+model CustomerAdvanceAllocation {
+ advance CustomerAdvance @relation(fields:[advanceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ debtEntry DebtEntry @relation(fields:[debtEntryId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ id String @id @default(uuid())
+ advanceId String
+ debtEntryId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ @@index([advanceId],map:"CustomerAdvanceAllocation_advance_idx")
+}
+model CustomerAdvanceRefund {
+ advance CustomerAdvance @relation(fields:[advanceId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ document FinancialDocument @relation(fields:[documentId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ id String @id @default(uuid())
+ advanceId String
+ documentId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdAt DateTime @default(now())
+ @@index([advanceId],map:"CustomerAdvanceRefund_advance_idx")
+}
+
+model BillingPlanVersion {
+ id String @id @default(uuid())
+ code String
+ version Int
+ name String
+ monthlyPrice Decimal @db.Decimal(14,2)
+ currency String
+ branchLimit Int
+ registerLimit Int
+ staffLimit Int
+ trialDays Int
+ graceDays Int
+ createdBy String?
+ createdAt DateTime @default(now())
+ creator User? @relation(fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ plans BillingPlan[]
+ invoices BillingInvoice[]
+ subscriptions OrganizationSubscription[]
+ @@unique([code,version])
+}
+model BillingPlan {
+ code String @id
+ currentVersionId String
+ isActive Boolean @default(true)
+ isTrial Boolean @default(false)
+ currentVersion BillingPlanVersion @relation(fields:[currentVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+model OrganizationSubscription {
+ organizationId String @id
+ planVersionId String
+ trialStartedAt DateTime
+ trialEndsAt DateTime
+ paidThrough DateTime?
+ cancelAtPeriodEnd Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ planVersion BillingPlanVersion @relation(fields:[planVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+
+model BillingInvoice {
+ id String @id @default(uuid())
+ organizationId String
+ planVersionId String
+ amount Decimal @db.Decimal(14,2)
+ currency String
+ periodStart DateTime
+ periodEnd DateTime
+ state String @default("open")
+ createdBy String
+ createdAt DateTime @default(now())
+ cancelledAt DateTime?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ planVersion BillingPlanVersion @relation(fields:[planVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ payment BillingPayment?
+ @@index([organizationId,createdAt,id])
+}
+model BillingPayment {
+ id String @id @default(uuid())
+ organizationId String
+ invoiceId String @unique
+ amount Decimal @db.Decimal(14,2)
+ currency String
+ channel String
+ proofHash String @unique
+ confirmedBy String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ invoice BillingInvoice @relation(fields:[invoiceId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ confirmer User @relation(fields:[confirmedBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+
+model IntegrationCost {
+ id String @id @default(uuid())
+ organizationId String
+ kind String
+ source String
+ currency String
+ periodStart DateTime
+ periodEnd DateTime
+ usageQuantity Decimal @db.Decimal(20,6)
+ unitPrice Decimal @db.Decimal(20,6)
+ amount Decimal @db.Decimal(14,2)
+ estimated Boolean
+ basis String
+ reason String
+ createdBy String
+ createdAt DateTime @default(now())
+ cancelledAt DateTime?
+ cancelledBy String?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ creator User @relation("IntegrationCostCreator",fields:[createdBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ canceller User? @relation("IntegrationCostCanceller",fields:[cancelledBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([organizationId,periodStart,id])
+}
+
+model AuthChallenge {
+ id String @id @default(uuid())
+ userId String
+ sessionId String?
+ kind String
+ channel String
+ providerId String
+ providerMode String
+ targetHash String
+ secretHash String
+ sealedSecret String?
+ deliveryAttempts Int @default(0)
+ deliveryLease String?
+ deliveryLeaseUntil DateTime?
+ nextDeliveryAt DateTime @default(now())
+ action String?
+ operationKey String?
+ payloadHash String?
+ attempts Int @default(0)
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ deliveredAt DateTime?
+ failedAt DateTime?
+ usedAt DateTime?
+ approvedOperationAt DateTime?
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ verifiedContact VerifiedContact?
+ @@index([userId,kind,createdAt])
+ @@index([expiresAt])
+ @@index([nextDeliveryAt])
+ @@index([secretHash])
+}
+model VerifiedContact {
+ id String @id @default(uuid())
+ userId String
+ channel String
+ targetHash String
+ challengeId String @unique
+ verifiedAt DateTime @default(now())
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ challenge AuthChallenge @relation(fields:[challengeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@unique([userId,channel])
+}
+
+model SupportPolicyVersion {
+ id String @id @default(uuid())
+ version Int @unique
+ timezone String
+ weekdays Int[]
+ opensMinute Int
+ closesMinute Int
+ firstResponseMinutes Int
+ escalationMinutes Int
+ status String @default("draft")
+ createdBy String?
+ reason String
+ createdAt DateTime @default(now())
+ tickets SupportTicket[]
+}
+model SupportTicket {
+ id String @id @default(uuid())
+ organizationId String
+ requestedBy String
+ assignedTo String?
+ title String
+ description String
+ diagnostics Json
+ severity String
+ state String @default("open")
+ policyVersionId String
+ firstResponseDueAt DateTime
+ escalationDueAt DateTime
+ createdAt DateTime @default(now())
+ firstRespondedAt DateTime?
+ firstResolvedAt DateTime?
+ resolvedAt DateTime?
+ updatedAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ requester User @relation("SupportTicketRequester",fields:[requestedBy],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ assignee User? @relation("SupportTicketAssignee",fields:[assignedTo],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ policy SupportPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ events SupportTicketEvent[]
+ @@unique([id,organizationId])
+ @@index([organizationId,createdAt,id])
+ @@index([state,severity,createdAt])
+}
+model SupportTicketEvent {
+ id String @id @default(uuid())
+ ticketId String
+ organizationId String
+ actorId String
+ kind String
+ message String
+ metadata Json
+ createdAt DateTime @default(now())
+ ticket SupportTicket @relation(fields:[ticketId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([ticketId,createdAt,id])
+}
+
+model RetentionPolicyVersion {
+ closureRequests OrganizationClosure[]
+ id String @id @default(uuid())
+ version Int @unique
+ expiredSubscriptionDays Int
+ closureCancellationDays Int
+ auditRetentionDays Int?
+ technicalLogRetentionDays Int?
+ backupRetentionDays Int?
+ proposedFinancialRetentionYears Int
+ createdBy String?
+ reason String
+ createdAt DateTime @default(now())
+ policies RetentionPolicy[]
+}
+model RetentionPolicy {
+ key String @id
+ currentVersionId String
+ currentVersion RetentionPolicyVersion @relation(fields:[currentVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+}
+
+model OrganizationClosure {
+ id String @id @default(uuid())
+ organizationId String
+ policyVersionId String
+ requestedBy String
+ requestedAt DateTime @default(now())
+ cancellationDays Int
+ cancellationEndsAt DateTime
+ exportJobId String
+ exportSha256 String
+ reason String
+ cancelledAt DateTime?
+ cancelledBy String?
+ cancellationReason String?
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ policy RetentionPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([organizationId,requestedAt,id])
+}
+
+model TotpFactor {
+ id String @id @default(uuid())
+ userId String
+ sessionId String
+ passwordDigest String
+ sealedSecret String?
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ confirmedAt DateTime?
+ revokedAt DateTime?
+ lastCounter BigInt?
+ attempts Int @default(0)
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ proofs TotpProof[]
+ recoveryCodes TotpRecoveryCode[]
+ keyRotations TotpKeyRotation[]
+ @@index([userId,createdAt])
+}
+model TotpProof {
+ id String @id @default(uuid())
+ userId String
+ factorId String
+ sessionId String
+ action String
+ operationKey String
+ payloadHash String
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ approvedOperationAt DateTime?
+ user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@index([userId,sessionId,action,operationKey])
+}
+
+model TotpRecoveryCode {
+ id String @id @default(uuid())
+ factorId String
+ secretHash String @unique
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ usedAt DateTime?
+ factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@index([factorId])
+}
+
+model TotpKeyRotation {
+ id String @id @default(uuid())
+ factorId String
+ batchId String
+ actorId String
+ reason String
+ oldEnvelopeHash String
+ newEnvelopeHash String
+ targetKeyFingerprint String
+ createdAt DateTime @default(now())
+ factor TotpFactor @relation(fields:[factorId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ @@unique([factorId,oldEnvelopeHash])
+ @@unique([batchId,factorId])
+ @@index([batchId])
+}
+
+// Operator-only restore quarantine and immutable review provenance.
+model AuthRestoreCheckpoint {
+ id String @id @default(uuid())
+ createdAt DateTime @default(now())
+ reviewedAt DateTime?
+ reviewer String?
+ reviewEvidence String?
+}
+
+// Future-only valuation order. Existing movement timestamps are not backfilled
+// into a fabricated sequence; legacyMovementCount records that limitation.
+model InventoryValuationSequence {
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ productId String @id
+ organizationId String
+ lastSequence BigInt @default(0)
+ legacyMovementCount BigInt
+ baselineQuantity Decimal? @db.Decimal(30,6)
+ baselineUnitCost Decimal? @db.Decimal(20,6)
+ initializedAt DateTime @default(now())
+ @@index([organizationId])
+}
+model InventoryValuationEvent {
+ product Product @relation(fields:[productId,organizationId],references:[id,organizationId],onDelete:Cascade,onUpdate:NoAction)
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store? @relation(fields:[storeId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ movement InventoryMovement? @relation(fields:[movementId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ actor User? @relation("ValuationEventActor",fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ storeId String?
+ movementId String? @unique
+ sequence BigInt
+ transactionId BigInt
+ kind String
+ quantityDelta Decimal? @db.Decimal(20,6)
+ unitCost Decimal? @db.Decimal(20,6)
+ beforeUnitCost Decimal? @db.Decimal(20,6)
+ afterUnitCost Decimal? @db.Decimal(20,6)
+ actorId String?
+ sourceType String?
+ sourceId String?
+ createdAt DateTime @default(now())
+ @@unique([productId,sequence])
+ @@index([organizationId,productId,sequence])
+}
+
+model InventoryBatch {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ code String
+ receivedOn String
+ expiresOn String
+ originItemId String @unique
+ createdBy String
+ createdAt DateTime @default(now())
+ product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+ entries InventoryBatchEntry[]
+ @@unique([productId,code])
+ @@index([organizationId,expiresOn,id])
+}
+
+model InventoryBatchEntry {
+ id String @id @default(uuid())
+ organizationId String
+ batchId String
+ storeId String
+ movementId String
+ quantityDelta Decimal @db.Decimal(20,6)
+ sourceEntryId String?
+ createdAt DateTime @default(now())
+ batch InventoryBatch @relation(fields:[batchId],references:[id],onDelete:Cascade)
+ movement InventoryMovement @relation(fields:[movementId],references:[id],onDelete:Cascade)
+ sourceEntry InventoryBatchEntry? @relation("BatchRestore",fields:[sourceEntryId],references:[id],onDelete:NoAction)
+ restorations InventoryBatchEntry[] @relation("BatchRestore")
+ dispositions InventoryBatchDisposition[]
+ @@unique([movementId,batchId])
+ @@index([organizationId,storeId,batchId])
+ @@index([batchId,storeId,id],map:"InventoryBatchEntry_batch_store_id_idx")
+ @@index([sourceEntryId])
+}
+
+model InventoryBatchDisposition {
+ id String @id @default(uuid())
+ organizationId String
+ sourceEntryId String
+ transferDispositionId String?
+ returnDispositionId String?
+ quantity Decimal @db.Decimal(20,6)
+ createdAt DateTime @default(now())
+ sourceEntry InventoryBatchEntry @relation(fields:[sourceEntryId],references:[id],onDelete:Cascade)
+ transferDisposition TransferDispositionEntry? @relation(fields:[transferDispositionId],references:[id],onDelete:Cascade)
+ returnDisposition ReturnDispositionEntry? @relation(fields:[returnDispositionId],references:[id],onDelete:Cascade)
+ @@unique([sourceEntryId,transferDispositionId])
+ @@unique([sourceEntryId,returnDispositionId])
+ @@index([organizationId,id])
+}
+
+model ReceiptCostApplication {
+ returnItems SaleReturnItem[]
+ id String @id @default(uuid())
+ ordinal BigInt @unique @default(autoincrement())
+ organizationId String
+ storeId String
+ planId String
+ actorId String
+ sessionId String
+ transactionId BigInt
+ amount Decimal @db.Decimal(14,2)
+ snapshot Json
+ reason String
+ createdAt DateTime @default(now())
+ reversalOfId String? @unique
+ reversalOf ReceiptCostApplication? @relation("CostApplicationReversal",fields:[reversalOfId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ reversal ReceiptCostApplication? @relation("CostApplicationReversal")
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ plan ReceiptCostPlan @relation(fields:[planId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@index([organizationId,createdAt,id])
+ @@index([planId,ordinal])
+}
+
+model ReceiptCostContinuation {
+ id String @id @default(uuid())
+ organizationId String
+ storeId String
+ productId String
+ planId String
+ actorId String
+ sessionId String
+ transactionId BigInt
+ lastSequence BigInt
+ sourceOperationId String?
+ sourceAuditId String?
+ varianceCorrection Decimal @db.Decimal(40,12)
+ roundingCorrection Decimal @db.Decimal(40,12)
+ cogsEntries Json
+ snapshot Json
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+ store Store @relation(fields:[storeId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ plan ReceiptCostPlan @relation(fields:[planId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ actor User @relation(fields:[actorId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ sourceOperation Operation? @relation(fields:[sourceOperationId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ sourceAudit AuditLog? @relation(fields:[sourceAuditId],references:[id],onDelete:NoAction,onUpdate:NoAction)
+ @@unique([planId,productId,transactionId])
+ @@index([organizationId,productId,createdAt,id])
+}
+
+
+model SerialNumber {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ code String
+ state String @default("available")
+ storeId String
+ lastSaleItemId String?
+ lastTransferId String?
+ version Int @default(0)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ events SerialEvent[]
+ warranties Warranty[]
+ @@unique([organizationId,code])
+ @@index([organizationId,storeId,productId,state,id])
+}
+model SerialEvent {
+ id String @id @default(uuid())
+ ordinal Int @default(0)
+ organizationId String
+ productId String
+ serialId String
+ storeId String
+ kind String
+ movementId String?
+ returnDispositionId String?
+ transferDispositionId String?
+ saleItemId String?
+ sourceId String
+ actorId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ serial SerialNumber @relation(fields:[serialId],references:[id],onDelete:NoAction)
+ @@unique([movementId,serialId])
+ @@index([organizationId,serialId,createdAt,id])
+ @@unique([serialId,ordinal])
+}
+model Warranty {
+ id String @id @default(uuid())
+ organizationId String
+ productId String
+ serialId String
+ saleItemId String
+ saleEventId String @unique
+ storeId String
+ startedAt DateTime
+ endsAt DateTime
+ terms String
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ serial SerialNumber @relation(fields:[serialId],references:[id],onDelete:NoAction)
+ services WarrantyService[]
+ @@unique([serialId,saleItemId])
+ @@index([organizationId,storeId,startedAt,id])
+}
+model WarrantyService {
+ id String @id @default(uuid())
+ ordinal Int @default(0)
+ organizationId String
+ productId String
+ warrantyId String
+ status String
+ note String
+ actorId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ product Product @relation(fields:[productId],references:[id],onDelete:NoAction)
+ warranty Warranty @relation(fields:[warrantyId],references:[id],onDelete:NoAction)
+ @@index([organizationId,warrantyId,createdAt,id])
+ @@unique([warrantyId,ordinal])
+}
+
+model LoyaltyPolicyVersion {
+ loyaltyCards LoyaltyCard[]
+ loyaltyPromotions LoyaltyPromotion[]
+ loyaltyBenefits LoyaltyBenefitSelection[]
+ giftCertificates GiftCertificate[]
+ redemptions LoyaltyRedemption[]
+ lots LoyaltyPointLot[]
+ id String @id @default(uuid())
+ organizationId String
+ revision Int
+ configuration Json
+ createdBy String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ author User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ @@unique([organizationId,revision])
+ @@index([organizationId,createdAt,id])
+}
+
+model LoyaltyPointLot {
+ recoveryOut LoyaltyRecoveryTransfer[] @relation("LoyaltyRecoveryFrom")
+ recoveryIn LoyaltyRecoveryTransfer[] @relation("LoyaltyRecoveryTo")
+ id String @id @default(uuid())
+ organizationId String
+ customerId String
+ saleId String @unique
+ policyVersionId String
+ initialPoints BigInt
+ expiresAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:NoAction)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ entries LoyaltyPointEntry[]
+ @@index([organizationId,customerId,createdAt,id])
+}
+model LoyaltyPointEntry {
+ redemptionId String?
+ transferId String?
+ id String @id @default(uuid())
+ organizationId String
+ lotId String
+ kind String
+ points BigInt
+ returnId String?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ lot LoyaltyPointLot @relation(fields:[lotId],references:[id],onDelete:NoAction)
+ saleReturn SaleReturn? @relation(fields:[returnId],references:[id],onDelete:NoAction)
+ redemption LoyaltyRedemption? @relation(fields:[redemptionId],references:[id],onDelete:NoAction)
+ transfer LoyaltyRecoveryTransfer? @relation(fields:[transferId],references:[id],onDelete:NoAction)
+ @@unique([lotId,kind,returnId])
+ @@index([organizationId,lotId,createdAt,id])
+ @@unique([lotId,kind,transferId])
+}
+
+model LoyaltyRedemption {
+ id String @id @default(uuid())
+ organizationId String
+ saleId String
+ customerId String
+ policyVersionId String
+ state String @default("prepared")
+ points BigInt
+ discountAmount Decimal @db.Decimal(14,2)
+ baseDiscountAmount Decimal @db.Decimal(14,2)
+ subtotalSnapshot Decimal @db.Decimal(14,2)
+ itemsSnapshot Json
+ originalDiscountPercent Decimal? @db.Decimal(5,2)
+ reason String
+ createdBy String
+ sessionId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ entries LoyaltyPointEntry[]
+ @@index([organizationId,saleId,createdAt,id])
+}
+
+model LoyaltyRecoveryTransfer {
+ returnId String?
+ id String @id @default(uuid())
+ organizationId String
+ fromLotId String
+ toLotId String
+ saleId String
+ points BigInt
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ fromLot LoyaltyPointLot @relation("LoyaltyRecoveryFrom",fields:[fromLotId],references:[id],onDelete:NoAction)
+ toLot LoyaltyPointLot @relation("LoyaltyRecoveryTo",fields:[toLotId],references:[id],onDelete:NoAction)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ saleReturn SaleReturn? @relation(fields:[returnId],references:[id],onDelete:NoAction)
+ entries LoyaltyPointEntry[]
+ @@index([organizationId,createdAt,id])
+}
+
+model GiftCertificate {
+ checkouts GiftCheckout[]
+ id String @id @default(uuid())
+ organizationId String
+ advanceId String @unique
+ policyVersionId String
+ code String
+ createdBy String
+ reason String
+ expiresAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ advance CustomerAdvance @relation(fields:[advanceId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ @@unique([organizationId,code])
+ @@index([organizationId,createdAt,id])
+}
+
+model GiftCheckout {
+ id String @id @default(uuid())
+ organizationId String
+ giftId String
+ saleId String @unique
+ amount Decimal @db.Decimal(14,2)
+ createdBy String
+ sessionId String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ gift GiftCertificate @relation(fields:[giftId],references:[id],onDelete:NoAction)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ @@index([organizationId,createdAt,id])
+}
+
+model LoyaltyCard {
+ id String @id @default(uuid())
+ organizationId String
+ customerId String
+ policyVersionId String
+ code String
+ createdBy String
+ reason String
+ expiresAt DateTime?
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:NoAction)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ selections LoyaltyBenefitSelection[]
+ @@unique([organizationId,code])
+ @@index([organizationId,customerId,createdAt,id])
+}
+model LoyaltyPromotion {
+ id String @id @default(uuid())
+ organizationId String
+ policyVersionId String
+ code String
+ configuration Json
+ createdBy String
+ reason String
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ selections LoyaltyBenefitSelection[]
+ @@unique([organizationId,code])
+ @@index([organizationId,createdAt,id])
+}
+model LoyaltyBenefitSelection {
+ id String @id @default(uuid())
+ organizationId String
+ saleId String
+ customerId String
+ policyVersionId String
+ cardId String?
+ promotionId String?
+ state String @default("prepared")
+ discountAmount Decimal @db.Decimal(14,2)
+ cardAmount Decimal @db.Decimal(14,2)
+ promotionAmount Decimal @db.Decimal(14,2)
+ baseDiscountAmount Decimal @db.Decimal(14,2)
+ originalDiscountPercent Decimal? @db.Decimal(5,2)
+ subtotalSnapshot Decimal @db.Decimal(14,2)
+ itemsSnapshot Json
+ createdBy String
+ sessionId String
+ reason String
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId],references:[id],onDelete:Cascade)
+ sale Sale @relation(fields:[saleId],references:[id],onDelete:NoAction)
+ customer Customer @relation(fields:[customerId],references:[id],onDelete:NoAction)
+ policy LoyaltyPolicyVersion @relation(fields:[policyVersionId],references:[id],onDelete:NoAction)
+ card LoyaltyCard? @relation(fields:[cardId],references:[id],onDelete:NoAction)
+ promotion LoyaltyPromotion? @relation(fields:[promotionId],references:[id],onDelete:NoAction)
+ creator User @relation(fields:[createdBy],references:[id],onDelete:NoAction)
+ @@index([organizationId,saleId,createdAt,id])
+ @@index([promotionId,state,customerId])
 }

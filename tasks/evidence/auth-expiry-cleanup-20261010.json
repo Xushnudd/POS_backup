@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-10",
+  "git_head": "975427bcbba849c25a9e120509135115d90393d2",
+  "version": "HEAD + working tree; no AI commit",
+  "change": "Bounded SKIP LOCKED expiry cleanup independent of delivery provider and encryption key; never marks delivered or verified",
+  "schema_change": false,
+  "source_sha256": {
+    "src/server/auth/challenges.ts": "09b90b23ec15153735a077229f24cec7a7059b67a013b6a7877621c155df8ff4",
+    "tests/auth-challenges.integration.test.ts": "07ad7a0fe3995a09917f8559df28b11b524a494556ab39d53f0fd7ec53c0183a",
+    "docs/operations/authentication-delivery.md": "5eb5fb95b8c0a279618e2fecc6ecb2c7b137162180a9c2ea410c850ec05234e7",
+    "tests/route-boundaries.integration.test.ts": "012ea75a12326d4a0354f131a3b9f56b93548441f0e0e460e017507239d81540"
+  },
+  "gates": {
+    "full_integration": {
+      "log": "/tmp/pos-core-regression-109.log",
+      "sha256": "8f0e30ec0e3149bec2e0b5f323b98e80a6305fdf9f9d91b27d861fe8c39ebae1",
+      "result": "PASS:244/244,322956.775004ms"
+    },
+    "unit": {
+      "log": "/tmp/pos-auth-expiry-unit.log",
+      "sha256": "8afe8db4706300dc57b3e676789198a2934f5463d38313b627e150c243602200",
+      "result": "PASS:23/23"
+    },
+    "lint": {
+      "log": "/tmp/pos-auth-expiry-lint.log",
+      "sha256": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+      "result": "PASS"
+    },
+    "worker_build": {
+      "log": "/tmp/pos-auth-expiry-worker.log",
+      "sha256": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+      "result": "PASS"
+    },
+    "production_build": {
+      "log": "/tmp/pos-auth-expiry-build.log",
+      "sha256": "f3929d588f3e561288301db577230d09d7f546f59863cc5707f325cdb36a8162",
+      "result": "PASS"
+    }
+  },
+  "original_done": 152,
+  "batch_progress": "7/20",
+  "external_integrations": "Unchanged; real SMS/email and vendor/hardware integrations remain deferred",
+  "previous_failed_full": "Earlier243 run had one outdated public-route classification; this final244 run includes corrected inventory and passes all cases"
+}

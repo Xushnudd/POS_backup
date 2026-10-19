@@ -1,0 +1,33 @@
+✔ Daily consented queue and concurrent worker replay prepare one exact statement; withdrawal immediately invalidates the link (321.612714ms)
+✔ Withdrawn queued consent, stale contact, other channel and foreign tenant cannot prepare or read a reminder (241.876838ms)
+✔ PostgreSQL jobs claim with SKIP LOCKED, preserve immutable scoped source, fence a stale lease and heartbeat the current lease (123.005322ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Bounded failure reaches visible dead-letter; manual retry creates fresh authorization once and audit failure has no duplicate effect (190.10172ms)
+✔ Job source/session revocation fails closed; cross-tenant, actual admin/cashier and expiry never scan or expose jobs (184.070955ms)
+✔ A slow real reconciliation receives automatic heartbeat; session revoked during work rolls back all effects (7089.729257ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"c3f6892c-df89-4f5a-86b3-18ac86f143cb","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","operationId":"74302327-e915-4c1b-a1e1-f2f53ae2ee96","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"c0654773-3261-4e7a-b017-5c0cd8ef7cf6","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","operationId":"16811268-ded9-4b70-b9f0-0f75c33e1b3e","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"ee0ed099-f0a8-4614-8f61-e81d6de4b124","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","operationId":"f76ba5f1-1722-4831-9207-cd2edc73084b","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"4def2473-b729-4f18-8959-edbc93267051","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","operationId":"998f434b-a02e-4cf4-b343-69cd24074869","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"9b8e8585-d166-4039-b33f-aa932d2f00cc","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","operationId":"1dff3c17-0cef-4428-aa5c-b81340cfd321","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"643636bf-c703-4540-8fc9-d62c5a9f1b11","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","status":429,"code":"RATE_LIMITED","durationMs":11,"event":"api_error"}
+{"requestId":"8fe86cc0-d4be-4ba5-8ec9-50eb25b5c7ba","organizationId":"f9b4b22d-aa7f-4aae-acef-50e830e4dc23","status":413,"code":"PAYLOAD_TOO_LARGE","durationMs":6,"event":"api_error"}
+{"requestId":"77f295a2-34ae-43b1-bb36-5d27a405047c","organizationId":"2f3c0e24-b7c3-4f70-8dfa-ac9e9876b00f","status":400,"code":"VALIDATION_ERROR","durationMs":10,"event":"api_error"}
+✔ Job quota is atomic and original replay bypasses new capacity; API rate/size/strict-kind bounds isolate actors (510.554387ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Consented receipt share retries once, preserves original decimals/identity, exposes no customer/staff/cost and revokes atomically (342.148981ms)
+✔ Actual near-expiry capability fails after database time passes; key removal fences prior links (2249.209907ms)
+{"requestId":"cd02f38d-6280-4440-9a83-45a4d25cffa5","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+{"requestId":"a993afd1-d6c3-4f84-b03f-7172d7f07e97","organizationId":"deb3527e-5baf-4a7c-9adc-ec25dd24cdda","operationId":"a7201122-61be-4fc6-a234-3d04cf600e47","status":200,"durationMs":36,"event":"api_response"}
+{"requestId":"f4f12989-c42b-4971-ab34-1caeccd4f42f","status":200,"durationMs":9,"event":"api_response"}
+{"requestId":"3b707efa-c54f-4745-b6b5-4072c3ea23f3","status":403,"code":"CSRF_REJECTED","durationMs":0,"event":"api_error"}
+✔ HTTP share creation needs auth and consent; public bearer POST requires origin and omits capability from responses (158.515778ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12058.91433

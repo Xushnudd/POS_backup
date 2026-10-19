@@ -1,0 +1,19 @@
+[WebServer] (node:116372) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:116421) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (8.8s)
+  ✓  2 [chromium] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (9.0s)
+(node:117122) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (11.8s)
+  ✓  4 [firefox] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (12.0s)
+(node:117622) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (9.2s)
+  ✓  6 [webkit] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (9.8s)
+
+  6 passed (1.1m)

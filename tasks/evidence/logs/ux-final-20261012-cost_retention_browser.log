@@ -1,0 +1,25 @@
+[WebServer] (node:817400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:817449) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (1.8s)
+  ✓   2 [chromium] › tests/e2e/billing-editor-state.spec.ts:46:5 › Billing and retention reads preserve independent administrator drafts (1.3s)
+  ✓   3 [chromium] › tests/e2e/billing-editor-state.spec.ts:84:5 › Platform cost lost acknowledgement replays once and cancellation keeps independent new quote draft (23.4s)
+  ✓   4 [chromium] › tests/e2e/retention.spec.ts:9:5 › Retention settings require actual platform authority and recover original lost acknowledgement without another version (29.9s)
+(node:819628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.2s)
+  ✓   6 [firefox] › tests/e2e/billing-editor-state.spec.ts:46:5 › Billing and retention reads preserve independent administrator drafts (1.6s)
+  ✓   7 [firefox] › tests/e2e/billing-editor-state.spec.ts:84:5 › Platform cost lost acknowledgement replays once and cancellation keeps independent new quote draft (25.6s)
+  ✓   8 [firefox] › tests/e2e/retention.spec.ts:9:5 › Retention settings require actual platform authority and recover original lost acknowledgement without another version (29.9s)
+(node:822088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/billing-editor-state.spec.ts:9:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.4s)
+  ✓  10 [webkit] › tests/e2e/billing-editor-state.spec.ts:46:5 › Billing and retention reads preserve independent administrator drafts (2.1s)
+  ✓  11 [webkit] › tests/e2e/billing-editor-state.spec.ts:84:5 › Platform cost lost acknowledgement replays once and cancellation keeps independent new quote draft (25.0s)
+  ✓  12 [webkit] › tests/e2e/retention.spec.ts:9:5 › Retention settings require actual platform authority and recover original lost acknowledgement without another version (29.6s)
+
+  12 passed (3.0m)

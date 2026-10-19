@@ -1,0 +1,8 @@
+{
+  "recordedAt": "2026-10-17T14:25:14.720733+00:00",
+  "container": "pos-preparation-20261017",
+  "volume": "pos-preparation-20261017-data",
+  "removed": true,
+  "scope": "Only the owned synthetic PostgreSQL review database/volume; real business app and database untouched",
+  "localTestImageRetained": "pos-preparation:20261017"
+}

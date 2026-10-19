@@ -1,0 +1,45 @@
+{"requestId":"143ca81e-34f6-4188-b84e-593c68bafc95","organizationId":"f731e543-783b-44d1-a253-7daee7d758d3","status":200,"durationMs":11,"event":"api_response"}
+✔ Maintenance rejects new durable writes, permits only authorized exact committed replay and lets an already admitted operation finish (167.698287ms)
+{"requestId":"65ca0984-2229-484f-b638-c1aa7af2c9bd","organizationId":"06e7f871-50fa-4c15-b88b-af619a0737f2","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"5da30270-1445-4154-81df-3164f426534b","organizationId":"06e7f871-50fa-4c15-b88b-af619a0737f2","status":403,"code":"TENANT_MISMATCH","durationMs":4,"event":"api_error"}
+{"requestId":"133cb138-d3ae-43de-bcc0-54ca0c20ea54","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Owner monitoring exposes only own counters/queues and overdue alert, without payloads or revoked/manager access (140.272427ms)
+✔ Real blocked DB query and expired provider lease generate scoped alerts without financial writes (744.417656ms)
+✔ Test-only rejected transport and dead job alert without leaking payloads; broken telemetry cannot alter settlement (215.582185ms)
+{"requestId":"5e7c3dc2-3523-4f07-8241-e7c62c86ef8f","organizationId":"c2e840e8-e0e8-4dfa-afc9-10d8f3f5c67c","status":200,"durationMs":35,"event":"api_response"}
+{"requestId":"62216b77-3344-4e15-9a61-1b3bf0fde43a","organizationId":"c2e840e8-e0e8-4dfa-afc9-10d8f3f5c67c","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"6314650b-4fb0-4689-a7e5-426bcb9ceef3","organizationId":"c2e840e8-e0e8-4dfa-afc9-10d8f3f5c67c","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"fb661343-c060-4655-b1ea-19ba205f5e05","organizationId":"c2e840e8-e0e8-4dfa-afc9-10d8f3f5c67c","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"c30acd0d-7ab2-437e-b7a4-246e60eb8f7f","organizationId":"c2e840e8-e0e8-4dfa-afc9-10d8f3f5c67c","status":403,"code":"TENANT_MISMATCH","durationMs":4,"event":"api_error"}
+{"requestId":"22b378f3-8bce-4dd7-9b24-e702da2fdb4f","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Owner sees admin-created active branches without assignment; staff lists stay scoped and revoked sessions fail (214.611508ms)
+{"requestId":"2813bdaa-6db6-4778-8540-42669a7835fa","organizationId":"175be2cc-56f3-46a1-b0bc-36d3eee7e5b9","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"f6f0c434-680e-4610-89c0-827c5debaf69","organizationId":"175be2cc-56f3-46a1-b0bc-36d3eee7e5b9","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"ce05f2cc-2bed-42fe-b4a6-8c4a3a57ce89","organizationId":"175be2cc-56f3-46a1-b0bc-36d3eee7e5b9","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"306829d6-4847-4c67-b004-1b3fc524030b","organizationId":"175be2cc-56f3-46a1-b0bc-36d3eee7e5b9","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"42c9249f-7712-439d-b5b6-7313a082092d","organizationId":"175be2cc-56f3-46a1-b0bc-36d3eee7e5b9","status":200,"durationMs":14,"event":"api_response"}
+✔ Blank optional TINs are null across businesses and settings can clear a saved TIN and receipt footer (96.642935ms)
+{"requestId":"ca8931aa-e16d-45e1-bf63-0a5ab3e247af","organizationId":"6601864a-2bef-4f66-ad7a-a64dbbbe025c","status":409,"code":"TIN_EXISTS","durationMs":12,"event":"api_error"}
+{"requestId":"bdeb683e-6345-45d5-98b1-0e5584ed9163","organizationId":"6601864a-2bef-4f66-ad7a-a64dbbbe025c","status":403,"code":"FORBIDDEN","durationMs":3,"event":"api_error"}
+✔ Duplicate TIN gives actionable sanitized409 and rolls back settings/audit; staff cannot change settings (56.599675ms)
+{"requestId":"017ed60b-d782-4bf4-b5cb-2f3226896d42","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":400,"code":"VALIDATION_ERROR","durationMs":19,"event":"api_error"}
+{"requestId":"c033e67a-1c2c-483c-b37a-b7765a8ddb49","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":400,"code":"VALIDATION_ERROR","durationMs":10,"event":"api_error"}
+{"requestId":"19d2e910-6f57-4936-9bb0-136110e3265e","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":400,"code":"VALIDATION_ERROR","durationMs":11,"event":"api_error"}
+{"requestId":"006770ad-9221-4535-87dc-1805b7e0f17a","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":400,"code":"VALIDATION_ERROR","durationMs":11,"event":"api_error"}
+{"requestId":"253088cf-af85-430b-ad3a-ac182a157668","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":400,"code":"VALIDATION_ERROR","durationMs":9,"event":"api_error"}
+{"requestId":"4d5f6610-dd47-4c30-89c4-cb3009593edc","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"7189e3c1-0710-4da9-97ca-8a0b4272e8fc","organizationId":"1ae1bc4d-9c5f-4aa2-95e0-650dec676d6b","status":200,"durationMs":13,"event":"api_response"}
+✔ Unknown timezone and malformed currency fail validation before mutation, supported timezones remain valid (106.950446ms)
+{"requestId":"d51ef338-a5a9-451c-9bf1-90d975ddadd6","organizationId":"accf0b6a-da75-40c6-b801-61131dc05418","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"ea8d9e6d-d5c7-493b-8f26-cca071fdc459","organizationId":"accf0b6a-da75-40c6-b801-61131dc05418","status":409,"code":"CONFLICT","durationMs":10,"event":"api_error"}
+✔ Duplicate register code reaches common409 handling without committing a second register or audit (55.215165ms)
+{"requestId":"a739fb8b-601e-4912-833e-06ca6d11f904","organizationId":"09ce224b-55f7-4bee-9841-705cc6c1e7a9","status":500,"code":"INTERNAL_ERROR","durationMs":12,"event":"api_error"}
+✔ Late settings audit failure returns sanitized500 with a request ID and rolls back the actual business update (33.148752ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2692.807149

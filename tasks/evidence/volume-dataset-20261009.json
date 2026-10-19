@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-09T10:14:17.004Z",
+  "organizationId": "0a999eb8-b572-457c-9ef1-06d079366e77",
+  "dataset": {
+    "products": 50000,
+    "saleItems": 1000000,
+    "activeRegisters": 20,
+    "historyStatus": "synthetic drafts; real measured checkout uses normal service"
+  },
+  "kind": "isolated synthetic volume; not production history"
+}

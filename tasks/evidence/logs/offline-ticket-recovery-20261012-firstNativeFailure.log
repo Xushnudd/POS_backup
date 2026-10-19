@@ -1,0 +1,79 @@
+✔ Central critical-action policy fails closed before writes/replay even when authenticator availability is off (386.581642ms)
+✔ Central MFA binds critical execution and replay to the approved payload and preserves late failure rollback (548.62931ms)
+✔ A valid MFA proof never grants platform privileges; revoked platform access denies a stored-result replay (529.458273ms)
+{"requestId":"2fb263db-c964-4395-9718-95b4d111fcac","organizationId":"4f032e12-650e-4f6f-ac14-52d4fa957cc5","status":200,"durationMs":46,"event":"api_response"}
+✔ Platform overview requires independent live admin and MFA, paginates safe tenant metadata and audits reads without storing cross-tenant results (922.766622ms)
+✔ TOTP enrollment requires live session and fresh password; secrets never enter audit (706.350297ms)
+✔ Five incorrect enrollment attempts commit and revoke the pending secret; foreign identity cannot confirm (760.399419ms)
+✔ Concurrent TOTP validation accepts one proof; action/key/hash/session binding and counter replay are enforced (1030.419811ms)
+✔ Late audit failure rolls back enrollment confirmation and consumed counter/proof together (529.589381ms)
+✔ An actual cashier PIN session cannot enroll a factor, and a second password session cannot confirm the first enrollment (954.265464ms)
+✔ Revoking a factor invalidates unconsumed proofs in both service and direct DB approval (497.335371ms)
+✔ Recovery codes are hashed, own-account and one-use; recovery revokes the factor and all password/PIN sessions (1742.434686ms)
+✔ Recovery audit failure rolls back code consumption, factor revocation and all-session logout (1023.703708ms)
+✔ Recovery rotation requires a fresh TOTP counter and password, replaces old codes, and status exposes only safe metadata (1662.732647ms)
+✔ Rotation audit failure preserves original backup codes and the unused TOTP counter (959.286376ms)
+✔ After a password change, a new password session plus backup code can recover exactly once under concurrency (966.948835ms)
+{"requestId":"d5e8e574-e904-4db6-bb37-c992576f0497","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":10,"event":"api_response"}
+{"requestId":"789161d1-3d60-4313-895d-5e6c36c1522b","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":503,"code":"TOTP_UNAVAILABLE","durationMs":9,"event":"api_error"}
+{"requestId":"ebf7110d-4ba0-4326-a3d6-dbeab2cfaaaa","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+{"requestId":"bb47146d-87f1-4af7-b2d6-217cfdb7a814","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"0fb21105-e77f-4630-bad1-0eb8fda98a55","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"df390305-1b67-48cf-a260-74d4f3db6299","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"6a8e362c-2c3a-491a-a098-c66256afa158","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"a13475ab-6c29-4c19-9d1d-46e1f790311e","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":9,"event":"api_response"}
+{"requestId":"4401c49b-d5de-44ab-8f8e-1885f02a6794","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":503,"code":"TOTP_UNAVAILABLE","durationMs":6,"event":"api_error"}
+{"requestId":"2e07e4d0-8ea9-4155-84d6-4997b7d733a5","organizationId":"c7107f3b-8b3b-4a45-af10-f26b4b779bb5","status":200,"durationMs":245,"event":"api_response"}
+✔ HTTP TOTP is opt-in, scoped, no-store and presents only one-time provisioning/recovery DTOs (874.900295ms)
+{"requestId":"8f8b1837-0736-4060-ac11-1d662dd4da5d","organizationId":"8f2ab9e8-0304-426c-a678-855dd733a831","status":200,"durationMs":9,"event":"api_response"}
+{"requestId":"9c5bcfec-de84-4073-91ba-026d3f0bc51b","organizationId":"8f2ab9e8-0304-426c-a678-855dd733a831","status":503,"code":"TOTP_UNAVAILABLE","durationMs":8,"event":"api_error"}
+✔ Invalid rotation configuration makes HTTP enrollment unavailable without persisting a factor (261.994471ms)
+✔ Member permissions require exact MFA and an operation key; approved replay does not log out a newly signed-in target (775.832451ms)
+✔ Ownership request audit fault rolls back MFA approval; both parties require independent proof and accepted session token is never stored (1069.230382ms)
+✔ Ownership cancellation requires its own action/hash proof and leaves original owner roles unchanged (758.089005ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Invitation grant requires bound MFA; concurrent replay never persists or reissues the bearer token (584.484069ms)
+{"requestId":"a2a51e31-52bb-47e2-b057-999d849044d8","organizationId":"abc8c413-382c-4f6b-a0f6-e5ab8232d6c2","operationId":"188fef67-6f3d-4564-b1e8-0d5dad6cf898","status":403,"code":"STEP_UP_REQUIRED","durationMs":18,"event":"api_error"}
+{"requestId":"bc275c12-e1be-440c-a28a-d3e4cb5578c4","organizationId":"abc8c413-382c-4f6b-a0f6-e5ab8232d6c2","operationId":"188fef67-6f3d-4564-b1e8-0d5dad6cf898","status":200,"durationMs":254,"event":"api_response"}
+{"requestId":"4996c742-ecde-481b-9daf-ebbd5a3146fd","organizationId":"abc8c413-382c-4f6b-a0f6-e5ab8232d6c2","operationId":"188fef67-6f3d-4564-b1e8-0d5dad6cf898","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"6bbbe478-5290-40f9-a9ae-0b23af32349c","organizationId":"abc8c413-382c-4f6b-a0f6-e5ab8232d6c2","operationId":"188fef67-6f3d-4564-b1e8-0d5dad6cf898","status":403,"code":"STEP_UP_REQUIRED","durationMs":20,"event":"api_error"}
+✔ HTTP staff creation binds the password privately and replays exactly one safe member result (809.269333ms)
+{"requestId":"c4edebaf-48a5-4bf3-ab30-b5a2af7e0eef","organizationId":"efb1fc45-c780-4daf-a26f-fce5da8f11ed","status":403,"code":"STEP_UP_REQUIRED","durationMs":462,"event":"api_error"}
+{"requestId":"2285784a-359d-4ad2-ac4e-b6347c72c356","organizationId":"efb1fc45-c780-4daf-a26f-fce5da8f11ed","status":500,"code":"INTERNAL_ERROR","durationMs":467,"event":"api_error"}
+{"requestId":"fef39a7a-7659-42a0-ad0a-06ac2c101574","organizationId":"efb1fc45-c780-4daf-a26f-fce5da8f11ed","status":200,"durationMs":471,"event":"api_response"}
+{"requestId":"56f4b456-10a1-40fe-a06f-583b778849f2","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Owner password change requires a bound second factor and atomically invalidates all sessions without storing credentials (2585.578344ms)
+✖ Hyphenated offline policy proof binds the actual operation key and rejects a changed payload and action (506.133849ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 23
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22048.442932
+
+✖ failing tests:
+
+test at .test-build/tests/totp.integration.test.js:793:22
+✖ Hyphenated offline policy proof binds the actual operation key and rejects a changed payload and action (506.133849ms)
+  PrismaClientUnknownRequestError: 
+  Invalid `tx.totpProof.create()` invocation in
+  /home/fedora/Developments/POS_backup/.test-build/src/server/auth/totp-service.js:102:42
+  
+     99 if (counter === null)
+    100     return null;
+    101 await tx.totpFactor.update({ where: { id: factor.id }, data: { lastCounter: counter } });
+  → 102 const proof = await tx.totpProof.create(
+  Error occurred during query execution:
+  ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "23514", message: "new row for relation \"TotpProof\" violates check constraint \"TotpProof_action_check\"", severity: "ERROR", detail: Some("Failing row contains (4cd9274c-8a23-4127-880e-4a3af59341de, da2a85e0-a4d0-46d7-b815-4a1bfe491b39, eb33ca32-3a7f-4cfa-bbd8-28a362ce94c1, d2268c6b-88fc-4653-a160-b6a441aee4de, offline-cash.policy, a747f402-5059-43ee-9b04-489c71225a98, 071bef2c26a424fd8205cff810537e814045395dccba9a22d78bc440acb051bf, 2026-10-12 11:48:00.631, 2026-10-12 11:53:00.631, null)."), column: None, hint: None }), transient: false })
+      at $n.handleRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:7505)
+      at $n.handleAndLogRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6623)
+      at $n.request (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6307)
+      at async l (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:9633)
+      at async /home/fedora/Developments/POS_backup/.test-build/src/server/auth/totp-service.js:102:23
+      at async Proxy._transactionWithCallback (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:8000)
+      at async createTotpProof (/home/fedora/Developments/POS_backup/.test-build/src/server/auth/totp-service.js:93:20)
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/totp.integration.test.js:801:23)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

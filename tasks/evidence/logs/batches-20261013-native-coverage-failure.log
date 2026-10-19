@@ -1,0 +1,53 @@
+✔ real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold (1289.862523ms)
+✔ tracked multi-batch transfer receive/loss/replay preserves original source and branch stock (418.898686ms)
+✔ partial original batch return, damaged return and exact per-batch count are atomic and idempotent (676.851093ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"event":"batch_acceptance_profile","receipts":54,"expiredRows":53,"elapsedMs":3787}
+✔ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (3846.143139ms)
+✖ supplier goods return targets original expired lot and opening reversal restores no invented batch (207.477459ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (356.826069ms)
+{"requestId":"96c51166-f775-4ac3-b069-d1278b18e987","organizationId":"7204abe3-ada3-49a3-9768-0d36a3d7f4e1","status":200,"durationMs":37,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (568.010645ms)
+✔ Oversized exports fail without publishing a partial artifact or business mutation (1214.153877ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (768.219538ms)
+✖ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (3.867582ms)
+✔ Deferred cross-tenant parent reference and direct ownership mutation fail; scoped ORM rejects foreign creates and shared models (69.034321ms)
+✔ Concurrent SKU and alias inserts have exactly one winner inside a tenant; a second tenant can use the same identifiers (68.27273ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 10
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11116.394537
+
+✖ failing tests:
+
+test at .test-build/tests/batches.integration.test.js:157:22
+✖ supplier goods return targets original expired lot and opening reversal restores no invented batch (207.477459ms)
+  NotFoundError [PrismaClientKnownRequestError]: No SupplierInvoice found
+      at /home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:31:5146
+      at async /home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:31:5086
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/batches.integration.test.js:164:21)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'P2025',
+    clientVersion: '5.22.0',
+    meta: undefined
+  }
+
+test at .test-build/tests/tenant-models.integration.test.js:18:22
+✖ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (3.867582ms)
+  AssertionError [ERR_ASSERTION]: InventoryBatch
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/tenant-models.integration.test.js:25:26)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

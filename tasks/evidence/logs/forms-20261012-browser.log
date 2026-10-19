@@ -1,0 +1,50 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test core.spec.ts organization-closure.spec.ts auth-form-state.spec.ts --grep Landed cost UI|Purchase order UI|Owner closes|durable shift correction|Supplier ledger UI|Supplier return UI|guards dirty and in-flight|successful login uses
+
+[WebServer] (node:25534) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 33 tests using 1 worker
+
+(node:25577) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.3s)
+  ✓   2 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (726ms)
+  ✓   3 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (392ms)
+  ✓   4 [chromium] › tests/e2e/auth-form-state.spec.ts:18:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (352ms)
+  ✓   5 [chromium] › tests/e2e/auth-form-state.spec.ts:54:5 › successful login uses authenticated role ACK and does not require a second me request (1.4s)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:45:5 › Landed cost UI previews partial receipts, invalidates edited results and retries without posting (2.8s)
+  ✓   7 [chromium] › tests/e2e/core.spec.ts:566:5 › Production HTTPS: durable shift correction and frozen report pagination/export (3.1s)
+  ✓   8 [chromium] › tests/e2e/core.spec.ts:951:5 › Supplier ledger UI records invoice, partial cash allocation and recovers unknown advance exactly once (2.6s)
+  ✓   9 [chromium] › tests/e2e/core.spec.ts:973:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (2.7s)
+  ✓  10 [chromium] › tests/e2e/core.spec.ts:983:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (2.6s)
+  ✓  11 [chromium] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (4.4s)
+(node:26323) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  12 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.7s)
+  ✓  13 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.1s)
+  ✓  14 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (716ms)
+  ✓  15 [firefox] › tests/e2e/auth-form-state.spec.ts:18:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (616ms)
+  ✓  16 [firefox] › tests/e2e/auth-form-state.spec.ts:54:5 › successful login uses authenticated role ACK and does not require a second me request (1.0s)
+  ✓  17 [firefox] › tests/e2e/core.spec.ts:45:5 › Landed cost UI previews partial receipts, invalidates edited results and retries without posting (3.8s)
+  ✓  18 [firefox] › tests/e2e/core.spec.ts:566:5 › Production HTTPS: durable shift correction and frozen report pagination/export (3.6s)
+  ✓  19 [firefox] › tests/e2e/core.spec.ts:951:5 › Supplier ledger UI records invoice, partial cash allocation and recovers unknown advance exactly once (3.4s)
+  ✓  20 [firefox] › tests/e2e/core.spec.ts:973:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (3.2s)
+  ✓  21 [firefox] › tests/e2e/core.spec.ts:983:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (3.5s)
+  ✓  22 [firefox] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (6.0s)
+(node:27888) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  23 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › login guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.6s)
+  ✓  24 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › register guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (1.4s)
+  ✓  25 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › forgot-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (726ms)
+  ✓  26 [webkit] › tests/e2e/auth-form-state.spec.ts:18:88 › reset-password guards dirty and in-flight state, rejects same-tick duplicate submit and preserves fields on real failure (817ms)
+  ✓  27 [webkit] › tests/e2e/auth-form-state.spec.ts:54:5 › successful login uses authenticated role ACK and does not require a second me request (1.9s)
+  ✓  28 [webkit] › tests/e2e/core.spec.ts:45:5 › Landed cost UI previews partial receipts, invalidates edited results and retries without posting (3.8s)
+  ✓  29 [webkit] › tests/e2e/core.spec.ts:566:5 › Production HTTPS: durable shift correction and frozen report pagination/export (3.8s)
+  ✓  30 [webkit] › tests/e2e/core.spec.ts:951:5 › Supplier ledger UI records invoice, partial cash allocation and recovers unknown advance exactly once (3.6s)
+  ✓  31 [webkit] › tests/e2e/core.spec.ts:973:5 › Purchase order UI accepts two receipts and preserves original unknown receipt intent across reload (3.6s)
+  ✓  32 [webkit] › tests/e2e/core.spec.ts:983:5 › Supplier return UI preserves original lost credit intent, releases paid amount to advance and never posts a cash refund (3.4s)
+  ✓  33 [webkit] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (4.8s)
+
+  33 passed (1.4m)

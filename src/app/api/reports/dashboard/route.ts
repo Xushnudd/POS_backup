@@ -1,161 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
-
-export async function GET(request: NextRequest) {
-  try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
-        { status: 401 }
-      )
-    }
-
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
-        { status: 401 }
-      )
-    }
-
-    const { searchParams } = new URL(request.url)
-    const organizationId = searchParams.get('organizationId')
-    const storeId = searchParams.get('storeId')
-    const date = searchParams.get('date') || new Date().toISOString().split('T')[0]
-
-    if (!organizationId) {
-      return NextResponse.json(
-        { success: false, error: { code: 'MISSING_PARAM', message: 'Organization ID talab qilinadi' } },
-        { status: 400 }
-      )
-    }
-
-    const startDate = new Date(date)
-    startDate.setHours(0, 0, 0, 0)
-    const endDate = new Date(date)
-    endDate.setHours(23, 59, 59, 999)
-
-    const where: any = {
-      organizationId,
-      status: 'completed',
-      completedAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    }
-
-    if (storeId) where.storeId = storeId
-
-    // Get today's sales
-    const sales = await prisma.sale.findMany({
-      where,
-      include: {
-        payments: true,
-      },
-    })
-
-    const totalSales = sales.length
-    const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.totalAmount), 0)
-    const averageCheck = totalSales > 0 ? totalRevenue / totalSales : 0
-
-    // Payment breakdown
-    const cashPayments = sales
-      .flatMap(sale => sale.payments)
-      .filter(p => p.paymentType === 'cash')
-      .reduce((sum, p) => sum + Number(p.amount), 0)
-    
-    const cardPayments = sales
-      .flatMap(sale => sale.payments)
-      .filter(p => p.paymentType === 'card')
-      .reduce((sum, p) => sum + Number(p.amount), 0)
-
-    // Open shifts
-    const openShifts = await prisma.shift.count({
-      where: {
-        status: 'open',
-        ...(storeId && { register: { storeId } }),
-      },
-    })
-
-    // Low stock items
-    const lowStockItems = await prisma.inventoryBalance.findMany({
-      where: {
-        ...(storeId && { storeId }),
-        product: {
-          minStock: {
-            gt: 0,
-          },
-        },
-      },
-      include: {
-        product: true,
-      },
-    })
-
-    const lowStockCount = lowStockItems.filter(
-      balance => Number(balance.quantity) < Number(balance.product.minStock)
-    ).length
-
-    // Top products today
-    const productSales = await prisma.saleItem.groupBy({
-      by: ['productId'],
-      where: {
-        sale: {
-          ...where,
-        },
-      },
-      _sum: {
-        quantity: true,
-        lineTotal: true,
-      },
-      orderBy: {
-        _sum: {
-          lineTotal: 'desc',
-        },
-      },
-      take: 5,
-    })
-
-    const topProducts = await Promise.all(
-      productSales.map(async (ps) => {
-        const product = await prisma.product.findUnique({
-          where: { id: ps.productId },
-          select: {
-            id: true,
-            name: true,
-            sku: true,
-          },
-        })
-        return {
-          ...product,
-          quantity: ps._sum.quantity,
-          revenue: ps._sum.lineTotal,
-        }
-      })
-    )
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        date,
-        totalSales,
-        totalRevenue,
-        averageCheck,
-        cashPayments,
-        cardPayments,
-        openShifts,
-        lowStockCount,
-        topProducts,
-      },
-    })
-
-  } catch (error) {
-    console.error('Get dashboard error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
-  }
-}
+import { withApi } from '@/server/api'
+import { getRequestToken, verifyToken } from '@/lib/auth'
+import { AccessError, tenantScope } from '@/server/auth/policy'
+import { financialFilter, financialSummary } from '@/server/reports/financial'
+import { localDate } from '@/server/reports/dates'
+export const GET=withApi(async(request:NextRequest)=>{
+ const context=await verifyToken(getRequestToken(request)??'')
+ if(!context)throw new AccessError(401,'UNAUTHORIZED')
+ const params=new URLSearchParams(request.nextUrl.searchParams)
+ if(!params.get('organizationId'))throw new AccessError(400,'MISSING_PARAM')
+ const result=await prisma.$transaction(async tx=>{
+  const org=await tx.organization.findUniqueOrThrow({where:{id:context.organizationId},select:{timezone:true}})
+  const date=params.get('date')??localDate(new Date(),org.timezone)
+  if(!params.has('startDate')&&!params.has('endDate')){params.set('startDate',date);params.set('endDate',date)}
+  const filter=await financialFilter(tx,context,params),{total,summary}=await financialSummary(tx,context,filter)
+  const openShifts=await tx.shift.count({where:{AND:tenantScope('Shift',context),status:'open',...(filter.storeId?{register:{storeId:filter.storeId}}:{})}})
+  const branches=context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND b."storeId" IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`
+  const low=await tx.$queryRaw<{count:bigint}[]>(Prisma.sql`SELECT count(*) FROM "InventoryBalance" b JOIN "Store" s ON s.id=b."storeId" JOIN "Product" p ON p.id=b."productId" WHERE s."organizationId"=${context.organizationId} AND p."organizationId"=${context.organizationId} AND p."minStock">0 AND b.quantity<p."minStock" ${branches} ${filter.storeId?Prisma.sql`AND b."storeId"=${filter.storeId}`:Prisma.empty}`)
+  const top=await tx.$queryRaw<{productId:string;quantity:Prisma.Decimal;revenue:Prisma.Decimal}[]>`SELECT i."productId",sum(i.quantity) AS quantity,sum(COALESCE(i."payableAmount",i."lineTotal"-i."receiptDiscount")) AS revenue FROM "SaleItem" i JOIN "Sale" s ON s.id=i."saleId" WHERE s."organizationId"=${context.organizationId} AND s.status IN ('completed','partially_returned','returned') AND s."createdAt"<=${filter.asOf} AND s."completedAt"<=${filter.asOf} ${context.role==='cashier'?Prisma.sql`AND s."cashierId"=${context.userId}`:Prisma.empty} ${context.role==='owner'?Prisma.empty:context.storeIds.length?Prisma.sql`AND s."storeId" IN (${Prisma.join(context.storeIds)})`:Prisma.sql`AND FALSE`} ${filter.storeId?Prisma.sql`AND s."storeId"=${filter.storeId}`:Prisma.empty} ${filter.range.gte?Prisma.sql`AND s."completedAt">=${filter.range.gte}`:Prisma.empty} ${filter.range.lt?Prisma.sql`AND s."completedAt"<${filter.range.lt}`:Prisma.empty} GROUP BY i."productId" ORDER BY revenue DESC,i."productId" LIMIT 5`
+  const names=await tx.product.findMany({where:{organizationId:context.organizationId,id:{in:top.map(x=>x.productId)}},select:{id:true,name:true,sku:true}})
+  const topProducts=top.map(row=>({...names.find(p=>p.id===row.productId),quantity:row.quantity,revenue:row.revenue}))
+  return {success:true,data:{date,...summary,totalSales:total,averageCheck:summary.averageSale,openShifts,lowStockCount:Number(low[0].count),topProducts},meta:{...filter.meta,operationalCounts:'current_snapshot'}}
+ },{isolationLevel:'RepeatableRead',timeout:15000})
+ return NextResponse.json(result)
+})

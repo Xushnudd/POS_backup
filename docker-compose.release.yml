@@ -1,0 +1,38 @@
+# Use with base compose and maintenance overlay; never deploy automatically.
+name: ${COMPOSE_PROJECT_NAME:?A separate environment project is required}
+x-release-auth: &release-auth
+  AUTH_CHALLENGE_SECRET: ${AUTH_CHALLENGE_SECRET:?A private environment-specific 64hex key is required}
+  AUTH_TOTP_ENABLED: "true"
+  AUTH_CRITICAL_MFA_REQUIRED: "true"
+  POS_RELEASE_IMAGE: ${POS_IMAGE:?Immutable approved image required}
+x-release-runtime: &release-runtime
+  entrypoint: ["node", "scripts/ops/release-entrypoint.mjs"]
+  user: "1001:1001"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,uid=1001,gid=1001,mode=1770,size=67108864
+    - /app/.next/cache:rw,noexec,nosuid,nodev,uid=1001,gid=1001,mode=0700,size=67108864
+services:
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Explicit environment database required}
+      POSTGRES_USER: ${POSTGRES_USER:?Explicit environment database user required}
+  app:
+    <<: *release-runtime
+    command: ["node", "server.js"]
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth
+  jobs:
+    <<: *release-runtime
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth
+  reconciliation:
+    <<: *release-runtime
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth
+  migrate:
+    <<: *release-runtime
+    image: ${POS_IMAGE:?Immutable approved image required}
+    environment: *release-auth

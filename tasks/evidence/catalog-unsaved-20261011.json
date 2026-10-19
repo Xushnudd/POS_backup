@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-11",
+  "task": "UX-01.05 partial core acceptance",
+  "version": {
+    "head": "9f5a43258c7980a565dd27dc10d42688bd5e7ab4",
+    "uncommittedChanges": true
+  },
+  "originalDoneBaseline": 159,
+  "originalDoneAdded": 0,
+  "originalTarget": 179,
+  "status": "in_progress",
+  "checks": {
+    "unit": {
+      "passedFiles": 34,
+      "failed": 0
+    },
+    "browser": {
+      "passed": 3,
+      "failed": 0,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "environment": "isolated localhost:55439/pos_test; local HTTPS; no production deployment"
+    },
+    "build": "passed Next16 webpack",
+    "typecheck": "passed",
+    "eslint": "passed changed files",
+    "securityScan": {
+      "scanned": 835,
+      "findings": [],
+      "scope": "working tree; no credential stores, history or container images"
+    }
+  },
+  "accepted": [
+    "Five scoped forms preserve drafts on rejected discard",
+    "409 save leaves draft intact and real successful save resets guard",
+    "Archiving another brand preserves current editor",
+    "Supplier Escape/X discard confirmation",
+    "Customer exact decimal creditLimit string round trip",
+    "Rejected logout/business switch leave server session and inputs unchanged",
+    "Accepted business switch uses one confirmation",
+    "Uncoded HTTP failure preserves status/requestId; transport failure retains unknown result guidance"
+  ],
+  "notAccepted": [
+    "All UX-01.05 pages and retry coverage",
+    "SPA browser back/forward interception",
+    "Actual production/pilot acceptance"
+  ],
+  "sources": {
+    "src/hooks/useUnsavedChanges.ts": "f4f5f9a5fb67f11b10867534a7783816052214009751860cee32f6acde3be464",
+    "src/lib/page-navigation.ts": "dc4db81b12529a0750154c0a78b1c5801dda04413a7667e5da760dc8811e8ad3",
+    "src/lib/api.ts": "fa4f637dff2b4ac04fcedb079961491e309db836b24279f537c4417cddbd3b2f",
+    "src/context/AuthContext.tsx": "1b123f022a67a73251107f6a31697f4e130d035d0322ad77231d4eb84f6a10e5",
+    "src/components/layouts/Header.tsx": "278919cb11dd9af6f0d976f209a55ff058c377a085dcf28d73d6b379b7af7856",
+    "src/app/(dashboard)/products/categories/page.tsx": "c579a3d89abd5b81721c2ae2fa223c086d6c81f0f666a78f41737d24febc05e2",
+    "src/app/(dashboard)/products/units/page.tsx": "343e463e4e7f550d7ae2a4bf965f67e9c10e349140bf4fc73c4ad520a748f127",
+    "src/app/(dashboard)/products/brands/page.tsx": "1b7261dba72699b0c166d02173099801a2e095f402a61193e4cb753fda97af09",
+    "src/app/(dashboard)/suppliers/page.tsx": "5beeee706cc695573c504f261b77519d82cc203d02d9ef7c497f2abc0f2b5b45",
+    "src/app/(dashboard)/customers/page.tsx": "288d4f0f81214e7dba0da50edf234bdb79d874edb740aa6313223a5a2df95727",
+    "tests/e2e/catalog-unsaved.spec.ts": "ab1218af779cf7b49dc413318df9219d33187b34324d8a014f1bc0f09aa879e0",
+    "tests/api-errors.unit.test.ts": "ef8f7fc82f5f6e2753d379fe569b3eefe0a252c35cc90c70c63ae87edff9eb79",
+    "docs/operations/unsaved-forms.md": "b85274271c76feae3dae30703edf57fc954f4d50a11becced7b2ede9be675e74"
+  }
+}

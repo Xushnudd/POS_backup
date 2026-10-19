@@ -1,0 +1,18 @@
+[Unit]
+Description=POS independent readiness observation (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=pos-ops-%i
+Group=pos-ops-%i
+EnvironmentFile=/etc/pos/%i/monitoring.env
+WorkingDirectory=/opt/pos
+ExecStart=/usr/bin/node /opt/pos/scripts/ops/uptime-probe.mjs
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+TimeoutStartSec=15s

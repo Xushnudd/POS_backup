@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-12",
+  "originalPlan": {
+    "total": 259,
+    "baselineDone": 164,
+    "done": 164,
+    "target": 170,
+    "delta": 0,
+    "completed": []
+  },
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "worktree": true,
+  "commitCreated": false,
+  "sourceSha256": {
+    "src/app/(dashboard)/inventory/page.tsx": "fa273231359b1593437678f40690706c1326dff989f02c9346e0eee20105bfb8",
+    "src/app/(dashboard)/inventory/transfers/page.tsx": "a020def92c2ddb5b10add5a98f8d19d612b129a15e8a4968a417b228233cd108",
+    "src/components/forms/PendingActions.tsx": "55d7bb02bd81aa1f46d1a32fbeb646a73e2e14f0a15689b0a471f9fd6fcc7ee3",
+    "src/components/forms/DurableMutation.tsx": "76100680cc420bac38975043f0f496e5f75ea755f58da3231cb594ae9d735320",
+    "src/app/api/stock-documents/route.ts": "aab43423634ac3f06a168813d2a919e6d5b060e7bfcd7c2001233972f40852d6",
+    "src/app/api/transfers/route.ts": "8e7328b2a03011e84be9c8d154cca54de54c7db0af5eaa9c9e18ffa79dfa4555",
+    "src/lib/api.ts": "62665c9ff22c06f0d0436bd4389a03a7833348d4e429f9b5020424428068a7a7",
+    "tests/e2e/stock-draft-recovery.spec.ts": "50c445bae5a7bcdc18a409b3daa159ed983a304ce711b0cd3480d81d87da277f",
+    "api.md": "4876157ebc7f43c3dec66fa9f72ded532e606317effabd8487afd67986424044",
+    "tasks/EXECUTION_STATUS.md": "fd2dbf2f0dc9644530331e7210f531e4dafa55985af6f39560b247b79da99e9e",
+    "tasks/PLAN1.md": "952313851a8f6b9c4bbfc5668503d417fe52f242363475f722379774f17c9577",
+    "prisma/schema.prisma": "133a94b492c7c9858c57c46c56c73d2ab1c630fb22fd73a755aa68bd6dbde008",
+    ".next/standalone/server.js": "5d1258714683b90e87c729268625861a0bcbe469830ad917a91e3ef2a6fae6e9"
+  },
+  "checks": {
+    "lostAckAndReloadBrowser": {
+      "passed": 6,
+      "failed": 0,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "legacyPreviewAndReceiptRegression": {
+      "passed": 6,
+      "failed": 0,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "typecheck": "pass",
+    "changedFileLint": "pass",
+    "webpackBuild": "pass (only API TS annotations changed afterwards)",
+    "diffCheck": "pass",
+    "logsSha256": {
+      "/tmp/pos-170-draft-ui-browser-final.log": "37dd67e94b037d390110bf0c19cb9ffc1c0da09f2f6b1d208e5659cd203a388e",
+      "/tmp/pos-170-draft-ui-regression.log": "096245f422627e588962fad9b9b8320ae7743472f68ba86ba6b966a4c772a003",
+      "/tmp/pos-170-draft-ui-build.log": "db13eda0d6381e16d4523b4b9fc5d7589b92163d993e21e2c80c9334f881c1c5",
+      "/tmp/pos-170-draft-ui-type-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+      "/tmp/pos-170-draft-ui-lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "/tmp/pos-170-draft-ui-browser.log": "7de99bb2d296362d233a6248ff52cbbb428a6aa3dded82dce4caa7b5ddd86d2e",
+      "/tmp/pos-170-draft-ui-browser-corrected.log": "7a794d5067eb82886d4d9e984e2d8e8079c61abbbad5219780411622fb54554d"
+    }
+  },
+  "invariants": [
+    "HTTP preceded by durable original scoped request",
+    "exact body and original operationId replay after reload",
+    "one document and audit, no inventory movement from creating draft",
+    "six-decimal quantity 2.000001 retained",
+    "maximum valid six-decimal cost 99999999999999.123456 retained",
+    "busy inputs and navigation blocked",
+    "store membership boundary preserved in fixture and application"
+  ],
+  "priorFailures": [
+    {
+      "initialBrowserRun": "6 failed",
+      "reason": "modal overlay intercept and missing UserStore fixture association"
+    },
+    {
+      "secondBrowserRun": "3 passed,3 failed",
+      "reason": "transfer fixture association absent",
+      "resolution": "fixture linked to actor, store readiness awaited; final6/6 passed"
+    }
+  ],
+  "scope": {
+    "database": "isolated 127.0.0.1:55439/pos_test",
+    "schemaChanged": false,
+    "migrationsChanged": false,
+    "externalIntegrationsChanged": false,
+    "productionDeployment": false
+  },
+  "remaining": [
+    "OpenShiftModal original immutable pending and reload recovery",
+    "stock count-start dirty and flight guards",
+    "all editor/auth semantic coverage",
+    "conditional and outside DurableMutation inputs",
+    "context/reset/retry acceptance"
+  ]
+}

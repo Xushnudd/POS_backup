@@ -1,0 +1,53 @@
+{
+  "task": "SEC-02.06",
+  "scope": "Operator-only audited encryption-key transition; original task remains in_progress",
+  "date": "2026-10-11",
+  "baseCommit": "97ded93d1c62c4a4180607d6686bf82395701ee2",
+  "workingTree": true,
+  "originalDoneTotal": 156,
+  "batchDone": 2,
+  "checks": {
+    "focusedPostgres": "38/38; four rekey/CLI cases plus existing MFA/export/read-only/route guards",
+    "unitTestFiles": "33/33",
+    "browser": "9/9 Chromium Firefox WebKit TOTP/recovery/lost ACK/critical billing,22.5s",
+    "freshLegacyMigrations": "123 PASS",
+    "productionBuild": "PASS webpack",
+    "workerBuild": "PASS",
+    "eslint": "PASS",
+    "secretScan": "787 source files zero findings",
+    "diffCheck": "PASS"
+  },
+  "limitations": [
+    "No real key change/deployment/business DB operation",
+    "No new vendor/hardware integration",
+    "Current 14 critical action types; remaining permission mutation inventory and restored credentials acceptance open",
+    "No full integration rerun on schema123; prior schema122 full302 accepted separately"
+  ],
+  "sources": {
+    "prisma/schema.prisma": "6315aa7a66884377a0a5fb6ca863910441af2b50602e46bdefb30d9058c44752",
+    "prisma/migrations/202610110123_totp_key_rotation/migration.sql": "fd3aed1970f8862b87c53f161c3caa99f326c40ad391299b1e11e22cfeb151f4",
+    "src/server/auth/totp.ts": "af87f237c93b8b8001704eee0ff92f6cf05d165c7a75c020dcbe02d33e2cc14b",
+    "src/server/auth/totp-key-rotation.ts": "d13c97025a86c03b5afe70b0ea69ce700c338d1848356616a030f0b667b1dd64",
+    "src/server/auth/totp-keys.ts": "8e9c1fa2f365b8a7d0e315d00aceb29495048796951c31e7f937d05af94a61c4",
+    "src/server/billing/read-only-policy.ts": "4d8f919cf956f58897439e57fa60d2d530e7810c8bd90cffc5a48ee1c506c092",
+    "src/server/jobs/tenant-export-contract.ts": "73874d217f4ff442e5ce97934ba278a94472442d25558358e63fcfc38aef2416",
+    "src/app/api/health/ready/route.ts": "06823bf2eea7fea65877876cee1cd265aced7bf79683c67d15655b9f57675c8d",
+    "scripts/workers/totp-rekey.ts": "7f5040e8386b7cc18571f5ff6d13fe4e1912ae8c018391a65473fd2ed37ff319",
+    "scripts/ops/test-migrations.sh": "5a9665c910350693e2a9686f9f28bc470926b427ca7e38ca0ae8bd60f9281070",
+    "package.json": "ef66e86ee53243f29bbde014af9fdb372eb4af907e69bc4f3b386b393dfa7c7b",
+    "tests/totp-key-rotation.integration.test.ts": "497d02b1438b62628b01512765b152ea565b5a9551431d95ffec5e689468d5ce",
+    "tests/totp.integration.test.ts": "57ea695e16735b564e1214608e167e8c3fe6f77592a23b37218943905f5c67b9",
+    "docs/operations/totp-key-rotation.md": "cccb7dbf03e3c353c73a64fe87525874be663d1be9e6adfc768b2867bb31168b",
+    "docs/operations/totp-core.md": "96b2db82e29b1e33770605ee748617eeadfc98772e9956a054fb644650beebc0"
+  },
+  "logs": {
+    "/tmp/pos-totp-rekey-focused.log": "3a8709e42e95dc549b22e3f4e13854ae0bb41552976d089584878f7fa3609d35",
+    "/tmp/pos-totp-rekey-unit.log": "d13fec8c190414a213cf8e31c81b0fbef7d28264e981bb13ea76021da5664aef",
+    "/tmp/pos-totp-rekey-browser.log": "bfa92fe03a4b3848363fe83973ed7fdaaa17103a53c846d8a55315ec42239418",
+    "/tmp/pos-totp-rekey-build.log": "2790157422649d466ea239f1c7701dcd364f5c054f577b85370c2dddb312e803",
+    "/tmp/pos-totp-rekey-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-totp-rekey-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-totp-rekey-migration-acceptance.log": "d5c233a4492979c19c174de7248aaee004d20908cd15649878403db89ce45f99",
+    "/tmp/pos-totp-rekey-secret-scan.log": "1f8d56eafbb45f502d68fcba275c1c3684b608f8983172914a36ff49d4ce3668"
+  }
+}

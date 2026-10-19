@@ -1,5 +1,12 @@
+import {errorGuidance} from './error-guidance';
+import {requestStepUp, stepUpBinding} from './step-up';
 import {
   ApiResponse,
+  SalesReportSummary,
+  CatalogUnit,
+  ProductBarcode,
+  Organization,
+  OrganizationMember,
   AuthData,
   Category,
   Customer,
@@ -11,37 +18,82 @@ import {
   ProductReportItem,
   Register,
   Sale,
+  SaleReturnHistory,
+  AuditSummary,
   Shift,
   StockDocument,
+  StockCount,
+  CustomerStatement,
+  CustomerDebtDocumentInput,
   StockTransfer,
   Store,
   Supplier,
-  User,
 } from '@/types';
 
+export class ApiError extends Error { code?: string; details?: unknown; status?: number; requestId?:string; nextAction?:string; }
+export type SecurityEventType = 'session_created'|'session_revoked'|'login_succeeded'|'login_failed'|'password_changed'|'cashier_pin_changed'|'member_updated'|'ownership_transferred';
+export interface SecurityEventRow {
+  id: string;
+  type: SecurityEventType;
+  suspicious: boolean;
+  organizationId: string;
+  sourceSessionId: string|null;
+  createdAt: string;
+  expiresAt: string;
+  deliveryState: string|null;
+  canRetry: boolean;
+  deliveryAttempts: number|null;
+  deliveryMaxAttempts: number|null;
+}
+export interface SecurityNoticeRow {
+  id: string;
+  eventId: string;
+  type: 'login_succeeded'|'login_failed';
+  organizationId: string;
+  createdAt: string;
+  readAt: string|null;
+}
+export interface SecurityHistoryData {
+  events: SecurityEventRow[];
+  notices: SecurityNoticeRow[];
+  unread: number;
+}
+export interface AccountSessionRow {
+  id:string;
+  organizationId:string;
+  createdAt:string;
+  expiresAt:string;
+  idleExpiresAt:string;
+  current:boolean;
+  authenticationMethod:'password'|'pin';
+  revokedAt:string|null;
+  status:'active'|'revoked'|'expired';
+}
 class ApiClient {
+  csvExport=(path:'/inventory/batches'|'/products'|'/customers'|'/reports/sales'|'/reports/products'|'/reports/purchases'|'/suppliers'|'/inventory/movements'|'/shifts'|'/audit'|'/categories'|'/units'|`/products/${string}/barcodes`|'/stock-documents'|'/transfers'|'/inventory/balances'|'/products/prices'|'/inventory/dispositions'|'/finance/documents'|'/reports/breakdowns'|'/reports/supplier-balances',params:Record<string,string>)=>this.request<{filename:string;content:string}>(`${path}?${new URLSearchParams({...params,format:'csv'})}`);
+  sessions = {
+    list:(page=1,state:'active'|'all'|'revoked'|'expired'='active')=>this.request<AccountSessionRow[]>(`/auth/sessions?page=${page}&limit=20&state=${state}`,{cache:'no-store'}),
+    revoke:(sessionId:string)=>this.request('/auth/sessions',{method:'POST',body:JSON.stringify({sessionId})}),
+  };
+  security = {
+    list: (page=1)=>this.request<SecurityHistoryData>(`/auth/security?page=${page}&limit=20`,{cache:'no-store'}),
+    read: (noticeId:string,operationId:string)=>this.request<{id:string;readAt:string}>('/auth/security/read',{method:'POST',body:JSON.stringify({operationId,noticeId})}),
+    retry: (eventId:string,operationId:string)=>this.request<{eventId:string;state:string;attempts:number;maxAttempts:number}>('/auth/security/retry',{method:'POST',body:JSON.stringify({operationId,eventId})}),
+  };
+  auditSummary = (params:Record<string,string>) => this.request<AuditSummary[]>(`/audit?${new URLSearchParams({limit:'50',...params,view:'summary'})}`);
   private getBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_URL || '/api';
   }
 
-  private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('pos_token');
-  }
-
-  private async request<T>(
+  async request<T, Summary = SalesReportSummary>(
     endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
-    const token = this.getToken();
+    options: RequestInit = {},
+    stepUpAttempted = false
+  ): Promise<ApiResponse<T, Summary>> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
 
     const url = `${this.getBaseUrl()}${endpoint}`;
 
@@ -49,32 +101,49 @@ class ApiClient {
       const response = await fetch(url, {
         ...options,
         headers,
+        credentials: 'same-origin',
       });
 
       const data = await response.json();
 
       if (!response.ok || data.success === false) {
+        const binding = stepUpBinding(data?.error?.details);
+        // Retry the original serialized body and operation key exactly once.
+        // Stream bodies cannot be replayed safely. Auth endpoints never recurse.
+        if (!stepUpAttempted && data?.error?.code === 'STEP_UP_REQUIRED' && binding && typeof options.body === 'string' && (endpoint === '/auth/change-password' || !endpoint.startsWith('/auth/')) && await requestStepUp(binding)) {
+          return this.request<T, Summary>(endpoint, options, true);
+        }
         const errorMsg =
           data?.error?.message || data?.message || `Xatolik: ${response.statusText}`;
-        const error: any = new Error(errorMsg);
-        error.code = data?.error?.code;
+        const error = new ApiError(errorMsg);
+        error.code = typeof data?.error?.code === 'string' && data.error.code
+          ? data.error.code : 'INTERNAL_ERROR';
+        error.status = response.status;
         error.details = data?.error?.details;
+        error.requestId=data.requestId??response.headers.get('x-request-id')??undefined;
+        error.nextAction=data?.error?.nextAction??errorGuidance(error.code??'INTERNAL_ERROR').nextAction;
+        error.message=errorMsg+' '+error.nextAction+(error.requestId?' So‘rov: '+error.requestId:'');
         throw error;
       }
 
       return data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       // If error is network or JSON parsing error
-      if (!err.code) {
-        console.error(`API Request failed on [${endpoint}]:`, err);
+      if (!(err instanceof ApiError)) {
+        const guide=errorGuidance('NETWORK_ERROR');const error=new ApiError(guide.message+' '+guide.nextAction);error.code='NETWORK_ERROR';error.nextAction=guide.nextAction;throw error;
       }
       throw err;
     }
   }
 
+  operations = {
+    cancelDraftIntent: (operationId:string,payload:Record<string,unknown>) => this.request<{state:'cancelled'|'created';saleId?:string}>('/operations/cancel',{method:'POST',body:JSON.stringify({operationId,payload})}),
+    status: (type: string, operationId: string) => this.request<{state:'not_found'|'completed'|'cancelled';result?:Sale}>(`/operations?${new URLSearchParams({type,operationId})}`),
+  };
+
   // Authentication
   auth = {
-    login: (body: { phone: string; password: string }) =>
+    login: (body: { phone: string; password: string; deviceId?:string }) =>
       this.request<AuthData>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -93,7 +162,29 @@ class ApiClient {
         body: JSON.stringify(body),
       }),
 
+    acceptInvitation: (data:{token:string;fullName?:string;password?:string}) => this.request<{organizationId:string;membershipId:string}>('/auth/invitations/accept',{method:'POST',body:JSON.stringify(data)}),
+    logout: () => this.request('/auth/logout', { method: 'POST', body: '{}' }),
+    logoutAll: () => this.request('/auth/logout-all', { method: 'POST', body: '{}' }),
+    changePassword:(currentPassword:string,newPassword:string)=>this.request('/auth/change-password',{method:'POST',body:JSON.stringify({operationId:crypto.randomUUID(),currentPassword,newPassword})}),
     me: () => this.request<AuthData>('/auth/me'),
+  };
+
+  units = {
+    list: (params:Record<string,string>={}) => this.request<CatalogUnit[]>(`/units?${new URLSearchParams(params)}`),
+    create: (data:{code:string;name:string;precision:number}) => this.request<CatalogUnit>('/units',{method:'POST',body:JSON.stringify(data)}),
+    update: (id:string,data:{name?:string;precision?:number;isActive?:boolean}) => this.request<CatalogUnit>(`/units/${id}`,{method:'PUT',body:JSON.stringify(data)}),
+  };
+  ownership = {
+    list: () => this.request<Array<{id:string;incoming:boolean;expiresAt:string}>>('/ownership-transfers'),
+    request: (organizationId:string,targetMembershipId:string,operationId=crypto.randomUUID()) => this.request(`/organizations/${organizationId}/transfer-ownership`,{method:'POST',body:JSON.stringify({targetMembershipId,operationId})}),
+    respond: (id:string,action:'accept'|'cancel',operationId=crypto.randomUUID()) => this.request(`/ownership-transfers/${id}`,{method:'POST',body:JSON.stringify({action,operationId})}),
+  };
+  barcodes = {
+    generate: (id:string,operationId:string) => this.request<ProductBarcode>(`/products/${id}/barcodes/generate`,{method:'POST',body:JSON.stringify({operationId})}),
+    labels: (id:string,barcodeId:string,copies:number) => this.request<{filename:string;content:string}>(`/products/${id}/barcodes/labels?${new URLSearchParams({barcodeId,copies:String(copies)})}`),
+    list: (id:string,params:Record<string,string>={}) => this.request<ProductBarcode[]>(`/products/${id}/barcodes?${new URLSearchParams(params)}`),
+    add: (id:string,value:string) => this.request<ProductBarcode>(`/products/${id}/barcodes`,{method:'POST',body:JSON.stringify({value})}),
+    remove: (id:string,barcodeId:string) => this.request(`/products/${id}/barcodes/${barcodeId}`,{method:'DELETE',body:'{}'}),
   };
 
   // Products
@@ -102,6 +193,8 @@ class ApiClient {
       organizationId: string;
       search?: string;
       categoryId?: string;
+      sort?: import('./list-query').ProductListSort;
+      status?: 'active'|'archived'|'all';
       barcode?: string;
       page?: number;
       limit?: number;
@@ -116,14 +209,20 @@ class ApiClient {
     },
 
     get: (id: string) => this.request<Product>(`/products/${id}`),
+    findByIdentifier: (organizationId:string,identifier:string) => this.request<Product>(`/products?${new URLSearchParams({organizationId,identifier})}`),
 
-    create: (data: Partial<Product>) =>
+    findByBarcode: (organizationId: string, barcode: string) => {
+      const query = new URLSearchParams({ organizationId, barcode });
+      return this.request<Product>(`/products?${query.toString()}`);
+    },
+
+    create: (data: Partial<Omit<Product,'costPrice'|'salePrice'|'minStock'>>&{costPrice?:string|number;salePrice?:string|number;minStock?:string|number}) =>
       this.request<Product>('/products', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    update: (id: string, data: Partial<Product>) =>
+    update: (id: string, data: Partial<Omit<Product,'costPrice'|'salePrice'|'minStock'>>&{costPrice?:string|number;salePrice?:string|number;minStock?:string|number}) =>
       this.request<Product>(`/products/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -135,12 +234,17 @@ class ApiClient {
       }),
   };
 
+  archive = {
+    list:(kind:'products'|'customers'|'categories',params:Record<string,string>)=>this.request<{id:string;name?:string;fullName?:string;isActive:boolean}[]>(`/${kind}?${new URLSearchParams(params)}`),
+    setActive:(kind:'products'|'customers'|'categories',id:string,isActive:boolean)=>this.request(`/${kind}/${id}`,{method:'PUT',body:JSON.stringify({isActive})}),
+  };
+
   // Categories
   categories = {
-    list: (organizationId: string) =>
-      this.request<Category[]>(`/categories?organizationId=${organizationId}`),
+    list: (organizationId: string,params:Record<string,string>={}) =>
+      this.request<Category[]>(`/categories?${new URLSearchParams({organizationId,...params})}`),
 
-    create: (data: { organizationId: string; name: string; sortOrder?: number }) =>
+    create: (data: { organizationId: string; name: string; sortOrder?: number; parentId?:string|null }) =>
       this.request<Category>('/categories', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -160,11 +264,15 @@ class ApiClient {
 
   // Sales
   sales = {
+    printRequest:(id:string,data:{operationId:string;width:58|80;copy:boolean})=>this.request(`/sales/${id}/print-requests`,{method:'POST',body:JSON.stringify(data)}),
     list: (params: {
       organizationId: string;
+      customerId?:string;
       storeId?: string;
       shiftId?: string;
       status?: string;
+      search?: string;
+      sort?: import('./sales-list-query').SaleListSort;
       page?: number;
       limit?: number;
     }) => {
@@ -179,23 +287,28 @@ class ApiClient {
 
     get: (id: string) => this.request<Sale>(`/sales/${id}`),
 
-    create: (data: any) =>
+    create: (data: Record<string, unknown>) =>
       this.request<Sale>('/sales', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    update: (id: string, data: any) =>
+    update: (id: string, data: Record<string, unknown>) =>
       this.request<Sale>(`/sales/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
 
-    complete: (id: string, data: { payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
+    complete: (id: string, data: { serialSelections?:{productId:string;ids:string[]}[];cashTendered?:string; creditDueAt?:string; payments: { paymentType: string; amount: number; referenceNo?: string }[] }) =>
       this.request<Sale>(`/sales/${id}/complete`, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+
+    returnHistory: (id:string,page=1) => this.request<SaleReturnHistory[]>(`/sales/${id}/returns?page=${page}&limit=20`),
+    returnPreview: (id:string,data:{operationId:string;shiftId:string;reason:string;items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';serialIds?:string[];batchSelection?:{entryId:string;quantity:string}[]}[]}) => this.request<{refundAmount:string;settlement:{cash:string;card:string;transfer:string;debt:string;waived:string}}>(`/sales/${id}/returns/preview`,{method:'POST',body:JSON.stringify(data)}),
+    returns: (id: string, data: {operationId:string;shiftId:string;reason:string;manualNonCash?:{confirmed:true;referenceNo:string;expectedSettlement:{cash:string;card:string;transfer:string;debt:string;waived:string}};items:{saleItemId:string;quantity:number|string;disposition:'sellable'|'damaged'|'write_off';serialIds?:string[];batchSelection?:{entryId:string;quantity:string}[]}[]}) =>
+      this.request(`/sales/${id}/returns`, {method:'POST',body:JSON.stringify(data)}),
 
     void: (id: string) =>
       this.request<Sale>(`/sales/${id}/void`, {
@@ -205,37 +318,41 @@ class ApiClient {
 
   // Shifts
   shifts = {
-    list: (params: { registerId?: string; status?: string } = {}) => {
+    list: (params: { registerId?: string; status?: string;storeId?:string;from?:string;to?:string;search?:string;sort?:string;page?:number;limit?:number } = {}) => {
       const q = new URLSearchParams();
-      if (params.registerId) q.append('registerId', params.registerId);
-      if (params.status) q.append('status', params.status);
+      Object.entries(params).forEach(([key,value])=>{if(value!==undefined&&value!=='')q.set(key,String(value));});
       return this.request<Shift[]>(`/shifts?${q.toString()}`);
     },
 
     get: (id: string) => this.request<Shift>(`/shifts/${id}`),
 
-    open: (data: { registerId: string; organizationUserId: string; openingCash: number; note?: string }) =>
+    open: (data: { registerId: string; organizationUserId: string; openingCash: string|number;
+      handoverFromId?:string; note?: string; operationId: string }) =>
       this.request<Shift>('/shifts', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    close: (id: string, data: { countedCash: number; note?: string }) =>
+    handover: (registerId:string)=>this.request<{id:string;countedCash:string;closedAt:string} | null>(`/operations/handover?${new URLSearchParams({registerId})}`),
+    rejectClose: (id:string,data:{requestId:string;operationId:string;reason:string})=>this.request<Shift>(`/shifts/${id}/close-rejection`,{method:'POST',body:JSON.stringify(data)}),
+    close: (id: string, data: { countedCash: string|number; note?: string;approvalRequestId?:string;operationId?:string }) =>
       this.request<Shift>(`/shifts/${id}`, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    cashMovement: (id: string, data: { movementType: 'cash_in' | 'cash_out'; amount: number; reason: string }) =>
+    corrections:(id:string,page=1)=>this.request<{id:string;amount:string;reason:string;postingShiftId:string;createdAt:string;creator:{fullName:string}}[]>(`/shifts/${id}/corrections?page=${page}&limit=20`),
+    correct:(id:string,input:{postingShiftId:string;direction:'cash_in'|'cash_out';amount:string;reason:string;operationId:string})=>this.request(`/shifts/${id}/corrections`,{method:'POST',body:JSON.stringify(input)}),
+    cashMovement: (id: string, data: { movementType: 'cash_in' | 'cash_out' | 'bank_deposit' | 'collection'; amount: number|string; reason: string; operationId?: string }) =>
       this.request(`/shifts/${id}/cash-movements`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, operationId: data.operationId ?? crypto.randomUUID() }),
       }),
   };
 
   // Inventory
   inventory = {
-    balances: (params: { organizationId: string; storeId?: string; lowStock?: boolean }) => {
+    balances: (params: { organizationId: string; storeId?: string; sort?:string;lowStock?: boolean;inactiveDays?:number;search?:string;categoryId?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
@@ -245,23 +362,33 @@ class ApiClient {
       return this.request<InventoryBalance[]>(`/inventory/balances?${q.toString()}`);
     },
 
-    movements: (params: { organizationId: string; storeId?: string; productId?: string }) => {
+    movements: (params: { organizationId: string; storeId?: string; productId?: string; movementType?:string;sourceType?:string;sourceId?:string;from?:string;to?:string;search?:string;sort?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null) {
           q.append(k, String(v));
         }
       });
-      return this.request<any[]>(`/inventory/movements?${q.toString()}`);
+      return this.request<Record<string, unknown>[]>(`/inventory/movements?${q.toString()}`);
     },
   };
 
   // Stock Documents (Kirim / Tuzatish)
+  stockCounts={
+    list:(page=1,filter:'active'|'all'='active',options:Record<string,string>={})=>this.request<StockCount[]>('/stock-counts?'+new URLSearchParams({page:String(page),limit:'50',filter,...options})),
+    get:(id:string)=>this.request<StockCount>(`/stock-counts/${id}`),
+    start:(data:{operationId:string;organizationId:string;storeId:string;scope:'full'|'partial';blind:boolean;productIds?:string[]})=>this.request<StockCount>('/stock-counts',{method:'POST',body:JSON.stringify(data)}),
+    record:(id:string,data:{operationId:string;items:{lineId:string;quantity:string}[]})=>this.request<StockCount>(`/stock-counts/${id}`,{method:'POST',body:JSON.stringify(data)}),
+    submit:(id:string)=>this.request<StockCount>(`/stock-counts/${id}/submit`,{method:'POST',body:'{}'}),
+    decide:(id:string,action:'approve'|'cancel',data:{operationId:string;reason:string})=>this.request<StockCount>(`/stock-counts/${id}/${action}`,{method:'POST',body:JSON.stringify(data)}),
+  };
+
   stockDocuments = {
     list: (params: {
       organizationId: string;
       storeId?: string;
       documentType?: string;
+      supplierId?:string;from?:string;to?:string;search?:string;sort?:string;
       status?: string;
       page?: number;
       limit?: number;
@@ -278,18 +405,22 @@ class ApiClient {
     get: (id: string) => this.request<StockDocument>(`/stock-documents/${id}`),
 
     create: (data: {
+      operationId?: string;
       organizationId: string;
       storeId: string;
       supplierId?: string;
       documentType: string;
       documentNo: string;
       note?: string;
-      items: { productId: string; quantity: number; unitCost: number; note?: string }[];
+      items: { productId: string; quantity: number|string; unitCost: number|string; tradeUnit?:string; note?: string }[];
     }) =>
       this.request<StockDocument>('/stock-documents', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+
+    reverse: (id:string,data:{operationId:string;reason:string}) =>
+      this.request<StockDocument>(`/stock-documents/${id}/reverse`,{method:"POST",body:JSON.stringify(data)}),
 
     confirm: (id: string) =>
       this.request<StockDocument>(`/stock-documents/${id}/confirm`, {
@@ -299,7 +430,7 @@ class ApiClient {
 
   // Transfers
   transfers = {
-    list: (params: { organizationId: string; status?: string; page?: number; limit?: number }) => {
+    list: (params: { organizationId: string; status?: string; page?: number; limit?: number;fromStoreId?:string;toStoreId?:string;from?:string;to?:string;search?:string;sort?:string }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -310,31 +441,37 @@ class ApiClient {
     },
 
     create: (data: {
+      operationId?: string;
       organizationId: string;
       fromStoreId: string;
       toStoreId: string;
       note?: string;
-      items: { productId: string; quantity: number; unitCost: number }[];
+      items: { productId: string; quantity: number|string; unitCost: number|string }[];
     }) =>
       this.request<StockTransfer>('/transfers', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
+    returnTransit: (id:string,data:{operationId:string;reason:string}) => this.request<StockTransfer>(`/transfers/${id}/return`,{method:"POST",body:JSON.stringify(data)}),
+
+    cancel: (id:string,reason:string) => this.request<StockTransfer>(`/transfers/${id}/cancel`,{method:"POST",body:JSON.stringify({reason})}),
+
     send: (id: string) =>
       this.request<StockTransfer>(`/transfers/${id}/send`, {
         method: 'POST',
       }),
 
-    receive: (id: string) =>
+    receive: (id: string,data?:{operationId:string;reason?:string;items:{itemId:string;quantity:string;damagedQuantity?:string;shortageQuantity?:string}[]}) =>
       this.request<StockTransfer>(`/transfers/${id}/receive`, {
         method: 'POST',
+        ...(data?{body:JSON.stringify(data)}:{}),
       }),
   };
 
   // Customers
   customers = {
-    list: (params: { organizationId: string; search?: string; page?: number; limit?: number }) => {
+    list: (params: { organizationId: string; search?: string; sort?: import('./list-query').CustomerListSort; page?: number; limit?: number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -346,25 +483,31 @@ class ApiClient {
 
     get: (id: string) => this.request<Customer>(`/customers/${id}`),
 
-    create: (data: Partial<Customer>) =>
+    create: (data: Partial<Omit<Customer,'creditLimit'>> & {creditLimit?:string|number}) =>
       this.request<Customer>('/customers', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
 
-    update: (id: string, data: Partial<Customer>) =>
+    update: (id: string, data: Partial<Omit<Customer,'creditLimit'>> & {creditLimit?:string|number}) =>
       this.request<Customer>(`/customers/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
 
-    getDebt: (id: string) => this.request<CustomerDebt>(`/customers/${id}/debt`),
+    exportStatement:(id:string,params:{from?:string;to?:string;format?:'csv'|'commercial-csv'|'html'}={})=>this.request<{filename:string;content:string}>(`/customers/${id}/ledger?${new URLSearchParams({format:'csv',...Object.fromEntries(Object.entries(params).filter(([,value])=>value))})}`),
+    statement:(id:string,params:{page?:number;limit?:number;from?:string;to?:string}={})=>this.request<CustomerStatement>(`/customers/${id}/ledger?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!=='').map(([k,v])=>[k,String(v)]))}`),
+    postDebtDocument:(id:string,data:CustomerDebtDocumentInput)=>this.request<{id:string}>(`/customers/${id}/ledger`,{method:'POST',body:JSON.stringify(data)}),
+    getDebt: (id: string, targetsPage?:number) => this.request<CustomerDebt>(`/customers/${id}/debt${targetsPage?`?targetsPage=${targetsPage}`:''}`),
   };
 
   // Suppliers
   suppliers = {
-    list: (organizationId: string) =>
-      this.request<Supplier[]>(`/suppliers?organizationId=${organizationId}`),
+    get:(id:string)=>this.request<Supplier>(`/suppliers/${id}`),
+    purchases:(id:string,params:Record<string,string>={})=>this.request<StockDocument[]>(`/suppliers/${id}/purchases?${new URLSearchParams(params)}`),
+    totals:(id:string,params:Record<string,string>={})=>this.request<{purchases:number;reversals:number;purchaseValue:string;reversalValue:string;netPurchaseValue:string;basis:string;currency:string}>(`/suppliers/${id}/purchase-totals?${new URLSearchParams(params)}`),
+    list: (organizationId: string,params:Record<string,string>={}) =>
+      this.request<Supplier[]>(`/suppliers?${new URLSearchParams({organizationId,...params})}`),
 
     create: (data: Partial<Supplier>) =>
       this.request<Supplier>('/suppliers', {
@@ -385,9 +528,14 @@ class ApiClient {
       organizationId: string;
       storeId: string;
       customerId: string;
-      amount: number;
+      amount: number | string;
+      shiftId: string;
+      operationId: string;
+      paymentType?: 'cash' | 'card' | 'transfer';
+      manualConfirmed?: boolean;
       referenceNo?: string;
       note?: string;
+      allocations?:{saleId:string|null;debtOriginId?:string;amount:string}[];
     }) =>
       this.request<Payment>('/payments/credit', {
         method: 'POST',
@@ -397,7 +545,9 @@ class ApiClient {
 
   // Reports
   reports = {
-    dashboard: (params: { organizationId: string; storeId?: string; date?: string }) => {
+    purchases: (params:Record<string,string>) => this.request<{rows:Record<string,unknown>[];summary:{purchaseValue:string;reversalValue:string;netPurchaseValue:string};meta:{asOf:string;timezone:string;currency:string}}>(`/reports/purchases?${new URLSearchParams(params)}`),
+    reconciliation: (params:{kind:string;storeId?:string;page:number;limit?:number;sort?:string;search?:string}) => this.request<Record<string,unknown>[]>(`/reports/reconciliation?${new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined).map(([k,v])=>[k,String(v)]))}`),
+    dashboard: (params: { organizationId: string; storeId?: string; date?: string;startDate?:string;endDate?:string;asOf?:string }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -407,7 +557,7 @@ class ApiClient {
       return this.request<DashboardReportData>(`/reports/dashboard?${q.toString()}`);
     },
 
-    sales: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string }) => {
+    sales: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string;asOf?:string;sort?:string;search?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -417,7 +567,7 @@ class ApiClient {
       return this.request<Sale[]>(`/reports/sales?${q.toString()}`);
     },
 
-    products: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string }) => {
+    products: (params: { organizationId: string; storeId?: string; startDate?: string; endDate?: string;asOf?:string;sort?:string;search?:string;page?:number;limit?:number }) => {
       const q = new URLSearchParams();
       Object.entries(params).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== '') {
@@ -451,19 +601,25 @@ class ApiClient {
 
   // Organizations & Users
   organizations = {
-    get: (id: string) => this.request<any>(`/organizations/${id}`),
+    list: () => this.request<Organization[]>('/organizations'),
+    switch: (targetOrganizationId:string) => this.request('/organizations/switch',{method:'POST',body:JSON.stringify({targetOrganizationId})}),
+    get: (id: string) => this.request<Organization>(`/organizations/${id}`),
 
-    update: (id: string, data: any) =>
-      this.request<any>(`/organizations/${id}`, {
+    update: (id: string, data: Record<string, unknown>) =>
+      this.request<Organization>(`/organizations/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
 
-    users: (id: string) => this.request<any[]>(`/organizations/${id}/users`),
+    revokeInvitation: (id:string,invitationId:string) => this.request(`/organizations/${id}/invitations/${invitationId}`,{method:'DELETE',body:'{}'}),
+    createInvitation: (id:string,data:{operationId?:string;phone:string;role:'admin'|'cashier';storeIds:string[]}) => this.request<{id:string;expiresAt:string;invitationToken?:string;invitationTokenUnavailable?:boolean}>(`/organizations/${id}/invitations`,{method:'POST',body:JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()})}),
+    updateMember: (id:string,memberId:string,data:{operationId?:string;role?:string;customRoleId?:string|null;isActive?:boolean;storeIds?:string[];action?:'archive'|'restore'}) => this.request(`/organizations/${id}/users/${memberId}`,{method:'PUT',body:JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()})}),
+    users: (id: string,params?:Record<string,string>) => this.request<OrganizationMember[]>(`/organizations/${id}/users${params?'?'+new URLSearchParams(params):''}`),
 
     addUser: (
       id: string,
       data: {
+        operationId?:string;
         fullName: string;
         phone: string;
         password: string;
@@ -474,7 +630,7 @@ class ApiClient {
     ) =>
       this.request(`/organizations/${id}/users`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({...data,operationId:data.operationId??crypto.randomUUID()}),
       }),
   };
 }

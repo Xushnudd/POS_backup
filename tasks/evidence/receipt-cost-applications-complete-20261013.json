@@ -1,0 +1,246 @@
+{
+  "date": "2026-10-13",
+  "gitHead": "55eeeda66acdb86a4c442b5f5fc16d7ebee45297",
+  "dirtyWorkspace": true,
+  "commitCreated": false,
+  "originalDoneBefore": 168,
+  "originalDoneAfter": 169,
+  "originalTotal": 259,
+  "completedOriginalTasks": [
+    "PUR-01.05"
+  ],
+  "requestedTarget": 169,
+  "scope": "Local synthetic core acceptance; no staging/production deployment or pilot/vendor acceptance",
+  "decisions": [
+    "ADR081",
+    "ADR085",
+    "ADR086",
+    "ADR087"
+  ],
+  "checks": {
+    "unit": {
+      "passed": 128,
+      "failed": 0
+    },
+    "postgres": {
+      "passed": 115,
+      "failed": 0,
+      "economicReportOffline": 100,
+      "batchNegativeTenantExport": 15,
+      "landedCost": 17,
+      "database": "isolated local pos_test only"
+    },
+    "browser": {
+      "passed": 15,
+      "failed": 0,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "applyPrepare": 6,
+      "sharedExistingForms": 9
+    },
+    "type": "PASS",
+    "lint": "PASS zero warnings",
+    "worker": "PASS",
+    "webpackProductionBuild": "PASS local only",
+    "migration": {
+      "fresh": 159,
+      "legacyBaseline": 133,
+      "upgradeRepeat": "PASS",
+      "actualValuationBatchApplicationContinuationDumpRestore": "PASS"
+    },
+    "prismaModels": 120,
+    "scanner": {
+      "scanned": 1231,
+      "findings": [],
+      "scope": "working tree tracked and nonignored source; credential stores not opened; git history and container images not scanned"
+    }
+  },
+  "expectedActual": [
+    {
+      "scenario": "actual paid fee apply/replay/reverse",
+      "expected": "one Header for original key, no second cash; old receipt2, reversal cost2",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "sale then fee then linked return",
+      "expected": "old SaleItem cost2 preserved; dated CGS/return corrections reconcile",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "independent repeated fees/selective reversal",
+      "expected": "remaining2 fee cost2.333333, final reversal restores2",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "stale hash and late audit fault",
+      "expected": "no partial price/event/operation/header; concurrent original replay one Header",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "future absolute override",
+      "expected": "original expense branch variance; original receipt unchanged",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "future stock loss",
+      "expected": "only freight share variance; unrelated SKU untouched",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "stale-draft active-fee transfer and later purchase",
+      "expected": "draft2 preserved, actual-send corrected snapshot; receive original branch variance0.67, other branch0",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "write-off already corrected",
+      "expected": "no double freight variance; reversal operating expense2",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "late continuation INSERT fault",
+      "expected": "original operation/cost/events/journal rollback; same-key retry one continuation",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "owner endpoints and thin history",
+      "expected": "foreign tenant/path404, admin403, strict forged fields400; no-store and bounded",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "three browser durable apply/reversal",
+      "expected": "MFA blocks until proof; committed lost ACK/reload same key/body, cost6 then2, bank88 unchanged by posting",
+      "actual": "PASS; local synthetic"
+    },
+    {
+      "scenario": "actual application and continuation dump/restore",
+      "expected": "canonical hashes equal; restored raw/financial replay1; actual continuation variance12",
+      "actual": "PASS; local synthetic"
+    }
+  ],
+  "logs": {
+    "unit": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-unit.log",
+      "sha256": "100d5e6398c0e130e192ae954d9465e72fe842762b4acc7fbf4aab3646c2b915",
+      "role": "final verification"
+    },
+    "postgresEconomic": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-postgresEconomic.log",
+      "sha256": "fec8648f9f0a6d342226c2805966f5608c34cb094ed8cd27e636f4ef2d2fd3e1",
+      "role": "final verification"
+    },
+    "postgresContracts": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-postgresContracts.log",
+      "sha256": "601b0cee83ca08cdc95f4abf6762c7cd6d82056151c566e7108bdd99d14ee4f3",
+      "role": "final verification"
+    },
+    "browserApplyPrepare": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-browserApplyPrepare.log",
+      "sha256": "15f020693a387a665acd98d389d1a80a2a33288d404a4932489d7ab10444b86c",
+      "role": "final verification"
+    },
+    "browserShared": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-browserShared.log",
+      "sha256": "7b668efe35ec073bb0523a5726bdf701970953c1d62798589cd790b2b4894054",
+      "role": "final verification"
+    },
+    "type": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-type.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "lint": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "worker": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "build": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-build.log",
+      "sha256": "f6c3ccd790c703909f76bea3046c9420f57c3cc2f549c120d8cc31aabc81bcdb",
+      "role": "final verification"
+    },
+    "migrationRestore": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-migrationRestore.log",
+      "sha256": "39d6ae9f4f8807eba648e2fe3923a6ff42e8e74761ca8025e357b1e15f9822b2",
+      "role": "final verification"
+    },
+    "scanner": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-scanner.log",
+      "sha256": "c5fa044ba2153c8d866389d2e65d0dfb8236131e362273823e24ff349d1f6bb3",
+      "role": "final verification"
+    },
+    "compile": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "final verification"
+    },
+    "browserInitialFailure": {
+      "path": "tasks/evidence/logs/receipt-cost-complete-20261013-browserInitialFailure.log",
+      "sha256": "697ec374857a04b9c48ec72c7e31c0b664373b6ccd7cfb8ec1ec71df4c28ab37",
+      "role": "historical failed attempt, fixed and rerun"
+    }
+  },
+  "sourceSha256": {
+    "api.md": "51491dd83a25efb6fabf42245be182066fb2a5fc06ebfa6f610894c764a7d73a",
+    "docs/operations/receipt-cost-applications.md": "e457cb06c5015e6aea17461d36aa9c0ccb201fca14fdb4617655e3a20e593b6e",
+    "prisma/migrations/202610130149_receipt_cost_applications/migration.sql": "b8917f0c7f3e0ab31135a53699b6f3ac387a88d45128558644ca96fbad32288e",
+    "prisma/migrations/202610130150_cost_application_tenant/migration.sql": "83faf36d78bfd4d74142023bcd9e4e2ff1808f45de64d0384dd69fd4426bebc5",
+    "prisma/migrations/202610130151_cost_application_sources/migration.sql": "8a4a4140c9a90ecd33e0a3444c143f01e251a02935fab357babac897530a8b6d",
+    "prisma/migrations/202610130152_cost_posting_timestamp_precision/migration.sql": "56c5be3e308a8d4d82f7dd2a2bb2c394ffdff7076abcc1c9df85344f9c1bbd8d",
+    "prisma/migrations/202610130153_return_effective_cost_source/migration.sql": "57927e3c21de36a6765cd3bb6003554d16f7d1b9158bbca9adee581c66853937",
+    "prisma/migrations/202610130154_cost_application_offline_guard/migration.sql": "ad0094f3a2b618a6a2709de2f41e1bab3e619c9648af63e21779a8dd7c241946",
+    "prisma/migrations/202610130155_receipt_cost_continuations/migration.sql": "58173548c07d248d760e8069770f106c917bcdcad8173ecbbaa4e4fb0aad2363",
+    "prisma/migrations/202610130156_cost_continuation_tenant/migration.sql": "5cd71e7dd225dffa8863d5b3968343f385214eb9152b67d2188d35a901d24c7b",
+    "prisma/migrations/202610130157_transfer_fee_issue_snapshot/migration.sql": "53a2c4d88112d9950f38d5a8f03d7fce31ac9fe839e410c19e5e6b77123432a7",
+    "prisma/migrations/202610130158_cost_receipt_line_capacity/migration.sql": "383175dbdab33a66192b785bb71a4991b41dcfb2692a215bb5d60e006d29747c",
+    "prisma/migrations/202610130159_continuation_source_guards/migration.sql": "201777eda97836f385b28ef5602c7947c53c1ef3efe203e8a02661f82c902ff9",
+    "prisma/schema.prisma": "ed8153d731365ae2c6476b7005ef09ca096f91e6bc59047cec738bdc7dc04383",
+    "scripts/ops/test-valuation-migrations.sh": "f592894fe02106719e9a44e817a16ff5748691e0724ec75889c7ed05c6208641",
+    "scripts/ops/valuation-cost-fixture.cjs": "9fb52d76ca6d481d00949c9f4784dc2abb1555b091d076a2ae584bfab76ed602",
+    "src/app/api/stock-documents/[id]/cost-plans/[planId]/application-preview/route.ts": "8de20bf2d03697c9b5b36b96566779685f2beaa6c7ed0f84637362c5b2a90b2d",
+    "src/app/api/stock-documents/[id]/cost-plans/[planId]/applications/route.ts": "e9096b117cf46aafca1a1985805ae0bb89f6d76d8a4b9b7fd9ba63f22822b06e",
+    "src/app/api/stock-documents/[id]/cost-plans/[planId]/apply/route.ts": "970891dff2e0a97a56ab1f2de00111a207f403ecd5e6b384b9b16697261f0cc0",
+    "src/app/api/stock-documents/[id]/cost-plans/[planId]/cancel/route.ts": "03d510ee7c6059a4851d17889160738bada8a79ad42030c26886f3b9b5f6559f",
+    "src/app/api/stock-documents/[id]/cost-plans/[planId]/reverse/route.ts": "55ee588833a1a1b3ba6e07d71224554e095d461155d3194c33f03709bf5dae44",
+    "src/components/forms/DurableMutation.tsx": "aae081017f6d91b3af3c90d7f5c08596729ba7c38d99568c4feef2048e1010f2",
+    "src/components/suppliers/ReceiptCostApplication.tsx": "e0a2241357101d1c9b1c5a7b4df09886cf833006eb395faa57e3a5e8ed3cda7d",
+    "src/server/exports/queries/reports-breakdowns.ts": "54e51f66c60ff936a5c15ec7f7770593de13a851af7d81c388968a2c40648e27",
+    "src/server/exports/queries/reports-products.ts": "d57f872d17b0ed957aad61cd616fec7629593657fa658825081c2f7005c599e0",
+    "src/server/inventory/documents.ts": "57459dbe90937fce2ed3ec5813efe7173bfbaa123c08f38482bc785d73a45e1b",
+    "src/server/inventory/valuation-facts.ts": "c3b1d7b6c458e1b315cdc842a12b032da7d2dcc26968bedbf40d873e9cf61dc2",
+    "src/server/inventory/valuation-history.ts": "9c1251faa41c4c5b4070b0dc9abdd845001b7563aeb0282430430c3337203feb",
+    "src/server/jobs/tenant-export-contract.ts": "09840b74588ad77a2b3c697ec20dcdbf87931037a517c94a61ea69f0205f1caf",
+    "src/server/operations.ts": "8f53509e5ee02065aefd204d750b58a27d7f5e6f8a334f5498d0b2d5af48143f",
+    "src/server/purchases/cost-application-contract.ts": "9df0bebdb048ad066fe68add984264773da5fcf789ed62ee995f54ec60d2b61a",
+    "src/server/purchases/cost-application-routes.ts": "89a6997c00f2a99b7c10f041ceee88374f01e1d0896ace87d6603c425f04f590",
+    "src/server/purchases/cost-applications.ts": "4d89141398e6a20b9f863ec6f7fcdd42413cd7ef1c9ac50bf5e8aa2fe1917a0b",
+    "src/server/purchases/cost-continuation-calculation.ts": "cfc7f4369bf0839cf0463e780c9e200127572c5c3245340dffec30e2de640a9e",
+    "src/server/purchases/cost-continuations.ts": "ea236911cb363a7a3eeb6c74dd9a9c879ed75b327f3ec014498c47db655e858e",
+    "src/server/purchases/cost-postings-query.ts": "8c88a3b7d4f6bde9d35fb55d168687dc493117751704a5d03717671c3cc05f49",
+    "src/server/reports/profit.ts": "075f2e3b11e00aeb6639f04e3a4340108d88976217427ca27c8dc2769be3f9d2",
+    "tasks/DECISIONS.md": "4ec3a9587229c77bfc0d241acd81cb3358b13b4d27682b04c289d9419efae189",
+    "tasks/EXECUTION_STATUS.md": "b94135f9fc3ceba98b3b5dad9bd17a4401fafbf1a30bb8ff56d56d27a0f432cf",
+    "tasks/PLAN1.md": "6b643d192a2a070d00a124335078d9222a02938f2bf5174661a55ec79a6c29b3",
+    "tests/e2e/receipt-cost-apply.spec.ts": "4b839f4e63cbe4e89ab5abe5ad973daddae90decf90d2f7b389041a858cad0ee",
+    "tests/landed-cost.integration.test.ts": "df30b5e4a343c811665ae606d429fe36ecea365b0b834327c3894bd67a5b3d38"
+  },
+  "remainingExternal": [
+    "Real server/domain/TLS/offsite/monitoring/pilot acceptance",
+    "Fiscal/E-POS/Click/vendor hardware integrations",
+    "Approved real scale model/barcode format"
+  ],
+  "limits": {
+    "receiptProducts": 200,
+    "nativeFacts": 10000,
+    "applicationSnapshotBytes": 8388608,
+    "continuationWork": 500000
+  },
+  "failureHistory": "Initial browser attempt found preview/reason gating disabled input. canReview separates editing from review. Final 15 browser checks passed; initial failure retained."
+}

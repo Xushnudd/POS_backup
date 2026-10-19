@@ -7,7 +7,27 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate || exit 0"
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit --incremental false",
+    "i18n:check": "node scripts/i18n/catalog.cjs check",
+    "db:migrate": "prisma migrate deploy",
+    "test": "node scripts/test.cjs",
+    "test:integration": "node scripts/test.cjs --integration",
+    "test:e2e": "playwright test && playwright test --config=playwright.pricing-failure.config.ts",
+    "worker:build": "tsc -p tsconfig.worker.json",
+    "worker:reconcile": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/reconcile.js",
+    "prebuild": "node scripts/build-offline.cjs",
+    "worker:jobs": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/jobs.js",
+    "security:scan": "node scripts/security/scan.mjs",
+    "security:scan:test": "node --test scripts/security/scan.test.mjs",
+    "security:history": "node scripts/security/history-scan.mjs",
+    "security:history:test": "node --test scripts/security/history-scan.test.mjs",
+    "worker:totp-rekey": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/totp-rekey.js",
+    "test:ops": "node --test --test-isolation=none scripts/ops/*.test.mjs",
+    "test:pitr": "node scripts/ops/test-pitr.mjs",
+    "worker:tenant-recovery-plan": "node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/tenant-recovery-plan.js",
+    "release:claims:check": "node scripts/release/check-claims.cjs",
+    "test:local-https": "node --test scripts/local/*.test.cjs"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.3.1",
@@ -15,14 +35,20 @@
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/react-fontawesome": "^3.5.0",
     "@prisma/client": "^5.22.0",
+    "@zxing/browser": "^0.2.1",
     "bcryptjs": "^3.0.3",
+    "bwip-js": "^4.11.4",
+    "exceljs": "4.4.0",
     "jsonwebtoken": "^9.0.3",
-    "next": "^16.3.4",
+    "next": "16.3.8",
+    "otpauth": "9.5.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "sharp": "0.35.5",
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
@@ -31,9 +57,17 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.3.8",
     "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   }
 }

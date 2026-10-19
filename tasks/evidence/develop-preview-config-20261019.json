@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-19",
+  "scope": "Isolated develop Preview environment, migration and local runtime preparation; Git cloud deployment verified separately on Vercel",
+  "productionBranch": "main",
+  "previewBranch": "develop",
+  "previewOrigin": "https://pos-backup-git-develop-xushnudd.vercel.app",
+  "environmentScope": {
+    "target": "preview",
+    "gitBranch": "develop",
+    "keys": [
+      "DATABASE_URL",
+      "APP_ORIGIN",
+      "AUTH_CHALLENGE_SECRET"
+    ]
+  },
+  "database": {
+    "separateDatabase": true,
+    "separateRestrictedLogin": true,
+    "sharedCompute": true,
+    "productionDataCopied": false,
+    "productionBusinessSchemaChanged": false,
+    "productionCredentialsShared": false
+  },
+  "isolation": {
+    "previewCredentialsCannotReadProductionBusinessTables": true,
+    "denialCode": "42501",
+    "separateAuthKey": true,
+    "sharedCompute": true,
+    "separateDatabase": true
+  },
+  "privileges": {
+    "previewBusinessAccessToProduction": false,
+    "previewCanCreateInProductionSchema": false,
+    "previewRoleSuperuser": false,
+    "previewRoleCanCreateDb": false,
+    "previewRoleCanCreateRoles": false,
+    "previewInheritsRoles": false,
+    "previewBypassesRls": false,
+    "previewIsProductionOwnerMember": false
+  },
+  "localRuntime": {
+    "verifiedAt": "2026-10-19T10:43:44.632Z",
+    "passed": true,
+    "checks": [
+      {
+        "route": "/",
+        "status": 200
+      },
+      {
+        "route": "/login",
+        "status": 200
+      },
+      {
+        "route": "/register",
+        "status": 200
+      },
+      {
+        "route": "/api/health/live",
+        "status": 200
+      },
+      {
+        "route": "/api/health/ready",
+        "status": 200
+      },
+      {
+        "route": "/api/auth/me",
+        "status": 401
+      },
+      {
+        "route": "empty-registration",
+        "status": 400,
+        "code": "VALIDATION_ERROR"
+      },
+      {
+        "route": "production-origin-denied",
+        "status": 403,
+        "code": "CSRF_REJECTED"
+      },
+      {
+        "route": "unchanged-production-readiness",
+        "status": 200
+      }
+    ],
+    "scope": "Local production binary against the isolated hosted Preview database; production health GET only",
+    "databaseCheck": {
+      "event": "vercel_database_check",
+      "connected": true,
+      "ready": true,
+      "applied": 190,
+      "expected": 190,
+      "code": "READY"
+    },
+    "businessAccountsCreated": 0
+  },
+  "configurationTestsPassed": 5,
+  "sourceSecretScan": "passed; no findings",
+  "ssoProtectionRemoved": false,
+  "automationBypassCreated": false,
+  "originalPlanDone": 185
+}

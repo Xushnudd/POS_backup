@@ -1,0 +1,140 @@
+[WebServer] (node:666127) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:666164) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (2.3s)
+(node:666355) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [firefox] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (2.7s)
+(node:666682) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [webkit] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (2.5s)
+
+
+  1) [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "Synthetic list failure"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="p-6 text-red-700">…</div> aka getByText('Synthetic list failure Asl')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 10000ms
+      - waiting for getByRole('alert')
+
+
+      32 |     else await route.continue();
+      33 |   });
+    > 34 |   await page.getByRole('button',{name:'Yangilash',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Synthetic list failure');
+         |                                                                                                              ^
+      35 |   await expect(page.getByText('Savdolar topilmadi',{exact:true})).toHaveCount(0);
+      36 |   await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      37 |   await page.unroute('**/api/sales?**');
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:34:110
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/error-context.md
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "Synthetic list failure"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="p-6 text-red-700">…</div> aka getByText('Synthetic list failure Asl')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 10000ms
+      - waiting for getByRole('alert')
+
+
+      32 |     else await route.continue();
+      33 |   });
+    > 34 |   await page.getByRole('button',{name:'Yangilash',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Synthetic list failure');
+         |                                                                                                              ^
+      35 |   await expect(page.getByText('Savdolar topilmadi',{exact:true})).toHaveCount(0);
+      36 |   await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      37 |   await page.unroute('**/api/sales?**');
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:34:110
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-firefox/error-context.md
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "Synthetic list failure"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="p-6 text-red-700">…</div> aka getByText('Synthetic list failure Asl')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 10000ms
+      - waiting for getByRole('alert')
+
+
+      32 |     else await route.continue();
+      33 |   });
+    > 34 |   await page.getByRole('button',{name:'Yangilash',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Synthetic list failure');
+         |                                                                                                              ^
+      35 |   await expect(page.getByText('Savdolar topilmadi',{exact:true})).toHaveCount(0);
+      36 |   await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(20);
+      37 |   await page.unroute('**/api/sales?**');
+        at /home/fedora/Developments/POS_backup/tests/e2e/sales-list.spec.ts:34:110
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-webkit/error-context.md
+
+    Error Context: test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sales-list-Sales-URL-searc-445f7-in-distinct-from-empty-data-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+    [firefox] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 
+    [webkit] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data 

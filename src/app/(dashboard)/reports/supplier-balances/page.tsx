@@ -1,0 +1,49 @@
+'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
+
+import {Suspense,useEffect,useState} from 'react';
+import Link from 'next/link';
+import {useAuth} from '@/context/AuthContext';
+import {useOrganization} from '@/context/OrganizationContext';
+import {api} from '@/lib/api';
+import CatalogFilter from '@/components/reports/CatalogFilter';
+import Card from '@/components/ui/Card';
+import Select from '@/components/ui/Select';
+import Button from '@/components/ui/Button';
+import Pagination from '@/components/ui/Pagination';
+import CsvExportButton from '@/components/ui/CsvExportButton';
+import {useListFilters} from '@/hooks/useListFilters';
+import {supplierBalanceSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import DataTable from '@/components/ui/DataTable';
+const fields=['invoiced','allocated','unpaid','overdue','upcoming','noDueDate','paid','advance'] as const;
+type Totals=Record<typeof fields[number],string>;
+type Row=Totals&{supplierId:string;storeId:string;supplierName:string;storeName:string};
+type Report={rows:Row[];summary:Totals;meta:{asOf:string;timezone:string;currency:string}};
+const labels:Record<typeof fields[number],string>={invoiced:'Invoice jami',allocated:'Taqsimlangan',unpaid:'To‘lanmagan qarz',overdue:'Muddati o‘tgan',upcoming:'Muddati kelmagan',noDueDate:'Muddatsiz',paid:'To‘langan pul',advance:'Taqsimlanmagan avans'};
+const labelsSource=labels;
+export default function SupplierBalancesPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();return organization&&user&&role&&role!=='cashier'?<Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Content key={[organization.id,user.id,role].join(':')}/></Suspense>:<p>{tr("Supplier hisobotiga rahbar vakolati kerak.")}</p>;}
+function Content(){
+ const {message:uiMessage}=useTranslation();
+
+ const {locale:mapLocale}=useTranslation();
+
+ const labels=localizeOwnedLabels(labelsSource,mapLocale);
+
+ const {t:tr}=useTranslation();
+const {stores}=useOrganization();
+ const {query,params,filters,changeQuery,replaceQuery}=useListFilters(supplierBalanceSorts,'source',['supplierId','storeId']);
+ const page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'source',search=query?.search??'',cutoff=params.get('asOf')??'',invalidQuery=!query;
+ const [draft,setDraft]=useState({supplierId:params.get('supplierId')??'',storeId:params.get('storeId')??''}),[pages,setPages]=useState(0),[report,setReport]=useState<Report|null>(null),[busy,setBusy]=useState(true),[error,setError]=useState(''),[revision,setRevision]=useState(0);
+ const filterKey=JSON.stringify(filters);
+ useEffect(()=>{let live=true;void Promise.resolve().then(()=>{if(live)setDraft({supplierId:'',storeId:'',...JSON.parse(filterKey)});});return()=>{live=false;};},[filterKey]);
+ useEffect(()=>{if(invalidQuery)return;let live=true;void(async()=>{if(live){setBusy(true);setError('');}try{const r=await api.request<Report>('/reports/supplier-balances?'+new URLSearchParams({...filters,page:String(page),limit:String(limit),sort,search,...(cutoff?{asOf:cutoff}:{})}));if(live){setReport(r.data??null);setPages(r.pagination?.totalPages??0);if(!cutoff&&r.data)replaceQuery({asOf:r.data.meta.asOf});}}catch(e){if(live){setError(displayErrorMessage(e,'Hisobot yuklanmadi'));}}finally{if(live)setBusy(false);}})();return()=>{live=false;};},[filters,page,limit,sort,search,cutoff,revision,invalidQuery,replaceQuery]);
+ const refresh=()=>{changeQuery({page:'1',asOf:''});setRevision(v=>v+1);};
+ return <div className="space-y-4"><h1 className="text-2xl font-bold">{tr("Supplier qarzi va to‘lov muddati")}</h1><p>{tr("Faqat tekshirilgan, ro‘yxatga olingan invoice va to‘lovlar. Eski ro‘yxatga olinmagan xaridlar avtomatik qarz deb olinmaydi. Qarz va avans alohida; filiallar orasida yashirin netting yo‘q.")}</p><Card><form onSubmit={e=>{e.preventDefault();changeQuery({...draft,page:'1',asOf:''});setRevision(v=>v+1);}} className="space-y-3"><CatalogFilter kind="supplier" value={draft.supplierId} onChange={supplierId=>setDraft(v=>({...v,supplierId}))}/><Select label={tr("Supplier hisobot filiali")} value={draft.storeId} onChange={e=>setDraft(v=>({...v,storeId:e.target.value}))} options={[{value:'',label:tr("Vakolatli filiallar")},...stores.map(s=>({value:s.id,label:s.name}))]}/><Button type="submit" disabled={busy}>{tr("Supplier hisobotini filtrlash")}</Button><Button disabled={busy} onClick={refresh}>{tr("Joriy balansni yangilash")}</Button></form></Card><ListFilter search={search} sort={sort} label={tr("Supplier yoki filial nomi qidirish")} onChange={changeQuery} reset={{supplierId:'',storeId:'',asOf:''}} options={[{value:'source',label:tr("Asl ketma-ketlik")},{value:'name_asc',label:tr("Supplier: A–Z")},{value:'name_desc',label:tr("Supplier: Z–A")},{value:'unpaid_asc',label:tr("Qarz: o‘sish")},{value:'unpaid_desc',label:tr("Qarz: kamayish")},{value:'overdue_desc',label:tr("Kechikkan qarz: kamayish")}]}/>{invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}{error&&<p role="alert">{uiMessage(error)}</p>}{busy&&!invalidQuery?<p>{tr("Yuklanmoqda...")}</p>:!error&&!invalidQuery&&report&&<><Card><p>{tr("Balans kesimi:")}{' '}{report.meta.asOf}; {report.meta.timezone}; {report.meta.currency}</p>{fields.map(k=><p key={k}>{labels[k]}: {report.summary[k]}</p>)}</Card><CsvExportButton path="/reports/supplier-balances" params={{...filters,sort,search,asOf:report.meta.asOf}} label={tr("Supplier balansini CSV yuklash")}/><div className="overflow-auto"><DataTable><thead><tr><th>{tr("Supplier / filial")}</th>{fields.map(k=><th key={k}>{labels[k]}</th>)}</tr></thead><tbody>{report.rows.map(r=><tr key={r.supplierId+':'+r.storeId}><td><Link prefetch={false} href={'/suppliers/'+r.supplierId}>{r.supplierName}</Link> · {r.storeName}</td>{fields.map(k=><td key={k}>{r[k]}</td>)}</tr>)}</tbody></DataTable>{!report.rows.length&&<p>{tr("Supplier ledger yozuvi yo‘q.")}</p>}</div></>}<Pagination page={page} pages={pages} busy={busy&&!invalidQuery} blocked={invalidQuery||!!error} onPage={value=>changeQuery({page:String(value)})} retry={refresh}/><p><Link prefetch={false} href="/shifts">{tr("Smena va pul farqi")}</Link> · <Link prefetch={false} href="/customers">{tr("Mijoz qarzi va muddati")}</Link> · <Link prefetch={false} href="/reports/purchases">{tr("Xarid hisoboti")}</Link></p></div>;
+}

@@ -1,0 +1,35 @@
+✔ Purpose/channel consent is absent by default, distinct, append-only, timestamped and tenant exported (212.162848ms)
+✔ Withdrawals invalidate queued consent, re-grants cannot revive old messages, contact edits and inactive cards fail closed (128.266603ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Idempotency preserves one event; stale and parallel revisions cannot overwrite decisions (124.784305ms)
+✔ Cross-tenant writes/read, forged role, revoked-session replay and DB-level mismatched roots are denied (169.420568ms)
+{"requestId":"f7317226-69ce-4f7e-a38c-3a7405012d4b","organizationId":"5252aa0d-0295-4513-b276-7c69bf4a2f6e","status":400,"code":"VALIDATION_ERROR","durationMs":18,"event":"api_error"}
+{"requestId":"102b1a66-1b73-4407-a40c-6dc0fe25d2c5","organizationId":"5252aa0d-0295-4513-b276-7c69bf4a2f6e","status":400,"code":"VALIDATION_ERROR","durationMs":19,"event":"api_error"}
+{"requestId":"a030e315-35d7-4ad8-ab78-cc1c42ad76e8","organizationId":"5252aa0d-0295-4513-b276-7c69bf4a2f6e","operationId":"2bc10032-89f6-488e-8e01-02edce3662d4","status":200,"durationMs":45,"event":"api_response"}
+{"requestId":"bac176b0-96d1-43dc-9a47-e7291165e993","organizationId":"5252aa0d-0295-4513-b276-7c69bf4a2f6e","operationId":"2bc10032-89f6-488e-8e01-02edce3662d4","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"72c250ea-63b0-42fb-b50d-26a8ef686fdc","organizationId":"5252aa0d-0295-4513-b276-7c69bf4a2f6e","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"51fc25c5-bfc7-483b-96a1-b667f7da7ee7","organizationId":"5252aa0d-0295-4513-b276-7c69bf4a2f6e","status":400,"code":"INVALID_CURSOR","durationMs":12,"event":"api_error"}
+{"requestId":"fd541e04-0d9f-4d07-aa34-0afe353cab5c","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+{"requestId":"05ac797e-539f-475e-b89e-cc08a21e18d7","organizationId":"107ff19b-5092-42a2-8f13-5a1e641d5a55","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+✔ Consent HTTP validates strict payload/cursor, idempotency and anonymous/foreign access (205.598837ms)
+✔ Expired subscriptions can withdraw consent but cannot grant; history pagination retains every original event (843.744322ms)
+{"requestId":"3854b910-212a-4c72-94f8-07dc36392747","organizationId":"57e193d4-3de9-4d37-9c45-9bf79abd013d","status":409,"code":"SUBSCRIPTION_EXPIRED","durationMs":22,"event":"api_error"}
+{"requestId":"20ab94ec-7739-4728-abd8-9dd0413a0569","organizationId":"57e193d4-3de9-4d37-9c45-9bf79abd013d","status":200,"durationMs":15,"event":"api_response"}
+✔ All reviewed business tables have DB guards; root/child CRUD and tenant reassignment cannot bypass read-only (217.031266ms)
+✔ Original committed replay remains available after expiry, but new operation cannot run work and revoked actor cannot replay (69.712805ms)
+✔ Real grace deadline crossed during work rolls back business mutation and terminal operation (2044.242128ms)
+✔ Expired owner exports existing data and renews through audited billing; ordinary business writes then resume without POS cash posting (295.530216ms)
+✔ Expired manual reservation housekeeping remains narrowly allowed while active stock writes remain denied (1210.028664ms)
+✔ Subscription row changed after a Serializable snapshot cannot supply stale write entitlement (47.823242ms)
+✔ Expired owner can cancel only an unposted draft intent; tombstone replay stays actor/hash bound and cannot become a posting (107.937219ms)
+✔ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (32.581549ms)
+✔ Deferred cross-tenant parent reference and direct ownership mutation fail; scoped ORM rejects foreign creates and shared models (122.272268ms)
+✔ Concurrent SKU and alias inserts have exactly one winner inside a tenant; a second tenant can use the same identifiers (49.346789ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6527.695541

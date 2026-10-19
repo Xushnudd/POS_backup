@@ -1,0 +1,123 @@
+[WebServer] (node:111975) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:112012) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (7.8s)
+(node:112633) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (9.5s)
+(node:112832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (11.6s)
+(node:113194) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (10.5s)
+(node:114316) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (8.1s)
+(node:114905) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  6 [webkit] › tests/e2e/journal-list.spec.ts:29:5 › Supplier receipt/invoice/order read pages and server drafts reach complete original sources and preserve an unrelated payment draft (10.1s)
+
+
+  1) [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: undefined
+
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+      22 |  await page.getByLabel('Avans sababi',{exact:true}).fill('');await page.unroute('**/api/customers/'+customer.id+'/advances?**');
+    > 23 |  const accountsResponse=await page.request.get('/api/finance/accounts');expect(accountsResponse.ok()).toBe(true);const cashAccount=(await accountsResponse.json()).data.find((account:{kind:string;registerId:string})=>account.kind==='cash'&&account.registerId===register.id);expect(cashAccount).toBeTruthy();
+         |                                                                                                                                                                                                                                                                                                      ^
+      24 |  for(let i=0;i<21;i++)await post('/api/customers/'+customer.id+'/advances',{action:'receive',amount:'1',accountId:cashAccount.id,shiftId:shift.id,reason:'Actual cash advance source '+i});
+      25 |  await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();const walletResponse=await page.request.get('/api/customers/'+customer.id+'/advances?page=1&limit=20'),wallet=(await walletResponse.json()).data;expect(wallet.rows).toHaveLength(20);await page.getByLabel('Avans amali',{exact:true}).selectOption('refund');await page.getByLabel('Asl avans',{exact:true}).selectOption(wallet.rows[0].id);await page.getByLabel('Avans summasi',{exact:true}).fill('0.50');await page.getByLabel('Avans sababi',{exact:true}).fill('Retained original unposted refund');await page.getByRole('button',{name:'Keyingi avanslar',exact:true}).click();await expect(page).toHaveURL(/advances_page=2/);await expect(page.getByLabel('Asl avans',{exact:true})).toHaveValue(wallet.rows[0].id);await expect(page.getByLabel('Avans summasi',{exact:true})).toHaveValue('0.50');await page.goBack();await expect(page.getByLabel('Asl avans',{exact:true})).toHaveValue(wallet.rows[0].id);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained original unposted refund');
+      26 |  expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(21);expect(await db.customerAdvanceRefund.count({where:{advance:{customerId:customer.id}}})).toBe(0);expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:23:294
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: undefined
+
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+      22 |  await page.getByLabel('Avans sababi',{exact:true}).fill('');await page.unroute('**/api/customers/'+customer.id+'/advances?**');
+    > 23 |  const accountsResponse=await page.request.get('/api/finance/accounts');expect(accountsResponse.ok()).toBe(true);const cashAccount=(await accountsResponse.json()).data.find((account:{kind:string;registerId:string})=>account.kind==='cash'&&account.registerId===register.id);expect(cashAccount).toBeTruthy();
+         |                                                                                                                                                                                                                                                                                                      ^
+      24 |  for(let i=0;i<21;i++)await post('/api/customers/'+customer.id+'/advances',{action:'receive',amount:'1',accountId:cashAccount.id,shiftId:shift.id,reason:'Actual cash advance source '+i});
+      25 |  await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();const walletResponse=await page.request.get('/api/customers/'+customer.id+'/advances?page=1&limit=20'),wallet=(await walletResponse.json()).data;expect(wallet.rows).toHaveLength(20);await page.getByLabel('Avans amali',{exact:true}).selectOption('refund');await page.getByLabel('Asl avans',{exact:true}).selectOption(wallet.rows[0].id);await page.getByLabel('Avans summasi',{exact:true}).fill('0.50');await page.getByLabel('Avans sababi',{exact:true}).fill('Retained original unposted refund');await page.getByRole('button',{name:'Keyingi avanslar',exact:true}).click();await expect(page).toHaveURL(/advances_page=2/);await expect(page.getByLabel('Asl avans',{exact:true})).toHaveValue(wallet.rows[0].id);await expect(page.getByLabel('Avans summasi',{exact:true})).toHaveValue('0.50');await page.goBack();await expect(page.getByLabel('Asl avans',{exact:true})).toHaveValue(wallet.rows[0].id);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained original unposted refund');
+      26 |  expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(21);expect(await db.customerAdvanceRefund.count({where:{advance:{customerId:customer.id}}})).toBe(0);expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:23:294
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(received).toBeTruthy()
+
+    Received: undefined
+
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+      22 |  await page.getByLabel('Avans sababi',{exact:true}).fill('');await page.unroute('**/api/customers/'+customer.id+'/advances?**');
+    > 23 |  const accountsResponse=await page.request.get('/api/finance/accounts');expect(accountsResponse.ok()).toBe(true);const cashAccount=(await accountsResponse.json()).data.find((account:{kind:string;registerId:string})=>account.kind==='cash'&&account.registerId===register.id);expect(cashAccount).toBeTruthy();
+         |                                                                                                                                                                                                                                                                                                      ^
+      24 |  for(let i=0;i<21;i++)await post('/api/customers/'+customer.id+'/advances',{action:'receive',amount:'1',accountId:cashAccount.id,shiftId:shift.id,reason:'Actual cash advance source '+i});
+      25 |  await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();const walletResponse=await page.request.get('/api/customers/'+customer.id+'/advances?page=1&limit=20'),wallet=(await walletResponse.json()).data;expect(wallet.rows).toHaveLength(20);await page.getByLabel('Avans amali',{exact:true}).selectOption('refund');await page.getByLabel('Asl avans',{exact:true}).selectOption(wallet.rows[0].id);await page.getByLabel('Avans summasi',{exact:true}).fill('0.50');await page.getByLabel('Avans sababi',{exact:true}).fill('Retained original unposted refund');await page.getByRole('button',{name:'Keyingi avanslar',exact:true}).click();await expect(page).toHaveURL(/advances_page=2/);await expect(page.getByLabel('Asl avans',{exact:true})).toHaveValue(wallet.rows[0].id);await expect(page.getByLabel('Avans summasi',{exact:true})).toHaveValue('0.50');await page.goBack();await expect(page.getByLabel('Asl avans',{exact:true})).toHaveValue(wallet.rows[0].id);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained original unposted refund');
+      26 |  expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(21);expect(await db.customerAdvanceRefund.count({where:{advance:{customerId:customer.id}}})).toBe(0);expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:23:294
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+    [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+    [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+  3 passed (1.1m)

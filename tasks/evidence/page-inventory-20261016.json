@@ -1,0 +1,617 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-16T15:38:05.615295+00:00",
+  "revision": "a456a5185fdaea6ba34082b5b3dac6c02f6c5f51",
+  "scope": "static page/component and permission inspection; manual test instructions, not execution proof",
+  "counts": {
+    "nextPages": 69,
+    "pwaHtmlPages": 2,
+    "separateStatusService": 1,
+    "customFallbackFiles": 4
+  },
+  "coverage": {
+    "missingPages": [],
+    "extraPages": [],
+    "duplicatePages": [],
+    "sequentialGuideNumbers": true
+  },
+  "guide": {
+    "path": "tasks/PAGES_TEST_GUIDE.md",
+    "sha256": "33f1b287dfaeecccaac75a5b1bb4cc651ee75aa56d402a0717ea2b0bcd1497c8",
+    "manualCheckboxes": 294
+  },
+  "pages": [
+    {
+      "number": 1,
+      "route": "/",
+      "title": "bosh sahifa",
+      "guideUrl": "/",
+      "source": "src/app/page.tsx",
+      "sourceSha256": "e22027bd10fa5668cf9207699ebcb41ff58cb8b0d7e3157bcf074c63ff8e5489"
+    },
+    {
+      "number": 2,
+      "route": "/login",
+      "title": "tizimga kirish",
+      "guideUrl": "/login",
+      "source": "src/app/(auth)/login/page.tsx",
+      "sourceSha256": "1a3fbcbcd8df57dd66fe191028cd06e0ed48c48a86b763c002c8ed6ab1fa60ac"
+    },
+    {
+      "number": 3,
+      "route": "/register",
+      "title": "biznesni ro‘yxatdan o‘tkazish",
+      "guideUrl": "/register",
+      "source": "src/app/(auth)/register/page.tsx",
+      "sourceSha256": "a4fcee9920f8218279879ad3d5d593f7cdb56dd03bc583a9afb47e24f7f141bc"
+    },
+    {
+      "number": 4,
+      "route": "/forgot-password",
+      "title": "parol tiklashni so‘rash",
+      "guideUrl": "/forgot-password",
+      "source": "src/app/(auth)/forgot-password/page.tsx",
+      "sourceSha256": "8c20faed61e412dd58f7318427e780047c3f26f43a0704957e6906636f627ade"
+    },
+    {
+      "number": 5,
+      "route": "/reset-password",
+      "title": "yangi parol o‘rnatish",
+      "guideUrl": "/reset-password",
+      "source": "src/app/(auth)/reset-password/page.tsx",
+      "sourceSha256": "a230fd0aec41c35234047c01910ebf4699f39da13278f51c236628450902ac80"
+    },
+    {
+      "number": 6,
+      "route": "/invite",
+      "title": "xodim taklifini qabul qilish",
+      "guideUrl": "/invite#…",
+      "source": "src/app/invite/page.tsx",
+      "sourceSha256": "d2c5bb01aaf7ca1dc0deccb57ebfcef4b6214104be2dd77e0a96d0098be09195"
+    },
+    {
+      "number": 7,
+      "route": "/r",
+      "title": "mijozga elektron chek nusxasi",
+      "guideUrl": "/r#…",
+      "source": "src/app/r/page.tsx",
+      "sourceSha256": "2464231ebe5483fe838a103060fc659ec6190373e917c8c7554725ae2877586e"
+    },
+    {
+      "number": 8,
+      "route": "/d",
+      "title": "shaxsan beriladigan qarz ko‘chirmasi",
+      "guideUrl": "/d#…",
+      "source": "src/app/d/page.tsx",
+      "sourceSha256": "f1900bae2469a2db3eaf2489c749c0c27799e2b183b57ee73ec29a32676375e7"
+    },
+    {
+      "number": 9,
+      "route": "/dashboard",
+      "title": "kunlik boshqaruv paneli",
+      "guideUrl": "/dashboard",
+      "source": "src/app/(dashboard)/dashboard/page.tsx",
+      "sourceSha256": "b1a7e2c6411000d0e36607aeaca0279b17ee2a5261dd2567ccc11e5c2c6310d2"
+    },
+    {
+      "number": 10,
+      "route": "/pos",
+      "title": "asosiy savdo kassasi",
+      "guideUrl": "/pos",
+      "source": "src/app/(dashboard)/pos/page.tsx",
+      "sourceSha256": "071e0b825faf428a0f43b75cba972583f723a467840c32ac9017d47ba2e87017"
+    },
+    {
+      "number": 11,
+      "route": "/pos/offline",
+      "title": "oldindan ruxsatlangan offline naqd savdo",
+      "guideUrl": "/pos/offline",
+      "source": "src/app/(dashboard)/pos/offline/page.tsx",
+      "sourceSha256": "2f2352179b565481432a76d167ee24e7baf2ebca54f071f109b9c342a44f4607"
+    },
+    {
+      "number": 12,
+      "route": "/drafts",
+      "title": "server qoralamalari",
+      "guideUrl": "/drafts",
+      "source": "src/app/(dashboard)/drafts/page.tsx",
+      "sourceSha256": "a0611f96825bda84b42a48f0a3423811d42168ec601f2a17c40599db1899666d"
+    },
+    {
+      "number": 13,
+      "route": "/sales",
+      "title": "savdolar jurnali",
+      "guideUrl": "/sales",
+      "source": "src/app/(dashboard)/sales/page.tsx",
+      "sourceSha256": "ccb3bb5fe2871f7faac16f7c8b196f4bfc97e1925d281be9dd48c2752d12f55d"
+    },
+    {
+      "number": 14,
+      "route": "/sales/[id]",
+      "title": "savdo tafsiloti, qaytarish va chek",
+      "guideUrl": "/sales/[id]",
+      "source": "src/app/(dashboard)/sales/[id]/page.tsx",
+      "sourceSha256": "36a5892f4f133c87241461fefd1efb99a61a5bc71fa0884a79f603fa085f0e38"
+    },
+    {
+      "number": 15,
+      "route": "/sales/[id]/exchange",
+      "title": "tovar almashtirish",
+      "guideUrl": "/sales/[id]/exchange",
+      "source": "src/app/(dashboard)/sales/[id]/exchange/page.tsx",
+      "sourceSha256": "f40d8f460efe95f383119f49fab77fe414d1e74c7cd575174807aa899459cccb"
+    },
+    {
+      "number": 16,
+      "route": "/shifts",
+      "title": "smena va naqd pul boshqaruvi",
+      "guideUrl": "/shifts",
+      "source": "src/app/(dashboard)/shifts/page.tsx",
+      "sourceSha256": "2d7bcf481a9528e4420506238dfb870fe2f6100eb6119c6e7638735a7ee5ca17"
+    },
+    {
+      "number": 17,
+      "route": "/products",
+      "title": "mahsulotlar ro‘yxati va yaratish",
+      "guideUrl": "/products",
+      "source": "src/app/(dashboard)/products/page.tsx",
+      "sourceSha256": "1749858f0068e341118923e9c5f5f20ab0e9aa8881006ae3507eebcd2ee0f7e8"
+    },
+    {
+      "number": 18,
+      "route": "/products/[id]",
+      "title": "mahsulot kartasi va barkodlar",
+      "guideUrl": "/products/[id]",
+      "source": "src/app/(dashboard)/products/[id]/page.tsx",
+      "sourceSha256": "897729ecd1ca5f900d323b99aa931263aac687c00ccc91960ec3f46467b118fb"
+    },
+    {
+      "number": 19,
+      "route": "/products/categories",
+      "title": "kategoriya daraxti",
+      "guideUrl": "/products/categories",
+      "source": "src/app/(dashboard)/products/categories/page.tsx",
+      "sourceSha256": "2a1e5d0ae38c3521bb8700907321ad32533144839ea27914b8f7f0b9086f3816"
+    },
+    {
+      "number": 20,
+      "route": "/products/brands",
+      "title": "brendlar",
+      "guideUrl": "/products/brands",
+      "source": "src/app/(dashboard)/products/brands/page.tsx",
+      "sourceSha256": "b255256cd5f7f535461624ab7e3feded9483e9dcbb28c5baf1b0b27591bd0962"
+    },
+    {
+      "number": 21,
+      "route": "/products/units",
+      "title": "o‘lchov birliklari",
+      "guideUrl": "/products/units",
+      "source": "src/app/(dashboard)/products/units/page.tsx",
+      "sourceSha256": "163392ee4a5737af9d63d3173737b191c33c96c7955a544799b380739c6ec452"
+    },
+    {
+      "number": 22,
+      "route": "/products/[id]/units",
+      "title": "mahsulotning birlik nisbati",
+      "guideUrl": "/products/[id]/units",
+      "source": "src/app/(dashboard)/products/[id]/units/page.tsx",
+      "sourceSha256": "dbb342641f8fe40249bf48ed07d729f4763a2e7d11f23c04d9db3cf1c2ee8460"
+    },
+    {
+      "number": 23,
+      "route": "/products/[id]/variants",
+      "title": "mustaqil mahsulot variantlari",
+      "guideUrl": "/products/[id]/variants",
+      "source": "src/app/(dashboard)/products/[id]/variants/page.tsx",
+      "sourceSha256": "a22096de6890a28354f191578369082b20b22d503a812c193a76359118a4d9c8"
+    },
+    {
+      "number": 24,
+      "route": "/products/[id]/compliance",
+      "title": "tasnif va savdo cheklovlari",
+      "guideUrl": "/products/[id]/compliance",
+      "source": "src/app/(dashboard)/products/[id]/compliance/page.tsx",
+      "sourceSha256": "40f30192cc13f9fd0a8be8bd6d27e98339cd532cffc9c194de07cd1c4152d774"
+    },
+    {
+      "number": 25,
+      "route": "/products/[id]/media",
+      "title": "brend, tavsif va rasm",
+      "guideUrl": "/products/[id]/media",
+      "source": "src/app/(dashboard)/products/[id]/media/page.tsx",
+      "sourceSha256": "b83530a8585858ae8552051bf2fba18dd3939636e1d03f952434f0eb90c684c4"
+    },
+    {
+      "number": 26,
+      "route": "/products/import",
+      "title": "CSV/XLSX import va katalog eksporti",
+      "guideUrl": "/products/import",
+      "source": "src/app/(dashboard)/products/import/page.tsx",
+      "sourceSha256": "1a27562a9a500b01934b2fb1942290d28dc6afc00d8d205e8c17350a0d2488e4"
+    },
+    {
+      "number": 27,
+      "route": "/products/prices",
+      "title": "ommaviy narx va narxlar tarixi",
+      "guideUrl": "/products/prices",
+      "source": "src/app/(dashboard)/products/prices/page.tsx",
+      "sourceSha256": "551c6bc1499726ee78c8835c51984df11676fa793d27cd684edcdb3016fe7952"
+    },
+    {
+      "number": 28,
+      "route": "/inventory",
+      "title": "qoldiq, kirim va tuzatish hujjatlari",
+      "guideUrl": "/inventory",
+      "source": "src/app/(dashboard)/inventory/page.tsx",
+      "sourceSha256": "4eba4a93e5b8f84e33fa5affed79573f2fc19b2eb55621b3ea78e3ba9e37259f"
+    },
+    {
+      "number": 29,
+      "route": "/inventory/transfers",
+      "title": "filiallararo transfer",
+      "guideUrl": "/inventory/transfers",
+      "source": "src/app/(dashboard)/inventory/transfers/page.tsx",
+      "sourceSha256": "612677b1da3705b7cfcabeaa68a476c74c057ccdd54c3a1862e0fc72cbd41f66"
+    },
+    {
+      "number": 30,
+      "route": "/inventory/counts",
+      "title": "inventarizatsiya",
+      "guideUrl": "/inventory/counts",
+      "source": "src/app/(dashboard)/inventory/counts/page.tsx",
+      "sourceSha256": "1c217ce0f7f09bba1f32ba5d2c5d1c4594fdcb3efb03421e0133b82462778c54"
+    },
+    {
+      "number": 31,
+      "route": "/inventory/movements",
+      "title": "ombor harakatlari jurnali",
+      "guideUrl": "/inventory/movements",
+      "source": "src/app/(dashboard)/inventory/movements/page.tsx",
+      "sourceSha256": "e8ce4c939ff6e65059adc7b9ebb58aec5f310640c3fe4e734dabdcdc55ddd5a9"
+    },
+    {
+      "number": 32,
+      "route": "/inventory/dispositions",
+      "title": "brak va hisobdan chiqarish",
+      "guideUrl": "/inventory/dispositions",
+      "source": "src/app/(dashboard)/inventory/dispositions/page.tsx",
+      "sourceSha256": "1b375adefd331fc0a2122c6647b93806f1daf7852e7847df86d2525ac66745b8"
+    },
+    {
+      "number": 33,
+      "route": "/inventory/locations",
+      "title": "zonalar va rezerv",
+      "guideUrl": "/inventory/locations",
+      "source": "src/app/(dashboard)/inventory/locations/page.tsx",
+      "sourceSha256": "4525fa94322d588cfed0d217c299ca330edeaeeadbf099591d0c39cc7fef31b7"
+    },
+    {
+      "number": 34,
+      "route": "/inventory/batches",
+      "title": "partiyalar va yaroqlilik",
+      "guideUrl": "/inventory/batches",
+      "source": "src/app/(dashboard)/inventory/batches/page.tsx",
+      "sourceSha256": "75c217ccaa817142a221212a84b4b00237f190b91d46e474b5b6f811596472f2"
+    },
+    {
+      "number": 35,
+      "route": "/inventory/serials",
+      "title": "seriallar va kafolat",
+      "guideUrl": "/inventory/serials",
+      "source": "src/app/(dashboard)/inventory/serials/page.tsx",
+      "sourceSha256": "b5aaedbc4014c4376ae92bcd4ff07448a078f132cc734b5616e3aecf44a95f70"
+    },
+    {
+      "number": 36,
+      "route": "/replenishment",
+      "title": "qayta buyurtma tavsiyasi",
+      "guideUrl": "/replenishment",
+      "source": "src/app/(dashboard)/replenishment/page.tsx",
+      "sourceSha256": "49ad2ba1e57e6758a24cff335d4dea90b4b552db5db67bb21b8c270b84dd9cee"
+    },
+    {
+      "number": 37,
+      "route": "/suppliers",
+      "title": "yetkazib beruvchilar",
+      "guideUrl": "/suppliers",
+      "source": "src/app/(dashboard)/suppliers/page.tsx",
+      "sourceSha256": "cb7590a351990715237fc804af70db8f61c9d80d54b5e0ae483effe4ec9171b3"
+    },
+    {
+      "number": 38,
+      "route": "/suppliers/[id]",
+      "title": "supplier, buyurtma, invoice va xarajat tannarxi",
+      "guideUrl": "/suppliers/[id]",
+      "source": "src/app/(dashboard)/suppliers/[id]/page.tsx",
+      "sourceSha256": "2c2c93c18018eff06836f9a8d7f67ac652ce2bed478905752b6f60394691d6df"
+    },
+    {
+      "number": 39,
+      "route": "/finance",
+      "title": "hisoblar, xarajatlar, ichki o‘tkazma va foyda",
+      "guideUrl": "/finance",
+      "source": "src/app/(dashboard)/finance/page.tsx",
+      "sourceSha256": "de25e8375a1ec5233516fbbd13417da2e3b6bd30f8df1839b153cd307f400f8b"
+    },
+    {
+      "number": 40,
+      "route": "/customers",
+      "title": "mijozlar va nasiya",
+      "guideUrl": "/customers",
+      "source": "src/app/(dashboard)/customers/page.tsx",
+      "sourceSha256": "823ce2cac80da315b95bf6e427d1de4f46e368f42c0f25d92f6e2d24eecdbe0b"
+    },
+    {
+      "number": 41,
+      "route": "/customers/[id]",
+      "title": "mijoz kartasi va ichki hisob",
+      "guideUrl": "/customers/[id]",
+      "source": "src/app/(dashboard)/customers/[id]/page.tsx",
+      "sourceSha256": "c758dcbe3878049aac32e979a67c4d60cab0a4b5e33afb6168d435a6921092c3"
+    },
+    {
+      "number": 42,
+      "route": "/customers/[id]/history",
+      "title": "original tarix va dublikat kartani birlashtirish",
+      "guideUrl": "/customers/[id]/history",
+      "source": "src/app/(dashboard)/customers/[id]/history/page.tsx",
+      "sourceSha256": "68d568409b2c651562c151280b9875ad457e9ded59a7ce2ee5964c0f7c740850"
+    },
+    {
+      "number": 43,
+      "route": "/customers/duplicates",
+      "title": "eski telefon dublikatlari",
+      "guideUrl": "/customers/duplicates",
+      "source": "src/app/(dashboard)/customers/duplicates/page.tsx",
+      "sourceSha256": "c008c5702eef4c634fb0f0ed65811a179dbcc3d71bafc00efa5af8269cb29edb"
+    },
+    {
+      "number": 44,
+      "route": "/loyalty",
+      "title": "bonus, karta, promo va sertifikat siyosati",
+      "guideUrl": "/loyalty",
+      "source": "src/app/(dashboard)/loyalty/page.tsx",
+      "sourceSha256": "2a04956dae25ca61beadf0808f30d01be57d8b3089bc1d1e31573ed22142f412"
+    },
+    {
+      "number": 45,
+      "route": "/reports",
+      "title": "savdo va mahsulot hisoboti",
+      "guideUrl": "/reports",
+      "source": "src/app/(dashboard)/reports/page.tsx",
+      "sourceSha256": "ad57a5e9d755f760a1a1dacff385321cbe6d0d5e6addff849592ccd935270a9c"
+    },
+    {
+      "number": 46,
+      "route": "/reports/breakdowns",
+      "title": "savdo kesimlari",
+      "guideUrl": "/reports/breakdowns",
+      "source": "src/app/(dashboard)/reports/breakdowns/page.tsx",
+      "sourceSha256": "b82b7edb982c1de2c9af9e2fc6f89977a867007e7c2a292a21571be8438bbc8e"
+    },
+    {
+      "number": 47,
+      "route": "/reports/purchases",
+      "title": "xarid narxlari va taqqoslash",
+      "guideUrl": "/reports/purchases",
+      "source": "src/app/(dashboard)/reports/purchases/page.tsx",
+      "sourceSha256": "b57d2607a9ae3408d180cef223fc58c0d61c37d6530add5f4f6f87dfd5c71255"
+    },
+    {
+      "number": 48,
+      "route": "/reports/supplier-balances",
+      "title": "supplier qarzi va muddati",
+      "guideUrl": "/reports/supplier-balances",
+      "source": "src/app/(dashboard)/reports/supplier-balances/page.tsx",
+      "sourceSha256": "87ca966cb401f9bd7cf11e03bae5713e9f323bb95603e9bf2d17e8bf3bb4bf64"
+    },
+    {
+      "number": 49,
+      "route": "/reports/reconciliation",
+      "title": "hisoblarni solishtirish",
+      "guideUrl": "/reports/reconciliation",
+      "source": "src/app/(dashboard)/reports/reconciliation/page.tsx",
+      "sourceSha256": "0907e2cdba7a25045557f7f8711180537e8404db1a8c7e969929d309e0a922fe"
+    },
+    {
+      "number": 50,
+      "route": "/reports/plans",
+      "title": "rejalashtirilgan hisobot/KPI/prognoz",
+      "guideUrl": "/reports/plans",
+      "source": "src/app/(dashboard)/reports/plans/page.tsx",
+      "sourceSha256": "2d74e5f87067ef1d46319b13ff3bd9b52a4791c49ee278cce51e13cf1b1664cf"
+    },
+    {
+      "number": 51,
+      "route": "/settings",
+      "title": "tashkilot, filial, kassa va xodimlar",
+      "guideUrl": "/settings",
+      "source": "src/app/(dashboard)/settings/page.tsx",
+      "sourceSha256": "e9cfce70152e962073500e35b53d4cd1cd6b5ccf2fb3dcc9055104b6dc2a3033"
+    },
+    {
+      "number": 52,
+      "route": "/settings/prices",
+      "title": "narx darajalari va mijoz guruhlari",
+      "guideUrl": "/settings/prices",
+      "source": "src/app/(dashboard)/settings/prices/page.tsx",
+      "sourceSha256": "485c6f2cf60dfbf484a3dbcfeeb7c92038a5fc2b9e5e248384a47b21fdb46e7d"
+    },
+    {
+      "number": 53,
+      "route": "/settings/taxes",
+      "title": "soliq profillari va tarixiy stavka",
+      "guideUrl": "/settings/taxes",
+      "source": "src/app/(dashboard)/settings/taxes/page.tsx",
+      "sourceSha256": "39bfa22633c2ecaf853c3f73c75b3752965d4821f0e7f549cc12d7f360eb4f01"
+    },
+    {
+      "number": 54,
+      "route": "/settings/support",
+      "title": "supportga vaqtli o‘qish ruxsati",
+      "guideUrl": "/settings/support",
+      "source": "src/app/(dashboard)/settings/support/page.tsx",
+      "sourceSha256": "d43c27638bb728caa9ae3f46121e95a051571f2e216aa6f9713757d73f4257da"
+    },
+    {
+      "number": 55,
+      "route": "/roles",
+      "title": "maxsus rollar va vakolatlar",
+      "guideUrl": "/roles",
+      "source": "src/app/(dashboard)/roles/page.tsx",
+      "sourceSha256": "c9a638df8309a759b43c1aef392ed621955642153547df2357357a9a29302792"
+    },
+    {
+      "number": 56,
+      "route": "/security",
+      "title": "hisob xavfsizligi",
+      "guideUrl": "/security",
+      "source": "src/app/(dashboard)/security/page.tsx",
+      "sourceSha256": "dcc1ec0d7193e18c48e6787824f2be2bd9c9020ce76c22f38242ac90dace4708"
+    },
+    {
+      "number": 57,
+      "route": "/billing",
+      "title": "tarif, obuna, retention va yopish",
+      "guideUrl": "/billing",
+      "source": "src/app/(dashboard)/billing/page.tsx",
+      "sourceSha256": "7b16d6ee8f00d977a6766de6d6ad92c79c7b164e957a44df24538f6467389da6"
+    },
+    {
+      "number": 58,
+      "route": "/platform",
+      "title": "platforma boshqaruvi",
+      "guideUrl": "/platform",
+      "source": "src/app/(dashboard)/platform/page.tsx",
+      "sourceSha256": "4c0cb3bbb916fa6169935ce8fa9c550082c61255292c111b6dc513c2aed90e7b"
+    },
+    {
+      "number": 59,
+      "route": "/support",
+      "title": "support operatorining konsoli",
+      "guideUrl": "/support",
+      "source": "src/app/(dashboard)/support/page.tsx",
+      "sourceSha256": "75c4248e59d4a8d224102e9390ce7868245385c4f7c256b6f0310bf974f89f99"
+    },
+    {
+      "number": 60,
+      "route": "/tickets",
+      "title": "yordam murojaatlari",
+      "guideUrl": "/tickets",
+      "source": "src/app/(dashboard)/tickets/page.tsx",
+      "sourceSha256": "095a4ca92e7921cc097c1b649d67646f1a2cd55d6fad71dad057301781e5e004"
+    },
+    {
+      "number": 61,
+      "route": "/tickets/[id]",
+      "title": "murojaat tafsiloti",
+      "guideUrl": "/tickets/[id]",
+      "source": "src/app/(dashboard)/tickets/[id]/page.tsx",
+      "sourceSha256": "4307ad353d02ab74d482f010e93d2a58bdde8b33748638b0aaff064a267bb022"
+    },
+    {
+      "number": 62,
+      "route": "/jobs",
+      "title": "fon ishlari va eksportlar",
+      "guideUrl": "/jobs",
+      "source": "src/app/(dashboard)/jobs/page.tsx",
+      "sourceSha256": "3e1e8cdade2a7f53a7e18ad8998adfae14ad41035a4c22a732565802ec80cf89"
+    },
+    {
+      "number": 63,
+      "route": "/audit",
+      "title": "audit tarixi",
+      "guideUrl": "/audit",
+      "source": "src/app/(dashboard)/audit/page.tsx",
+      "sourceSha256": "ad4b35358b97d34f6374384c3296ebc61e2287272bc5f1b3aad975e85d2c4548"
+    },
+    {
+      "number": 64,
+      "route": "/archive",
+      "title": "arxivlangan katalog va mijozlar",
+      "guideUrl": "/archive",
+      "source": "src/app/(dashboard)/archive/page.tsx",
+      "sourceSha256": "bc2ba48ef752ee68ea4a51ec138c23e360ec95fd93a4ec13b174e52e08817dcf"
+    },
+    {
+      "number": 65,
+      "route": "/incidents",
+      "title": "hisob tafovutlari va hal qilish",
+      "guideUrl": "/incidents",
+      "source": "src/app/(dashboard)/incidents/page.tsx",
+      "sourceSha256": "19b3f0ce301e0f9877e3a728aba08849a4d0d9a72ca8064fa5e0d22f8679fcf6"
+    },
+    {
+      "number": 66,
+      "route": "/sync-review",
+      "title": "lokal navbat va server konfliktlari",
+      "guideUrl": "/sync-review",
+      "source": "src/app/(dashboard)/sync-review/page.tsx",
+      "sourceSha256": "2753c378c4860cb053007354864039e72bf3c1d985627533608e027cb5c609f7"
+    },
+    {
+      "number": 67,
+      "route": "/onboarding",
+      "title": "filialning birlamchi tayyorgarligi",
+      "guideUrl": "/onboarding",
+      "source": "src/app/(dashboard)/onboarding/page.tsx",
+      "sourceSha256": "1bf45aede54c28475700dfa1dbc0e021ff08ecbc28db9936420f1b088e06d2ad"
+    },
+    {
+      "number": 68,
+      "route": "/help",
+      "title": "foydalanish va tiklash qo‘llanmasi",
+      "guideUrl": "/help",
+      "source": "src/app/(dashboard)/help/page.tsx",
+      "sourceSha256": "9ab0ad8606a201df6a8a3e1996989887432dc2eab006e698816e093dfcd590d3"
+    },
+    {
+      "number": 69,
+      "route": "/training",
+      "title": "kassirning iqtisodiy yozuvsiz mashqi",
+      "guideUrl": "/training",
+      "source": "src/app/(dashboard)/training/page.tsx",
+      "sourceSha256": "b036c39c0900812821c6226471a625c71be21ed92baa0969dd0fe94f439b39f4"
+    }
+  ],
+  "additionalSources": [
+    {
+      "path": "public/pwa/offline.html",
+      "sha256": "73c7b7366405985caebcf2be27f0638cd8306d385fd6f5b3423eba2873f14014"
+    },
+    {
+      "path": "public/pwa/cash.html",
+      "sha256": "b08257f3e76a526664461ff270eb83a97598b2e3b8c46fb83e6fd169f36cf001"
+    },
+    {
+      "path": "ops/status/server.mjs",
+      "sha256": "709aed120c8f4d5323c81c133a8f1a1ddb201713ed9232823af88683727d6f82"
+    },
+    {
+      "path": "ops/status/status.mjs",
+      "sha256": "eff8ff551d75df7e7bf5cc4c19d25e2917db7f5c0bbd754fecde42d0b3b71ace"
+    },
+    {
+      "path": "src/app/not-found.tsx",
+      "sha256": "19bc0a4ec79bb4277aecfb29ac90c180a236884442bb1a19ecf2378a5f81ff61"
+    },
+    {
+      "path": "src/app/global-error.tsx",
+      "sha256": "cda8a437b02c82f37d303a63fc0803e90c92a1dffd3fd285c7db5ff1e820b910"
+    },
+    {
+      "path": "src/app/(dashboard)/error.tsx",
+      "sha256": "9c52ee40b0f8f5ec22d9858f3aa68be3b50764557f036d65eebe242be14c9f8f"
+    },
+    {
+      "path": "src/app/(dashboard)/loading.tsx",
+      "sha256": "f2b48be27a7a83c8261222833c7350025f5d5d1527e291030e77fe94f16599e5"
+    }
+  ],
+  "limitations": [
+    "No browser smoke or complete functional execution of all pages was performed in this documentation task.",
+    "Observed missing common branch switch UI and receipt-only navigation from sales list are recorded as findings, not fixed.",
+    "API role admission is narrower/wider than some page UI; DAL, branch, session and custom-role constraints still apply.",
+    "No real vendor/hardware, production deployment, owner data or environment file changes."
+  ]
+}

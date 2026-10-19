@@ -1,0 +1,36 @@
+{
+  "recordedAt": "2026-10-17T09:36:46.427865+00:00",
+  "scope": "Local development image source consistency; no DB writes, no production deployment",
+  "files": [
+    {
+      "file": "src/components/layouts/Header.tsx",
+      "sourceSha256": "0f6f3cc88a7268938214ce0b9a4f00c71bbef63c01d6be1f76974724b35e4738",
+      "containerSha256": "0f6f3cc88a7268938214ce0b9a4f00c71bbef63c01d6be1f76974724b35e4738",
+      "matches": true
+    },
+    {
+      "file": "src/context/AuthContext.tsx",
+      "sourceSha256": "7f3d63dd563a5f0e73b88d1376be1f5bc0b162e1f94f7cc749aaf7e2b3c26f68",
+      "containerSha256": "7f3d63dd563a5f0e73b88d1376be1f5bc0b162e1f94f7cc749aaf7e2b3c26f68",
+      "matches": true
+    },
+    {
+      "file": "src/server/deployment/state.ts",
+      "sourceSha256": "e01119cd32b45b7cfe00ee1e80d48111f0992121aa89205eb82cdeaa456782ff",
+      "containerSha256": "e01119cd32b45b7cfe00ee1e80d48111f0992121aa89205eb82cdeaa456782ff",
+      "matches": true
+    },
+    {
+      "file": "src/app/(dashboard)/products/[id]/units/page.tsx",
+      "sourceSha256": "6aac8fcd6fba3c09ebcf0ad1ec3f35ebcce9f7e59ffbf589e27dba4061b17d4a",
+      "containerSha256": "6aac8fcd6fba3c09ebcf0ad1ec3f35ebcce9f7e59ffbf589e27dba4061b17d4a",
+      "matches": true
+    },
+    {
+      "file": "src/server/organizations/validation.ts",
+      "sourceSha256": "21346430d76b1a832aba3ba91cff5b7d771337dbe3c9211e90f59e8c92b78a88",
+      "containerSha256": "21346430d76b1a832aba3ba91cff5b7d771337dbe3c9211e90f59e8c92b78a88",
+      "matches": true
+    }
+  ]
+}

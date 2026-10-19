@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-15",
+  "status": "awaiting_operator_ca_trust_approval",
+  "cause": "Actual browser ERR_CERT_AUTHORITY_INVALID: self-signed localhost issuer not in system/browser trust.",
+  "verified": {
+    "httpRedirect": 308,
+    "explicitLeafTrustHttps": 200,
+    "defaultSystemTrustExit": 60,
+    "mkcertInstalled": false,
+    "nssToolsInstalled": false,
+    "scriptShellSyntaxExit": 0,
+    "scriptHelpExit": 0,
+    "sourceSecurityScanExit": 0
+  },
+  "prepared": "scripts/local/setup-trusted-https.sh --install-ca",
+  "trustStoreChanged": false,
+  "browserWarningBypassed": false,
+  "successClaimed": false,
+  "originalDoneCount": 176,
+  "sourceSha256": {
+    "scripts/local/setup-trusted-https.sh": "8d518a0749be989eed0999311cc2be5bcaeacd849c6c74281a7b6f84b99b2e33",
+    "scripts/local/setup-https.sh": "a19b6ff5024ab8b4d642ab81428aba82bb8ef92ba17a4e1e1ee37a2eaadc57fe",
+    "docs/operations/local-docker-https.md": "49fc8d8b15ee2e4009fb14810e21666c57a500afa926db50ab67f3443e88a08f"
+  },
+  "sources": [
+    "https://github.com/FiloSottile/mkcert",
+    "https://packages.fedoraproject.org/pkgs/mkcert/mkcert/"
+  ]
+}

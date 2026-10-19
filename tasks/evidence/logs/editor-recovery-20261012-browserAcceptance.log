@@ -1,0 +1,175 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/incident-recovery.spec.ts tests/e2e/tax-form-recovery.spec.ts tests/e2e/product-editor-state.spec.ts tests/e2e/core.spec.ts --grep incident scan and resolution|tax forms protect|product unit and classification drafts|Owner sees durable inventory alert|Sync conflict requires manager terminal proof|Owner consent UI recovers|Configured tax UI|Product classification owner UI|Box conversion owner recovery
+
+[WebServer] (node:135158) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 27 tests using 1 worker
+
+(node:135195) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.2s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.0s)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (6.6s)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (2.9s)
+  ✓   5 [chromium] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (1.1s)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:1254:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (6.3s)
+  ✓   7 [chromium] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (1.4s)
+  ✘   8 [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.0s)
+(node:136821) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [chromium] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (1.4s)
+(node:136991) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [firefox] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.7s)
+  ✓  11 [firefox] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.5s)
+  ✓  12 [firefox] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.3s)
+  ✓  13 [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (5.0s)
+  ✓  14 [firefox] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (1.4s)
+  ✓  15 [firefox] › tests/e2e/core.spec.ts:1254:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (6.7s)
+  ✓  16 [firefox] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (1.8s)
+  ✘  17 [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.6s)
+(node:138307) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  18 [firefox] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (2.0s)
+(node:139045) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 [webkit] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.3s)
+  ✓  20 [webkit] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.7s)
+  ✓  21 [webkit] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.8s)
+  ✓  22 [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (6.7s)
+  ✓  23 [webkit] › tests/e2e/core.spec.ts:1241:5 › Product classification owner UI stores reviewed policy and checkout rejects unavailable marking (2.0s)
+  ✓  24 [webkit] › tests/e2e/core.spec.ts:1254:5 › Box conversion owner recovery and POS checkout preserve original ratio, stock and one cash receipt (7.3s)
+  ✓  25 [webkit] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.1s)
+  ✘  26 [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection (1.7s)
+(node:141708) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  27 [webkit] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (2.1s)
+
+
+  1) [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert')
+    Expected: visible
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert">Kiritilgan ma’lumotlar noto‘g‘ri. Belgilangan may…</p> aka getByText('Kiritilgan ma’lumotlar noto‘g')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert') with timeout 10000ms
+      - waiting for getByRole('alert')
+
+
+      21 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      22 |  expect((await unitRejected).status()).toBe(400)
+    > 23 |  await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('Original reviewed box draft')
+         |                                        ^
+      24 |  await page.getByLabel('Asosiy birliklar soni',{exact:true}).fill('12')
+      25 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      26 |  await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('')
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:23:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert')
+    Expected: visible
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert">…</p> aka getByText('Server bilan ulanish uzildi;')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert') with timeout 10000ms
+      - waiting for getByRole('alert')
+
+
+      27 |  await expect(page.getByRole('button',{name:'Nisbatni tanlash',exact:true})).toBeEnabled()
+      28 |  await page.getByLabel('Konvertatsiya sababi',{exact:true}).fill('A new independent draft')
+    > 29 |  await page.route('**/api'+unitPath,route=>route.abort('failed'));await page.getByRole('button',{name:'Birliklar ro‘yxatini yangilash',exact:true}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('A new independent draft');await expect(page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true})).toBeDisabled();await page.unroute('**/api'+unitPath);await page.getByRole('button',{name:'Qayta yuklash',exact:true}).click();await expect(page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true})).toBeEnabled();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('A new independent draft');
+         |                                                                                                                                                                                                   ^
+      30 |  await page.getByRole('button',{name:'Nisbatni tanlash',exact:true}).click();expect(prompts).toBe(2);await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('A new independent draft')
+      31 |  await page.getByLabel('Konvertatsiya sababi',{exact:true}).fill('')
+      32 |  const compliancePath='/products/'+product.id+'/compliance'
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:29:195
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert')
+    Expected: visible
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <p role="alert">Kiritilgan ma’lumotlar noto‘g‘ri. Belgilangan may…</p> aka getByText('Kiritilgan ma’lumotlar noto‘g')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert') with timeout 10000ms
+      - waiting for getByRole('alert')
+
+
+      21 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      22 |  expect((await unitRejected).status()).toBe(400)
+    > 23 |  await expect(page.locator('p[role="alert"]')).toBeVisible();await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('Original reviewed box draft')
+         |                                        ^
+      24 |  await page.getByLabel('Asosiy birliklar soni',{exact:true}).fill('12')
+      25 |  await page.getByRole('button',{name:'Konvertatsiyani saqlash: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click()
+      26 |  await expect(page.getByLabel('Konvertatsiya sababi',{exact:true})).toHaveValue('')
+        at /home/fedora/Developments/POS_backup/tests/e2e/product-editor-state.spec.ts:23:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/error-context.md
+
+    Error Context: test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/product-editor-state-produ-630f9-osing-navigation-protection-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+    [firefox] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+    [webkit] › tests/e2e/product-editor-state.spec.ts:8:5 › product unit and classification drafts survive failed reads and successful retries without losing navigation protection 
+  24 passed (1.7m)

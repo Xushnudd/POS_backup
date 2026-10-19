@@ -1,0 +1,852 @@
+{
+  "version": 3,
+  "at": "2026-10-17T14:16:36.673Z",
+  "node": "v24.18.0",
+  "fixtureOrganizationId": "3b2af4a1-a308-4c36-8c52-9239f848910b",
+  "environment": {
+    "platform": "linux",
+    "kernel": "7.2.10-200.fc44.x86_64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "totalMemoryBytes": 33467346944,
+    "postgres": "PostgreSQL 15.19 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit"
+  },
+  "databaseMigrations": [
+    {
+      "migrationName": "20260907100516_init",
+      "checksum": "8222b0e73f88ce86d4f4020569679ef363a7d438b8396ad939515835d5d0e57f"
+    },
+    {
+      "migrationName": "202610050001_foundation",
+      "checksum": "77ab7ecc5b18b9b37bf4454441ba98efef20a96fc4099fa189e19d991d7160ac"
+    },
+    {
+      "migrationName": "202610050002_operations",
+      "checksum": "99af161891780cb8fe37aa19489b36c6b5482f62dfb361001a0058e4e9b98e5a"
+    },
+    {
+      "migrationName": "202610050003_inventory",
+      "checksum": "5896a04b41b68ffb5384b705974a0355bb3730099cf2b10311ab55b096e3999c"
+    },
+    {
+      "migrationName": "202610050004_security",
+      "checksum": "a4e747618c702d1d8e86db2d306736f3c5355bc9188fc314674196d7b16a438d"
+    },
+    {
+      "migrationName": "202610050005_operation_actor",
+      "checksum": "8ef9c813e392a70858a5a3c8da2cefa9a989c77aa0706ec00ac5e6e94dbb57c3"
+    },
+    {
+      "migrationName": "202610050006_legacy_scope_validation",
+      "checksum": "bf9f2bf202c776bd987c38b75f24425479b6c3f8aa73e7276d85122af504f336"
+    },
+    {
+      "migrationName": "202610050007_invitations",
+      "checksum": "3a23beaded9349b5fb48d4484c152f7b62d80a3c8430bd7dcbf0f7fdce7adc4c"
+    },
+    {
+      "migrationName": "202610050008_catalog_units_barcodes",
+      "checksum": "5e3c8b4428eeb11a591727cd5ca49959133472c677fe65d7ab9a03a4a7aa9934"
+    },
+    {
+      "migrationName": "202610050009_default_units",
+      "checksum": "ca2842923b47683981ca87f013e6204d2a9fe1d43cf7e36b59bb000b67a0a4f5"
+    },
+    {
+      "migrationName": "202610050010_cancelled_operations",
+      "checksum": "361ac2151c806f8a553a2a5fea5bc37f7b3dc2ee323d8c8e7ba59cec6b11a395"
+    },
+    {
+      "migrationName": "202610050011_stock_reversals",
+      "checksum": "b715c0f0f59906c405aafb1264e7337a68c0b5ae2b0e06705bf1849597fd8016"
+    },
+    {
+      "migrationName": "202610050012_transfer_returns",
+      "checksum": "075283d1f0912d6a63aba4a0f74677c4d0763eecb59972f605438b46c4f6c125"
+    },
+    {
+      "migrationName": "202610050013_stock_counts",
+      "checksum": "258d72a5c33768d691aa803b59325b9a417b6c8c37faad4ce767bd4e5baab472"
+    },
+    {
+      "migrationName": "202610050014_count_history_guards",
+      "checksum": "fdd21333ccb08821bb7bbccb35d7991c30c2a1e11abcad02fcddfaeb7e9b126f"
+    },
+    {
+      "migrationName": "202610050015_customer_ledger_documents",
+      "checksum": "f27d64f5f5b3feb63136efdf9422220cb88973d36d9b85119461fb68e273b39f"
+    },
+    {
+      "migrationName": "202610060016_audit_history_guards",
+      "checksum": "15858a92365ff497737f1db362ccadf40bdc042c1bd85e02f9019c9629ea3257"
+    },
+    {
+      "migrationName": "202610060017_sale_history",
+      "checksum": "e21cb29fb35af6e4d16034aec90f08dc205c477698e7ff74155873a2f4da276f"
+    },
+    {
+      "migrationName": "202610060018_sale_item_lock",
+      "checksum": "88084f4bc2bc53645ab32f293fb853827d597b5bb74e7b0ed444aedd9880a01f"
+    },
+    {
+      "migrationName": "202610060019_finance_history",
+      "checksum": "42259b7d970b624ff2f0c358cf6a1a628080b64a83439335b489d6bd6424ef82"
+    },
+    {
+      "migrationName": "202610060020_correction_cash_link",
+      "checksum": "1cfe33500aad1201f8b41c0eba985debc5927d218d48e91195ba430af11990cb"
+    },
+    {
+      "migrationName": "202610060021_return_approval_check",
+      "checksum": "bdae3b73672f77c20e864aabc58fe87f159ef8f4f2fa1ff01fe3974c07ef8e36"
+    },
+    {
+      "migrationName": "202610060022_cash_tender",
+      "checksum": "9f2e1c66a9e2aacf2eb6e528908a8a29ca2eb22f28b4532690fb24e44b87ee76"
+    },
+    {
+      "migrationName": "202610060023_sale_metadata",
+      "checksum": "002bcd5623d4665ce23023b8c3067e781dc53818e844b521a365ae79501e73f9"
+    },
+    {
+      "migrationName": "202610060024_ownership_acceptance",
+      "checksum": "afbbeaf8753e72660e85fbd706f44a327532d4c3db323400efaa23b561f85eef"
+    },
+    {
+      "migrationName": "202610060025_stock_journal_guards",
+      "checksum": "62333ef1d7143f005cccaaa5c323404844c7ae65e9c88130833949bc3795cddb"
+    },
+    {
+      "migrationName": "202610060026_member_archive",
+      "checksum": "01f0a0fcc43a425219f314b5e0b1c2ea61271f9b52a1a8b580acfe1bb0a10e76"
+    },
+    {
+      "migrationName": "202610060027_checkout_shift_debt",
+      "checksum": "63a4c915919483f5587882ea8485605d77bba7be5c78460c27c97fc921a3ec07"
+    },
+    {
+      "migrationName": "202610060028_alerts_sync_thresholds",
+      "checksum": "a35d49d2102e163d33015ff5f64faa84497edbfde76c292bd932d8966c84a4e3"
+    },
+    {
+      "migrationName": "202610060029_review_actor_scope",
+      "checksum": "f9ec89d649c410cfe72ad7f4e278dffd8fb0a24afae2aa6fcc6f1d8b73455b3c"
+    },
+    {
+      "migrationName": "202610070031_manual_refund_proof",
+      "checksum": "a4ab7a5e8ea8ca0962210de03270abef6cdfe9aebd0cc96568c1d42974a8424e"
+    },
+    {
+      "migrationName": "202610070032_supplier_terms",
+      "checksum": "eb6ba24916be63d93bb2212478266d55d883386d1017dec54ce752b10ddedca2"
+    },
+    {
+      "migrationName": "202610070033_payment_source",
+      "checksum": "d679e82de017299f6be65d3adff094da5227a0fb4bfc8767982692a38d212c50"
+    },
+    {
+      "migrationName": "202610070034_manual_collection_proof",
+      "checksum": "98e87d856edd2b66c159419119b6074587ff14d95883e19464b7e0a7314c0990"
+    },
+    {
+      "migrationName": "202610070035_price_history",
+      "checksum": "620126213a7cde4c84f13f29ce35fdade16d0e203c66e611c118aaf52bda06e8"
+    },
+    {
+      "migrationName": "202610070036_return_dispositions",
+      "checksum": "a1a60dce17ed2adb88057be4f3fae859edb986dec562bd5156770b51eb492522"
+    },
+    {
+      "migrationName": "202610080037_price_location_scope",
+      "checksum": "a3f59bc5e3c9201ba12114a03b432abf7b0c657ab4b71d77384e1824365f6984"
+    },
+    {
+      "migrationName": "202610080038_financial_accounts",
+      "checksum": "621411973584baa2af263bf8ad1b04e255ceb3d7a6744ec99110f2b83ce5d36f"
+    },
+    {
+      "migrationName": "202610080039_financial_trigger_record",
+      "checksum": "e61b739bdd098b8c9a56bb89283478ef814259c12461049f0e75ef9ebdb04226"
+    },
+    {
+      "migrationName": "202610080040_financial_trigger_alias",
+      "checksum": "26d4a9d531eff0f30cde66443f11b3f5ee715c1efd619149331997a3ceb7d59b"
+    },
+    {
+      "migrationName": "202610080041_financial_cash_mirror",
+      "checksum": "c4e434031f827485a1c5ffb92f2f997345e111eab4a4734c9081257164f2cfa4"
+    },
+    {
+      "migrationName": "202610080042_supplier_ledger",
+      "checksum": "af95a15cc0fd3d5278a4e5132bd1145674188fb9e3f03c9a5a5e78e38820e326"
+    },
+    {
+      "migrationName": "202610080043_supplier_trigger_record",
+      "checksum": "fc126fc6c3df221809e3041c50a2dc9c2c99c9a73995fb28cf281ba460db7039"
+    },
+    {
+      "migrationName": "202610080044_supplier_payment_proof",
+      "checksum": "9383161ccfd2bf8b552deed386f7a177c510b2dc52d4ea0c92bebc6cdc21936f"
+    },
+    {
+      "migrationName": "202610080045_purchase_orders",
+      "checksum": "048c81dd1a2357479dec03fdc57a5334d1db20300b945fc7286a606ccea16e07"
+    },
+    {
+      "migrationName": "202610080046_purchase_receipt_complete",
+      "checksum": "8e7ec892788838f57e2d1d9a73d637cfa922a07341cc5188ff6ffd89511c362c"
+    },
+    {
+      "migrationName": "202610080047_purchase_cascade_constraints",
+      "checksum": "a492a4d0b6dd33f080ea06a9da079490c1556844f8ba4b3e21f2c38434660b11"
+    },
+    {
+      "migrationName": "202610080048_zero_value_receipts",
+      "checksum": "aff14d1f46e7a6748539db8dfd49ef7eacb0dbf8f34a392518ab81c3da2d8d11"
+    },
+    {
+      "migrationName": "202610080049_supplier_credits",
+      "checksum": "f59e452a633a8be03ffe6dc9b368d25d2a9357b3fa62bbe1c492d3cbd373c1dd"
+    },
+    {
+      "migrationName": "202610080050_product_variants",
+      "checksum": "b91e8deefe00fd0e771c51d2fc72ed9b24c5c72594ca8cae2ba12019dd41fccc"
+    },
+    {
+      "migrationName": "202610080051_variant_tenant_fks",
+      "checksum": "b4be2a39364c208824e5b2e65d3a22774366fbf12fb5fb3ca504c08fe5eaa89a"
+    },
+    {
+      "migrationName": "202610080052_protected_files",
+      "checksum": "8afa5f8a15c6652453403b9b37db28ffb97a60cb1c3c2ba8e0346465d2aa35d8"
+    },
+    {
+      "migrationName": "202610080053_catalog_metadata",
+      "checksum": "14de09212dd2300505f9e41cbbee1d970268ac060b3785a915a1641a882ad8d4"
+    },
+    {
+      "migrationName": "202610080054_file_image_links",
+      "checksum": "b9fc62a208a084a00094b2e4c7ea147879c8658e2ea83917d5cf9bac799cb8f2"
+    },
+    {
+      "migrationName": "202610080055_category_graph_lock",
+      "checksum": "f507192a9a0d322cba0fa1fb963521d69d0e8e2bf54a71215e8840368fa48198"
+    },
+    {
+      "migrationName": "202610080056_cashier_pin",
+      "checksum": "ea2c98020968917c24eb0cf8f264ed9a8cc68b475589c3bf6ef996ae271f7218"
+    },
+    {
+      "migrationName": "202610080057_tax_snapshots",
+      "checksum": "c244c60fb7f051a5850fdd407fb5c1237a08fcfb9b23d313ba01ea1fe4d4b17e"
+    },
+    {
+      "migrationName": "202610080058_return_tax_allocation",
+      "checksum": "c48e68008420cad3dfbfda84664860d36ae189e655109e67622ab4a9650c2a75"
+    },
+    {
+      "migrationName": "202610080059_discount_authorization",
+      "checksum": "b2ee869b223e80fb94467b90f91592eabd91bdba58279fab0e1f1c5a8f28094b"
+    },
+    {
+      "migrationName": "202610080060_transfer_dispositions",
+      "checksum": "adfbd80104d52383112571fbee9dc2befba590d5c2048179dcfcfe2de417f702"
+    },
+    {
+      "migrationName": "202610080061_transfer_snapshot_guards",
+      "checksum": "95ab0fe8555620b5474052772fb785cc845c516e9b4cc7b39ef782c220495179"
+    },
+    {
+      "migrationName": "202610080062_support_grants",
+      "checksum": "fc2006d680ff065ac80b58ae2166ea977e20a71b16ccb0ae4e6d45be86a0bb26"
+    },
+    {
+      "migrationName": "202610080063_price_rules",
+      "checksum": "d07c369b4b893be019e871a4ef8332e7c9aebf899a159f550b8522aedd41abbe"
+    },
+    {
+      "migrationName": "202610080064_price_rule_guards",
+      "checksum": "d70326ebf483f2b53d623de83cbc2d20c12821141f2969b9072ae4098d3c3fbe"
+    },
+    {
+      "migrationName": "202610080065_customer_identity",
+      "checksum": "39dc31e50c73d80aebf70ace9eea3b09a05ab2e2d66ad06017f50a2550f7d9ee"
+    },
+    {
+      "migrationName": "202610080066_receipt_join_indexes",
+      "checksum": "6c31ecda22c3f40d79b0a3d8d25e37cddb4525b3e652478ad810f034d4eed461"
+    },
+    {
+      "migrationName": "202610080067_receipt_index",
+      "checksum": "b39c41d610f44ea00d4481ab1a132d13b3dd2ed7e34ac8307a443d7afa0cf2a3"
+    },
+    {
+      "migrationName": "202610080068_receipt_index",
+      "checksum": "66c4e7ffac4f5f62410b9199be998cec0904816d3adfac73bb21c96d51d498fc"
+    },
+    {
+      "migrationName": "202610080069_receipt_index",
+      "checksum": "cfcf0f72bfd71a94064c56b1b3af6db8eabb93989f37c0543b7ab739f681f9f5"
+    },
+    {
+      "migrationName": "202610080070_receipt_index",
+      "checksum": "8203d2eec2fde06d98a701e696cdeafbc2e760b1e6a7b628038b2f337cdf9745"
+    },
+    {
+      "migrationName": "202610080071_receipt_index",
+      "checksum": "a6255ad6fb9390636a6600d3340ff627929dc6247488865524d9e11855a7f1f2"
+    },
+    {
+      "migrationName": "202610080072_receipt_index",
+      "checksum": "3897a115e0878b0609580a42c7ebace21970a095effc1369e59f9c6160237452"
+    },
+    {
+      "migrationName": "202610080073_receipt_index",
+      "checksum": "c43b180bc9a8b750ae0c4ecbd13c4929942ee66c993820be0e429ac0008bd877"
+    },
+    {
+      "migrationName": "202610080074_stock_locations_reservations",
+      "checksum": "e875014e2d410fcf2194871d038488590f10fc8cabf21caf9807542bb50c5e36"
+    },
+    {
+      "migrationName": "202610080075_reservation_unit_guards",
+      "checksum": "22930c9e6b66d1f2af4ea64fa7297064ed075ab4917866afae480b5e72f63dbd"
+    },
+    {
+      "migrationName": "202610090076_offline_cash_leases",
+      "checksum": "633c6794c7942430042715cb87684e7bc620088a4c02a8885efa91ded4d213be"
+    },
+    {
+      "migrationName": "202610090077_offline_uncertain_stock",
+      "checksum": "841268472f35c25cb3b447cef023a126c9ee3728b188e2f3e59765e14446a6e2"
+    },
+    {
+      "migrationName": "202610090078_offline_sale_payload",
+      "checksum": "82a0c87ebe13c8a4858076f55d5a91a93aba9b1cd3eaa3df73ee8695359c048e"
+    },
+    {
+      "migrationName": "202610090079_offline_count_freeze",
+      "checksum": "d8924767c381abb04e69fb3196c13ad73893f21a7d3be01aad355ef2e665df0b"
+    },
+    {
+      "migrationName": "202610090080_offline_owner_settlement",
+      "checksum": "131c11e15fb3406c53624c9bf1d438d5515c7e5aaa29d47467d4ffcf9c375c61"
+    },
+    {
+      "migrationName": "202610090081_offline_settlement_proof_guards",
+      "checksum": "d9e983a26fa68edc019ff6709d7924e343f5650d1b9e7f7af5ac84127ecf6627"
+    },
+    {
+      "migrationName": "202610090082_onboarding_checkpoints",
+      "checksum": "595c16c24c76f96209c5c555461908cec9829a61222f42630d4728b80c9a7155"
+    },
+    {
+      "migrationName": "202610090083_sale_exchanges",
+      "checksum": "e5db3191919d24746a011edee7e373c66ce0aab6a54e51ecc202554ae2993d2c"
+    },
+    {
+      "migrationName": "202610090084_background_jobs",
+      "checksum": "a414633944e6ff1a98c1d96fc1c6f0a4569947d55370006f1155423668ef2526"
+    },
+    {
+      "migrationName": "202610090085_security_events",
+      "checksum": "25c96024ec67df50fcba598d46727e3f036b83011188df2e48214cea5d73807d"
+    },
+    {
+      "migrationName": "202610090086_security_notice_retry",
+      "checksum": "61b2658d937df27717fc2b4788705c27ff1950159b3472f2eca5acefc8614a37"
+    },
+    {
+      "migrationName": "202610090087_product_classification",
+      "checksum": "fe06768fd44a21dfeb4943d9105a4874ac943d6e06486167031957609854e6a8"
+    },
+    {
+      "migrationName": "202610090088_unit_conversions",
+      "checksum": "83755df0fcdd87298cef1609d5da1069f89e2a8a68fbbbad52bfd82363a1a6b1"
+    },
+    {
+      "migrationName": "202610090089_payment_receipt_indexes",
+      "checksum": "f54956aa25b00f827a50273418d29db20c24baef72bc45a67b5a2f0cfb1e2153"
+    },
+    {
+      "migrationName": "202610090090_payment_shift_index",
+      "checksum": "0acf5abd00bcce51f79446c6e7064c92e4f12b43a338133019d63baacda0839f"
+    },
+    {
+      "migrationName": "202610090091_inventory_product_index",
+      "checksum": "6a1fc29718a94dcb4d2d1934b7b478b6536264b6555333f2b4496155ac4a8249"
+    },
+    {
+      "migrationName": "202610090092_catalog_export_jobs",
+      "checksum": "86c6bfd5397f174657d008fc14f5a216e2445d20aa13c3768d41fdbeb1467efb"
+    },
+    {
+      "migrationName": "202610090093_export_artifact_guards",
+      "checksum": "f8d003931fa03a91cac587484b0744835a20e0f3359145ba4f02b2e18bd82cb9"
+    },
+    {
+      "migrationName": "202610090094_customer_advances",
+      "checksum": "405f1064acecf029c0a8c89654c02c186d35180147363ccdd9251ec578d68183"
+    },
+    {
+      "migrationName": "202610090095_advance_trigger_alias",
+      "checksum": "cab95a6711ce5e148392d6672b73eb73f115707ec32a103a4968c34ffefd406b"
+    },
+    {
+      "migrationName": "202610090096_receipt_cost_plans",
+      "checksum": "5f33b1cd44cef829b3ea30e19795796d670dae63b2e25f52deb3e0afbfa02fa2"
+    },
+    {
+      "migrationName": "202610090097_cost_plan_cancel_reason",
+      "checksum": "905dfe4937eddec633bac1db31f8da92fd06a74c8e1000f3108bda0f25e218c3"
+    },
+    {
+      "migrationName": "202610090098_provider_outbox_core",
+      "checksum": "09ad9f2e03c496814e3f7b16b2381705dc18da9de9fd5e5e45337022f5cbadaa"
+    },
+    {
+      "migrationName": "202610090099_provider_business_identity",
+      "checksum": "85c802455aed06236d743601df9e539c9a681c748bb6cf4edc30fd2cf725cd5b"
+    },
+    {
+      "migrationName": "202610100100_saas_entitlements",
+      "checksum": "89a2ec0e0ebe5933a4b4e122fcf1c01a8afec8d9623ac86bec2d3d56679ff434"
+    },
+    {
+      "migrationName": "202610100101_subscription_invoices",
+      "checksum": "4c166bd2937d24e21954dbe0bdb32d77f40a6fafa78163719ef6bafcc13dd521"
+    },
+    {
+      "migrationName": "202610100102_billing_settlement_consistency",
+      "checksum": "2853d5db7e583655a7b0e969c92a02de0183cd014d527ec75f0eb682681b4f43"
+    },
+    {
+      "migrationName": "202610100103_billing_identity_guards",
+      "checksum": "94c7e80935a8a7ef7a0a3828de38b9cb2c66392e413dec11e6b6e8a71d0a4804"
+    },
+    {
+      "migrationName": "202610100104_integration_cost_budget",
+      "checksum": "3da2ddd1a7b77c0267b2f4d8e60e8beb41a8626a8985251a640759ef28d43c97"
+    },
+    {
+      "migrationName": "202610100105_cost_period_identity",
+      "checksum": "98a65124657268419915404d078007a51f928e68310272a86f20caed3e760831"
+    },
+    {
+      "migrationName": "202610100106_auth_challenges",
+      "checksum": "f6ddc76baa8747bd3749e97ef108c2be95620b41d0921c4b493bfc23ad47bef1"
+    },
+    {
+      "migrationName": "202610100107_contact_proof_session_history",
+      "checksum": "42e66f76e6685031a033533db075fc64840d4293d78423d7dcc1d924ef25a327"
+    },
+    {
+      "migrationName": "202610100108_support_tickets",
+      "checksum": "2282bd14ffbd856500aaee29e71cf06b3e8df99249bb83d55e1167d6d3ecc044"
+    },
+    {
+      "migrationName": "202610100109_receipt_identity_snapshot",
+      "checksum": "04f6e3d6ae804f6322f0907ded6b27d63c75dca74d1e1989d1e585ee85e85e64"
+    },
+    {
+      "migrationName": "202610100110_retention_policy",
+      "checksum": "70e95470b47fdc3fdb5429aed869ea28a5fa003690857f992e28fca91641b61e"
+    },
+    {
+      "migrationName": "202610100111_tenant_export_jobs",
+      "checksum": "f64530d3626bb5f59b86fbd3b4eb26a8904ca12d43271050eb17e35f16d60d35"
+    },
+    {
+      "migrationName": "202610100112_export_failure_codes",
+      "checksum": "2357e6b68c43748e26047041a3338169bc0f4f947620a983e0cb561c7165c123"
+    },
+    {
+      "migrationName": "202610100113_subscription_read_only",
+      "checksum": "1a99f07bdd8b0aeec5e9b221b21b16d678a5343ba60ff435d40cba4b78677e92"
+    },
+    {
+      "migrationName": "202610100114_read_only_housekeeping_scope",
+      "checksum": "8a3528803b97979d94bb0f4870b27222cb65abdafb5b6fbee6cbb1b912178682"
+    },
+    {
+      "migrationName": "202610100115_subscription_snapshot_lock",
+      "checksum": "caf670004aba757df621988cc1ae9c17235ca85a18f5fd33b05d00d09312f76a"
+    },
+    {
+      "migrationName": "202610100116_read_only_draft_cancellation",
+      "checksum": "f5dbae97d7a3e1bb562b16f746844211c5ef0107934c37fb5a07ad639be5be61"
+    },
+    {
+      "migrationName": "202610100117_organization_closure",
+      "checksum": "c94039576790c28d114ca494789ab67b151f4207bdccd38eff657c949c5a463b"
+    },
+    {
+      "migrationName": "202610100118_closure_source_guards",
+      "checksum": "418d951e4b059ed6ad0a7b1eb29974344778d0f2f32cd0e7aa35f60d453bcf36"
+    },
+    {
+      "migrationName": "202610100119_totp_factors",
+      "checksum": "73888faeccfa4ba187d67ee4e6a170799fd69d3468049a3fc61e6cc8b3713268"
+    },
+    {
+      "migrationName": "202610100120_totp_proof_approval",
+      "checksum": "53059d645d51c3670a3eebc3d573086309b5987c5dfd17d73fe80f19375920d7"
+    },
+    {
+      "migrationName": "202610100121_totp_recovery",
+      "checksum": "40e3d339c6cba39785d66d83fa75b3c199238b2e52d0e41f8dd6b829361bb5c2"
+    },
+    {
+      "migrationName": "202610110122_custom_roles",
+      "checksum": "3c4bba479becbc29f5e51668bc2c71a46fd9ab9a0835cda37460a955c5986ec4"
+    },
+    {
+      "migrationName": "202610110123_totp_key_rotation",
+      "checksum": "fd3aed1970f8862b87c53f161c3caa99f326c40ad391299b1e11e22cfeb151f4"
+    },
+    {
+      "migrationName": "202610110124_auth_restore_quarantine",
+      "checksum": "5558f0b423a7f9ccbaba63bc115e9bcabdaac9f616746998e1b3fd04c038db11"
+    },
+    {
+      "migrationName": "202610110125_auth_restore_review_shape",
+      "checksum": "59c9d7ab9209e1a45ffdca07252525d9e11909e951a66de7c855b39505a5d833"
+    },
+    {
+      "migrationName": "202610110126_provider_restore_lookup",
+      "checksum": "35a4333325e755731e530a7c6a782db7805af998078b90c4a63a4202777fb083"
+    },
+    {
+      "migrationName": "202610110127_provider_restore_counter_proof",
+      "checksum": "0fb4c2b1da58d1e7e05b60737686dd931fb4f152cb5a57c692b29a9a6b2ffdcf"
+    },
+    {
+      "migrationName": "202610110128_provider_restore_function_scope",
+      "checksum": "108d48c335dd4604326ae4c5730fe4cad409241f3eae0e0b08c9baea16a2898e"
+    },
+    {
+      "migrationName": "202610110129_tenant_relation_guards",
+      "checksum": "9d1b01307a5b8e5df622913b40d4ba3bca385fddd2b0c84b78173ad06cbeb372"
+    },
+    {
+      "migrationName": "202610110130_report_export_jobs",
+      "checksum": "67c9d2a72f03064c02cb60bcabdf747470cf874108f287ee45bea8924c089e8c"
+    },
+    {
+      "migrationName": "202610110131_organization_edge_deferral",
+      "checksum": "e0ac0fad75eef931626ee0e2ee21a8e11a8eb6c38908d6fc083d678b38b1d9f8"
+    },
+    {
+      "migrationName": "202610110132_tenant_guard_native_keys",
+      "checksum": "5153b2a33f67244aa1dccc7b4dbb91a2d4b261adc9bd7fa252d2942b3d2aca85"
+    },
+    {
+      "migrationName": "202610120133_totp_action_names",
+      "checksum": "7b57562d79dbdc1989c6745dc110a4a11a68b2953130c4a1c67fc34a9a393373"
+    },
+    {
+      "migrationName": "202610120134_inventory_valuation_order",
+      "checksum": "97ed5c0b4e87e50459beb7f6ee3ed323873850ed20142dea471722d06f0ed401"
+    },
+    {
+      "migrationName": "202610120135_inventory_valuation_capture_guards",
+      "checksum": "41b7e06fd47e93792d27f9958d99e9acc3bb77af05225cc30e85c88e7a823927"
+    },
+    {
+      "migrationName": "202610120136_inventory_valuation_baseline",
+      "checksum": "bce02871dc2327a05b3c39d55b1cbda7bd956ef4fab2cc7535b2e69b8fccfed9"
+    },
+    {
+      "migrationName": "202610120137_inventory_valuation_capture_lookup",
+      "checksum": "bec3faef0ceb67ca73eafb4ad1c61794e97f4e4f6ee6fdfb655b25e2824ad009"
+    },
+    {
+      "migrationName": "202610120138_inventory_valuation_global_quantity",
+      "checksum": "e4a4181dc485f5c58ec5bbf4b0d34b1de17301740ebfd9f222b611e9e8d1761c"
+    },
+    {
+      "migrationName": "202610130139_negative_stock_disabled",
+      "checksum": "6ebf813714c0e0adf997b10a26ac5abc99c01d29074f3eb379fbd82a499b00b4"
+    },
+    {
+      "migrationName": "202610130140_inventory_batches",
+      "checksum": "eb8c6a702ce9f570ff401eba28f0ebb75a2c43487d8878cd29d1860679dc9f75"
+    },
+    {
+      "migrationName": "202610130141_batch_source_guards",
+      "checksum": "e8c5fb8488e96df450d9db24d473b10f9f480185b829bc0a16c2d8dea029ee4f"
+    },
+    {
+      "migrationName": "202610130142_batch_authoritative_origins",
+      "checksum": "156349f69e903c0f1f10352de7849425a26233c10732c9987e09247327a283f4"
+    },
+    {
+      "migrationName": "202610130143_batch_source_conservation",
+      "checksum": "ca3a73d053adb6911ff2ace7fb1ca065e1a80af881bcd741d7177a449f97f743"
+    },
+    {
+      "migrationName": "202610130144_batch_document_totals",
+      "checksum": "f5503cf8b31762c764a973b5d68ed1fbf3e49bf69168d56d7517b1ca8ceabccc"
+    },
+    {
+      "migrationName": "202610130145_batch_readonly_admission",
+      "checksum": "e7839c177f9db5365aa98186cc89ea1698da09022bd08cf94ade397c58f2e9b3"
+    },
+    {
+      "migrationName": "202610130146_batch_supplier_sources",
+      "checksum": "b41cad16f8b8ad65b7457aafe6e7dc0cd775bca02b7377815b86e8ea12ef723f"
+    },
+    {
+      "migrationName": "202610130147_batch_tenant_edges",
+      "checksum": "472226111683563a7b191597798c1d2e062c841cf70c00209cd4c3bb6527ef8c"
+    },
+    {
+      "migrationName": "202610130148_valuation_tenant_edges",
+      "checksum": "ecef2eb0e1376288c33e7b69df6f9a68e178d541431a44264d9aacebbf923d64"
+    },
+    {
+      "migrationName": "202610130149_receipt_cost_applications",
+      "checksum": "b8917f0c7f3e0ab31135a53699b6f3ac387a88d45128558644ca96fbad32288e"
+    },
+    {
+      "migrationName": "202610130150_cost_application_tenant",
+      "checksum": "83faf36d78bfd4d74142023bcd9e4e2ff1808f45de64d0384dd69fd4426bebc5"
+    },
+    {
+      "migrationName": "202610130151_cost_application_sources",
+      "checksum": "8a4a4140c9a90ecd33e0a3444c143f01e251a02935fab357babac897530a8b6d"
+    },
+    {
+      "migrationName": "202610130152_cost_posting_timestamp_precision",
+      "checksum": "56c5be3e308a8d4d82f7dd2a2bb2c394ffdff7076abcc1c9df85344f9c1bbd8d"
+    },
+    {
+      "migrationName": "202610130153_return_effective_cost_source",
+      "checksum": "57927e3c21de36a6765cd3bb6003554d16f7d1b9158bbca9adee581c66853937"
+    },
+    {
+      "migrationName": "202610130154_cost_application_offline_guard",
+      "checksum": "ad0094f3a2b618a6a2709de2f41e1bab3e619c9648af63e21779a8dd7c241946"
+    },
+    {
+      "migrationName": "202610130155_receipt_cost_continuations",
+      "checksum": "58173548c07d248d760e8069770f106c917bcdcad8173ecbbaa4e4fb0aad2363"
+    },
+    {
+      "migrationName": "202610130156_cost_continuation_tenant",
+      "checksum": "5cd71e7dd225dffa8863d5b3968343f385214eb9152b67d2188d35a901d24c7b"
+    },
+    {
+      "migrationName": "202610130157_transfer_fee_issue_snapshot",
+      "checksum": "53a2c4d88112d9950f38d5a8f03d7fce31ac9fe839e410c19e5e6b77123432a7"
+    },
+    {
+      "migrationName": "202610130158_cost_receipt_line_capacity",
+      "checksum": "383175dbdab33a66192b785bb71a4991b41dcfb2692a215bb5d60e006d29747c"
+    },
+    {
+      "migrationName": "202610130159_continuation_source_guards",
+      "checksum": "201777eda97836f385b28ef5602c7947c53c1ef3efe203e8a02661f82c902ff9"
+    },
+    {
+      "migrationName": "202610130160_serial_warranty_core",
+      "checksum": "23b54620409ac7b3ec743859663badfa713af272f0567710e95224a3958d2199"
+    },
+    {
+      "migrationName": "202610130161_serial_business_scope",
+      "checksum": "992e2a7c38e2f7f8a84c569fe519331526e08bc4735d9811ec42f1cb42f36240"
+    },
+    {
+      "migrationName": "202610130162_serial_current_source",
+      "checksum": "edd7e4b79dd22caa97d97316ed625515a0a124c704158e7d0e07aed154c30363"
+    },
+    {
+      "migrationName": "202610130163_serial_complete_guards",
+      "checksum": "23959c35c364ddf3996a5520763090fca769d6736ba556d2665d05badf1aa6b2"
+    },
+    {
+      "migrationName": "202610130164_serial_loss_restore",
+      "checksum": "5326d744d56de72712c9e6151f65a866cec94970e25bdc4cf5bb709bc6dfe2b6"
+    },
+    {
+      "migrationName": "202610130165_serial_projection_guards",
+      "checksum": "e7eee7b9d2a052606251e5bf8e1274182b9aba115b806c15a00126085a4eda26"
+    },
+    {
+      "migrationName": "202610130166_serial_native_order",
+      "checksum": "d541453ffc38ce9cc8d1d41e004519bb9f2e1486fe20b49dba80f044361208f8"
+    },
+    {
+      "migrationName": "202610130167_scheduled_reports",
+      "checksum": "c5533ec100fe49ced92e76d0f5b23df431aefd24dbe34b19306571649d5f29e7"
+    },
+    {
+      "migrationName": "202610130168_loyalty_policy_versions",
+      "checksum": "db6627597a36bde61d0f1a5415e5af85c20373f08ebfd841a85cdff50a8d479b"
+    },
+    {
+      "migrationName": "202610130169_loyalty_source_journals",
+      "checksum": "c705450a1e48928d6fac04c04c6a74e3c8f1b7c1005141cb4eeaf9ffe8c68fc0"
+    },
+    {
+      "migrationName": "202610130170_loyalty_online_currency_boundary",
+      "checksum": "1fc8aa98ef1852e6afb5160a4c4eeb0b47faf157a47765337b5d009f4004b337"
+    },
+    {
+      "migrationName": "202610130171_loyalty_redemption",
+      "checksum": "cbfe881d9050ca1f190d45429e9323130372c1e60e189950d2b00bd76d084c2b"
+    },
+    {
+      "migrationName": "202610140172_loyalty_disabled_gift_rules",
+      "checksum": "6d6d52e92b31f1b81a3a8778fc5a4baab46485d4fe8d95b825e59eec0a95bcd8"
+    },
+    {
+      "migrationName": "202610140173_loyalty_return_settlement",
+      "checksum": "d004ec50bcf5dc6811f27f2c4cea62d5359cd3c789f848689a059ad0fd4db74c"
+    },
+    {
+      "migrationName": "202610140174_gift_certificates",
+      "checksum": "cb8ad73b2a0246600814693051c7cd6cf7ddec3f442c9a9bef593eeb4a7124ea"
+    },
+    {
+      "migrationName": "202610140175_gift_source_currency",
+      "checksum": "ae6292eeb5acd842fa11d68dd0c55e652f5552d4ac48e15cafaa62e6e45adcb3"
+    },
+    {
+      "migrationName": "202610140176_gift_checkout_source",
+      "checksum": "843d74740ffbcff3b156039b886d1d848bca9aa2eafac111b9aaee4d74911843"
+    },
+    {
+      "migrationName": "202610140177_loyalty_cards_promotions",
+      "checksum": "98c6e894de6c3a569394e8355207ebd6e7cdaafcac5931bb40539d16ce92e810"
+    },
+    {
+      "migrationName": "202610140178_loyalty_benefit_source_guards",
+      "checksum": "833bcc9ca5d044468874dd34eec3d1ce2c4920a6198aa1327644740d3c60cef1"
+    },
+    {
+      "migrationName": "202610150179_loyalty_active_customer",
+      "checksum": "6c5363d2c4afb8dd0c99dd71c3e491b48ab791e769fcca7c5de94c6ad96c19ce"
+    },
+    {
+      "migrationName": "202610150180_customer_consent_events",
+      "checksum": "fb8d15587a1b4f5e7a0ee56c378fffb57b33d4c9a7420f47fc675dbb463b5581"
+    },
+    {
+      "migrationName": "202610150181_consent_withdraw_readonly",
+      "checksum": "8ae68711888a184ae215c5ca5b2cef945a233273c3f4151b7b7a8f9ddc61bb12"
+    },
+    {
+      "migrationName": "202610160182_consent_tenant_proof",
+      "checksum": "079bb0949c8661b40251a40aac5247d68588934ae91b613df29f36519d761744"
+    },
+    {
+      "migrationName": "202610160183_extension_tenant_guards",
+      "checksum": "32748338d44bbaae6214a405365132834d2386fdd9bcb957ef799fff01658c02"
+    },
+    {
+      "migrationName": "202610160184_consent_native_revision",
+      "checksum": "8592f95b9848045311aa891171ee6304a084fa67bb99933c1ee4b076e09c108e"
+    },
+    {
+      "migrationName": "202610160185_internal_product_images",
+      "checksum": "4339121ab0849abe176062d272f9fd69ad5044d30d0cff6765f1c60281e8eae6"
+    },
+    {
+      "migrationName": "202610160186_receipt_share_operations",
+      "checksum": "bc94d05a8a9fb7a45653e609682998106436e7b2848ffee510b2bf749f741bd0"
+    },
+    {
+      "migrationName": "202610160187_in_person_customer_reminders",
+      "checksum": "74472e924c358cf07dea6aeea00be1290b16c02c8eae829aecc49fbab1b9ec4f"
+    },
+    {
+      "migrationName": "202610160188_capability_result_guards",
+      "checksum": "e8949cb4f89dbea41b20dd7f6759412bf27fc557207a7cd9d53ee07b9cb9ae21"
+    },
+    {
+      "migrationName": "202610170189_chunked_tenant_exports",
+      "checksum": "9910b337aeec4cdb0a8c3cf7513b8a15383b0781c140b257ff24ecdc77d02c10"
+    },
+    {
+      "migrationName": "202610170190_chunk_tenant_edges",
+      "checksum": "635f5bfce93fc03fb2e667ad4b007f46b5588d0dc7a60254754e4d8b891d747f"
+    }
+  ],
+  "dataset": {
+    "products": 50000,
+    "syntheticDraftItems": 1000000,
+    "activeRegisters": 20
+  },
+  "valuationCaptureBefore": {
+    "productOffset": 30000,
+    "selectedProducts": 100,
+    "alreadyCaptured": 0,
+    "firstCaptureProducts": 100
+  },
+  "concurrency": 20,
+  "actorRole": "owner",
+  "checkoutItemsPerSale": 1,
+  "search": {
+    "samples": 100,
+    "attempted": 100,
+    "failed": 0,
+    "byStatus": {
+      "200": 100
+    },
+    "p95Ms": 306.3524100000001,
+    "targetMs": 500
+  },
+  "checkout": {
+    "samples": 100,
+    "attempted": 100,
+    "failed": 0,
+    "p95Ms": 231.03364599999986,
+    "targetMs": 2000
+  },
+  "draft": {
+    "attempted": 100,
+    "succeeded": 100,
+    "excludedFromCheckoutLatency": true
+  },
+  "physicalAttempts": {
+    "draft": {
+      "calls": 100,
+      "conflicts": 0,
+      "retries": 0,
+      "failed": 0
+    },
+    "checkout": {
+      "calls": 100,
+      "conflicts": 0,
+      "retries": 0,
+      "failed": 0
+    }
+  },
+  "retryPolicy": {
+    "maxAttempts": 8,
+    "deadlineMs": 10000,
+    "code": "CONCURRENT_CONFLICT",
+    "originalKey": true,
+    "checkoutLatencyIncludesBackoff": true
+  },
+  "rawErrorRate": {
+    "failed": 0,
+    "denominator": 300,
+    "rate": 0,
+    "scope": "Every search and physical draft/checkout service invocation; controlled conflicts included"
+  },
+  "errorRate": {
+    "failed": 0,
+    "denominator": 200,
+    "rate": 0,
+    "scope": "Product route-handler response plus completeSale invocation; draft setup failures reported separately; not HTTP end-to-end"
+  },
+  "economicInvariants": {
+    "newCompletedSales": 100,
+    "newPayments": 100
+  },
+  "errors": [],
+  "providerTime": "No vendor calls; internal cash only",
+  "limits": "Synthetic draft volume; service-level API harness, no public network latency; not real pilot or production SLA"
+}

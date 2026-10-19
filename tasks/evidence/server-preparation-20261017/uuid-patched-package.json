@@ -1,0 +1,14 @@
+{
+  ".": {
+    "node": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "browser": {
+      "import": "./dist/esm-browser/index.js",
+      "require": "./dist/cjs-browser/index.js"
+    },
+    "default": "./dist/esm-browser/index.js"
+  },
+  "./package.json": "./package.json"
+}

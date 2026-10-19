@@ -1,0 +1,91 @@
+import { test, expect } from '@playwright/test'
+import { PrismaClient } from '@prisma/client'
+import { randomUUID } from 'node:crypto'
+const connection = new URL(process.env.DATABASE_URL ?? '')
+if (connection.hostname !== '127.0.0.1' || connection.port !== '55439' || connection.pathname !== '/pos_test') throw Error('Isolated test DB only')
+const db = new PrismaClient(), orgs: string[] = [], users: string[] = []
+test.afterAll(async () => {
+  await db.organization.deleteMany({ where: { id: { in: orgs } } })
+  await db.user.deleteMany({ where: { id: { in: users } } }); await db.$disconnect()
+})
+test('Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory', async ({ page }) => {
+  const origin = { Origin: 'https://localhost:3100' }
+  const registration = await page.request.post('/api/auth/register', { headers: origin,
+    data: { phone: 'prepare-' + randomUUID(), password: 'test-only-password', fullName: 'Preparation owner', organizationName: 'Preparation business' } })
+  expect(registration.ok()).toBe(true)
+  const me = (await (await page.request.get('/api/auth/me')).json()).data; orgs.push(me.organization.id); users.push(me.user.id)
+  const store = await db.store.findFirstOrThrow({ where: { organizationId: me.organization.id } })
+  const supplier = await db.supplier.create({ data: { organizationId: me.organization.id, name: 'Preparation supplier' } })
+  const product = await db.product.create({ data: { organizationId: me.organization.id, name: 'Preparation item', sku: randomUUID(), barcode: randomUUID(), unit: 'dona', salePrice: '10', costPrice: '2' } })
+  const post = async (path: string, data: Record<string, unknown>) => {
+    const response = await page.request.post(path, { headers: origin, data: { operationId: randomUUID(), ...data } }); expect(response.ok()).toBe(true); return (await response.json()).data
+  }
+  const order = await post('/api/purchase-orders', { storeId: store.id, supplierId: supplier.id, referenceNo: 'PREPARE-ORDER', reason: 'Actual ordered goods', items: [{ productId: product.id, quantity: '3', unitCost: '2' }] })
+  const receipt = await post(`/api/purchase-orders/${order.id}/receive`, { referenceNo: 'PREPARE-RECEIPT', reason: 'Actual receipt', items: [{ orderItemId: order.items[0].id, quantity: '3' }] })
+  const stock = receipt.stockDocument
+  const account = await post('/api/finance/accounts', { storeId: store.id, name: 'Freight bank book', kind: 'bank', openingBalance: '100', reason: 'Actual opening bank' })
+  const category = await post('/api/finance/categories', { name: 'Freight', treatment: 'capitalised' })
+  const expense = await post('/api/finance/expenses', { accountId: account.id, expenseCategoryId: category.id, amount: '12', reason: 'First actual freight' })
+  await post('/api/finance/expenses', { accountId: account.id, expenseCategoryId: category.id, amount: '5', reason: 'Second actual freight' })
+  await page.goto('/suppliers/' + supplier.id); await page.getByRole('button', { name: /PREPARE-ORDER/ }).click()
+  const panel = page.getByRole('region', { name: 'Taqsimotni tayyorlash: PREPARE-RECEIPT', exact: true })
+  await panel.getByRole('button', { name: /Xarajatni tanlash: First actual freight/ }).click()
+  await panel.getByLabel('Taqsimotni tayyorlash sababi', { exact: true }).fill('Original freight allocation reason')
+  await panel.getByLabel('Saqlanadigan taqsimot usuli', { exact: true }).selectOption('weight')
+  await panel.getByLabel('Saqlanadigan taqsimot qatori 1: kg / bazaviy birlik', { exact: true }).fill('0.5')
+  page.on('dialog', dialog => dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss())
+  await page.locator('a[href="/dashboard"]').first().click(); await expect(page).toHaveURL(new RegExp('/suppliers/' + supplier.id + '$'))
+  await page.route('**/cost-sources?*', route => route.abort('failed'))
+  await panel.getByRole('button', { name: 'Qayta yuklash', exact: true }).click(); await expect(panel.getByRole('alert')).toBeVisible()
+  await expect(panel.getByLabel('Taqsimotni tayyorlash sababi', { exact: true })).toHaveValue('Original freight allocation reason')
+  await expect(panel.getByRole('button', { name: 'Kirim xarajatini tayyorlash: oldindan ko‘rish', exact: true })).toBeDisabled()
+  await page.unroute('**/cost-sources?*'); await panel.getByRole('button', { name: 'Qayta yuklash', exact: true }).click()
+  await panel.getByRole('button', { name: 'Kirim xarajatini tayyorlash: oldindan ko‘rish', exact: true }).click()
+  await expect(panel.getByRole('status').filter({ hasText: 'Amalni tekshiring' })).toContainText('Original summa: 12.00')
+  await expect(panel.getByLabel('Saqlanadigan taqsimot usuli', { exact: true })).toBeDisabled()
+  await expect(panel.getByRole('button', { name: /Xarajatni tanlash: Second actual freight/ })).toBeDisabled()
+  const keys: string[] = []; let dropped = false
+  await page.route(`**/stock-documents/${stock.id}/cost-plans`, async route => {
+    if (route.request().method() !== 'POST') return route.continue()
+    keys.push(route.request().postDataJSON().operationId)
+    const response = await route.fetch(); expect(response.ok()).toBe(true)
+    if (!dropped) { dropped = true; await route.abort('failed') } else await route.fulfill({ response })
+  })
+  await panel.getByRole('button', { name: 'Amalni tasdiqlash', exact: true }).click()
+  await expect(panel.getByRole('button', { name: 'Original amalni qayta tekshirish', exact: true })).toBeVisible()
+  await expect.poll(() => db.receiptCostPlan.count({ where: { expenseDocumentId: expense.id } })).toBe(1)
+  await expect(panel.getByRole('button', { name: 'Original amalni qayta tekshirish', exact: true })).toBeEnabled()
+  await page.reload(); await page.getByRole('button', { name: /PREPARE-ORDER/ }).click()
+  await page.getByLabel('Buyurtma raqami', { exact: true }).fill('Independent next purchase draft')
+  await expect(panel.getByRole('button', { name: 'Original amalni qayta tekshirish', exact: true })).toBeVisible()
+  await page.route('**/cost-sources?*', route => route.abort('failed'))
+  await panel.getByRole('button', { name: 'Qayta yuklash', exact: true }).click(); await expect(panel.getByRole('alert')).toBeVisible()
+  await panel.getByRole('button', { name: 'Original amalni qayta tekshirish', exact: true }).click()
+  await expect(panel.getByRole('button', { name: 'Original amalni qayta tekshirish', exact: true })).toHaveCount(0)
+  expect(keys).toHaveLength(2); expect(keys[0]).toBe(keys[1])
+  await expect(page.getByLabel('Buyurtma raqami', { exact: true })).toHaveValue('Independent next purchase draft')
+  const plan = await db.receiptCostPlan.findFirstOrThrow({ where: { expenseDocumentId: expense.id } })
+  expect(plan.status).toBe('prepared'); expect(plan.method).toBe('weight'); expect(plan.amount.toString()).toBe('12')
+  expect(await db.auditLog.count({ where: { entityId: plan.id, action: 'prepared' } })).toBe(1)
+  const history = page.getByRole('region', { name: 'Taqsimot tarixi: PREPARE-RECEIPT', exact: true })
+  const article = history.getByRole('article', { name: `Taqsimot ${plan.id}`, exact: true })
+  await article.getByLabel('Taqsimotni bekor qilish sababi', { exact: true }).fill('Independent cancellation draft')
+  for (let index = 0; index < 20; index++) {
+    const pageExpense = await post('/api/finance/expenses', { accountId: account.id, expenseCategoryId: category.id, amount: '1', reason: `Actual page freight ${index}` })
+    await post(`/api/stock-documents/${stock.id}/cost-plans`, { expenseDocumentId: pageExpense.id, amount: '1', method: 'value', reason: `Actual page allocation ${index}` })
+  }
+  await history.getByRole('button', { name: 'Qayta yuklash', exact: true }).click()
+  await expect(history.getByText('1 / 2', { exact: true })).toBeVisible(); await expect(article).toHaveCount(0)
+  await history.getByRole('button', { name: 'Keyingi', exact: true }).click()
+  await expect(article.getByLabel('Taqsimotni bekor qilish sababi', { exact: true })).toHaveValue('Independent cancellation draft')
+  await page.route(`**/cost-plans?page=*`, route => route.abort('failed'))
+  await history.getByRole('button', { name: 'Qayta yuklash', exact: true }).click(); await expect(history.getByRole('alert')).toBeVisible()
+  await expect(article.getByLabel('Taqsimotni bekor qilish sababi', { exact: true })).toHaveValue('Independent cancellation draft')
+  await expect(article.getByRole('button', { name: 'Tayyor taqsimotni bekor qilish: oldindan ko‘rish', exact: true })).toBeDisabled()
+  expect((await db.inventoryBalance.findUniqueOrThrow({ where: { storeId_productId: { storeId: store.id, productId: product.id } } })).quantity.toString()).toBe('3')
+  expect((await db.product.findUniqueOrThrow({ where: { id: product.id } })).costPrice.toString()).toBe('2')
+  expect((await db.accountEntry.aggregate({ where: { accountId: account.id }, _sum: { amount: true } }))._sum.amount?.toString()).toBe('63')
+  const preview = await page.request.post(`/api/stock-documents/${stock.id}/cost-correction-preview`, { headers: origin, data: { amount: '12', method: 'value' } })
+  expect(preview.ok()).toBe(true); const result = (await preview.json()).data
+  expect(result.financialPosting).toBe(false); expect(result.products[0].inventoryCorrection).toBe('12'); expect(result.products[0].cogsCorrection).toBe('0')
+})

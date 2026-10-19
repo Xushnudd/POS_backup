@@ -1,0 +1,23 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/ticket-editor-state.spec.ts tests/e2e/support-tickets.spec.ts
+
+[WebServer] (node:317560) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:317596) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.6s)
+  ✓  2 [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.0s)
+(node:317870) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (3.0s)
+  ✓  4 [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.5s)
+(node:318299) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (3.1s)
+  ✓  6 [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.9s)
+
+  6 passed (15.8s)

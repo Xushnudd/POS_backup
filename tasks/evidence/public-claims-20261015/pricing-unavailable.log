@@ -1,0 +1,16 @@
+[WebServer] (node:86659) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:86706) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/public-pricing-failure.spec.ts:11:5 › A real uncached pricing read timeout shows no invented price or trial in either language (4.7s)
+(node:86889) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [firefox] › tests/e2e/public-pricing-failure.spec.ts:11:5 › A real uncached pricing read timeout shows no invented price or trial in either language (5.0s)
+(node:87209) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [webkit] › tests/e2e/public-pricing-failure.spec.ts:11:5 › A real uncached pricing read timeout shows no invented price or trial in either language (5.2s)
+
+  3 passed (17.0s)

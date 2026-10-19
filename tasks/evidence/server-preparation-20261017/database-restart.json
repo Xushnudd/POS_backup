@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-17T10:13:48.364Z",
+  "scope": "Isolated PostgreSQL SIGKILL/restart on an owned persistent Docker volume; not a physical power-loss or production/off-site test",
+  "survived": true,
+  "size": 17509861,
+  "sha256": "4bc3e9b6e32de8d6dba1eeb1af77ee9d872e67b574c90c59270a80db5e498523",
+  "chunks": 67,
+  "publicationCount": 1,
+  "guardsDisabled": false
+}

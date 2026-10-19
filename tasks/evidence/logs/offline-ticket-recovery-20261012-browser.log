@@ -1,0 +1,89 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/offline-editor-state.spec.ts tests/e2e/location-editor-state.spec.ts tests/e2e/ticket-editor-state.spec.ts tests/e2e/support-tickets.spec.ts tests/e2e/media-editor-state.spec.ts tests/e2e/import-editor-state.spec.ts tests/e2e/core.spec.ts --grep zone and reservation drafts|Stock zone UI|Offline issuer and cash|offline unlock and partial|ticket reply draft|Ticket lost ACK|catalog draft survives|Catalog tree brand|import selected file|Catalog CSV import
+
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 30 tests using 1 worker
+
+(node:321925) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (2.6s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:1109:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (4.3s)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:1130:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (2.7s)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:1157:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.3s)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [chromium] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (1.7s)
+  ✓   6 [chromium] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (4.0s)
+  ✓   7 [chromium] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (2.4s)
+  ✓   8 [chromium] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (1.6s)
+  ✓   9 [chromium] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.2s)
+  ✓  10 [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.2s)
+(node:322814) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [firefox] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.1s)
+  ✓  12 [firefox] › tests/e2e/core.spec.ts:1109:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (4.1s)
+  ✓  13 [firefox] › tests/e2e/core.spec.ts:1130:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (3.2s)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  14 [firefox] › tests/e2e/core.spec.ts:1157:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.2s)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 [firefox] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (2.2s)
+  ✓  16 [firefox] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (4.2s)
+  ✓  17 [firefox] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (2.3s)
+  ✓  18 [firefox] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (2.3s)
+  ✓  19 [firefox] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (3.0s)
+  ✓  20 [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.4s)
+(node:324068) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  21 [webkit] › tests/e2e/core.spec.ts:1009:5 › Catalog tree brand description and protected image UI recover a lost upload and delete retained bytes safely (3.1s)
+  ✓  22 [webkit] › tests/e2e/core.spec.ts:1109:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (3.8s)
+  ✓  23 [webkit] › tests/e2e/core.spec.ts:1130:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (3.4s)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  24 [webkit] › tests/e2e/core.spec.ts:1157:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.5s)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:321848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  25 [webkit] › tests/e2e/import-editor-state.spec.ts:8:5 › import selected file is guarded before preview and old confirmation recovery preserves a new file draft (2.6s)
+  ✓  26 [webkit] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (4.5s)
+  ✓  27 [webkit] › tests/e2e/media-editor-state.spec.ts:9:5 › catalog draft survives failed refresh and file deletion replays its original DELETE key (2.5s)
+  ✓  28 [webkit] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (2.8s)
+  ✓  29 [webkit] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.8s)
+  ✓  30 [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (2.0s)
+
+  30 passed (1.5m)

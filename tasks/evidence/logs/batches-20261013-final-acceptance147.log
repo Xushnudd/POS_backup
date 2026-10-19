@@ -1,0 +1,40 @@
+✔ real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold (1090.057356ms)
+✔ tracked multi-batch transfer receive/loss/replay preserves original source and branch stock (407.208854ms)
+✔ partial original batch return, damaged return and exact per-batch count are atomic and idempotent (648.282851ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"event":"batch_acceptance_profile","receipts":54,"expiredRows":53,"elapsedMs":3731}
+✔ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (3785.518365ms)
+✔ supplier goods return targets original expired lot and receipt reversal restores no invented batch (483.340337ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (417.703418ms)
+{"requestId":"829241bd-ec10-40a6-adbe-df87682db568","organizationId":"fecd53b2-52c7-4572-8eac-d8736bd35166","status":200,"durationMs":30,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (569.544265ms)
+✔ Oversized exports fail without publishing a partial artifact or business mutation (1159.693731ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (445.317878ms)
+✖ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (3.017402ms)
+✔ Deferred cross-tenant parent reference and direct ownership mutation fail; scoped ORM rejects foreign creates and shared models (62.693093ms)
+✔ Concurrent SKU and alias inserts have exactly one winner inside a tenant; a second tenant can use the same identifiers (66.723427ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10727.91937
+
+✖ failing tests:
+
+test at .test-build/tests/tenant-models.integration.test.js:18:22
+✖ Native table inventory matches the reviewed model roots; every tenant table has immutable ownership and deferred edge guards (3.017402ms)
+  AssertionError [ERR_ASSERTION]: InventoryValuationSequence
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/tenant-models.integration.test.js:25:26)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

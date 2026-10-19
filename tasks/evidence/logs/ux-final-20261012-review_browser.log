@@ -1,0 +1,19 @@
+[WebServer] (node:814088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:814138) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (1.8s)
+  ✓  2 [chromium] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (1.3s)
+(node:814378) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.4s)
+  ✓  4 [firefox] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (1.7s)
+(node:814795) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.4s)
+  ✓  6 [webkit] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (2.2s)
+
+  6 passed (14.3s)

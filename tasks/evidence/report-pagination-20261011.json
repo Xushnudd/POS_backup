@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-11",
+  "scope": "Bounded replenishment/incident pagination, scoped branch filter and session revocation",
+  "originalDone": 157,
+  "batchDone": 1,
+  "batchTarget": 20,
+  "parentTask": "REP-01.07 remains in_progress; expiry/slow-moving not implemented by this fix",
+  "checks": {
+    "financeIntegration": "66/66 before added per-page/revocation assertions",
+    "finalFocused": "1/1 with per-page/revocation assertions",
+    "unitFiles": "33/33",
+    "lint": "passed",
+    "diff": "passed",
+    "typecheck": "passed",
+    "workerBuild": "passed"
+  },
+  "productionDeployment": false,
+  "sourceSHA256": {
+    "src/app/api/reports/replenishment/route.ts": "c9c35ca89743909097b5fefc67c0065b0d13089dc37238ac752f260f883075e7",
+    "src/app/api/incidents/route.ts": "d6cec6e00cdccc4238f4389faa5f59cd153f0a278f8e5387a1019780c22eb700",
+    "src/server/monitoring/service.ts": "ee038a337f89931f1071bc5889ae15e1c7868bc539064c2ca8efbf9353b8da6a",
+    "tests/reports-finance.integration.test.ts": "4004b577b9b6d3a8218fa56549d325ad4c9f45bf39ab141d26509ba4f1440e2f"
+  },
+  "logSHA256": {
+    "/tmp/pos-report-pagination-integration.log": "7b6c40fae2c03883bdf3a0c159b4334fdeb1183e3e405998adb0b4b5dae179ab",
+    "/tmp/pos-report-pagination-focused-final.log": "2f48f4c630cd08598557ea45f6cea4e67e611e450af5a1bd2eadf023aa39ba97",
+    "/tmp/pos-report-pagination-unit-final.log": "effa47109f5278da8eabe236a3a8f4b38ff709301433d335fb161e198b909533",
+    "/tmp/pos-report-pagination-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-report-pagination-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-report-pagination-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355"
+  }
+}

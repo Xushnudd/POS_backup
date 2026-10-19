@@ -1,0 +1,10 @@
+[Unit]
+Description=POS data mount observation cadence (%i)
+
+[Timer]
+OnBootSec=1m
+OnUnitInactiveSec=5m
+Unit=pos-disk@%i.service
+
+[Install]
+WantedBy=timers.target

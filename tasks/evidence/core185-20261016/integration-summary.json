@@ -1,0 +1,147 @@
+{
+  "startedAt": "2026-10-16T04:34:16.385Z",
+  "isolation": "One Node process per file, sequential; named cases via --test-isolation=none; each file teardown completes before the next file",
+  "files": [
+    {
+      "file": ".test-build/tests/customer-consent.integration.test.js",
+      "compiledSha256": "00fa404337151c65e0e0d09072c98d4fb96737ae1ae7b1fcc684d566d98a9cb2",
+      "exit": 0,
+      "tests": 6,
+      "pass": 6,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/customer-reminders.integration.test.js",
+      "compiledSha256": "0f34ca6a84e6cda351593a70aeea7ec9b917cd117a244639d08e1d19239c1d29",
+      "exit": 0,
+      "tests": 2,
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/receipt-links.integration.test.js",
+      "compiledSha256": "1894c0709385431e9ef05a9c3b6b96b116d55d2ece975a9975805dfc16b86206",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/receipt-identity.integration.test.js",
+      "compiledSha256": "b265e27f345954f131ec68e4dcc5f721339533fbd464e5406f479781060fcc86",
+      "exit": 0,
+      "tests": 2,
+      "pass": 2,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/files-catalog.integration.test.js",
+      "compiledSha256": "08f74a6f27dd76d772c63c9a6a4c32af45be5ea1f9dc21972d720d4b2ea27f06",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/jobs.integration.test.js",
+      "compiledSha256": "def5665abdc6c1c4328227bdb5e7f2f019a44ffdbe9a89d6d5e2060402b0877d",
+      "exit": 0,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/job-export.integration.test.js",
+      "compiledSha256": "5ecce0e83bc8f73bd506bc25413001e8737dc22d8ee27a2b8f203ebd9ed22248",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/planned-report.integration.test.js",
+      "compiledSha256": "2003ce8e11ac6f21633f07157dc66f82e7d884fb96eb5da5dcea99f7e61883ea",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/report-export.integration.test.js",
+      "compiledSha256": "84f22f449da34b2160da8670f4fc65d5faab15d29e662ac09a6a2cad53cffa2a",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/reports-finance.integration.test.js",
+      "compiledSha256": "8b675ec34ac61c1675c9e23882386557344962c770a0041cfdab702213fd174c",
+      "exit": 0,
+      "tests": 73,
+      "pass": 73,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/scheduled-reports.integration.test.js",
+      "compiledSha256": "7b45ad6f3a4de31751029efb6e33b004c3e6774e2a59f706ac081336bdc51310",
+      "exit": 0,
+      "tests": 8,
+      "pass": 8,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/provider-outbox.integration.test.js",
+      "compiledSha256": "ff28e053f5bec38c9c2a4071707ae88ea3f8da9dfe060a377ef06d8c8da0709b",
+      "exit": 0,
+      "tests": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/monitoring.integration.test.js",
+      "compiledSha256": "212a70825b9a3951f846f9999b9891630d0fe3bdb41cc0d24c08d99ccabbebe0",
+      "exit": 0,
+      "tests": 3,
+      "pass": 3,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/billing.integration.test.js",
+      "compiledSha256": "216b55280bb023b7a4a61ef4dfd941e245ddcf5e38b277aea5bf3fb00d47ddc4",
+      "exit": 0,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/totp-key-rotation.integration.test.js",
+      "compiledSha256": "edd39e6e2570cebd7217093f68e4658567f8f2d39abd17862654864e2a2e4017",
+      "exit": 0,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/customer-identity.integration.test.js",
+      "compiledSha256": "23a406a41d113bff0e248d475d8d41c204ff972359118dd6dae077f71edc2e74",
+      "exit": 0,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0
+    },
+    {
+      "file": ".test-build/tests/customer-advances.integration.test.js",
+      "compiledSha256": "4ae82bfe7d95838ed23fa863ba0c3c98ef6c7c26bcef5ccc567409e0e6166782",
+      "exit": 0,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0
+    }
+  ],
+  "tests": 148,
+  "pass": 148,
+  "fail": 0,
+  "failedFiles": 0,
+  "endedAt": "2026-10-16T04:36:38.920Z"
+}

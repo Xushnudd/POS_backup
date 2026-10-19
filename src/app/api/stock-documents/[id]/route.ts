@@ -1,26 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { signedQuantitySchema, nonnegativeQuantitySchema } from '@/server/catalog/service'
+import { assertLiveContext, audit } from '@/server/operations'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { AccessError, tenantScope } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateStockDocumentSchema = z.object({
   supplierId: z.string().uuid().optional(),
-  note: z.string().optional(),
+  note: z.string().max(2000).optional(),
   items: z.array(z.object({
     productId: z.string().uuid(),
-    quantity: z.number().positive(),
-    unitCost: z.number().positive(),
-    note: z.string().optional(),
-  })).optional(),
+    quantity: signedQuantitySchema,
+    unitCost: nonnegativeQuantitySchema,
+    note: z.string().max(2000).optional(),
+  })).min(1).max(500).optional(),
 })
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -28,15 +33,16 @@ export async function GET(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
-    const document = await prisma.stockDocument.findUnique({
+    const document = await db.stockDocument.findUnique({
       where: { id },
       include: {
         store: true,
@@ -62,21 +68,18 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('Get stock document error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    if (error instanceof AccessError) throw error
+    throw error
   }
 }
 
-export async function PUT(
+async function handlePUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -84,18 +87,19 @@ export async function PUT(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = updateStockDocumentSchema.parse(body)
 
-    const document = await prisma.stockDocument.findUnique({
+    const document = await db.stockDocument.findUnique({
       where: { id },
     })
 
@@ -114,6 +118,12 @@ export async function PUT(
     }
 
     const updatedDocument = await prisma.$transaction(async (tx) => {
+      await assertLiveContext(tx,payload)
+      await tx.$queryRaw`SELECT id FROM "StockDocument" WHERE id=${id} FOR UPDATE`
+      const locked=await tx.stockDocument.findFirstOrThrow({where:{id,AND:tenantScope("StockDocument",payload)}})
+      if (locked.status!=='draft') throw new AccessError(409,'INVALID_STATUS')
+      if (validatedData.items && locked.documentType!=='adjustment' && validatedData.items.some(item=>Number(item.quantity)<=0)) throw new AccessError(400,'INVALID_QUANTITY')
+      await audit(tx,payload,'StockDocument',id,'draft_updated',validatedData)
       // Delete existing items if new items provided
       if (validatedData.items) {
         await tx.stockDocumentItem.deleteMany({
@@ -145,17 +155,17 @@ export async function PUT(
     })
 
   } catch (error) {
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Update stock document error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
+export const GET = withApi(handleGET)
+
+export const PUT = withApi(handlePUT)

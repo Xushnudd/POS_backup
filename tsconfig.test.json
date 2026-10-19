@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": false,
+    "incremental": false,
+    "outDir": ".test-build",
+    "rootDir": ".",
+    "plugins": [],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "bwip-js/node": [
+        "./node_modules/bwip-js/dist/bwip-js-node.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "tests/**/*.ts",
+    "src/server/**/*.ts",
+    "src/app/api/**/*.ts",
+    "src/lib/auth.ts",
+    "src/lib/prisma.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".test-build",
+    "tests/e2e"
+  ]
+}

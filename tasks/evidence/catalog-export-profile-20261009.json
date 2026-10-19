@@ -1,0 +1,136 @@
+{
+  "at": "2026-10-09T13:17:24.245Z",
+  "node": "v24.18.0",
+  "kind": "isolated synthetic 50000 product export; no production data",
+  "rowCount": 50000,
+  "bytes": 7150137,
+  "queryCount": 206,
+  "cursorPageSize": 500,
+  "elapsedMs": 3822.642722,
+  "heapBefore": 14130120,
+  "heapAfter": 31471528,
+  "memoryBefore": {
+    "rss": 98762752,
+    "heapTotal": 20701184,
+    "heapUsed": 14130120,
+    "external": 2398233,
+    "arrayBuffers": 146711
+  },
+  "memoryAfter": {
+    "rss": 246448128,
+    "heapTotal": 99803136,
+    "heapUsed": 31472736,
+    "external": 23847632,
+    "arrayBuffers": 21594022
+  },
+  "workerArtifact": {
+    "jobId": "4f4fb3ec-6628-423f-b324-23fc2160c42b",
+    "sha256": "15baaa49cdda085a65ef97e5691e49b474cb4af180be132ca89df239fc42f5c0",
+    "rowCount": 50000
+  },
+  "inventoryPlans": {
+    "sequentialComparison": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Seq Scan",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Relation Name": "InventoryBalance",
+              "Alias": "InventoryBalance",
+              "Startup Cost": 0,
+              "Total Cost": 2696.15,
+              "Plan Rows": 1,
+              "Plan Width": 87,
+              "Actual Startup Time": 4.553,
+              "Actual Total Time": 9.702,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Filter": "(\"productId\" = '0e40d3b3-4352-b663-6ffb-c0973159d70f'::text)",
+              "Rows Removed by Filter": 100011,
+              "Shared Hit Blocks": 8,
+              "Shared Read Blocks": 1438,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 26,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning": {
+              "Shared Hit Blocks": 48,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.161,
+            "Triggers": [],
+            "Execution Time": 9.708
+          }
+        ]
+      }
+    ],
+    "normalIndexedPlan": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Index Scan",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Scan Direction": "Forward",
+              "Index Name": "InventoryBalance_productId_idx",
+              "Relation Name": "InventoryBalance",
+              "Alias": "InventoryBalance",
+              "Startup Cost": 0.42,
+              "Total Cost": 8.44,
+              "Plan Rows": 1,
+              "Plan Width": 87,
+              "Actual Startup Time": 0.024,
+              "Actual Total Time": 0.025,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Index Cond": "(\"productId\" = '0e40d3b3-4352-b663-6ffb-c0973159d70f'::text)",
+              "Rows Removed by Index Recheck": 0,
+              "Shared Hit Blocks": 3,
+              "Shared Read Blocks": 1,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning": {
+              "Shared Hit Blocks": 0,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.024,
+            "Triggers": [],
+            "Execution Time": 0.032
+          }
+        ]
+      }
+    ]
+  },
+  "limits": "Controlled planner comparison, not a historical before schema; owner CSV only, no PDF/XLSX/vendor SLA"
+}

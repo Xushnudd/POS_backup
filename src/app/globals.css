@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@layer base {
+ button, input:not([type=checkbox]):not([type=radio]), select, textarea { min-height:44px; }
+ button { min-width:44px; }
+ nav a { min-height:44px; }
+ :focus-visible { outline:3px solid #1d4ed8; outline-offset:3px; }
+}

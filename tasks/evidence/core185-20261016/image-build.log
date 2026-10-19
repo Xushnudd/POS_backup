@@ -1,0 +1,451 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.67kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24-slim
+#2 DONE 1.8s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 316B done
+#3 DONE 0.0s
+
+#4 [deps 1/7] FROM docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5
+#4 resolve docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 985.50kB 0.0s done
+#5 DONE 0.1s
+
+#6 [builder 2/7] RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [deps 4/7] COPY package.json package-lock.json* ./
+#7 CACHED
+
+#8 [deps 5/7] COPY prisma ./prisma/
+#8 CACHED
+
+#9 [builder 3/7] WORKDIR /app
+#9 CACHED
+
+#10 [deps 2/7] RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+#10 CACHED
+
+#11 [deps 6/7] RUN npm ci --engine-strict
+#11 CACHED
+
+#12 [deps 7/7] RUN npx prisma generate
+#12 CACHED
+
+#13 [deps 3/7] WORKDIR /app
+#13 CACHED
+
+#14 [builder 4/7] COPY --from=deps /app/node_modules ./node_modules
+#14 CACHED
+
+#15 [builder 5/7] COPY . .
+#15 DONE 0.2s
+
+#16 [builder 6/7] RUN npm run worker:build
+#16 0.338 
+#16 0.338 > frontend@0.1.0 worker:build
+#16 0.338 > tsc -p tsconfig.worker.json
+#16 0.338 
+#16 4.089 npm notice
+#16 4.089 npm notice New major version of npm available! 11.19.1 -> 12.2.0
+#16 4.089 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#16 4.089 npm notice To update run: npm install -g npm@12.2.0
+#16 4.089 npm notice
+#16 DONE 4.5s
+
+#17 [builder 7/7] RUN APP_ORIGIN=https://build.example.invalid DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build npm run build
+#17 0.194 
+#17 0.194 > frontend@0.1.0 prebuild
+#17 0.194 > node scripts/build-offline.cjs
+#17 0.194 
+#17 0.438 
+#17 0.438 > frontend@0.1.0 build
+#17 0.438 > next build
+#17 0.438 
+#17 0.665 ▲ Next.js 16.3.8 (Turbopack)
+#17 0.692 ✓ Running next.config.ts took 26ms
+#17 0.698 
+#17 0.730   Creating an optimized production build ...
+#17 7.516 ✓ Compiled successfully in 6.7s
+#17 7.518   Running TypeScript ...
+#17 18.15   Finished TypeScript in 10.6s ...
+#17 18.15   Collecting page data using 19 workers ...
+#17 19.27   Generating static pages using 19 workers (0/183) ...
+#17 19.31   Generating static pages using 19 workers (45/183) 
+#17 19.36   Generating static pages using 19 workers (91/183) 
+#17 19.41   Generating static pages using 19 workers (137/183) 
+#17 19.50 ✓ Generating static pages using 19 workers (183/183) in 235ms
+#17 19.51   Finalizing page optimization ...
+#17 19.89 
+#17 19.90 Route (app)
+#17 19.90 ┌ ƒ /
+#17 19.90 ├ ƒ /_not-found
+#17 19.90 ├ ƒ /api/audit
+#17 19.90 ├ ƒ /api/auth/challenges
+#17 19.90 ├ ƒ /api/auth/challenges/verify
+#17 19.90 ├ ƒ /api/auth/change-password
+#17 19.90 ├ ƒ /api/auth/delivery
+#17 19.90 ├ ƒ /api/auth/invitations/accept
+#17 19.90 ├ ƒ /api/auth/login
+#17 19.90 ├ ƒ /api/auth/logout
+#17 19.90 ├ ƒ /api/auth/logout-all
+#17 19.90 ├ ƒ /api/auth/me
+#17 19.90 ├ ƒ /api/auth/password-reset/complete
+#17 19.90 ├ ƒ /api/auth/password-reset/request
+#17 19.90 ├ ƒ /api/auth/pin
+#17 19.90 ├ ƒ /api/auth/pin-switch
+#17 19.90 ├ ƒ /api/auth/register
+#17 19.90 ├ ƒ /api/auth/security
+#17 19.90 ├ ƒ /api/auth/security/read
+#17 19.90 ├ ƒ /api/auth/security/retry
+#17 19.90 ├ ƒ /api/auth/sessions
+#17 19.90 ├ ƒ /api/auth/totp
+#17 19.90 ├ ƒ /api/auth/totp/confirm
+#17 19.90 ├ ƒ /api/auth/totp/enroll
+#17 19.90 ├ ƒ /api/auth/totp/proof
+#17 19.90 ├ ƒ /api/auth/totp/recover
+#17 19.90 ├ ƒ /api/auth/totp/rotate
+#17 19.90 ├ ƒ /api/billing
+#17 19.90 ├ ƒ /api/billing/assign
+#17 19.90 ├ ƒ /api/billing/cancel
+#17 19.90 ├ ƒ /api/billing/closure
+#17 19.90 ├ ƒ /api/billing/costs
+#17 19.90 ├ ƒ /api/billing/costs/[id]/cancel
+#17 19.90 ├ ƒ /api/billing/invoices
+#17 19.90 ├ ƒ /api/billing/invoices/[id]/cancel
+#17 19.90 ├ ƒ /api/billing/payments
+#17 19.90 ├ ƒ /api/billing/plans
+#17 19.90 ├ ƒ /api/billing/retention
+#17 19.90 ├ ƒ /api/brands
+#17 19.90 ├ ƒ /api/brands/[id]
+#17 19.90 ├ ƒ /api/catalog-import
+#17 19.90 ├ ƒ /api/catalog-import/export
+#17 19.90 ├ ƒ /api/catalog-import/preview
+#17 19.90 ├ ƒ /api/categories
+#17 19.90 ├ ƒ /api/categories/[id]
+#17 19.90 ├ ƒ /api/customer-groups
+#17 19.90 ├ ƒ /api/customer-groups/assign
+#17 19.90 ├ ƒ /api/customer-merges
+#17 19.90 ├ ƒ /api/customers
+#17 19.90 ├ ƒ /api/customers/[id]
+#17 19.90 ├ ƒ /api/customers/[id]/advances
+#17 19.90 ├ ƒ /api/customers/[id]/consents
+#17 19.90 ├ ƒ /api/customers/[id]/debt
+#17 19.90 ├ ƒ /api/customers/[id]/history
+#17 19.90 ├ ƒ /api/customers/[id]/ledger
+#17 19.90 ├ ƒ /api/customers/[id]/points
+#17 19.90 ├ ƒ /api/customers/[id]/reminders
+#17 19.90 ├ ƒ /api/deployment/status
+#17 19.90 ├ ƒ /api/exchanges
+#17 19.90 ├ ƒ /api/exchanges/preview
+#17 19.90 ├ ƒ /api/files
+#17 19.90 ├ ƒ /api/files/[id]
+#17 19.90 ├ ƒ /api/finance/accounts
+#17 19.90 ├ ƒ /api/finance/categories
+#17 19.90 ├ ƒ /api/finance/documents
+#17 19.90 ├ ƒ /api/finance/documents/[id]/reverse
+#17 19.90 ├ ƒ /api/finance/expenses
+#17 19.90 ├ ƒ /api/finance/transfers
+#17 19.90 ├ ƒ /api/health/live
+#17 19.90 ├ ƒ /api/health/ready
+#17 19.90 ├ ƒ /api/incidents
+#17 19.90 ├ ƒ /api/incidents/[id]
+#17 19.90 ├ ƒ /api/integration-operations
+#17 19.90 ├ ƒ /api/integration-operations/[id]/lookup
+#17 19.90 ├ ƒ /api/inventory/balances
+#17 19.90 ├ ƒ /api/inventory/batches
+#17 19.90 ├ ƒ /api/inventory/batches/count/[productId]
+#17 19.90 ├ ƒ /api/inventory/batches/policy
+#17 19.90 ├ ƒ /api/inventory/batches/sources
+#17 19.90 ├ ƒ /api/inventory/dispositions
+#17 19.90 ├ ƒ /api/inventory/locations
+#17 19.90 ├ ƒ /api/inventory/locations/move
+#17 19.90 ├ ƒ /api/inventory/movements
+#17 19.90 ├ ƒ /api/inventory/position
+#17 19.90 ├ ƒ /api/inventory/reservations
+#17 19.90 ├ ƒ /api/inventory/reservations/[id]/release
+#17 19.90 ├ ƒ /api/inventory/serials
+#17 19.90 ├ ƒ /api/inventory/serials/[id]/history
+#17 19.90 ├ ƒ /api/inventory/serials/policy
+#17 19.90 ├ ƒ /api/inventory/serials/service
+#17 19.90 ├ ƒ /api/inventory/thresholds
+#17 19.90 ├ ƒ /api/jobs
+#17 19.90 ├ ƒ /api/jobs/[id]/events
+#17 19.90 ├ ƒ /api/jobs/[id]/export
+#17 19.90 ├ ƒ /api/jobs/[id]/retry
+#17 19.90 ├ ƒ /api/loyalty/gifts
+#17 19.90 ├ ƒ /api/loyalty/marketing
+#17 19.90 ├ ƒ /api/loyalty/policy
+#17 19.90 ├ ƒ /api/monitoring
+#17 19.90 ├ ƒ /api/offline-cash
+#17 19.90 ├ ƒ /api/offline-cash/[id]
+#17 19.90 ├ ƒ /api/offline-cash/[id]/cancel
+#17 19.90 ├ ƒ /api/offline-cash/[id]/settle
+#17 19.90 ├ ƒ /api/offline-cash/policy
+#17 19.90 ├ ƒ /api/onboarding
+#17 19.90 ├ ƒ /api/operations
+#17 19.90 ├ ƒ /api/operations/cancel
+#17 19.90 ├ ƒ /api/operations/handover
+#17 19.90 ├ ƒ /api/operations/overview
+#17 19.90 ├ ƒ /api/organizations
+#17 19.90 ├ ƒ /api/organizations/[id]
+#17 19.90 ├ ƒ /api/organizations/[id]/invitations
+#17 19.90 ├ ƒ /api/organizations/[id]/invitations/[invitationId]
+#17 19.90 ├ ƒ /api/organizations/[id]/transfer-ownership
+#17 19.90 ├ ƒ /api/organizations/[id]/users
+#17 19.90 ├ ƒ /api/organizations/[id]/users/[userId]
+#17 19.90 ├ ƒ /api/organizations/switch
+#17 19.90 ├ ƒ /api/ownership-transfers
+#17 19.90 ├ ƒ /api/ownership-transfers/[id]
+#17 19.90 ├ ƒ /api/payments
+#17 19.90 ├ ƒ /api/payments/credit
+#17 19.90 ├ ƒ /api/platform/overview
+#17 19.90 ├ ƒ /api/price-rules
+#17 19.90 ├ ƒ /api/price-rules/[id]/archive
+#17 19.90 ├ ƒ /api/price-rules/quote
+#17 19.90 ├ ƒ /api/products
+#17 19.90 ├ ƒ /api/products/[id]
+#17 19.90 ├ ƒ /api/products/[id]/barcodes
+#17 19.90 ├ ƒ /api/products/[id]/barcodes/[barcodeId]
+#17 19.90 ├ ƒ /api/products/[id]/barcodes/generate
+#17 19.90 ├ ƒ /api/products/[id]/barcodes/labels
+#17 19.90 ├ ƒ /api/products/[id]/compliance
+#17 19.90 ├ ƒ /api/products/[id]/units
+#17 19.90 ├ ƒ /api/products/[id]/variants
+#17 19.90 ├ ƒ /api/products/prices
+#17 19.90 ├ ƒ /api/purchase-orders
+#17 19.90 ├ ƒ /api/purchase-orders/[id]
+#17 19.90 ├ ƒ /api/purchase-orders/[id]/receipts
+#17 19.90 ├ ƒ /api/purchase-orders/[id]/receive
+#17 19.90 ├ ƒ /api/receipt-view
+#17 19.90 ├ ƒ /api/registers/[id]
+#17 19.90 ├ ƒ /api/reminder-view
+#17 19.90 ├ ƒ /api/reports/breakdowns
+#17 19.90 ├ ƒ /api/reports/dashboard
+#17 19.90 ├ ƒ /api/reports/plans
+#17 19.90 ├ ƒ /api/reports/plans/[id]/runs
+#17 19.90 ├ ƒ /api/reports/plans/[id]/stop
+#17 19.90 ├ ƒ /api/reports/plans/preview
+#17 19.90 ├ ƒ /api/reports/plans/runs/[id]/export
+#17 19.90 ├ ƒ /api/reports/products
+#17 19.90 ├ ƒ /api/reports/profit
+#17 19.90 ├ ƒ /api/reports/purchases
+#17 19.90 ├ ƒ /api/reports/reconciliation
+#17 19.90 ├ ƒ /api/reports/replenishment
+#17 19.90 ├ ƒ /api/reports/sales
+#17 19.90 ├ ƒ /api/reports/supplier-balances
+#17 19.90 ├ ƒ /api/roles
+#17 19.90 ├ ƒ /api/roles/[id]
+#17 19.90 ├ ƒ /api/sales
+#17 19.90 ├ ƒ /api/sales/[id]
+#17 19.90 ├ ƒ /api/sales/[id]/benefits
+#17 19.90 ├ ƒ /api/sales/[id]/benefits/cancel
+#17 19.90 ├ ƒ /api/sales/[id]/complete
+#17 19.90 ├ ƒ /api/sales/[id]/gift
+#17 19.90 ├ ƒ /api/sales/[id]/points
+#17 19.90 ├ ƒ /api/sales/[id]/points/cancel
+#17 19.90 ├ ƒ /api/sales/[id]/print-requests
+#17 19.90 ├ ƒ /api/sales/[id]/receipt-links
+#17 19.90 ├ ƒ /api/sales/[id]/returns
+#17 19.90 ├ ƒ /api/sales/[id]/returns/preview
+#17 19.90 ├ ƒ /api/sales/[id]/void
+#17 19.90 ├ ƒ /api/sales/preview
+#17 19.90 ├ ƒ /api/settings/discounts
+#17 19.90 ├ ƒ /api/shifts
+#17 19.90 ├ ƒ /api/shifts/[id]
+#17 19.90 ├ ƒ /api/shifts/[id]/cash-movements
+#17 19.90 ├ ƒ /api/shifts/[id]/close-rejection
+#17 19.90 ├ ƒ /api/shifts/[id]/corrections
+#17 19.90 ├ ƒ /api/stock-counts
+#17 19.90 ├ ƒ /api/stock-counts/[id]
+#17 19.90 ├ ƒ /api/stock-counts/[id]/approve
+#17 19.90 ├ ƒ /api/stock-counts/[id]/cancel
+#17 19.90 ├ ƒ /api/stock-counts/[id]/submit
+#17 19.90 ├ ƒ /api/stock-documents
+#17 19.90 ├ ƒ /api/stock-documents/[id]
+#17 19.90 ├ ƒ /api/stock-documents/[id]/confirm
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-correction-preview
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-plans
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/application-preview
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/applications
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/apply
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/cancel
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-plans/[planId]/reverse
+#17 19.90 ├ ƒ /api/stock-documents/[id]/cost-sources
+#17 19.90 ├ ƒ /api/stock-documents/[id]/landed-cost-preview
+#17 19.90 ├ ƒ /api/stock-documents/[id]/reverse
+#17 19.90 ├ ƒ /api/stores
+#17 19.90 ├ ƒ /api/stores/[id]
+#17 19.90 ├ ƒ /api/stores/[id]/registers
+#17 19.90 ├ ƒ /api/supplier-invoices/[id]
+#17 19.90 ├ ƒ /api/supplier-invoices/[id]/credits
+#17 19.90 ├ ƒ /api/supplier-payments
+#17 19.90 ├ ƒ /api/supplier-payments/[id]/allocate
+#17 19.90 ├ ƒ /api/supplier-payments/[id]/allocations
+#17 19.90 ├ ƒ /api/suppliers
+#17 19.90 ├ ƒ /api/suppliers/[id]
+#17 19.90 ├ ƒ /api/suppliers/[id]/ledger
+#17 19.90 ├ ƒ /api/suppliers/[id]/purchase-totals
+#17 19.90 ├ ƒ /api/suppliers/[id]/purchases
+#17 19.90 ├ ƒ /api/support/grants
+#17 19.90 ├ ƒ /api/support/grants/[id]/revoke
+#17 19.90 ├ ƒ /api/support/grants/[id]/view
+#17 19.90 ├ ƒ /api/support/operators
+#17 19.90 ├ ƒ /api/support/policy
+#17 19.90 ├ ƒ /api/support/tickets
+#17 19.90 ├ ƒ /api/support/tickets/[id]
+#17 19.90 ├ ƒ /api/support/tickets/[id]/commands
+#17 19.90 ├ ƒ /api/support/tickets/operators
+#17 19.90 ├ ƒ /api/sync
+#17 19.90 ├ ƒ /api/sync/reviews
+#17 19.90 ├ ƒ /api/sync/reviews/[id]
+#17 19.90 ├ ƒ /api/taxes
+#17 19.90 ├ ƒ /api/taxes/[id]
+#17 19.90 ├ ƒ /api/taxes/[id]/versions
+#17 19.90 ├ ƒ /api/transfers
+#17 19.90 ├ ƒ /api/transfers/[id]/cancel
+#17 19.90 ├ ƒ /api/transfers/[id]/receive
+#17 19.90 ├ ƒ /api/transfers/[id]/return
+#17 19.90 ├ ƒ /api/transfers/[id]/send
+#17 19.90 ├ ƒ /api/units
+#17 19.90 ├ ƒ /api/units/[id]
+#17 19.90 ├ ƒ /archive
+#17 19.90 ├ ƒ /audit
+#17 19.90 ├ ƒ /billing
+#17 19.90 ├ ƒ /customers
+#17 19.90 ├ ƒ /customers/[id]
+#17 19.90 ├ ƒ /customers/[id]/history
+#17 19.90 ├ ƒ /customers/duplicates
+#17 19.90 ├ ƒ /d
+#17 19.90 ├ ƒ /dashboard
+#17 19.90 ├ ƒ /drafts
+#17 19.90 ├ ƒ /finance
+#17 19.90 ├ ƒ /forgot-password
+#17 19.90 ├ ƒ /help
+#17 19.90 ├ ƒ /incidents
+#17 19.90 ├ ƒ /inventory
+#17 19.90 ├ ƒ /inventory/batches
+#17 19.90 ├ ƒ /inventory/counts
+#17 19.90 ├ ƒ /inventory/dispositions
+#17 19.90 ├ ƒ /inventory/locations
+#17 19.90 ├ ƒ /inventory/movements
+#17 19.90 ├ ƒ /inventory/serials
+#17 19.90 ├ ƒ /inventory/transfers
+#17 19.90 ├ ƒ /invite
+#17 19.90 ├ ƒ /jobs
+#17 19.90 ├ ƒ /login
+#17 19.90 ├ ƒ /loyalty
+#17 19.90 ├ ƒ /manifest.webmanifest
+#17 19.90 ├ ƒ /onboarding
+#17 19.90 ├ ƒ /platform
+#17 19.90 ├ ƒ /pos
+#17 19.90 ├ ƒ /pos/offline
+#17 19.90 ├ ƒ /products
+#17 19.90 ├ ƒ /products/[id]
+#17 19.90 ├ ƒ /products/[id]/compliance
+#17 19.90 ├ ƒ /products/[id]/media
+#17 19.90 ├ ƒ /products/[id]/units
+#17 19.90 ├ ƒ /products/[id]/variants
+#17 19.90 ├ ƒ /products/brands
+#17 19.90 ├ ƒ /products/categories
+#17 19.90 ├ ƒ /products/import
+#17 19.90 ├ ƒ /products/prices
+#17 19.90 ├ ƒ /products/units
+#17 19.90 ├ ƒ /r
+#17 19.90 ├ ƒ /register
+#17 19.90 ├ ƒ /replenishment
+#17 19.90 ├ ƒ /reports
+#17 19.90 ├ ƒ /reports/breakdowns
+#17 19.90 ├ ƒ /reports/plans
+#17 19.90 ├ ƒ /reports/purchases
+#17 19.90 ├ ƒ /reports/reconciliation
+#17 19.90 ├ ƒ /reports/supplier-balances
+#17 19.90 ├ ƒ /reset-password
+#17 19.90 ├ ƒ /roles
+#17 19.90 ├ ƒ /sales
+#17 19.90 ├ ƒ /sales/[id]
+#17 19.90 ├ ƒ /sales/[id]/exchange
+#17 19.90 ├ ƒ /security
+#17 19.90 ├ ƒ /settings
+#17 19.90 ├ ƒ /settings/prices
+#17 19.90 ├ ƒ /settings/support
+#17 19.90 ├ ƒ /settings/taxes
+#17 19.90 ├ ƒ /shifts
+#17 19.90 ├ ƒ /suppliers
+#17 19.90 ├ ƒ /suppliers/[id]
+#17 19.90 ├ ƒ /support
+#17 19.90 ├ ƒ /sync-review
+#17 19.90 ├ ƒ /tickets
+#17 19.90 ├ ƒ /tickets/[id]
+#17 19.90 └ ƒ /training
+#17 19.90 
+#17 19.90 
+#17 19.90 ƒ Proxy (Middleware)
+#17 19.90 
+#17 19.90 ƒ  (Dynamic)  server-rendered on demand
+#17 19.90 
+#17 DONE 20.3s
+
+#9 [builder 3/7] WORKDIR /app
+#9 CACHED
+
+#18 [runtime-deps 1/1] RUN npm prune --omit=dev --ignore-scripts --no-audit --no-fund
+#18 CACHED
+
+#19 [runner  4/15] COPY --from=builder /app/.next/standalone ./
+#19 DONE 0.4s
+
+#20 [runner  5/15] COPY --from=runtime-deps /app/node_modules ./node_modules
+#20 DONE 1.6s
+
+#21 [runner  6/15] COPY --from=builder /app/.next/static ./.next/static
+#21 DONE 0.2s
+
+#22 [runner  7/15] COPY --from=builder /app/public ./public
+#22 DONE 0.1s
+
+#23 [runner  8/15] COPY --from=builder /app/.worker-build ./.worker-build
+#23 DONE 0.1s
+
+#24 [runner  9/15] COPY --from=builder /app/scripts/worker-resolver.cjs ./scripts/worker-resolver.cjs
+#24 DONE 0.1s
+
+#25 [runner 10/15] COPY --from=builder /app/scripts/ops/release-entrypoint.mjs ./scripts/ops/release-entrypoint.mjs
+#25 DONE 0.1s
+
+#26 [runner 11/15] COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+#26 DONE 0.1s
+
+#27 [runner 12/15] COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+#27 DONE 0.1s
+
+#28 [runner 13/15] COPY --from=builder /app/prisma ./prisma
+#28 DONE 0.1s
+
+#29 [runner 14/15] COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+#29 DONE 0.1s
+
+#30 [runner 15/15] RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nextjs     && chown -R nextjs:nodejs /app
+#30 0.227 useradd warning: nextjs's uid 1001 is greater than SYS_UID_MAX 999
+#30 DONE 1.2s
+
+#31 exporting to image
+#31 exporting layers
+#31 exporting layers 15.6s done
+#31 exporting manifest sha256:f7745deb1fe1b0c8cd0ab38e1d66539424bf1621d2e37571aa69288118406017 0.0s done
+#31 exporting config sha256:b5c8228fcde993b48de327be5dd7fc17df83dd20974ff03a5056869fbdbffbe4 0.0s done
+#31 exporting attestation manifest sha256:3cf3b23f66deb5c06be6491a6fdc17ad843a7d4d899f33b9b491ff43f2161cf8 0.0s done
+#31 exporting manifest list sha256:145f43ce70ddea25b3757e7b4e6e68affad7f9a519097ced9b0056a55d45cea7 0.0s done
+#31 naming to docker.io/library/pos-core185-candidate:20261016
+#31 naming to docker.io/library/pos-core185-candidate:20261016 done
+#31 unpacking to docker.io/library/pos-core185-candidate:20261016
+#31 unpacking to docker.io/library/pos-core185-candidate:20261016 8.2s done
+#31 DONE 24.0s

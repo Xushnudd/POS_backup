@@ -1,0 +1,15 @@
+[Unit]
+Description=POS selected data mount disk observation (%i)
+
+[Service]
+Type=oneshot
+User=pos-ops-%i
+Group=pos-ops-%i
+EnvironmentFile=/etc/pos/%i/disk.env
+WorkingDirectory=/opt/pos
+ExecStart=/usr/bin/node /opt/pos/scripts/ops/host-health.mjs
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+TimeoutStartSec=15s

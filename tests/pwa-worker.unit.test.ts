@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {runInNewContext} from 'node:vm';
+test('Public PWA worker waits safely for update and never caches private requests or server HTML',async()=>{
+ type Event={request?:Request;waitUntil:(p:Promise<unknown>)=>void;respondWith:(p:Promise<Response>)=>void};
+ const handlers:Record<string,(e:Event)=>void>={},stored=new Map<string,Response>(),deleted:string[]=[];let skipped=false,claimed=false,offline=false,wait:Promise<unknown>|undefined,response:Promise<Response>|undefined;
+ const cache={addAll:async(paths:string[])=>{for(const p of paths)stored.set(p,new Response('public:'+p))},match:async(p:string)=>stored.get(p)?.clone()};
+ runInNewContext(readFileSync('public/sw.js','utf8'),{URL,Response,self:{location:{origin:'https://pos.invalid'},skipWaiting:()=>{skipped=true},clients:{claim:()=>{claimed=true}},addEventListener:(name:string,handler:(e:Event)=>void)=>{handlers[name]=handler}},caches:{open:async()=>cache,keys:async()=>['shuni-public-shell-v0','shuni-public-shell-v1','shuni-public-shell-v2','shuni-public-shell-v3','shuni-public-shell-v4','another-app-cache'],delete:async(key:string)=>{deleted.push(key)}},fetch:async()=>{if(offline)throw new Error('network outage');return new Response('private server HTML')}});
+ const event=(request?:Request):Event=>({request,waitUntil:p=>{wait=p},respondWith:p=>{response=p}});
+ handlers.install(event());await wait;assert.deepEqual([...stored.keys()],['/pwa/offline.html','/pwa/icon-192.png','/pwa/icon-512.png','/pwa/cash.html','/pwa/cash-crypto.js','/pwa/cash-store.js','/pwa/cash-screen.js','/pwa/locale.js','/pwa/money.js','/pwa/format.js','/pwa/messages.js','/pwa/static-locale.js']);assert.equal(skipped,false);assert.equal(claimed,false);
+ handlers.activate(event());await wait;assert.deepEqual(deleted,['shuni-public-shell-v0','shuni-public-shell-v1','shuni-public-shell-v2','shuni-public-shell-v3']);
+ for(const path of ['/api/sales','/api/files/private','/_next/static/private.js','/pwa/offline.html?private=yes']){response=undefined;handlers.fetch(event(new Request('https://pos.invalid'+path)));assert.equal(response,undefined);}
+ const navigation=new Request('https://pos.invalid/pos');Object.defineProperty(navigation,'mode',{value:'navigate'});handlers.fetch(event(navigation));assert.equal(await(await response!).text(),'private server HTML');assert.equal(stored.size,12);
+ offline=true;handlers.fetch(event(navigation));assert.equal(await(await response!).text(),'public:/pwa/offline.html');assert.equal(stored.size,12);
+});
