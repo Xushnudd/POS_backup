@@ -8,13 +8,29 @@ Production origin sozlangach, sahifalar ochildi, ammo readiness503 va bo‘sh re
 
 Production `APP_ORIGIN` haqiqiy doimiy domenga sozlandi: **https://pos-backup-sooty.vercel.app**. Staff credential binding uchun yetishmayotgan `AUTH_CHALLENGE_SECRET` alohida generatsiya qilinib, productionga sensitive variable sifatida saqlandi. Private recovery nusxasi `.local/vercel/production-auth-key`da; Git va deploy uploadiga kirmaydi. MFA siyosati yoki CSRF guardi o‘chirilmadi.
 
-Yakuniy versiya shu doimiy domenga e’lon qilindi. Eski `pos-backup-qq11zephj-xushnudd.vercel.app` — oldingi immutable Preview deploymenti; yangi sozlamalar uni qayta yozmaydi. Ishlash uchun yuqoridagi doimiy production manzilidan foydalaning. Preview muhitining alohida origin/baza izolatsiyasi yakunlangan deb hisoblanmaydi.
+Yakuniy versiya shu doimiy domenga e’lon qilindi. Eski `pos-backup-qq11zephj-xushnudd.vercel.app` — oldingi immutable Preview deploymenti; yangi sozlamalar uni qayta yozmaydi. Production uchun yuqoridagi doimiy manzildan foydalaning. `develop`ning keyingi alohida Preview sozlamasi quyida berilgan; boshqa Preview branchlari avtomatik tayyor deb hisoblanmaydi.
 
 Repozitoriyda `vercel.json` qo‘shildi. U Next.js frameworkini, `npm ci` installni va `node scripts/vercel/build.cjs` buildni tanlaydi. Build skripti avval private environmentni tekshiradi, keyin `prisma generate` va `npm run build -- --webpack`ni bajaradi. Mavjud offline/PWA prebuild ham ishlaydi. Lokal Turbopack build OS `EPERM`ga uchradi; webpack bilan build o‘tdi. Bu lokal xato Vercel’dagi build ham aynan shu sababdan yiqilganini isbotlamaydi.
 
 Build bazani migrate, reset, seed yoki baseline qilmaydi. Vercel muhitida Prisma generate’dan keyin `check-database.cjs` faqat o‘qish transactionida ulanish, barcha migratsiyalar/checksumlar, UTC va auth-restore holatini tekshiradi. Bu tekshiruvdan o‘tmagan build e’lon qilinmaydi. Xatoda raw URL yoki DB exception o‘rniga xavfsiz kod beriladi. Bu guard biznes/E2E qabul sinovi o‘rnini bosmaydi.
 
 ## Dashboard sozlamalari
+
+### `develop` uchun alohida Preview
+
+Foydalanuvchi tanloviga ko‘ra **`main` Production branch bo‘lib qoladi**, **`develop` esa Preview** sifatida deploy qilinadi. Production branch almashtirilmagan. `git push origin develop` Git integratsiyasi orqali Preview buildni boshlaydi.
+
+`develop` uchun branch manzili Vercel deployment metadata’sidan olindi: **https://pos-backup-git-develop-xushnudd.vercel.app**. Saytni va formalarni shu doimiy branch manzilida oching; tasodifiy deployment URLi uchun alohida Origin ruxsati qo‘shilmaydi.
+
+`DATABASE_URL`, `APP_ORIGIN` va `AUTH_CHALLENGE_SECRET` faqat `target=preview`, `gitBranch=develop` scope’da sozlandi. Branchga xos DATABASE_URL umumiy eski Preview qiymatidan ustun keladi. Production environment o‘zgarmaydi, uning bazasi yoki auth kaliti Preview’ga ko‘chirilmaydi.
+
+Mavjud Neon compute ichida yangi bo‘sh `pos_preview_develop` bazasi va alohida cheklangan SQL login yaratildi. Preview login superuser emas, database/role yaratish yoki production roli huquqlarini meros olish imkoniga ega emas. Faqat yangi Preview bazasining schema huquqlari berilgan; production biznes jadvaliga `LIMIT 0` o‘qish sinovi `42501` bilan rad etildi. Production ma’lumotlari nusxalanmagan. Bu alohida baza/credential izolyatsiyasi; compute, tarmoq yoki billing bo‘yicha alohida Neon project/branch yaratilgani da’vo qilinmaydi.
+
+Private Preview URL/parol/auth kaliti `.local/vercel/develop-preview/state.json`da saqlanadi. Bu fayl Git, secret scanner inventari va Vercel uploadidan chiqarilgan; ulashmang. Migratsiyalar faqat shu yangi bazaga alohida operator amali sifatida qo‘llanadi; keyingi web buildlar ularni avtomatik bajarmaydi va 190 migratsiya/checksum readinessni faqat o‘qib tekshiradi.
+
+Tayyorlash tekshiruvi: **190/190** migratsiya va checksum readiness o‘tdi. Mavjud production binary yangi Preview bazasi va kaliti bilan localhostda sinovdan o‘tdi: sahifalar/live/ready200, sessiyasiz me401, bo‘sh registration400, production Origin’dan so‘rov403. Production readiness ham200 saqlandi. Bu lokal runtime tekshiruvi; Git orqali cloud deploymentning holati Vercel Deployments’da `develop` branch va aynan push qilingan commit bo‘yicha tekshiriladi. Tayyorlash/izolyatsiya dalili: [develop-preview-config-20261019.json](../../tasks/evidence/develop-preview-config-20261019.json).
+
+Vercel Authentication himoyasi saqlanadi: Preview’ni ochish uchun Vercel akkauntiga kirish talab qilinishi mumkin. Anonim 302 login redirecti ilovaning 500 xatosi bilan teng emas. Avtomatik test uchun loyiha himoyasini o‘chirmang yoki yangi protection-bypass kalitini tasdiqsiz yaratmang. Boshqa Preview branchlari o‘z bazasi/origin/kaliti bilan alohida tayyorlanadi.
 
 1. Mavjud Vercel loyihasini tanlang va repository root katalogini belgilang. Framework **Next.js**, Node.js **24.x** bo‘lsin. Docker build yoki static export tanlanmaydi. Output Directory uchun maxsus `out`/`standalone` qiymati kiritmang; framework defaultini qoldiring. [Rasmiy Node versiyalari](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions).
 2. Settings → Environment Variables’da quyidagilarni tegishli **Production** yoki **Preview** muhitiga kiriting. Lokal `.env` faylini to‘liq import qilmang.
