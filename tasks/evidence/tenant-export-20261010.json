@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-10T11:36:15.105614+00:00",
+  "sourceCommit": "975427bcbba849c25a9e120509135115d90393d2",
+  "workingTree": true,
+  "task": "BIZ-02.07",
+  "status": "in_progress",
+  "originalDoneCurrent": 154,
+  "requestedAdditional": 20,
+  "acceptedAdditional": 1,
+  "remainingTarget": 19,
+  "newOriginalDoneThisCheckpoint": 0,
+  "scope": "reviewed portable business data, not database backup/restore",
+  "reviewedModels": 106,
+  "includedModels": 85,
+  "omittedModels": 21,
+  "limits": {
+    "totalRows": 100000,
+    "artifactBytes": 16777216,
+    "artifactTtlHours": 24,
+    "activeTenantArtifactsBytes": 33554432
+  },
+  "gates": {
+    "fullIntegration": {
+      "pass": 262,
+      "total": 262,
+      "durationMs": 334705.074447
+    },
+    "unit": {
+      "pass": 64,
+      "total": 64,
+      "files": 27,
+      "durationMs": 1378.850179
+    },
+    "productionHttpsBrowsers": {
+      "pass": 6,
+      "total": 6,
+      "durationSeconds": 14.5,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "scenarios": [
+        "existing catalogue CSV lost ACK/worker/download",
+        "tenant JSON original-key lost ACK/worker/manifest/download"
+      ]
+    },
+    "productionBuild": "PASS",
+    "workerBuild": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "freshAndLegacyMigrations": 112,
+    "gitDiffCheck": "PASS"
+  },
+  "verified": [
+    "all-branch tenant and child scope",
+    "decimal strings and base64 file integrity",
+    "manifest row counts and dataset/file sha256",
+    "schema changes fail closed until reviewed",
+    "credential and operation-result omissions",
+    "oversize: dead code and no partial artifact",
+    "late audit failure: artifact and success rollback, safe retry",
+    "revoked session prevents publication/download",
+    "original enqueue key creates one job/artifact"
+  ],
+  "failedEarlierRuns": [
+    "missing TokenPayload.authenticationMethod corrected by actual DB password-session checks",
+    "FileAsset fixture mime corrected to existing image/webp constraint",
+    "new error code rejected by historical DB check; additive112 fixes it without editing applied111",
+    "readonly metadata test cast fixed before final clean compile/build"
+  ],
+  "remaining": [
+    "owner reauthenticated close/cancel",
+    "all business-write read-only enforcement",
+    "legal hold/category approval and irreversible deletion",
+    "larger exports beyond documented artifact caps"
+  ],
+  "sourcesSha256": {
+    "src/server/jobs/tenant-export.ts": "6e3e040bd2c6088bdfb07031f9e5c2623b70908ef2bc60ad099c1fcfbc223fdf",
+    "src/server/jobs/tenant-export-contract.ts": "e4111ae33219f068377dbe11c8ac795b927e1eeb1d4965978b65e080a95f1b28",
+    "src/server/jobs/service.ts": "d640fe7d85d34e32c35878a4e066bca42ef93c547a8c8ab564d91e3a2b06b4f5",
+    "src/server/jobs/catalog-export.ts": "f384dfca7d17a8a66c3e6d9e4326b0b822d5a82e35cee56c2e745b831c0dcb76",
+    "src/app/(dashboard)/jobs/page.tsx": "deb68b556eed521d0756967cae094460086d53b234a6a576a9d7e799f209447c",
+    "src/app/api/health/ready/route.ts": "a4fa9066049679b63515f9dcc46a24d85be2087f457b90a9b0f36c8d4cb599cf",
+    "prisma/migrations/202610100111_tenant_export_jobs/migration.sql": "f64530d3626bb5f59b86fbd3b4eb26a8904ca12d43271050eb17e35f16d60d35",
+    "prisma/migrations/202610100112_export_failure_codes/migration.sql": "2357e6b68c43748e26047041a3338169bc0f4f947620a983e0cb561c7165c123",
+    "scripts/ops/test-migrations.sh": "66a58424c69adc2924f1cb1e96c721677a5eaff99d85b44aa372b14dcc131b30",
+    "tests/tenant-export.unit.test.ts": "ac9c8e69aeb77d88ab72b7869322aba9aa3b930cd81c7fed45a1069ac14aea1e",
+    "tests/tenant-export.integration.test.ts": "1c251a4a678005bc2a7867855a73178a7ab8fbb76c8225acd2f3f496867ca389",
+    "tests/e2e/tenant-export.spec.ts": "74cb83eb6947b1bd549c8ab8db949ac2ed27fa9e41c061e28b271c8c41fe5c1d",
+    "docs/operations/tenant-export.md": "1de577605235512fd3b4a761576d911502097a4aa71504b3d4412c2f2969323e"
+  },
+  "logsSha256": {
+    "/tmp/pos-tenant-export-full.log": "a1fb49e52e7b5d21a1feff702d9392d655b95bfdf1e78c07b4940014e245e24b",
+    "/tmp/pos-tenant-export-unit-real.log": "ba50cb02597c3741750e3fb42457603e5f9ee78d51218fa9d4d123feb786e7c1",
+    "/tmp/pos-tenant-export-browser.log": "719f54793b3be96519b1fcbb84b996297f5b0174c149c0e939ef1b5405d5298a",
+    "/tmp/pos-tenant-export-build-safe.log": "adbdf7fb92fd7ed72e935aeebcf3b74901cd6fa0dfaf8b7e1c7c4dd96728fd9f",
+    "/tmp/pos-tenant-export-worker-final.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-tenant-export-lint-final.log": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+    "/tmp/pos-tenant-export-type-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-tenant-export-migrations.log": "c481a278aba562459931a133f79025a5cb9ce2cbb6efef61145784838b51220f"
+  },
+  "liveProductionDatabaseChanged": false,
+  "deployed": false,
+  "vendorHardwareImplemented": false,
+  "automaticBusinessDeletion": false
+}

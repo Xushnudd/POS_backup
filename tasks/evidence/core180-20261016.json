@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "date": "2026-10-16",
+  "timezone": "Asia/Tashkent",
+  "sourceBase": "15bd1cf4dc5e281590f940661cddea7683758100",
+  "originalTotal": 259,
+  "baselineOriginalDone": 176,
+  "originalDone": 180,
+  "acceptedOriginalIds": [
+    "LEG-01.05",
+    "OPS-03.03",
+    "OPS-01.05",
+    "RELEASE-01.08"
+  ],
+  "artifacts": {
+    "tasks/evidence/customer-consent-20261016.json": "b2e810b1cf86670022828cbb5be2a98a331be7213dde7493a8ae7d3e33eae507",
+    "tasks/evidence/pitr-drill-20261016.json": "a49a62c3fcd34897d0670c7f48937818145822da57286180c2b8e0f3192a3728",
+    "tasks/evidence/release-image-security-20261016.json": "32cd4dbaeb63a1bdecf430b806368b4763b5347db35c7b720f05cf9e4456a622",
+    "tasks/evidence/release-service-targets-20261016.json": "e287e1322c7c82fec6074444fe4f19fc72b79770e514be6fa38c8e2963d2522b"
+  },
+  "tests": {
+    "unit": 166,
+    "postgresRegression": 138,
+    "ops": 37,
+    "chromium": 3,
+    "allFailed": 0
+  },
+  "logs": {
+    "integration": "tasks/evidence/core180-20261016/integration.log",
+    "unit": "tasks/evidence/core180-20261016/unit.log",
+    "ops": "tasks/evidence/core180-20261016/ops.log",
+    "browser": "tasks/evidence/core180-20261016/browser.log",
+    "giftCleanup": "tasks/evidence/core180-20261016/giftCleanup.log",
+    "historicalCleanupFailure": "tasks/evidence/core180-20261016/historicalCleanupFailure.log"
+  },
+  "limits": [
+    "Local technical acceptance only; no actual production deployment",
+    "External providers/hardware/staging/pilot/legal approvals retain their statuses",
+    "Historical failed load and fixture cleanup attempts retained and excluded from accepted runs",
+    "Synthetic performance fixture retained in dedicated isolated test database for repeatability"
+  ]
+}

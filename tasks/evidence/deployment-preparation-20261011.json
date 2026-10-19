@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-11",
+  "status": "core_preparation_only",
+  "checks": {
+    "isolationTests": "7/7",
+    "composeAllProfiles": "synthetic render PASS; missing key rejected",
+    "lint": "passed",
+    "diff": "passed",
+    "opsTests": "9/9",
+    "unitFiles": "33/33",
+    "portableRestoreIntegration": "2/2",
+    "productionBuild": "passed",
+    "workerBuild": "passed",
+    "typecheck": "passed",
+    "secretScan": {
+      "files": 815,
+      "findings": 0
+    }
+  },
+  "notPerformed": [
+    "real deployment",
+    "container image build",
+    "nginx runtime syntax/TLS test",
+    "systemd installation",
+    "real host/database/key isolation audit",
+    "offsite upload",
+    "real monitoring delivery",
+    "pilot acceptance"
+  ],
+  "originalDone": 157,
+  "batchDone": 1,
+  "batchTarget": 20,
+  "sourceSHA256": {
+    "docker-compose.yml": "3efd61cd296c91bc262a83a9d4802dc11b07da13b13c07b7511dd7cd719ace3f",
+    "docker-compose.release.yml": "273b35fe4cfed5a6fc9fbd79506915faa27c1f6d09fa055b7b7932d0cda85d7a",
+    "ops/environments/staging.env.example": "092dd433bbb1a2e7054e870f566ed3b6a2f48fe340b8f088bab569e2ea1d6cc3",
+    "ops/environments/production.env.example": "be1ad95deef8a91cd99274dad5d23c7d270a34c62940632e0838758d732d40d2",
+    "ops/nginx/pos.conf.template": "cc8a9a7e1e02acec1e2e34225de10a6ef5d870f4bcf575473fe43a4351a698e5",
+    "scripts/ops/check-environment-isolation.mjs": "53532d3e7368af59fda5ee3b843340f3740429eedb1d3992c586821a2247091f",
+    "scripts/ops/check-environment-isolation.test.mjs": "74eff1844a37832b4ff0a3b8a8ad8879f799716a4ce8d764cabdefcf74fcf1a9",
+    "docs/operations/deployment-readiness.md": "a5725eb71fb7795a39f9dc96e94615268bdfa5769420cfaf683185f319e41cd9",
+    "ops/systemd/pos-backup@.service": "c8d1540d614064c210f6c4df9a527acc37a4ed302e7c731007e66166ad3c1f92",
+    "ops/systemd/pos-backup@.timer": "55df94e912264c4aca1c7676f24783b802341095f7f9fddfb3d92050bc55f2bb",
+    "ops/systemd/pos-uptime@.service": "b7ac0abc1048eaa8b0ee2a37ac8f2f62ec37501bc93a754235c0bc7f8883f574",
+    "ops/systemd/pos-uptime@.timer": "782a06cdd0faa5a61b7da0759e383238e3f775520745e861a7b36c3dbb1958df",
+    "ops/systemd/pos-disk@.service": "cbc6d167255b35363573cebf89d7c5349f416126d92810319d09ea8490ee4588",
+    "ops/systemd/pos-disk@.timer": "ef32f91df64c0bb9ea9996641c16e1aeebcee64d556f40a9a94555eff8551347",
+    "ops/systemd/README.md": "85955eebcdb64cc07f120e3a888bc3394cf5b95fc9bc2c603384e1541768661e",
+    "src/server/config.ts": "2d9e1839e0da5423b947febcf0923fa77da3f66f047f17ffea20cee99c5ca183",
+    "tests/calculations.unit.test.ts": "28980ddf67aaf26fa5b639da730cdc2db9b39d0cf986189e512353966ec43145",
+    "package.json": "c35cd96264f7a19877d235f4fdd480b8bc207c4618a2e3763dd6e925b95bf9d5",
+    ".github/workflows/ci.yml": "57bb898bdf729a99e9659d939cf9fe4dbf1a423ad144999138e86404d15340d2",
+    "tests/auth-restore.integration.test.ts": "97f9e39b09fae4a4c140186f195ac706317d7c7c323b751932883277cdaa6a5a"
+  },
+  "logSHA256": {
+    "/tmp/pos-environment-isolation-tests.log": "a5b703f9151775c56560f9c4d2709648c89386d5e78e74365a8354c8b32fc863",
+    "/tmp/pos-release-compose-config.log": "03cbd543e3abce48217737cbcb715fc7a78610ab5a8b9bd87051867ba2905b49",
+    "/tmp/pos-ops-tests-20261011.log": "aca07d101fba1f5182f8b0ef5ac467a2465f7258fb1c5410d80a373192482899",
+    "/tmp/pos-production-mfa-config-unit.log": "be73b086715b81cea05b84dfd8e172aad7ee6c2c6cb6a88d50ce3b5797cd2451",
+    "/tmp/pos-restore-portable-integration.log": "41b251c22f1016f586c8c56638af96ebd93c3f07f4c64801b29f096b0511a3ff",
+    "/tmp/pos-deployment-prep-build.log": "b2ca88c2b94cc2655c9ad8d5dcfc9d266ae88243edcd1b41f4b274c73d1f0e5f",
+    "/tmp/pos-deployment-prep-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-deployment-prep-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-deployment-prep-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-deployment-prep-secret-scan.log": "1daf0163254351fa4b93dfc7c581f517ea9c0fdf991c326d09caf11163b8b78e"
+  }
+}

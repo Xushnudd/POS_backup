@@ -1,9 +1,12 @@
+import { fixed } from '@/lib/money';
 export function formatMoney(amount: number | string | null | undefined): string {
-  if (amount === null || amount === undefined || isNaN(Number(amount))) {
-    return '0 so\'m';
-  }
-  const num = Math.round(Number(amount));
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m';
+  if (amount===null || amount===undefined) return "0 so‘m";
+  try {
+    const cents=fixed(amount);const absolute=cents<BigInt(0)?-cents:cents;
+    const integer=(absolute/BigInt(100)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+    const fraction=absolute%BigInt(100);
+    return (cents<BigInt(0)?'-':'')+integer+(fraction?'.'+fraction.toString().padStart(2,'0'):'')+" so‘m";
+  } catch {return "0 so‘m";}
 }
 
 export function formatNumber(val: number | string | null | undefined): string {

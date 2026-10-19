@@ -1,0 +1,203 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"3614ab82-09e3-48e6-941c-fae1abacbf8f","organizationId":"0ef8750f-fc5b-41c2-a21a-c88ea9b80a95","status":200,"durationMs":27,"event":"api_response"}
+✔ Worker catalog export traverses cursor pages once, preserves exact cost and formula protection, fences duplicates and tenant downloads (3603.713441ms)
+✔ Export filters isolate own active catalogue and revoked source cannot publish an artifact (86.151448ms)
+✔ Late worker audit failure rolls back artifact; same source retries once without publishing a partial file (98.422667ms)
+✔ Expired export erases bytes, preserves metadata/history and refuses download with 410 (46.690552ms)
+✔ PostgreSQL jobs claim with SKIP LOCKED, preserve immutable scoped source, fence a stale lease and heartbeat the current lease (133.299408ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Bounded failure reaches visible dead-letter; manual retry creates fresh authorization once and audit failure has no duplicate effect (243.884302ms)
+✔ Job source/session revocation fails closed; cross-tenant, actual admin/cashier and expiry never scan or expose jobs (202.116937ms)
+✔ A slow real reconciliation receives automatic heartbeat; session revoked during work rolls back all effects (7085.295211ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"af409a3d-9efa-4e20-a699-a6bbf8a09dde","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","operationId":"feb6d0e8-789d-4f33-afce-f95ccc167314","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"e896f152-2116-4481-a9b4-54894de03d28","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","operationId":"11b44844-4e2d-4295-bd68-279cf764f5e2","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"c939e318-528b-4efd-823e-2dd9aa429d4c","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","operationId":"94d6a7b2-0a35-4656-9579-6579a933d0b4","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"ca9a440d-0097-4087-8de8-dc1d99d6ea8f","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","operationId":"0eb050a0-1ce5-4b58-bd32-47b7a4703a1f","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"844e4401-902d-497b-a155-cd59260fc9d8","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","operationId":"b41e0496-3c92-4b96-bf05-433aadbe2158","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"1438c20e-5878-427e-b135-86bf5b564a98","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","status":429,"code":"RATE_LIMITED","durationMs":13,"event":"api_error"}
+{"requestId":"6181499e-d4c4-47d8-b792-db2859666dfc","organizationId":"2d707a48-6f3e-4cb0-abd1-651d1cba5b24","status":413,"code":"PAYLOAD_TOO_LARGE","durationMs":8,"event":"api_error"}
+{"requestId":"6db71366-4d51-4d96-9691-6e3a39203f0e","organizationId":"2102b2dd-8e53-4004-a8fc-60638591a273","status":400,"code":"VALIDATION_ERROR","durationMs":14,"event":"api_error"}
+✔ Job quota is atomic and original replay bypasses new capacity; API rate/size/strict-kind bounds isolate actors (637.242072ms)
+✔ Planned branch KPI reuses real cash sale/refund accounting and explicitly reports unavailable forecast history (364.161483ms)
+✔ Planned report never accepts another tenant branch/product or a lesser role scope (169.697586ms)
+✔ A delayed through-now occurrence retains its original cutoff and never includes later sales (140.257365ms)
+✖ 1001 selected report rows survive CSV/XLSX/native PDF document in background without foreign/out-of-period rows; exact decimals and artifact fencing (1506.563404ms)
+✖ Every reviewed report uses the existing filtered CSV query for XLSX/print; arbitrary filters and cross-tenant resources cannot publish (484.748467ms)
+✖ Expired report file is unavailable; late audit rollback preserves original-key job retry and publishes only one complete artifact (50.696164ms)
+✖ Malformed native report payload fails closed rather than falling back to an unfiltered catalogue export (30.286318ms)
+✔ Owner configuration is disabled by default choice, idempotent, revision-safe and native-proof protected (90.547165ms)
+✔ Concurrent scheduler/claims publish one private original artifact and full scoped CSV/JSON (132.374767ms)
+✔ Missed-run policy explicitly skips old periods; stopping a grant cancels an already queued original (48.834361ms)
+✔ Late publish audit failure rolls back the result; original retry cannot create a second occurrence (2448.952743ms)
+✔ A real elapsed lease recovers the same original run with a new nonce; stale worker cannot publish (32248.499482ms)
+✔ Persistent owner grant survives logout, but a role revoked during calculation prevents publication (156.647488ms)
+✔ Read-only expiry preserves private exports and stopping grants, while rejecting new configuration (91.437198ms)
+✔ Catch-up records each original period once and a stop fences every remaining queued period (87.523505ms)
+✖ All reviewed business tables have DB guards; root/child CRUD and tenant reassignment cannot bypass read-only (2.710452ms)
+✔ Original committed replay remains available after expiry, but new operation cannot run work and revoked actor cannot replay (55.574337ms)
+✔ Real grace deadline crossed during work rolls back business mutation and terminal operation (2049.448819ms)
+✖ Expired owner exports existing data and renews through audited billing; ordinary business writes then resume without POS cash posting (125.290666ms)
+✔ Expired manual reservation housekeeping remains narrowly allowed while active stock writes remain denied (1210.389752ms)
+✔ Subscription row changed after a Serializable snapshot cannot supply stale write entitlement (37.886217ms)
+✔ Expired owner can cancel only an unposted draft intent; tombstone replay stays actor/hash bound and cannot become a posting (70.341431ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 25
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69449.707219
+
+✖ failing tests:
+
+test at .test-build/tests/report-export.integration.test.js:69:22
+✖ 1001 selected report rows survive CSV/XLSX/native PDF document in background without foreign/out-of-period rows; exact decimals and artifact fencing (1506.563404ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'd327b947-5846-4335-8236-e12f6d02650b'
+  - 'b3209970-054c-464e-92ef-1cb180c72449'
+  
+      at run (/home/fedora/Developments/POS_backup/.test-build/tests/report-export.integration.test.js:63:22)
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/report-export.integration.test.js:76:17)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'd327b947-5846-4335-8236-e12f6d02650b',
+    expected: 'b3209970-054c-464e-92ef-1cb180c72449',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .test-build/tests/report-export.integration.test.js:105:22
+✖ Every reviewed report uses the existing filtered CSV query for XLSX/print; arbitrary filters and cross-tenant resources cannot publish (484.748467ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'c96b3538-1812-4167-8e8c-c509734a1481'
+  - 'caf5ff9c-7f7b-4f5f-a122-1c7c25028da7'
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/report-export.integration.test.js:115:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'c96b3538-1812-4167-8e8c-c509734a1481',
+    expected: 'caf5ff9c-7f7b-4f5f-a122-1c7c25028da7',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .test-build/tests/report-export.integration.test.js:121:22
+✖ Expired report file is unavailable; late audit rollback preserves original-key job retry and publishes only one complete artifact (50.696164ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/report-export.integration.test.js:126:26)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .test-build/tests/report-export.integration.test.js:142:22
+✖ Malformed native report payload fails closed rather than falling back to an unfiltered catalogue export (30.286318ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '20d70475-5a06-4d2d-8dda-07da602491dd'
+  - '6211ae75-c447-41fa-ac47-ae4379fcaaa2'
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/report-export.integration.test.js:145:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '20d70475-5a06-4d2d-8dda-07da602491dd',
+    expected: '6211ae75-c447-41fa-ac47-ae4379fcaaa2',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .test-build/tests/subscription-readonly.integration.test.js:74:22
+✖ All reviewed business tables have DB guards; root/child CRUD and tenant reassignment cannot bypass read-only (2.710452ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      'AccountEntry',
+      'Brand',
+      'CashMovement',
+      'Category',
+  ...
+      'InventoryBalance',
+  -   'InventoryBatch',
+  -   'InventoryBatchDisposition',
+  -   'InventoryBatchEntry',
+      'InventoryMovement',
+      'LocationBalance',
+      'LocationEntry',
+      'OfflineCashLease',
+      'OfflineCashPolicy',
+  ...
+      'PurchaseReceiptLine',
+  -   'ReceiptCostApplication',
+  -   'ReceiptCostContinuation',
+      'ReceiptCostPlan',
+      'Register',
+      'ReservationEntry',
+      'ReservationItem',
+      'ReturnDispositionEntry',
+  ...
+      'SaleReturnItem',
+  -   'SerialEvent',
+  -   'SerialNumber',
+      'Shift',
+      'ShiftCorrection',
+      'StockCount',
+      'StockCountLine',
+      'StockCountReading',
+  ...
+      'UserStore',
+  -   'Warranty',
+  -   'WarrantyService'
+    ]
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/subscription-readonly.integration.test.js:76:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [Array],
+    expected: [Array],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at .test-build/tests/subscription-readonly.integration.test.js:111:22
+✖ Expired owner exports existing data and renews through audited billing; ordinary business writes then resume without POS cash posting (125.290666ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '88c9c1f4-bf8e-42d0-b325-85d835503abd'
+  - '55314b59-4336-4951-a709-c0a93afa3e92'
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/subscription-readonly.integration.test.js:115:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '88c9c1f4-bf8e-42d0-b325-85d835503abd',
+    expected: '55314b59-4336-4951-a709-c0a93afa3e92',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,63 @@
+[WebServer] (node:17610) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:17659) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources (12.6s)
+
+
+  1) [chromium] › tests/e2e/identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('article')
+    Expected substring: "POS-1"
+    Error: strict mode violation: locator('article') resolved to 11 elements:
+        1) <article>…</article> aka getByText('POS-12026-10-15T02:31:57.929Z')
+        2) <article>…</article> aka getByText('POS-102026-10-15T02:31:59.')
+        3) <article>…</article> aka getByText('POS-112026-10-15T02:32:00.')
+        4) <article>…</article> aka getByText('POS-122026-10-15T02:32:00.')
+        5) <article>…</article> aka getByText('POS-132026-10-15T02:32:00.')
+        6) <article>…</article> aka getByText('POS-142026-10-15T02:32:00.')
+        7) <article>…</article> aka getByText('POS-152026-10-15T02:32:00.')
+        8) <article>…</article> aka getByText('POS-162026-10-15T02:32:01.')
+        9) <article>…</article> aka getByText('POS-172026-10-15T02:32:01.')
+        10) <article>…</article> aka getByText('POS-182026-10-15T02:32:01.')
+        ...
+
+    Call log:
+      - Expect "toContainText" locator('article') with timeout 10000ms
+      - waiting for locator('article')
+        4 × locator resolved to <article>…</article>
+          - unexpected value "POS-212026-10-15T02:32:01.877Z · completed · Original karta: Original list buyer · Jami 10 · Soliq 0"
+
+
+      18 |  await page.getByLabel('Variant nomi',{exact:true}).fill('Retained independent variant editor');await page.getByLabel('Variant nomi, SKU yoki barkod qidirish',{exact:true}).fill('Variant browser 042');await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('tbody tr')).toHaveCount(1);await expect(page.getByLabel('Variant nomi',{exact:true})).toHaveValue('Retained independent variant editor');await page.goBack();await expect(page.locator('tbody tr')).toHaveCount(3);await page.getByLabel('Variant nomi',{exact:true}).fill('');
+      19 |  await page.goto('/customers/'+customer.id+'/history?sort=oldest&page=2');await expect(page.locator('article')).toHaveCount(1);await expect(page.locator('article')).toContainText(sales[20].receiptNo);await page.reload();await expect(page.locator('article')).toHaveCount(1);
+    > 20 |  await page.getByLabel('Merge asosiy mijozi',{exact:true}).selectOption(target.id);await page.getByLabel('Mijoz merge sababi',{exact:true}).fill('Retained original merge reason');await page.getByLabel('Original xarid cheki qidirish',{exact:true}).fill(sales[0].receiptNo);await page.getByRole('button',{name:'Qidirish',exact:true}).click();await expect(page.locator('article')).toHaveCount(1);await expect(page.locator('article')).toContainText(sales[0].receiptNo);await page.goBack();await expect(page.locator('article')).toContainText(sales[20].receiptNo);await expect(page.getByLabel('Mijoz merge sababi',{exact:true})).toHaveValue('Retained original merge reason');
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+      21 |  await page.getByLabel('Mijoz merge sababi',{exact:true}).fill('');await page.getByLabel('Merge asosiy mijozi',{exact:true}).selectOption('');
+      22 |  // Synthetic pre-migration duplicates stay local to the disposable fixture TX.
+      23 |  await db.$transaction(async tx=>{await tx.$executeRawUnsafe('SET LOCAL session_replication_role = replica');for(let i=0;i<43;i++)await tx.$executeRaw`INSERT INTO "Customer" (id,"organizationId","fullName",phone,"updatedAt") VALUES (${randomUUID()},${me.organization.id},${'Browser legacy '+String(i).padStart(3,'0')},'901234567',NOW())`});
+        at /home/fedora/Developments/POS_backup/tests/e2e/identity-list.spec.ts:20:432
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/error-context.md
+
+    Error Context: test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/identity-list-Variant-and--ab127-rewrite-posted-sale-sources-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/identity-list.spec.ts:8:5 › Variant and original customer history URL filters preserve independent business editors and never rewrite posted sale sources 

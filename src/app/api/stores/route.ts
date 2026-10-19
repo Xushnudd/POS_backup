@@ -1,6 +1,10 @@
+import {billingDatabaseError} from '@/server/billing/errors'
+import {assertLiveContext} from '@/server/operations'
+import { AccessError,tenantScope } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 
 const createStoreSchema = z.object({
@@ -10,16 +14,9 @@ const createStoreSchema = z.object({
   phone: z.string().optional(),
 })
 
-const updateStoreSchema = z.object({
-  name: z.string().min(2).optional(),
-  address: z.string().optional(),
-  phone: z.string().optional(),
-  isActive: z.boolean().optional(),
-})
-
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -27,13 +24,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
@@ -45,8 +43,19 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Owners manage every active branch, including branches created by an admin.
+    // Nonowners remain restricted to their current explicit branch assignments.
+    if (payload.role === 'owner') {
+      const stores = await db.store.findMany({
+        where: { organizationId, isActive: true },
+        include: { registers: { where: { isActive: true } } },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      })
+      return NextResponse.json({ success: true, data: stores })
+    }
+
     // Get user's accessible stores
-    const organizationUser = await prisma.organizationUser.findFirst({
+    const organizationUser = await db.organizationUser.findFirst({
       where: {
         userId: payload.userId,
         organizationId,
@@ -54,6 +63,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         userStores: {
+          where:{store:{AND:tenantScope('Store',payload),isActive:true}},
           include: {
             store: {
               include: {
@@ -85,17 +95,15 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get stores error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
+    if (error instanceof AccessError) throw error
+    throw error
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -103,19 +111,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = createStoreSchema.parse(body)
 
     // Check if user has permission (owner or admin)
-    const orgUser = await prisma.organizationUser.findFirst({
+    const orgUser = await db.organizationUser.findFirst({
       where: {
         userId: payload.userId,
         organizationId: validatedData.organizationId,
@@ -130,17 +139,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const store = await prisma.store.create({
+    const store = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      const result = await tx.store.create({
       data: validatedData,
     })
-
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Store",entityId:result.id,action:"create"}})
     // Give creator access to the store
-    await prisma.userStore.create({
+    await tx.userStore.create({
       data: {
         organizationUserId: orgUser.id,
-        storeId: store.id,
+        storeId: result.id,
       },
     })
+
+      return result
+    })
+
 
     return NextResponse.json({
       success: true,
@@ -149,17 +164,18 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    const billingError=billingDatabaseError(error);if(billingError)throw billingError
+    if (error instanceof AccessError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Create store error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

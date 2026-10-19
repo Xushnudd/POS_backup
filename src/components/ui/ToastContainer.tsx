@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import {useTranslation} from '@/context/LocaleContext';
 import { useNotification, NotificationType } from '@/context/NotificationContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -43,6 +44,7 @@ const typeConfig: Record<
 };
 
 export function ToastContainer() {
+  const {message}=useTranslation();
   const { notifications, removeNotification } = useNotification();
 
   if (notifications.length === 0) return null;
@@ -58,8 +60,8 @@ export function ToastContainer() {
           >
             <FontAwesomeIcon icon={config.icon} className={`mt-0.5 text-lg ${config.text}`} />
             <div className="flex-1">
-              {n.title && <h4 className={`font-semibold text-sm ${config.text}`}>{n.title}</h4>}
-              <p className={`text-sm ${config.text}`}>{n.message}</p>
+              {n.title && <h4 className={`font-semibold text-sm ${config.text}`}>{message(n.title)}</h4>}
+              <p className={`text-sm ${config.text}`}>{message(n.message)}</p>
             </div>
             <button
               onClick={() => removeNotification(n.id)}

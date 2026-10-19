@@ -1,0 +1,18 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "pos_test", schema "public" at "127.0.0.1:55439"
+
+150 migrations found in prisma/migrations
+
+Applying migration `202610130149_receipt_cost_applications`
+Applying migration `202610130150_cost_application_tenant`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 202610130149_receipt_cost_applications/
+    └─ migration.sql
+  └─ 202610130150_cost_application_tenant/
+    └─ migration.sql
+      
+All migrations have been successfully applied.

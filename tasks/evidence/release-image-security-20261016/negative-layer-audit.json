@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "baseImage": "ubuntu@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55",
+  "deletedCredentialLayerRejected": true,
+  "actualCredentialUsed": false,
+  "audit": {
+    "status": "rejected",
+    "imageId": "sha256:193a4791947b409ccd098b1431e6bb8bac5ab9df000fbfa7dc4632fa156b64cb",
+    "repoDigests": [
+      "pos-release-canary@sha256:193a4791947b409ccd098b1431e6bb8bac5ab9df000fbfa7dc4632fa156b64cb"
+    ],
+    "declaredUser": "1001:1001",
+    "os": "linux",
+    "architecture": "amd64",
+    "configurationProblems": [],
+    "historyTokenMarkerKinds": [],
+    "layersScanned": 3,
+    "layerEntries": 3447,
+    "layerBytes": 78176847,
+    "forbiddenCredentialPaths": 1,
+    "tokenMarkerKinds": [
+      "private_key"
+    ],
+    "layersWithHeaderLabels": 2,
+    "reviewedPublicTestVectors": 0,
+    "publicVectorReview": "https://gitlab.com/gnutls/gnutls/-/blob/3.7.9/lib/crypto-selftests-pk.c",
+    "scope": "All saved layers including deleted files: app credential-store paths, complete PEM private-key blocks, configured token markers; image configuration and history. Public GnuTLS self-test vectors require exact binary path/hash and occurrence limits; unknown/additional keys reject. Header labels used by crypto parsers are reported separately. Does not prove absence of arbitrary unknown secrets; runtime secret-store ACL and real deployment remain operator acceptance."
+  }
+}

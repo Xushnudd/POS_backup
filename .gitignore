@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.test-build/
+
+!.env.example
+
+/playwright-report/
+/test-results/
+
+.worker-build/
+
+# Private local TLS files and opt-in workstation Compose overlay.
+/.local/
+/docker-compose.override.yml

@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-17T14:08:22.390Z",
+  "organizationId": "3b2af4a1-a308-4c36-8c52-9239f848910b",
+  "before": {
+    "products": 0,
+    "balances": 0
+  },
+  "after": {
+    "products": 50000,
+    "balances": 50000
+  },
+  "workers": 4,
+  "guardsDisabled": false,
+  "scope": "synthetic fixture setup only; not a load measurement"
+}

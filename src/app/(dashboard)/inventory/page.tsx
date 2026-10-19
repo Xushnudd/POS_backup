@@ -1,13 +1,23 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import {useTranslation} from '@/context/LocaleContext';
+
+import SerialPicker from '@/components/inventory/SerialPicker';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useNotification } from '@/context/NotificationContext';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
+import DurableMutation from '@/components/forms/DurableMutation';
+import PendingActions from '@/components/forms/PendingActions';
+import {confirmPageNavigation} from '@/lib/page-navigation';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
 import { InventoryBalance, Product, StockDocument, Supplier } from '@/types';
-import { formatNumber, formatDate } from '@/lib/format';
+
+import Pagination from '@/components/ui/Pagination';
+import CsvExportButton from '@/components/ui/CsvExportButton';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -26,19 +36,40 @@ import {
   faRightLeft,
 } from '@fortawesome/free-solid-svg-icons';
 
-export default function InventoryPage() {
-  const { organization } = useAuth();
+import {useListFilters} from '@/hooks/useListFilters';
+import {inventoryListSorts,journalListSorts} from '@/lib/list-query';
+import DataTable from '@/components/ui/DataTable';
+export default function InventoryPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();return <Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><Inventory key={[organization?.id,user?.id,role].join(':')}/></Suspense>;}
+function Inventory() {
+ const {message:uiMessage}=useTranslation();
+
+ const {formatNumber,formatDate}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
+  const { organization, role } = useAuth();
   const { activeStore } = useOrganization();
   const { notifySuccess, notifyError } = useNotification();
 
-  const [activeTab, setActiveTab] = useState<'balances' | 'documents'>('balances');
+  const {query,params,filters,changeQuery}=useListFilters(inventoryListSorts,'newest',['search','from','to','documentType','status','supplierId']);
+  const activeTab=params.get('tab')??'balances',page=query?.page??1,limit=query?.limit??20,sort=query?.sort??'newest';
+  const inactiveDays=params.get('inactiveDays')??'',lowStockOnly=params.get('lowStock')==='true';
+  const invalidQuery=!query||!['balances','documents'].includes(activeTab)||(activeTab==='documents'&&!journalListSorts.some(value=>value===sort))||(params.has('lowStock')&&!['true','false'].includes(params.get('lowStock')!));
+  const setActiveTab=(tab:string)=>changeQuery({tab,page:'1',sort:''}),setInactiveDays=(value:string)=>changeQuery({inactiveDays:value,page:'1'}),setLowStockOnly=(value:boolean)=>changeQuery({lowStock:value?'true':'',page:'1'});
   const [balances, setBalances] = useState<InventoryBalance[]>([]);
   const [documents, setDocuments] = useState<StockDocument[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [lowStockOnly, setLowStockOnly] = useState<boolean>(false);
+
+  const [listError,setListError]=useState(''),[pages,setPages]=useState(0);
+  const [draftFilters,setDraftFilters]=useState({search:params.get('search')??'',from:params.get('from')??'',to:params.get('to')??'',documentType:params.get('documentType')??'',status:params.get('status')??'',supplierId:params.get('supplierId')??''});
+  const filterKey=JSON.stringify(filters);
+  useEffect(()=>{let live=true;void Promise.resolve().then(()=>{if(live)setDraftFilters({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',...JSON.parse(filterKey)});});return()=>{live=false;};},[filterKey]);
+  const requestSequence=useRef({value:0});
 
   // New stock document modal
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
@@ -46,37 +77,48 @@ export default function InventoryPage() {
   const [docSupplierId, setDocSupplierId] = useState<string>('');
   const [docNote, setDocNote] = useState<string>('');
   const [docItems, setDocItems] = useState<
-    { productId: string; quantity: number; unitCost: number }[]
+    { productId: string; quantity: string; unitCost: string;tradeUnit?:string;serialInput?:string[];batchInput?:{code:string;receivedOn:string;expiresOn:string} }[]
   >([]);
-  const [isSavingDoc, setIsSavingDoc] = useState(false);
+  const [documentNo,setDocumentNo]=useState('');
+  const [draftRevision,setDraftRevision]=useState(0);
+  const [reverseTarget,setReverseTarget]=useState<{id:string;operationId:string}|null>(null);
+  const [reverseReason,setReverseReason]=useState('');
+  const [isReversing,setIsReversing]=useState(false);
+  const [reverseSubmitted,setReverseSubmitted]=useState(false);
+  const [docBaseline,setDocBaseline]=useState('');
+  const docDirty=isDocModalOpen&&JSON.stringify([docType,docSupplierId,docNote,docItems])!==docBaseline;
+  useUnsavedChanges(docDirty);
+  const closeReversal=useUnsavedChanges(Boolean(reverseTarget&&reverseReason),isReversing);
 
   const loadData = useCallback(async () => {
-    if (!organization?.id) return;
-    setIsLoading(true);
+    if (!organization?.id||invalidQuery) return;
+    const sequence=++requestSequence.current.value;
+    setIsLoading(true);setListError('');
     try {
       if (activeTab === 'balances') {
         const res = await api.inventory.balances({
           organizationId: organization.id,
           storeId: activeStore?.id,
-          lowStock: lowStockOnly || undefined,
+          lowStock: lowStockOnly || undefined,inactiveDays:inactiveDays?Number(inactiveDays):undefined,search:filters.search,page,limit,sort,
         });
-        if (res.data) setBalances(res.data);
+        if(sequence===requestSequence.current.value){setBalances(res.data??[]);setPages(res.pagination?.totalPages??0);}
       } else {
         const res = await api.stockDocuments.list({
           organizationId: organization.id,
-          storeId: activeStore?.id,
+          storeId: activeStore?.id,...filters,page,limit,sort,
         });
-        if (res.data) setDocuments(res.data);
+        if(sequence===requestSequence.current.value){setDocuments(res.data??[]);setPages(res.pagination?.totalPages??0);}
       }
     } catch (err: unknown) {
-      console.error('Failed to load inventory data:', err);
+      if(sequence===requestSequence.current.value)setListError(displayErrorMessage(err,'Ombor ro‘yxati yuklanmadi'));
     } finally {
-      setIsLoading(false);
+      if(sequence===requestSequence.current.value)setIsLoading(false);
     }
-  }, [organization, activeStore, activeTab, lowStockOnly]);
+  }, [organization, activeStore, activeTab, lowStockOnly, inactiveDays, filters, page, limit, sort, invalidQuery]);
 
   useEffect(() => {
-    void Promise.resolve().then(loadData);
+    const requests=requestSequence.current;let cancelled=false;void Promise.resolve().then(()=>{if(!cancelled)return loadData();});
+    return()=>{cancelled=true;requests.value++;};
   }, [loadData]);
 
   // Load products and suppliers for document creation
@@ -98,19 +140,32 @@ export default function InventoryPage() {
       notifySuccess('Ombor hujjati tasdiqlandi va qoldiqlar yangilandi!');
       loadData();
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Hujjatni tasdiqlashda xatolik');
+      notifyError(displayErrorMessage(err,'Hujjatni tasdiqlashda xatolik'));
     }
   };
 
+  const handleReverseDocument=async(event:React.FormEvent)=>{
+    event.preventDefault();
+    if(!reverseTarget)return;
+    setIsReversing(true);setReverseSubmitted(true);
+    try{
+      await api.stockDocuments.reverse(reverseTarget.id,{operationId:reverseTarget.operationId,reason:reverseReason});
+      setReverseTarget(null);notifySuccess('Qarshi hujjat tasdiqlandi; asl hujjat tarixda saqlandi');await loadData();
+    }catch(error){
+      if(error instanceof ApiError && error.status && error.status>=400 && error.status<500){setReverseSubmitted(false);if(error.code==='ALREADY_REVERSED'){setReverseTarget(null);await loadData();}}
+      notifyError(displayErrorMessage(error,'Qarshi hujjat yaratilmadi. Shu amal bilan qayta urinishingiz mumkin'));
+    }
+    finally{setIsReversing(false);}
+  };
+
   const openNewDocModal = () => {
+    setDocumentNo('DOC-'+crypto.randomUUID());
     setDocType('purchase');
     setDocSupplierId(suppliers[0]?.id || '');
     setDocNote('');
-    setDocItems(
-      products.length > 0
-        ? [{ productId: products[0].id, quantity: 10, unitCost: Number(products[0].costPrice) || 0 }]
-        : []
-    );
+    const initialItems=products.length>0?[{productId:products[0].id,quantity:'10',unitCost:String(products[0].costPrice??'0')}]:[];
+    setDocItems(initialItems);
+    setDocBaseline(JSON.stringify(['purchase',suppliers[0]?.id||'','',initialItems]));
     setIsDocModalOpen(true);
   };
 
@@ -118,7 +173,7 @@ export default function InventoryPage() {
     if (products.length === 0) return;
     setDocItems([
       ...docItems,
-      { productId: products[0].id, quantity: 1, unitCost: Number(products[0].costPrice) || 0 },
+      { productId: products[0].id, quantity: '1', unitCost: String(products[0].costPrice??'0') },
     ]);
   };
 
@@ -126,66 +181,25 @@ export default function InventoryPage() {
     setDocItems(docItems.filter((_, i) => i !== index));
   };
 
-  const handleSaveDocument = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!organization?.id || !activeStore?.id) {
-      notifyError('Do\'kon tanlanmagan');
-      return;
-    }
-    if (docItems.length === 0) {
-      notifyError('Kamida bitta mahsulot qo\'shing');
-      return;
-    }
-    if (docItems.some((item) => !item.productId || item.quantity <= 0 || item.unitCost < 0)) {
-      notifyError('Har bir mahsulot uchun miqdor 0 dan katta, tannarx esa manfiy bo\'lmagan son bo\'lishi kerak');
-      return;
-    }
-
-    setIsSavingDoc(true);
-    try {
-      await api.stockDocuments.create({
-        organizationId: organization.id,
-        storeId: activeStore.id,
-        documentType: docType,
-        documentNo: `DOC-${Date.now().toString().slice(-6)}`,
-        supplierId: docSupplierId || undefined,
-        note: docNote || undefined,
-        items: docItems.map((item) => ({
-          productId: item.productId,
-          quantity: Number(item.quantity) || 1,
-          unitCost: Number(item.unitCost) || 0,
-        })),
-      });
-
-      notifySuccess('Ombor hujjati yaratildi');
-      setIsDocModalOpen(false);
-      setActiveTab('documents');
-      loadData();
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Hujjatni yaratishda xatolik');
-    } finally {
-      setIsSavingDoc(false);
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      <Link href="/inventory/serials" className="text-blue-700 underline">{tr("Seriya raqamlari va kafolat")}</Link>
+      <Link href="/inventory/batches" className="text-blue-700 underline">{tr("Partiyalar va yaroqlilik hisoboti")}</Link>
+      <PendingActions prefix="/stock-documents" returnPath="/inventory" revision={draftRevision} onDone={()=>{setDraftRevision(value=>value+1);void loadData()}}/>
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Ombor boshqaruvi
-          </h1>
+            {tr("Ombor boshqaruvi")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Tovar qoldiqlari, kirim hujjatlari va inventarizatsiya
-          </p>
+            {tr("Tovar qoldiqlari, kirim hujjatlari va inventarizatsiya")}</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="/inventory/transfers">
+          <Link href="/inventory/counts"><Button variant="outline">{tr("Inventarizatsiya")}</Button></Link>
+          <Link href="/inventory/locations">{tr("Zonalar va rezervlar")}</Link><Link href="/inventory/transfers">
             <Button variant="outline" leftIcon={<FontAwesomeIcon icon={faRightLeft} />}>
-              Transferlar
-            </Button>
+              {tr("Transferlar")}</Button>
           </Link>
 
           <Button
@@ -194,8 +208,7 @@ export default function InventoryPage() {
             leftIcon={<FontAwesomeIcon icon={faPlus} />}
             className="font-bold shadow-md shadow-emerald-500/20"
           >
-            Yangi kirim hujjati
-          </Button>
+            {tr("Yangi kirim hujjati")}</Button>
         </div>
       </div>
 
@@ -211,8 +224,7 @@ export default function InventoryPage() {
             }`}
           >
             <FontAwesomeIcon icon={faBoxesStacked} className="mr-2" />
-            Joriy qoldiqlar
-          </button>
+            {tr("Joriy qoldiqlar")}</button>
 
           <button
             onClick={() => setActiveTab('documents')}
@@ -223,8 +235,7 @@ export default function InventoryPage() {
             }`}
           >
             <FontAwesomeIcon icon={faFileLines} className="mr-2" />
-            Hujjatlar (Kirim/Tuzatish)
-          </button>
+            {tr("Hujjatlar (Kirim/Tuzatish)")}</button>
         </div>
 
         {activeTab === 'balances' && (
@@ -235,54 +246,66 @@ export default function InventoryPage() {
               onChange={(e) => setLowStockOnly(e.target.checked)}
               className="rounded-sm text-blue-600 focus:ring-blue-500 cursor-pointer"
             />
-            <span>Faqat kam qolganlar</span>
+            <span>{tr("Faqat kam qolganlar")}</span>
           </label>
         )}
       </div>
 
+      {activeTab==='balances'&&<div className="max-w-md space-y-1"><Select label={tr("Filialda yakunlangan savdosiz qoldiq")} value={inactiveDays} onChange={event=>setInactiveDays(event.target.value)} options={[{value:'',label:tr("Barcha qoldiqlar")},{value:'30',label:tr("Oxirgi 30 kun savdo yo‘q")},{value:'60',label:tr("Oxirgi 60 kun savdo yo‘q")},{value:'90',label:tr("Oxirgi 90 kun savdo yo‘q")}]}/><p className="text-xs text-gray-600">{tr("Faqat musbat joriy qoldiq. Bu omborda turish yoshi emas; qaytarilgan savdo ham savdo harakati hisoblanadi.")}</p></div>}
+      <form className="grid sm:grid-cols-3 gap-3" onSubmit={event=>{event.preventDefault();changeQuery({...Object.fromEntries(Object.entries(draftFilters).map(([key,value])=>[key,value.trim()])),page:'1'});}}>
+        <Input label={activeTab==='balances'?tr("Mahsulot, SKU yoki barkod"):tr("Hujjat raqamini qidirish")} value={draftFilters.search} maxLength={200} onChange={e=>setDraftFilters({...draftFilters,search:e.target.value})}/>
+        {activeTab==='documents'&&<><Input label={tr("Hujjat davri boshi")} type="date" value={draftFilters.from} onChange={e=>setDraftFilters({...draftFilters,from:e.target.value})}/><Input label={tr("Hujjat davri oxiri")} type="date" value={draftFilters.to} onChange={e=>setDraftFilters({...draftFilters,to:e.target.value})}/><Select label={tr("Hujjat turi filtri")} value={draftFilters.documentType} options={[{value:'',label:tr("Barchasi")},{value:'purchase',label:tr("Xarid")},{value:'opening',label:tr("Boshlang‘ich qoldiq")},{value:'adjustment',label:tr("Tuzatish")},{value:'reversal',label:tr("Qarshi hujjat")},{value:'transfer_out',label:tr("Transfer chiqimi")},{value:'transfer_in',label:tr("Transfer kirimi")},{value:'return_in',label:tr("Qaytarish kirimi")}]} onChange={e=>setDraftFilters({...draftFilters,documentType:e.target.value})}/><Select label={tr("Hujjat holati filtri")} value={draftFilters.status} options={[{value:'',label:tr("Barchasi")},{value:'draft',label:tr("Qoralama")},{value:'confirmed',label:tr("Tasdiqlangan")}]} onChange={e=>setDraftFilters({...draftFilters,status:e.target.value})}/><Input label={tr("Supplier ID filtri")} value={draftFilters.supplierId} onChange={e=>setDraftFilters({...draftFilters,supplierId:e.target.value})}/></>}
+        <Button type="submit" disabled={isLoading}>{tr("Filtrlash")}</Button>
+      </form>
+      <div className="flex gap-3"><Select label={tr("Ombor saralash")} value={sort} options={(activeTab==='documents'?journalListSorts:inventoryListSorts).map(value=>({value,label:({newest:tr("Eng yangi"),oldest:tr("Eng eski"),name_asc:tr("Nom: A–Z"),name_desc:tr("Nom: Z–A"),quantity_asc:tr("Miqdor: o‘sish"),quantity_desc:tr("Miqdor: kamayish")} as Record<string,string>)[value]}))} onChange={e=>changeQuery({sort:e.target.value,page:'1'})}/><Button onClick={()=>changeQuery({search:'',from:'',to:'',documentType:'',status:'',supplierId:'',sort:'',page:'',limit:'',inactiveDays:'',lowStock:''})}>{tr("Filtrlarni tozalash")}</Button></div>
+      {organization&&<CsvExportButton path={activeTab==='balances'?'/inventory/balances':'/stock-documents'} label={activeTab==='balances'?tr("Qoldiqlarni CSV yuklash"):tr("Hujjatlarni CSV yuklash")} params={{organizationId:organization.id,sort,...(activeStore?{storeId:activeStore.id}:{}),...(activeTab==='balances'?{...(filters.search?{search:filters.search}:{}),...(lowStockOnly?{lowStock:'true'}:{}),...(inactiveDays?{inactiveDays}:{})}:filters)}}/>}
+      {invalidQuery&&<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>}
+      {listError&&<p role="alert" className="text-red-700">{uiMessage(listError)}</p>}
+      {!invalidQuery&&page>Math.max(1,pages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}
+      <Pagination page={page} pages={pages} busy={isLoading&&!invalidQuery} blocked={invalidQuery||!!listError} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void loadData();}}/>
+
       {/* Tab Content: Balances */}
       {activeTab === 'balances' && (
         <Card padding={false}>
-          {isLoading ? (
+          {invalidQuery||listError ? (<p>{tr("Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.")}</p>) : isLoading ? (
             <div className="h-64 flex items-center justify-center">
-              <LoadingSpinner size="lg" text="Qoldiqlar yuklanmoqda..." />
+              <LoadingSpinner size="lg" text={tr("Qoldiqlar yuklanmoqda...")} />
             </div>
           ) : balances.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
               <FontAwesomeIcon icon={faWarehouse} className="text-4xl text-gray-300 mb-3" />
-              <p className="text-base font-bold text-gray-700">Qoldiqlar mavjud emas</p>
+              <p className="text-base font-bold text-gray-700">{tr("Qoldiqlar mavjud emas")}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Omborga tovar kiritish uchun &quot;Yangi kirim hujjati&quot; tugmasini bosing
-              </p>
+                {tr("Omborga tovar kiritish uchun \"Yangi kirim hujjati\" tugmasini bosing")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Mahsulot</th>
-                    <th className="py-3.5 px-4">SKU / Barkod</th>
-                    <th className="py-3.5 px-4 text-center">Birlik</th>
-                    <th className="py-3.5 px-4 text-right">Mavjud qoldiq</th>
-                    <th className="py-3.5 px-4 text-center">Min. zaxira</th>
-                    <th className="py-3.5 px-4 text-center">Holat</th>
+                    <th className="py-3.5 px-4">{tr("Mahsulot")}</th>
+                    <th className="py-3.5 px-4">{tr("SKU / Barkod")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Birlik")}</th>
+                    <th className="py-3.5 px-4 text-right">{tr("Mavjud qoldiq")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Min. zaxira")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Holat")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {balances.map((b, idx) => {
                     const isLow =
                       Number(b.product?.minStock || 0) > 0 &&
-                      Number(b.quantity) <= Number(b.product?.minStock || 0);
+                      Number(b.quantity) < Number(b.product?.minStock || 0);
                     return (
                       <tr key={idx} className="hover:bg-gray-50/70 transition">
                         <td className="py-3.5 px-4 font-bold text-gray-900">
-                          {b.product?.name || 'Mahsulot'}
+                          {b.product?.name || tr("Mahsulot")}
                         </td>
                         <td className="py-3.5 px-4 font-mono text-gray-500">
                           {b.product?.sku}
                         </td>
                         <td className="py-3.5 px-4 text-center font-medium text-gray-600">
-                          {b.product?.unit || 'dona'}
+                          {b.product?.unit || tr("dona")}
                         </td>
                         <td className="py-3.5 px-4 text-right font-black text-sm text-gray-900">
                           {formatNumber(b.quantity)}
@@ -293,19 +316,17 @@ export default function InventoryPage() {
                         <td className="py-3.5 px-4 text-center">
                           {isLow ? (
                             <Badge variant="danger" size="sm" dot>
-                              Kam qolgan
-                            </Badge>
+                              {tr("Kam qolgan")}</Badge>
                           ) : (
                             <Badge variant="success" size="sm" dot>
-                              Yetarli
-                            </Badge>
+                              {tr("Yetarli")}</Badge>
                           )}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
-              </table>
+              </DataTable>
             </div>
           )}
         </Card>
@@ -314,30 +335,29 @@ export default function InventoryPage() {
       {/* Tab Content: Documents */}
       {activeTab === 'documents' && (
         <Card padding={false}>
-          {isLoading ? (
+          {invalidQuery||listError ? (<p>{tr("Ro‘yxat yuklanmadi; filtrlarni tekshiring yoki qayta yuklang.")}</p>) : isLoading ? (
             <div className="h-64 flex items-center justify-center">
-              <LoadingSpinner size="lg" text="Hujjatlar yuklanmoqda..." />
+              <LoadingSpinner size="lg" text={tr("Hujjatlar yuklanmoqda...")} />
             </div>
           ) : documents.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-gray-400">
               <FontAwesomeIcon icon={faFileLines} className="text-4xl text-gray-300 mb-3" />
-              <p className="text-base font-bold text-gray-700">Hujjatlar topilmadi</p>
+              <p className="text-base font-bold text-gray-700">{tr("Hujjatlar topilmadi")}</p>
               <p className="text-xs text-gray-400 mt-1">
-                Kirim va tuzatish hujjatlari bu yerda ko&apos;rinadi
-              </p>
+                {tr("Kirim va tuzatish hujjatlari bu yerda ko'rinadi")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <DataTable className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/60 text-gray-500 font-bold uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Hujjat №</th>
-                    <th className="py-3.5 px-4">Turi</th>
-                    <th className="py-3.5 px-4">Ta&apos;minotchi</th>
-                    <th className="py-3.5 px-4 text-center">Mahsulotlar soni</th>
-                    <th className="py-3.5 px-4">Sana</th>
-                    <th className="py-3.5 px-4 text-center">Holat</th>
-                    <th className="py-3.5 px-4 text-right">Amallar</th>
+                    <th className="py-3.5 px-4">{tr("Hujjat №")}</th>
+                    <th className="py-3.5 px-4">{tr("Turi")}</th>
+                    <th className="py-3.5 px-4">{tr("Ta'minotchi")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Mahsulotlar soni")}</th>
+                    <th className="py-3.5 px-4">{tr("Sana")}</th>
+                    <th className="py-3.5 px-4 text-center">{tr("Holat")}</th>
+                    <th className="py-3.5 px-4 text-right">{tr("Amallar")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -348,32 +368,33 @@ export default function InventoryPage() {
                       </td>
                       <td className="py-3.5 px-4 font-semibold text-gray-700">
                         {doc.documentType === 'purchase'
-                          ? 'Kirim (Xarid)'
+                          ? tr("Kirim (Xarid)")
                           : doc.documentType === 'adjustment'
-                          ? 'Tuzatish'
-                          : doc.documentType}
+                          ? tr("Tuzatish")
+                          : doc.documentType === 'reversal' ? tr("Qarshi hujjat") : doc.documentType}
                       </td>
                       <td className="py-3.5 px-4 text-gray-700">
                         {doc.supplier?.name || '-'}
                       </td>
                       <td className="py-3.5 px-4 text-center font-bold text-gray-800">
-                        {doc.items?.length || 0} ta
-                      </td>
+                        {doc.items?.length || 0} {tr("ta")}</td>
                       <td className="py-3.5 px-4 text-gray-500">
                         {formatDate(doc.createdAt, true)}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {doc.status === 'confirmed' ? (
                           <Badge variant="success" size="sm">
-                            Tasdiqlangan
-                          </Badge>
+                            {tr("Tasdiqlangan")}</Badge>
                         ) : (
                           <Badge variant="warning" size="sm">
-                            Qoralama
-                          </Badge>
+                            {tr("Qoralama")}</Badge>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
+                        {doc.status === 'confirmed' && !doc.reversalOfId && (role==='owner'||role==='admin') && (
+                          doc.reversal ? <span className="text-xs text-gray-500">{tr("Qaytarilgan:")}{' '}{doc.reversal.documentNo}</span> :
+                          <Button variant="outline" size="sm" onClick={()=>{setReverseTarget({id:doc.id,operationId:crypto.randomUUID()});setReverseReason('');setReverseSubmitted(false);}}>{tr("Qarshi hujjat")}</Button>
+                        )}
                         {doc.status === 'draft' && (
                           <Button
                             variant="success"
@@ -381,50 +402,58 @@ export default function InventoryPage() {
                             onClick={() => handleConfirmDocument(doc.id)}
                             leftIcon={<FontAwesomeIcon icon={faCheck} />}
                           >
-                            Tasdiqlash
-                          </Button>
+                            {tr("Tasdiqlash")}</Button>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </DataTable>
             </div>
           )}
         </Card>
       )}
 
+      <Modal isOpen={!!reverseTarget} onClose={()=>{if(!reverseSubmitted&&closeReversal())setReverseTarget(null);}} title={tr("Ombor hujjatini qaytarish")}>
+        <form onSubmit={handleReverseDocument} className="space-y-4">
+          <p className="text-sm text-gray-600">{tr("Asl hujjat o‘zgarmaydi. Miqdorlar qarshi hujjat bilan qaytariladi; yetarli qoldiq bo‘lishi shart.")}</p>
+          <Input label={tr("Qaytarish sababi")} value={reverseReason} onChange={event=>setReverseReason(event.target.value)} minLength={3} maxLength={2000} required disabled={reverseSubmitted}/>
+          {reverseSubmitted && <p className="text-sm text-amber-700">{tr("Javob noaniq bo‘lsa, shu amal bilan qayta urining. Sabab va kalit saqlanadi.")}</p>}
+          <Button type="submit" disabled={isReversing}>{isReversing?tr("Tekshirilmoqda..."):reverseSubmitted?tr("Natijani qayta olish"):tr("Qarshi hujjatni tasdiqlash")}</Button>
+        </form>
+      </Modal>
       {/* New Document Modal */}
       <Modal
         isOpen={isDocModalOpen}
-        onClose={() => setIsDocModalOpen(false)}
-        title="Yangi ombor hujjati (Kirim)"
+        onClose={() => {if(confirmPageNavigation())setIsDocModalOpen(false)}}
+        title={tr("Yangi ombor hujjati (Kirim)")}
         size="xl"
       >
-        <form onSubmit={handleSaveDocument} className="space-y-4">
+        <DurableMutation path="/stock-documents" returnPath="/inventory" label={tr("Hujjatni yaratish")} body={{organizationId:organization?.id,storeId:activeStore?.id,documentNo,documentType:docType,supplierId:docSupplierId||undefined,note:docNote||undefined,items:docItems}} review={[tr("Qoralama: {value1}",{value1:String(documentNo)}),tr("Tur: {value1}; filial: {value2}",{value1:String(docType),value2:String(activeStore?.name??'')}),tr("Qatorlar: {value1}",{value1:String(docItems.length)}),tr("Sabab: {value1}",{value1:String(docNote)}), ...docItems.map(item=>`${products.find(product=>product.id===item.productId)?.name??item.productId}: ${item.quantity} × ${item.unitCost}; birlik: ${item.tradeUnit??products.find(product=>product.id===item.productId)?.unit??''}${item.batchInput?'; partiya '+item.batchInput.code+'; kirim '+item.batchInput.receivedOn+'; yaroqli '+item.batchInput.expiresOn:''}`)]} onDone={()=>{notifySuccess('Ombor qoralamasi yaratildi');setIsDocModalOpen(false);setActiveTab('documents');setDraftRevision(value=>value+1);void loadData()}}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
-              label="Hujjat turi"
+              label={tr("Hujjat turi")}
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
               options={[
-                { value: 'purchase', label: 'Kirim (Xarid)' },
-                { value: 'adjustment', label: 'Tuzatish (Inventarizatsiya)' },
+                { value: 'purchase', label: tr("Kirim (Xarid)") },
+                { value: 'opening', label: tr("Boshlang‘ich qoldiq") },
+                { value: 'adjustment', label: tr("Tuzatish (Inventarizatsiya)") },
               ]}
             />
 
             <Select
-              label="Yetkazib beruvchi (ta'minotchi)"
+              label={tr("Yetkazib beruvchi (ta'minotchi)")}
               value={docSupplierId}
               onChange={(e) => setDocSupplierId(e.target.value)}
               options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
-              placeholder="Ta'minotchini tanlang (ixtiyoriy)"
+              placeholder={tr("Ta'minotchini tanlang (ixtiyoriy)")}
             />
           </div>
 
           <Input
-            label="Izoh (ixtiyoriy)"
-            placeholder="Hujjat bo'yicha qo'shimcha ma'lumot"
+            label={tr("Izoh (ixtiyoriy)")}
+            placeholder={tr("Hujjat bo'yicha qo'shimcha ma'lumot")}
             value={docNote}
             onChange={(e) => setDocNote(e.target.value)}
           />
@@ -433,8 +462,7 @@ export default function InventoryPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-gray-700">
-                Mahsulotlar ro&apos;yxati
-              </label>
+                {tr("Mahsulotlar ro'yxati")}</label>
               <Button
                 type="button"
                 variant="outline"
@@ -442,10 +470,10 @@ export default function InventoryPage() {
                 onClick={handleAddItemRow}
                 leftIcon={<FontAwesomeIcon icon={faPlus} />}
               >
-                Qator qo&apos;shish
-              </Button>
+                {tr("Qator qo'shish")}</Button>
             </div>
 
+            <p>{tr("Tannarx har doim mahsulotning asosiy birligi uchun kiritiladi; hujjat miqdori tanlangan birlikdan konvertatsiya qilinadi.")}</p>
             <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50">
               {docItems.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-gray-200">
@@ -455,9 +483,10 @@ export default function InventoryPage() {
                       onChange={(e) => {
                         const selProd = products.find((p) => p.id === e.target.value);
                         const updated = [...docItems];
-                        updated[idx].productId = e.target.value;
+                        updated[idx].productId = e.target.value;updated[idx].tradeUnit=undefined;
                         if (selProd) {
-                          updated[idx].unitCost = Number(selProd.costPrice) || 0;
+                          updated[idx].batchInput = undefined;updated[idx].serialInput=undefined;
+                          updated[idx].unitCost = String(selProd.costPrice??'0');
                         }
                         setDocItems(updated);
                       }}
@@ -471,16 +500,17 @@ export default function InventoryPage() {
                     </select>
                   </div>
 
+                  <label className="text-xs">{tr("Hujjat birligi")}<select aria-label={tr("Hujjat birligi")+" "+idx} value={item.tradeUnit??products.find(p=>p.id===item.productId)?.unit??''} onChange={e=>{const updated=[...docItems];updated[idx]={...item,tradeUnit:e.target.value};setDocItems(updated)}}><option value={products.find(p=>p.id===item.productId)?.unit}>{products.find(p=>p.id===item.productId)?.unit}</option>{products.find(p=>p.id===item.productId)?.unitConversions?.filter(row=>row.isActive).map(row=><option key={row.tradeUnit} value={row.tradeUnit}>{row.tradeUnit}:1={row.ratio} {row.baseUnit}</option>)}</select></label>
                   <div className="w-24">
                     <input
                       type="number"
-                      placeholder="Miqdor"
-                      min="0.1"
+                      placeholder={tr("Miqdor")}
+                      min={docType==='adjustment'?undefined:'0.000001'}
                       step="0.1"
                       value={item.quantity}
                       onChange={(e) => {
                         const updated = [...docItems];
-                        updated[idx].quantity = parseFloat(e.target.value) || 0;
+                        updated[idx].quantity = e.target.value;
                         setDocItems(updated);
                       }}
                       className="w-full text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-hidden text-center"
@@ -490,19 +520,22 @@ export default function InventoryPage() {
                   <div className="w-32">
                     <input
                       type="number"
-                      placeholder="Tannarx"
+                      placeholder={tr("Asosiy birlik tannarxi")}
+                      aria-label={tr("Asosiy birlik tannarxi")+" "+idx}
                       min="0"
                       step="100"
                       value={item.unitCost}
                       onChange={(e) => {
                         const updated = [...docItems];
-                        updated[idx].unitCost = parseFloat(e.target.value) || 0;
+                        updated[idx].unitCost = e.target.value;
                         setDocItems(updated);
                       }}
                       className="w-full text-xs font-bold bg-gray-50 border border-gray-200 rounded-lg p-2 focus:outline-hidden text-right"
                     />
                   </div>
 
+                  {products.find(product=>product.id===item.productId)?.serialTracking&&(item.quantity.trim().startsWith('-')&&activeStore?<SerialPicker storeId={activeStore.id} productId={item.productId} label={tr("Hisobdan chiqariladigan seriallar")+" "+(idx+1)} value={item.serialInput??[]} onChange={ids=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:ids}:r))}/>:<Input label={tr("Hujjat seriya raqamlari")+" "+(idx+1)} value={(item.serialInput??[]).join(', ')} onChange={event=>setDocItems(previous=>previous.map((r,n)=>n===idx?{...r,serialInput:event.target.value.split(/[\s,;]+/).filter(Boolean)}:r))}/>)}
+                  {products.find(product=>product.id===item.productId)?.batchTracking&&<div className="flex gap-2 flex-wrap" aria-label={tr("Partiya ma’lumotlari")}>{(['code','receivedOn','expiresOn'] as const).map((field,index)=><label key={field}>{[tr("Partiya kodi"),tr("Partiya kirim kuni"),tr("Yaroqlilik kuni")][index]}<input aria-label={[tr("Partiya kodi"),tr("Partiya kirim kuni"),tr("Yaroqlilik kuni")][index]+' '+idx} type={field==='code'?'text':'date'} value={item.batchInput?.[field]??''} onChange={event=>setDocItems(previous=>previous.map((row,n)=>n===idx?{...row,batchInput:{code:row.batchInput?.code??'',receivedOn:row.batchInput?.receivedOn??'',expiresOn:row.batchInput?.expiresOn??'',[field]:event.target.value}}:row))} className="block border p-2 rounded"/></label>)}</div>}
                   <button
                     type="button"
                     onClick={() => handleRemoveItemRow(idx)}
@@ -519,21 +552,12 @@ export default function InventoryPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsDocModalOpen(false)}
-              disabled={isSavingDoc}
+              onClick={() => {if(confirmPageNavigation())setIsDocModalOpen(false)}}
             >
-              Bekor qilish
-            </Button>
-            <Button
-              type="submit"
-              variant="success"
-              isLoading={isSavingDoc}
-              className="font-bold"
-            >
-              Hujjatni yaratish
-            </Button>
+              {tr("Bekor qilish")}</Button>
+
           </div>
-        </form>
+        </DurableMutation>
       </Modal>
     </div>
   );

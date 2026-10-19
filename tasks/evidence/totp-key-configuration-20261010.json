@@ -1,0 +1,31 @@
+{
+  "task": "SEC-02.06",
+  "status": "in_progress",
+  "originalDoneAdded": 0,
+  "originalDoneTotal": 154,
+  "target": 174,
+  "scope": "Invalid rotation configuration consistently fails closed for availability, encryption and decryption; HTTP enrollment cannot persist a factor",
+  "checks": {
+    "unitTestFilesPassed": 31,
+    "totpIntegrationTestsPassed": 13,
+    "targetedEslint": "pass",
+    "diffCheck": "pass"
+  },
+  "sourceSha256": {
+    "src/server/auth/totp.ts": "855d5dd21449cde99278f6f54527330741671a66d0d510f80b910c44af572d81",
+    "src/server/auth/totp-keys.ts": "8e9c1fa2f365b8a7d0e315d00aceb29495048796951c31e7f937d05af94a61c4",
+    "src/server/auth/totp-availability.ts": "39b32a1aab36f158025efde218d7c6c423f0613716d189388eeae8eb1a5134dd",
+    "tests/totp.unit.test.ts": "8a22d07da002a4355a5dc61c6a17b28adc870a7f0ce6a70ebf3a88aab6b112af",
+    "tests/totp.integration.test.ts": "6768c4da1b55f5747626226b3b92b2868da9c36a9ca7b08b4e92cef316688774"
+  },
+  "logsSha256": {
+    "/tmp/pos-totp-config-final-unit.log": "74b205750694db66d27631e808dcd6cfed4e7cde2a5ac081e883a02a6c7b70aa",
+    "/tmp/pos-totp-config-integration.log": "37359b3e7a8abbb3c9e34b22dab5dea490286853cde07b7e07c6599a0acd4d6b"
+  },
+  "limitations": [
+    "No operator re-encryption tool",
+    "No global critical-action/platform MFA enforcement",
+    "No full integration or browser/build rerun",
+    "No production secret or live business DB changes"
+  ]
+}

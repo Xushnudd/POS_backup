@@ -1,0 +1,22 @@
+// Run from repository root: node < tasks/evidence/post185-fixes-20261016/measure-runner.txt
+// DATABASE_URL must be the guarded disposable pos_test target accepted by core-measure.
+const fs=require('node:fs'),{spawnSync,execFileSync}=require('node:child_process'),{createHash}=require('node:crypto');
+const {sourceHashes,validateServiceTargets}=require('./scripts/release/check-service-targets.cjs');
+const root=process.cwd(),prefix='tasks/evidence/',sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+const fixture=JSON.parse(fs.readFileSync('/tmp/pos-volume-dataset.json','utf8'));
+const before=sourceHashes(root),sourceRevision=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const startedAt=new Date().toISOString();
+const result=spawnSync(process.execPath,['--require','./scripts/test-resolver.cjs','.test-build/tests/performance/core-measure.js'],{env:{...process.env,POS_PROFILE_TEST_ORG:fixture.organizationId},encoding:'utf8',timeout:180000,maxBuffer:16*1024*1024});
+const endedAt=new Date().toISOString();
+fs.writeFileSync('/tmp/pos-fixes-measure.log',(result.stdout||'')+(result.stderr||''));
+const after=sourceHashes(root),unchanged=JSON.stringify(before)===JSON.stringify(after);
+const execution={startedAt,endedAt,processExit:result.status,signal:result.signal,sourceRevision,sourceFilesUnchangedDuringMeasurement:unchanged,sourceFiles:Object.keys(before).length,sourceHashes:before,compiledHarnessSha256:sha(fs.readFileSync('.test-build/tests/performance/core-measure.js')),command:'node --require ./scripts/test-resolver.cjs .test-build/tests/performance/core-measure.js',scope:'isolated_synthetic_service_measurement_not_deployment'};
+const save=(name,value)=>{const file=prefix+name,bytes=Buffer.from(JSON.stringify(value,null,2)+'\n');fs.writeFileSync(file,bytes,{flag:'wx'});return {path:file,sha256:sha(bytes)}};
+if(result.status!==0||!unchanged){save('service-load-execution-20261016-post185-failed.json',execution);throw Error('Actual measurement failed; no acceptance manifest published. See /tmp/pos-fixes-measure.log');}
+const load=JSON.parse(fs.readFileSync('/tmp/pos-volume-measure.json','utf8'));
+if(Date.parse(load.at)<Date.parse(startedAt)||Date.parse(load.at)>Date.parse(endedAt)||load.fixtureOrganizationId!==fixture.organizationId)throw Error('Measurement identity/time mismatch');
+const old=JSON.parse(fs.readFileSync(prefix+'release-service-targets-20261016-core185.json','utf8'));
+const report={...old,sourceRevision,measuredAt:load.at,sourceHashes:before,load:save('service-load-20261016-post185.json',load),fixture:save('service-load-dataset-20261016-post185.json',fixture),execution:save('service-load-execution-20261016-post185.json',execution),documentationSha256:sha(fs.readFileSync('docs/operations/release-service-targets.md')),historical:[...old.historical,{path:prefix+'release-service-targets-20261016-core185.json',sha256:sha(fs.readFileSync(prefix+'release-service-targets-20261016-core185.json'))}]};
+const validated=validateServiceTargets(report);
+save('release-service-targets-20261016-post185.json',report);
+console.log(JSON.stringify(validated));

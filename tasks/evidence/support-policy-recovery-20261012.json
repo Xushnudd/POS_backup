@@ -1,0 +1,68 @@
+{
+  "task": "UX-01.05",
+  "date": "2026-10-12",
+  "status": "in_progress",
+  "original_done": 164,
+  "original_total": 259,
+  "target": 170,
+  "original_delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 12,
+      "failed": 0,
+      "duration": "1.2m",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "log": "tasks/evidence/logs/support-policy-20261012-pos-170-support-policy-final-e2e.log"
+    },
+    "earlier_runs": [
+      {
+        "passed": 9,
+        "failed": 3,
+        "reason": "Policy publish fixture lacked actual critical MFA proof",
+        "log": "tasks/evidence/logs/support-policy-20261012-pos-170-support-policy-e2e.log"
+      },
+      {
+        "passed": 9,
+        "failed": 3,
+        "reason": "afterAll tried to delete immutable support policy history; native invariant correctly rejected it",
+        "log": "tasks/evidence/logs/support-policy-20261012-pos-170-support-policy-corrective-e2e.log"
+      }
+    ],
+    "build": "Webpack PASS, local session12226 exit0",
+    "typecheck": "PASS",
+    "changed_lint": "PASS"
+  },
+  "accepted": [
+    "Raw invalid time draft is guarded even when parsed JSON is null",
+    "New policy version GET no longer remounts and destroys independent draft",
+    "Explicit latest policy draft loading requires discard admission",
+    "Own publish ACK clears own reason, preserves separate ticket title",
+    "Actual enrolled TOTP proof used for both independent publication and UI publication",
+    "Operator read error retains previous selection/message and prevents stale assignment; successful retry restores readiness",
+    "Existing lost ticket/reply ACK recovery regressions pass"
+  ],
+  "source_sha256": {
+    "src/components/support/TicketList.tsx": "7d95a04f60b662122b5cc08959ab9c03772b8794153380a2ae8dd17e54278d47",
+    "src/components/support/TicketDetail.tsx": "a8c0a5659204b71c25debc0d89c8cd1ac0f8e0a6b768baa9b3fc510adf65b741",
+    "tests/e2e/support-policy-state.spec.ts": "b648201428b649b2d23a7fb04fd4cb7e2605203d11a402c0a944805d4c0fd1ea",
+    "tests/e2e/critical-fixture.ts": "aa9c68581d9fad6d083a19c908e30872a84767061ccf5aafa0ee46309c8d51b9"
+  },
+  "logs": [
+    "tasks/evidence/logs/support-policy-20261012-pos-170-support-policy-e2e.log",
+    "tasks/evidence/logs/support-policy-20261012-pos-170-support-policy-corrective-e2e.log",
+    "tasks/evidence/logs/support-policy-20261012-pos-170-support-policy-final-e2e.log",
+    "tasks/evidence/logs/support-policy-20261012-pos-170-support-webpack-build.log",
+    "tasks/evidence/logs/support-policy-20261012-pos-170-support-final-type.log",
+    "tasks/evidence/logs/support-policy-20261012-pos-170-support-final-lint.log"
+  ],
+  "limits": [
+    "Immutable synthetic global policy versions deliberately retained in isolated pos_test; native invariant not disabled.",
+    "Original UX-01.05 remains open; helper acceptance is not a new original done.",
+    "No vendor integrations, external delivery or production deployment."
+  ]
+}

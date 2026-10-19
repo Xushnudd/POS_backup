@@ -1,0 +1,125 @@
+[WebServer] (node:31139) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:31549) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (3.6s)
+(node:31764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [firefox] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (4.2s)
+(node:32504) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [webkit] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (5.9s)
+
+
+  1) [chromium] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery 
+
+    Error: {"success":false,"error":{"code":"VALIDATION_ERROR","message":"Kiritilgan ma’lumotlar noto‘g‘ri.","details":[{"expected":"string","code":"invalid_type","path":["organizationUserId"],"message":"Invalid input: expected string, received undefined"}],"nextAction":"Belgilangan maydonlarni tekshiring. Xato so‘rov pul yoki qoldiqni o‘zgartirmaydi."},"requestId":"6fc6c48e-b557-4b93-85b3-8772ec53e49e"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      32 |  const parts=new Intl.DateTimeFormat('en',{timeZone:'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),part=(kind:string)=>parts.find(value=>value.type===kind)!.value,today=part('year')+'-'+part('month')+'-'+part('day')
+      33 |  const day=(offset:number)=>{const value=new Date(today+'T00:00:00Z');value.setUTCDate(value.getUTCDate()+offset);return value.toISOString().slice(0,10)}
+    > 34 |  const post=async(path:string,data:Record<string,unknown>)=>{const response=await page.request.post(path,{headers,data:{operationId:randomUUID(),...data}});expect(response.ok(),await response.text()).toBe(true);return (await response.json()).data}
+         |                                                                                                                                                                                                         ^
+      35 |  for(const [code,quantity,expiry] of [['Expired','5',day(-1)],['Early','2',day(1)],['Later','3',day(90)]]){const doc=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'BATCH-'+code,note:'Actual batch receipt',items:[{productId:product.id,quantity,unitCost:'3',batchInput:{code,receivedOn:day(-30),expiresOn:expiry}}]});await post('/api/stock-documents/'+doc.id+'/confirm',{})}
+      36 |  const register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),shift=await post('/api/shifts',{registerId:register.id,openingCash:'0'})
+      37 |  const sale=await post('/api/sales',{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,items:[{productId:product.id,quantity:'3',discountAmount:'0'}],discountAmount:'0'})
+        at post (/home/fedora/Developments/POS_backup/tests/e2e/batches.spec.ts:34:201)
+        at /home/fedora/Developments/POS_backup/tests/e2e/batches.spec.ts:36:86
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-chromium/error-context.md
+
+    Error Context: test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery 
+
+    Error: {"success":false,"error":{"code":"VALIDATION_ERROR","message":"Kiritilgan ma’lumotlar noto‘g‘ri.","details":[{"expected":"string","code":"invalid_type","path":["organizationUserId"],"message":"Invalid input: expected string, received undefined"}],"nextAction":"Belgilangan maydonlarni tekshiring. Xato so‘rov pul yoki qoldiqni o‘zgartirmaydi."},"requestId":"5cfa8732-9d26-4589-b605-b18fe33447fd"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      32 |  const parts=new Intl.DateTimeFormat('en',{timeZone:'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),part=(kind:string)=>parts.find(value=>value.type===kind)!.value,today=part('year')+'-'+part('month')+'-'+part('day')
+      33 |  const day=(offset:number)=>{const value=new Date(today+'T00:00:00Z');value.setUTCDate(value.getUTCDate()+offset);return value.toISOString().slice(0,10)}
+    > 34 |  const post=async(path:string,data:Record<string,unknown>)=>{const response=await page.request.post(path,{headers,data:{operationId:randomUUID(),...data}});expect(response.ok(),await response.text()).toBe(true);return (await response.json()).data}
+         |                                                                                                                                                                                                         ^
+      35 |  for(const [code,quantity,expiry] of [['Expired','5',day(-1)],['Early','2',day(1)],['Later','3',day(90)]]){const doc=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'BATCH-'+code,note:'Actual batch receipt',items:[{productId:product.id,quantity,unitCost:'3',batchInput:{code,receivedOn:day(-30),expiresOn:expiry}}]});await post('/api/stock-documents/'+doc.id+'/confirm',{})}
+      36 |  const register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),shift=await post('/api/shifts',{registerId:register.id,openingCash:'0'})
+      37 |  const sale=await post('/api/sales',{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,items:[{productId:product.id,quantity:'3',discountAmount:'0'}],discountAmount:'0'})
+        at post (/home/fedora/Developments/POS_backup/tests/e2e/batches.spec.ts:34:201)
+        at /home/fedora/Developments/POS_backup/tests/e2e/batches.spec.ts:36:86
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-firefox/error-context.md
+
+    Error Context: test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery 
+
+    Error: {"success":false,"error":{"code":"VALIDATION_ERROR","message":"Kiritilgan ma’lumotlar noto‘g‘ri.","details":[{"expected":"string","code":"invalid_type","path":["organizationUserId"],"message":"Invalid input: expected string, received undefined"}],"nextAction":"Belgilangan maydonlarni tekshiring. Xato so‘rov pul yoki qoldiqni o‘zgartirmaydi."},"requestId":"9ed1fb5b-07d8-41f6-84c4-4a3dad9f55e1"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      32 |  const parts=new Intl.DateTimeFormat('en',{timeZone:'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),part=(kind:string)=>parts.find(value=>value.type===kind)!.value,today=part('year')+'-'+part('month')+'-'+part('day')
+      33 |  const day=(offset:number)=>{const value=new Date(today+'T00:00:00Z');value.setUTCDate(value.getUTCDate()+offset);return value.toISOString().slice(0,10)}
+    > 34 |  const post=async(path:string,data:Record<string,unknown>)=>{const response=await page.request.post(path,{headers,data:{operationId:randomUUID(),...data}});expect(response.ok(),await response.text()).toBe(true);return (await response.json()).data}
+         |                                                                                                                                                                                                         ^
+      35 |  for(const [code,quantity,expiry] of [['Expired','5',day(-1)],['Early','2',day(1)],['Later','3',day(90)]]){const doc=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'BATCH-'+code,note:'Actual batch receipt',items:[{productId:product.id,quantity,unitCost:'3',batchInput:{code,receivedOn:day(-30),expiresOn:expiry}}]});await post('/api/stock-documents/'+doc.id+'/confirm',{})}
+      36 |  const register=await db.register.findFirstOrThrow({where:{storeId:store.id}}),shift=await post('/api/shifts',{registerId:register.id,openingCash:'0'})
+      37 |  const sale=await post('/api/sales',{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,items:[{productId:product.id,quantity:'3',discountAmount:'0'}],discountAmount:'0'})
+        at post (/home/fedora/Developments/POS_backup/tests/e2e/batches.spec.ts:34:201)
+        at /home/fedora/Developments/POS_backup/tests/e2e/batches.spec.ts:36:86
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-webkit/error-context.md
+
+    Error Context: test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/batches-Batch-policy-MFA-l-66e96-count-original-key-recovery-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery 
+    [firefox] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery 
+    [webkit] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery 

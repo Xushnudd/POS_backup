@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-10",
+  "tasks": [
+    "BIZ-01.01",
+    "BIZ-01.02",
+    "BIZ-01.03",
+    "BIZ-01.04",
+    "BIZ-01.05",
+    "BIZ-01.06",
+    "BIZ-01.07"
+  ],
+  "baseline_done": 145,
+  "accepted_done": 152,
+  "batch_progress": "7/20",
+  "git_head": "8bef83af8a9d0d607d3833c219c4ef2cb7599cc7",
+  "version": "HEAD + working tree; no AI commit",
+  "source_sha256": {
+    "src/server/billing/service.ts": "319edb3d2b89edceddfc4597e9c8a5532101e8e3340cef2beed58b86ec88b136",
+    "src/server/billing/invoices.ts": "de1c6caaebcb37e7016e7cf51b0847e70ad149c7ff0b2578194026466994ecae",
+    "src/server/billing/costs.ts": "883f6360fe1f8d48f9e0283a381dab9e3630b887c1849c3014bb1a10601f8b70",
+    "src/server/billing/phase.ts": "9f7e0e9417a00ba9a6b0277425a6c333086a3e3b32b6629de17ab9917187f772",
+    "src/server/operations.ts": "5df94e0fc5da645233c07eb186a31e1b10198ccc4cde473087818462dbe5e8cb",
+    "src/app/page.tsx": "a1e318fc7be1c1b8fc76417c9e5222aadb2edd1c7cabdbfbb97350e6878f9ede",
+    "tests/billing.integration.test.ts": "76eb5d78e74f291af67b413651a571eeaff9c031b5e8a01937381555c8bd99e2",
+    "tests/billing-costs.integration.test.ts": "1f0a006c4cae2ea6828df5da843b854f54e90220a7437ed83d27f31cd964baa2",
+    "tests/e2e/billing.spec.ts": "f83237ccce57e4ba3f56b0f19f3f7c05b168323f5ebc6bced2b2e14a3871d062"
+  },
+  "gates": {
+    "unit": {
+      "log": "/tmp/pos-billing-privilege-unit.log",
+      "sha256": "bc4016d4935ef5511c29ea1ceea55e30c2a8bed3677d26aeb517f9182a2b3dad",
+      "status": "PASS"
+    },
+    "integration_before_auth": {
+      "log": "/tmp/pos-billing-cost-full-accepted.log",
+      "sha256": "67826a9247d1ccf7fd26cf18dde34cd3d18670feaa7dd9451d67353c2d6c7b37",
+      "status": "PASS"
+    },
+    "final_focused": {
+      "log": "/tmp/pos-billing-privilege-focused.log",
+      "sha256": "0d362a0d016fc2eb1331e1e60f579d2d231146f9c1f6e4e2873fece212d8fecc",
+      "status": "PASS"
+    },
+    "three_browsers": {
+      "log": "/tmp/pos-billing-privilege-browser.log",
+      "sha256": "f8266242f8ad60e808116e96152343b4e6ea993a9f6b91e42104ce891fbd1db5",
+      "status": "PASS"
+    },
+    "build": {
+      "log": "/tmp/pos-billing-privilege-build.log",
+      "sha256": "63a910509eea9cfa6c293c02f2cfe5fe0bd1c0870063ae77eca9a1d00e8b373f",
+      "status": "PASS"
+    },
+    "lint": {
+      "log": "/tmp/pos-billing-privilege-lint.log",
+      "sha256": "596cb56788cfc0dfab4886fb07703457a292cd1e556aca9d7ab6a3620fa71873",
+      "status": "PASS"
+    },
+    "migrations105": {
+      "log": "/tmp/pos-billing-migrations-105.log",
+      "sha256": "3514234c58a1615f31735af12efebc2ff8642c736b2b4fdbe11b727577b8e80e",
+      "status": "PASS"
+    }
+  },
+  "scope_exclusions": [
+    "Real Click/fiscal/E-POS/hardware bindings",
+    "Production deployment/pilot/MFA global acceptance",
+    "Auth106+ changes are a separate checkpoint"
+  ],
+  "policy": {
+    "trial": "Pro, one-time14days for new organizations",
+    "existing": "separate administrator enrollment, no automatic blocking",
+    "currency": "UZS",
+    "grace_days": 7,
+    "billing_payment": "Explicit operator-verified manual bank proof; no provider transport",
+    "costs": "Known whole-period budget costs, unknown/estimated/foreign currency explicitly incomplete; not accounting profit"
+  }
+}

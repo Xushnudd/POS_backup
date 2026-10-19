@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "at": "2026-10-09T09:52:39.544Z",
+  "node": "v24.18.0",
+  "dataset": {
+    "products": 50000,
+    "syntheticDraftItems": 1000000,
+    "activeRegisters": 20
+  },
+  "concurrency": 20,
+  "search": {
+    "samples": 100,
+    "p95Ms": 304.746707,
+    "targetMs": 500
+  },
+  "checkout": {
+    "samples": 100,
+    "p95Ms": 140.56126099999983,
+    "targetMs": 2000
+  },
+  "errors": [],
+  "providerTime": "No vendor calls; internal cash only",
+  "limits": "Synthetic draft volume; service-level API harness, no public network latency; not real pilot or production SLA"
+}

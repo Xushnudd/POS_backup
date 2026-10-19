@@ -1,0 +1,251 @@
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 27 tests using 1 worker
+
+(node:41837) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 [chromium] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (10.4s)
+(node:42075) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (22.5s)
+  ✘   3 [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (1.0m)
+(node:44430) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   4 [chromium] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (3.3s)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [chromium] › tests/e2e/core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.4s)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [chromium] › tests/e2e/core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order (5.6s)
+  ✓   7 [chromium] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (811ms)
+  ✘   8 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (10.5s)
+(node:44809) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (722ms)
+(node:44934) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [firefox] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.7s)
+  ✓  11 [firefox] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (26.5s)
+  ✘  12 [firefox] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (1.0m)
+(node:46936) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 [firefox] › tests/e2e/core.spec.ts:832:5 › Training is isolated from real money and keyboard-only payment modal traps and restores focus (3.9s)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  14 [firefox] › tests/e2e/core.spec.ts:1164:5 › Catalog CSV import previews errors, recovers original lost confirmation once and exports exact Excel values (2.5s)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:41797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 [firefox] › tests/e2e/core.spec.ts:1170:5 › Onboarding resumes original lost checkpoint and verifies actual branch import opening cashier and a normal POS sale in order (7.6s)
+  ✓  16 [firefox] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (1.1s)
+  ✓  17 [firefox] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (888ms)
+  ✓  18 [firefox] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (1.0s)
+(node:48702) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 [webkit] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.5s)
+  ✓  20 [webkit] › tests/e2e/core.spec.ts:144:5 › Production HTTPS: register, open shift, restore local basket and sell cash exactly once (24.5s)
+  ✘  21 [webkit] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports (32.9s)
+
+
+  1) [chromium] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#prices').getByRole('article').filter({ has: getByRole('heading', { name: 'Business', exact: true }) }).getByText('249 000 so‘m/oy', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#prices').getByRole('article').filter({ has: getByRole('heading', { name: 'Business', exact: true }) }).getByText('249 000 so‘m/oy', { exact: true }) with timeout 10000ms
+      - waiting for locator('#prices').getByRole('article').filter({ has: getByRole('heading', { name: 'Business', exact: true }) }).getByText('249 000 so‘m/oy', { exact: true })
+
+
+      13 |  const publicPlans=await db.billingPlan.findMany({where:{isActive:true},include:{currentVersion:true},orderBy:{code:'asc'}})
+      14 |  expect(publicPlans.length).toBeGreaterThan(0)
+    > 15 |  for(const plan of publicPlans){const version=plan.currentVersion;await expect(pricing.getByRole('article').filter({has:page.getByRole('heading',{name:version.name,exact:true})}).getByText((version.currency==='UZS'?formatLocaleMoney(version.monthlyPrice.toFixed(2),'uz'):version.monthlyPrice.toFixed(2)+' '+version.currency)+'/oy',{exact:true})).toBeVisible()}
+         |                                                                                                                                                                                                                                                                                                                                                           ^
+      16 |  await expect(page.getByText('100+ do\'konlar bizni tanlagan',{exact:true})).toHaveCount(0)
+      17 |  await expect(page.getByText('Cheksiz kassalar',{exact:true})).toHaveCount(0)
+      18 |  await expect(page.getByRole('heading',{name:'Brauzer, qurilmalar va integratsiyalar'})).toBeVisible()
+        at /home/fedora/Developments/POS_backup/tests/e2e/billing.spec.ts:15:347
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/billing-Billing-displays-D-a74fe-ment-without-double-billing-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/billing-Billing-displays-D-a74fe-ment-without-double-billing-chromium/error-context.md
+
+    Error Context: test-results/billing-Billing-displays-D-a74fe-ment-without-double-billing-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/billing-Billing-displays-D-a74fe-ment-without-double-billing-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/billing-Billing-displays-D-a74fe-ment-without-double-billing-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Hujjat raqami', { exact: true })
+
+
+      556 |  await page.getByLabel('Xarid tahlili ko‘rinishi',{exact:true}).selectOption('comparison');await page.getByRole('button',{name:'Xaridni filtrlash',exact:true}).click();await expect(page.getByRole('columnheader',{name:'Vaznli o‘rtacha',exact:true})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).toContain('2.000000')
+      557 |  await page.goto('/suppliers');await page.getByRole('row').filter({hasText:'Browser history supplier'}).getByRole('button',{name:'Tahrirlash',exact:true}).click();await page.getByLabel('Bank nomi',{exact:true}).fill('Browser bank');await page.getByLabel('Bank hisob raqami',{exact:true}).fill('browser-opaque-account');await page.getByLabel('To‘lov va yetkazish shartlari',{exact:true}).fill('30 days after acceptance');await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();await page.getByRole('link',{name:'Browser history supplier',exact:true}).click();await expect(page.getByText('Bank: Browser bank',{exact:true})).toBeVisible();await expect(page.getByText('Hisob raqami: browser-opaque-account',{exact:true})).toBeVisible();await expect(page.getByText('To‘lov va yetkazish shartlari: 30 days after acceptance',{exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Yetkazib beruvchi kartasi',exact:true})).toBeVisible();await expect(page.getByText('Sof xarid qiymati: 4 UZS',{exact:true})).toBeVisible();await expect(page.getByText('Supplierga to‘langan pul yoki qarz hisobi emas;',{exact:false})).toBeVisible();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();const historyCsv=await downloadText('Supplier tarixini CSV yuklash');expect(historyCsv).toContain('BROWSER-REVERSED');expect(historyCsv).toContain('"-2.000000"')
+    > 558 |  await page.getByLabel('Hujjat raqami',{exact:true}).fill('CURRENT');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toHaveCount(1);expect((await downloadText('Supplier tarixini CSV yuklash')).includes('BROWSER-DRAFT')).toBe(false)
+          |                                                      ^
+      559 |  await page.goto('/inventory');await page.getByLabel('Mahsulot, SKU yoki barkod',{exact:true}).fill('catalog');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await page.getByText('Faqat kam qolganlar',{exact:true}).click();await expect(page.getByRole('row').filter({hasText:'Browser catalog product'})).toBeVisible();const balanceCsv=await downloadText('Qoldiqlarni CSV yuklash');expect(balanceCsv).toContain('"2.000000","3.000000","1.000000","2.000000","4.00"')
+      560 |  await page.getByRole('button',{name:'Hujjatlar (Kirim/Tuzatish)',exact:false}).click();await page.getByLabel('Hujjat raqamini qidirish',{exact:true}).fill('BROWSER');await page.getByLabel('Hujjat holati filtri',{exact:true}).selectOption('confirmed');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();expect(await downloadText('Hujjatlarni CSV yuklash')).toContain('BROWSER-CURRENT')
+      561 |  const destination=await db.store.create({data:{organizationId:org,name:'Browser transfer destination'}})
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:558:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-chromium/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#prices').getByRole('article').first().getByText('249 000 so‘m/oy', { exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#prices').getByRole('article').first().getByText('249 000 so‘m/oy', { exact: true }) with timeout 10000ms
+      - waiting for locator('#prices').getByRole('article').first().getByText('249 000 so‘m/oy', { exact: true })
+
+
+      42 |    await expect(card.getByRole('heading',{name:version.name,exact:true})).toBeVisible();
+      43 |    const price=version.currency==='UZS'?formatLocaleMoney(version.monthlyPrice.toFixed(2),locale):version.monthlyPrice.toFixed(2)+' '+version.currency;
+    > 44 |    await expect(card.getByText(price+tr(PUBLIC_COPY.pricePeriod),{exact:true})).toBeVisible();
+         |                                                                                 ^
+      45 |    await expect(card.getByText(`${version.branchLimit} ${tr(PUBLIC_COPY.branchLimit)}`,{exact:true})).toBeVisible();
+      46 |    await expect(card.getByText(`${tr(PUBLIC_COPY.organizationLimit)} ${version.registerLimit} ${tr(PUBLIC_COPY.registerLimit)}`,{exact:true})).toBeVisible();
+      47 |    await expect(card.getByText(`${tr(PUBLIC_COPY.totalLimit)} ${version.staffLimit} ${tr(PUBLIC_COPY.staffLimit)}`,{exact:true})).toBeVisible();
+        at /home/fedora/Developments/POS_backup/tests/e2e/public-claims.spec.ts:44:81
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/public-claims-Public-claim-a1487-mits-and-localized-metadata-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/public-claims-Public-claim-a1487-mits-and-localized-metadata-chromium/error-context.md
+
+    Error Context: test-results/public-claims-Public-claim-a1487-mits-and-localized-metadata-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/public-claims-Public-claim-a1487-mits-and-localized-metadata-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/public-claims-Public-claim-a1487-mits-and-localized-metadata-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [firefox] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Hujjat raqami', { exact: true })
+
+
+      556 |  await page.getByLabel('Xarid tahlili ko‘rinishi',{exact:true}).selectOption('comparison');await page.getByRole('button',{name:'Xaridni filtrlash',exact:true}).click();await expect(page.getByRole('columnheader',{name:'Vaznli o‘rtacha',exact:true})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).toContain('2.000000')
+      557 |  await page.goto('/suppliers');await page.getByRole('row').filter({hasText:'Browser history supplier'}).getByRole('button',{name:'Tahrirlash',exact:true}).click();await page.getByLabel('Bank nomi',{exact:true}).fill('Browser bank');await page.getByLabel('Bank hisob raqami',{exact:true}).fill('browser-opaque-account');await page.getByLabel('To‘lov va yetkazish shartlari',{exact:true}).fill('30 days after acceptance');await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();await page.getByRole('link',{name:'Browser history supplier',exact:true}).click();await expect(page.getByText('Bank: Browser bank',{exact:true})).toBeVisible();await expect(page.getByText('Hisob raqami: browser-opaque-account',{exact:true})).toBeVisible();await expect(page.getByText('To‘lov va yetkazish shartlari: 30 days after acceptance',{exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Yetkazib beruvchi kartasi',exact:true})).toBeVisible();await expect(page.getByText('Sof xarid qiymati: 4 UZS',{exact:true})).toBeVisible();await expect(page.getByText('Supplierga to‘langan pul yoki qarz hisobi emas;',{exact:false})).toBeVisible();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();const historyCsv=await downloadText('Supplier tarixini CSV yuklash');expect(historyCsv).toContain('BROWSER-REVERSED');expect(historyCsv).toContain('"-2.000000"')
+    > 558 |  await page.getByLabel('Hujjat raqami',{exact:true}).fill('CURRENT');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toHaveCount(1);expect((await downloadText('Supplier tarixini CSV yuklash')).includes('BROWSER-DRAFT')).toBe(false)
+          |                                                      ^
+      559 |  await page.goto('/inventory');await page.getByLabel('Mahsulot, SKU yoki barkod',{exact:true}).fill('catalog');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await page.getByText('Faqat kam qolganlar',{exact:true}).click();await expect(page.getByRole('row').filter({hasText:'Browser catalog product'})).toBeVisible();const balanceCsv=await downloadText('Qoldiqlarni CSV yuklash');expect(balanceCsv).toContain('"2.000000","3.000000","1.000000","2.000000","4.00"')
+      560 |  await page.getByRole('button',{name:'Hujjatlar (Kirim/Tuzatish)',exact:false}).click();await page.getByLabel('Hujjat raqamini qidirish',{exact:true}).fill('BROWSER');await page.getByLabel('Hujjat holati filtri',{exact:true}).selectOption('confirmed');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();expect(await downloadText('Hujjatlarni CSV yuklash')).toContain('BROWSER-CURRENT')
+      561 |  const destination=await db.store.create({data:{organizationId:org,name:'Browser transfer destination'}})
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:558:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-firefox/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [webkit] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports 
+
+    Test was interrupted.
+
+    Error: locator.fill: Test ended.
+    Call log:
+      - waiting for getByLabel('Hujjat raqami', { exact: true })
+
+
+      556 |  await page.getByLabel('Xarid tahlili ko‘rinishi',{exact:true}).selectOption('comparison');await page.getByRole('button',{name:'Xaridni filtrlash',exact:true}).click();await expect(page.getByRole('columnheader',{name:'Vaznli o‘rtacha',exact:true})).toBeVisible();expect(await downloadText('Xarid tahlilini CSV yuklash')).toContain('2.000000')
+      557 |  await page.goto('/suppliers');await page.getByRole('row').filter({hasText:'Browser history supplier'}).getByRole('button',{name:'Tahrirlash',exact:true}).click();await page.getByLabel('Bank nomi',{exact:true}).fill('Browser bank');await page.getByLabel('Bank hisob raqami',{exact:true}).fill('browser-opaque-account');await page.getByLabel('To‘lov va yetkazish shartlari',{exact:true}).fill('30 days after acceptance');await page.getByRole('dialog').getByRole('button',{name:'Saqlash',exact:true}).click();await expect(page.getByRole('dialog')).not.toBeVisible();await page.getByRole('link',{name:'Browser history supplier',exact:true}).click();await expect(page.getByText('Bank: Browser bank',{exact:true})).toBeVisible();await expect(page.getByText('Hisob raqami: browser-opaque-account',{exact:true})).toBeVisible();await expect(page.getByText('To‘lov va yetkazish shartlari: 30 days after acceptance',{exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Yetkazib beruvchi kartasi',exact:true})).toBeVisible();await expect(page.getByText('Sof xarid qiymati: 4 UZS',{exact:true})).toBeVisible();await expect(page.getByText('Supplierga to‘langan pul yoki qarz hisobi emas;',{exact:false})).toBeVisible();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toBeVisible();const historyCsv=await downloadText('Supplier tarixini CSV yuklash');expect(historyCsv).toContain('BROWSER-REVERSED');expect(historyCsv).toContain('"-2.000000"')
+    > 558 |  await page.getByLabel('Hujjat raqami',{exact:true}).fill('CURRENT');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await expect(page.getByRole('row').filter({hasText:'BROWSER-CURRENT'})).toHaveCount(1);expect((await downloadText('Supplier tarixini CSV yuklash')).includes('BROWSER-DRAFT')).toBe(false)
+          |                                                      ^
+      559 |  await page.goto('/inventory');await page.getByLabel('Mahsulot, SKU yoki barkod',{exact:true}).fill('catalog');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();await page.getByText('Faqat kam qolganlar',{exact:true}).click();await expect(page.getByRole('row').filter({hasText:'Browser catalog product'})).toBeVisible();const balanceCsv=await downloadText('Qoldiqlarni CSV yuklash');expect(balanceCsv).toContain('"2.000000","3.000000","1.000000","2.000000","4.00"')
+      560 |  await page.getByRole('button',{name:'Hujjatlar (Kirim/Tuzatish)',exact:false}).click();await page.getByLabel('Hujjat raqamini qidirish',{exact:true}).fill('BROWSER');await page.getByLabel('Hujjat holati filtri',{exact:true}).selectOption('confirmed');await page.getByRole('button',{name:'Filtrlash',exact:true}).click();expect(await downloadText('Hujjatlarni CSV yuklash')).toContain('BROWSER-CURRENT')
+      561 |  const destination=await db.store.create({data:{organizationId:org,name:'Browser transfer destination'}})
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:558:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-webkit/error-context.md
+
+    Error Context: test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Production-HTTPS-cata-0f05a--complete-inventory-exports-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium] › tests/e2e/billing.spec.ts:10:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing 
+    [chromium] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports 
+    [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata 
+    [firefox] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports 
+  1 interrupted
+    [webkit] › tests/e2e/core.spec.ts:527:5 › Production HTTPS: catalog management, supplier purchase history and complete inventory exports 
+  6 did not run
+  16 passed (4.9m)

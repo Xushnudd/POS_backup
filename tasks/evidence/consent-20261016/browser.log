@@ -1,0 +1,12 @@
+[WebServer] (node:53440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:53509) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event (2.2s)
+  ✓  2 [chromium] › tests/e2e/customer-consent.spec.ts:55:5 › Concurrent consent revision rejection refreshes history and permits a fresh reviewed decision (1.1s)
+  ✓  3 [chromium] › tests/e2e/customer-consent.spec.ts:69:5 › Recovered stale consent discards only a definitive rollback; unknown conflicts retain the original operation (1.8s)
+
+  3 passed (6.4s)

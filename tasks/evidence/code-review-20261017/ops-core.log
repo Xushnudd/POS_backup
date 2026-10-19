@@ -1,0 +1,43 @@
+✔ rendered isolation cannot be inferred merely from distinct env keys (2.230751ms)
+✔ DB publishing, network bypass and incorrect runtime targets are rejected (1.385518ms)
+✔ maintenance paths cannot alias or nest across environments, including symlinks (0.614584ms)
+✔ distinct synthetic environments pass without claiming network verification (0.5856ms)
+✔ same database with a different user and query still rejected (0.209878ms)
+✔ URL-encoded database name cannot disguise the same target (0.177922ms)
+✔ password, active key and old overlap cannot cross environment boundaries (0.285959ms)
+✔ overlap configuration follows runtime limit and does not normalize malformed input (0.238465ms)
+✔ release MFA, loopback and immutable image are required (0.281769ms)
+✔ CLI accepts own 0600 files, refuses public file/symlink and never logs secret input (74.426674ms)
+✔ image audit rejects baked runtime credentials and root identities without returning credential values (0.465167ms)
+✔ image audit recognizes excluded credential stores inside nested layers but allows public system certificates (0.219729ms)
+✔ image audit refuses mutable references before invoking Docker (0.475971ms)
+✔ reviewed public test vectors do not permit unknown keys or extra copies of the same key in another file (0.122286ms)
+✔ Data-flow inventory rejects unapproved vendor activation and unreviewed boundary changes/new adapters (3.003489ms)
+✔ Host disk probe alerts on exact byte/percent thresholds and hides paths or filesystem errors (0.236507ms)
+✔ Exact numeric projection and deterministic composite key; malicious manifest identifiers rejected (0.322682ms)
+✔ Same row count with changed content fails; missing rows/tables fail; unchanged projection passes (0.285763ms)
+✔ libpq gets connection through environment; unexpected options/invalid URLs rejected (0.301677ms)
+✔ Tables without a primary key use canonical complete-record sorting (0.096408ms)
+✔ Platform/collation mismatch and missing identifier cannot silently pass (0.109729ms)
+✔ CLI rejects unconfirmed quiescence and unsafe baseline files without exposing inputs (108.580752ms)
+✔ PITR retains boundary base older than cutoff and every newer base, with all required WAL (1.675379ms)
+✔ new repository reports insufficient historical coverage without dropping its only base (0.354001ms)
+✔ other timelines and history are retained without guessed ancestry (0.700085ms)
+✔ unsafe access permissions, symlinks and incomplete metadata fail closed (0.576457ms)
+✔ automatic deletion and malformed retention are rejected (0.618606ms)
+✔ native WAL archiver publishes original bytes and accepts exact retry while rejecting conflicting bytes (33.310101ms)
+✔ native WAL archive rejects unsafe paths, permissions and source/destination symlinks (21.712359ms)
+✔ restore command requires existing regular archive and rejects destination symlink without touching its target (26.099887ms)
+✔ recovery preparation refuses injected timestamp and symlink ancestor before target creation (22.290803ms)
+✔ release startup requires a digest reference, production and a non-root identity (0.791854ms)
+✔ mutable-image startup never invokes the child and rejects without echoing input (18.811169ms)
+✔ release entrypoint preserves the child exit code and forwards shutdown (80.574022ms)
+✔ Independent probe fails closed on outage, malformed/oversized body and redirects; emits no response secrets (13.296109ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 436.408215

@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-11",
+  "task": "SEC-02.06",
+  "status": "done",
+  "scope": "Core only; 21 critical actions and restore authentication quarantine",
+  "head": "97ded93d1c62c4a4180607d6686bf82395701ee2",
+  "originalDone": 157,
+  "batchBaseline": 156,
+  "batchDone": 1,
+  "batchTarget": 20,
+  "checks": {
+    "fullIntegration": "313/313 before additional failure fixture",
+    "focusedIntegration": "35/35",
+    "latestRestoreCLI": "2/2",
+    "unitFiles": 33,
+    "browsers": "15/15 Chromium Firefox WebKit",
+    "migrations": 125,
+    "productionBuild": "passed",
+    "workerBuild": "passed",
+    "encryptedFixtureRestore": "passed",
+    "portableRestoreCLI": "2/2 after container selection change"
+  },
+  "productionChanges": false,
+  "externalAcceptance": "blocked_external; no confirmed hosts/domain/monitoring/offsite/pilot",
+  "sourceSHA256": {
+    "src/server/auth/restore-state.ts": "f5175bb92db9f5107bfeac8da3d75f75430ed436c77518aa67834f5b327a1e47",
+    "src/server/auth/critical-actions.ts": "73e7d2bd71422367a98bd1a85a1d7266efc3c3b5470a77de41ea24f010ae4747",
+    "src/lib/api.ts": "af2b3cba09edd3eb2f1b6f27f06385137bf979896c477550ce7fad47cce80718",
+    "scripts/ops/auth-restore-quarantine.sql": "255d425660231f49f4068986454713e016be2a13e7dd5522f8726b05db3ae390",
+    "scripts/ops/review-restored-auth.sh": "30341fff690fa612ba5f963a01f8e04e0bf37cd62ba6daac815b5f5a76363af9",
+    "tests/auth-restore.integration.test.ts": "97f9e39b09fae4a4c140186f195ac706317d7c7c323b751932883277cdaa6a5a",
+    "tests/totp.integration.test.ts": "ff78a36ae4021ee810df9c9b918f5bd3a4569fb8327eabfc6ef558f0128453a3",
+    "tests/e2e/totp.spec.ts": "cc2db76b8301418e6dcd966d135a48b02616a8c7f1b60f318c9d3868b1c885b6",
+    "prisma/schema.prisma": "133a94b492c7c9858c57c46c56c73d2ab1c630fb22fd73a755aa68bd6dbde008"
+  },
+  "logSHA256": {
+    "/tmp/pos-restore-full-integration.log": "b2b83d22a3060d02424741766c69ff54649f699f7608dbbc39161ea3dc4c4025",
+    "/tmp/pos-restore-focused-accepted.log": "dfaece494fec7f5cf20dafb8e280d5030698b67159f8f218a4803f8c90d3d22b",
+    "/tmp/pos-restore-cli-accepted.log": "9585bddd22b5ebdf06e5eb9cdb05a994e1d1652364d99c859012155d565a821d",
+    "/tmp/pos-restore-browser-accepted.log": "1fdce3f3be45fd5d4a62b1ef1d533eb683108011fb25d7716092be7ae83bc4b2",
+    "/tmp/pos-restore-unit-cli.log": "4da717be977a2b080bfcae63caa44ba9dae397cc176472835b16b524d13fe35b",
+    "/tmp/pos-restore-build-final.log": "fa9d72496c54698f6a1d8ddbfe20ce755240d374772cc600441b4630175d77cf",
+    "/tmp/pos-restore-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-restore-fresh-migrations.log": "21d2c8f27e92247b7e7d83c191e1363f8f476abde28df5706d9d6e1353859629",
+    "/tmp/pos-restore-backup.log": "a4dbc2bc2d5991c332623c34ec158d78a116603238df489e1009f103ec64455d",
+    "/tmp/pos-restore-portable-integration.log": "41b251c22f1016f586c8c56638af96ebd93c3f07f4c64801b29f096b0511a3ff"
+  },
+  "validationNote": "Full313 snapshot predates extra failure fixture and portable container selection; focused35 and latest portable restore2 validate those follow-ups. No full314 claim."
+}

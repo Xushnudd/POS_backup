@@ -1,0 +1,184 @@
+{"requestId":"beefe127-12f9-461c-a4c4-5136dda6b26c","status":200,"durationMs":327,"event":"api_response"}
+{"requestId":"f11e9c44-1ab6-432d-8f55-8a032d500879","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"67e77262-9351-42d9-b387-fa5b07d74f6b","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":409,"code":"CUSTOMER_HAS_BALANCE","durationMs":25,"event":"api_error"}
+{"requestId":"07d38b4c-3825-4689-9731-cf295385a08d","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":409,"code":"CUSTOMER_HAS_BALANCE","durationMs":14,"event":"api_error"}
+{"requestId":"65cbc982-d753-400c-880c-fbd27e1aebce","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":409,"code":"CUSTOMER_HAS_BALANCE","durationMs":12,"event":"api_error"}
+{"requestId":"ecc77fd6-b332-488a-a3ba-28d22e5fd446","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":409,"code":"CUSTOMER_HAS_BALANCE","durationMs":12,"event":"api_error"}
+{"requestId":"2aa11b51-b16f-4f22-b6e1-b12dd53ca3f7","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"9d6afd23-47d4-4719-a80e-a16b8cc4ef98","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"ee3c4dce-5e4f-4c1b-894c-beb334da7f80","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":9,"event":"api_response"}
+{"requestId":"f4ca6c39-5859-4bca-990e-c498849060e2","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"d5e779ff-9b56-49d4-895b-393eda4ce41f","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"df2a0f0e-e4e4-4383-8920-48ea729ef622","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+{"requestId":"3fd23c71-f8d2-4ab1-9bf7-b2622107b85c","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":400,"code":"INVALID_STATUS","durationMs":9,"event":"api_error"}
+{"requestId":"22235bc7-90f5-424e-a59c-f649e93796ad","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":12,"event":"api_response"}
+{"requestId":"609740b2-35ce-4528-9225-afd109f388d7","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+{"requestId":"fceef976-65de-4448-b593-2fa3fc7fd43a","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":400,"code":"INVALID_STATUS","durationMs":9,"event":"api_error"}
+{"requestId":"00875796-0b78-4a36-9eeb-7329fab5429e","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":403,"code":"FORBIDDEN","durationMs":9,"event":"api_error"}
+{"requestId":"17e28f5a-891b-4ef2-90da-50b313f12b39","organizationId":"88b0db95-d18c-4973-97e0-85d857a56b8d","status":200,"durationMs":13,"event":"api_response"}
+✔ Archive filters are explicit, tenant-safe and cashier cannot read archive; zero/nonzero ledger balance controls both archive paths (839.592077ms)
+{"requestId":"dff5e6f3-af32-4a55-946c-d23ca62f11ab","status":200,"durationMs":246,"event":"api_response"}
+{"requestId":"b3246854-1ec2-4c24-8f75-fa8124a930d4","organizationId":"75b3ac88-9a5a-4fa0-a937-49d28a8a6325","status":409,"code":"CUSTOMER_HAS_BALANCE","durationMs":44,"event":"api_error"}
+✔ Archiving cannot overtake a concurrent debt posting holding the customer lock (299.48882ms)
+{"requestId":"62e0b6a9-45f7-4cdb-a71e-cf78989176bf","status":200,"durationMs":255,"event":"api_response"}
+{"requestId":"e35fbc77-50ab-4d9f-a64f-7fde4473a671","status":200,"durationMs":245,"event":"api_response"}
+{"requestId":"f6cf5df6-f49d-4d01-999b-704e8cb1c359","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":400,"durationMs":14,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"95685100-2689-45e0-8058-7662c7f22c69","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"05a93b22-34a3-45e3-a2af-9a0515b42328","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"7976a28d-cbb7-4279-919d-8768d697fcb5","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":200,"durationMs":12,"event":"api_response"}
+{"requestId":"8b4fd8f2-1373-4aa5-a71c-6c9b6bd02c40","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"f2cf6c22-7b93-462e-bfdd-6d5cd759ee2e","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"5a897d82-a39d-4c09-b43c-938eb379df30","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"13b04d89-2701-4561-9ebd-2b57ad538e30","organizationId":"f6e61362-25c1-49c2-9461-26c9dea63447","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+✔ Supplier lifecycle keeps history, paginates opt-in, validates lengths and exports all filtered rows safely (655.717179ms)
+{"requestId":"6cb31c0a-598a-48ee-8189-1f2942210e46","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"5815f17a-8009-40a0-b6d9-a9260a918c99","status":200,"durationMs":234,"event":"api_response"}
+{"requestId":"37cc49d3-03fa-4c31-b109-76c667f8d81b","organizationId":"29a36367-8bd0-4ce6-aca4-14c7bcfc0565","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"cfcf98db-2efa-48aa-8726-99abe2161f22","organizationId":"29a36367-8bd0-4ce6-aca4-14c7bcfc0565","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"b104c378-2f5b-4109-9fc1-e3588fb3020d","organizationId":"29a36367-8bd0-4ce6-aca4-14c7bcfc0565","status":400,"code":"INVALID_DATE","durationMs":8,"event":"api_error"}
+{"requestId":"907895d3-e1d4-486c-abf3-2c89047e501f","organizationId":"29a36367-8bd0-4ce6-aca4-14c7bcfc0565","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"7c22ba9d-aca0-4c1a-8fd7-7aa1aa08efcb","organizationId":"29a36367-8bd0-4ce6-aca4-14c7bcfc0565","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+{"requestId":"dabb6a6f-964f-4b95-8984-4934360b55ea","organizationId":"29a36367-8bd0-4ce6-aca4-14c7bcfc0565","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+✔ Inventory journal and CSV preserve signed precision, local-day boundaries, stable paging and assigned-branch scope (628.560475ms)
+{"requestId":"98c750ae-a4cd-4955-af79-2c8f96cb9c47","status":200,"durationMs":237,"event":"api_response"}
+{"requestId":"8467b4e6-9308-4e3d-a274-c4b70f78a191","organizationId":"4d989fda-74b6-4e5e-8450-c95d3998d3e1","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"a4421a04-079b-4419-ab18-56dd3f4bddd1","organizationId":"4d989fda-74b6-4e5e-8450-c95d3998d3e1","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"fd84236d-1921-4225-9688-a35fba8e0a3b","organizationId":"4d989fda-74b6-4e5e-8450-c95d3998d3e1","status":403,"code":"FORBIDDEN","durationMs":9,"event":"api_error"}
+{"requestId":"51803d9a-e918-4742-bc49-fb30fbbd7b0a","organizationId":"4d989fda-74b6-4e5e-8450-c95d3998d3e1","status":403,"code":"FORBIDDEN","durationMs":11,"event":"api_error"}
+✔ Shift CSV uses frozen close amounts, omits unknown open settlement and scopes to assigned branch; audit CSV is owner-only and payload-free (325.690133ms)
+{"requestId":"f4b2e110-8470-498c-9229-6e804810ce99","status":200,"durationMs":240,"event":"api_response"}
+{"requestId":"1ba268dc-6728-47a4-b26f-d2662436e322","status":200,"durationMs":236,"event":"api_response"}
+{"requestId":"734c4098-d8b9-4a2d-bd19-ed25eab8f109","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","operationId":"c898cb71-ba05-4663-b6cc-b41cd23fd9cf","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"c8819ca8-b600-43ab-8cb3-98bdef87a0e8","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","operationId":"c898cb71-ba05-4663-b6cc-b41cd23fd9cf","code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"c8819ca8-b600-43ab-8cb3-98bdef87a0e8","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","operationId":"c898cb71-ba05-4663-b6cc-b41cd23fd9cf","status":200,"durationMs":88,"event":"api_response"}
+{"requestId":"c77ac7f3-9c2a-4719-b33e-82bb194d4510","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","operationId":"c898cb71-ba05-4663-b6cc-b41cd23fd9cf","status":409,"code":"OPERATION_PAYLOAD_CONFLICT","durationMs":12,"event":"api_error"}
+{"requestId":"c07b77c3-c71d-4b36-9708-569d9fbb990f","organizationId":"ac6fb97d-793b-417d-8ccf-6548bc9efe8a","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"8e06dbf7-1fe1-4ef5-8d3f-4957b1133f91","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","operationId":"6b58c37f-7d78-4b2b-baf2-017b214537d2","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"5d623d61-e466-45d7-9186-8357c50c5b90","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"2d34193a-a7d8-4600-a95a-5d6abdecf005","organizationId":"74f23b4d-3cc5-4acc-ac7c-1675fe5d17d3","status":429,"code":"RATE_LIMITED","durationMs":11,"event":"api_error"}
+✔ Print requests are idempotent under concurrency, reject altered intent and do not change any financial/stock rows (705.423001ms)
+{"requestId":"04bf0473-2847-4150-a83c-d033cc8cd2b2","status":200,"durationMs":239,"event":"api_response"}
+{"requestId":"bfb26c67-73f3-40b2-b455-9d02d2d852aa","organizationId":"64e9e362-79f6-4485-a17b-5a106c687344","status":413,"code":"EXPORT_TOO_LARGE","durationMs":19,"event":"api_error"}
+{"requestId":"2352278e-948c-4722-9d85-38e608e4faca","organizationId":"64e9e362-79f6-4485-a17b-5a106c687344","status":413,"code":"EXPORT_TOO_LARGE","durationMs":20,"event":"api_error"}
+{"requestId":"4b122fda-b76a-43bb-80f6-6450332cefd7","organizationId":"64e9e362-79f6-4485-a17b-5a106c687344","status":413,"code":"EXPORT_TOO_LARGE","durationMs":16,"event":"api_error"}
+{"requestId":"2966f660-aa6d-474a-bc69-3a2cb0475702","organizationId":"64e9e362-79f6-4485-a17b-5a106c687344","status":413,"code":"EXPORT_TOO_LARGE","durationMs":18,"event":"api_error"}
+✔ Supplier, journal, shift and audit exports reject more than 10000 rows rather than truncating (25127.031093ms)
+{"requestId":"847e2ebf-0072-4abc-bec8-4515f59bbf54","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"89a12470-4660-43bd-b19b-055f5e9387e9","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"a4f880dc-48f3-437e-8ce0-f9494a0e86af","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":400,"durationMs":11,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"282c6a04-e979-47a0-81aa-6a43d2bcbcf3","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":400,"durationMs":10,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"26f61963-c58f-468b-9429-5798523eb3c4","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":400,"durationMs":10,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"fb95ebd8-afe5-42af-a16f-04901ebb0d46","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":400,"durationMs":9,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"bea6cf95-618f-449f-83b4-6014622ecbed","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"36807b4d-b57f-4512-a7a6-2564126389ef","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":400,"durationMs":11,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"4da653ef-884f-47f8-978c-99429fd191d8","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"23a2f4e4-4b4e-40c7-ad09-c8ef5118efb4","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"d197e8e5-3fe7-41df-b4b7-c0e347d70636","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"ca41432f-0461-468a-9d39-4cc72e24bfd0","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":403,"code":"TENANT_MISMATCH","durationMs":8,"event":"api_error"}
+{"requestId":"5d44dab0-5ab9-4d08-9cec-712ddb5618a0","organizationId":"85bd0c40-b024-4634-bb29-7bf33dab0ae1","status":403,"code":"FORBIDDEN","durationMs":12,"event":"api_error"}
+✔ Category validation/search/sort and full CSV remain tenant/role safe beyond page 200 (706.362638ms)
+{"requestId":"31b6d4f6-ead1-4985-a6f0-d81cd242bf55","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"7e1e82c4-13a6-4b1f-ae41-48629b87e5e8","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"111c9d43-e1fa-49ec-9511-29956b808c3c","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"d32748dc-ea81-497c-8435-5966fbfd6d59","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"f027e86d-b037-43da-a6cb-477e061dfb0e","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"c9799af5-082a-46dc-b850-e7b16b6c3ae5","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"0f7e5633-bbbc-4aa4-bbb6-efe32799b27d","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"3f8d33e9-63a2-43d2-9e17-62c18c14b847","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"f5ffd5d1-7203-4325-9bd3-bdc230b3338b","organizationId":"56f7b190-85c6-4fb2-81e2-2ea4624b0568","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"8caef0a0-0d7a-44b7-95c3-9f47333e94e6","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"9631493a-f7e3-4161-9bdf-47a6a67ae8a5","organizationId":"8e9d61e5-4558-4d57-8441-bf6b3b571e0c","status":403,"code":"FORBIDDEN","durationMs":9,"event":"api_error"}
+✔ Unit and barcode search/paging expose all records, stable primary order and complete safe exports (739.047487ms)
+{"requestId":"6d5fdbf8-c41f-479e-adc7-f8d4db49ebb4","status":200,"durationMs":235,"event":"api_response"}
+{"requestId":"fc96e931-57a5-4043-8129-6d140c90e91d","status":200,"durationMs":235,"event":"api_response"}
+{"requestId":"5b6d46bf-ea95-482a-b2b8-64a2f5cfbb7f","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"cdabe842-e749-45fe-8b06-58ebbccc192e","organizationId":"ab1d998d-b5c5-4699-a67b-e1a44733db66","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"0cf92630-a370-40cc-88ef-b52fa76c3882","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"adc3bd07-0da6-41fa-b245-62b90b41eb5b","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"5a802163-ec34-4b58-b63c-197ff68d431b","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":200,"durationMs":85,"event":"api_response"}
+{"requestId":"b11ba82a-6504-46db-aa21-b0677175fb05","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"26cb9ead-7b83-4305-8533-e206bde4dcdf","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":404,"code":"NOT_FOUND","durationMs":5,"event":"api_error"}
+{"requestId":"d189d25a-f911-4ab9-93d5-059dca494492","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":404,"code":"NOT_FOUND","durationMs":5,"event":"api_error"}
+{"requestId":"da6e5c95-e088-4e44-9764-51ec3570f075","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":400,"code":"INVALID_TOTAL_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"9633ffdf-2521-4a3c-bedb-4327a312d84f","organizationId":"ade81a4d-a629-422c-acde-dbeffc2049a3","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+✔ Supplier history and confirmed purchase totals use scoped event dates and Decimal reversals without counting drafts or other adjustments (749.289645ms)
+{"requestId":"ccade9cf-2436-403f-be2e-797fac0bd5b6","status":200,"durationMs":238,"event":"api_response"}
+{"requestId":"de3468f1-d449-4236-ad60-8d9e3d72810b","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"ffb2ea6c-b33d-4b49-a606-e98103736348","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"93d24899-7f07-4105-af58-76b01bda4633","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"4cf9e4ee-ef84-4e6f-8f34-4d4ec07d90fb","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"20260790-6437-4888-89cb-0f783deeaedc","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"a7c64296-929a-4a05-b36e-0fda255cbcaa","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"1b4f8c2d-9538-4f73-9654-5679135a275f","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":400,"code":"INVALID_DOCUMENT_TYPE","durationMs":12,"event":"api_error"}
+{"requestId":"094214a8-044f-4db0-b350-abb70099e69d","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":400,"code":"INVALID_DATE","durationMs":12,"event":"api_error"}
+{"requestId":"719639f3-1630-4872-8577-5b93c87edb92","organizationId":"a0f90911-223b-48b8-8e41-bf954e11bd54","status":400,"code":"INVALID_STATUS","durationMs":8,"event":"api_error"}
+✔ Stock document and transfer filtering and CSV are stable, full, signed and branch-scoped (520.192746ms)
+{"requestId":"03a7081e-ffc4-43b5-a635-9e6b87eb2d2a","status":200,"durationMs":237,"event":"api_response"}
+{"requestId":"f9f7ca2b-3079-4fc5-b98e-33a25c4b5c07","organizationId":"a53fd8f8-2af3-46a7-973f-fe23cc1eecda","status":200,"durationMs":12,"event":"api_response"}
+{"requestId":"26d0b66d-d995-478a-af81-fbea9ece8927","organizationId":"a53fd8f8-2af3-46a7-973f-fe23cc1eecda","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"dc7ad396-87b7-47b6-8a0c-b4eb64e17e85","organizationId":"a53fd8f8-2af3-46a7-973f-fe23cc1eecda","status":400,"code":"INVALID_FORMAT","durationMs":9,"event":"api_error"}
+{"requestId":"3111abaa-7ff7-47df-84c1-2f24d23c1314","organizationId":"a53fd8f8-2af3-46a7-973f-fe23cc1eecda","status":400,"code":"INVALID_FILTER","durationMs":7,"event":"api_error"}
+{"requestId":"70b0c8e6-0bef-470a-bfc4-a8e9ccc322eb","organizationId":"a53fd8f8-2af3-46a7-973f-fe23cc1eecda","status":429,"code":"RATE_LIMITED","durationMs":14,"event":"api_error"}
+✔ Stock balance CSV matches low-stock scope, preserves quantities/cost and does not truncate to its UI page (429.927666ms)
+{"requestId":"1e0c06d4-4273-423d-827e-03e6497f80f8","status":200,"durationMs":234,"event":"api_response"}
+{"requestId":"55aa2d0f-0caf-4320-90bc-0a1c883a5ff2","organizationId":"52f6a8af-de10-43f5-9429-88134cdce56d","status":413,"code":"EXPORT_TOO_LARGE","durationMs":32,"event":"api_error"}
+{"requestId":"fad19a4b-aec8-4546-8f46-248bdd867d7e","organizationId":"52f6a8af-de10-43f5-9429-88134cdce56d","status":413,"code":"EXPORT_TOO_LARGE","durationMs":82,"event":"api_error"}
+✔ Document and transfer CSV caps count child lines, not only parent documents; failure returns no partial content (13760.727812ms)
+✔ Sales URL contract rejects unbounded/ambiguous pagination and unknown filters (0.580397ms)
+{"requestId":"21ae5b80-d063-4c22-929f-a89b7953d95c","status":200,"durationMs":230,"event":"api_response"}
+{"requestId":"86d16e88-c3a3-48c0-a875-a4be82f39b75","status":200,"durationMs":235,"event":"api_response"}
+{"requestId":"7f7219ec-9e5a-45fb-a44f-51bcbbab89d6","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"cf83795a-9adb-427f-b461-9077ec8a76e8","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"d4ade1ab-0749-43fe-a804-ba29b8c49c0a","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":37,"event":"api_response"}
+{"requestId":"430131f2-06b6-4807-8e94-756c337fe0b1","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":32,"event":"api_response"}
+{"requestId":"422e25d9-695e-4776-a88d-291fe6051b2b","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":55,"event":"api_response"}
+{"requestId":"37bab209-5486-4aa9-970c-ea307ddc6068","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":45,"event":"api_response"}
+{"requestId":"c8d45d7e-812e-4a45-a0cd-1090f07a70df","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"c252ce2f-9cd8-4a30-b137-d72ec8b70a2a","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":39,"event":"api_response"}
+{"requestId":"be822fbf-a745-4f3c-a0ce-ece135c55f0d","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"e67eb819-1b3b-4172-932f-54e78fcb3420","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"c1ff8b6b-71df-46a6-8d87-131790887017","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"812186e6-b410-41c8-a777-b4bacb091ed6","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"2d5e0612-f740-4bd9-a1c9-08b33ae36112","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":400,"code":"INVALID_FILTER","durationMs":17,"event":"api_error"}
+{"requestId":"7f025fa9-09b2-4511-8b53-a43d4da6dfdc","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":400,"code":"INVALID_FILTER","durationMs":20,"event":"api_error"}
+{"requestId":"2c114eca-a854-4110-b250-068dad1d0a97","organizationId":"197a64b4-8938-4e8b-8258-5ce47cdc8deb","status":403,"code":"TENANT_MISMATCH","durationMs":9,"event":"api_error"}
+{"requestId":"66fe33f1-d0b9-4482-b249-658959af0447","organizationId":"5ee15587-4baa-4500-bf90-3dd556b12805","status":200,"durationMs":15,"event":"api_response"}
+✔ Sales list filters, deterministic global sort, page boundaries, empty state and tenant isolation (935.501688ms)
+{"requestId":"dccf8f86-e68f-4f04-afa5-6ea05cd20e8d","status":200,"durationMs":228,"event":"api_response"}
+{"requestId":"5c060b06-79cf-482b-8fe0-fbbba6e8d487","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"fd31269f-f114-4eae-b2a6-162e7d3b91b6","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"a2d11805-94fc-4e09-97d6-eb6bbba42ada","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"53a0f0bb-3f5c-498c-bea3-e6da96932ad9","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":400,"code":"INVALID_FILTER","durationMs":24,"event":"api_error"}
+{"requestId":"1a7e87e6-fe5f-4960-aea8-fbf717f0f26b","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":400,"code":"INVALID_PAGINATION","durationMs":32,"event":"api_error"}
+{"requestId":"5d998b25-676a-40e4-bde0-447df21e80d8","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":400,"code":"INVALID_FILTER","durationMs":31,"event":"api_error"}
+{"requestId":"d7ce715b-afc0-40f7-84d0-07d979803f42","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":106,"event":"api_response"}
+{"requestId":"28b04602-85ec-4bff-b414-16ac213b824c","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"18d7b653-944a-4d5d-99c6-2d982cf76ad9","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":12,"event":"api_response"}
+{"requestId":"b194a2d0-cb81-4fb6-a397-c9e125c7c363","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"274664a0-3d4a-45a7-949b-fc91559a0898","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":400,"code":"INVALID_FILTER","durationMs":21,"event":"api_error"}
+{"requestId":"2a28a941-fc7d-4dcb-964b-11a296f1e871","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":400,"code":"INVALID_PAGINATION","durationMs":36,"event":"api_error"}
+{"requestId":"e6669307-009e-4d33-b273-40d9836fce55","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":400,"code":"INVALID_FILTER","durationMs":36,"event":"api_error"}
+{"requestId":"ab922434-5451-423f-b577-f53e856d1fba","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":49,"event":"api_response"}
+{"requestId":"88e9e1b4-cbbd-4c9f-b2ff-a98de637b665","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":32,"event":"api_response"}
+{"requestId":"37607a46-ae24-4378-b0b7-937b5e9a232b","organizationId":"52f78d57-683f-47c5-ac7e-daa8abafbefa","status":200,"durationMs":18,"event":"api_response"}
+✔ Catalog/customer sort and paging cover every record, preserve CSV filters and reject unsafe sorting (840.344448ms)
+{"requestId":"dd0165a5-c571-490c-843a-21396ba1fec9","status":200,"durationMs":234,"event":"api_response"}
+{"requestId":"ba633dde-8c04-47f4-a920-b035ad2d41f5","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":12,"event":"api_response"}
+{"requestId":"2d40e212-1ebb-42b0-92e4-218a116bf911","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"b8fb0ce2-2fa0-4e62-87c0-8b381e35c3e5","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":400,"code":"INVALID_FILTER","durationMs":9,"event":"api_error"}
+{"requestId":"7368cf18-d2d0-4dd0-84f9-fe35231b65ba","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"3cf0a617-0c82-49f6-a1d7-4289b0db4027","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"d0ecb1f7-a887-4ba1-ba59-74f90088485c","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"bf2449fe-2967-4cbe-8caf-00aefd3a4488","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":400,"code":"INVALID_FILTER","durationMs":13,"event":"api_error"}
+{"requestId":"6cf0daef-595d-488f-89ac-08c027c03f98","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"9b120ebe-a85e-4cab-9f9f-fc5bba125386","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"9afd569a-a859-4119-913d-fa895d48bf4e","organizationId":"97abacf5-e370-451a-92bb-e5a0a4c7901a","status":200,"durationMs":44,"event":"api_response"}
+✔ Category/unit list URL sort keeps legacy defaults, filters, native order and full export (442.999447ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 87896.425982

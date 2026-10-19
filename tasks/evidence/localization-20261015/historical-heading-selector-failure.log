@@ -1,0 +1,150 @@
+[WebServer] (node:234881) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:234920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (838ms)
+  ✓   2 [chromium] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (432ms)
+  ✓   3 [chromium] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (376ms)
+  ✘   4 [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (1.3s)
+(node:235535) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (1.4s)
+  ✓   6 [firefox] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (602ms)
+  ✓   7 [firefox] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (567ms)
+  ✘   8 [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (1.4s)
+(node:235945) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/auth-form-state.spec.ts:66:5 › invalid invitation preserves credential draft, blocks dirty and busy exit and sends one same-tick request (1.2s)
+  ✓  10 [webkit] › tests/e2e/localization.spec.ts:8:5 › Locale preference changes without navigating or clearing a credential draft and is isolated per SSR request (952ms)
+  ✓  11 [webkit] › tests/e2e/localization.spec.ts:16:5 › Offline locale changes preserve the encrypted ticket, unlock draft, exact tender and original operation without taking cash (731ms)
+  ✘  12 [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement (2.5s)
+
+
+  1) [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Saqlash', exact: true })
+    Expected: visible
+    Error: strict mode violation: getByRole('heading', { name: 'Saqlash', exact: true }) resolved to 2 elements:
+        1) <h4 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-emerald-700 transition">Saqlash</h4> aka getByRole('button', { name: 'Saqlash — добавить в корзину' })
+        2) <h4 class="text-xs font-bold text-gray-900 truncate leading-snug">Saqlash</h4> aka getByRole('heading', { name: 'Saqlash' }).nth(1)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Saqlash', exact: true }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Saqlash', exact: true })
+
+
+      47 |  await page.goto('/pos');await page.getByRole('button',{name:'Smenani ochish',exact:true}).click();let dialog=page.getByRole('dialog');await dialog.getByRole('button',{name:'Smenani ochish: oldindan ko‘rish',exact:true}).click();await dialog.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(dialog).toHaveCount(0);
+      48 |  await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('0012345678901');await page.keyboard.press('Enter');await page.getByLabel('Saqlash miqdori',{exact:true}).fill('0.125');
+    > 49 |  const address=page.url();await page.getByLabel('Til',{exact:true}).selectOption('ru');await expect(page.getByLabel('Saqlash количество',{exact:true})).toHaveValue('0.125');await expect(page.getByRole('heading',{name:'Saqlash',exact:true})).toBeVisible();expect(page.url()).toBe(address);
+         |                                                                                                                                                                                                                                                  ^
+      50 |  await page.keyboard.press('F9');dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'Долг / кредит',exact:true}).click();await dialog.getByLabel('Срок погашения долга (необязательно)',{exact:true}).fill('2030-01-01');
+      51 |  await dialog.getByLabel('Язык',{exact:true}).selectOption('uz');await expect(dialog.getByLabel('Nasiya to‘lash muddati (ixtiyoriy)',{exact:true})).toHaveValue('2030-01-01');await dialog.getByRole('button',{name:'Naqd pul',exact:true}).click();await dialog.getByLabel("Mijoz bergan naqd pul (so'm)",{exact:true}).fill('20.00');
+      52 |  await dialog.getByLabel('Til',{exact:true}).selectOption('ru');await expect(dialog.getByLabel('Наличные от клиента (сум)',{exact:true})).toHaveValue('20.00');await expect(dialog).toContainText('12,50 сум');expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:49:242
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Saqlash', exact: true })
+    Expected: visible
+    Error: strict mode violation: getByRole('heading', { name: 'Saqlash', exact: true }) resolved to 2 elements:
+        1) <h4 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-emerald-700 transition">Saqlash</h4> aka getByRole('button', { name: 'Saqlash — добавить в корзину' })
+        2) <h4 class="text-xs font-bold text-gray-900 truncate leading-snug">Saqlash</h4> aka getByRole('heading', { name: 'Saqlash' }).nth(1)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Saqlash', exact: true }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Saqlash', exact: true })
+
+
+      47 |  await page.goto('/pos');await page.getByRole('button',{name:'Smenani ochish',exact:true}).click();let dialog=page.getByRole('dialog');await dialog.getByRole('button',{name:'Smenani ochish: oldindan ko‘rish',exact:true}).click();await dialog.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(dialog).toHaveCount(0);
+      48 |  await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('0012345678901');await page.keyboard.press('Enter');await page.getByLabel('Saqlash miqdori',{exact:true}).fill('0.125');
+    > 49 |  const address=page.url();await page.getByLabel('Til',{exact:true}).selectOption('ru');await expect(page.getByLabel('Saqlash количество',{exact:true})).toHaveValue('0.125');await expect(page.getByRole('heading',{name:'Saqlash',exact:true})).toBeVisible();expect(page.url()).toBe(address);
+         |                                                                                                                                                                                                                                                  ^
+      50 |  await page.keyboard.press('F9');dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'Долг / кредит',exact:true}).click();await dialog.getByLabel('Срок погашения долга (необязательно)',{exact:true}).fill('2030-01-01');
+      51 |  await dialog.getByLabel('Язык',{exact:true}).selectOption('uz');await expect(dialog.getByLabel('Nasiya to‘lash muddati (ixtiyoriy)',{exact:true})).toHaveValue('2030-01-01');await dialog.getByRole('button',{name:'Naqd pul',exact:true}).click();await dialog.getByLabel("Mijoz bergan naqd pul (so'm)",{exact:true}).fill('20.00');
+      52 |  await dialog.getByLabel('Til',{exact:true}).selectOption('ru');await expect(dialog.getByLabel('Наличные от клиента (сум)',{exact:true})).toHaveValue('20.00');await expect(dialog).toContainText('12,50 сум');expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:49:242
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Saqlash', exact: true })
+    Expected: visible
+    Error: strict mode violation: getByRole('heading', { name: 'Saqlash', exact: true }) resolved to 2 elements:
+        1) <h4 class="text-xs font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-emerald-700 transition">Saqlash</h4> aka getByRole('button', { name: 'Saqlash — добавить в корзину' })
+        2) <h4 class="text-xs font-bold text-gray-900 truncate leading-snug">Saqlash</h4> aka getByRole('heading', { name: 'Saqlash' }).nth(1)
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Saqlash', exact: true }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Saqlash', exact: true })
+
+
+      47 |  await page.goto('/pos');await page.getByRole('button',{name:'Smenani ochish',exact:true}).click();let dialog=page.getByRole('dialog');await dialog.getByRole('button',{name:'Smenani ochish: oldindan ko‘rish',exact:true}).click();await dialog.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(dialog).toHaveCount(0);
+      48 |  await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill('0012345678901');await page.keyboard.press('Enter');await page.getByLabel('Saqlash miqdori',{exact:true}).fill('0.125');
+    > 49 |  const address=page.url();await page.getByLabel('Til',{exact:true}).selectOption('ru');await expect(page.getByLabel('Saqlash количество',{exact:true})).toHaveValue('0.125');await expect(page.getByRole('heading',{name:'Saqlash',exact:true})).toBeVisible();expect(page.url()).toBe(address);
+         |                                                                                                                                                                                                                                                  ^
+      50 |  await page.keyboard.press('F9');dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'Долг / кредит',exact:true}).click();await dialog.getByLabel('Срок погашения долга (необязательно)',{exact:true}).fill('2030-01-01');
+      51 |  await dialog.getByLabel('Язык',{exact:true}).selectOption('uz');await expect(dialog.getByLabel('Nasiya to‘lash muddati (ixtiyoriy)',{exact:true})).toHaveValue('2030-01-01');await dialog.getByRole('button',{name:'Naqd pul',exact:true}).click();await dialog.getByLabel("Mijoz bergan naqd pul (so'm)",{exact:true}).fill('20.00');
+      52 |  await dialog.getByLabel('Til',{exact:true}).selectOption('ru');await expect(dialog.getByLabel('Наличные от клиента (сум)',{exact:true})).toHaveValue('20.00');await expect(dialog).toContainText('12,50 сум');expect(await db.sale.count({where:{organizationId:me.organization.id}})).toBe(0);
+        at /home/fedora/Developments/POS_backup/tests/e2e/localization.spec.ts:49:242
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/error-context.md
+
+    Error Context: test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/localization-A-fractional--8317d-lost-server-acknowledgement-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+    [firefox] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+    [webkit] › tests/e2e/localization.spec.ts:40:5 › A fractional cash sale keeps canonical quantities, date and pending body across locale switches and a lost server acknowledgement 
+  9 passed (15.5s)

@@ -1,0 +1,16 @@
+✔ real receipt journals conserve batch stock, sale uses FEFO and expired units cannot be sold (1209.815978ms)
+✔ tracked multi-batch transfer receive/loss/replay preserves original source and branch stock (813.48536ms)
+✔ partial original batch return, damaged return and exact per-batch count are atomic and idempotent (704.582808ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"event":"batch_acceptance_profile","receipts":54,"expiredRows":53,"elapsedMs":3968}
+✔ expiry predicates precede paging, full CSV and branch isolation; competing sales conserve final batch (4028.288605ms)
+✔ supplier goods return targets original expired lot and receipt reversal restores no invented batch (584.507978ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8022.648339

@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-16T15:10:04.036024+00:00",
+  "baselineRevision": "f7da0ac329f5bd2d9425ea352cfb986535fbf277",
+  "scope": "registration_conflict_fix_and_local_verification",
+  "requestId": "a29acbaa-895f-4e0b-9a28-4aca5c25b182",
+  "observedDatabaseError": "duplicate key value violates unique constraint Organization_tin_key",
+  "changes": [
+    "Map unique TIN/e-mail/phone conflicts to actionable safe errors, including races",
+    "Normalize blank optional TIN/e-mail to absent and trim supplied values",
+    "Use shared safe error handler and reviewed Uzbek/Russian UI guidance",
+    "Preserve unique indexes, atomic registration and live session behavior"
+  ],
+  "tests": {
+    "integration": {
+      "tests": 21,
+      "pass": 21,
+      "fail": 0
+    },
+    "unit": {
+      "tests": 168,
+      "pass": 168,
+      "fail": 0
+    },
+    "serviceTargetTests": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0
+    },
+    "chromium": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0
+    }
+  },
+  "checks": {
+    "productionWebpackBuild": "passed after permitted sandbox retry",
+    "typecheck": "passed",
+    "changedTypeScriptESLint": "passed",
+    "i18n": {
+      "checked": 966,
+      "unreviewed": 0,
+      "missing": []
+    },
+    "publicClaims": {
+      "copyEntries": 44,
+      "capabilities": 7,
+      "proofs": 9,
+      "surfaces": 5,
+      "problems": []
+    },
+    "dataFlows": {
+      "task": "LEG-01.06",
+      "activeThirdPartyProviders": 0,
+      "reviewedFlows": 9,
+      "sourceFiles": 13,
+      "scope": "current_local_core_and_explicitly_disabled_external_boundaries",
+      "productionDeploymentVerified": false
+    },
+    "performanceGate": {
+      "task": "RELEASE-01.08",
+      "currentSearchP95Ms": 300.0169800000001,
+      "currentCheckoutP95Ms": 843.7209349999998,
+      "failed": 0,
+      "denominator": 200,
+      "rawFailed": 72,
+      "rawDenominator": 372,
+      "sourceFiles": 636,
+      "scope": "local_technical_readiness",
+      "contractualSla": false
+    },
+    "appliedMigrations": 188,
+    "migrationEvidence": "actual core-measure databaseMigrations; checksums verified by service target gate",
+    "localHttp": {
+      "registerPage": 200,
+      "readiness": 200
+    },
+    "localContainersHealthy": [
+      "app",
+      "db",
+      "local-https"
+    ],
+    "runningImageSourceHashesMatchWorkspace": true
+  },
+  "originalPlan": {
+    "total": 259,
+    "done": 185,
+    "addedDone": 0
+  },
+  "cleanup": {
+    "disposableTestDatabaseRemoved": true,
+    "onlyLocalAppRecreated": true,
+    "schemaOrMigrationChanged": false,
+    "envFilesEdited": false,
+    "realBusinessRecordsWritten": false,
+    "realProductionDeployment": false,
+    "hostTrustStoreChanged": false
+  },
+  "limitations": [
+    "Focused21 PostgreSQL tests do not represent a rerun of the prior full457 suite.",
+    "Load measurement is local synthetic service-level cash testing, not real hosting, pilot or vendor acceptance.",
+    "Raw72/372 physical conflicts were resolved within existing bounded original-key retry policy; logical final0/200.",
+    "Initial serial seed was deliberately terminated and deterministic preparation resumed with all SQL guards enabled.",
+    "Final optional psql snapshot did not consume stdin and produced an empty file; that file was removed and is not claimed as evidence. Migration counts come from actual load-harness query.",
+    "No commit or push created."
+  ],
+  "sourceHashes": {
+    "api.md": "82f4139f57ee824d4a17a14008078499bc79e73b65474c820c45baf7933983f2",
+    "docs/operations/release-service-targets.md": "21801dadcd77e5f1b6b63247294af0ec2a8898e6f06c491524bea4b3368072ce",
+    "scripts/release/check-service-targets.cjs": "edf0080af5951dc1edc85d69c67fa7f31871cdd46700733752d4adc10039916c",
+    "src/app/api/auth/register/route.ts": "2b1205d07a98de61acf7c7f3cb190ffc7293009e9cbbeb279c1ba5f1b52840a8",
+    "src/dictionary/ui.ru.json": "1a4a69d8300ab24d8918539146767b1b9b6069d3886b76f3c2c11392d4206930",
+    "src/dictionary/ui.uz.json": "39a779f97f8a0a32dc3617230decf4b449030ff8e7bc667a8776514c2639841e",
+    "src/lib/error-guidance.ts": "04f1b5656a39b66bb2aab19fa2d9f51f50cfdd194740d84fb2c3857df89ac1d1",
+    "tasks/EXECUTION_STATUS.md": "00b4cb4e04f01b76f062f5be4a50a5a2d23f48db765d086bd4572a20467cd3ec",
+    "tests/e2e/auth-form-state.spec.ts": "2cc4bc744aebadf634241544c87820cf02d249ef20f773ab7a19c5db3c7bdffc",
+    "tests/registration.integration.test.ts": "1dbcff7e19ae349c1cbaad1a188b32be5bcc33f9f18cce8f6f32ec1c7d2e6cfb"
+  },
+  "artifacts": [
+    {
+      "path": "tasks/evidence/registration-fix-20261016/browser.log",
+      "sha256": "f5a1f238c8c596796946995e705e95b06d410687b7dd9cb276d3f91b19749185"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/data-flows.json",
+      "sha256": "e65e3ec9a8f1fe291aaab27f694cd84f5c369c5b673f562c800d02cddfed8067"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/docker-build.log",
+      "sha256": "ae560d1bfed2a444768baf99ad822f86a1d484e1ebbcde5fac998331af05eaee"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/i18n.json",
+      "sha256": "cf655a438422f34c7a063fa6373e39b7efcf0146bf4e1a9bb294184a22a99ab8"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/integration.log",
+      "sha256": "283c92cd6631632050e5d9af43b5528bdd34f5971d9d30dbf58c457fbbcdebd9"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/measure-runner.txt",
+      "sha256": "0ca497e951a3c2d70cc48ca58c17d71a48d2eb682c5e23427830e8e1456aa01f"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/measure.log",
+      "sha256": "a4cbeeb61c5910528c739d1c5ffe59b8dbec8357f9d4b41405c1997964ecda3f"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/migrations.log",
+      "sha256": "9690e6203d941d3bf4ec95336f9524bc4ea9673423467f6fddadbf4d396b9ec8"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/next-build.log",
+      "sha256": "6c9e5c233b01a85c7c92f66358af4e0b2938cb7ce02798a73ed0857317785505"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/prepare-runner.txt",
+      "sha256": "93e2424d54d3d916c18452bc421f2e6d11d607b2fec95300eacc18127ef321eb"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/public-claims.json",
+      "sha256": "09cecfd49e7c01aaa3caf21a3c4c1db6c5b0d6b62e71af5c455fcad85fddadf0"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/seed-preparation.json",
+      "sha256": "4379802293d08ea2fe6aefc03e03f13122202581d7d0ebd872f2157bd31b1ad4"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/seed-preparation.log",
+      "sha256": "26508a0432194eb770166a05d1e716dff1bb1d42618bbf83e6ad459724843f5b"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/seed-resume.log",
+      "sha256": "c25ed02faa5a8ddfd9706afad65871778335e1ca726ca32f2a133f4a18304a5f"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/seed-serial.log",
+      "sha256": "1d5fc474cf26ca86d662fe156a94920bc96fd4ccf7271f68cba64a4214c4e8cd"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/service-target-check.json",
+      "sha256": "15f685efbedebd0c97792c709305cbf09d208bfd6fe0a0a81cf757bed3407f5a"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/service-targets-tests.log",
+      "sha256": "06f6fb3e77bb0a82083914cfc308098af528fc54b2ffe8430a6552c8451acc93"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/registration-fix-20261016/unit.log",
+      "sha256": "04031a1d7be3edc6f9402738dd0e7db7464a21eea34af58c7526ba17ac95f38d"
+    },
+    {
+      "path": "tasks/evidence/release-service-targets-20261016-registration.json",
+      "sha256": "72eddcc0b8cb01f20efae10a36cca262727c444e7d04b85a14e3bdeadbcb6adf"
+    },
+    {
+      "path": "tasks/evidence/service-load-20261016-registration.json",
+      "sha256": "9bb56a40534165987d405aafdc409363bf8e24eabaf7268f5d5068dc10f3d085"
+    },
+    {
+      "path": "tasks/evidence/service-load-dataset-20261016-registration.json",
+      "sha256": "3b4744004ecbcf37cf28789e646b5cb4ded92d409f455af0162b8ee2ec72d91e"
+    },
+    {
+      "path": "tasks/evidence/service-load-execution-20261016-registration.json",
+      "sha256": "4f7b31e376d9f5a28c7df9161999fa5ffccb88b53bde11d457536987bd4e60d7"
+    }
+  ]
+}

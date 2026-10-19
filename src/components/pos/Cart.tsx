@@ -1,10 +1,13 @@
 'use client';
 
+import {useTranslation} from '@/context/LocaleContext';
+
 import React, { useState } from 'react';
+import DiscountInput from './DiscountInput';
 import { CartItem as ICartItem, Customer } from '@/types';
 import CartItem from './CartItem';
 import Button from '@/components/ui/Button';
-import { formatMoney } from '@/lib/format';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCartShopping,
@@ -19,13 +22,19 @@ interface CartProps {
   subtotal: number;
   totalAmount: number;
   cartDiscount: number;
+  cartDiscountPercent?:number;
+  onSetCartPercent:(value:number|undefined)=>void;
+  discountReason:string;
+  onSetDiscountReason:(value:string)=>void;
   customer: Customer | null;
   customers: Customer[];
+  onSelectUnit:(productId:string,unit:string)=>void;
+  onUpdateTradeQuantity:(productId:string,value:string)=>void;
   onUpdateQuantity: (productId: string, quantity: number) => void;
-  onUpdateDiscount: (productId: string, discount: number) => void;
+  onUpdateDiscount: (productId: string, discount: number,percent?:number) => void;
   onRemoveItem: (productId: string) => void;
   onClearCart: () => void;
-  onSetCartDiscount: (discount: number) => void;
+  onSetCartDiscount: (discount: number,percent?:number) => void;
   onSetCustomer: (customer: Customer | null) => void;
   onCheckout: () => void;
   disabled?: boolean;
@@ -35,10 +44,10 @@ export default function Cart({
   items,
   subtotal,
   totalAmount,
-  cartDiscount,
+  cartDiscount,cartDiscountPercent,onSetCartPercent,discountReason,onSetDiscountReason,
   customer,
   customers,
-  onUpdateQuantity,
+  onUpdateQuantity,onSelectUnit,onUpdateTradeQuantity,
   onUpdateDiscount,
   onRemoveItem,
   onClearCart,
@@ -47,6 +56,10 @@ export default function Cart({
   onCheckout,
   disabled = false,
 }: CartProps) {
+ const {formatMoney}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const [showDiscountInput, setShowDiscountInput] = useState(false);
 
   return (
@@ -55,9 +68,8 @@ export default function Cart({
       <div className="p-3.5 border-b border-gray-100 bg-gray-50/50">
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">
-              Mijoz (Nasiya uchun majburiy)
-            </label>
+            <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider block mb-1">
+              {tr("Mijoz (Nasiya uchun majburiy)")}</label>
             <div className="relative">
               <select
                 value={customer?.id || ''}
@@ -67,7 +79,7 @@ export default function Cart({
                 }}
                 className="w-full text-xs font-semibold bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 focus:outline-hidden focus:border-blue-500 text-gray-800 cursor-pointer"
               >
-                <option value="">Oddiy xaridor (Mijozsiz)</option>
+                <option value="">{tr("Oddiy xaridor (Mijozsiz)")}</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.fullName} ({c.phone})
@@ -80,8 +92,8 @@ export default function Cart({
           {customer && (
             <button
               onClick={() => onSetCustomer(null)}
-              className="mt-4 p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 transition"
-              title="Mijozni olib tashlash"
+              className="mt-4 p-1.5 text-gray-600 hover:text-red-500 rounded-lg hover:bg-gray-100 transition"
+              title={tr("Mijozni olib tashlash")}
             >
               <FontAwesomeIcon icon={faTimes} className="text-xs" />
             </button>
@@ -92,21 +104,20 @@ export default function Cart({
       {/* Cart Items List */}
       <div className="flex-1 p-3 overflow-y-auto space-y-2">
         {items.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400">
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-600">
             <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl mb-3 text-gray-300">
               <FontAwesomeIcon icon={faCartShopping} />
             </div>
-            <p className="text-sm font-bold text-gray-600">Savat bo&apos;sh</p>
-            <p className="text-xs text-gray-400 mt-1 max-w-[200px]">
-              Katalogdan mahsulot tanlang yoki barkodni skaner qiling
-            </p>
+            <p className="text-sm font-bold text-gray-600">{tr("Savat bo'sh")}</p>
+            <p className="text-xs text-gray-600 mt-1 max-w-[200px]">
+              {tr("Katalogdan mahsulot tanlang yoki barkodni skaner qiling")}</p>
           </div>
         ) : (
           items.map((item) => (
             <CartItem
               key={item.product.id}
               item={item}
-              onUpdateQuantity={onUpdateQuantity}
+              onUpdateQuantity={onUpdateQuantity} onSelectUnit={onSelectUnit} onUpdateTradeQuantity={onUpdateTradeQuantity} disabled={disabled}
               onUpdateDiscount={onUpdateDiscount}
               onRemove={onRemoveItem}
             />
@@ -119,8 +130,8 @@ export default function Cart({
         <div className="p-4 border-t border-gray-200 bg-gray-50/70 space-y-3">
           {/* Discount and Subtotal rows */}
           <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between text-gray-500 font-medium">
-              <span>Oraliq summa:</span>
+            <div className="flex justify-between text-gray-600 font-medium">
+              <span>{tr("Oraliq summa:")}</span>
               <span className="font-semibold text-gray-800">{formatMoney(subtotal)}</span>
             </div>
 
@@ -131,7 +142,7 @@ export default function Cart({
                 className="text-blue-600 hover:underline inline-flex items-center gap-1 font-semibold"
               >
                 <FontAwesomeIcon icon={faPercent} className="text-[10px]" />
-                <span>Chegirma qo&apos;llash</span>
+                <span>{tr("Chegirma qo'llash")}</span>
               </button>
               {cartDiscount > 0 && (
                 <span className="font-bold text-red-600">-{formatMoney(cartDiscount)}</span>
@@ -140,25 +151,19 @@ export default function Cart({
 
             {showDiscountInput && (
               <div className="pt-1 pb-1">
-                <input
-                  type="number"
-                  placeholder="Umumiy chegirma summasi"
-                  min="0"
-                  max={subtotal}
-                  value={cartDiscount || ''}
-                  onChange={(e) => onSetCartDiscount(parseFloat(e.target.value) || 0)}
-                  className="w-full text-xs px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-red-600 font-bold focus:outline-hidden focus:border-red-400"
-                />
+                <DiscountInput label={tr("Butun chek chegirmasi")} amount={cartDiscount} percent={cartDiscountPercent} onChange={(amount,percent)=>{if(percent===undefined)onSetCartDiscount(amount);else onSetCartPercent(percent);}}/>
+
               </div>
             )}
           </div>
 
+          <label className="block text-xs text-gray-900">{tr("Chegirma sababi")}<input aria-label={tr("Chegirma sababi")} maxLength={2000} value={discountReason} onChange={e=>onSetDiscountReason(e.target.value)} className="w-full border bg-white rounded-lg p-2"/></label>
+          <p className="text-xs text-gray-700">{tr("Chegirma vakolati serverda tekshiriladi. Katta chegirmani rahbar o‘z hisobida tasdiqlaydi; sabab chekda saqlanadi.")}</p>
           {/* Big Total */}
           <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
-                Jami to&apos;lov
-              </span>
+              <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider block">
+                {tr("Jami to'lov")}</span>
               <span className="text-2xl font-black text-gray-900 leading-tight">
                 {formatMoney(totalAmount)}
               </span>
@@ -167,8 +172,8 @@ export default function Cart({
             <button
               type="button"
               onClick={onClearCart}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
-              title="Savatni tozalash"
+              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer"
+              title={tr("Savatni tozalash")}
             >
               <FontAwesomeIcon icon={faTrash} className="text-sm" />
             </button>
@@ -184,8 +189,7 @@ export default function Cart({
             rightIcon={<FontAwesomeIcon icon={faArrowRight} />}
             className="font-black text-base shadow-md shadow-emerald-500/20 py-3.5"
           >
-            To&apos;lovga o&apos;tish
-          </Button>
+            {tr("To'lovga o'tish")}</Button>
         </div>
       )}
     </div>

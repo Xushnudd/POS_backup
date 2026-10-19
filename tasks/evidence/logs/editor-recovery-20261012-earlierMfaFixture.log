@@ -1,0 +1,175 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/incident-recovery.spec.ts tests/e2e/core.spec.ts --grep incident scan and resolution|Owner sees durable inventory alert|Sync conflict requires manager terminal proof|Owner consent UI recovers
+
+[WebServer] (node:73645) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:73728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.3s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.4s)
+  ✘   3 [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (11.8s)
+(node:74703) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   4 [chromium] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (1.5s)
+(node:74877) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.7s)
+  ✓   6 [firefox] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.5s)
+  ✘   7 [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (12.3s)
+(node:76050) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   8 [firefox] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.3s)
+(node:76385) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.2s)
+  ✓  10 [webkit] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.5s)
+  ✘  11 [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (13.7s)
+(node:77170) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  12 [webkit] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.3s)
+
+
+  1) [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+
+    Error: expect(locator).not.toBeVisible() failed
+
+    Locator:  getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true })
+    Expected: not visible
+    Received: visible
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "not toBeVisible" getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true }) with timeout 10000ms
+      - waiting for getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true })
+        24 × locator resolved to <button disabled class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Saqlangan amalni qayta tekshirish</button>
+           - unexpected value "visible"
+
+
+      1079 |  const operatorContext=await browser.newContext({ignoreHTTPSErrors:true,serviceWorkers:'block'});try{const operatorPage=await operatorContext.newPage(),operatorPhone='998'+(Date.now()+1);phones.push(operatorPhone);expect((await operatorContext.request.post('https://localhost:3100/api/auth/register',{headers:origin,data:{fullName:'Browser support operator',phone:operatorPhone,password:'test-only-password',organizationName:'Support operator source'}})).ok()).toBe(true);const operator=(await(await operatorContext.request.get('https://localhost:3100/api/auth/me')).json()).data;orgs.push(operator.organization.id);users.push(operator.user.id);await db.platformOperator.create({data:{userId:operator.user.id,role:'platform_admin'}});
+      1080 |  expect((await operatorContext.request.get('https://localhost:3100/api/products?organizationId='+me.organization.id)).status()).toBe(403);await operatorPage.goto('https://localhost:3100/support');await expect(operatorPage.getByLabel('Ruxsatli biznes')).toHaveValue('');
+    > 1081 |  await page.goto('/settings/support');await page.getByLabel('Support operator',{exact:true}).selectOption(operator.user.id);await page.getByRole('checkbox',{name:store.name,exact:true}).check();await page.getByRole('checkbox',{name:'Katalog (tannarxsiz)',exact:true}).check();await page.getByLabel('Support ruxsati sababi',{exact:true}).fill('Owner approved catalog issue diagnosis');let dropped=false;await page.route('**/api/support/grants',async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();if(!dropped&&response.ok()){dropped=true;await route.abort('failed')}else await route.fulfill({response})});await page.getByRole('button',{name:'Support ruxsatini berish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).not.toBeVisible();expect(await db.supportGrant.count({where:{organizationId:me.organization.id}})).toBe(1);const grant=await db.supportGrant.findFirstOrThrow({where:{organizationId:me.organization.id}});expect(grant.approvedBy).toBe(me.user.id);expect(await db.auditLog.count({where:{entityId:grant.id,action:'support_granted'}})).toBe(1);
+           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^
+      1082 |  await operatorPage.getByRole('button',{name:'Operator ruxsatlarini yangilash',exact:true}).click();await expect(operatorPage.getByLabel('Ruxsatli biznes')).toContainText('Support consent target');await operatorPage.getByLabel('Ruxsatli biznes').selectOption(grant.id);await operatorPage.getByLabel('Support ko‘rish turi').selectOption('catalog');await operatorPage.getByRole('button',{name:'Ruxsatli ma’lumotni ko‘rish',exact:true}).click();await expect(operatorPage.getByLabel('Support natija')).toContainText('Support scoped browser item');await expect(operatorPage.getByLabel('Support natija')).not.toContainText('costPrice');expect(await db.auditLog.count({where:{entityId:grant.id,action:'support_read',actorId:operator.user.id}})).toBe(1);
+      1083 |  await page.getByLabel('Support bekor qilish sababi').fill('Unsubmitted revoke draft');
+      1084 |  let supportPrompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{supportPrompts++;await dialog.dismiss()}});
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1081:1157
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/error-context.md
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+
+    Error: expect(locator).not.toBeVisible() failed
+
+    Locator:  getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true })
+    Expected: not visible
+    Received: visible
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "not toBeVisible" getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true }) with timeout 10000ms
+      - waiting for getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true })
+        24 × locator resolved to <button disabled class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Saqlangan amalni qayta tekshirish</button>
+           - unexpected value "visible"
+
+
+      1079 |  const operatorContext=await browser.newContext({ignoreHTTPSErrors:true,serviceWorkers:'block'});try{const operatorPage=await operatorContext.newPage(),operatorPhone='998'+(Date.now()+1);phones.push(operatorPhone);expect((await operatorContext.request.post('https://localhost:3100/api/auth/register',{headers:origin,data:{fullName:'Browser support operator',phone:operatorPhone,password:'test-only-password',organizationName:'Support operator source'}})).ok()).toBe(true);const operator=(await(await operatorContext.request.get('https://localhost:3100/api/auth/me')).json()).data;orgs.push(operator.organization.id);users.push(operator.user.id);await db.platformOperator.create({data:{userId:operator.user.id,role:'platform_admin'}});
+      1080 |  expect((await operatorContext.request.get('https://localhost:3100/api/products?organizationId='+me.organization.id)).status()).toBe(403);await operatorPage.goto('https://localhost:3100/support');await expect(operatorPage.getByLabel('Ruxsatli biznes')).toHaveValue('');
+    > 1081 |  await page.goto('/settings/support');await page.getByLabel('Support operator',{exact:true}).selectOption(operator.user.id);await page.getByRole('checkbox',{name:store.name,exact:true}).check();await page.getByRole('checkbox',{name:'Katalog (tannarxsiz)',exact:true}).check();await page.getByLabel('Support ruxsati sababi',{exact:true}).fill('Owner approved catalog issue diagnosis');let dropped=false;await page.route('**/api/support/grants',async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();if(!dropped&&response.ok()){dropped=true;await route.abort('failed')}else await route.fulfill({response})});await page.getByRole('button',{name:'Support ruxsatini berish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).not.toBeVisible();expect(await db.supportGrant.count({where:{organizationId:me.organization.id}})).toBe(1);const grant=await db.supportGrant.findFirstOrThrow({where:{organizationId:me.organization.id}});expect(grant.approvedBy).toBe(me.user.id);expect(await db.auditLog.count({where:{entityId:grant.id,action:'support_granted'}})).toBe(1);
+           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^
+      1082 |  await operatorPage.getByRole('button',{name:'Operator ruxsatlarini yangilash',exact:true}).click();await expect(operatorPage.getByLabel('Ruxsatli biznes')).toContainText('Support consent target');await operatorPage.getByLabel('Ruxsatli biznes').selectOption(grant.id);await operatorPage.getByLabel('Support ko‘rish turi').selectOption('catalog');await operatorPage.getByRole('button',{name:'Ruxsatli ma’lumotni ko‘rish',exact:true}).click();await expect(operatorPage.getByLabel('Support natija')).toContainText('Support scoped browser item');await expect(operatorPage.getByLabel('Support natija')).not.toContainText('costPrice');expect(await db.auditLog.count({where:{entityId:grant.id,action:'support_read',actorId:operator.user.id}})).toBe(1);
+      1083 |  await page.getByLabel('Support bekor qilish sababi').fill('Unsubmitted revoke draft');
+      1084 |  let supportPrompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{supportPrompts++;await dialog.dismiss()}});
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1081:1157
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/error-context.md
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+
+    Error: expect(locator).not.toBeVisible() failed
+
+    Locator:  getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true })
+    Expected: not visible
+    Received: visible
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "not toBeVisible" getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true }) with timeout 10000ms
+      - waiting for getByRole('button', { name: 'Saqlangan amalni qayta tekshirish', exact: true })
+        23 × locator resolved to <button disabled class="min-h-11 min-w-11 inline-flex items-center justify-center transition-all duration-150 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] bg-blue-600 hover:bg-blue-700 text-white shadow-xs focus:ring-blue-500 px-4 py-2 text-sm rounded-xl gap-2 font-medium  ">Saqlangan amalni qayta tekshirish</button>
+           - unexpected value "visible"
+
+
+      1079 |  const operatorContext=await browser.newContext({ignoreHTTPSErrors:true,serviceWorkers:'block'});try{const operatorPage=await operatorContext.newPage(),operatorPhone='998'+(Date.now()+1);phones.push(operatorPhone);expect((await operatorContext.request.post('https://localhost:3100/api/auth/register',{headers:origin,data:{fullName:'Browser support operator',phone:operatorPhone,password:'test-only-password',organizationName:'Support operator source'}})).ok()).toBe(true);const operator=(await(await operatorContext.request.get('https://localhost:3100/api/auth/me')).json()).data;orgs.push(operator.organization.id);users.push(operator.user.id);await db.platformOperator.create({data:{userId:operator.user.id,role:'platform_admin'}});
+      1080 |  expect((await operatorContext.request.get('https://localhost:3100/api/products?organizationId='+me.organization.id)).status()).toBe(403);await operatorPage.goto('https://localhost:3100/support');await expect(operatorPage.getByLabel('Ruxsatli biznes')).toHaveValue('');
+    > 1081 |  await page.goto('/settings/support');await page.getByLabel('Support operator',{exact:true}).selectOption(operator.user.id);await page.getByRole('checkbox',{name:store.name,exact:true}).check();await page.getByRole('checkbox',{name:'Katalog (tannarxsiz)',exact:true}).check();await page.getByLabel('Support ruxsati sababi',{exact:true}).fill('Owner approved catalog issue diagnosis');let dropped=false;await page.route('**/api/support/grants',async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();if(!dropped&&response.ok()){dropped=true;await route.abort('failed')}else await route.fulfill({response})});await page.getByRole('button',{name:'Support ruxsatini berish: oldindan ko‘rish',exact:true}).click();await page.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();await expect(page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true})).not.toBeVisible();expect(await db.supportGrant.count({where:{organizationId:me.organization.id}})).toBe(1);const grant=await db.supportGrant.findFirstOrThrow({where:{organizationId:me.organization.id}});expect(grant.approvedBy).toBe(me.user.id);expect(await db.auditLog.count({where:{entityId:grant.id,action:'support_granted'}})).toBe(1);
+           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^
+      1082 |  await operatorPage.getByRole('button',{name:'Operator ruxsatlarini yangilash',exact:true}).click();await expect(operatorPage.getByLabel('Ruxsatli biznes')).toContainText('Support consent target');await operatorPage.getByLabel('Ruxsatli biznes').selectOption(grant.id);await operatorPage.getByLabel('Support ko‘rish turi').selectOption('catalog');await operatorPage.getByRole('button',{name:'Ruxsatli ma’lumotni ko‘rish',exact:true}).click();await expect(operatorPage.getByLabel('Support natija')).toContainText('Support scoped browser item');await expect(operatorPage.getByLabel('Support natija')).not.toContainText('costPrice');expect(await db.auditLog.count({where:{entityId:grant.id,action:'support_read',actorId:operator.user.id}})).toBe(1);
+      1083 |  await page.getByLabel('Support bekor qilish sababi').fill('Unsubmitted revoke draft');
+      1084 |  let supportPrompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{supportPrompts++;await dialog.dismiss()}});
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1081:1157
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/error-context.md
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+    [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+    [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+  9 passed (1.1m)

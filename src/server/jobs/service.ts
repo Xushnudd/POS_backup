@@ -1,0 +1,129 @@
+import {assertCurrentConsent} from '../customers/consent'
+import {reminderInputSchema,reminderPayloadSchema,prepareCustomerReminder} from '../customers/reminders'
+import {randomUUID} from 'node:crypto'
+import {Prisma,type BackgroundJob} from '@prisma/client'
+import {z} from 'zod'
+import {prisma} from '@/lib/prisma'
+import type {TokenPayload} from '@/lib/auth'
+import {AccessError} from '../auth/policy'
+import {assertLiveContext,audit,runOperation} from '../operations'
+import {scanOrganization} from '../monitoring/service'
+import {catalogExport,exportFilter} from './catalog-export'
+import {reportExport,reportExportSchema} from './report-export'
+import {streamTenantExport} from './tenant-export'
+import {MAX_EXPORT_BYTES} from './catalog-export'
+import {assertJobLease,tenantExportSink,readExportChunk,lockExportStorage,discardExportAttempt} from './export-chunks'
+export const jobSchema=z.object({operationId:z.string().uuid(),type:z.enum(['reconciliation','catalog_export','tenant_export','report_export','customer_reminder']),reminder:reminderInputSchema.optional(),filter:exportFilter.optional(),report:reportExportSchema.optional(),storeId:z.string().uuid().optional(),reason:z.string().trim().min(3).max(2000)}).strict().refine(v=>v.type==='customer_reminder'?!!v.reminder&&!v.report&&!v.filter&&!v.storeId:!v.reminder&&(v.type==='report_export'?!!v.report&&!v.storeId&&!v.filter:!v.report&&(v.type==='catalog_export'?!v.storeId:v.type==='tenant_export'?!v.storeId&&!v.filter:!v.filter)),'Job payload does not match its type')
+export const retryJobSchema=z.object({operationId:z.string().uuid(),reason:z.string().trim().min(3).max(2000)}).strict()
+const payloadSchema=z.object({reminder:reminderPayloadSchema.optional(),storeId:z.string().uuid().optional(),filter:exportFilter.optional(),report:reportExportSchema.optional()}).strict()
+async function passwordSession(tx:Prisma.TransactionClient,ctx:TokenPayload){if(!await tx.session.findFirst({where:{id:ctx.sessionId,organizationId:ctx.organizationId,userId:ctx.userId,authenticationMethod:'password'}}))throw new AccessError(403,'PASSWORD_SESSION_REQUIRED')}
+function owner(ctx:TokenPayload){if(ctx.role!=='owner')throw new AccessError(403,'OWNER_REQUIRED')}
+async function event(tx:Prisma.TransactionClient,job:Pick<BackgroundJob,'id'|'attempts'|'generation'>,kind:string,code?:string){await tx.jobEvent.create({data:{jobId:job.id,event:kind,attempt:job.attempts,generation:job.generation,code}})}
+function publicJob(job:BackgroundJob){const {leaseToken,payload,result,...safe}=job;void leaseToken;void payload;return {...safe,result:job.type.endsWith('_export')||job.type==='customer_reminder'?null:result}}
+async function authorize(tx:Prisma.TransactionClient,ctx:TokenPayload,job:BackgroundJob,reason:string){return tx.jobAuthorization.create({data:{jobId:job.id,organizationId:ctx.organizationId,generation:job.generation,userId:ctx.userId,sessionId:ctx.sessionId,reason}})}
+export async function enqueueJob(ctx:TokenPayload,input:z.infer<typeof jobSchema>){owner(ctx);return runOperation(ctx,'job.enqueue',input.operationId,input,async tx=>{
+ await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'jobs:'+ctx.organizationId},0))::text`
+ const notice=input.type==='customer_reminder'&&input.reminder?await tx.$queryRaw<{day:string}[]>`SELECT to_char(clock_timestamp() AT TIME ZONE timezone,'YYYY-MM-DD') AS day FROM "Organization" WHERE id=${ctx.organizationId}`:null
+ const reminderPayload=input.reminder&&notice?{...input.reminder,noticeDate:notice[0].day}:undefined
+ if(reminderPayload){
+  await assertCurrentConsent(tx,ctx.organizationId,reminderPayload.customerId,'service_reminder','in_person',reminderPayload.consentEventId)
+  const existing=await tx.backgroundJob.findFirst({where:{organizationId:ctx.organizationId,type:'customer_reminder',payload:{equals:{reminder:reminderPayload}}}})
+  if(existing)return publicJob(existing)
+ }
+ if(input.storeId&&!await tx.store.findFirst({where:{id:input.storeId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(404,'STORE_NOT_FOUND')
+ if(await tx.backgroundJob.count({where:{organizationId:ctx.organizationId,state:{in:['queued','running']}}})>=20)throw new AccessError(429,'JOB_LIMIT')
+ const job=await tx.backgroundJob.create({data:{organizationId:ctx.organizationId,type:input.type,payload:reminderPayload?{reminder:reminderPayload}:input.type==='report_export'?{report:input.report!}:input.type==='catalog_export'?{filter:input.filter??{active:'all'}}:input.storeId?{storeId:input.storeId}:{},expiresAt:new Date(Date.now()+3600000)}})
+ await authorize(tx,ctx,job,input.reason);await event(tx,job,'queued');await audit(tx,ctx,'BackgroundJob',job.id,'job_queued',{type:job.type,storeId:input.storeId,reason:input.reason});return publicJob(job)
+ },async tx=>{if(input.type==='tenant_export')await passwordSession(tx,ctx);if(input.reminder)await assertCurrentConsent(tx,ctx.organizationId,input.reminder.customerId,'service_reminder','in_person',input.reminder.consentEventId)})}
+export async function retryJob(ctx:TokenPayload,id:string,input:z.infer<typeof retryJobSchema>){owner(ctx);return runOperation(ctx,'job.retry',input.operationId,{id,...input},async tx=>{
+ await tx.$queryRaw`SELECT id FROM "BackgroundJob" WHERE id=${id} AND "organizationId"=${ctx.organizationId} FOR UPDATE`
+ const job=await tx.backgroundJob.findFirst({where:{id,organizationId:ctx.organizationId}});if(!job)throw new AccessError(404,'NOT_FOUND')
+ if(job.state!=='dead'||job.generation>=9)throw new AccessError(409,'JOB_NOT_RETRYABLE')
+ const payload=payloadSchema.parse(job.payload);if(job.type==='customer_reminder'?!payload.reminder||!!payload.report||!!payload.filter||!!payload.storeId:!!payload.reminder||(job.type==='report_export'?!payload.report||!!payload.filter||!!payload.storeId:!!payload.report))throw new AccessError(400,'UNSUPPORTED_JOB');if(payload.storeId&&!await tx.store.findFirst({where:{id:payload.storeId,organizationId:ctx.organizationId,isActive:true}}))throw new AccessError(404,'STORE_NOT_FOUND')
+ const next={...job,generation:job.generation+1};await authorize(tx,ctx,next,input.reason)
+ const updated=await tx.backgroundJob.update({where:{id},data:{generation:next.generation,state:'queued',maxAttempts:job.attempts+3,nextRunAt:new Date(),expiresAt:new Date(Date.now()+3600000),lastError:null,result:Prisma.DbNull,updatedAt:new Date()}})
+ await event(tx,updated,'manual_retry');await audit(tx,ctx,'BackgroundJob',id,'job_retried',{generation:updated.generation,reason:input.reason,previousError:job.lastError});return publicJob(updated)
+ },async tx=>{const job=await tx.backgroundJob.findFirst({where:{id,organizationId:ctx.organizationId},select:{type:true,payload:true}});if(job?.type==='tenant_export')await passwordSession(tx,ctx);if(job?.type==='customer_reminder'){const payload=payloadSchema.parse(job.payload);if(!payload.reminder)throw new AccessError(400,'UNSUPPORTED_JOB');await assertCurrentConsent(tx,ctx.organizationId,payload.reminder.customerId,'service_reminder','in_person',payload.reminder.consentEventId)}})}
+export async function listJobs(ctx:TokenPayload,page:number,state?:string,options:{limit?:number;sort?:'newest'|'oldest';search?:string}={}){
+ owner(ctx);const {limit,sort,search}=z.object({limit:z.number().int().min(1).max(200).default(20),sort:z.enum(['newest','oldest']).default('newest'),search:z.string().trim().max(200).default('')}).strict().parse(options);
+ if(!Number.isSafeInteger(page)||page<1||(page-1)*limit>2147483647||state&&!['queued','running','succeeded','dead','cancelled'].includes(state))throw new AccessError(400,'INVALID_PAGINATION');
+ return prisma.$transaction(async tx=>{await assertLiveContext(tx,ctx);const where={organizationId:ctx.organizationId,...(state?{state}:{}),...(search?{OR:[{id:{contains:search}},{type:{contains:search,mode:'insensitive' as const}}]}:{})};
+  return {rows:(await tx.backgroundJob.findMany({where,orderBy:[{createdAt:sort==='oldest'?'asc':'desc'},{id:'asc'}],skip:(page-1)*limit,take:limit})).map(publicJob),total:await tx.backgroundJob.count({where}),limit};
+ },{isolationLevel:'RepeatableRead'});
+}
+export async function jobEvents(ctx:TokenPayload,id:string){owner(ctx);return prisma.$transaction(async tx=>{await assertLiveContext(tx,ctx);if(!await tx.backgroundJob.findFirst({where:{id,organizationId:ctx.organizationId}}))throw new AccessError(404,'NOT_FOUND');return tx.jobEvent.findMany({where:{jobId:id},orderBy:[{createdAt:'desc'},{id:'desc'}],take:100})},{isolationLevel:'RepeatableRead'})}
+async function liveAuthorization(tx:Prisma.TransactionClient,job:BackgroundJob,lock=false){
+ const rows=await tx.$queryRaw<{valid:boolean}[]>(Prisma.sql`SELECT TRUE AS valid FROM "JobAuthorization" a JOIN "Session" s ON s.id=a."sessionId" JOIN "User" u ON u.id=a."userId" JOIN "OrganizationUser" m ON m."userId"=a."userId" AND m."organizationId"=a."organizationId" WHERE a."jobId"=${job.id} AND a.generation=${job.generation} AND a."organizationId"=${job.organizationId} AND s."organizationId"=a."organizationId" AND s."userId"=a."userId" AND s."revokedAt" IS NULL AND s."expiresAt">clock_timestamp() AND s."idleExpiresAt">clock_timestamp() AND (${job.type}<>'tenant_export' OR s."authenticationMethod"='password') AND m.role='owner' AND m."isActive" AND u."isActive" ${lock?Prisma.sql`FOR SHARE OF s,m,u`:Prisma.empty}`)
+ if(!rows[0]?.valid)throw new AccessError(403,'AUTHORIZATION_CHANGED')
+ const payload=payloadSchema.parse(job.payload);if(job.type==='customer_reminder'?!payload.reminder||!!payload.report||!!payload.filter||!!payload.storeId:!!payload.reminder||(job.type==='report_export'?!payload.report||!!payload.filter||!!payload.storeId:!!payload.report))throw new AccessError(400,'UNSUPPORTED_JOB');if(payload.storeId&&!await tx.store.findFirst({where:{id:payload.storeId,organizationId:job.organizationId,isActive:true}}))throw new AccessError(403,'AUTHORIZATION_CHANGED');return payload
+}
+export async function recoverJobs(){return prisma.$transaction(async tx=>{
+ const rows=await tx.$queryRaw<BackgroundJob[]>`SELECT * FROM "BackgroundJob" WHERE (state='running' AND "leaseUntil"<=NOW()) OR (state='queued' AND "expiresAt"<=NOW()) ORDER BY "createdAt",id FOR UPDATE SKIP LOCKED LIMIT 25`
+ for(const job of rows){const expired=job.expiresAt.getTime()<=Date.now(),state=expired?'cancelled':job.attempts>=job.maxAttempts?'dead':'queued',code=expired?'JOB_EXPIRED':'LEASE_EXPIRED';await tx.backgroundJob.update({where:{id:job.id},data:{state,leaseToken:null,leaseUntil:null,lastError:code,nextRunAt:new Date(Date.now()+1000*Math.min(300,2**job.attempts)),updatedAt:new Date()}});await event(tx,job,state==='queued'?'lease_lost':state,code)}return rows.length
+ })}
+export async function claimJob(){return prisma.$transaction(async tx=>{
+ const token=randomUUID(),rows=await tx.$queryRaw<BackgroundJob[]>`UPDATE "BackgroundJob" SET state='running',attempts=attempts+1,"leaseToken"=${token},"leaseUntil"=NOW()+INTERVAL '30 seconds',"heartbeatAt"=NOW(),"updatedAt"=NOW() WHERE id=(SELECT id FROM "BackgroundJob" WHERE state='queued' AND "nextRunAt"<=NOW() AND "expiresAt">NOW() AND attempts<"maxAttempts" ORDER BY "nextRunAt",id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *`
+ const job=rows[0];if(job)await event(tx,job,'claimed');return job??null
+ })}
+export async function heartbeatJob(job:BackgroundJob){const changed=await prisma.backgroundJob.updateMany({where:{id:job.id,state:'running',leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}},data:{leaseUntil:new Date(Date.now()+30000),heartbeatAt:new Date(),updatedAt:new Date()}});return changed.count===1}
+export async function failJob(job:BackgroundJob,code:'WORK_FAILED'|'AUTHORIZATION_CHANGED'|'EXPORT_TOO_LARGE'|'EXPORT_SCHEMA_UNREVIEWED'|'EXPORT_CORRUPTED'='WORK_FAILED'){return prisma.$transaction(async tx=>{
+ await tx.$queryRaw`SELECT id FROM "BackgroundJob" WHERE id=${job.id} FOR UPDATE`
+ const current=await tx.backgroundJob.findUnique({where:{id:job.id}});if(!current||current.state!=='running'||current.leaseToken!==job.leaseToken)return false
+ const state=code!=='WORK_FAILED'||current.attempts>=current.maxAttempts?'dead':'queued',changed=await tx.backgroundJob.update({where:{id:job.id},data:{state,leaseToken:null,leaseUntil:null,lastError:code,nextRunAt:new Date(Date.now()+1000*Math.min(300,2**current.attempts)),updatedAt:new Date()}});await event(tx,changed,state==='queued'?'retry':'dead',code);return true
+ })}
+async function publishJob(tx:Prisma.TransactionClient,source:BackgroundJob,result:Prisma.InputJsonObject){
+ await liveAuthorization(tx,source,true)
+ const updated=await tx.backgroundJob.updateMany({where:{id:source.id,state:'running',generation:source.generation,leaseToken:source.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}},data:{state:'succeeded',leaseToken:null,leaseUntil:null,result,lastError:null,updatedAt:new Date()}})
+ if(updated.count!==1)throw new AccessError(409,'JOB_LEASE_LOST')
+ await event(tx,source,'succeeded');await tx.auditLog.create({data:{organizationId:source.organizationId,actorId:null,entityType:'BackgroundJob',entityId:source.id,action:'system_job_succeeded',afterData:{type:source.type,generation:source.generation,attempt:source.attempts,result}}})
+ return result
+}
+async function executeTenantExport(job:BackgroundJob){
+ await prisma.$transaction(async tx=>{await assertJobLease(tx,job);await liveAuthorization(tx,job)})
+ const sink=tenantExportSink(job,liveAuthorization)
+ const meta=await streamTenantExport(job.organizationId,sink.write)
+ const chunkCount=await sink.finish()
+ // Preserve the legacy bounded inline contract for existing small archives.
+ const inline=meta.size<=MAX_EXPORT_BYTES&&meta.rowCount<=100000
+ let data:Buffer|null=null
+ if(inline){
+  const chunks:Buffer[]=[]
+  for(let ordinal=0;ordinal<chunkCount;ordinal++)chunks.push(await readExportChunk(prisma,{jobId:job.id,organizationId:job.organizationId,chunkAttempt:job.leaseToken},ordinal))
+  data=Buffer.concat(chunks)
+ }
+ return prisma.$transaction(async tx=>{
+  await lockExportStorage(tx);await assertJobLease(tx,job);await liveAuthorization(tx,job,true)
+  await tx.jobExport.create({data:{jobId:job.id,organizationId:job.organizationId,...meta,data,chunkCount:inline?0:chunkCount,chunkAttempt:inline?null:job.leaseToken,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}})
+  const result={...meta,downloadPath:'/api/jobs/'+job.id+'/export'}
+  await publishJob(tx,job,result)
+  if(inline)await tx.jobExportChunk.deleteMany({where:{jobId:job.id,attempt:job.leaseToken!}})
+  return result
+ },{timeout:30000})
+}
+export async function executeJob(job:BackgroundJob){let active=true,inFlight:Promise<boolean>|undefined;const timer=setInterval(()=>{if(active&&!inFlight){inFlight=heartbeatJob(job).catch(()=>false);void inFlight.finally(()=>{inFlight=undefined})}},5000);try{
+ if(job.type==='tenant_export')return {succeeded:true,result:await executeTenantExport(job)}
+ const result=await prisma.$transaction(async tx=>{
+  const source=await tx.backgroundJob.findFirst({where:{id:job.id,state:'running',generation:job.generation,leaseToken:job.leaseToken,leaseUntil:{gt:new Date()},expiresAt:{gt:new Date()}}});if(!source)throw new AccessError(409,'JOB_LEASE_LOST')
+  const payload=await liveAuthorization(tx,source);let result:Prisma.InputJsonObject;
+  if(source.type==='customer_reminder'&&payload.reminder){
+   const authorization=await tx.jobAuthorization.findUniqueOrThrow({where:{jobId_generation:{jobId:source.id,generation:source.generation}}})
+   const membership=await tx.organizationUser.findUniqueOrThrow({where:{organizationId_userId:{organizationId:source.organizationId,userId:authorization.userId}},include:{userStores:true}})
+   const context={userId:authorization.userId,organizationId:source.organizationId,organizationUserId:membership.id,role:membership.role,storeIds:membership.userStores.map(row=>row.storeId),sessionId:authorization.sessionId}
+   result=await prepareCustomerReminder(tx,context,source,payload.reminder)
+  }else if(source.type==='reconciliation')result=await scanOrganization(tx,source.organizationId,payload.storeId?[payload.storeId]:undefined)
+  else if(source.type==='catalog_export'||source.type==='tenant_export'||source.type==='report_export'){
+   const authorization=source.type==='report_export'?await tx.jobAuthorization.findUniqueOrThrow({where:{jobId_generation:{jobId:source.id,generation:source.generation}}}):null;
+   const membership=authorization?await tx.organizationUser.findUniqueOrThrow({where:{organizationId_userId:{organizationId:source.organizationId,userId:authorization.userId}},include:{userStores:true}}):null;
+   const context=authorization&&membership?{userId:authorization.userId,organizationId:source.organizationId,organizationUserId:membership.id,role:membership.role,storeIds:membership.userStores.map(row=>row.storeId),sessionId:authorization.sessionId}:null;
+   const exported=source.type==='report_export'&&context&&payload.report?await reportExport(context,payload.report):await catalogExport(source.organizationId,payload.filter??{active:'all'});
+   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'exports:'+source.organizationId},0))::text`;
+   const used=await tx.jobExport.aggregate({where:{organizationId:source.organizationId,job:{type:{not:'tenant_export'}},expiresAt:{gt:new Date()},data:{not:null}},_sum:{size:true}});
+   const scheduled=await tx.reportScheduleRun.aggregate({where:{organizationId:source.organizationId,expiresAt:{gt:new Date()},result:{not:Prisma.DbNull}},_sum:{size:true}});
+   if((used._sum.size??0)+(scheduled._sum.size??0)+exported.size>32*1024*1024)throw new AccessError(413,'EXPORT_QUOTA');
+   const {data,...meta}=exported;await tx.jobExport.create({data:{jobId:source.id,organizationId:source.organizationId,data,...meta,asOf:new Date(meta.asOf),expiresAt:new Date(Date.now()+86400000)}});result={...meta,downloadPath:'/api/jobs/'+source.id+'/export'};
+  }else throw new AccessError(400,'UNSUPPORTED_JOB')
+  return publishJob(tx,source,result)
+ },{isolationLevel:'ReadCommitted',timeout:90000});return {succeeded:true,result}
+ }catch(e){await failJob(job,e instanceof AccessError&&['AUTHORIZATION_CHANGED','CUSTOMER_CONSENT_REQUIRED'].includes(e.code)?'AUTHORIZATION_CHANGED':e instanceof AccessError&&e.code==='EXPORT_TOO_LARGE'?'EXPORT_TOO_LARGE':e instanceof AccessError&&e.code==='EXPORT_SCHEMA_UNREVIEWED'?'EXPORT_SCHEMA_UNREVIEWED':e instanceof AccessError&&e.code==='EXPORT_CORRUPTED'?'EXPORT_CORRUPTED':'WORK_FAILED');return {succeeded:false}}
+ finally{active=false;clearInterval(timer);if(inFlight)await inFlight;if(job.type==='tenant_export')await discardExportAttempt(job)}
+}

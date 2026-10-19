@@ -1,0 +1,167 @@
+[WebServer] (node:858002) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:858163) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (1.2m)
+(node:862784) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [firefox] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (1.1m)
+(node:865428) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [webkit] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (1.1m)
+
+
+  1) [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Hisobot nomi', { exact: true })
+        - locator resolved to <input value="" id="_r_2d_" type="text" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("Reviewed internal KPI")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        139 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      15 |  await page.goto('/reports/plans');await expect(page.getByText('Hali hisobot jadvali yaratilmagan.',{exact:true})).toBeVisible();
+      16 |  await expect(page.getByLabel('Avtomatik hisobot yaratishga ruxsat',{exact:true})).not.toBeChecked();
+    > 17 |  await page.getByLabel('Hisobot nomi',{exact:true}).fill('Reviewed internal KPI');await page.getByLabel('Sozlash sababi',{exact:true}).fill('Owner reviewed KPI and retention');
+         |                                                     ^
+      18 |  await page.getByRole('button',{name:'KPI va prognozni oldindan ko‘rish',exact:true}).click();
+      19 |  await expect(page.getByRole('region',{name:'Hisobot oldindan ko‘rish'}).getByRole('table')).toBeVisible();expect(await db.reportSchedule.count({where:{organizationId:me.organization.id}})).toBe(0);
+      20 |  const bodies:string[]=[];let lost=false;
+        at /home/fedora/Developments/POS_backup/tests/e2e/report-plans.spec.ts:17:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/error-context.md
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Hisobot nomi', { exact: true })
+        - locator resolved to <input value="" id="_r_2d_" type="text" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("Reviewed internal KPI")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        122 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      15 |  await page.goto('/reports/plans');await expect(page.getByText('Hali hisobot jadvali yaratilmagan.',{exact:true})).toBeVisible();
+      16 |  await expect(page.getByLabel('Avtomatik hisobot yaratishga ruxsat',{exact:true})).not.toBeChecked();
+    > 17 |  await page.getByLabel('Hisobot nomi',{exact:true}).fill('Reviewed internal KPI');await page.getByLabel('Sozlash sababi',{exact:true}).fill('Owner reviewed KPI and retention');
+         |                                                     ^
+      18 |  await page.getByRole('button',{name:'KPI va prognozni oldindan ko‘rish',exact:true}).click();
+      19 |  await expect(page.getByRole('region',{name:'Hisobot oldindan ko‘rish'}).getByRole('table')).toBeVisible();expect(await db.reportSchedule.count({where:{organizationId:me.organization.id}})).toBe(0);
+      20 |  const bodies:string[]=[];let lost=false;
+        at /home/fedora/Developments/POS_backup/tests/e2e/report-plans.spec.ts:17:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-firefox/error-context.md
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/report-plans-Owner-report--03260--original-disabled-schedule-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Hisobot nomi', { exact: true })
+        - locator resolved to <input value="" id="_r_2d_" type="text" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("Reviewed internal KPI")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        126 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      15 |  await page.goto('/reports/plans');await expect(page.getByText('Hali hisobot jadvali yaratilmagan.',{exact:true})).toBeVisible();
+      16 |  await expect(page.getByLabel('Avtomatik hisobot yaratishga ruxsat',{exact:true})).not.toBeChecked();
+    > 17 |  await page.getByLabel('Hisobot nomi',{exact:true}).fill('Reviewed internal KPI');await page.getByLabel('Sozlash sababi',{exact:true}).fill('Owner reviewed KPI and retention');
+         |                                                     ^
+      18 |  await page.getByRole('button',{name:'KPI va prognozni oldindan ko‘rish',exact:true}).click();
+      19 |  await expect(page.getByRole('region',{name:'Hisobot oldindan ko‘rish'}).getByRole('table')).toBeVisible();expect(await db.reportSchedule.count({where:{organizationId:me.organization.id}})).toBe(0);
+      20 |  const bodies:string[]=[];let lost=false;
+        at /home/fedora/Developments/POS_backup/tests/e2e/report-plans.spec.ts:17:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-webkit/error-context.md
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/report-plans-Owner-report--03260--original-disabled-schedule-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+    [firefox] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+    [webkit] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 

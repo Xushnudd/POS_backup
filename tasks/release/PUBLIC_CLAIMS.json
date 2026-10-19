@@ -1,0 +1,1027 @@
+{
+  "schemaVersion": 1,
+  "scope": "Reviewed source-owned wording of a local candidate release; no production/pilot, uptime, legal, vendor or physical-device certification.",
+  "proofs": {
+    "localization": {
+      "file": "tasks/evidence/localization-20261015.json",
+      "sha256": "f064575f56eee40a8d4fe56330a56b55f8ac27661f37d56d8bf7b277ea378b69",
+      "purpose": "Fresh local unit/PG/native-browser cases and source fingerprints; no deployment or hardware certification."
+    },
+    "ledger": {
+      "file": "tasks/evidence/release-ledger-20261011.json",
+      "sha256": "1cd3c6ccf1d57e68c4603963855fe837811c0741c6b8a6953856a24e18d212fd",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "lists": {
+      "file": "tasks/evidence/list-journals-20261015.json",
+      "sha256": "2b121a1b5bcbb9845395c61f37edff4c2ac6853e44fa0288002b8783a3992302",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "billing": {
+      "file": "tasks/evidence/saas-core-20261010.json",
+      "sha256": "5700c16a01b3d8060d3a984e92736430b3d2839c6e07b09c1c350511745f0287",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "readonly": {
+      "file": "tasks/evidence/subscription-readonly-20261010.json",
+      "sha256": "cb402c89939aa484a0297adc5d9769deb222141cdac08f9545a0973465699376",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "permission": {
+      "file": "tasks/evidence/permission-receipt-20261010.json",
+      "sha256": "2f59ef9285a12cf6979c3e1c539cce73714185563874bd902ec31bb19026b7c4",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "editors": {
+      "file": "tasks/evidence/ux-final-20261012.json",
+      "sha256": "7e94e732a570028f8cb5f2793f046defb1f82f0c4d78ac1f51a4a10769591700",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "import": {
+      "file": "tasks/evidence/import-editor-state-20261012.json",
+      "sha256": "0e8214f28af43e3a6abb1e06e2cae2093d1ca98d06cc474cd2fc971e3bc84e50",
+      "purpose": "Historical scoped rehearsal. Original restrictions/case counts remain in this immutable manifest; a partial proof is not whole-original acceptance."
+    },
+    "currentCore": {
+      "file": "tasks/evidence/public-claims-core-20261015.json",
+      "sha256": "818e1f2b9ca0d49142b906f7c993198ebf789e0227bec9c8fadb12ab1533f848",
+      "purpose": "Fresh100-case native PostgreSQL acceptance including actual guided onboarding/catalog import and all listed bounded capability services; no deployment/pilot claim."
+    }
+  },
+  "groups": {
+    "checkout": {
+      "originalIds": [
+        "POS-02.03",
+        "POS-02.04",
+        "POS-02.06",
+        "RET-01.01",
+        "RET-01.05",
+        "CRM-01.07"
+      ],
+      "proofs": [
+        "ledger",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Exact cash/credit/discount/refund/customer statement. Bank/card records require manual proof and are not provider settlement.",
+      "sourceAnchors": {
+        "src/server/sales/service.ts": {
+          "proof": "currentCore",
+          "sha256": "8ab5b37c9b1e93aba764416f425cdc4d02aa501941208b9e5f849b021aab3ecc"
+        },
+        "src/server/returns/service.ts": {
+          "proof": "currentCore",
+          "sha256": "12640edb5ae06a685d7f7e228c57f554dcf3d7d624709db2edbd204e1bf9e856"
+        },
+        "tests/reports-finance.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "312ec37d220f63262425cc96f872aacb4feddb7c6864be9f508397902c0f80da"
+        }
+      }
+    },
+    "tenantRoles": {
+      "originalIds": [
+        "SEC-01.01",
+        "SEC-01.02",
+        "SEC-01.03",
+        "SEC-01.04",
+        "SEC-01.06"
+      ],
+      "proofs": [
+        "permission",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Server-side tenant/branch/session/role scope. No broad platform support access or real-device certification.",
+      "sourceAnchors": {
+        "src/server/auth/policy.ts": {
+          "proof": "currentCore",
+          "sha256": "ceb7f2be3cfc2e974a8af65e92de990c4b172011c20f8da2e05142f838ed85b3"
+        },
+        "tests/receipt-identity.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052"
+        }
+      }
+    },
+    "inventory": {
+      "originalIds": [
+        "CAT-01.01",
+        "CAT-01.02",
+        "PUR-01.01",
+        "PUR-01.02",
+        "INV-01.01",
+        "INV-01.04",
+        "INV-02.01",
+        "INV-02.03"
+      ],
+      "proofs": [
+        "lists",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Catalog and ordinary barcodes, source stock/purchases, transfers and counts. No scale/hardware format assumption.",
+      "sourceAnchors": {
+        "src/server/catalog/service.ts": {
+          "proof": "currentCore",
+          "sha256": "39a042bdf1c7d76e3934b45a6433c67e0045be8f8e2fba93735439b1e3ccadb8"
+        },
+        "src/server/inventory/documents.ts": {
+          "proof": "currentCore",
+          "sha256": "20a8e011286ccad10f3b1f35a87c3e285b9fe86ee89f1e99865d8f41adf21acd"
+        },
+        "src/server/inventory/counts.ts": {
+          "proof": "currentCore",
+          "sha256": "38bfc1b70ac2acb1f0c4d54b3eff170444509b1f62887a09c1c2bb7742c18d2f"
+        },
+        "tests/catalog-purchase.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "1128241ae470b2b1db28fb215661e86da66a3bbbbb071af955fd979d013fdc61"
+        }
+      }
+    },
+    "reports": {
+      "originalIds": [
+        "FIN-01.02",
+        "FIN-01.03",
+        "REP-01.04",
+        "REP-01.06",
+        "REP-01.08",
+        "REP-01.09"
+      ],
+      "proofs": [
+        "ledger",
+        "lists",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Shift cash journals and bounded filtered reports/CSV with source cutoff and permission rules.",
+      "sourceAnchors": {
+        "src/server/reports/financial.ts": {
+          "proof": "currentCore",
+          "sha256": "5eeafa8ebbe1f86394661b1e96dcba183d4012213c2882efd450eaf8d672df9e"
+        },
+        "tests/reports-finance.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "312ec37d220f63262425cc96f872aacb4feddb7c6864be9f508397902c0f80da"
+        }
+      }
+    },
+    "subscription": {
+      "originalIds": [
+        "BIZ-01.01",
+        "BIZ-01.02",
+        "BIZ-01.03",
+        "BIZ-01.04",
+        "BIZ-01.05"
+      ],
+      "proofs": [
+        "billing",
+        "readonly",
+        "editors",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Actual current DB plan price/aggregate limits/trial/grace and manual invoice. No hardcoded price, deletion or Click charge. Public configuration cache60s; invoice revalidates current version.",
+      "sourceAnchors": {
+        "src/server/billing/public-pricing.ts": {
+          "proof": "currentCore",
+          "sha256": "e0ec9665ec47c5b7dc462dc9171eee914fef8c4c27a897667a5bbb32bb6e8e0c"
+        },
+        "src/server/billing/service.ts": {
+          "proof": "currentCore",
+          "sha256": "75628ca8100cb04521b6eb5a707796bf53a21c016cee96c2f648644e840ac44a"
+        },
+        "src/server/billing/invoices.ts": {
+          "proof": "currentCore",
+          "sha256": "de1c6caaebcb37e7016e7cf51b0847e70ad149c7ff0b2578194026466994ecae"
+        },
+        "tests/billing.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "1c3e0260a328c452a96311dc6bc15af5f61e554fd1a9a9e71d1131111a069c70"
+        }
+      }
+    },
+    "browserReceipts": {
+      "originalIds": [
+        "UX-01.02",
+        "POS-02.05",
+        "CAT-01.02",
+        "OFF-01.03"
+      ],
+      "proofs": [
+        "permission",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Native Chromium/Firefox/WebKit engine tests, keyboard barcode and58/80mm nonfiscal browser copies. POS-02.09 electronic delivery remains incomplete, not advertised.",
+      "sourceAnchors": {
+        "tests/receipt-identity.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "1d4d416cf43ea6f43586b66bd7a26a178920208373e6159dd517715667efb052"
+        }
+      }
+    },
+    "onboarding": {
+      "originalIds": [
+        "UX-01.01",
+        "UX-01.08",
+        "UX-01.09",
+        "CAT-01.08",
+        "INV-01.02"
+      ],
+      "proofs": [
+        "editors",
+        "import",
+        "localization",
+        "currentCore"
+      ],
+      "description": "Bounded reviewed import, opening stock document, guided setup/help and isolated cashier training; no external delivery promise.",
+      "sourceAnchors": {
+        "src/server/onboarding/service.ts": {
+          "proof": "currentCore",
+          "sha256": "792bb2da2be882d596e787be679c3977d01e2283070e4fb4c58f17d63f9b8c09"
+        },
+        "src/server/catalog/imports.ts": {
+          "proof": "currentCore",
+          "sha256": "f79f69225a433c4b1976d4ae3fb098ae568156e39185b449600504871d545e07"
+        },
+        "tests/onboarding.integration.test.ts": {
+          "proof": "currentCore",
+          "sha256": "233f674f0c422206580c83ac7ee47dfebc38cb41b7382b2e2c30a0951d600eb7"
+        }
+      }
+    }
+  },
+  "copy": {
+    "navigationLabel": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "9a53d7c596127a33b94b465c7b8b8aef19653d51da63404c43415318c5bb4382",
+        "ru": "8fff0bba4454d28d6acd28aee587187982a6e69ee8f21b96c9cd8c899d0aa942"
+      }
+    },
+    "featuresNavigation": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "0449e8344de33e5e3b36ce1460428b3b91b71e14fa34fa1c647a011216989507",
+        "ru": "04afc09e60bdc004125c1607d212ffc9ae1b0dd17a2e260cb7a7cb57006a8fb8"
+      }
+    },
+    "pricesNavigation": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "54a5c22dc81c94bce7077ce8ad0779c70f196558261ff344b70358889b166ddd",
+        "ru": "b2fbb44bb3e3e62b370a1c08863bdd89e174711e0ce8f92c854d17a56580dadb"
+      }
+    },
+    "compatibilityNavigation": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "bc68fbcfa4c73243699c83fda274534a0e57317dbc2a0bbf4f017abae68fb3c0",
+        "ru": "79b5bfb4673a1ee69f351d0d0ec457d8c50a3a85a31776b91e4b3f2e7dbb0586"
+      }
+    },
+    "login": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "a07a860dcea0e0a21ab4f85f601324c1df969266e3a54bad70e9af88e94cadcf",
+        "ru": "8fc9ab2eeb38ad7a5ee16c668e0b80d52041249411f886b28981e93ff32d52b9"
+      }
+    },
+    "heroTitle": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory",
+        "reports"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "eda81b2eaca93da1809e0a8a54900c30bfa7e67bc762609a823fd99e420d4a97",
+        "ru": "6e120f9fbcf2c0782a43fb8bac5791558a2465629fabdb22810a46202b971329"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "heroDescription": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory",
+        "reports",
+        "tenantRoles"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "2768015c896466ecc036471520f1336ac230021c0221c4f9ff2bb64c90f5363e",
+        "ru": "a4bf3172b28f3d734ad5687e0ca7e1d98631736254420c850635101265b4152b"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "trialOrganization": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "975d9302d95b7423ef5b140fcd9abef11eabbd94d47546ff02c4baf715742eed",
+        "ru": "88ccea9e25b941dda518b921f13c236e4eeb5a7d23de5aea5094e5e2b30c9d81"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "trialDays": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "b805b25dbd76af5054446fc20f42d957f8ee08595641e58ca7e622b2fbc13338",
+        "ru": "c27d559b169947b2c1d612d3f2788c168a3a316d5e68a54822d450bcf34fbba5"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "trialAfter": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "bef4815feb1dac3c91f4e54cee918e313977e24c3ce20c6d7820e71c35cc7b20",
+        "ru": "778593e54ac5006b804a6672899db44a0b9625f1ce5ddbefc79f65bbb078cdc6"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "graceDays": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "bb6a63ebf1c5b8864d2a6845521a92455081a98b49d63b784bd09b98c3cfa6bc",
+        "ru": "d93064596e6b64171ebd758e1c84e2240ccf620c6c1d66676ed1c7c97ae46dc9"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "startTrial": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "28ce37b5e0e07832f527664149c20e8de827a192396a84f00acceef02cbdbafb",
+        "ru": "dc75d57f78dfda6790bcf567113e9747f58c0a6ad38157a798a50bc1f7ed219d"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "openPos": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "d73abe69bfb909662a31c306561f824cd6c309eea0bd146dcd07fb07ced543f4",
+        "ru": "1fcea3521025befd6635788a5fbf236056ed638dbf4054bb1460e3f23d4cf5b8"
+      }
+    },
+    "featuresTitle": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory",
+        "reports"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "c0a976169fcb6036ba663d8bc912980ef01d9d264ac7d9633bf8be7ae30fbbd4",
+        "ru": "bfe053b07da163c9af29b40587105007cff318b75f33ee22dadf6d4b92d61d54"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "salesTitle": {
+      "kind": "claim",
+      "groups": [
+        "checkout"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "86286a5523482ecbe91b124877ab34ee79cfce812699f2aad7383388a518dfed",
+        "ru": "c24d5bd1a4a07b1edae9ea51db5686b3e879e04d71682fe7af9607d90f971ab8"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "salesDescription": {
+      "kind": "claim",
+      "groups": [
+        "checkout"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "c11a6b46bba9b9e20203ea748092ee361237cb9328101e98313c0b1b67a2e955",
+        "ru": "11104d13765b2bd8a245cfc6f24961794d150d3f6131c9b6826e826edf1558dc"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "inventoryTitle": {
+      "kind": "claim",
+      "groups": [
+        "inventory"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "970c096ccea5f20613985ded481c8cbdd90c8cf15a994563a55557f1aeb8fb9e",
+        "ru": "b7e96436cf6eb11f5e0e51ca0772e0056f0d3bc6fea1e09fa9f774df04b10f14"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "inventoryDescription": {
+      "kind": "claim",
+      "groups": [
+        "inventory"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "6a9f2e19f543e732a8f1831649e4c32007c7420e6661ef9901685046467b414b",
+        "ru": "d85b3db9f4d8ed0d49992e14d9ca7807f6d87f93ddcc05f1437620ab304b6983"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "shiftsTitle": {
+      "kind": "claim",
+      "groups": [
+        "reports"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "d84737e247918135aa8b460d7384e02b5f7fcd7aec650046edb507d5ce40ca4c",
+        "ru": "cd819383d15d75b1173618f44360dcb61fbc4a7fdebc596f16e34a6a3f9ed509"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "shiftsDescription": {
+      "kind": "claim",
+      "groups": [
+        "reports"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "1cde4cb2477b14e4cda26efa1050c2fb0f8a9c8ddaa00329c8952ae06f6072b6",
+        "ru": "19d4011fea59cd2691d9a70be524a0b40daa3b9f50920ee680916e5c4a0d09cc"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "pricesTitle": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "3565ba27c362327b7c45690b71a85f995b4aa2eef18d25c7ef0dd97a8f2c99b8",
+        "ru": "242cd1d65177cf1a3324431a37b79f8fcd82a273448d36f6e3dd28ea80c83956"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "pricesUnavailable": {
+      "kind": "boundary",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "23496e1a1479e2cc3082528037fcd3ba49663169b2ac270b6cdebf82941cdb22",
+        "ru": "5ae7c8989933b036cf95a6ad387864791cb8cbb5443fc6a7a634039997995e76"
+      }
+    },
+    "pricePeriod": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "d31f59d339b2ed68f5b9398fe8318b17f7fc9dccead5ced39e3d9d07d1c1f0e4",
+        "ru": "972d542877647eefa4e7c8c7e361aebc5baea00792e22c09e89dd2f8f0eb78b0"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "branchLimit": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "75b7b899754e50abbc4b4087668f1b6a34cb73e83128e18382f49db198be7318",
+        "ru": "bd741dcb524ab5321a6df394ae5843de9c1fd91f09c59fa1b707d11e8440eed3"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "organizationLimit": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "4cf9643d52c53af478addce3daee20976fa280f2a104bc8dea899562dd58d058",
+        "ru": "11574d55d96465828d89c33788031a99ce8004839d10c20bf7cd834189f76a50"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "registerLimit": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "08df682b4bf764b5cc5b5bdbf7070f12123086e443e4ebb0b2a6e6f451ae98fc",
+        "ru": "4a5c0f2f717bcd8c223a102740e236851db5ee2e39fa5bc6af73d1a9eb695d1e"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "totalLimit": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "4b08733b27a497b0c3c6af7b9cfd90d5c4d53d56b6fd9f3815e455b15368a920",
+        "ru": "3d1a7abf6f2b3219f584e4bdfae238771ab2007c0968ef43afe5b0776314b6b9"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "staffLimit": {
+      "kind": "claim",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "8196bdd44ee39d7ee3c29445820b052120e1c5ac24957eda84fbe22f9371709e",
+        "ru": "8e6ee7b540284004186cb03145ff6e129bc1615ea5e39ee7193cd53b9d356f1b"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "register": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "baa79db90b9ad43ba3d69f41e7823d3de4ec493279ff028048aa4671da5ae49d",
+        "ru": "9d91b7f27006ee4aff6cde08e41395b56d2fa3f7ffbfaa74e570775ab00d8936"
+      }
+    },
+    "subscriptionConditions": {
+      "kind": "boundary",
+      "groups": [
+        "subscription"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "dfe65c77f07767efcbdbe7bf8912dfceafbe25696fecaf7e24dc3f4631d90661",
+        "ru": "a84ce9a955bbc2e08bba30cbbda14b0a9cedb2046b38069b02c5fccd425e88a7"
+      }
+    },
+    "compatibilityTitle": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "99ed273d7b2d9d95a1389f80252cb53f6dd7505747c02f1b2c67ffb166a0e1a3",
+        "ru": "bcee7e1dd28343ff3cac2254aa75a123a8a5f9b7de28660cf3e3e0a3b5189ccf"
+      }
+    },
+    "browserCompatibility": {
+      "kind": "claim",
+      "groups": [
+        "browserReceipts"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "38eb8d3b455cf91d9d8343a491cea9cd5796044911693a349cfd51a7c80bdab3",
+        "ru": "c1509d2f34af01e477b487e398797809c0d5fff790454fcf88289bf46f98e25a"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "hardwareLimitations": {
+      "kind": "boundary",
+      "groups": [
+        "browserReceipts"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "36f6cb44dd9a2199517cb96f56280c78325df30f4c3a5460c2e2997a99c0594d",
+        "ru": "4da23f040970279843202ed426fa25c6a3e42c1160ed4b53a68fb5df83fb2b7b"
+      }
+    },
+    "integrationLimitations": {
+      "kind": "boundary",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "ffd14f93ff173c03fe602e0bc83f05bc8647cc04ed0ce8b8ab5e3211a5e8dd0d",
+        "ru": "8549595880f911f798edc185e441b5a795f0eb26482803daef7c0ed6f24aa077"
+      }
+    },
+    "helpTitle": {
+      "kind": "neutral",
+      "groups": [],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "8a0aec92a16ecc0c79c54477e1d857c3cfbceb67f9492cd942ce0ed132be0782",
+        "ru": "468a635797d612ab99984ae858743257d9ced24bf788e37269426d1f5e6e55bc"
+      }
+    },
+    "onboardingDescription": {
+      "kind": "claim",
+      "groups": [
+        "onboarding"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "4b28505968ce99377c7f7df3bfac13173295056052d290b9a79afc49921964e2",
+        "ru": "49b25e724cada948760453539d07f1c79b0f4d5f3b094bcd8dcb7dfe7a24f02d"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "onboarding": {
+      "kind": "claim",
+      "groups": [
+        "onboarding"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "74a69adebb9aadf98f0aff69899d03f36388350c6588afa6ca063a29de248ddc",
+        "ru": "59df96d35ad11c16639cc35ab86f5a8903ab62d7e2367fd308c29a750d398919"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "help": {
+      "kind": "claim",
+      "groups": [
+        "onboarding"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "2ae94f5032431ccd860837f6b5ba9a33fc259c8e4c1df2b8d3f3056f5f52080d",
+        "ru": "06655b56cf0bb322f677077e1f76df0ac4ad84fff0101a292513a1d09ca7b9fc"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "footer": {
+      "kind": "claim",
+      "groups": [
+        "subscription",
+        "checkout",
+        "inventory",
+        "reports"
+      ],
+      "surfaces": [
+        "src/components/landing/LandingContent.tsx"
+      ],
+      "textSha256": {
+        "uz": "0d06297b07d5ce9ddfc70922cbd4ae1907874bf15e187627e59f4b382392337b",
+        "ru": "cf9cd13bcf71a490eddeac65b0a3e14482257ea62e3d82a9f46ea9573cca30c9"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "landingTitle": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory",
+        "subscription"
+      ],
+      "surfaces": [
+        "src/app/page.tsx",
+        "src/context/LocaleContext.tsx"
+      ],
+      "textSha256": {
+        "uz": "2f170351754badc4f2f349095dd400bda49eb9c01fc8bb71077e1df8cacf2ef8",
+        "ru": "5cb19124606d03d5b8cf1dbc251eb50d947ca2506d8207fed89f963b88af7683"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "landingDescription": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory",
+        "reports",
+        "subscription"
+      ],
+      "surfaces": [
+        "src/app/page.tsx"
+      ],
+      "textSha256": {
+        "uz": "e2e10a693e3fd7261ae848979e7cfdc2f9023e16c536692a71ccc772c37bdb0b",
+        "ru": "c53bfab8a357d61a2dac94c971b0b8ba31c352013582d2d3a7940c71594e39ea"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "rootTitle": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory"
+      ],
+      "surfaces": [
+        "src/app/layout.tsx",
+        "src/context/LocaleContext.tsx"
+      ],
+      "textSha256": {
+        "uz": "ac5cee3cd9fa3687d514e69628d4f855e14af811152fea90a749133ee31a689f",
+        "ru": "24b918320037a07f2da7afa55f4c6e05729add3056ccb8e75aae830fae2f61ae"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "rootDescription": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory"
+      ],
+      "surfaces": [
+        "src/app/layout.tsx"
+      ],
+      "textSha256": {
+        "uz": "2b6c7cb0c317ce7f56b8d3f593d1eaf61be9eaec422e1c65eb9899573c4cd88b",
+        "ru": "2e92486ef2c30506a5cdde9e764d12ac96a2e585f1de849c6987f571ad4215f1"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    },
+    "manifestDescription": {
+      "kind": "claim",
+      "groups": [
+        "checkout",
+        "inventory"
+      ],
+      "surfaces": [
+        "src/app/manifest.ts"
+      ],
+      "textSha256": {
+        "uz": "6f79cc5327bef05b2b7b68f83ad36923ac25ae20c0f690b82ac97ecb953e4f47",
+        "ru": "29727e73e5b6ffca309885117a65d9cbe83c3c1dbb2365a161daee2d1fe0ece1"
+      },
+      "requiredBoundaries": [
+        "hardwareLimitations",
+        "integrationLimitations",
+        "subscriptionConditions"
+      ]
+    }
+  },
+  "unavailable": [
+    {
+      "id": "click",
+      "notice": "integrationLimitations",
+      "originalIds": [
+        "LOC-03.02"
+      ]
+    },
+    {
+      "id": "fiscal_epos",
+      "notice": "integrationLimitations",
+      "originalIds": [
+        "LOC-01.04",
+        "RELEASE-01.04"
+      ]
+    },
+    {
+      "id": "hardware_models",
+      "notice": "hardwareLimitations",
+      "originalIds": [
+        "RELEASE-01.05"
+      ]
+    },
+    {
+      "id": "provider_offline",
+      "notice": "integrationLimitations",
+      "originalIds": [
+        "OFF-02.06"
+      ]
+    }
+  ],
+  "surfaceSha256": {
+    "src/components/landing/LandingContent.tsx": "b82fdca30124eabb6390972ab31eb245e822f2ca8bb57443f10f85ff443771b8",
+    "src/app/page.tsx": "e22027bd10fa5668cf9207699ebcb41ff58cb8b0d7e3157bcf074c63ff8e5489",
+    "src/app/layout.tsx": "37ff0b8dd2934a40ff35191b5f7beea6f5634194465e4db392dbaf582ac33a63",
+    "src/app/manifest.ts": "11bb57ada6e4e617ac32d20443f0e142f3c43107857de981cfd022e87b2b7423",
+    "src/context/LocaleContext.tsx": "cb25f7bba0d141816c2406ffb04b3d46022db3c4e35cc685bd7282439cbf8797"
+  },
+  "runtimeSha256": {
+    "src/i18n/messages.ts": "548ee22b6d1b7f2be283f9dccd5b24398492c2578de9429ce38ec1cfd199e486",
+    "src/i18n/locale.ts": "d8b5f47edeb1317d2a65de5adab7b868e5a338f80d68de76e1d2d3a0e5e6d6f7",
+    "src/i18n/format.ts": "c673fa684b0455015bfd6004b3462dac4939d3929508c5681727adadeaff0ba3",
+    "src/lib/money.ts": "19ceb74a777c4688b015c7617f483d43265c81c054d67a62f280a4bd9056224b"
+  }
+}

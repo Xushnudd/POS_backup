@@ -1,0 +1,30 @@
+{"requestId":"114a1dd4-3bbe-4542-9b84-b23d807c2eae","organizationId":"b52c44f9-7398-4ab5-baa2-22d9e32e7be6","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"edaf3756-6504-44ed-b5fe-dbc837c609c8","organizationId":"77eb0458-d312-4da4-804c-1908ce587b7c","status":404,"code":"NOT_FOUND","durationMs":15,"event":"api_error"}
+{"requestId":"d82f60a8-ff21-4be4-b912-c5924b953ad8","organizationId":"b52c44f9-7398-4ab5-baa2-22d9e32e7be6","status":200,"durationMs":156,"event":"api_response"}
+{"requestId":"9c819359-c8b8-4b24-b57f-a62b41cf4365","organizationId":"b52c44f9-7398-4ab5-baa2-22d9e32e7be6","status":200,"durationMs":157,"event":"api_response"}
+{"requestId":"c84ce4f9-d7f0-44d3-a6aa-ced4d814ded8","organizationId":"b52c44f9-7398-4ab5-baa2-22d9e32e7be6","status":200,"durationMs":192,"event":"api_response"}
+{"requestId":"18b1f249-8ef7-4b3a-8f94-699fa098834c","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Large web archive is exact, private, immutable and auditable only after complete streaming; closure accepts it (2723.27504ms)
+{"requestId":"f783933b-e66b-4e98-a28d-98b64c71c3ca","organizationId":"7167f2f1-45a3-452b-9cb2-8a1f068b8bf8","status":404,"code":"NOT_FOUND","durationMs":11,"event":"api_error"}
+✔ A killed worker never exposes partial bytes; persisted lease recovery fences the old attempt and publishes exactly once (2042.44575ms)
+{"requestId":"c79315d2-8fe3-445d-865e-5923d138cfa7","organizationId":"c4ce7e55-1213-4942-b902-0d1777fcc4f7","status":410,"code":"EXPORT_EXPIRED","durationMs":14,"event":"api_error"}
+✔ Expired chunk bytes are pruned while metadata/history stays and incomplete publication is rejected natively (67.08244ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"9c5580aa-67bf-4ac6-adf5-95ea27e383db","organizationId":"20dfa7de-c07d-4e27-bd2e-73fbe362f2ae","status":200,"durationMs":24,"event":"api_response"}
+✔ Worker catalog export traverses cursor pages once, preserves exact cost and formula protection, fences duplicates and tenant downloads (3018.248887ms)
+✔ Export filters isolate own active catalogue and revoked source cannot publish an artifact (82.250291ms)
+✔ Late worker audit failure rolls back artifact; same source retries once without publishing a partial file (105.828878ms)
+✔ Expired export erases bytes, preserves metadata/history and refuses download with 410 (54.006834ms)
+✔ Tenant archive includes all branches and child rows, exact decimals, binary files and a verifiable manifest, never foreign data or credentials (392.978665ms)
+{"requestId":"590cebf6-31fb-4307-9120-4852a3c2bff9","organizationId":"c7e7875d-ec1f-4269-a259-bb27b8eb0be6","status":200,"durationMs":16,"event":"api_response"}
+✔ Tenant export uses the existing durable job, one artifact, scoped audited download and live authorization (400.033739ms)
+✔ Buffered exports reject oversized archives while the durable worker publishes a complete chunked archive (1776.403102ms)
+✔ Late success-audit failure rolls back artifact and job success; the same claimed job retries safely (276.712132ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18461.451762

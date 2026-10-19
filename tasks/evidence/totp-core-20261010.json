@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-10",
+  "source": {
+    "head": "d8edf567e12ba7ca5a19cd9368b43bd28045a1c4",
+    "workingTree": true,
+    "aiCommit": false
+  },
+  "task": "SEC-02.06",
+  "status": "in_progress",
+  "baselineOriginalDone": 154,
+  "originalDoneAdded": 0,
+  "requestedAdditionalDone": 20,
+  "checks": {
+    "unit": "73/73",
+    "focusedPostgreSQL": "24/24 (TOTP6/auth7/export4/readonly7)",
+    "productionWebpackBuild": "pass",
+    "workerBuild": "pass",
+    "targetedLint": "pass",
+    "freshLegacyMigrations": "120 pass",
+    "browser": "not run; no new UI or HTTP routes",
+    "fullIntegration": "not run"
+  },
+  "limitations": [
+    "No global MFA enforcement, HTTP/UI enrollment or production availability.",
+    "Recovery codes/disable/replace/key rotation remain.",
+    "No independent security audit is claimed for the dependency.",
+    "No live-business DB, deployment or vendor/hardware integration."
+  ],
+  "sources": [
+    "https://github.com/hectorm/otpauth",
+    "https://www.rfc-editor.org/rfc/rfc6238",
+    "https://www.rfc-editor.org/rfc/rfc4226"
+  ],
+  "sha256": {
+    "package.json": "e195db7a5cdbdf4365bfac6d0e8e50b09ab1a8fb42cd1fe77a71a69e300c6600",
+    "package-lock.json": "ea4283833a90780665ecbe752c306315ca73140564729d75f5f8d95b6510fb9a",
+    "prisma/schema.prisma": "086c6d666b885688e35d0d1da392dc6537e9430d4afbdb3b167468698d06c3d0",
+    "prisma/migrations/202610100119_totp_factors/migration.sql": "73888faeccfa4ba187d67ee4e6a170799fd69d3468049a3fc61e6cc8b3713268",
+    "prisma/migrations/202610100120_totp_proof_approval/migration.sql": "53059d645d51c3670a3eebc3d573086309b5987c5dfd17d73fe80f19375920d7",
+    "src/server/auth/totp.ts": "a4e3ae29c83a45e395c4c07fbb70f5c233ad56a633c821b04e3be4c792bc19d3",
+    "src/server/auth/totp-service.ts": "e1b0505a5f3511acabd1d05b7d1159dd6488bf856e8280d533df3da2bf57a6f1",
+    "src/server/jobs/tenant-export-contract.ts": "37ca8e63bd90225489d56bdc89ab6a180177d6356970381290ffde024ea0431a",
+    "src/server/billing/read-only-policy.ts": "13aebe3879e20e14b64296165136282fbfdd7cbd5c7f15e9b0dbdf791764710c",
+    "src/app/api/health/ready/route.ts": "54fbd1cf06dcee972b259c73c3aebde203fba437fb13be11d3a9fa07b4e46f40",
+    "scripts/ops/test-migrations.sh": "b334482b3863ab9d106f869c4e2c2885503aa27bdec52d2df58dfe1d9454c3de",
+    "tests/totp.unit.test.ts": "30bf645fb7578f219007160b8c91f18915961c7f3f345a4dcad91e7606d5f51c",
+    "tests/totp.integration.test.ts": "1ae1f05b6d9720d08b17a5ecad900cd25004cb806e213e6dd5d72077271c1177",
+    "docs/operations/totp-core.md": "06e60ee3eac4aaad6eda5beeaf9ad800c803954daecf66d8f461e720d7cc8bee",
+    "tasks/PLAN1.md": "6120906c7edbe395154380442cf280761d58e181ed164a553d4a08c14a1e850d",
+    "tasks/EXECUTION_STATUS.md": "6e9bad2b19eb73a4fdf82fe061335d4ff00e09a570d55d5e9d843003d755d641",
+    "tasks/DECISIONS.md": "8fb85f4a6bae5237c032308031fa646a9936db35fbe30e8a49393cc0f88454d1",
+    "/tmp/pos-totp-unit-accepted.log": "47633b9b42c8ebdaa275d268b46716b92f3efd99cfbd9586420b8944cb1cf99f",
+    "/tmp/pos-totp-focused-accepted.log": "917f64860222b675bebb78bf111d3ce64f1bb86d3babf1adf0392ad66f15fd8d",
+    "/tmp/pos-totp-build-final.log": "c8535a9e091e02e0b5f4d2160fc8e2189cee10acd2abd61e480a464ddedd812b",
+    "/tmp/pos-totp-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-totp-lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-totp-test-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-totp-migrations.log": "d6d65a6dd89aab4dbc610e342a463297cbbf5e79ce6223ff4cc7ba4107a89467"
+  }
+}

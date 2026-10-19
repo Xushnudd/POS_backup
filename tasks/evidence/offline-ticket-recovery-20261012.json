@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-12",
+  "originalTask": "UX-01.05",
+  "originalStatus": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 30,
+      "failed": 0,
+      "durationDisplay": "1.5m",
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "unit": {
+      "passed": 101,
+      "failed": 0
+    },
+    "postgres": {
+      "passed": 24,
+      "failed": 0
+    },
+    "migration": {
+      "count": 133,
+      "freshInstall": true,
+      "actualSyntheticDumpRestore": true,
+      "legacyProjectionPreserved": true,
+      "repeatedExpandedProjectionPreserved": true,
+      "validatedConstraints": true
+    },
+    "build": "pass",
+    "worker": "pass",
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "behavior": [
+    "Separate zone/move/reserve/release/settlement drafts; failed reads retain last data and drafts; search/page preserves selected source identity",
+    "Readiness closes immediately on refresh/search/page so debounce does not leave a stale enabled confirmation window",
+    "Offline unlock and raw partial policy/cancel/settle drafts guarded; no unlock persistence; own ACK resets matching group only",
+    "Actual hyphenated offline-cash.policy MFA works across client/server/native SQL while action/key/hash/session and counter constraints stay enforced",
+    "Native SQL133 rejects path/query/newline/script/oversized names; previous migration and proof identities immutable",
+    "Ticket reply remains mounted on read failure; explicit textarea accessible labels; one original command replay and no duplicate event",
+    "PendingActions callback supplies original body/path, permitting matching-only draft cleanup; independent media/import drafts retained"
+  ],
+  "priorFailures": [
+    "Native old TotpProof_action_check rejected existing hyphenated critical operation; new additive SQL133 required",
+    "Metadata debounce readiness race intermittently prevented mouse confirmation; synchronous loading closes the window",
+    "Exact implicit label query included textarea value; explicit aria-label retained intended stable field name"
+  ],
+  "limits": [
+    "Original parent still open; no new original done",
+    "No production/staging deployment or provider/hardware implementation",
+    "Synthetic migration drill is not customer/pilot acceptance"
+  ],
+  "logs": {
+    "browser": "tasks/evidence/logs/offline-ticket-recovery-20261012-browser.log",
+    "unit": "tasks/evidence/logs/offline-ticket-recovery-20261012-unit.log",
+    "postgres": "tasks/evidence/logs/offline-ticket-recovery-20261012-postgres.log",
+    "migrationDrill": "tasks/evidence/logs/offline-ticket-recovery-20261012-migrationDrill.log",
+    "migrationApply": "tasks/evidence/logs/offline-ticket-recovery-20261012-migrationApply.log",
+    "build": "tasks/evidence/logs/offline-ticket-recovery-20261012-build.log",
+    "worker": "tasks/evidence/logs/offline-ticket-recovery-20261012-worker.log",
+    "typecheck": "tasks/evidence/logs/offline-ticket-recovery-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/offline-ticket-recovery-20261012-lint.log",
+    "priorBrowser": "tasks/evidence/logs/offline-ticket-recovery-20261012-priorBrowser.log",
+    "priorRace": "tasks/evidence/logs/offline-ticket-recovery-20261012-priorRace.log",
+    "ticketCorrective": "tasks/evidence/logs/offline-ticket-recovery-20261012-ticketCorrective.log",
+    "firstNativeFailure": "tasks/evidence/logs/offline-ticket-recovery-20261012-firstNativeFailure.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/inventory/locations/page.tsx": "015c979380d8fe4a887d123c680cbb611881f2fa6647093ae675959bc08b4dbb",
+    "src/app/(dashboard)/pos/offline/page.tsx": "871d80f796f627987317697c4bd069c62d0f3ccfb3653376cc760c96f4f88bcb",
+    "src/components/support/TicketList.tsx": "2554151d12d7f46cef21fac2965e4dc75947f050ccde8d2e533e9726aed69981",
+    "src/components/support/TicketDetail.tsx": "d151c81284a6aa8a4622f6d54a24f492bb91d2f2dc866bbd6f2d22f98b337474",
+    "src/components/forms/PendingActions.tsx": "d1e58c31d9ca521fb2bf8462477fa3e049943680a62eed39a64d9198a594b081",
+    "src/components/forms/DurableMutation.tsx": "1abefa300a88309372793f394361706a4a0a7f40bd9df4ef00ac91e3b1a40e4e",
+    "src/app/(dashboard)/products/[id]/media/page.tsx": "511860ed6c7a5fc5f23279100bf3ec03dbe761970c206f6b25c4c88f6f4de77d",
+    "src/app/(dashboard)/products/import/page.tsx": "082d3332afd12727f9f02ae0ebbdcd25940ae64527b4ec86ef310b8b1dba3399",
+    "src/lib/step-up.ts": "a45507cd6568d6468352c44da23afad0e98d6caf1e6a52f78106aa3776cb6925",
+    "src/server/auth/totp-service.ts": "4e4f3d95d19e0531d068c1a1be714bc360665b01d165b3e816633181161fe750",
+    "prisma/migrations/202610120133_totp_action_names/migration.sql": "7b57562d79dbdc1989c6745dc110a4a11a68b2953130c4a1c67fc34a9a393373",
+    "tests/critical-step-up.unit.test.ts": "f1bcd69a548cb29125e93f24cf4a681b3dc8c4166bb65483bf73e4d81d438d87",
+    "tests/totp.integration.test.ts": "a278073e22a847c29774629559c90e1921c73ac01a8267d360db398407135839",
+    "tests/e2e/critical-fixture.ts": "aa9c68581d9fad6d083a19c908e30872a84767061ccf5aafa0ee46309c8d51b9",
+    "tests/e2e/location-editor-state.spec.ts": "e48935e76a4dbc9090b4160ad84032e00bf81cf7ba815ce46a6503c49a9fae99",
+    "tests/e2e/offline-editor-state.spec.ts": "95b15ce75a8fc40b500cb4bc64fe9e6c84017bc791699be5749dad265c7c1900",
+    "tests/e2e/ticket-editor-state.spec.ts": "144065632cd23dd5c35f186ef028ca56573936f72a0297cdbd2852a92fd91f06"
+  }
+}

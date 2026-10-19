@@ -1,0 +1,58 @@
+[WebServer] (node:876406) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:876443) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (12.2s)
+(node:877937) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [firefox] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (2.8s)
+(node:878288) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [webkit] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule (2.9s)
+
+
+  1) [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Ochish: Reviewed internal KPI', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Ochish: Reviewed internal KPI', exact: true }) with timeout 10000ms
+      - waiting for getByRole('button', { name: 'Ochish: Reviewed internal KPI', exact: true })
+
+
+      25 |  await expect(page.getByRole('button',{name:'Original amalni qayta tekshirish',exact:true})).toBeVisible();
+      26 |  await page.reload();await page.getByRole('button',{name:'Saqlangan amalni qayta tekshirish',exact:true}).click();
+    > 27 |  await expect(page.getByRole('button',{name:'Ochish: Reviewed internal KPI',exact:true})).toBeVisible();
+         |                                                                                           ^
+      28 |  const saved=await db.reportSchedule.findMany({where:{organizationId:me.organization.id}});expect(saved).toHaveLength(1);expect(saved[0].enabled).toBe(false);expect(saved[0].revision).toBe(1);
+      29 |  expect(bodies.length).toBeGreaterThanOrEqual(3);expect(new Set(bodies).size).toBe(1);
+      30 |  await page.getByRole('button',{name:'Ochish: Reviewed internal KPI',exact:true}).click();await page.getByLabel('Hisobot nomi',{exact:true}).fill('Unsaved name');page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Yangi hisobot jadvali',exact:true}).click();await expect(page.getByLabel('Hisobot nomi',{exact:true})).toHaveValue('Unsaved name');
+        at /home/fedora/Developments/POS_backup/tests/e2e/report-plans.spec.ts:27:91
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/error-context.md
+
+    Error Context: test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/report-plans-Owner-report--03260--original-disabled-schedule-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/report-plans.spec.ts:9:5 › Owner report policy preview, MFA and lost-ack recovery preserve one original disabled schedule 
+  2 passed (20.7s)

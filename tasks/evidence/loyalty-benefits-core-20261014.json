@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-14",
+  "task": "CRM-02.03",
+  "status": "in_progress",
+  "originalDone": 172,
+  "targetDone": 175,
+  "newOriginalDone": 0,
+  "version": {
+    "head": "e41124bcbfc31e8b20410c6b0288ad419668e979",
+    "workingTree": "uncommitted changes identified by source hashes"
+  },
+  "sourceSha256": {
+    "src/server/loyalty/benefits.ts": "1fe6fa992c652a5068963425cc2799f0bb7c7d5f5e3126f5f8c06988d2bc1b23",
+    "src/server/loyalty/gift-ledger.ts": "e8783ada7019f8f6370ba3d7d330b9cd9f77e9a5e5736e23a817539cadd1b1a2",
+    "src/server/loyalty/calculations.ts": "7d899c94aab0db65bc9de3476cd5caf9e228309187c1246a00d9934cd44b739d",
+    "tests/loyalty-benefits.unit.test.ts": "5b771d73e77bb1592d7221cc42f44f874ad9219c1f8e80399ea9720e7e5aa1d3",
+    "tests/loyalty-policy.integration.test.ts": "3d60a21847fd818b4b196690749bdf4a2bb234880d5c349de103b3fd16d47888",
+    "tasks/loyalty-benefits-core.md": "6a45d69f9b720e965e747d4706a7fe20240106b0f8b1a6e07d7de3a92468cbbe"
+  },
+  "validation": {
+    "testCompile": "PASS",
+    "appTypecheck": "PASS",
+    "focusedPureCases": {
+      "passed": 11,
+      "failed": 0
+    },
+    "postgresPolicyCases": {
+      "passed": 2,
+      "failed": 0,
+      "database": "isolated local pos_test only"
+    },
+    "isolatedUnitFiles": {
+      "passed": 50,
+      "failed": 0
+    },
+    "eslint": "PASS zero warnings",
+    "diffCheck": "PASS"
+  },
+  "logDirectory": "tasks/evidence/loyalty-benefits-core-20261014",
+  "environmentRetry": "Initial PG attempt could not connect because the existing isolated container was stopped. Started only pos-plan-test-db and reran policy tests successfully. No production database used.",
+  "acceptedCore": [
+    "exact product/branch-scoped promo quotes and use/stacking constraints",
+    "customer-bound card quotes with half-open original validity",
+    "exact immutable-input gift reconciliation with source-limited restoration and separate cash/liability, no duplicate goods revenue",
+    "expiry blocks spending without deleting liability",
+    "invalid Date fails closed",
+    "policy activation guard remains verified"
+  ],
+  "notAccepted": [
+    "card/promo/gift database journals and native source guards",
+    "transactional checkout and return integration",
+    "owner/cashier UI and browser acceptance",
+    "original CRM-02.03 completion"
+  ],
+  "externalIntegrationsChanged": false,
+  "appliedMigrationsChanged": false
+}

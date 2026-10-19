@@ -1,8 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback,useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import {confirmPageNavigation} from '@/lib/page-navigation';
+import { clearScope, deviceId,assertScopeCanBeCleared } from '@/lib/offline';
 import { AuthData, AuthUser, Organization, Role } from '@/types';
 
 interface AuthContextType {
@@ -12,7 +14,7 @@ interface AuthContextType {
   role: Role | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (phone: string, password: string) => Promise<void>;
+  login: (phone: string, password: string) => Promise<AuthData>;
   register: (data: {
     fullName: string;
     phone: string;
@@ -21,7 +23,7 @@ interface AuthContextType {
     email?: string;
     tin?: string;
   }) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -34,9 +36,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const logoutFlight=useRef(false);
 
   const setAuthData = useCallback((data: AuthData) => {
-    localStorage.setItem('pos_token', data.token);
+    localStorage.removeItem('pos_token');
     setToken(data.token);
     setUser(data.user);
     setOrganization({
@@ -63,11 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const savedToken = localStorage.getItem('pos_token');
-    if (!savedToken) {
-      setIsLoading(false);
-      return;
-    }
+    localStorage.removeItem('pos_token');
+    const savedToken = 'cookie-session';
 
     try {
       const res = await api.auth.me();
@@ -96,16 +96,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [clearAuthData]);
 
   useEffect(() => {
-    refreshUser();
+    void Promise.resolve().then(refreshUser);
   }, [refreshUser]);
 
   const login = async (phone: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await api.auth.login({ phone, password });
-      if (res.data) {
-        setAuthData(res.data);
-      }
+      const res = await api.auth.login({ phone, password, deviceId:deviceId() });
+      if (!res.data)throw new Error('Server autentifikatsiya natijasini qaytarmadi');
+      setAuthData(res.data);
+      return res.data;
     } finally {
       setIsLoading(false);
     }
@@ -122,17 +122,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const res = await api.auth.register(data);
-      if (res.data) {
-        setAuthData(res.data);
-      }
+      if (!res.data)throw new Error('Server ro‘yxatdan o‘tish natijasini qaytarmadi');
+      setAuthData(res.data);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    clearAuthData();
-    router.push('/login');
+  const logout = async () => {
+    if(logoutFlight.current||!confirmPageNavigation())return;
+    logoutFlight.current=true;
+    try{
+      const scope=organization?.id&&user?.id?{organizationId:organization.id,userId:user.id,deviceId:deviceId()}:undefined;
+      if(scope)await assertScopeCanBeCleared(scope);
+      // A failed or unacknowledged logout must not erase the recoverable cart.
+      await api.auth.logout();
+      try{if(scope)await clearScope(scope)}
+      finally{clearAuthData();router.push('/login')}
+    }finally{logoutFlight.current=false}
   };
 
   return (

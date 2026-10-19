@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-11",
+  "task": "REP-01.07",
+  "status": "in_progress",
+  "acceptedCore": "Branch positive-stock inactivity analysis and UI/full filtered CSV",
+  "head": "97ded93d1c62c4a4180607d6686bf82395701ee2",
+  "checks": {
+    "financeIntegration": "67/67 before final metadata label/60-day assert",
+    "finalFocused": "1/1",
+    "unitFiles": 33,
+    "browsers": "3/3 Chromium Firefox WebKit",
+    "productionBuild": "passed",
+    "workerBuild": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "diff": "passed",
+    "secretScan": {
+      "files": 819,
+      "findings": 0
+    }
+  },
+  "remaining": [
+    "lot/expiry core INV-02.06",
+    "expiry report"
+  ],
+  "originalDone": 157,
+  "batchDone": 1,
+  "batchTarget": 20,
+  "productionDeployment": false,
+  "sourceSHA256": {
+    "src/app/api/inventory/balances/route.ts": "7720ba0185e6f7e6c983125e753e67f592e04b0c73e981fff4130832616d0343",
+    "src/app/(dashboard)/inventory/page.tsx": "e8b02200fdea948bf7454cb678d1e9366b8c678eea059278e21399cc3be6032b",
+    "src/lib/api.ts": "58e6623fce0c75f419b8a3907cdc271d1936913717e3e51956c54baaab0db273",
+    "tests/reports-finance.integration.test.ts": "34d0d954e29d3d23562bae455b339fcb12790049177d0ef692dfe8615dd2ffc7",
+    "tests/e2e/inactive-stock.spec.ts": "cc20ae089e6ca85cc180325fd7e88a14faab093a02a1da8b638f79a01330ac19",
+    "docs/operations/inventory-inactivity.md": "015d99304c727d2a29df8639c4d785cbd9fd01a1b5d41a381be14b18f3b749d8"
+  },
+  "logSHA256": {
+    "/tmp/pos-inactive-stock-finance-final.log": "96e6e8f06ccf7309c0e6b25857d53096b3be9c2043a373ecf6172d5df231d47b",
+    "/tmp/pos-inactive-stock-focused-final.log": "407065b4044c25c95bcd45d5e9e51e5cedfc8d2bd8c44b8aeda80da9a853e3cf",
+    "/tmp/pos-inactive-stock-unit-final.log": "7103e534d6216c789f8b805060ac04d4e750fcf6cfd9d6b37cfd049d63b10148",
+    "/tmp/pos-inactive-stock-browser.log": "aabfcee476617d1c126810a2e9c55d64653cf8e7ddc1b797b61251706c3bca53",
+    "/tmp/pos-inactive-stock-build-final.log": "c3b59a5b7bc23d5dcde26be0b9ed95d2b628c552719692194bda47dd6ffff379",
+    "/tmp/pos-inactive-stock-worker.log": "83362caf43108fee254710b9d35983f9e8c2523adc715d271ae359e18420c355",
+    "/tmp/pos-inactive-stock-typecheck-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-inactive-stock-lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/pos-inactive-stock-secret-scan.log": "cc8e8e1682f30a278b3f566a2ea917c1891f2c635ad26e02cb96189b90053183"
+  }
+}

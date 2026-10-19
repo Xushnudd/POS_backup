@@ -1,0 +1,11 @@
+volume-resume: 400/4000 disjoint batches validated
+volume-resume: 800/4000 disjoint batches validated
+volume-resume: 1200/4000 disjoint batches validated
+volume-resume: 1600/4000 disjoint batches validated
+volume-resume: 2000/4000 disjoint batches validated
+volume-resume: 2400/4000 disjoint batches validated
+volume-resume: 2800/4000 disjoint batches validated
+volume-resume: 3200/4000 disjoint batches validated
+volume-resume: 3600/4000 disjoint batches validated
+volume-resume: 4000/4000 disjoint batches validated
+{"dataset":{"products":50000,"saleItems":1000000,"activeRegisters":20,"historyStatus":"synthetic drafts; real measured checkout uses normal service"},"resume":{"beforeSaleItems":249500,"afterSaleItems":1000000,"workers":4,"guardsDisabled":false}}

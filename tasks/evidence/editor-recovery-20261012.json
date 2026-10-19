@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "total": 259,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "unit": {
+      "passed": 99,
+      "failed": 0
+    },
+    "postgresql": {
+      "passed": 13,
+      "failed": 0,
+      "isolated": "127.0.0.1:55439/pos_test",
+      "files": [
+        "conversions",
+        "taxes",
+        "reservations",
+        "price-rules"
+      ]
+    },
+    "browser": {
+      "distinctAccepted": 30,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "firstFinalRun": {
+        "passed": 24,
+        "failed": 3,
+        "failure": "Product editor test used broad alert locator; application validation and remaining eight scenarios passed",
+        "durationDisplay": "1.7m"
+      },
+      "correctiveRun": {
+        "passed": 6,
+        "failed": 0,
+        "seconds": 19.3,
+        "cases": [
+          "product unit/classification dirty, real validation error, failed read and retry",
+          "pending tenant scope, real server session replacement, original replay"
+        ]
+      }
+    },
+    "webpackBuild": "pass",
+    "typecheck": "pass",
+    "changedLint": "pass"
+  },
+  "behavior": [
+    "Incident scan/resolve retains original operation/body and never repairs financial/stock balances",
+    "Sync terminal proof preserves immutable original conflict payload",
+    "Support grant strict MFA and recovery, metadata failure preserves independent revoke draft",
+    "Tax profile archive/recovery preserves HTTP PUT; other recovered PUT/DELETE/PATCH rejected",
+    "Committed local operation changes notify both editor and recovery panel without transmitting payload",
+    "Product units/classification stay mounted with draft on failed GET; retry does not reset draft",
+    "Malformed ratio/rate/price/quantity fails validation before Decimal arithmetic; exact boundaries unchanged"
+  ],
+  "attempts": [
+    "Initial support fixture omitted strict MFA; corrected using actual TOTP",
+    "An unnecessary replay proof expectation was removed because the original bound proof remains valid",
+    "A real stale editor pending state after panel ACK was fixed by local commit notifications",
+    "Actual ratio validation produced500 on malformed text; format validation now precedes Decimal arithmetic",
+    "Classification/new editor tests needed specific status/alert/retry locators",
+    "WebKit scope test navigated before new session loaded; now waits for actual selected business"
+  ],
+  "limits": [
+    "No new original PLAN1 task closed; full UX-01.05 editor coverage remains open",
+    "No vendor-specific integration or real production deployment performed",
+    "No database schema or migration changed in this acceptance",
+    "No stock repair or economic write fabricated; corruption fixtures isolated to disposable test DB"
+  ],
+  "logs": {
+    "browserAcceptance": "tasks/evidence/logs/editor-recovery-20261012-browserAcceptance.log",
+    "browserCorrective": "tasks/evidence/logs/editor-recovery-20261012-browserCorrective.log",
+    "unit": "tasks/evidence/logs/editor-recovery-20261012-unit.log",
+    "integration": "tasks/evidence/logs/editor-recovery-20261012-integration.log",
+    "build": "tasks/evidence/logs/editor-recovery-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/editor-recovery-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/editor-recovery-20261012-lint.log",
+    "testLint": "tasks/evidence/logs/editor-recovery-20261012-testLint.log",
+    "earlierMfaFixture": "tasks/evidence/logs/editor-recovery-20261012-earlierMfaFixture.log",
+    "earlierReplayProofFixture": "tasks/evidence/logs/editor-recovery-20261012-earlierReplayProofFixture.log",
+    "earlierStalePending": "tasks/evidence/logs/editor-recovery-20261012-earlierStalePending.log",
+    "earlierValidationAndLocator": "tasks/evidence/logs/editor-recovery-20261012-earlierValidationAndLocator.log",
+    "earlierCorrectiveLocators": "tasks/evidence/logs/editor-recovery-20261012-earlierCorrectiveLocators.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/incidents/page.tsx": "e694db127a8c767a0cdd8b72b8cd0962ae9d3d3c65ec6abdd11caae12f0c4730",
+    "src/app/(dashboard)/sync-review/page.tsx": "9da09855559baa179b4fe05f7b92b2c897be68777e363637f55df3e1e5f03510",
+    "src/app/(dashboard)/settings/support/page.tsx": "2bc7df9347607b1319011a407087ca2c004ee4255e275f94056933801ea5e743",
+    "src/app/(dashboard)/settings/taxes/page.tsx": "01d27a8942b5fa03e40e9bca4a7b70de7591f24715bd2c2cbfb422d0b857a609",
+    "src/app/(dashboard)/products/[id]/units/page.tsx": "847d60361558cb8f639fd71da5adca9195d03d2e6fc9e3d367e6935b2c5b9bd3",
+    "src/app/(dashboard)/products/[id]/compliance/page.tsx": "e0e997f29b066ad7340de96e23f1316fd5af804c82ece26adee4463246aca7d9",
+    "src/components/forms/DurableMutation.tsx": "606b19981a1853880f9e701162241d79e16ea0ac5846d1f0a134642aca750667",
+    "src/components/forms/PendingActions.tsx": "47b80a3459d9d030532987c411c68d14a90367976e57cec0188832074e8d23d6",
+    "src/lib/offline.ts": "194330c9e0bdf27935ef28579c96c3b8a0a8a2206ec7e73a1fa059cd1ff050ad",
+    "src/lib/durable-request.ts": "766ce741121ccd3dbd253a36efd43b7ede59b024f14d12c2ad6b5152f686754e",
+    "src/server/catalog/conversions.ts": "8a555d026e9c6faa287a6148ecf53b692695462ef4451190ddcb3c0e05d95b94",
+    "src/server/catalog/service.ts": "39a042bdf1c7d76e3934b45a6433c67e0045be8f8e2fba93735439b1e3ccadb8",
+    "src/server/catalog/price-rules.ts": "45c42a16abbabd6dd210962601baa5ae2fc13f4cc5c8e2b37b797387d793ae38",
+    "src/server/inventory/reservations.ts": "7b6a7c10e9ad1cb99dfc230c3f13ea21391f6466f1d174019abba677d15ef6c3",
+    "src/server/taxes/service.ts": "0fe15da14ef62f29ad939e99b4c4b9b8300e5dca65e7e70f0e70b8095afd5f41",
+    "tests/e2e/core.spec.ts": "a258dc30ce670ae7e669b1c98325590eb2724fc2b6b4b70be8f9bd2303f804ed",
+    "tests/e2e/incident-recovery.spec.ts": "9e18ffff1efd55607d4f0bd311089283035631d8236adaea648d175a4a4f47c1",
+    "tests/e2e/tax-form-recovery.spec.ts": "43a5e4f0dc7057e873a4b4f7a0952d097f69ce877617875deb86d5876a6ffa04",
+    "tests/e2e/product-editor-state.spec.ts": "6b71bab627139cc0171f5e78066d5d8895538e1626b2838483505eb1713e7615",
+    "tests/e2e/pending-tenant-scope.spec.ts": "0c9b0f0dc17989f410c7e396acfc47b441e71f7fa52e253def74ed1179230570",
+    "tests/configuration-validation.unit.test.ts": "b5efd1fdaa06c393756435dbfe52a7deb530867e4456d3b6e834a385e0d4dc63",
+    "tests/durable-request.unit.test.ts": "98fc3fbf237521b87da1be277115ca0e30a03bc6eda0da0b81dcd06ce94d69db",
+    "tasks/evidence/logs/editor-recovery-20261012-browserAcceptance.log": "dcd041ab1bca0f00af08b0bdbea3f017385106f7aea883292803b46d1769a3fc",
+    "tasks/evidence/logs/editor-recovery-20261012-browserCorrective.log": "6f796e15b06b61b11c8f13c1658194a89832093eec7ea8ba256d069c03e7ce76",
+    "tasks/evidence/logs/editor-recovery-20261012-unit.log": "0d214cb408fa6b7bc47f9a9d1456c2673368f05d76fc34e0068b90ec9e43f843",
+    "tasks/evidence/logs/editor-recovery-20261012-integration.log": "56514ad2c099b6b03ae4cb264fad12894a4ec41607a62df7eb50ec5ec229afde",
+    "tasks/evidence/logs/editor-recovery-20261012-build.log": "2841a333c0cf319cc39caa955a8dc27eaad4975b929812e41373803c36815bfe",
+    "tasks/evidence/logs/editor-recovery-20261012-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "tasks/evidence/logs/editor-recovery-20261012-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/logs/editor-recovery-20261012-testLint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/logs/editor-recovery-20261012-earlierMfaFixture.log": "d01ca6224f8941cb863138336318fc0e38d2cd7a401b1ba687bc5366708be563",
+    "tasks/evidence/logs/editor-recovery-20261012-earlierReplayProofFixture.log": "7d8ddaa2abcc94f190fe758da0d37569fc43430d3e5732185162fb4447897e47",
+    "tasks/evidence/logs/editor-recovery-20261012-earlierStalePending.log": "3b06bba70d0f3c9de0b0726017f345c344f44a3a4a500c1af68117057012ed64",
+    "tasks/evidence/logs/editor-recovery-20261012-earlierValidationAndLocator.log": "2d5cafe7d0e1017420480f184f049eb6e41cd5a588c26351fcd05733736ce4a5",
+    "tasks/evidence/logs/editor-recovery-20261012-earlierCorrectiveLocators.log": "de71f2e1757e9d4fc94754f7ec803908d0c2a632952eba839d49bd7639801f0e"
+  }
+}

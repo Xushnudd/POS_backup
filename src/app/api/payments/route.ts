@@ -1,24 +1,14 @@
+import { Prisma } from '@prisma/client'
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
-import { z } from 'zod'
+import { verifyToken, getRequestToken } from '@/lib/auth'
+import { manualPaymentSchema, recordManualPayment } from '@/server/payments/manual'
 
-const createPaymentSchema = z.object({
-  organizationId: z.string().uuid(),
-  storeId: z.string().uuid(),
-  shiftId: z.string().uuid().optional(),
-  saleId: z.string().uuid().optional(),
-  customerId: z.string().uuid().optional(),
-  paymentType: z.enum(['cash', 'card', 'transfer', 'credit']),
-  direction: z.enum(['in', 'out']),
-  amount: z.number().positive(),
-  referenceNo: z.string().optional(),
-  note: z.string().optional(),
-})
-
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -26,13 +16,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
@@ -49,7 +40,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const where: any = {
+    const where: Prisma.PaymentWhereInput = {
       organizationId,
     }
 
@@ -57,7 +48,7 @@ export async function GET(request: NextRequest) {
     if (paymentType) where.paymentType = paymentType
 
     const [payments, total] = await Promise.all([
-      prisma.payment.findMany({
+      db.payment.findMany({
         where,
         include: {
           customer: true,
@@ -69,7 +60,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
       }),
-      prisma.payment.count({ where }),
+      db.payment.count({ where }),
     ])
 
     return NextResponse.json({
@@ -84,64 +75,17 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get payments error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    if (error instanceof AccessError) throw error
+    throw error
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
-        { status: 401 }
-      )
-    }
-
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
-        { status: 401 }
-      )
-    }
-
-    const body = await request.json()
-    const validatedData = createPaymentSchema.parse(body)
-
-    const payment = await prisma.payment.create({
-      data: {
-        ...validatedData,
-        receivedBy: payload.userId,
-      },
-      include: {
-        customer: true,
-        sale: true,
-      },
-    })
-
-    return NextResponse.json({
-      success: true,
-      data: payment,
-      message: 'To\'lov muvaffaqiyatli yaratildi',
-    })
-
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
-        { status: 400 }
-      )
-    }
-
-    console.error('Create payment error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
-  }
+async function handlePOST(request: NextRequest) {
+  const context = await verifyToken(getRequestToken(request) ?? '')
+  if (!context) throw new AccessError(401, 'UNAUTHORIZED')
+  const input = manualPaymentSchema.parse(await request.json())
+  return NextResponse.json({ success: true, data: await recordManualPayment(context, input) })
 }
+export const GET = withApi(handleGET)
+
+export const POST = withApi(handlePOST)

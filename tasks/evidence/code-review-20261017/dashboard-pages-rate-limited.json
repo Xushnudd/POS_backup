@@ -1,0 +1,274 @@
+{
+  "recordedAt": "2026-10-17T09:38:25.578Z",
+  "complete": false,
+  "scope": "isolated Chromium route loading, not full business acceptance",
+  "routes": [
+    {
+      "path": "/archive",
+      "status": 200,
+      "reached": "/archive"
+    },
+    {
+      "path": "/audit",
+      "status": 200,
+      "reached": "/audit"
+    },
+    {
+      "path": "/billing",
+      "status": 200,
+      "reached": "/billing"
+    },
+    {
+      "path": "/customers/1fd5dd53-9937-4f54-96bf-34cd10e31718/history",
+      "status": 200,
+      "reached": "/customers/1fd5dd53-9937-4f54-96bf-34cd10e31718/history"
+    },
+    {
+      "path": "/customers/1fd5dd53-9937-4f54-96bf-34cd10e31718",
+      "status": 200,
+      "reached": "/customers/1fd5dd53-9937-4f54-96bf-34cd10e31718"
+    },
+    {
+      "path": "/customers/duplicates",
+      "status": 200,
+      "reached": "/customers/duplicates"
+    },
+    {
+      "path": "/customers",
+      "status": 200,
+      "reached": "/customers"
+    },
+    {
+      "path": "/dashboard",
+      "status": 200,
+      "reached": "/dashboard"
+    },
+    {
+      "path": "/drafts",
+      "status": 200,
+      "reached": "/drafts"
+    },
+    {
+      "path": "/finance",
+      "status": 200,
+      "reached": "/finance"
+    },
+    {
+      "path": "/help",
+      "status": 200,
+      "reached": "/help"
+    },
+    {
+      "path": "/incidents",
+      "status": 200,
+      "reached": "/incidents"
+    },
+    {
+      "path": "/inventory/batches",
+      "status": 200,
+      "reached": "/inventory/batches"
+    },
+    {
+      "path": "/inventory/counts",
+      "status": 200,
+      "reached": "/inventory/counts"
+    },
+    {
+      "path": "/inventory/dispositions",
+      "status": 200,
+      "reached": "/inventory/dispositions"
+    },
+    {
+      "path": "/inventory/locations",
+      "status": 200,
+      "reached": "/inventory/locations"
+    },
+    {
+      "path": "/inventory/movements",
+      "status": 200,
+      "reached": "/inventory/movements"
+    },
+    {
+      "path": "/inventory",
+      "status": 200,
+      "reached": "/inventory"
+    },
+    {
+      "path": "/inventory/serials",
+      "status": 200,
+      "reached": "/inventory/serials"
+    },
+    {
+      "path": "/inventory/transfers",
+      "status": 200,
+      "reached": "/inventory/transfers"
+    },
+    {
+      "path": "/jobs",
+      "status": 200,
+      "reached": "/jobs"
+    },
+    {
+      "path": "/loyalty",
+      "status": 200,
+      "reached": "/loyalty"
+    },
+    {
+      "path": "/onboarding",
+      "status": 200,
+      "reached": "/onboarding"
+    },
+    {
+      "path": "/platform",
+      "status": 200,
+      "reached": "/platform"
+    },
+    {
+      "path": "/pos/offline",
+      "status": 200,
+      "reached": "/pos/offline"
+    },
+    {
+      "path": "/pos",
+      "status": 200,
+      "reached": "/pos"
+    },
+    {
+      "path": "/products/00c48621-aa41-4e89-841b-370216325cb3/compliance",
+      "status": 200,
+      "reached": "/products/00c48621-aa41-4e89-841b-370216325cb3/compliance"
+    },
+    {
+      "path": "/products/00c48621-aa41-4e89-841b-370216325cb3/media",
+      "status": 200,
+      "reached": "/products/00c48621-aa41-4e89-841b-370216325cb3/media"
+    },
+    {
+      "path": "/products/00c48621-aa41-4e89-841b-370216325cb3",
+      "status": 200,
+      "reached": "/products/00c48621-aa41-4e89-841b-370216325cb3"
+    },
+    {
+      "path": "/products/00c48621-aa41-4e89-841b-370216325cb3/units",
+      "status": 200,
+      "reached": "/products/00c48621-aa41-4e89-841b-370216325cb3/units"
+    },
+    {
+      "path": "/products/00c48621-aa41-4e89-841b-370216325cb3/variants",
+      "status": 200,
+      "reached": "/products/00c48621-aa41-4e89-841b-370216325cb3/variants"
+    },
+    {
+      "path": "/products/brands",
+      "status": 200,
+      "reached": "/products/brands"
+    },
+    {
+      "path": "/products/categories",
+      "status": 200,
+      "reached": "/products/categories"
+    },
+    {
+      "path": "/products/import",
+      "status": 200,
+      "reached": "/products/import"
+    },
+    {
+      "path": "/products",
+      "status": 200,
+      "reached": "/products"
+    },
+    {
+      "path": "/products/prices",
+      "status": 200,
+      "reached": "/products/prices"
+    },
+    {
+      "path": "/products/units",
+      "status": 200,
+      "reached": "/products/units"
+    },
+    {
+      "path": "/replenishment",
+      "status": 200,
+      "reached": "/replenishment"
+    },
+    {
+      "path": "/reports/breakdowns",
+      "status": 200,
+      "reached": "/reports/breakdowns"
+    },
+    {
+      "path": "/reports",
+      "status": 200,
+      "reached": "/reports"
+    },
+    {
+      "path": "/reports/plans",
+      "status": 200,
+      "reached": "/reports/plans"
+    },
+    {
+      "path": "/reports/purchases",
+      "status": 200,
+      "reached": "/reports/purchases"
+    },
+    {
+      "path": "/reports/reconciliation",
+      "status": 200,
+      "reached": "/reports/reconciliation"
+    },
+    {
+      "path": "/reports/supplier-balances",
+      "status": 200,
+      "reached": "/reports/supplier-balances"
+    },
+    {
+      "path": "/roles",
+      "status": 200,
+      "reached": "/roles"
+    },
+    {
+      "path": "/sales/b0ebd1f6-5b25-4c88-b8d4-32d2bf5f0348/exchange",
+      "status": 200,
+      "reached": "/sales/b0ebd1f6-5b25-4c88-b8d4-32d2bf5f0348/exchange"
+    },
+    {
+      "path": "/sales/b0ebd1f6-5b25-4c88-b8d4-32d2bf5f0348",
+      "status": 200,
+      "reached": "/sales/b0ebd1f6-5b25-4c88-b8d4-32d2bf5f0348"
+    },
+    {
+      "path": "/sales",
+      "status": 200,
+      "reached": "/sales"
+    },
+    {
+      "path": "/security",
+      "status": 200,
+      "reached": "/security"
+    },
+    {
+      "path": "/settings",
+      "status": 200,
+      "reached": "/settings"
+    },
+    {
+      "path": "/settings/prices",
+      "status": 200,
+      "reached": "/settings/prices"
+    },
+    {
+      "path": "/settings/support",
+      "status": 200,
+      "reached": "/settings/support"
+    },
+    {
+      "path": "/settings/taxes",
+      "status": 200,
+      "reached": "/settings/taxes"
+    }
+  ],
+  "browserExceptions": [],
+  "apiServerFailures": []
+}

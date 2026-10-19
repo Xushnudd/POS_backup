@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-13",
+  "task": "PUR-01.05",
+  "status": "in_progress",
+  "originalDone": 168,
+  "target": 170,
+  "countDelta": 0,
+  "head": "f9ef36a34df3ae346fe3013dd22c6dc33ec9e795",
+  "dirty": true,
+  "scope": "ADR085 source-validated read-only historical variance calculation; no application posting",
+  "checks": {
+    "allUnit": 124,
+    "finalPostgres": 16,
+    "actualMovementSourceCases": 9,
+    "browser": 6,
+    "build": "PASS webpack",
+    "type": "PASS",
+    "lint": "PASS",
+    "worker": "PASS",
+    "finalBuild": "PASS webpack after final source guards"
+  },
+  "results": {
+    "actualTransferReceiptSale": "inventory6.5+cogs1.5+variance2=10",
+    "actualNonStockReturn": "inventory6.5+cogs1+variance2.5=10",
+    "approvedAbsoluteOverride": "inventory1(transit)+cogs1+variance8=10",
+    "actualSupplierWithdrawal": "physical9,average0.888889,correction inventory1",
+    "fullReceiptReversal": "no remaining stock; charge5 as variance"
+  },
+  "logs": {
+    "compile": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "unit-final": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-unit-final.log",
+      "sha256": "cf76d20f5e062c1e89be6ecb9ef7d22b8a3f0cf1065093880579af3c894f60b2"
+    },
+    "guards-postgres": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-guards-postgres.log",
+      "sha256": "a307f2e8f8e20939128e479ce9619d9e6670c0b5c8440ffe17c12c3591fbd543"
+    },
+    "source-fixed": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-source-fixed.log",
+      "sha256": "2c30d65de43a0ce0464df0a6eedad1df93dda7eb6782da87e44aac93668267fb"
+    },
+    "browser": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-browser.log",
+      "sha256": "a8a4ddb2a2045daa29dcf94cafe72b54c5ba67987bccf5e6def75676b31fafa7"
+    },
+    "type-last": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-type-last.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint-final": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "last-lint": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-last-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-build.log",
+      "sha256": "3e33011f27155a968161b0efc33529f08e14fcc704eddc8397571d8239cc8df9"
+    },
+    "scanner": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-scanner.log",
+      "sha256": "c87272b25e0bc467c3aa0bf5cd3e240e290b723b5c917c2114ede872c99ec009"
+    },
+    "transfer-source-failure": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-transfer-source-failure.log",
+      "sha256": "793e1383a1eee6426d075ac771a7ad4d6617b0b000fd3905ac0730e2e6aa0830"
+    },
+    "build-final": {
+      "path": "tasks/evidence/logs/valuation-variance-20261013-build-final.log",
+      "sha256": "51a09e31cd06e4fba20c1de9401ab6388908c7a15b31d43188c0a7ac0c0ccd21"
+    }
+  },
+  "sources": {
+    "src/server/inventory/valuation-replay.ts": "d46190e5a89ad7376a397cd059d9ceefc8b147961b2f62d77bd64d41a814634f",
+    "src/server/inventory/valuation-facts.ts": "ed291f13f3bfbb97ca16300693b4593ae7416d60bb4df6550fe99c2d582af822",
+    "src/server/inventory/manual-cost-approval.ts": "5e2fb4b8701cad0bdb2aa57943774774dc13b2d8cd2bab4d2f38babac5458456",
+    "src/server/catalog/prices.ts": "559e45c44fa479be06ab666d89f1b7712d06722ad2cabd8b47d2be25a46d6cb8",
+    "src/app/api/products/[id]/route.ts": "3670de991a7be84e12b3ee83c819cc8d4bf2e73757b2e04c4d2113f183dfcadf",
+    "src/server/purchases/receipt-cost-correction-preview.ts": "0e30e89fb37b1df2e3e7cdc86fdafca7e2a0b54b0dd891d056bb5927a29b20c4",
+    "tests/valuation-replay.unit.test.ts": "d50eebeffbf0875419d29799eb8725907a4d62201ff54054bfc28d27339eed2f",
+    "tests/valuation-order.integration.test.ts": "1074793ec684567cfc8689e544296ba257a0ff81fe5e81158eef25fdf073a590"
+  },
+  "pending": [
+    "Immutable correction application posting and replay barriers for repeated actual charges",
+    "Effective original sale/return costs after application, no historical document rewrite",
+    "Financial and inventory reporting integration",
+    "Owner reviewed apply/recovery UI and full economic acceptance",
+    "INV-02.07 serial/warranty original task still todo"
+  ],
+  "external": "No production deployment, vendor/hardware API or pilot result"
+}

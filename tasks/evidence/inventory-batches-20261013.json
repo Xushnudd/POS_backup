@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-13",
+  "tasks": [
+    "INV-02.06",
+    "REP-01.07"
+  ],
+  "scope": "original core tasks, local isolated acceptance only",
+  "baseline": 166,
+  "acceptedDone": 168,
+  "target": 170,
+  "version": {
+    "head": "f9ef36a34df3ae346fe3013dd22c6dc33ec9e795",
+    "dirtyWorkingTree": true
+  },
+  "database": "isolated localhost:55439/pos_test",
+  "schemaModels": 118,
+  "migrations": 148,
+  "checks": {
+    "unit": 114,
+    "stockFinancialReportRegression": 95,
+    "batchTenantValuationRegression": 25,
+    "finalBatchAssertions": 5,
+    "finalBatchBrowsers": 3,
+    "sharedCoreBrowsers": 12,
+    "freshUpgradeRepeatDumpRestore": "PASS including native batch receipt",
+    "build": "PASS webpack",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "worker": "PASS",
+    "scanner": "zero findings, working-tree scope"
+  },
+  "evidenceLogs": [
+    {
+      "path": "tasks/evidence/logs/batches-20261013-unit.log",
+      "sha256": "0e12babeb6d772d8a56544ae895014792a7328fb49067568dc0c7cf3448de002"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-postgres148.log",
+      "sha256": "fd5535782031a38ec4de31219e38dbe5e222f7ca127822ea369e9bee2eb2643a"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-final-acceptance148.log",
+      "sha256": "743381ddbdbd94c35563572a655d2f60296ec98e7657443ab7810536846330cd"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-last-batch.log",
+      "sha256": "52c60c35bfb664ef4990f752b85a38a007d2464cf2d772c3fce0440284a857c0"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-browser148.log",
+      "sha256": "95118b8ba5d552328a15a28bb57ed2fda6b4771cf26b03606517d4fa880f5be6"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-core-browser.log",
+      "sha256": "80f2ca463ec3562ec9db4caed77a570a9e0e609b15aafc2b2353a1c8aaa6ed71"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-migration148-drill-fixed.log",
+      "sha256": "ba065cec893664f399d3769364d47dad4d14174b1ff988ca18a83ef2a9d34a0e"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-build148.log",
+      "sha256": "2806cdd88e2f388ae35044a128a4e23e9d9e65c225c99c591eacb5cb5ba17e23"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-full-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tasks/evidence/logs/batches-20261013-scanner-final.log",
+      "sha256": "5526dadd797d71abff224ab4ffcc198fcb9ed9454a854b744260e49972c15e68"
+    }
+  ],
+  "sourceHashes": {
+    "prisma/schema.prisma": "81bf98dc2c6c029c8345fdc1f847bb5e6929d02996055862e221fb024ec29297",
+    "src/server/inventory/batches.ts": "65f5fef48d920e211a830b23f9ff6a267cbe7be164ff9b1a07fa695bb631a503",
+    "src/server/inventory/counts.ts": "4c902629881e5562141d453f8e94dbd566271158b30184248eba3e0536719f33",
+    "src/server/inventory/documents.ts": "117f1c85da43f355e3d5c2709c392157b7d870dfa8c0cca4cd9c71b9c419db12",
+    "src/server/inventory/movements.ts": "b8b6bb31220bea7d7fd42f1810d2a357f27cad2ade68a2a3c9eea3596226bded",
+    "src/server/exports/queries/inventory-batches.ts": "8ef0858d5f51a3c60703280970766212464f5a67c97b0bd14da14a8cd41bec43",
+    "src/server/jobs/tenant-export-contract.ts": "1523312b735489f0837559832817f1fd761dec506785951946c1d9294ca0370d",
+    "tests/batches.integration.test.ts": "1f7c79a8375e1aef51e6a952b5302b3b157ed691ca9cd2bf80263bc40e95d17e",
+    "tests/e2e/batches.spec.ts": "5163bdecf8589086989e41f1e731c4383b66b2f68d964f20554f223b006d654d",
+    "scripts/ops/test-valuation-migrations.sh": "2a0a3c751c75d54a3d85f2983f30586230989d716fc60dc21c35aa4f8a1b2435",
+    "docs/operations/inventory-batches.md": "23cd30318cebe0a6921adf1ae1e381f9b5387dfc6c262bf39b7d42ddbc96d4f7"
+  },
+  "acceptance": {
+    "fefo": "expired5, early2, later3; sale3 consumes early2/later1; expired excluded and insufficient valid sale rolls back payment/stock",
+    "transfer": "actual original entries restore3 plus damage1; full receive status received; original-key replay no duplicate",
+    "returns": "partial multibatch selection required; sellable/damaged source conservation; count balanced batch differences and stale snapshot rejection",
+    "reports": "53 expired receipts => pages50/3, fullCSV53 despite page2, formula escape, scope denial, dueSoon1 then concurrent sales have one winner",
+    "alerts": "internal audit daily dedup, no external delivery",
+    "supplier": "original expired invoice lot withdrawal and actual receipt reversal",
+    "recovery": "tenant export includes entries/disposition; native full DB batch dump/restore unchanged"
+  },
+  "failuresCorrected": [
+    "product query missing organizationId (before restored runtime)",
+    "browser fixture missing shift organizationUserId",
+    "admin fixture changed token role without actual membership",
+    "supplier invoice fixture not registered",
+    "new batch tables missing generic tenant triggers",
+    "preexisting valuation tables missing generic tenant triggers",
+    "native restore fixture attempted tracking on INSERT instead of reviewed UPDATE"
+  ],
+  "limits": [
+    "No production deployment, real server/domain/vendor/hardware or pilot acceptance",
+    "No batch backfill of historical stock",
+    "Tracked offline cash leases rejected; online FEFO works",
+    "Manual holds reserve aggregate quantity, not a lot",
+    "FEFO/export10000; count500; worker100000 branch-batches, explicit cap errors",
+    "54 receipt local profile is not real pilot load acceptance",
+    "PUR-01.05 and INV-02.07 remain open"
+  ]
+}

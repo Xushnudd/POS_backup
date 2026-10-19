@@ -1,0 +1,153 @@
+[WebServer] (node:772337) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:772373) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (1.8s)
+  ✘   2 [chromium] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (11.1s)
+(node:773613) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   3 [chromium] › tests/e2e/billing.spec.ts:8:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (1.7s)
+  ✓   4 [chromium] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (25.1s)
+(node:775538) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.5s)
+  ✘   6 [firefox] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (11.3s)
+(node:776962) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [firefox] › tests/e2e/billing.spec.ts:8:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.7s)
+  ✓   8 [firefox] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (11.9s)
+(node:778017) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/billing-editor-state.spec.ts:8:5 › Invoice read failure preserves cancellation draft and blocks new commands until retry (2.4s)
+  ✘  10 [webkit] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts (11.8s)
+(node:779383) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [webkit] › tests/e2e/billing.spec.ts:8:5 › Billing displays DB prices/Pro trial and recovers lost invoice acknowledgement without double billing (2.6s)
+  ✓  12 [webkit] › tests/e2e/organization-closure.spec.ts:9:5 › Owner closes with downloaded export, recovers lost ACK without stored password, and cancels with fresh reauth (11.3s)
+
+
+  1) [chromium] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Failed' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Failed' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Failed' })
+
+
+      60 |  await page.route('**/api/billing',route=>route.abort('failed'))
+      61 |  await page.getByRole('button',{name:'Obuna holatini yangilash',exact:true}).click()
+    > 62 |  await expect(page.getByRole('alert').filter({hasText:'Failed'})).toBeVisible()
+         |                                                                   ^
+      63 |  await expect(plan.getByRole('button',{name:'Tarif versiyasini saqlash: oldindan ko‘rish'})).toBeDisabled()
+      64 |  await expect(plan.getByLabel('Tarif nomi',{exact:true})).toHaveValue('Independent unpublished plan')
+      65 |  await page.unroute('**/api/billing');await page.getByRole('button',{name:'Obuna holatini yangilash',exact:true}).click()
+        at /home/fedora/Developments/POS_backup/tests/e2e/billing-editor-state.spec.ts:62:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-chromium/error-context.md
+
+    Error Context: test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Failed' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Failed' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Failed' })
+
+
+      60 |  await page.route('**/api/billing',route=>route.abort('failed'))
+      61 |  await page.getByRole('button',{name:'Obuna holatini yangilash',exact:true}).click()
+    > 62 |  await expect(page.getByRole('alert').filter({has:page.getByRole('button',{name:'Qayta urinish',exact:true})})).toBeVisible()
+         |                                                                   ^
+      63 |  await expect(plan.getByRole('button',{name:'Tarif versiyasini saqlash: oldindan ko‘rish'})).toBeDisabled()
+      64 |  await expect(plan.getByLabel('Tarif nomi',{exact:true})).toHaveValue('Independent unpublished plan')
+      65 |  await page.unroute('**/api/billing');await page.getByRole('button',{name:'Obuna holatini yangilash',exact:true}).click()
+        at /home/fedora/Developments/POS_backup/tests/e2e/billing-editor-state.spec.ts:62:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-firefox/error-context.md
+
+    Error Context: test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Failed' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'Failed' }) with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Failed' })
+
+
+      60 |  await page.route('**/api/billing',route=>route.abort('failed'))
+      61 |  await page.getByRole('button',{name:'Obuna holatini yangilash',exact:true}).click()
+    > 62 |  await expect(page.getByRole('alert').filter({has:page.getByRole('button',{name:'Qayta urinish',exact:true})})).toBeVisible()
+         |                                                                   ^
+      63 |  await expect(plan.getByRole('button',{name:'Tarif versiyasini saqlash: oldindan ko‘rish'})).toBeDisabled()
+      64 |  await expect(plan.getByLabel('Tarif nomi',{exact:true})).toHaveValue('Independent unpublished plan')
+      65 |  await page.unroute('**/api/billing');await page.getByRole('button',{name:'Obuna holatini yangilash',exact:true}).click()
+        at /home/fedora/Developments/POS_backup/tests/e2e/billing-editor-state.spec.ts:62:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-webkit/error-context.md
+
+    Error Context: test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/billing-editor-state-Billi-6c1af-endent-administrator-drafts-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts 
+    [firefox] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts 
+    [webkit] › tests/e2e/billing-editor-state.spec.ts:45:5 › Billing and retention reads preserve independent administrator drafts 
+  9 passed (1.7m)

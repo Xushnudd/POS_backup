@@ -1,0 +1,50 @@
+// Read-only application acceptance against the disposable restored database.
+import assert from 'node:assert/strict';
+import {randomBytes,createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+const url=new URL(process.env.DATABASE_URL??'');
+if(url.hostname!=='127.0.0.1'||url.port!=='55439'||url.username!=='pos_test'||!/^\/pos_restore_test_\d+$/.test(url.pathname))throw new Error('Disposable restored database required');
+const fixture=process.env.RESTORE_FIXTURE_ID;
+if(!fixture||!/^[0-9a-f-]{36}$/i.test(fixture))throw new Error('Explicit test fixture required');
+const require=createRequire(import.meta.url);
+const {prisma}=require('../../.test-build/src/lib/prisma.js');
+const {sessionHash}=require('../../.test-build/src/server/auth/session.js');
+const {NextRequest}=require('next/server');
+const count=require('../../.test-build/src/app/api/stock-counts/[id]/route.js');
+const ledger=require('../../.test-build/src/app/api/customers/[id]/ledger/route.js');
+const me=require('../../.test-build/src/app/api/auth/me/route.js');
+const token=randomBytes(32).toString('base64url');
+let session;
+try {
+  assert.equal((await prisma.session.findUniqueOrThrow({where:{id:fixture}})).revokedAt instanceof Date,true);
+  assert.equal(await prisma.authRestoreCheckpoint.count({where:{reviewedAt:null}}),0);
+  assert.equal(await prisma.authRestoreCheckpoint.count({where:{reviewedAt:{not:null}}}),1);
+  const before=await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]);
+  session=await prisma.session.create({data:{organizationId:fixture,userId:fixture,tokenHash:sessionHash(token),expiresAt:new Date(Date.now()+3600000),idleExpiresAt:new Date(Date.now()+3600000)}});
+  const request=path=>new NextRequest('http://localhost:3000/api/'+path,{headers:{cookie:'pos_session='+token}});
+  const context={params:Promise.resolve({id:fixture})};
+  const identity=await me.GET(request('auth/me'));assert.equal(identity.status,200);assert.equal((await identity.json()).data.organization.id,fixture);
+  const counting=await count.GET(request('stock-counts/'+fixture),context);assert.equal(counting.status,200);const restoredCount=(await counting.json()).data;
+  assert.equal(restoredCount.status,'counting');assert.equal(restoredCount.lines.length,1);assert.equal(restoredCount.lines[0].readings[0].quantity,'2');
+  const statement=await ledger.GET(request('customers/'+fixture+'/ledger'),context);assert.equal(statement.status,200);const restoredLedger=(await statement.json()).data;
+  assert.equal(restoredLedger.summary.currentBalance,'3.75');assert.equal(restoredLedger.entries[0].sourceType,'opening_debt');assert.equal(restoredLedger.entries[0].dueAt,'2026-02-01T00:00:00.000Z');
+  const files=require('../../.test-build/src/app/api/files/[id]/route.js');
+  const asset=await prisma.fileAsset.findUniqueOrThrow({where:{id:fixture}});
+  const download=await files.GET(request('files/'+fixture),context);assert.equal(download.status,200);assert.equal(download.headers.get('Content-Type'),'image/webp');
+  assert.equal(createHash('sha256').update(Buffer.from(await download.arrayBuffer())).digest('hex'),asset.sha256);
+  assert.equal((await prisma.product.findUniqueOrThrow({where:{id:fixture}})).imageUrl,'/api/files/'+fixture);
+  const jobs=require('../../.test-build/src/app/api/jobs/route.js');
+  const restoredJobs=await jobs.GET(request('jobs?state=dead'));assert.equal(restoredJobs.status,200);const restoredJob=(await restoredJobs.json()).data.find(job=>job.id===fixture);
+  assert.ok(restoredJob);assert.equal(restoredJob.attempts,3);assert.equal(restoredJob.lastError,'WORK_FAILED');assert.equal('leaseToken'in restoredJob,false);
+  assert.equal((await prisma.jobAuthorization.findUniqueOrThrow({where:{jobId_generation:{jobId:fixture,generation:0}}})).sessionId,fixture);
+  assert.equal((await prisma.jobEvent.findUniqueOrThrow({where:{id:fixture}})).event,'dead');
+  const security=require('../../.test-build/src/app/api/auth/security/route.js');
+  const restoredSecurity=await security.GET(request('auth/security?limit=100'));assert.equal(restoredSecurity.status,200);const events=(await restoredSecurity.json()).data.events;
+  assert.ok(events.some(event=>event.id===fixture&&event.type==='login_failed'&&event.suspicious&&event.deliveryState==='pending'));
+  assert.equal('clientHash' in events[0],false);assert.equal((await prisma.securityNoticeOutbox.findUniqueOrThrow({where:{eventId:fixture}})).state,'pending');
+  assert.deepEqual(await Promise.all([prisma.sale.count(),prisma.payment.count(),prisma.inventoryMovement.count(),prisma.debtEntry.count()]),before);
+  console.info('PASS: restored application authenticates scoped fixture, reads frozen count and exact historical debt/due date; protected image bytes/SHA256/link and dead-job/source-authorization/event history and security event/pending outbox recovered; economic row counts unchanged; no external calls');
+} finally {
+  if(session)await prisma.session.delete({where:{id:session.id}});
+  await prisma.$disconnect();
+}

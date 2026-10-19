@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 9,
+      "failed": 0,
+      "seconds": 30.4,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "cases": [
+        "existing exact cash exchange original replay and linked return/replacement",
+        "malformed line rejection, double-preview single request, held actual preview failure, dirty/busy guards, held actual posting lost ACK, newer draft retained on original replay",
+        "independent price/group regression after optional busy callback change"
+      ]
+    },
+    "build": "pass",
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "limits": [
+    "No new original done; remaining UX-01.05 editors open",
+    "No real provider/hardware/production deployment performed"
+  ],
+  "logs": {
+    "browser": "tasks/evidence/logs/exchange-editor-state-20261012-browser.log",
+    "build": "tasks/evidence/logs/exchange-editor-state-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/exchange-editor-state-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/exchange-editor-state-20261012-lint.log",
+    "testLint": "tasks/evidence/logs/exchange-editor-state-20261012-testLint.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/sales/[id]/exchange/page.tsx": "9b1e2b3bc790456000f7fa08ac902dc335b36110225b69e1e9914921f572893f",
+    "src/components/forms/DurableMutation.tsx": "2bc360cb8aa1d78b1b9527848c58a5ecd5337b62436904dc38e6eb3530fbcc96",
+    "tests/e2e/exchange-editor-state.spec.ts": "6d5fd110f7f7d4866967bece318bb5080be80563173fb7fa7c15b18f72543e84",
+    "tests/e2e/core.spec.ts": "3a22756f2d52114f54075a0bc9d8d5d8ec33d60a91ab6e86a6d915615f18de22",
+    "tests/e2e/price-editor-state.spec.ts": "b066d7aedb70b81b80c68e15531126a85ea895f44f9bcf6f8f96c9f514b6a462",
+    "tasks/evidence/logs/exchange-editor-state-20261012-browser.log": "8fc02f6147d1a1b987ffa4f86885907a02026f8518f60be4c3cea8d3df8c0c34",
+    "tasks/evidence/logs/exchange-editor-state-20261012-build.log": "6108938acc8f14c5e03fa7ad6e52b72500f72b796dc2b207159beff7bc216adc",
+    "tasks/evidence/logs/exchange-editor-state-20261012-typecheck.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "tasks/evidence/logs/exchange-editor-state-20261012-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks/evidence/logs/exchange-editor-state-20261012-testLint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "originalTotal": 259,
+  "statuses": {
+    "blocked_external": 29,
+    "done": 185,
+    "deferred": 29,
+    "in_progress": 6,
+    "todo": 10
+  },
+  "bugfixIncrement": 0
+}

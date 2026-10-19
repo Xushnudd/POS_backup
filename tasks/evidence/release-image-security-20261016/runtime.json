@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "imageId": "sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee",
+  "localRepoDigest": "pos-core-180@sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee",
+  "remoteRegistryPublished": false,
+  "uid": 1001,
+  "rootReadonly": true,
+  "tmpWritable": true,
+  "capabilitiesEmpty": true,
+  "noNewPrivileges": true,
+  "readinessStatus": 200,
+  "readinessState": "ready",
+  "stopExitCode": 143,
+  "stopMilliseconds": 551,
+  "stopGraceSeconds": 30,
+  "forcedKill": false,
+  "logsContainSyntheticCredential": false,
+  "mutableImageRejectedBeforeChild": true,
+  "hostPortsPublished": false,
+  "productionDeployment": false
+}

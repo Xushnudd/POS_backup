@@ -1,14 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { assertLiveContext } from '@/server/operations'
+import { debtTargets } from '@/server/customers/targets'
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
+import { Prisma } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -16,15 +22,16 @@ export async function GET(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
-    const customer = await prisma.customer.findUnique({
+    const customer = await db.customer.findUnique({
       where: { id },
     })
 
@@ -35,33 +42,27 @@ export async function GET(
       )
     }
 
-    // Calculate debt: sales on credit - credit payments
-    const creditSales = await prisma.payment.aggregate({
-      where: {
-        customerId: id,
-        paymentType: 'credit',
-        direction: 'in',
-      },
-      _sum: {
-        amount: true,
-      },
+    const ledger = await db.debtEntry.aggregate({
+      where: { customerId: id }, _sum: { amount: true },
     })
+    const totalDebt = new Prisma.Decimal(ledger._sum.amount ?? 0)
 
-    const creditPayments = await prisma.payment.aggregate({
-      where: {
-        customerId: id,
-        paymentType: 'credit',
-        direction: 'out',
-      },
-      _sum: {
-        amount: true,
-      },
-    })
-
-    const totalDebt = (creditSales._sum.amount || 0) - (creditPayments._sum.amount || 0)
+    let allocationTargets
+    if (request.nextUrl.searchParams.has('targetsPage')) {
+      if (payload.role!=='owner') throw new AccessError(403,'OWNER_REQUIRED')
+      const raw=request.nextUrl.searchParams.get('targetsPage')??''
+      if (!/^[1-9]\d*$/.test(raw)||!Number.isSafeInteger(Number(raw))||Number(raw)>100000) throw new AccessError(400,'INVALID_PAGE')
+      const page=Number(raw),limit=50
+      allocationTargets=await prisma.$transaction(async tx=>{
+        await assertLiveContext(tx,payload)
+        const groups=(await debtTargets(tx,payload.organizationId,id)).filter(group=>group.balance.gt(0))
+        const selected=groups.slice((page-1)*limit,page*limit)
+        return {page,hasMore:groups.length>page*limit,items:selected.map(group=>({saleId:group.saleId,debtOriginId:group.debtOriginId,sourceType:group.sourceType,receiptNo:group.receiptNo,balance:String(group.balance),dueAt:group.dueAt,legacyUnallocated:group.legacyUnallocated}))}
+      },{isolationLevel:'RepeatableRead'})
+    }
 
     // Get recent transactions
-    const recentPayments = await prisma.payment.findMany({
+    const recentPayments = await db.payment.findMany({
       where: {
         customerId: id,
         paymentType: 'credit',
@@ -79,16 +80,15 @@ export async function GET(
         customerName: customer.fullName,
         creditLimit: customer.creditLimit,
         totalDebt,
-        remainingCredit: customer.creditLimit - totalDebt,
+        remainingCredit: customer.creditLimit.sub(totalDebt),
         recentPayments,
+        ...(allocationTargets?{allocationTargets}:{}),
       },
     })
 
   } catch (error) {
-    console.error('Get customer debt error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    if (error instanceof AccessError) throw error
+    throw error
   }
 }
+export const GET = withApi(handleGET)

@@ -1,0 +1,8 @@
+{
+  "scope": "disposable_pos_test_only",
+  "organizationIds": [
+    "39abc185-7a53-4ab2-ba31-170cdd164060"
+  ],
+  "reason": "Native refund document FK forbids root cascade; retained until test database teardown",
+  "guardsDisabled": false
+}

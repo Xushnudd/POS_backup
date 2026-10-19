@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "imageId": "sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee",
+  "repoDigests": [
+    "pos-core-180@sha256:3fd6d4c5e6fe9567848dfe0d10c432fc1535c36df8da01d87bd079cb6976abee"
+  ],
+  "declaredUser": "nextjs",
+  "os": "linux",
+  "architecture": "amd64",
+  "configurationProblems": [],
+  "historyTokenMarkerKinds": [],
+  "layersScanned": 18,
+  "layerEntries": 22266,
+  "layerBytes": 604351694,
+  "forbiddenCredentialPaths": 0,
+  "tokenMarkerKinds": [],
+  "layersWithHeaderLabels": 2,
+  "reviewedPublicTestVectors": 6,
+  "publicVectorReview": "https://gitlab.com/gnutls/gnutls/-/blob/3.7.9/lib/crypto-selftests-pk.c",
+  "scope": "All saved layers including deleted files: app credential-store paths, complete PEM private-key blocks, configured token markers; image configuration and history. Public GnuTLS self-test vectors require exact binary path/hash and occurrence limits; unknown/additional keys reject. Header labels used by crypto parsers are reported separately. Does not prove absence of arbitrary unknown secrets; runtime secret-store ACL and real deployment remain operator acceptance."
+}

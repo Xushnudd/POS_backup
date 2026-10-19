@@ -1,0 +1,19 @@
+[WebServer] (node:342523) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:342573) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/gift-certificates.spec.ts:8:5 › Owner gift policy MFA, actual cash issuance lost-ACK recovery and zero-credit-limit atomic checkout (4.8s)
+  ✓  2 [chromium] › tests/e2e/loyalty-marketing.spec.ts:8:5 › Owner MFA card/campaign management, customer-specific exact discount and lost-ACK recovery consume one campaign use (1.0m)
+(node:345652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/gift-certificates.spec.ts:8:5 › Owner gift policy MFA, actual cash issuance lost-ACK recovery and zero-credit-limit atomic checkout (5.4s)
+  ✓  4 [firefox] › tests/e2e/loyalty-marketing.spec.ts:8:5 › Owner MFA card/campaign management, customer-specific exact discount and lost-ACK recovery consume one campaign use (53.8s)
+(node:348643) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/gift-certificates.spec.ts:8:5 › Owner gift policy MFA, actual cash issuance lost-ACK recovery and zero-credit-limit atomic checkout (5.4s)
+  ✓  6 [webkit] › tests/e2e/loyalty-marketing.spec.ts:8:5 › Owner MFA card/campaign management, customer-specific exact discount and lost-ACK recovery consume one campaign use (53.9s)
+
+  6 passed (3.1m)

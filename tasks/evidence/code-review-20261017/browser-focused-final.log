@@ -1,0 +1,56 @@
+[WebServer] (node:223620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 7 tests using 1 worker
+
+(node:224078) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/core.spec.ts:574:5 › Production HTTPS: durable shift correction and frozen report pagination/export (4.2s)
+  ✓  2 [chromium] › tests/e2e/core.spec.ts:669:5 › Business switching keeps catalogs, local baskets and terminal selection scoped; label HTML downloads safely (1.3m)
+  ✓  3 [chromium] › tests/e2e/core.spec.ts:826:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (2.1s)
+  ✓  4 [chromium] › tests/e2e/core.spec.ts:1366:5 › Dashboard boundary recovers a render failure without creating an economic operation or exposing input data (788ms)
+  ✓  5 [chromium] › tests/e2e/custom-roles.spec.ts:9:5 › Owner explicitly creates and assigns observer profile; actual staff admission and session invalidation follow policy edits (1.4m)
+  ✘  6 [chromium] › tests/e2e/pages-smoke.spec.ts:45:5 › Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception (26.2s)
+(node:235604) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [chromium] › tests/e2e/threshold-recovery.spec.ts:8:5 › stock threshold preserves exact immutable intent after lost ACK and reload, with no duplicate audit or stock posting (1.7s)
+
+
+  1) [chromium] › tests/e2e/pages-smoke.spec.ts:45:5 › Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception 
+
+    Error: /shifts live session
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 429
+
+      29 |   const identity=authenticated?page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/me'):undefined
+      30 |   const response=await page.goto(path);expect(response?.status(),path).toBe(200)
+    > 31 |   if(identity)expect((await identity).status(),path+' live session').toBe(200)
+         |                                                                      ^
+      32 |   // Next may keep RSC prefetch connections alive. Readiness depends on the
+      33 |   // actual API responses, not on unrelated background network quiescence.
+      34 |   let settled=0
+        at visit (/home/fedora/Developments/POS_backup/tests/e2e/pages-smoke.spec.ts:31:70)
+        at /home/fedora/Developments/POS_backup/tests/e2e/pages-smoke.spec.ts:59:2
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/pages-smoke-Every-dashboar-19feb-t-a-server-render-exception-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/pages-smoke-Every-dashboar-19feb-t-a-server-render-exception-chromium/error-context.md
+
+    Error Context: test-results/pages-smoke-Every-dashboar-19feb-t-a-server-render-exception-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/pages-smoke-Every-dashboar-19feb-t-a-server-render-exception-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/pages-smoke-Every-dashboar-19feb-t-a-server-render-exception-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests/e2e/pages-smoke.spec.ts:45:5 › Every dashboard page loads its real owned source or an explicit permission/business-state boundary without a server/render exception 
+  6 passed (3.4m)

@@ -1,0 +1,134 @@
+'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
+
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useOrganization } from '@/context/OrganizationContext';
+import { useNotification } from '@/context/NotificationContext';
+import { api, ApiError } from '@/lib/api';
+import {useUnsavedChanges,confirmUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {deviceId,pendingOperations,enqueue,acknowledge,type PendingOperation} from '@/lib/offline';
+import type { Product, StockCount } from '@/types';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+
+import {useListQuery} from '@/hooks/useListQuery';
+import {journalListSorts} from '@/lib/list-query';
+import ListFilter from '@/components/ui/ListFilter';
+import Pagination from '@/components/ui/Pagination';
+import DataTable from '@/components/ui/DataTable';
+const labels={counting:'Sanash davom etmoqda',review:'Tekshirish va qayta sanash',approved:'Tasdiqlangan',cancelled:'Bekor qilingan'};
+const labelsSource=labels;
+export default function StockCountsPage(){
+ const {t:tr}=useTranslation();
+const {organization,user,role}=useAuth();const {activeStore}=useOrganization();return organization&&user?<Suspense fallback={<p>{tr("Yuklanmoqda...")}</p>}><CountControls key={[organization.id,user.id,role,activeStore?.id].join(':')}/></Suspense>:null;}
+function CountControls(){
+ const {formatDate}=useTranslation();
+
+ const {message:uiMessage}=useTranslation();
+
+ const {locale:mapLocale}=useTranslation();
+
+ const labels=localizeOwnedLabels(labelsSource,mapLocale);
+
+ const {t:tr}=useTranslation();
+
+ const {organization,user}=useAuth(),{activeStore}=useOrganization(),{notifyError,notifySuccess}=useNotification();
+ const [counts,setCounts]=useState<StockCount[]>([]),[current,setCurrent]=useState<StockCount|null>(null);
+ const {query,params,changeQuery}=useListQuery(journalListSorts,'newest');
+ const countPage=query?.page??1,limit=query?.limit??20,sort=query?.sort??'newest',listSearch=query?.search??'',filter=params.get('filter')??'active',invalidQuery=!query||!['active','all'].includes(filter),allCounts=filter==='all';
+ const [totalPages,setTotalPages]=useState(0),[listBusy,setListBusy]=useState(true),[listError,setListError]=useState('');
+ const listSequence=useRef({value:0});
+ const [scope,setScope]=useState<'full'|'partial'>('full'),[blind,setBlind]=useState(true);
+ const [products,setProducts]=useState<Product[]>([]),[selected,setSelected]=useState<string[]>([]),[search,setSearch]=useState('');
+ const [inputs,setInputs]=useState<Record<string,string>>({}),[reason,setReason]=useState(''),[busy,setBusy]=useState(false),[unknown,setUnknown]=useState(false);
+ const attempt=useRef<PendingOperation|null>(null),flight=useRef(false),live=useRef(true);
+ const organizationId=organization?.id,userId=user?.id;
+ const [ready,setReady]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState(false),[localRevision,setLocalRevision]=useState(0),[pendingView,setPendingView]=useState<PendingOperation|null>(null);
+ useEffect(()=>{let cancelled=false;live.current=true;void(async()=>{try{if(!organizationId||!userId)return;const rows=await pendingOperations({organizationId,userId,deviceId:deviceId()});if(!cancelled){attempt.current=rows.find(row=>row.type==='finance.action'&&row.payload.returnPath==='/inventory/counts'&&String(row.payload.path).startsWith('/stock-counts'))??null;setPendingView(attempt.current);setUnknown(Boolean(attempt.current));setReady(true);}}catch(e){if(!cancelled)setError(displayErrorMessage(e,'Lokal amal tekshirilmadi'));}})();return()=>{cancelled=true;live.current=false;};},[organizationId,userId,localRevision]);
+ const countDirty=Boolean(scope!=='full'||!blind||selected.length>0||Object.values(inputs).some(value=>value.length>0)||reason||unknown);
+ const discardCount=useUnsavedChanges(countDirty,busy,unknown?'Sanash amalining natijasi noma’lum. Avval original amalni tekshiring. Sahifadan chiqishni tasdiqlaysizmi?':undefined);
+
+ const refresh=useCallback(async()=>{
+  if(invalidQuery)return;const sequence=++listSequence.current.value;setListBusy(true);setListError('');
+  try{const response=await api.stockCounts.list(countPage,allCounts?'all':'active',{limit:String(limit),sort,search:listSearch});if(sequence===listSequence.current.value){setCounts(response.data??[]);setTotalPages(response.pagination?.totalPages??0);}}
+  catch(error){if(sequence===listSequence.current.value)setListError(displayErrorMessage(error,'Sanashlar yuklanmadi'));}
+  finally{if(sequence===listSequence.current.value)setListBusy(false);}
+ },[countPage,allCounts,limit,sort,listSearch,invalidQuery]);
+ useEffect(()=>{const requests=listSequence.current;let live=true;void Promise.resolve().then(()=>{if(live)return refresh();});return()=>{live=false;requests.value++;};},[refresh]);
+ const loadProducts=async()=>{if(!organization)return;try{const response=await api.products.list({organizationId:organization.id,search,limit:200});setProducts(response.data??[]);}catch(error){notifyError(displayErrorMessage(error,'Katalog yuklanmadi'));}};
+ const openCount=async(id:string)=>{if(!ready||attempt.current||!discardCount())return;try{const response=await api.stockCounts.get(id);setCurrent(response.data??null);setInputs({});setReason('');}catch(error){notifyError(displayErrorMessage(error,'Sanash topilmadi'));}};
+ const execute=async(name:string,path?:string,body?:Record<string,unknown>)=>{
+  if(flight.current||!ready||!organization||!user)return;
+  if(attempt.current&&path){notifyError("Avval original amal natijasini tekshiring");return;}
+  flight.current=true;setBusy(true);setError('');setSaved(false);const retrying=Boolean(attempt.current);
+  let op=attempt.current;
+  try{
+   if(!op){
+    if(!path||!body)throw new Error("Amal ma’lumoti topilmadi");
+    const id=typeof body.operationId==='string'?body.operationId:crypto.randomUUID();
+    op=await enqueue({id,scope:{organizationId:organization.id,userId:user.id,deviceId:deviceId()},type:'finance.action',payload:{path,returnPath:'/inventory/counts',label:name,body:JSON.parse(JSON.stringify({...body,operationId:id})),review:[`Filial: ${activeStore?.name??''}`,`Sanash: ${current?.id??'yangi'}`,`Amal: ${name}`, ...(typeof body.reason==='string'?[`Sabab: ${body.reason}`]:[]),...(Array.isArray(body.items)?body.items.map(row=>`${row.lineId}: ${row.quantity}`):[])]},state:'pending',createdAt:new Date().toISOString()});
+    attempt.current=op;if(live.current)setPendingView(op);
+   }
+   const target=String(op.payload.path);
+   if(!/^\/stock-counts(?:\/[0-9a-f-]{36}(?:\/(?:submit|approve|cancel))?)?$/.test(target))throw new Error("Original sanash manzili noto‘g‘ri");
+   const response=await api.request<StockCount>(target,{method:'POST',body:JSON.stringify(op.payload.body)});
+   await acknowledge(op.id,'synced',response.data);
+   if(live.current){setCurrent(response.data??null);if(target==='/stock-counts'){setScope('full');setBlind(true);setSelected([]);setInputs({});setReason('');}else if(/\/(approve|cancel)$/.test(target)){setInputs({});setReason('');}else if(!target.endsWith('/submit')){setInputs({});}attempt.current=null;setPendingView(null);setUnknown(false);setSaved(true);notifySuccess("Sanash amali serverda saqlandi");if(response.data?.id){try{const actual=await api.stockCounts.get(response.data.id);if(live.current)setCurrent(actual.data??null);}catch{if(live.current){setCurrent(null);setError("Amal saqlandi, lekin sanash holati yuklanmadi. Ro‘yxatdan qayta oching.");}}}await refresh();}
+  }catch(e){
+   if(!retrying&&op&&e instanceof ApiError&&([400,403,404,413,415].includes(e.status??0)||['COUNT_ALREADY_ACTIVE','COUNT_INCOMPLETE','COUNT_STOCK_CHANGED','COUNT_UNIT_CHANGED','INVALID_STATUS','READING_LIMIT','RECOUNT_REQUIRED','UNRESOLVED_OFFLINE_STOCK'].includes(e.code??''))){await acknowledge(op.id,'rejected',undefined,e.code);attempt.current=null;if(live.current)setPendingView(null);}
+   if(live.current){setUnknown(Boolean(attempt.current));setError(displayErrorMessage(e,'Natija noaniq; original kalit saqlangan'));}
+  }finally{flight.current=false;if(live.current)setBusy(false);}
+ };
+ const start=()=>{
+  if(!organization||!activeStore){notifyError("Do‘kon tanlang");return;}
+  if(!confirmUnsavedChanges(Boolean(Object.values(inputs).some(value=>value.trim())||reason),busy))return;
+ const data={operationId:crypto.randomUUID(),organizationId:organization.id,storeId:activeStore.id,scope,blind,...(scope==='partial'?{productIds:selected}:{})};
+  void execute('Sanashni boshlash','/stock-counts',data);
+ };
+ const record=()=>{
+  if(!current)return;
+  const items=Object.entries(inputs).filter(([,quantity])=>quantity.trim()!=='').map(([lineId,quantity])=>({lineId,quantity:quantity.trim()}));
+  if(!items.length){notifyError("Kamida bitta sanalgan miqdorni kiriting");return;}
+  const id=current.id,data={operationId:crypto.randomUUID(),items};void execute('Miqdorlarni saqlash',`/stock-counts/${id}`,data);
+ };
+ const decide=(action:'approve'|'cancel')=>{
+  if(!current||reason.trim().length<3){notifyError("Kamida 3 belgili sabab kiriting");return;}
+  if(!confirmUnsavedChanges(Object.values(inputs).some(value=>Boolean(value.trim())),busy))return;
+  const id=current.id,data={operationId:crypto.randomUUID(),reason:reason.trim()};void execute(action==='approve'?'Farqni tasdiqlash':'Sanashni bekor qilish',`/stock-counts/${id}/${action}`,data);
+ };
+ const active=current&&['counting','review'].includes(current.status);
+ return <div className="space-y-5">
+  <div className="flex items-center gap-3"><Link href="/inventory"><Button variant="outline">{tr("Omborga qaytish")}</Button></Link><h1 className="text-2xl font-bold">{tr("Inventarizatsiya")}</h1></div>
+  <p className="text-sm text-gray-600">{tr("Tanlangan mahsulotlar sanash tugaguncha savdo, kirim va transfer uchun bloklanadi. Sanashni tez yakunlang yoki bekor qiling. Farq bo‘lsa qayta sanash va manager tasdig‘i talab qilinadi.")}</p>
+  {!ready&&!error&&<p role="status">{tr("Lokal sanash navbati tekshirilmoqda…")}</p>}
+  {busy&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}
+  {!busy&&countDirty&&!unknown&&<p role="status">{tr("Saqlanmagan sanash o‘zgarishlari bor.")}</p>}
+  {saved&&!busy&&<p role="status">{tr("Sanash serverda saqlandi.")}</p>}
+  {error&&<p role="alert">{uiMessage(error)}{!ready&&<button type="button" className="underline ml-2" onClick={()=>setLocalRevision(value=>value+1)}>{tr("Lokal navbatni qayta tekshirish")}</button>}</p>}
+  {unknown&&<Card><p>{tr("Oldingi javob noaniq. Ma’lumot va amal kaliti saqlangan.")}</p>{(Array.isArray(pendingView?.payload.review)?pendingView.payload.review:[]).map((line,index)=><p key={index}>{String(line)}</p>)}<Button disabled={busy} onClick={()=>{if(attempt.current)void execute(String(attempt.current.payload.label??'Original sanash'));}}>{tr("Oldingi amalni qayta tekshirish")}</Button></Card>}
+  <Card className="space-y-3">
+   <h2 className="font-bold">{tr("Yangi sanash —")}{' '}{activeStore?.name??tr("do‘kon tanlanmagan")}</h2>
+   <Select label={tr("Sanash doirasi")} value={scope} disabled={!ready||busy||unknown} onChange={event=>setScope(event.target.value as 'full'|'partial')} options={[{value:'full',label:tr("To‘liq katalog (2000 tagacha)")},{value:'partial',label:tr("Tanlangan mahsulotlar")}]}/>
+   <label className="flex gap-2"><input type="checkbox" checked={blind} disabled={!ready||busy||unknown} onChange={event=>setBlind(event.target.checked)}/>{tr("Kutilgan qoldiqni sanash paytida yashirish")}</label>
+   {scope==='partial'&&<div className="space-y-2"><Input label={tr("Mahsulot qidirish")} value={search} onChange={event=>setSearch(event.target.value)} disabled={!ready||busy||unknown}/><Button onClick={loadProducts} disabled={!ready||busy||unknown}>{tr("Mahsulotlarni topish")}</Button><p>{selected.length} {tr("mahsulot tanlangan; qidiruvda 200 tagacha natija.")}</p><div className="max-h-48 overflow-auto">{products.map(product=><label key={product.id} className="flex gap-2"><input type="checkbox" checked={selected.includes(product.id)} disabled={!ready||busy||unknown} onChange={event=>setSelected(values=>event.target.checked?[...values,product.id]:values.filter(id=>id!==product.id))}/>{product.name} ({product.sku})</label>)}</div></div>}
+   <Button disabled={!ready||busy||unknown||!activeStore||(scope==='partial'&&!selected.length)} onClick={start}>{tr("Sanashni boshlash")}</Button>
+  </Card>
+  <Card><h2 className="font-bold mb-3">{tr("Sanashlar")}</h2><ListFilter search={listSearch} sort={sort} label={tr("Sanash IDsi yoki filial qidirish")} disabled={busy||unknown} onChange={changeQuery} reset={{filter:''}} options={[{value:'newest',label:tr("Eng yangi")},{value:'oldest',label:tr("Eng eski")}]}><label className="flex gap-2"><input type="checkbox" checked={allCounts} disabled={!ready||busy||unknown} onChange={e=>changeQuery({filter:e.target.checked?'all':'active',page:'1'})}/>{tr("Yakunlangan sanashlarni ham ko‘rsatish")}</label></ListFilter>{invalidQuery?<p role="alert">{tr("URL filtri yoki sahifasi noto‘g‘ri. Filtrlarni tozalang.")}</p>:listError?<p role="alert">{uiMessage(listError)}{tr(". Oxirgi ro‘yxat saqlangan.")}</p>:listBusy?<p role="status">{tr("Sanashlar yuklanmoqda…")}</p>:<><DataTable><thead><tr><th>{tr("Filial / holat")}</th><th>{tr("Sanash ID / amal")}</th></tr></thead><tbody>{counts.map(count=><tr key={count.id}><td>{count.store?.name} — {labels[count.status]}</td><td><Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>openCount(count.id)}>{count.store?.name} — {labels[count.status]} — {count.id.slice(0,8)}</Button></td></tr>)}</tbody></DataTable>{!counts.length&&<p>{tr("Sanash topilmadi.")}</p>}</>}<Pagination page={countPage} pages={totalPages} busy={listBusy&&!invalidQuery||busy||unknown} blocked={invalidQuery||!!listError||!ready} onPage={value=>changeQuery({page:String(value)})} retry={()=>{void refresh();}}/>{!invalidQuery&&countPage>Math.max(1,totalPages)&&<Button onClick={()=>changeQuery({page:'1'})}>{tr("Birinchi sahifaga qaytish")}</Button>}</Card>
+  {current&&<Card className="space-y-4">
+   <h2 className="font-bold">{labels[current.status]} — {current.id.slice(0,8)}</h2>
+   {current.status==='counting'&&current.blind&&<p>{tr("Kutilgan qoldiq birinchi sanash davomida yashirilgan.")}</p>}
+   <div className="overflow-auto"><table className="w-full text-sm"><thead><tr><th>{tr("Mahsulot")}</th><th>{tr("Kutilgan")}</th><th>{tr("Sanash tarixi")}</th><th>{tr("Yangi miqdor")}</th></tr></thead><tbody>{current.lines?.map(line=><tr key={line.id} className="border-t"><td className="p-2">{line.productName} ({line.sku}) — {line.unit}</td><td>{line.expectedQuantity??tr("Yashirilgan")}</td><td>{line.readings.map(reading=><div key={reading.id}>{reading.round}{tr("-sanash:")}{' '}{String(reading.quantity)} — {formatDate(reading.countedAt,true)}</div>)}</td><td>{active&&<Input aria-label={tr("{value1} sanalgan miqdor",{value1:String(line.sku)})} inputMode="decimal" value={inputs[line.id]??''} onChange={event=>setInputs(values=>({...values,[line.id]:event.target.value}))} disabled={!ready||busy||unknown}/>}</td></tr>)}</tbody></table></div>
+   {active&&<><Button onClick={record} disabled={!ready||busy||unknown}>{tr("Sanalgan miqdorlarni saqlash")}</Button>{current.status==='counting'&&<Button disabled={!ready||busy||unknown} onClick={()=>{if(Object.values(inputs).some(value=>value.trim())){notifyError("Avval kiritilgan miqdorlarni saqlang");return;}const id=current.id;void execute('Tekshirishga yuborish',`/stock-counts/${id}/submit`,{});}}>{tr("Tekshirishga yuborish")}</Button>}<Input label={tr("Tasdiqlash yoki bekor qilish sababi")} value={reason} maxLength={2000} disabled={!ready||busy||unknown} onChange={event=>setReason(event.target.value)}/><div className="flex gap-2">{current.status==='review'&&<Button disabled={!ready||busy||unknown} onClick={()=>decide('approve')}>{tr("Farqni tasdiqlash")}</Button>}<Button variant="outline" disabled={!ready||busy||unknown} onClick={()=>decide('cancel')}>{tr("Sanashni bekor qilish")}</Button></div></>}
+   {current.adjustmentId&&<p>{tr("Farq hujjati:")}{' '}{current.adjustmentId}</p>}
+   {current.approvedBy&&<p>{tr("Tasdiqlovchi:")}{' '}{current.approvedBy}{tr("; sabab:")}{' '}{current.reason}</p>}
+  </Card>}
+ </div>;
+}

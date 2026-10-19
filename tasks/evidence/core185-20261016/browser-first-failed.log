@@ -1,0 +1,136 @@
+[WebServer] (node:152331) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 8 tests using 1 worker
+
+(node:152635) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event (533ms)
+(node:152846) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/customer-consent.spec.ts:55:5 › Concurrent consent revision rejection refreshes history and permits a fresh reviewed decision (2.1s)
+  ✓  3 [chromium] › tests/e2e/customer-consent.spec.ts:69:5 › Recovered stale consent discards only a definitive rollback; unknown conflicts retain the original operation (1.7s)
+  ✓  4 [chromium] › tests/e2e/permission-receipts.spec.ts:16:5 › Production HTTP role decisions deny privileged mutations and revoke a live cashier without economic effects (760ms)
+  ✓  5 [chromium] › tests/e2e/permission-receipts.spec.ts:39:5 › 58 and 80mm copies retain original organization, branch, cashier and footer after all live identities change (1.2s)
+  ✘  6 [chromium] › tests/e2e/shared-documents.spec.ts:19:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke (12.5s)
+(node:156268) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  7 [chromium] › tests/e2e/shared-documents.spec.ts:49:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload (3.3s)
+(node:156516) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  8 [chromium] › tests/e2e/shared-documents.spec.ts:70:5 › Legacy external image metadata cannot create an automatic browser request (1.2s)
+
+
+  1) [chromium] › tests/e2e/customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event 
+
+    Error: page.goto: net::ERR_NETWORK_CHANGED at https://localhost:3100/customers/0561fbd3-7d28-4ecf-9bcc-6a1ae9ecdb8e
+    Call log:
+      - navigating to "https://localhost:3100/customers/0561fbd3-7d28-4ecf-9bcc-6a1ae9ecdb8e", waiting until "load"
+
+
+      14 |  const customer=await db.customer.create({data:{organizationId:me.organization.id,fullName:'Consent browser customer',phone:randomUUID()}});
+      15 |  const path='/api/customers/'+customer.id+'/consents';
+    > 16 |  await page.goto('/customers/'+customer.id);
+         |             ^
+      17 |  await expect(page.getByLabel('Rozilik dalilining identifikatori',{exact:true})).toBeEnabled();
+      18 |  return {orgId:me.organization.id,customer,path};
+      19 | }
+        at fixture (/home/fedora/Developments/POS_backup/tests/e2e/customer-consent.spec.ts:16:13)
+        at /home/fedora/Developments/POS_backup/tests/e2e/customer-consent.spec.ts:32:10
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/customer-consent-Empty-con-78b92-K-replays-exactly-one-event-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/customer-consent-Empty-con-78b92-K-replays-exactly-one-event-chromium/error-context.md
+
+    Error Context: test-results/customer-consent-Empty-con-78b92-K-replays-exactly-one-event-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/customer-consent-Empty-con-78b92-K-replays-exactly-one-event-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/customer-consent-Empty-con-78b92-K-replays-exactly-one-event-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests/e2e/shared-documents.spec.ts:19:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Elektron chek mavjud emas yoki muddati tugagan.', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Elektron chek mavjud emas yoki muddati tugagan.', exact: true }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Elektron chek mavjud emas yoki muddati tugagan.', exact: true })
+
+
+      43 |   mkdirSync('tasks/evidence/core185-20261016',{recursive:true});await receipt.screenshot({path:'tasks/evidence/core185-20261016/receipt.png',fullPage:true});
+      44 |   await section.getByRole('button',{name:'Havolani bekor qilish',exact:true}).click();await expect(section.getByText('Havola faol emas.',{exact:true})).toBeVisible();
+    > 45 |   await receipt.goto(url);await expect(receipt.getByRole('heading',{name:'Elektron chek mavjud emas yoki muddati tugagan.',exact:true})).toBeVisible();
+         |                                                                                                                                          ^
+      46 |  }finally{await anonymous.close();}
+      47 |  expect(await db.payment.count({where:{organizationId:f.orgId}})).toBe(1);expect(await db.inventoryMovement.count({where:{organizationId:f.orgId}})).toBe(1);
+      48 | });
+        at /home/fedora/Developments/POS_backup/tests/e2e/shared-documents.spec.ts:45:138
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/shared-documents-Receipt-c-c6053-comes-unavailable-on-revoke-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/shared-documents-Receipt-c-c6053-comes-unavailable-on-revoke-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/shared-documents-Receipt-c-c6053-comes-unavailable-on-revoke-chromium/error-context.md
+
+    Error Context: test-results/shared-documents-Receipt-c-c6053-comes-unavailable-on-revoke-chromium/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/shared-documents-Receipt-c-c6053-comes-unavailable-on-revoke-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/shared-documents-Receipt-c-c6053-comes-unavailable-on-revoke-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests/e2e/shared-documents.spec.ts:49:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload 
+
+    Error: Command failed: /home/fedora/.nvm/versions/node/v24.18.0/bin/node --require ./scripts/worker-resolver.cjs .worker-build/scripts/workers/jobs.js --once
+    (node:156408) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+    (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+      59 |  await card.getByRole('button',{name:'Yangilash',exact:true}).click();await card.getByRole('button',{name:'Ko‘chirmani tayyorlash navbatiga qo‘yish: oldindan ko‘rish',exact:true}).click();await card.getByRole('button',{name:'Amalni tasdiqlash',exact:true}).click();
+      60 |  await expect.poll(()=>db.backgroundJob.count({where:{organizationId:f.orgId,type:'customer_reminder'}})).toBe(1);
+    > 61 |  execFileSync(process.execPath,['--require','./scripts/worker-resolver.cjs','.worker-build/scripts/workers/jobs.js','--once'],{env:{...process.env,APP_ORIGIN:'https://localhost:3100',AUTH_TOTP_ENABLED:'true',AUTH_CHALLENGE_SECRET:'c'.repeat(64)},stdio:'pipe',timeout:60000});
+         |              ^
+      62 |  await card.getByRole('button',{name:'Yangilash',exact:true}).click();const link=card.getByRole('link',{name:'Ko‘chirmani ochish',exact:true});await expect(link).toBeVisible();const url=(await link.getAttribute('href'))!;
+      63 |  const anonymous=await browser.newContext({ignoreHTTPSErrors:true}),statement=await anonymous.newPage();
+      64 |  try{
+        at /home/fedora/Developments/POS_backup/tests/e2e/shared-documents.spec.ts:61:14
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/error-context.md
+
+    Error Context: test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/shared-documents-Personal--39f59-out-blocks-anonymous-reload-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/customer-consent.spec.ts:31:5 › Empty consent evidence remains editable; confirmation requires valid input and lost success ACK replays exactly one event 
+    [chromium] › tests/e2e/shared-documents.spec.ts:19:5 › Receipt consent UI survives lost acknowledgement; anonymous receipt matches both PDF widths and becomes unavailable on revoke 
+    [chromium] › tests/e2e/shared-documents.spec.ts:49:5 › Personal service consent prepares a real worker statement; opt-out blocks anonymous reload 
+  5 passed (26.4s)

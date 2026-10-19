@@ -1,0 +1,178 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/incident-recovery.spec.ts tests/e2e/tax-form-recovery.spec.ts tests/e2e/core.spec.ts --grep incident scan and resolution|tax forms protect|Owner sees durable inventory alert|Sync conflict requires manager terminal proof|Owner consent UI recovers|Configured tax UI
+
+[WebServer] (node:85633) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 18 tests using 1 worker
+
+(node:85686) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (2.6s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (1.7s)
+  ✓   3 [chromium] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (6.4s)
+  ✘   4 [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (12.5s)
+(node:87200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [chromium] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (1.6s)
+  ✓   6 [chromium] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (1.3s)
+(node:87430) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [firefox] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (4.3s)
+  ✓   8 [firefox] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (3.2s)
+  ✓   9 [firefox] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.3s)
+  ✘  10 [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (13.2s)
+(node:89624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [firefox] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.2s)
+  ✓  12 [firefox] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (1.7s)
+(node:90430) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 [webkit] › tests/e2e/core.spec.ts:811:5 › Owner sees durable inventory alert, exact branch replenishment and guided help without hidden repairs (3.2s)
+  ✓  14 [webkit] › tests/e2e/core.spec.ts:851:5 › Sync conflict requires manager terminal proof and keeps the original local and server payloads (2.5s)
+  ✓  15 [webkit] › tests/e2e/core.spec.ts:1024:5 › Configured tax UI recovers original rate acknowledgement, binds POS server quote and preserves old tax and profit after configuration changes (7.6s)
+  ✘  16 [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation (14.2s)
+(node:91754) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  17 [webkit] › tests/e2e/incident-recovery.spec.ts:8:5 › incident scan and resolution replay original intent without economic repair or clearing a newer reason (2.3s)
+  ✓  18 [webkit] › tests/e2e/tax-form-recovery.spec.ts:8:5 › tax forms protect partial drafts and archive replays the original PUT once after reload (2.1s)
+
+
+  1) [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true }) with timeout 10000ms
+      - waiting for getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })
+
+
+      19 |  let lastCounter=Math.floor(stamp/30000);
+      20 |  return async()=>{
+    > 21 |   const proof=page.getByRole('dialog',{name:'Muhim amalni tasdiqlash',exact:true});await expect(proof).toBeVisible();
+         |                                                                                                        ^
+      22 |   await expect.poll(()=>Math.floor(Date.now()/30000),{timeout:35000,intervals:[250]}).toBeGreaterThan(lastCounter);
+      23 |   const now=Date.now();lastCounter=Math.floor(now/30000);
+      24 |   await proof.getByLabel('Muhim amal uchun Authenticator kodi',{exact:true}).fill(totp.generate({timestamp:now}));
+        at approveSupport (/home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:21:104)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1082:1089
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/error-context.md
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true }) with timeout 10000ms
+      - waiting for getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })
+
+
+      19 |  let lastCounter=Math.floor(stamp/30000);
+      20 |  return async()=>{
+    > 21 |   const proof=page.getByRole('dialog',{name:'Muhim amalni tasdiqlash',exact:true});await expect(proof).toBeVisible();
+         |                                                                                                        ^
+      22 |   await expect.poll(()=>Math.floor(Date.now()/30000),{timeout:35000,intervals:[250]}).toBeGreaterThan(lastCounter);
+      23 |   const now=Date.now();lastCounter=Math.floor(now/30000);
+      24 |   await proof.getByLabel('Muhim amal uchun Authenticator kodi',{exact:true}).fill(totp.generate({timestamp:now}));
+        at approveSupport (/home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:21:104)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1082:1089
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/error-context.md
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true }) with timeout 10000ms
+      - waiting for getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })
+
+
+      19 |  let lastCounter=Math.floor(stamp/30000);
+      20 |  return async()=>{
+    > 21 |   const proof=page.getByRole('dialog',{name:'Muhim amalni tasdiqlash',exact:true});await expect(proof).toBeVisible();
+         |                                                                                                        ^
+      22 |   await expect.poll(()=>Math.floor(Date.now()/30000),{timeout:35000,intervals:[250]}).toBeGreaterThan(lastCounter);
+      23 |   const now=Date.now();lastCounter=Math.floor(now/30000);
+      24 |   await proof.getByLabel('Muhim amal uchun Authenticator kodi',{exact:true}).fill(totp.generate({timestamp:now}));
+        at approveSupport (/home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:21:104)
+        at /home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:1082:1089
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/error-context.md
+
+    Error Context: test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/core-Owner-consent-UI-reco-e817d-mmediately-after-revocation-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+    [firefox] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+    [webkit] › tests/e2e/core.spec.ts:1077:5 › Owner consent UI recovers a single support grant and platform operator read is audited and blocked immediately after revocation 
+  15 passed (1.6m)

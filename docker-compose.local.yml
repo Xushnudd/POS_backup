@@ -1,0 +1,78 @@
+# Local workstation only. Production uses explicit -f release files, not this overlay.
+x-local-image: &local-image
+  image: ${POS_LOCAL_IMAGE:-pos-app:development}
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: local-development
+x-local-database: &local-database
+  # The wrapper builds the internal URL, percent-encoding these actual DB settings.
+  POSTGRES_USER: ${POSTGRES_USER:-pos_user}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be supplied securely}
+  POSTGRES_DB: ${POSTGRES_DB:-pos_db}
+  DATABASE_URL: ""
+
+services:
+  migrate:
+    <<: *local-image
+    profiles: !reset []
+    init: true
+    environment: *local-database
+    command: ["node", "/local/docker-database.cjs", "node_modules/prisma/build/index.js", "migrate", "deploy"]
+    volumes:
+      - ./scripts/local/docker-database.cjs:/local/docker-database.cjs:ro,z
+  app:
+    <<: *local-image
+    ports: !reset []
+    environment:
+      <<: *local-database
+      NODE_ENV: development
+      APP_ORIGIN: http://localhost:3000
+    command: ["node", "/local/docker-database.cjs", "node_modules/next/dist/bin/next", "dev", "--webpack", "--hostname", "0.0.0.0", "--port", "3000"]
+    volumes:
+      - ./scripts/local/docker-database.cjs:/local/docker-database.cjs:ro,z
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  jobs:
+    <<: *local-image
+    environment:
+      <<: *local-database
+      NODE_ENV: development
+      APP_ORIGIN: http://localhost:3000
+    command: ["node", "/local/docker-database.cjs", "--require", "./scripts/worker-resolver.cjs", ".worker-build/scripts/workers/jobs.js"]
+    volumes:
+      - ./scripts/local/docker-database.cjs:/local/docker-database.cjs:ro,z
+  reconciliation:
+    <<: *local-image
+    environment:
+      <<: *local-database
+      NODE_ENV: development
+      APP_ORIGIN: http://localhost:3000
+    command: ["node", "/local/docker-database.cjs", "--require", "./scripts/worker-resolver.cjs", ".worker-build/scripts/workers/reconcile.js"]
+    volumes:
+      - ./scripts/local/docker-database.cjs:/local/docker-database.cjs:ro,z
+  local-https:
+    image: ${POS_IMAGE:-pos-app:local}
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    command: ["node", "/local/https-proxy.cjs"]
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3443:3443"
+    volumes:
+      - ./scripts/local/https-proxy.cjs:/local/https-proxy.cjs:ro,Z
+      - ./.local/https:/local/tls:ro,Z
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

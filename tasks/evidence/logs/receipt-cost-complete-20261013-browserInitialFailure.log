@@ -1,0 +1,177 @@
+[WebServer] (node:341757) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:341806) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (1.1m)
+(node:342915) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (5.4s)
+(node:343119) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (1.0m)
+(node:344659) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (6.3s)
+(node:345023) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (1.1m)
+(node:346491) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  6 [webkit] › tests/e2e/receipt-cost-prepare.spec.ts:11:5 › Receipt cost preparation preserves drafts through metadata failure and original lost-ACK replay without capitalising inventory (8.6s)
+
+
+  1) [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: 'Tannarx jurnali 5f1f788e-7c27-47e7-9dc4-f772c4a9e69c', exact: true }).getByLabel('Tannarxni qo‘llash sababi', { exact: true })
+        - locator resolved to <input value="" id="_r_3c_" type="text" minlength="3" maxlength="2000" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("Original reviewed application")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        125 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      23 |  await page.goto('/suppliers/'+supplier.id);await page.getByRole('button',{name:/ACTUAL-COST-ORDER/}).click()
+      24 |  const panel=page.getByRole('region',{name:'Tannarx jurnali '+plan.id,exact:true}),reason=panel.getByLabel('Tannarxni qo‘llash sababi',{exact:true})
+    > 25 |  await reason.fill('Original reviewed application')
+         |               ^
+      26 |  await page.route('**/application-preview',route=>route.abort('failed'))
+      27 |  await panel.getByRole('button',{name:'Xarajatni tannarxga qo‘llash: hisobni yangilash',exact:true}).click()
+      28 |  await expect(panel.getByRole('alert')).toBeVisible();await expect(reason).toHaveValue('Original reviewed application')
+        at /home/fedora/Developments/POS_backup/tests/e2e/receipt-cost-apply.spec.ts:25:15
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-chromium/error-context.md
+
+    Error Context: test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: 'Tannarx jurnali c3c5249b-0f4e-45aa-8375-62c9ce86479e', exact: true }).getByLabel('Tannarxni qo‘llash sababi', { exact: true })
+        - locator resolved to <input value="" id="_r_3c_" type="text" minlength="3" maxlength="2000" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("Original reviewed application")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        117 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      23 |  await page.goto('/suppliers/'+supplier.id);await page.getByRole('button',{name:/ACTUAL-COST-ORDER/}).click()
+      24 |  const panel=page.getByRole('region',{name:'Tannarx jurnali '+plan.id,exact:true}),reason=panel.getByLabel('Tannarxni qo‘llash sababi',{exact:true})
+    > 25 |  await reason.fill('Original reviewed application')
+         |               ^
+      26 |  await page.route('**/application-preview',route=>route.abort('failed'))
+      27 |  await panel.getByRole('button',{name:'Xarajatni tannarxga qo‘llash: hisobni yangilash',exact:true}).click()
+      28 |  await expect(panel.getByRole('alert')).toBeVisible();await expect(reason).toHaveValue('Original reviewed application')
+        at /home/fedora/Developments/POS_backup/tests/e2e/receipt-cost-apply.spec.ts:25:15
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-firefox/error-context.md
+
+    Error Context: test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.fill: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for getByRole('region', { name: 'Tannarx jurnali 8548cd13-fe7c-41b3-aa7f-24268ced8532', exact: true }).getByLabel('Tannarxni qo‘llash sababi', { exact: true })
+        - locator resolved to <input value="" id="_r_3c_" type="text" minlength="3" maxlength="2000" aria-invalid="false" class="w-full bg-white text-gray-900 border text-sm rounded-xl transition-all focus:outline-hidden focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed pl-3.5 pr-3.5 py-2.5 border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-100 "/>
+        - fill("Original reviewed application")
+      - attempting fill action
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and editable
+          - element is not enabled
+        - retrying fill action
+          - waiting 100ms
+        120 × waiting for element to be visible, enabled and editable
+            - element is not enabled
+          - retrying fill action
+            - waiting 500ms
+
+
+      23 |  await page.goto('/suppliers/'+supplier.id);await page.getByRole('button',{name:/ACTUAL-COST-ORDER/}).click()
+      24 |  const panel=page.getByRole('region',{name:'Tannarx jurnali '+plan.id,exact:true}),reason=panel.getByLabel('Tannarxni qo‘llash sababi',{exact:true})
+    > 25 |  await reason.fill('Original reviewed application')
+         |               ^
+      26 |  await page.route('**/application-preview',route=>route.abort('failed'))
+      27 |  await panel.getByRole('button',{name:'Xarajatni tannarxga qo‘llash: hisobni yangilash',exact:true}).click()
+      28 |  await expect(panel.getByRole('alert')).toBeVisible();await expect(reason).toHaveValue('Original reviewed application')
+        at /home/fedora/Developments/POS_backup/tests/e2e/receipt-cost-apply.spec.ts:25:15
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-webkit/error-context.md
+
+    Error Context: test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/receipt-cost-apply-Owner-a-d5184-es-once-with-source-journal-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal 
+    [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal 
+    [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal 
+  3 passed (3.9m)

@@ -1,0 +1,20 @@
+[Unit]
+Description=POS encrypted backup (%i); local artifact only, off-site acceptance separate
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=pos-ops-%i
+Group=pos-ops-%i
+EnvironmentFile=/etc/pos/%i/backup.env
+WorkingDirectory=/opt/pos
+ExecStart=/usr/bin/bash /opt/pos/scripts/ops/backup.sh
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/pos-backups/%i /var/lib/pos-ops/%i
+TimeoutStartSec=2h
+# Off-site upload and alert delivery are intentionally absent until selected.

@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-13",
+  "task": "REP-01.11",
+  "originalCount": {
+    "before": 170,
+    "after": 171,
+    "target": 175
+  },
+  "version": {
+    "head": "5683904c1ef89aae03cb570cc621ed2b7e7b490f",
+    "worktree": "uncommitted changes; no AI commit or deploy",
+    "models": 126,
+    "migrations": 167
+  },
+  "acceptance": [
+    {
+      "input": "Parallel scheduler/claims, duplicate execution, late audit fault and real elapsed30s lease",
+      "expected": "One original occurrence/result; rollback and nonce fencing",
+      "actual": "PASS; same run retry, one terminal success audit"
+    },
+    {
+      "input": "Real cash sales200/300, partial refund100, cost50/unit, two branches",
+      "expected": "A net100/cogs50/profit50/margin50%; B net300/cogs150/profit150",
+      "actual": "PASS; original cutoff excludes later sales"
+    },
+    {
+      "input": "Synthetic exact constant, weekday pattern and shock holdouts",
+      "expected": "No leakage, exact MAE/RMSE/WAPE/zero baseline, insufficient-history explicit",
+      "actual": "PASS; documented measured baselines; no real pilot accuracy claim"
+    },
+    {
+      "input": "Logout, concurrent role revoke, stop queued run, expired trial",
+      "expected": "Persistent active grant survives logout; revoke blocks result; read-only stop/export preserved",
+      "actual": "PASS; fresh publication lock sees revocation, no result bytes"
+    },
+    {
+      "input": "21 branches/110 series, bounded20 branches/100 series; CSV/XLSX/browser-print/JSON",
+      "expected": "Oversize rejected without partial result, selected bounded data complete",
+      "actual": "PASS"
+    },
+    {
+      "input": "Owner MFA and committed lost-ack reload recovery in Chromium/Firefox/WebKit",
+      "expected": "One original disabled schedule, no duplicate operation, draft preserved",
+      "actual": "3/3 PASS"
+    },
+    {
+      "input": "Fresh migration,133 synthetic upgrade/repeat and actual report dump/restore",
+      "expected": "167 migrations and unchanged original report/financial/serial history",
+      "actual": "PASS; local disposable databases only"
+    }
+  ],
+  "validation": {
+    "unit": "48 isolated unit test files passed",
+    "financialRegression": "80/80 cases passed",
+    "queueReadonlyRegression": "31/31 cases passed in separate sequential file processes",
+    "focusedReport": "16/16 cases passed (4 pure +12 PostgreSQL)",
+    "browser": "3/3 passed",
+    "type": "PASS",
+    "lint": "PASS zero warnings",
+    "workerBuild": "PASS",
+    "workerOnce": "PASS bounded local loop",
+    "webpackReleaseBuild": "PASS",
+    "restore": "PASS167 fresh/133 upgrade/repeat/actual dump-restore",
+    "sourceScan": "1329files/0findings"
+  },
+  "historicalFailures": {
+    "form": "Required field validity incorrectly disabled editing; fixed canSubmit availability vs canReview validation",
+    "browserRace": "Chromium restarted before MFA request completed; test now waits actual committed injected lost acknowledgement",
+    "sharedProcess": "--test-isolation=none kept global queue fixtures across files; rerun separate sequential processes; readonly inventory updated to actual reviewed dedicated native functions",
+    "schema": "Initial new-model export fingerprint correctly failed closed before reviewed update",
+    "compile": "New bound fixture branches array needed explicit id type; corrected before executing final tests"
+  },
+  "logs": {
+    "unit": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-unit.log",
+      "sha256": "5a979f4c7b6d0a24fcd40ab2b2ae5329c9bc0edbe124d0d5a947cb4ce48f3654"
+    },
+    "financial_regression": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-financial_regression.log",
+      "sha256": "f9f2147be8b07dc558985c77d02bb83d25873ec1ec0be359c0c8aa9ecaefffd6"
+    },
+    "queue_readonly_regression": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-queue_readonly_regression.log",
+      "sha256": "fed97405fd3e6cd4e49a41c396c124636cc34e39df0c72f0e3d73fcc55475c3c"
+    },
+    "bounds_forecast_schedule": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-bounds_forecast_schedule.log",
+      "sha256": "e052aaafad5f5562bf8e75d62eb6ab84a148b56ad7848937950ad9d70e94d0d2"
+    },
+    "browser": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-browser.log",
+      "sha256": "a92801f61637a75709240a5ee1f972a1752ccd5e096de162a3d68d633520827c"
+    },
+    "type": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-type.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker_once": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-worker_once.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-build.log",
+      "sha256": "d4f0673084f9a9f5d00ab8b01fa8b2ae64bc354782dfb7be313c9b90e64a6e66"
+    },
+    "restore": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-restore.log",
+      "sha256": "af16ff245a3b76f9bc3e533adacfd2d5dca269288560aa2ad23ccecaf6258d83"
+    },
+    "scan": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-scan.log",
+      "sha256": "b469459ccf5f376ab24c3d6906303a33e5e8076ca74e8c8bdde5c63fa93e83f8"
+    },
+    "historical_form_failure": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-historical_form_failure.log",
+      "sha256": "b2e4b51de086b2f0e9de5bdd79f22391178ca1fb5b0756d4f15d24c97c989fe0"
+    },
+    "historical_test_restart_race": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-historical_test_restart_race.log",
+      "sha256": "d377ee392d5ae471f2d79344322b5c8a2e3023995087c5c70575a26014edb1e7"
+    },
+    "historical_shared_process_failure": {
+      "path": "tasks/evidence/logs/scheduled-reports-20261013-historical_shared_process_failure.log",
+      "sha256": "a88ea9519b55b285b2a9d25d39b7377e0009c8ff16b187a50b29bec9301b51e3"
+    }
+  },
+  "sourceHashes": {
+    "src/server/reports/dates.ts": "483950d9ec98cf713932ad0123f4734f3dff424497c729afbf7007a52f03d491",
+    "src/server/reports/financial.ts": "5eeafa8ebbe1f86394661b1e96dcba183d4012213c2882efd450eaf8d672df9e",
+    "src/server/reports/numeric.ts": "f2d952da9b02596c94d97d16b51f7f7e63578148c316f4038c1acf21f21f9db8",
+    "src/server/reports/profit.ts": "483c8d546796fdfe08840b45ef9e0e14691bf1351e9338c748dba1e913219d48",
+    "src/server/reports/forecast.ts": "ecd5e9e40d4fc23b71a8bf548d288fb1539130e2824af8396b3579ae3a6915c8",
+    "src/server/reports/planned-report.ts": "820e2b7febeba088ab9cdfa91f1086115d416e78fcfde0aa99df923a18f2316f",
+    "src/server/reports/schedule-contract.ts": "8de70e60f3ee960d41387a6da7242716ded3582b09acaa28aaadd93b95c1ed6a",
+    "src/server/reports/schedules.ts": "44e9039576e67356a876e3e38ade76fd0f18488b6bbdd13984c9ec5d5cf832d0",
+    "src/server/reports/schedule-worker.ts": "a75afcadbcd429d54e5f5e75d21cc2a43c384dd7929ad7625551e226f97f9d27",
+    "src/server/reports/schedule-artifact.ts": "309640513f98acba9ea51d5464391e4e1e75aa8731c4b596ecf3ff8f2ad42e78",
+    "src/server/reports/http-context.ts": "c924f77894472abf486d5fc4984cf19dbfd34e3587037904b06d0061634270f1",
+    "src/app/api/reports/plans/route.ts": "b957cb5d746c6809061cbb597ed3430b3c6799f1e519ca6ac26e1897d5b0c957",
+    "src/app/api/reports/plans/preview/route.ts": "7bc636762e6b06278d7cb883b7ccef3ea8bdd515d6ed4ab721d7039ac2ee23ca",
+    "src/app/api/reports/plans/runs/[id]/export/route.ts": "00308a06cb4f17254175a1bc7ef8b09a274929477bb3da64ead9f7617dc2e9c6",
+    "src/app/api/reports/plans/[id]/stop/route.ts": "515b6ef263ef872fd7a6cdcc4744aac55cec51cad996919be8ea6a5d511df124",
+    "src/app/api/reports/plans/[id]/runs/route.ts": "aed3b557684e45701cd8de4659cf1f5402dbd3d97018ffcde026101dcfc62428",
+    "src/app/(dashboard)/reports/plans/page.tsx": "cfac2b2fd5548b98dfad686c9328260c18b2164f3672ff3d8cdba6f6c4791ee8",
+    "src/lib/report-plan-metrics.ts": "d39abb7f6df1b2fea91fc311c034a3de71d72b54b68886e15248674ab1eac4bb",
+    "scripts/workers/jobs.ts": "d9db3f497bf1001407e192dfed60d857b98eca7a6a871480dce6bf047be4defb",
+    "scripts/ops/report-restore-fixture.cjs": "8025dc6c16e935bf6d6fec0bbd6c4dce55bf4d27ef32fd0bb97c579e69026e6c",
+    "scripts/ops/test-valuation-migrations.sh": "0a1df7d7e7a3dd3081ce6e241dce40aa832631723996acb0acee7b93e2370e06",
+    "prisma/schema.prisma": "df5149af2aa12e2d836b75243468c783d50ac8ebbaee49ed2d2571df13e14ea4",
+    "prisma/migrations/202610130167_scheduled_reports/migration.sql": "c5533ec100fe49ced92e76d0f5b23df431aefd24dbe34b19306571649d5f29e7",
+    "tests/demand-forecast.unit.test.ts": "a9071fc3ab220ef7604649f0448fb4406349ca5a96ab0a6bb3659990802c0a41",
+    "tests/planned-report.integration.test.ts": "1f581c46ee249c9adf25d98ee8e6e7529572d44174777ac764c9982814edacd9",
+    "tests/scheduled-reports.integration.test.ts": "82cde097931ec167ec6ca4ea8c9ba1561ad64f93a745686aafbd8cf99efcbb12",
+    "tests/e2e/report-plans.spec.ts": "c060abdaf5a700ac8de35611b9e98245e3f2ae8a058792a31bd691de83ef012c",
+    "docs/operations/scheduled-reports.md": "d37d9550781c3fb141a536765c6090c4b749e8377a799dd237ea995bcb482ffc"
+  },
+  "limits": [
+    "Internal private artifact only; no real SMS/email delivery",
+    "No staging/production/pilot/vendor acceptance or deployment",
+    "UX partial lists do not increment original count",
+    "Applied167 not modified; irreversible source history deletion absent"
+  ]
+}

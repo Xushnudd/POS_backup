@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-13",
+  "task": "INV-01.07",
+  "status": "done",
+  "approved_scope": "Negative stock entirely forbidden; enabling and negative-cost correction deferred by explicit user decision ADR-083.",
+  "original_done": 166,
+  "original_total": 259,
+  "target": 170,
+  "head": "f9ef36a34df3ae346fe3013dd22c6dc33ec9e795",
+  "working_tree": true,
+  "production_deployment": false,
+  "input": "Isolated pos_test; actual stock writes, competing completed sales, original-key replay and owner HTTP settings. Synthetic legacy negative exists only inside a rolled-back exclusive transaction.",
+  "expected": "No new or deeper negative stock; allowNegative override ignored, SQL and API cannot enable flag; legacy balances retained and may recover; one sale/payment/stock effect for one remaining item.",
+  "actual": {
+    "parallel_completed_sales": 1,
+    "payments": 1,
+    "sale_movements": 1,
+    "final_quantity": "0",
+    "legacy_recovery": "-3 -> -2 -> 0 inside rolled-back test transaction",
+    "true_create_update_http_status": 400,
+    "ordinary_settings_update_status": 200,
+    "direct_sql_negative_rejected": true
+  },
+  "checks": {
+    "postgres": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-postgres.log",
+      "passed": 18
+    },
+    "unit": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-unit.log",
+      "passed": 114
+    },
+    "typecheck": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-typecheck.log"
+    },
+    "lint": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-lint.log"
+    },
+    "test_lint": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-test_lint.log"
+    },
+    "build": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-build.log"
+    },
+    "migration": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-migration.log"
+    },
+    "scanner": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-scanner.log"
+    },
+    "initial_fixture_failure": {
+      "log": "tasks/evidence/logs/negative-stock-disabled-20261013-initial_fixture_failure.log"
+    }
+  },
+  "migration_limit": "Applied 139 on isolated pos_test. Real customer upgrade and staging/production acceptance not performed. Migration contains audited disabling of existing true flags; no actual customer flag/data modified.",
+  "initial_failures": "Two added test fixtures initially failed: pending deferred trigger events before ALTER TABLE, and invalid session-token format. Corrected fixtures, no production guard bypass.",
+  "source_sha256": {
+    "src/server/inventory/movements.ts": "2aa005a7c8c084a70232fb3e61ab95053f96eb027720cbde31f8b748a1532a6b",
+    "src/server/inventory/documents.ts": "0bba7200e2b578e3805d81373a7dba982bddce755e5c64d680810e7fbe943458",
+    "src/server/sales/service.ts": "d127504661f7c6132b241a7b9e16343711b9ed5d2e0c3a44ef7167a509cfa01f",
+    "src/app/api/organizations/route.ts": "6158c9ee0fb8ec4b61390b396a59fd1b27f77459bba5af7293f459e0408669ac",
+    "src/app/api/organizations/[id]/route.ts": "d35fa2c48e4ce3da987be6f1611ceb62dee7f5f447e30bf11d9bdfaad6b312bd",
+    "src/app/(dashboard)/settings/page.tsx": "2efa438b4d90b68dca3821e0daa847b2f23b32258af4b679b3d36abc1b064644",
+    "prisma/migrations/202610130139_negative_stock_disabled/migration.sql": "6ebf813714c0e0adf997b10a26ac5abc99c01d29074f3eb379fbd82a499b00b4",
+    "tests/negative-stock.integration.test.ts": "cba7457db4cd90a11d161a21aa2e64dc2c31023ad515258a8d34378a465f2f7f"
+  }
+}

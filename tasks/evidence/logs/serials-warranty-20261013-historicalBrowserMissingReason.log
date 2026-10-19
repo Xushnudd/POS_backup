@@ -1,0 +1,129 @@
+[WebServer] (node:532054) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:532090) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (3.6s)
+  ✘  2 [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (13.2s)
+(node:532914) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.7s)
+  ✘  4 [firefox] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (14.2s)
+(node:533930) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.9s)
+  ✘  6 [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (14.5s)
+
+
+  1) [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "available"
+    Received: "sold"
+
+    Call Log:
+    - Timeout 10000ms exceeded while waiting on the predicate
+
+      39 |  const picker=page.getByRole('group',{name:product.name+' original qaytariladigan seriallar',exact:true});await expect(picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true})).toBeVisible()
+      40 |  await picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check();await page.getByLabel(product.name,{exact:true}).fill('1');await page.getByRole('button',{name:'Qaytarishni tasdiqlash',exact:true}).click()
+    > 41 |  await expect.poll(async()=>(await db.serialNumber.findUniqueOrThrow({where:{id:serial.id}})).state).toBe('available')
+         |                                                                                                      ^
+      42 |  await page.goto('/pos');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill(product.name);await page.getByRole('button',{name:product.name+' — savatga qo‘shish',exact:true}).click();await page.getByRole('button',{name:"To'lovga o'tish",exact:true}).click()
+      43 |  const payment=page.getByRole('dialog',{name:"To'lovni qabul qilish",exact:true}),checkoutPicker=payment.getByRole('group',{name:product.name+' sotiladigan seriallar (1)',exact:true})
+      44 |  await checkoutPicker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check()
+        at /home/fedora/Developments/POS_backup/tests/e2e/serials.spec.ts:41:102
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-chromium/error-context.md
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "available"
+    Received: "sold"
+
+    Call Log:
+    - Timeout 10000ms exceeded while waiting on the predicate
+
+      39 |  const picker=page.getByRole('group',{name:product.name+' original qaytariladigan seriallar',exact:true});await expect(picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true})).toBeVisible()
+      40 |  await picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check();await page.getByLabel(product.name,{exact:true}).fill('1');await page.getByRole('button',{name:'Qaytarishni tasdiqlash',exact:true}).click()
+    > 41 |  await expect.poll(async()=>(await db.serialNumber.findUniqueOrThrow({where:{id:serial.id}})).state).toBe('available')
+         |                                                                                                      ^
+      42 |  await page.goto('/pos');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill(product.name);await page.getByRole('button',{name:product.name+' — savatga qo‘shish',exact:true}).click();await page.getByRole('button',{name:"To'lovga o'tish",exact:true}).click()
+      43 |  const payment=page.getByRole('dialog',{name:"To'lovni qabul qilish",exact:true}),checkoutPicker=payment.getByRole('group',{name:product.name+' sotiladigan seriallar (1)',exact:true})
+      44 |  await checkoutPicker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check()
+        at /home/fedora/Developments/POS_backup/tests/e2e/serials.spec.ts:41:102
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-firefox/error-context.md
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "available"
+    Received: "sold"
+
+    Call Log:
+    - Timeout 10000ms exceeded while waiting on the predicate
+
+      39 |  const picker=page.getByRole('group',{name:product.name+' original qaytariladigan seriallar',exact:true});await expect(picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true})).toBeVisible()
+      40 |  await picker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check();await page.getByLabel(product.name,{exact:true}).fill('1');await page.getByRole('button',{name:'Qaytarishni tasdiqlash',exact:true}).click()
+    > 41 |  await expect.poll(async()=>(await db.serialNumber.findUniqueOrThrow({where:{id:serial.id}})).state).toBe('available')
+         |                                                                                                      ^
+      42 |  await page.goto('/pos');await page.getByLabel('POS mahsulot qidirish',{exact:true}).fill(product.name);await page.getByRole('button',{name:product.name+' — savatga qo‘shish',exact:true}).click();await page.getByRole('button',{name:"To'lovga o'tish",exact:true}).click()
+      43 |  const payment=page.getByRole('dialog',{name:"To'lovni qabul qilish",exact:true}),checkoutPicker=payment.getByRole('group',{name:product.name+' sotiladigan seriallar (1)',exact:true})
+      44 |  await checkoutPicker.getByLabel('BROWSER-SERIAL-ONE',{exact:true}).check()
+        at /home/fedora/Developments/POS_backup/tests/e2e/serials.spec.ts:41:102
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/error-context.md
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+    [firefox] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+    [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+  3 passed (59.5s)

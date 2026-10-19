@@ -1,0 +1,23 @@
+# Optional technical readiness profile; never enables itself in local/default
+# Compose. Source and repository belong to one environment/cluster only.
+services:
+  pitr-init:
+    image: postgres:15-alpine
+    network_mode: none
+    restart: "no"
+    entrypoint: ["/bin/sh", "-eu", "-c"]
+    command:
+      - mkdir -p /repository/base /repository/archive; chmod 700 /repository /repository/base /repository/archive; chown postgres:postgres /repository /repository/base /repository/archive
+    volumes:
+      - pitr_repository:/repository
+  db:
+    command: ["postgres", "-c", "config_file=/etc/postgresql/pitr.conf"]
+    volumes:
+      - pitr_repository:/repository
+      - ./ops/postgresql/pitr.conf:/etc/postgresql/pitr.conf:ro,z
+      - ./scripts/ops/pitr:/ops/pitr:ro,z
+    depends_on:
+      pitr-init:
+        condition: service_completed_successfully
+volumes:
+  pitr_repository: {}

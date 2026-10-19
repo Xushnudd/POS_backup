@@ -1,10 +1,20 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
-import React, { useRef } from 'react';
+import type {Locale} from '@/i18n/locale';
+import {localizeOwnedLabels} from '@/i18n/messages';
+
+import {useTranslation} from '@/context/LocaleContext';
+
+import React, { useRef, useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 import { Sale } from '@/types';
-import { formatMoney, formatDate } from '@/lib/format';
+import { api } from '@/lib/api';
+import { posFailure } from '@/lib/pos-failure';
+import ReceiptLinks from './ReceiptLinks';
+
 import { useAuth } from '@/context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -13,20 +23,54 @@ interface ReceiptPreviewProps {
   isOpen: boolean;
   onClose: () => void;
   sale: Sale | null;
+  copy?:boolean;
 }
 
 export default function ReceiptPreview({
   isOpen,
   onClose,
   sale,
+  copy=false,
 }: ReceiptPreviewProps) {
+ const {message:uiMessage}=useTranslation();
+
+ const {formatMoney,formatDate}=useTranslation();
+
+ const {locale:mapLocale}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const { organization, user } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
+  const [width,setWidth]=useState('80');
+  const [printRequested,setPrintRequested]=useState(false);
+  const [printing,setPrinting]=useState(false),[printError,setPrintError]=useState('');
+  const printAttempt=useRef<{saleId:string;operationId:string;width:58|80;copy:boolean;markup:string;locale:Locale}|null>(null);
 
   if (!sale) return null;
+  const identity = sale.receiptSnapshot;
+  const draft = sale.status === 'draft';
+  const receiptName = identity?.organizationName ?? (draft ? organization?.name : tr('Original rekvizitlar saqlanmagan'));
+  const receiptPhone = identity?.organizationPhone ?? (draft ? organization?.phone : null);
+  const receiptTin = identity ? identity.tin : (draft ? organization?.tin : null);
+  const receiptTimezone = identity?.timezone ?? organization?.timezone ?? 'Asia/Tashkent';
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    // This records only a browser print request, never hardware confirmation.
+    if(!printRef.current)return;
+    if(printing)return;
+    const attempt=(printAttempt.current?.saleId===sale.id?printAttempt.current:null)??{saleId:sale.id,operationId:crypto.randomUUID(),width:Number(width)===58?58 as const:80 as const,copy,markup:printRef.current.outerHTML,locale:mapLocale};
+    printAttempt.current=attempt;setPrinting(true);setPrintError('');
+    try{await api.sales.printRequest(attempt.saleId,{operationId:attempt.operationId,width:attempt.width,copy:attempt.copy});}
+    catch(error){setPrintError('PRINT_REQUEST_FAILED: '+(displayErrorMessage(error,'Chop etish so‘rovi yozilmadi; qayta urinib ko‘ring')));setPrinting(false);return;}
+    printAttempt.current=null;setPrinting(false);
+    if(!printRef.current)return;
+    setPrintRequested(true);
+    const frame=document.createElement('iframe');frame.title=tr('Chek chop etish');frame.style.cssText='position:fixed;width:0;height:0;border:0;';
+    const paper=attempt.width;
+    frame.srcdoc=`<!doctype html><html lang="${attempt.locale}"><head><meta charset="utf-8"><title>${tr('POS chek')}</title><style>@page{size:${paper}mm 297mm;margin:2mm}body{margin:0;font:11px monospace;color:#111}#printable-receipt{width:${paper-4}mm!important;max-width:none!important;padding:0!important;border:0!important}p{margin:3px 0}h2{font-size:14px}.flex{display:flex}.flex-col{flex-direction:column}.justify-between{justify-content:space-between}.text-center{text-align:center}.font-bold,.font-black{font-weight:bold}.break-words{overflow-wrap:anywhere}.flex-1{flex:1}.border-b{border-bottom:1px dashed #aaa}.py-2\\.5,.py-3{padding:6px 0}.space-y-2>div{margin:5px 0}svg{display:none}</style></head><body>${attempt.markup}</body></html>`;
+    frame.onload=()=>{frame.contentWindow?.addEventListener('afterprint',()=>frame.remove(),{once:true});try{if(!frame.contentWindow)throw new Error('Chop etish oynasi ochilmadi');frame.contentWindow.focus();frame.contentWindow.print();}catch(error){setPrintRequested(false);setPrintError('PRINT_FAILED: '+posFailure(error,'print').message);frame.remove();}};
+    document.body.append(frame);setTimeout(()=>frame.remove(),120000);
   };
 
   return (
@@ -34,89 +78,103 @@ export default function ReceiptPreview({
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2 text-emerald-600">
+        <div className="flex items-center gap-2 text-emerald-700">
           <FontAwesomeIcon icon={faCheckCircle} />
-          <span>Savdo muvaffaqiyatli yakunlandi</span>
+          <span>{copy?tr("Chek nusxasi"):sale.status==='draft'?tr("Savdo qoralamasi"):tr("Savdo muvaffaqiyatli yakunlandi")}</span>
         </div>
       }
       size="md"
       footer={
         <div className="flex items-center justify-between w-full">
           <Button variant="outline" onClick={onClose}>
-            Yangi savdo
+            {copy?tr("Yopish"):tr("Yangi savdo")}
           </Button>
           <Button
             variant="primary"
             onClick={handlePrint}
+            disabled={printing}
             leftIcon={<FontAwesomeIcon icon={faPrint} />}
             className="font-bold shadow-md"
           >
-            Chekni chop etish
-          </Button>
+            {tr("Chekni chop etish")}</Button>
         </div>
       }
     >
+      <Select disabled={printing||!!printError} label={tr("Chek qog‘ozi eni")} value={width} options={[{value:'58',label:tr("58 mm")},{value:'80',label:tr("80 mm")}]} onChange={event=>setWidth(event.target.value)}/>
+      <p className="text-xs text-slate-500 mb-3">{tr("Brauzer orqali chop etish/PDF. Printer sozlamasida mos qog‘ozni tanlang. Bu fiskal chek emas.")}</p>
+      {printError&&<div role="alert" data-stage="print" className="text-red-600 text-xs"><p>{uiMessage(printError)}</p><p>{uiMessage(posFailure(null,'print').nextAction)}</p></div>}
+      {printRequested&&<p role="status" className="text-xs">{tr("Chop etish oynasi so‘raldi; fizik chop etilganligi tasdiqlanmaydi.")}</p>}
+      {isOpen&&!draft&&<ReceiptLinks key={sale.id} saleId={sale.id}/>}
       {/* Printable Receipt Paper */}
       <div
         ref={printRef}
         id="printable-receipt"
         className="bg-white p-6 border border-dashed border-gray-300 rounded-xl max-w-sm mx-auto font-mono text-xs text-gray-800"
+        style={{width:width+'mm',maxWidth:'100%'}}
       >
         {/* Header */}
+        <p className="text-center font-bold">{sale.status==='draft'?tr("QORALAMA ·"):''}{copy?tr("CHEK NUSXASI"):tr("SAVDO CHEKI")} {tr("· FISKAL EMAS")}</p>
         <div className="text-center pb-3 border-b border-dashed border-gray-300">
           <h2 className="text-base font-black uppercase text-gray-900 tracking-wider">
-            {organization?.name || 'SHUNI POS'}
+            {receiptName || tr("SHUNI POS")}
           </h2>
-          {organization?.phone && (
-            <p className="text-[11px] text-gray-600 mt-0.5">Tel: {organization.phone}</p>
+          {receiptPhone && (
+            <p className="text-[11px] text-gray-600 mt-0.5">{tr("Tel:")}{' '}{receiptPhone}</p>
           )}
-          {organization?.tin && (
-            <p className="text-[11px] text-gray-600">STIR: {organization.tin}</p>
+          {receiptTin && (
+            <p className="text-[11px] text-gray-600">{tr("STIR:")}{' '}{receiptTin}</p>
           )}
+          {identity && <><p>{identity.storeName} · {identity.registerName} ({identity.registerCode})</p>{identity.storeAddress && <p>{identity.storeAddress}</p>}<p>{tr("Valyuta:")}{' '}{identity.currencyCode}</p></>}
+          {!identity && !draft && <p>{tr("Eski chek: tashkilot/filial/kassirning tarixiy rekvizitlari yozilmagan. Sana joriy vaqt zonasida ko‘rsatiladi.")}</p>}
         </div>
 
         {/* Info */}
         <div className="py-2.5 border-b border-dashed border-gray-300 space-y-1 text-[11px]">
           <div className="flex justify-between">
-            <span className="text-gray-500">Chek raqami:</span>
+            <span className="text-gray-600">{tr("Chek raqami:")}</span>
             <span className="font-bold">{sale.receiptNo}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Sana:</span>
-            <span>{formatDate(sale.completedAt || sale.createdAt, true)}</span>
+            <span className="text-gray-600">{tr("Sana:")}</span>
+            <span>{formatDate(sale.completedAt||sale.createdAt,true,receiptTimezone)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Kassir:</span>
-            <span>{user?.fullName || 'Kassir'}</span>
+            <span className="text-gray-600">{tr("Kassir:")}</span>
+            <span>{identity?.cashierName || (draft ? sale.cashier?.fullName || (sale.cashierId===user?.id?user.fullName:tr("Chekdagi kassir ID:")+" "+sale.cashierId) : tr("Chekdagi kassir ID:")+" "+sale.cashierId)}</span>
           </div>
           {sale.customer && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Mijoz:</span>
+              <span className="text-gray-600">{tr("Mijoz:")}</span>
               <span className="font-semibold">{sale.customer.fullName}</span>
             </div>
           )}
         </div>
 
+        {sale.discountReason&&<p className="break-words">{tr("Chegirma sababi:")}{' '}{sale.discountReason}</p>}
+        {sale.discountApprovedRole&&<p>{tr("Chegirma vakolati:")}{' '}{sale.discountApprovedRole}</p>}
+        {sale.serviceType&&<p>{tr("Xizmat:")}{' '}{sale.serviceType}</p>}
+        {sale.note&&<p className="break-words">{tr("Izoh:")}{' '}{sale.note}</p>}
+        {sale.cashTendered!=null&&sale.cashChange!=null&&<div><p>{tr("Berilgan naqd:")}{' '}{formatMoney(sale.cashTendered)}</p><p>{tr("Qaytim:")}{' '}{formatMoney(sale.cashChange)}</p></div>}
         {/* Items List */}
         <div className="py-2.5 border-b border-dashed border-gray-300">
-          <div className="flex justify-between font-bold pb-1 text-[11px] text-gray-500 uppercase">
-            <span>Mahsulot</span>
-            <span>Summa</span>
+          <div className="flex justify-between font-bold pb-1 text-[11px] text-gray-600 uppercase">
+            <span>{tr("Mahsulot")}</span>
+            <span>{tr("Summa")}</span>
           </div>
           <div className="space-y-2 mt-1">
             {sale.items.map((item, idx) => (
               <div key={idx} className="flex flex-col text-[11px]">
                 <div className="flex justify-between font-medium text-gray-900">
-                  <span className="truncate max-w-[200px]">{item.productName}</span>
+                  <span className="break-words min-w-0 flex-1">{item.productName}{item.serialAssignments?.map(serial=><span key={serial.id} className="block text-[10px]">{tr("Serial")}{' '}{serial.code}{tr("; kafolat")}{' '}{serial.startedAt} — {serial.endsAt}; {serial.terms}</span>)}{item.batchAllocations?.map(batch=><span key={batch.batchId} className="block text-[10px]">{tr("Partiya")}{' '}{batch.code}: {batch.quantity} {item.unit??''}{tr("; yaroqli")}{' '}{batch.expiresOn}</span>)}</span>
                   <span className="font-bold">{formatMoney(item.lineTotal)}</span>
                 </div>
-                <div className="flex justify-between text-[10px] text-gray-500">
+                <div className="flex justify-between text-[10px] text-gray-600">
                   <span>
-                    {item.quantity} x {formatMoney(item.unitPrice)}
+                    {item.quantity} {item.unit??''} {tr("x")}{' '}{formatMoney(item.unitPrice)}{item.conversionSnapshot&&<span className="block">{tr("Asl:")}{' '}{item.conversionSnapshot.tradeQuantity} {item.conversionSnapshot.tradeUnit}; 1 = {item.conversionSnapshot.ratio} {item.conversionSnapshot.baseUnit}</span>}
                   </span>
                   {item.discountAmount > 0 && (
                     <span className="text-red-500">
-                      Chegirma: -{formatMoney(item.discountAmount)}
+                      {tr("Chegirma: -")}{formatMoney(item.discountAmount)}
                     </span>
                   )}
                 </div>
@@ -128,17 +186,18 @@ export default function ReceiptPreview({
         {/* Totals */}
         <div className="py-3 border-b border-dashed border-gray-300 space-y-1.5 text-[11px]">
           <div className="flex justify-between text-gray-600">
-            <span>Oraliq summa:</span>
+            <span>{tr("Oraliq summa:")}</span>
             <span>{formatMoney(sale.subtotal)}</span>
           </div>
           {sale.discountAmount > 0 && (
             <div className="flex justify-between text-red-600 font-medium">
-              <span>Umumiy chegirma:</span>
+              <span>{tr("Umumiy chegirma:")}</span>
               <span>-{formatMoney(sale.discountAmount)}</span>
             </div>
           )}
+          {sale.netAmount!=null&&sale.taxAmount!==undefined&&<div className="flex justify-between text-gray-600"><span>{tr("Jami ichidagi soliq qismi:")}</span><span>{formatMoney(sale.taxAmount)}</span></div>}
           <div className="flex justify-between text-sm font-black text-gray-950 pt-1 border-t border-gray-200">
-            <span>JAMI TO&apos;LOV:</span>
+            <span>{tr("JAMI TO'LOV:")}</span>
             <span className="text-emerald-700">{formatMoney(sale.totalAmount)}</span>
           </div>
         </div>
@@ -146,17 +205,17 @@ export default function ReceiptPreview({
         {/* Payments breakdown */}
         {sale.payments && sale.payments.length > 0 && (
           <div className="py-2.5 border-b border-dashed border-gray-300 space-y-1 text-[11px]">
-            <span className="text-gray-500 font-bold block mb-1">To&apos;lov turi:</span>
+            <span className="text-gray-600 font-bold block mb-1">{tr("To'lov turi:")}</span>
             {sale.payments.map((p, idx) => {
-              const pTypeLabels: Record<string, string> = {
+              const pTypeLabels: Record<string, string> = localizeOwnedLabels({
                 cash: 'Naqd pul',
                 card: 'Plastik karta',
                 transfer: 'O\'tkazma',
                 credit: 'Nasiya / Qarz',
-              };
+              },mapLocale);
               return (
                 <div key={idx} className="flex justify-between text-gray-700">
-                  <span>{pTypeLabels[p.paymentType] || p.paymentType}:</span>
+                  <span>{p.paymentType==='credit'&&p.direction==='in'&&sale.giftFunding?tr("Sertifikat")+" "+sale.giftFunding.code:pTypeLabels[p.paymentType] || p.paymentType} ({p.direction==='out'?tr("chiqim"):tr("kirim")}):</span>
                   <span className="font-semibold">{formatMoney(p.amount)}</span>
                 </div>
               );
@@ -165,9 +224,9 @@ export default function ReceiptPreview({
         )}
 
         {/* Footer message */}
-        <div className="text-center pt-4 text-[11px] text-gray-500">
-          <p>{organization?.receiptFooter || 'Xaridingiz uchun rahmat!'}</p>
-          <p className="text-[9px] text-gray-400 mt-2">Dastur: Shuni POS</p>
+        <div className="text-center pt-4 text-[11px] text-gray-600">
+          <p>{identity ? identity.receiptFooter || tr("Xaridingiz uchun rahmat!") : draft ? organization?.receiptFooter || tr("Xaridingiz uchun rahmat!") : tr("Xaridingiz uchun rahmat!")}</p>
+          <p className="text-[9px] text-gray-600 mt-2">{tr("Dastur: Shuni POS")}</p>
         </div>
       </div>
     </Modal>

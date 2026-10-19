@@ -1,0 +1,65 @@
+{
+  "task": "OPS-01.01",
+  "status": "local_technical_acceptance_passed",
+  "executedAtUtc": "2026-10-16T04:37:21.278Z",
+  "command": "node scripts/ops/test-environment-isolation.mjs",
+  "sourceRevision": "15bd1cf4dc5e281590f940661cddea7683758100",
+  "postgresImageId": "sha256:a46e076249ce434e41203b8c1dadfaa025b9726331d72390df038385d6dc29cd",
+  "scope": "Synthetic local development/staging/production configuration and isolation rehearsal. No approved real staging/production environment exists.",
+  "checks": [
+    {
+      "check": "actual_base_and_release_compose_render",
+      "passed": true,
+      "status": "ready_for_operator_review",
+      "environments": 3,
+      "renderedNetworksAndVolumesVerified": true,
+      "liveEnvironmentsVerified": false
+    },
+    {
+      "check": "three_real_private_postgresql_clusters",
+      "passed": true,
+      "ownEnvironmentWrites": 3,
+      "foreignCredentialsRejected": 6,
+      "foreignNetworksRejectedEvenWithTargetCredentials": 6,
+      "publishedDatabasePorts": 0,
+      "unexpectedWrites": 0,
+      "syntheticDataOnly": true
+    }
+  ],
+  "files": [
+    {
+      "path": "scripts/ops/check-environment-isolation.mjs",
+      "sha256": "99ff7f79f6c436e6932e10029082a697a31f7397fa98d2f01a4975bc39b46e86"
+    },
+    {
+      "path": "scripts/ops/check-compose-isolation.mjs",
+      "sha256": "0b569d06adefbeb18e71a7bced9ca06ee0b21aef8e1630c0c87d8d5594e2a5da"
+    },
+    {
+      "path": "scripts/ops/check-compose-isolation.test.mjs",
+      "sha256": "f43e0bf3e088713c10ff88f743461ecc0e333b498c1a5a34956648bd4dfb61c6"
+    },
+    {
+      "path": "scripts/ops/test-environment-isolation.mjs",
+      "sha256": "6265de8b990a0cf2c0f1139fae2d29e83ef11ce0268791745560b4ce89c6288a"
+    },
+    {
+      "path": "docker-compose.yml",
+      "sha256": "749b3e401f87e34343546416b668ab879bb6cdc1fef0ae6202cfd123cc79d376"
+    },
+    {
+      "path": "docker-compose.release.yml",
+      "sha256": "7d92d61f383f9769e9da97aa41db318213528ba9af068752193403f4eda276f0"
+    },
+    {
+      "path": "docker-compose.maintenance.yml",
+      "sha256": "1bcbaf94bb28d5dcc6da0473850175285b61ff3f45194414c107b0b836802270"
+    }
+  ],
+  "limits": [
+    "Actual host/secret-store access controls and operator credentials require external acceptance before deployment.",
+    "No real personal data copied, provider enabled, existing .env inspected or real deployment performed.",
+    "Three fresh PostgreSQL clusters use distinct bootstrap roles/passwords and private volumes/networks. A bootstrap role is superuser only inside its own disposable cluster; this is not proof of least-privileged runtime DB roles."
+  ],
+  "cleanup": "all disposable containers, networks, volumes and generated credentials removed"
+}

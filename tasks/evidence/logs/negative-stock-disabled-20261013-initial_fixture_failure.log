@@ -1,0 +1,113 @@
+{"requestId":"fd5c49eb-a2f8-4197-85c6-b8f22d6b0db4","status":200,"durationMs":309,"event":"api_response"}
+{"requestId":"d34da765-8731-43db-a4d3-d9f66fe23d3d","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"06138c9b-6991-42b2-a1e4-b05e0c7b45ec","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":14,"event":"api_error"}
+{"requestId":"6a4661b1-7da9-4248-9071-e1faea559e81","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":16,"event":"api_error"}
+{"requestId":"c2614505-be4e-45c9-9524-f19fa6482001","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":15,"event":"api_error"}
+{"requestId":"5187ae49-a373-4552-b26c-28161d61ac1c","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":16,"event":"api_error"}
+{"requestId":"3afa0107-6d06-40b2-b95d-3bcf506bb526","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":16,"event":"api_error"}
+{"requestId":"66fe39c5-a124-4ed6-b43b-7e5737023982","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":33,"event":"api_error"}
+{"requestId":"c5bc4d05-c4d2-4a50-aa98-1a9c5bce2220","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"VALIDATION_ERROR","durationMs":30,"event":"api_error"}
+{"requestId":"64d38937-6dd6-4cce-a7dd-75912646686f","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"59ddfd68-61ab-4311-9ee6-78c2698f8f82","organizationId":"1a63181e-73b6-4483-8db0-377ea7d3d978","status":400,"code":"INVALID_ITEMS","durationMs":47,"event":"api_error"}
+✔ Receipt-backed preview uses actual partial receipt snapshots, has no journal effect and rejects forged fields (743.029264ms)
+{"requestId":"43460062-a72f-4ea6-8e73-ff8b418b7a94","status":200,"durationMs":267,"event":"api_response"}
+{"requestId":"e3c0f93f-4046-46f9-91b6-a116f9347311","status":200,"durationMs":236,"event":"api_response"}
+{"requestId":"95f1f696-ce3b-46a2-9579-e46a7a0a092a","organizationId":"0a066c7e-7c7b-4d63-bca5-0c781371dfca","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"6fddd871-df63-4203-9297-10f8762e264e","organizationId":"9f64c285-cab2-4693-b15e-0c8f21e1fd9d","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"77451788-2020-4fa9-86ca-4f5092b376e0","organizationId":"9f64c285-cab2-4693-b15e-0c8f21e1fd9d","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"6bc600d2-956b-4cde-900a-380e417e73e8","organizationId":"9f64c285-cab2-4693-b15e-0c8f21e1fd9d","status":403,"code":"FORBIDDEN","durationMs":3,"event":"api_error"}
+{"requestId":"a517bdc3-3f80-489e-8381-af48afb06f50","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Preview enforces tenant, assigned branch, live role and session boundaries (691.998743ms)
+{"requestId":"62a04b90-4e19-4c8f-90ba-9036d54ba6fb","status":200,"durationMs":239,"event":"api_response"}
+{"requestId":"1999a0be-899f-4783-840d-22ad4c55ca29","organizationId":"5bdff90a-0aed-4fa3-ab70-39ce079b3a62","status":200,"durationMs":34,"event":"api_response"}
+{"requestId":"98a82e94-b3b3-4a48-823d-652ffb61ac9e","organizationId":"5bdff90a-0aed-4fa3-ab70-39ce079b3a62","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"504d7413-0625-4b4c-b19c-1adb4fb45515","organizationId":"5bdff90a-0aed-4fa3-ab70-39ce079b3a62","status":400,"code":"VALIDATION_ERROR","durationMs":14,"event":"api_error"}
+{"requestId":"dd0752ee-76fb-4b12-83aa-94830cf7e6b1","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"9c92a2ca-30a0-4d5f-aab7-376bd6cca6c9","organizationId":"177a4afc-9b1b-47ee-b6cf-d8f8f78e9aed","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"1ffc8e6c-5c5b-4cc8-9bf4-95c45537d370","organizationId":"5bdff90a-0aed-4fa3-ab70-39ce079b3a62","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"5101e90c-3945-41b8-98e7-440cd9cbc8a2","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Historical correction API is owner-only, read-only, bounded and rejects forged source fields (656.940465ms)
+{"requestId":"fc7b26c0-b6ea-4e4c-8c8b-3b4d6f965713","status":200,"durationMs":234,"event":"api_response"}
+{"requestId":"da8fb27c-8c96-47d3-bf2a-00cf8e75db35","status":200,"durationMs":229,"event":"api_response"}
+✔ Receipt cost sources list only same-branch unassigned unreversed capitalised expenses and preserve original money (643.990061ms)
+{"requestId":"cf800e2b-f9e9-4b12-b703-37ee196cd099","status":200,"durationMs":234,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Prepared receipt cost journal uses one paid source, replays once, cancels safely and never posts valuation (548.171438ms)
+{"requestId":"b3b4c266-5514-42f8-864d-414f10c76d80","status":200,"durationMs":240,"event":"api_response"}
+{"requestId":"51e1217c-1d79-4ea4-b691-b056da176be8","status":200,"durationMs":245,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"9d0ba403-86a6-4191-8969-4d77f1022743","organizationId":"a43c8652-4378-48fd-9c3c-a99776686ada","operationId":"17d1e278-b03d-4cdc-b2ab-3d4f1162b021","status":409,"code":"EXPENSE_ALREADY_ASSIGNED","durationMs":71,"event":"api_error"}
+{"requestId":"5f9defe2-5674-4fc3-9a23-d47352443343","organizationId":"a43c8652-4378-48fd-9c3c-a99776686ada","status":403,"code":"FORBIDDEN","durationMs":13,"event":"api_error"}
+✔ Distinct concurrent keys cannot assign one expense twice; source guards and API remain scoped (905.50174ms)
+{"requestId":"d423c55e-948f-467d-967a-6a7434bdbbd4","status":200,"durationMs":251,"event":"api_response"}
+✔ Late audit failure rolls back prepared source assignment and SQL refuses altered original receipt quantities (473.075192ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ negative policy cannot be enabled, forged override cannot overdraw and competing sales conserve stock (389.515121ms)
+✖ legacy negative balance can recover but cannot deepen or move to another branch (50.555991ms)
+{"requestId":"68302dcb-bf20-4656-a82b-4334113467be","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+✖ owner HTTP create and update reject enabling, ordinary settings remain editable (43.295756ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Locations and reservations conserve physical stock; concurrent holds, exact reserved sale, replay and SQL corruption checks (478.193456ms)
+{"requestId":"f90766d4-d2fe-4764-80ce-c4f4bc5d27cc","organizationId":"b42e6a7f-3aac-4a92-bea2-c0a0afc6fb17","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"16d20a54-2da8-4b68-a8ca-0fd75ed58c9e","organizationId":"b42e6a7f-3aac-4a92-bea2-c0a0afc6fb17","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"d982d6d1-7271-43f5-8680-07f9591327b7","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Expiry uses server time once, ignored expired quota does not oversell; audit failure rolls back and APIs enforce tenant/live role (158.747871ms)
+✔ actual receipt captures cost change and movement in one transaction, replay adds no valuation event (256.034711ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ parallel branches receive unique committed product order, sequence does not use timestamp sorting, rollback adds no event (111.18062ms)
+✔ legacy unjournaled balance is recorded as an unproven boundary, never silently capitalised (74.48406ms)
+✔ actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes (582.71318ms)
+✔ native capture alone cannot authorize an invented source or an unimplemented adjustment adapter (86.460907ms)
+✔ organization-wide baseline preserves exact sum beyond one branch decimal capacity without breaking original cost update (39.682145ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 16
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8339.884358
+
+✖ failing tests:
+
+test at .test-build/tests/negative-stock.integration.test.js:84:22
+✖ legacy negative balance can recover but cannot deepen or move to another branch (50.555991ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  PrismaClientKnownRequestError: 
+  Invalid `prisma.$executeRawUnsafe()` invocation:
+  
+  
+  Raw query failed. Code: `55006`. Message: `ERROR: cannot ALTER TABLE "InventoryBalance" because it has pending trigger events`
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/negative-stock.integration.test.js:88:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [PrismaClientKnownRequestError],
+    expected: [Function (anonymous)],
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at .test-build/tests/negative-stock.integration.test.js:105:22
+✖ owner HTTP create and update reject enabling, ordinary settings remain editable (43.295756ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  401 !== 400
+  
+      at TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/negative-stock.integration.test.js:111:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 400,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

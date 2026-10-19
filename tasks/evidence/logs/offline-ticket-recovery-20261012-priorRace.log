@@ -1,0 +1,154 @@
+
+> frontend@0.1.0 test:e2e
+> playwright test tests/e2e/ticket-editor-state.spec.ts tests/e2e/location-editor-state.spec.ts tests/e2e/offline-editor-state.spec.ts tests/e2e/core.spec.ts --grep ticket reply draft|zone and reservation drafts|Stock zone UI|offline unlock and partial|Offline issuer and cash
+
+[WebServer] (node:305886) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 15 tests using 1 worker
+
+(node:305945) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/core.spec.ts:1109:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (4.9s)
+  ✓   2 [chromium] › tests/e2e/core.spec.ts:1130:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (2.8s)
+  ✓   3 [chromium] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (3.5s)
+  ✓   4 [chromium] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (1.5s)
+  ✘   5 [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (10.9s)
+(node:307489) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [firefox] › tests/e2e/core.spec.ts:1109:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (5.6s)
+  ✓   7 [firefox] › tests/e2e/core.spec.ts:1130:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (3.2s)
+  ✓   8 [firefox] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (4.2s)
+  ✓   9 [firefox] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (2.3s)
+  ✘  10 [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (11.2s)
+(node:308541) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [webkit] › tests/e2e/core.spec.ts:1109:5 › Stock zone UI recovers original lost reservation once, protects held stock and releases without physical movement (3.9s)
+  ✓  12 [webkit] › tests/e2e/core.spec.ts:1130:5 › Offline issuer and cash synchronization recover original lost acknowledgements with encrypted ticket and a single financial effect (3.4s)
+  ✓  13 [webkit] › tests/e2e/location-editor-state.spec.ts:8:5 › zone and reservation drafts remain independent through relocation ACK and failed stock metadata refresh (4.0s)
+  ✓  14 [webkit] › tests/e2e/offline-editor-state.spec.ts:9:5 › offline unlock and partial owner drafts are guarded; policy ACK resets only its own draft (2.7s)
+  ✘  15 [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (11.7s)
+
+
+  1) [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByLabel('Javob yoki sabab', { exact: true })
+    Expected: "Independent reply draft"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('Javob yoki sabab', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('Javob yoki sabab', { exact: true })
+
+
+      14 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+      15 |  await page.getByRole('link',{name:'Murojaatlar ro‘yxati',exact:true}).click();await expect(page).toHaveURL(new RegExp(path+'$'));expect(prompts).toBe(1)
+    > 16 |  await page.route('**/api/support/tickets/'+ticket.id+'?*',route=>route.abort('failed'));await page.getByRole('button',{name:'Murojaatni yangilash',exact:true}).click();await expect(page.getByRole('button',{name:'Qayta urinish',exact:true})).toBeVisible();await expect(message).toHaveValue('Independent reply draft');await expect(command.getByRole('button',{name:'Murojaat amalini bajarish: oldindan ko‘rish',exact:true})).toBeDisabled()
+         |                                                                                                                                                                                                                                                                                       ^
+      17 |  await page.unroute('**/api/support/tickets/'+ticket.id+'?*');await page.getByRole('button',{name:'Qayta urinish',exact:true}).click();await expect(message).toBeEnabled();await expect(message).toHaveValue('Independent reply draft')
+      18 |  const bodies:string[]=[];let lost=false
+      19 |  await page.route('**/api/support/tickets/'+ticket.id+'/commands',async route=>{bodies.push(route.request().postData()??'');const response=await route.fetch();if(!lost&&response.ok()){lost=true;await route.abort('failed')}else await route.fulfill({response})})
+        at /home/fedora/Developments/POS_backup/tests/e2e/ticket-editor-state.spec.ts:16:279
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-chromium/error-context.md
+
+    Error Context: test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByLabel('Javob yoki sabab', { exact: true })
+    Expected: "Independent reply draft"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('Javob yoki sabab', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('Javob yoki sabab', { exact: true })
+
+
+      14 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+      15 |  await page.getByRole('link',{name:'Murojaatlar ro‘yxati',exact:true}).click();await expect(page).toHaveURL(new RegExp(path+'$'));expect(prompts).toBe(1)
+    > 16 |  await page.route('**/api/support/tickets/'+ticket.id+'?*',route=>route.abort('failed'));await page.getByRole('button',{name:'Murojaatni yangilash',exact:true}).click();await expect(page.getByRole('button',{name:'Qayta urinish',exact:true})).toBeVisible();await expect(message).toHaveValue('Independent reply draft');await expect(command.getByRole('button',{name:'Murojaat amalini bajarish: oldindan ko‘rish',exact:true})).toBeDisabled()
+         |                                                                                                                                                                                                                                                                                       ^
+      17 |  await page.unroute('**/api/support/tickets/'+ticket.id+'?*');await page.getByRole('button',{name:'Qayta urinish',exact:true}).click();await expect(message).toBeEnabled();await expect(message).toHaveValue('Independent reply draft')
+      18 |  const bodies:string[]=[];let lost=false
+      19 |  await page.route('**/api/support/tickets/'+ticket.id+'/commands',async route=>{bodies.push(route.request().postData()??'');const response=await route.fetch();if(!lost&&response.ok()){lost=true;await route.abort('failed')}else await route.fulfill({response})})
+        at /home/fedora/Developments/POS_backup/tests/e2e/ticket-editor-state.spec.ts:16:279
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-firefox/error-context.md
+
+    Error Context: test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByLabel('Javob yoki sabab', { exact: true })
+    Expected: "Independent reply draft"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('Javob yoki sabab', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('Javob yoki sabab', { exact: true })
+
+
+      14 |  let prompts=0;page.on('dialog',async dialog=>{if(dialog.type()==='beforeunload')await dialog.accept();else{prompts++;await dialog.dismiss()}})
+      15 |  await page.getByRole('link',{name:'Murojaatlar ro‘yxati',exact:true}).click();await expect(page).toHaveURL(new RegExp(path+'$'));expect(prompts).toBe(1)
+    > 16 |  await page.route('**/api/support/tickets/'+ticket.id+'?*',route=>route.abort('failed'));await page.getByRole('button',{name:'Murojaatni yangilash',exact:true}).click();await expect(page.getByRole('button',{name:'Qayta urinish',exact:true})).toBeVisible();await expect(message).toHaveValue('Independent reply draft');await expect(command.getByRole('button',{name:'Murojaat amalini bajarish: oldindan ko‘rish',exact:true})).toBeDisabled()
+         |                                                                                                                                                                                                                                                                                       ^
+      17 |  await page.unroute('**/api/support/tickets/'+ticket.id+'?*');await page.getByRole('button',{name:'Qayta urinish',exact:true}).click();await expect(message).toBeEnabled();await expect(message).toHaveValue('Independent reply draft')
+      18 |  const bodies:string[]=[];let lost=false
+      19 |  await page.route('**/api/support/tickets/'+ticket.id+'/commands',async route=>{bodies.push(route.request().postData()??'');const response=await route.fetch();if(!lost&&response.ok()){lost=true;await route.abort('failed')}else await route.fulfill({response})})
+        at /home/fedora/Developments/POS_backup/tests/e2e/ticket-editor-state.spec.ts:16:279
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-webkit/error-context.md
+
+    Error Context: test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/ticket-editor-state-ticket-29cc8-ars-only-acknowledged-draft-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft 
+    [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft 
+    [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft 
+  12 passed (1.4m)

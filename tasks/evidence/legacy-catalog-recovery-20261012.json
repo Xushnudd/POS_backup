@@ -1,0 +1,54 @@
+{
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "date": "2026-10-12",
+  "original_done": 164,
+  "original_total": 259,
+  "target": 170,
+  "original_delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 12,
+      "failed": 0,
+      "duration": "46.2s",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "cases": [
+        "Category partial draft, failed read, held create ACK and same-tick double click",
+        "Unit partial draft, failed read, held create ACK and same-tick double click",
+        "Existing catalogue management/supplier purchase history/inventory exports",
+        "Existing category tree/brand/image upload/delete recovery"
+      ]
+    },
+    "build": "Webpack PASS",
+    "typecheck": "PASS",
+    "changed_lint": "PASS"
+  },
+  "invariants": [
+    "Read failure retains previous rows and draft, prevents new mutation until successful retry.",
+    "Synchronous ref admits only one request even before React saving state commits.",
+    "ACK clears own draft and marks saved independently of a following read failure.",
+    "Legacy endpoints have no server operation key; no automatic retry or claimed original-key idempotency.",
+    "No physical inventory movements created by catalogue edits."
+  ],
+  "source_sha256": {
+    "src/hooks/useAcknowledgedMutation.ts": "c3452b18c7cf1cb75f693d9f1f19071518e6dc5a51cff09aac2f5820056a0703",
+    "src/app/(dashboard)/products/categories/page.tsx": "0021a2efc90e737a279d2755a10165fc67ab93144be8c119f8236a3b9799bc9a",
+    "src/app/(dashboard)/products/units/page.tsx": "72407dafce609e043f41b2710a808754c4458a2c5d7e6ad67be20fb3e36b4080",
+    "tests/e2e/legacy-catalog-state.spec.ts": "520925ba6fac8df45b72600266b1bda7d935e8b778fa64448ec8e81363307628"
+  },
+  "logs": [
+    "tasks/evidence/logs/legacy-catalog-20261012-pos-170-catalog-legacy-e2e.log",
+    "tasks/evidence/logs/legacy-catalog-20261012-pos-170-catalog-legacy-build.log",
+    "tasks/evidence/logs/legacy-catalog-20261012-pos-170-catalog-legacy-type.log",
+    "tasks/evidence/logs/legacy-catalog-20261012-pos-170-catalog-legacy-lint.log"
+  ],
+  "limits": [
+    "Original UX-01.05 remains open.",
+    "No vendor, real delivery, hardware or production deployment."
+  ]
+}

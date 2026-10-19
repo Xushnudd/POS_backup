@@ -1,0 +1,31 @@
+{
+  "verifiedAt": "2026-10-17T14:59:05.378Z",
+  "passed": true,
+  "backup": {
+    "encrypted": true,
+    "bytes": 61484,
+    "sha256": "ae634c3023f467b9fefefa7e289c0ca5b7d09d3a719ffbf16f392114d5fa2d3b",
+    "restoredAndRehearsed": true
+  },
+  "initial": {
+    "tables": 25,
+    "rows": 0,
+    "migrationHistory": false,
+    "matchedInitialSchema": true
+  },
+  "remote": {
+    "applied": 190,
+    "failed": 0,
+    "allChecksumsMatch": true,
+    "schemaSha256": "468059b78e59e81a11ed61c1c84f6786a529b300bccbf9078c9b62944ab85e78",
+    "catalogObjectCount": 5023,
+    "modelColumnQueries": 138,
+    "originalRows": 0,
+    "restore_ready": true,
+    "timezone": "GMT",
+    "tables": 139,
+    "matchesRehearsedSchema": true
+  },
+  "activeConnectionChanged": false,
+  "applicationCodeChanged": false
+}

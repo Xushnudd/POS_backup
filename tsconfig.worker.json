@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.test.json","compilerOptions":{"outDir":".worker-build"},"include":["scripts/workers/**/*.ts"],"exclude":["node_modules",".next",".test-build","tests"]}

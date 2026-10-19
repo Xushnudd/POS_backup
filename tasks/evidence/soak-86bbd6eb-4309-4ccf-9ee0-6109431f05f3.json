@@ -1,0 +1,193 @@
+{
+  "runId": "86bbd6eb-4309-4ccf-9ee0-6109431f05f3",
+  "mode": "smoke",
+  "startedAt": "2026-10-11T18:14:26.689Z",
+  "profile": {
+    "synthetic": true,
+    "normalRegisters": 20,
+    "stressConcurrentCheckouts": 40,
+    "waveIntervalMs": 30000,
+    "normalStressMinutes": null,
+    "normalSoakMinutes": null,
+    "referencePeak": "20 simultaneous checkouts every 30 seconds; PLAN1 synthetic profile, not measured pilot demand",
+    "database": "isolated pos_test on loopback:55439; shared historical test dataset",
+    "transport": "private loopback HTTP; HTTPS origin/cookie policy retained, no external traffic"
+  },
+  "hardware": {
+    "platform": "linux",
+    "kernel": "7.2.8-200.fc44.x86_64",
+    "node": "v24.18.0",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "memoryBytes": 33467367424
+  },
+  "phases": [
+    {
+      "name": "stress",
+      "concurrentCheckouts": 40,
+      "startAt": "2026-10-11T18:14:27.647Z",
+      "endedAt": "2026-10-11T18:15:39.245Z",
+      "durationMs": 71597.25721699999,
+      "requestedDurationMs": 15000,
+      "waves": 2,
+      "requests": 378,
+      "p50Ms": 341.281375,
+      "p95Ms": 694.1970060000001,
+      "p99Ms": 732.2663710000006,
+      "maxMs": 900.61481
+    },
+    {
+      "name": "soak",
+      "concurrentCheckouts": 20,
+      "startAt": "2026-10-11T18:15:39.840Z",
+      "endedAt": "2026-10-11T18:16:58.023Z",
+      "durationMs": 78182.765617,
+      "requestedDurationMs": 15000,
+      "waves": 4,
+      "requests": 329,
+      "p50Ms": 215.74290600001405,
+      "p95Ms": 407.75869100001,
+      "p99Ms": 444.0042609999946,
+      "maxMs": 474.8425439999992
+    }
+  ],
+  "samples": [
+    {
+      "at": "2026-10-11T18:14:32.672Z",
+      "phase": "stress",
+      "pid": 1796786,
+      "rssBytes": 311230464,
+      "virtualBytes": 3590336512,
+      "diskFreeBytes": 614031732736,
+      "database": {
+        "bytes": "1718140263",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:15:39.243Z",
+      "phase": "stress",
+      "pid": 1796786,
+      "rssBytes": 216899584,
+      "virtualBytes": 3469930496,
+      "diskFreeBytes": 614025650176,
+      "database": {
+        "bytes": "1718353255",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:15:43.111Z",
+      "phase": "soak",
+      "pid": 1799786,
+      "rssBytes": 231522304,
+      "virtualBytes": 3502854144,
+      "diskFreeBytes": 614025650176,
+      "database": {
+        "bytes": "1718394215",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:15:46.973Z",
+      "phase": "soak",
+      "pid": 1799786,
+      "rssBytes": 295690240,
+      "virtualBytes": 3573121024,
+      "diskFreeBytes": 614025650176,
+      "database": {
+        "bytes": "1718435175",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:15:52.936Z",
+      "phase": "soak",
+      "pid": 1799786,
+      "rssBytes": 301375488,
+      "virtualBytes": 3573391360,
+      "diskFreeBytes": 614023143424,
+      "database": {
+        "bytes": "1718476135",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    },
+    {
+      "at": "2026-10-11T18:16:58.021Z",
+      "phase": "soak",
+      "pid": 1799786,
+      "rssBytes": 209240064,
+      "virtualBytes": 3464024064,
+      "diskFreeBytes": 614013030400,
+      "database": {
+        "bytes": "1719745895",
+        "connections": 11,
+        "waiting": 0,
+        "deadlocks": "3"
+      },
+      "queues": []
+    }
+  ],
+  "restarts": [
+    {
+      "signal": "SIGKILL",
+      "outcome": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "recoveryMs": 594.3907520000066,
+      "replayedSaleId": "0d91a711-eefb-494a-b950-1eefe6b6d6fd"
+    },
+    {
+      "signal": "SIGTERM",
+      "outcome": {
+        "code": 143,
+        "signal": null
+      },
+      "recoveryMs": 624.1237599999877,
+      "replayedSaleId": "fc64c777-f150-4170-9048-235e49c83698"
+    }
+  ],
+  "requests": {
+    "successful": 484,
+    "retryable": 227,
+    "networkUnknown": 0,
+    "byStatus": {
+      "200": 484,
+      "409": 183,
+      "429": 44
+    }
+  },
+  "accepted": false,
+  "fixture": {
+    "organizationId": "acd6a04c-d714-47b0-9ab3-5975c156d478",
+    "registers": 20,
+    "initialStockPerProduct": 100000
+  },
+  "invariants": {
+    "completedSales": 160,
+    "saleItems": 160,
+    "payments": 160,
+    "saleMovements": 160,
+    "cashAmount": "161.60",
+    "duplicates": 0,
+    "missingCommands": 0,
+    "stockChecks": 20
+  },
+  "endedAt": "2026-10-11T18:16:58.716Z"
+}

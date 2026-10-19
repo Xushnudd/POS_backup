@@ -1,7 +1,12 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
 
-import React, { useState } from 'react';
+import {useTranslation} from '@/context/LocaleContext';
+
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
+import {useUnsavedChanges} from '@/hooks/useUnsavedChanges';
+import {commitPageNavigation} from '@/lib/page-navigation';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
@@ -19,6 +24,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function RegisterPage() {
+ const {message:uiMessage}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const router = useRouter();
   const { register } = useAuth();
   const { notifySuccess, notifyError } = useNotification();
@@ -32,31 +41,36 @@ export default function RegisterPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const flight=useRef(false);
+  const dirty=Boolean(fullName||phone||email||password||organizationName||tin);
+  useUnsavedChanges(dirty,isLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(flight.current)return;
     setErrorMessage('');
 
     if (!fullName || fullName.trim().length < 2) {
-      setErrorMessage('Iltimos, ism familiyangizni kiriting');
+      setErrorMessage("Iltimos, ism familiyangizni kiriting");
       return;
     }
 
     if (!phone || phone.trim().length < 9) {
-      setErrorMessage('Telefon raqami kamida 9 ta belgidan iborat bo\'lishi kerak');
+      setErrorMessage("Telefon raqami kamida 9 ta belgidan iborat bo'lishi kerak");
       return;
     }
 
-    if (!password || password.length < 6) {
-      setErrorMessage('Parol kamida 6 ta belgidan iborat bo\'lishi kerak');
+    if (!password || password.length < 8 || password.length > 72) {
+      setErrorMessage("Parol 8–72 ta belgidan iborat bo'lishi kerak");
       return;
     }
 
     if (!organizationName || organizationName.trim().length < 2) {
-      setErrorMessage('Tashkilot yoki do\'kon nomini kiriting');
+      setErrorMessage("Tashkilot yoki do'kon nomini kiriting");
       return;
     }
 
+    flight.current=true;
     setIsLoading(true);
     try {
       await register({
@@ -68,13 +82,14 @@ export default function RegisterPage() {
         tin: tin ? tin.trim() : undefined,
       });
 
-      notifySuccess('Muvaffaqiyatli ro\'yxatdan o\'tdingiz! Tizim sozlandi.');
-      router.push('/dashboard');
+      notifySuccess("Muvaffaqiyatli ro'yxatdan o'tdingiz! Tizim sozlandi.");
+      setPassword('');commitPageNavigation();router.push('/dashboard');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ro\'yxatdan o\'tishda xatolik yuz berdi';
+      const msg = displayErrorMessage(err,'Ro\'yxatdan o\'tishda xatolik yuz berdi');
       setErrorMessage(msg);
       notifyError(msg);
     } finally {
+      flight.current=false;
       setIsLoading(false);
     }
   };
@@ -91,26 +106,26 @@ export default function RegisterPage() {
           </span>
         </Link>
         <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-          Yangi biznesni ro&apos;yxatdan o&apos;tkazish
-        </h2>
+          {tr("Yangi biznesni ro'yxatdan o'tkazish")}</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Bir necha soniyada o&apos;z do&apos;koningizni tizimga ulang
-        </p>
+          {tr("Bir necha soniyada o'z do'koningizni tizimga ulang")}</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-gray-100">
           {errorMessage && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-              {errorMessage}
+            <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+              {uiMessage(errorMessage)}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {isLoading&&<p role="status">{tr("Server tasdig‘i kutilmoqda…")}</p>}
+          {!isLoading&&dirty&&<p role="status">{tr("Saqlanmagan forma ma’lumotlari bor.")}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4"><fieldset disabled={isLoading} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Ism va Familiya"
-                placeholder="Ali Valiyev"
+                label={tr("Ism va Familiya")}
+                placeholder={tr("Ali Valiyev")}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 leftIcon={<FontAwesomeIcon icon={faUser} className="text-xs" />}
@@ -118,7 +133,7 @@ export default function RegisterPage() {
               />
 
               <Input
-                label="Telefon raqam"
+                label={tr("Telefon raqam")}
                 type="tel"
                 placeholder="901234567"
                 value={phone}
@@ -130,8 +145,8 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Do'kon yoki Biznes nomi"
-                placeholder="Mening Do'konim"
+                label={tr("Do'kon yoki Biznes nomi")}
+                placeholder={tr("Mening Do'konim")}
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
                 leftIcon={<FontAwesomeIcon icon={faBuilding} className="text-xs" />}
@@ -139,7 +154,7 @@ export default function RegisterPage() {
               />
 
               <Input
-                label="STIR / INN (ixtiyoriy)"
+                label={tr("STIR / INN (ixtiyoriy)")}
                 placeholder="123456789"
                 value={tin}
                 onChange={(e) => setTin(e.target.value)}
@@ -148,7 +163,7 @@ export default function RegisterPage() {
             </div>
 
             <Input
-              label="Email (ixtiyoriy)"
+              label={tr("Email (ixtiyoriy)")}
               type="email"
               placeholder="example@pos.uz"
               value={email}
@@ -157,11 +172,12 @@ export default function RegisterPage() {
             />
 
             <Input
-              label="Parol (kamida 6 ta belgi)"
+              label={tr("Parol (8–72 ta belgi)")}
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              minLength={8} maxLength={72}
               leftIcon={<FontAwesomeIcon icon={faLock} className="text-xs" />}
               required
             />
@@ -176,20 +192,18 @@ export default function RegisterPage() {
                 rightIcon={<FontAwesomeIcon icon={faArrowRight} />}
                 className="font-bold shadow-md shadow-emerald-500/20"
               >
-                Hisob yaratish va Boshlash
-              </Button>
+                {tr("Hisob yaratish va Boshlash")}</Button>
             </div>
-          </form>
+          </fieldset></form>
 
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-600">
-              Allaqachon ro&apos;yxatdan o&apos;tganmisiz?{' '}
+              {tr("Allaqachon ro'yxatdan o'tganmisiz?")}{' '}
               <Link
                 href="/login"
                 className="font-bold text-blue-600 hover:text-blue-700 hover:underline"
               >
-                Kirish
-              </Link>
+                {tr("Kirish")}</Link>
             </p>
           </div>
         </div>

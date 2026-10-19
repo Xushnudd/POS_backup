@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-12",
+  "originalDone": 164,
+  "target": 170,
+  "originalDelta": 0,
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "changes": [
+    "Stock count start/read/submit/approve/cancel store immutable scoped request in IndexedDB before POST; lost ACK recovers original operation after reload",
+    "Known first-attempt business rejection releases pending action; uncertain retries retain original intent",
+    "Read current server count after ACK; preserve unrelated reason/start draft; reject submit with unsaved readings",
+    "PendingActions remounts on organization/user/role changes"
+  ],
+  "checks": {
+    "webpackBuild": "pass",
+    "typecheck": "pass",
+    "browserInitial": {
+      "passed": 12,
+      "failed": 3,
+      "reason": "Count test alert locator also matched Next route announcer; assertion corrected, no app change"
+    },
+    "browserCorrected": {
+      "passed": 3,
+      "failed": 0,
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "seconds": 13.4
+    },
+    "invariants": [
+      "start replay creates one count/freeze",
+      "reading replay creates one reading and exact 5.000001 quantity",
+      "RECOUNT_REQUIRED rejects first approval without trapping form",
+      "second reading preserves approval reason",
+      "approval replay creates one adjustment movement/audit and balance 5.000001, releases freeze"
+    ]
+  },
+  "limitations": [
+    "Not full UX-01.05 coverage; original checkbox remains open",
+    "Actor remount regression covered existing scoped recovery paths; explicit actor-switch browser scenario remains",
+    "No production/vendor deployment evidence"
+  ],
+  "sha256": {
+    "src/app/(dashboard)/inventory/counts/page.tsx": "8522f62c2edd8771aa4e856a6a27ee88cf6bbfe01b4879dc61ce24b1ab387717",
+    "src/components/forms/PendingActions.tsx": "e2c9fdc32350ebdf4e70ec27de1b044dec5257cbd5306b18713c44503eaf5805",
+    "tests/e2e/count-recovery.spec.ts": "46bf64242d6aeccb40658ad34fdb22a9063470f0e5b94c58fadf4cd98545e248",
+    "/tmp/pos-170-count-build.log": "04bcfe487f1e5ba4a1e4d0ea7a87868d675bc4782f5b2bf2c837be9cb2bacd41",
+    "/tmp/pos-170-count-type-final.log": "2a23ac0c1fad374380eb99be2f6eb46211bda89dbecd447fbf00a9fe0db85e39",
+    "/tmp/pos-170-count-browser.log": "3a0535303bbe7dc141230a61492291842fc74bd9f151e892520e4c6295d1af87",
+    "/tmp/pos-170-count-browser-corrected.log": "77590d6e14b18f58b5f91bd7fa9e622b3401cf2b887c40bb024c90815c16d279"
+  }
+}

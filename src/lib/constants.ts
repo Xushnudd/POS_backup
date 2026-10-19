@@ -1,15 +1,16 @@
+import type {MessageKey} from '@/i18n/messages';
 export const APP_NAME = 'Shuni POS';
 export const APP_DESCRIPTION = 'Kichik va o‘rta bizneslar uchun savdo va ombor boshqaruvi tizimi';
 
-export const PRODUCT_UNITS = [
-  { value: 'dona', label: 'Dona (dona)' },
-  { value: 'kg', label: 'Kilogramm (kg)' },
-  { value: 'litr', label: 'Litr (l)' },
-  { value: 'metr', label: 'Metr (m)' },
-  { value: 'quti', label: 'Quti' },
-  { value: 'juft', label: 'Juft' },
-  { value: 'gramm', label: 'Gramm (g)' },
-  { value: 'komplekt', label: 'Komplekt' },
+export const PRODUCT_UNITS:Array<{value:string;label:string;labelKey?:MessageKey}> = [
+  { value: 'dona', label: 'Dona (dona)', labelKey: 'Dona (dona)' },
+  { value: 'kg', label: 'Kilogramm (kg)', labelKey: 'Kilogramm (kg)' },
+  { value: 'litr', label: 'Litr (l)', labelKey: 'Litr (l)' },
+  { value: 'metr', label: 'Metr (m)', labelKey: 'Metr (m)' },
+  { value: 'quti', label: 'Quti', labelKey: 'Quti' },
+  { value: 'juft', label: 'Juft', labelKey: 'Juft' },
+  { value: 'gramm', label: 'Gramm (g)', labelKey: 'Gramm (g)' },
+  { value: 'komplekt', label: 'Komplekt', labelKey: 'Komplekt' },
 ];
 
 export const PAYMENT_TYPES = [

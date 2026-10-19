@@ -1,0 +1,10 @@
+[Unit]
+Description=POS readiness observation cadence (%i)
+
+[Timer]
+OnBootSec=1m
+OnUnitInactiveSec=1m
+Unit=pos-uptime@%i.service
+
+[Install]
+WantedBy=timers.target

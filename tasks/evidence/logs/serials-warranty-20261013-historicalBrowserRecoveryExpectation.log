@@ -1,0 +1,66 @@
+[WebServer] (node:565888) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:566333) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (3.9s)
+  ✓  2 [chromium] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (3.2s)
+  ✓  3 [chromium] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (4.2s)
+(node:567084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (4.8s)
+  ✓  5 [firefox] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.7s)
+  ✓  6 [firefox] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (5.3s)
+(node:567674) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [webkit] › tests/e2e/batches.spec.ts:10:5 › Batch policy MFA/lost acknowledgement, FEFO receipt, expiry CSV and count original-key recovery (4.3s)
+  ✓  8 [webkit] › tests/e2e/receipt-cost-apply.spec.ts:9:5 › Owner applies actual freight with MFA, recovers committed lost ACK after reload and reverses once with source journal (4.5s)
+  ✘  9 [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked (16.7s)
+
+
+  1) [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByText('Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.', { exact: true })
+    Expected: 0
+    Received: 1
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveCount" getByText('Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.', { exact: true }) with timeout 10000ms
+      - waiting for getByText('Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.', { exact: true })
+        24 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      47 |  await payment.getByRole('button',{name:/Savdoni yakunlash/}).click();await expect.poll(()=>db.warranty.count({where:{serialId:serial.id}})).toBe(2)
+      48 |  await page.reload();await expect.poll(()=>db.warranty.count({where:{serialId:serial.id}})).toBe(2)
+    > 49 |  await expect(page.getByText('Oldingi savdo natijasi tekshirilishi kerak. Savatni o‘zgartirmang.',{exact:true})).toHaveCount(0)
+         |                                                                                                                  ^
+      50 |  expect(new Set(completionKeys).size).toBe(1);expect(await db.serialEvent.count({where:{serialId:serial.id,kind:'sale'}})).toBe(2)
+      51 |  expect((await db.inventoryBalance.findUniqueOrThrow({where:{storeId_productId:{storeId:store.id,productId:product.id}}})).quantity.toFixed()).toBe('0')
+      52 |
+        at /home/fedora/Developments/POS_backup/tests/e2e/serials.spec.ts:49:114
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/error-context.md
+
+    Error Context: test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/serials-Owner-serial-polic-0571c-story-remains-source-linked-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › tests/e2e/serials.spec.ts:8:5 › Owner serial policy MFA and original lost ACK recovery; real unit warranty/service history remains source-linked 
+  8 passed (57.0s)

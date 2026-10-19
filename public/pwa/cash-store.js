@@ -1,0 +1,34 @@
+import { decryptCashTicket, encryptCashTicket, stableJSON, offlineCashAmount, usableCashTicket } from './cash-crypto.js';
+async function ticketHash(ticket) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stableJSON(ticket)))), b => b.toString(16).padStart(2, '0')).join(''); }
+function open() { return new Promise((resolve, reject) => { const request = indexedDB.open('shuni-pos-offline-cash-v1', 1); request.onupgradeneeded = () => { for (const name of ['leases', 'actions'])
+    request.result.createObjectStore(name, { keyPath: 'id' }); }; request.onsuccess = () => { request.result.onversionchange = () => request.result.close(); resolve(request.result); }; request.onerror = () => reject(request.error); }); }
+async function change(id, work) { const db = await open(); return new Promise((resolve, reject) => { const tx = db.transaction(['leases', 'actions'], 'readwrite'), leases = tx.objectStore('leases'), query = leases.get(id); let result, failure; query.onsuccess = () => { try {
+    const changed = work(query.result, tx.objectStore('actions'));
+    leases.put(changed.row);
+    result = changed.result;
+}
+catch (error) {
+    failure = error;
+    tx.abort();
+} }; tx.oncomplete = () => { db.close(); resolve(result); }; tx.onabort = tx.onerror = () => { db.close(); reject(failure ?? tx.error ?? new Error('Offline amal lokal saqlanmadi')); }; }); }
+export async function listCashTickets() { const db = await open(); return new Promise((resolve, reject) => { const tx = db.transaction('leases', 'readonly'), query = tx.objectStore('leases').getAll(); let result = []; query.onsuccess = () => { result = query.result; }; tx.oncomplete = () => { db.close(); resolve(result); }; tx.onabort = tx.onerror = () => { db.close(); reject(tx.error); }; }); }
+export async function saveCashTicket(ticket, phrase) { const cipher = await encryptCashTicket(ticket, phrase), hash = await ticketHash(ticket), p = ticket.payload; if (p.deviceId !== localStorage.getItem('pos_device_id'))
+    throw new Error('Offline ruxsat boshqa qurilma uchun'); return change(p.id, old => { if (old) {
+    if (old.ticketHash !== hash)
+        throw new Error('Original ruxsat o‘zgargan');
+    return { row: old, result: undefined };
+} ; return { row: { id: p.id, cashOperationId: p.cashOperationId, organizationId: p.organizationId, userId: p.userId, deviceId: p.deviceId, ticketHash: hash, cipher, state: 'unused', lastSeen: Date.now() }, result: undefined }; }); }
+export async function unlockCashTicket(id, phrase) { const stored = (await listCashTickets()).find(l => l.id === id); if (!stored)
+    throw new Error('Lokal ruxsat topilmadi'); const ticket = await decryptCashTicket(stored.cipher, phrase), p = ticket.payload; if (await ticketHash(ticket) !== stored.ticketHash || p.id !== id || p.organizationId !== stored.organizationId || p.userId !== stored.userId || p.deviceId !== stored.deviceId || p.cashOperationId !== stored.cashOperationId)
+    throw new Error('Lokal ruxsat konteksti mos emas'); return { stored, ticket }; }
+export async function takeOfflineCash(ticket, tender) { const hash = await ticketHash(ticket), p = ticket.payload, amount = offlineCashAmount(p.totalAmount, tender), now = Date.now(); return change(p.id, (old, actions) => { if (!old || old.ticketHash !== hash || old.state !== 'unused')
+    throw new Error('Bu ruxsat ishlatilgan yoki yopilgan; qayta pul olmang'); if (p.cashOperationId !== old.cashOperationId || !usableCashTicket(ticket, now, old.lastSeen))
+    throw new Error('Offline ruxsat muddati tugagan yoki qurilma vaqti o‘zgargan'); const action = { id: p.cashOperationId, leaseId: p.id, organizationId: p.organizationId, userId: p.userId, deviceId: p.deviceId, ...amount, createdAt: new Date(now).toISOString() }; actions.add(action); return { row: { ...old, state: 'pending', lastSeen: now }, result: action }; }); }
+export async function readCashAction(id) { const db = await open(); return new Promise((resolve, reject) => { const tx = db.transaction('actions', 'readonly'), query = tx.objectStore('actions').get(id); let result; query.onsuccess = () => { result = query.result; }; tx.oncomplete = () => { db.close(); resolve(result); }; tx.onabort = tx.onerror = () => { db.close(); reject(tx.error); }; }); }
+export async function acknowledgeCash(id, state, result, code) { return change(id, old => { if (!old)
+    throw new Error('Original ruxsat topilmadi'); if (['synced', 'cancelled'].includes(old.state))
+    return { row: old, result: undefined }; return { row: { ...old, state, result, code }, result: undefined }; }); }
+export async function hasUnresolvedCash(organizationId, userId, deviceId) { return (await listCashTickets()).some(l => l.organizationId === organizationId && l.userId === userId && l.deviceId === deviceId && !['synced', 'cancelled'].includes(l.state)); }
+export async function observeCashClock(id) { const now = Date.now(); return change(id, old => { if (!old)
+    throw new Error('Ruxsat topilmadi'); if (now < old.lastSeen)
+    throw new Error('Qurilma vaqti orqaga o‘zgargan; offline to‘lovni to‘xtating'); return { row: { ...old, lastSeen: now }, result: now }; }); }

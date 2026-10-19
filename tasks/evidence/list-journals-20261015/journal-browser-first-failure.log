@@ -1,0 +1,143 @@
+[WebServer] (node:55817) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:55854) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (16.9s)
+(node:57273) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (21.4s)
+(node:59262) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero (16.8s)
+
+
+  1) [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr')
+    Expected: 3
+    Received: 0
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr') with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr')
+        24 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      16 |  const receipt=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'JOURNAL-LIST-STOCK',items:[{productId:product.id,quantity:'43',unitCost:'1'}]});await post('/api/stock-documents/'+receipt.id+'/confirm',{});const shift=await post('/api/shifts',{registerId:register.id,organizationUserId:me.user.organizationUserId,openingCash:'0'});
+      17 |  for(let i=0;i<43;i++){const sale=await post('/api/sales',{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,customerId:customer.id,discountAmount:0,items:[{productId:product.id,quantity:'1',discountAmount:0}]});await post('/api/sales/'+sale.id+'/complete',{payments:[{paymentType:'credit',amount:'10'}]});}
+    > 18 |  await page.goto('/customers/'+customer.id+'?ledger_page=3&customer_sales_page=3');const ledger=page.getByRole('heading',{name:'Mijoz qarz ko‘chirmasi',exact:true}).locator('..'),sales=page.getByRole('heading',{name:'Mijoz savdolari va qaytarishlari',exact:true}).locator('..');await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(sales.locator('tbody tr')).toHaveCount(3);await page.reload();await expect(ledger.locator('tbody tr')).toHaveCount(3);
+         |                                                                                                                                                                                                                                                                                                                                ^
+      19 |  await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('Retained unposted debt document');await ledger.getByRole('button',{name:'Oldingi',exact:true}).click();await expect(ledger.locator('tbody tr')).toHaveCount(20);await page.goBack();await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(page.getByLabel('Qarz hujjati sababi',{exact:true})).toHaveValue('Retained unposted debt document');await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('');
+      20 |  await page.getByLabel('Avans sababi',{exact:true}).fill('Retained unposted advance reason');let fail=true;await page.route('**/api/customers/'+customer.id+'/advances?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic advance read failure'}}})}else await route.continue()});await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic advance read failure'})).toBeVisible();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toHaveCount(0);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained unposted advance reason');await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toBeVisible();
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:18:320
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr')
+    Expected: 3
+    Received: 0
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr') with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr')
+        23 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      16 |  const receipt=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'JOURNAL-LIST-STOCK',items:[{productId:product.id,quantity:'43',unitCost:'1'}]});await post('/api/stock-documents/'+receipt.id+'/confirm',{});const shift=await post('/api/shifts',{registerId:register.id,organizationUserId:me.user.organizationUserId,openingCash:'0'});
+      17 |  for(let i=0;i<43;i++){const sale=await post('/api/sales',{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,customerId:customer.id,discountAmount:0,items:[{productId:product.id,quantity:'1',discountAmount:0}]});await post('/api/sales/'+sale.id+'/complete',{payments:[{paymentType:'credit',amount:'10'}]});}
+    > 18 |  await page.goto('/customers/'+customer.id+'?ledger_page=3&customer_sales_page=3');const ledger=page.getByRole('heading',{name:'Mijoz qarz ko‘chirmasi',exact:true}).locator('..'),sales=page.getByRole('heading',{name:'Mijoz savdolari va qaytarishlari',exact:true}).locator('..');await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(sales.locator('tbody tr')).toHaveCount(3);await page.reload();await expect(ledger.locator('tbody tr')).toHaveCount(3);
+         |                                                                                                                                                                                                                                                                                                                                ^
+      19 |  await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('Retained unposted debt document');await ledger.getByRole('button',{name:'Oldingi',exact:true}).click();await expect(ledger.locator('tbody tr')).toHaveCount(20);await page.goBack();await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(page.getByLabel('Qarz hujjati sababi',{exact:true})).toHaveValue('Retained unposted debt document');await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('');
+      20 |  await page.getByLabel('Avans sababi',{exact:true}).fill('Retained unposted advance reason');let fail=true;await page.route('**/api/customers/'+customer.id+'/advances?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic advance read failure'}}})}else await route.continue()});await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic advance read failure'})).toBeVisible();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toHaveCount(0);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained unposted advance reason');await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toBeVisible();
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:18:320
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr')
+    Expected: 3
+    Received: 0
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr') with timeout 10000ms
+      - waiting for getByRole('heading', { name: 'Mijoz qarz ko‘chirmasi', exact: true }).locator('..').locator('tbody tr')
+        24 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      16 |  const receipt=await post('/api/stock-documents',{organizationId:me.organization.id,storeId:store.id,documentType:'purchase',documentNo:'JOURNAL-LIST-STOCK',items:[{productId:product.id,quantity:'43',unitCost:'1'}]});await post('/api/stock-documents/'+receipt.id+'/confirm',{});const shift=await post('/api/shifts',{registerId:register.id,organizationUserId:me.user.organizationUserId,openingCash:'0'});
+      17 |  for(let i=0;i<43;i++){const sale=await post('/api/sales',{organizationId:me.organization.id,storeId:store.id,registerId:register.id,shiftId:shift.id,customerId:customer.id,discountAmount:0,items:[{productId:product.id,quantity:'1',discountAmount:0}]});await post('/api/sales/'+sale.id+'/complete',{payments:[{paymentType:'credit',amount:'10'}]});}
+    > 18 |  await page.goto('/customers/'+customer.id+'?ledger_page=3&customer_sales_page=3');const ledger=page.getByRole('heading',{name:'Mijoz qarz ko‘chirmasi',exact:true}).locator('..'),sales=page.getByRole('heading',{name:'Mijoz savdolari va qaytarishlari',exact:true}).locator('..');await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(sales.locator('tbody tr')).toHaveCount(3);await page.reload();await expect(ledger.locator('tbody tr')).toHaveCount(3);
+         |                                                                                                                                                                                                                                                                                                                                ^
+      19 |  await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('Retained unposted debt document');await ledger.getByRole('button',{name:'Oldingi',exact:true}).click();await expect(ledger.locator('tbody tr')).toHaveCount(20);await page.goBack();await expect(ledger.locator('tbody tr')).toHaveCount(3);await expect(page.getByLabel('Qarz hujjati sababi',{exact:true})).toHaveValue('Retained unposted debt document');await page.getByLabel('Qarz hujjati sababi',{exact:true}).fill('');
+      20 |  await page.getByLabel('Avans sababi',{exact:true}).fill('Retained unposted advance reason');let fail=true;await page.route('**/api/customers/'+customer.id+'/advances?**',async route=>{if(fail){fail=false;await route.fulfill({status:500,json:{success:false,error:{code:'INTERNAL_ERROR',message:'Synthetic advance read failure'}}})}else await route.continue()});await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Synthetic advance read failure'})).toBeVisible();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toHaveCount(0);await expect(page.getByLabel('Avans sababi',{exact:true})).toHaveValue('Retained unposted advance reason');await page.getByRole('button',{name:'Avanslarni yangilash',exact:true}).click();await expect(page.getByText('Hali avans yo‘q.',{exact:true})).toBeVisible();
+      21 |  expect((await db.debtEntry.aggregate({where:{customerId:customer.id},_sum:{amount:true}}))._sum.amount?.toFixed()).toBe('430');expect(await db.customerAdvance.count({where:{customerId:customer.id}})).toBe(0);
+        at /home/fedora/Developments/POS_backup/tests/e2e/journal-list.spec.ts:18:320
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/error-context.md
+
+    Error Context: test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journal-list-Staff-URL-fil-4087a-turn-failed-reads-into-zero-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+    [firefox] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 
+    [webkit] › tests/e2e/journal-list.spec.ts:8:5 › Staff URL filters and original ledger/advance read pages preserve unrelated business drafts and never turn failed reads into zero 

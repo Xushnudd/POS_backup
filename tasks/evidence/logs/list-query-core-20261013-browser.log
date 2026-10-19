@@ -1,0 +1,22 @@
+[WebServer] (node:685006) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:685070) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (3.4s)
+  ✓  2 [chromium] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (2.2s)
+  ✓  3 [chromium] › tests/e2e/sales-list.spec.ts:54:5 › Catalog and customer URL pages reach records beyond the old truncation and keep filter state through reload (3.5s)
+(node:685443) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [firefox] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (5.0s)
+  ✓  5 [firefox] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (2.9s)
+  ✓  6 [firefox] › tests/e2e/sales-list.spec.ts:54:5 › Catalog and customer URL pages reach records beyond the old truncation and keep filter state through reload (4.0s)
+(node:686020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  7 [webkit] › tests/e2e/catalog-unsaved.spec.ts:8:5 › Catalog forms preserve unsaved data on cancel, navigation and failed save; successful saves reset the guard (4.5s)
+  ✓  8 [webkit] › tests/e2e/sales-list.spec.ts:8:5 › Sales URL search/sort/pages survive reload and history; failure and stale response remain distinct from empty data (3.0s)
+  ✓  9 [webkit] › tests/e2e/sales-list.spec.ts:54:5 › Catalog and customer URL pages reach records beyond the old truncation and keep filter state through reload (4.1s)
+
+  9 passed (39.4s)

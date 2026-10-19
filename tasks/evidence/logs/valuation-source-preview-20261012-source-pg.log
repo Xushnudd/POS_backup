@@ -1,0 +1,24 @@
+✔ actual receipt captures cost change and movement in one transaction, replay adds no valuation event (459.955066ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ parallel branches receive unique committed product order, sequence does not use timestamp sorting, rollback adds no event (165.436355ms)
+✔ legacy unjournaled balance is recorded as an unproven boundary, never silently capitalised (81.727011ms)
+✖ actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes (154.869415ms)
+✔ native capture alone cannot authorize an invented source or an unimplemented adjustment adapter (84.097411ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1350.469137
+
+✖ failing tests:
+
+test at .test-build/tests/valuation-order.integration.test.js:100:22
+✖ actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes (154.869415ms)
+  TypeError: draft.totalAmount.toFixed is not a function
+      at sell (/home/fedora/Developments/POS_backup/.test-build/tests/valuation-order.integration.test.js:111:127)
+      at async TestContext.<anonymous> (/home/fedora/Developments/POS_backup/.test-build/tests/valuation-order.integration.test.js:113:55)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

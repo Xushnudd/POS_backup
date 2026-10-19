@@ -1,0 +1,74 @@
+{"requestId":"85d59c41-2259-4bf0-9754-ee6dc76492d0","status":200,"durationMs":302,"event":"api_response"}
+{"requestId":"c4a9216e-287d-4f6e-b285-0f825e563ca4","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"23d7ee78-7177-4341-b213-7b604ef9f16a","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"6e3d7017-c324-4c11-a717-0d9a23e0eb9b","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"14ecc566-b327-4982-a13c-54ce4336a22b","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"97f9c343-4ccb-40c1-886e-26a8396fae65","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"4623d9b0-7231-4233-9a7d-3f4b5520a96c","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":21,"event":"api_error"}
+{"requestId":"a20e8d30-1759-4e1f-a206-95241156cbc2","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":41,"event":"api_error"}
+{"requestId":"bcefae42-c421-474e-983b-846455d953a2","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"VALIDATION_ERROR","durationMs":42,"event":"api_error"}
+{"requestId":"e205807c-38e0-4941-848b-d62fee0bea63","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":200,"durationMs":50,"event":"api_response"}
+{"requestId":"9f85acb5-f335-44e3-83b5-8ec066386fc5","organizationId":"983cd339-1dd7-41b4-9891-4d8119e50fcc","status":400,"code":"INVALID_ITEMS","durationMs":35,"event":"api_error"}
+✔ Receipt-backed preview uses actual partial receipt snapshots, has no journal effect and rejects forged fields (746.617966ms)
+{"requestId":"6829266f-c169-4593-b701-630ec75487cb","status":200,"durationMs":250,"event":"api_response"}
+{"requestId":"f23740ea-34a2-485d-9304-03e9d11c30e9","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"73ea06dd-de74-4745-bcce-3e7b68fde4d0","organizationId":"fb9e8aa9-519d-43dc-b6cf-402fd7ca3aef","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"8a4524cb-d8fe-4834-9833-c8168d3feb4a","organizationId":"2d02ffb2-be6a-48f8-b59b-764c1a2f1ab8","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"7c43ea5c-b1c1-4282-b39d-6791a8738c29","organizationId":"2d02ffb2-be6a-48f8-b59b-764c1a2f1ab8","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"ebf4b5f6-2e5b-45b9-a503-5ad9f183dcc5","organizationId":"2d02ffb2-be6a-48f8-b59b-764c1a2f1ab8","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"c004c5ea-6afb-4076-a43a-f46387c6847a","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Preview enforces tenant, assigned branch, live role and session boundaries (692.256094ms)
+{"requestId":"98b0aabb-0b2a-476e-ae9b-26ce226ad4a9","status":200,"durationMs":252,"event":"api_response"}
+{"requestId":"a2295eb0-dd28-4112-bee3-54f2eaf8a6fd","organizationId":"cc35750c-f436-4291-b9e7-39084a278b50","status":200,"durationMs":33,"event":"api_response"}
+{"requestId":"e0f73466-ec8d-4eda-b1f5-b247ec5f5b8f","organizationId":"cc35750c-f436-4291-b9e7-39084a278b50","status":400,"code":"VALIDATION_ERROR","durationMs":22,"event":"api_error"}
+{"requestId":"5abf00a9-3506-499d-872d-9ad546c6abc3","organizationId":"cc35750c-f436-4291-b9e7-39084a278b50","status":400,"code":"VALIDATION_ERROR","durationMs":32,"event":"api_error"}
+{"requestId":"5daba5ef-f49f-4efb-9baf-efcff0ec5ee4","status":200,"durationMs":247,"event":"api_response"}
+{"requestId":"973b2597-6012-4a3b-a8da-41d43ffd7f21","organizationId":"73fbd577-62c7-4684-9352-d8a07483e14d","status":404,"code":"NOT_FOUND","durationMs":5,"event":"api_error"}
+{"requestId":"af8a3608-7aab-46a7-ac59-bab28bd05679","organizationId":"cc35750c-f436-4291-b9e7-39084a278b50","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"f5235e1f-37e4-4285-a533-8ba15381c7be","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Historical correction API is owner-only, read-only, bounded and rejects forged source fields (755.948495ms)
+{"requestId":"5adf5287-001f-4433-9af5-e257a432981f","status":200,"durationMs":235,"event":"api_response"}
+{"requestId":"16f68986-c635-4307-ac07-7f7b9f8fa8a2","status":200,"durationMs":232,"event":"api_response"}
+✔ Receipt cost sources list only same-branch unassigned unreversed capitalised expenses and preserve original money (651.969259ms)
+{"requestId":"f872411b-8081-47c1-8e05-38713fd81ba1","status":200,"durationMs":229,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Prepared receipt cost journal uses one paid source, replays once, cancels safely and never posts valuation (680.939504ms)
+{"requestId":"b28a7735-3e10-419b-b6f1-880cf57ca629","status":200,"durationMs":231,"event":"api_response"}
+{"requestId":"b6b614e7-fb18-4a17-9436-9f6e2ce1e59f","status":200,"durationMs":231,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"5e96c832-0623-4de7-91a0-80ce96dc82d5","organizationId":"16ee0214-db58-4561-a6d9-1b2088c3985e","operationId":"be972b81-27b2-4182-84ce-11f1454f4048","status":409,"code":"EXPENSE_ALREADY_ASSIGNED","durationMs":52,"event":"api_error"}
+{"requestId":"e39dc1e5-93aa-43f7-83cf-38bd6caadffe","organizationId":"16ee0214-db58-4561-a6d9-1b2088c3985e","status":403,"code":"FORBIDDEN","durationMs":11,"event":"api_error"}
+✔ Distinct concurrent keys cannot assign one expense twice; source guards and API remain scoped (783.041693ms)
+{"requestId":"09ce61d1-6e67-4703-9f73-4e1319e64c79","status":200,"durationMs":250,"event":"api_response"}
+✔ Late audit failure rolls back prepared source assignment and SQL refuses altered original receipt quantities (386.569731ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ negative policy cannot be enabled, forged override cannot overdraw and competing sales conserve stock (433.487826ms)
+✔ legacy negative balance can recover but cannot deepen or move to another branch (37.77427ms)
+{"requestId":"e85c95e6-2226-4464-97bd-9d89393e498d","organizationId":"fb5a2f75-7866-4cf0-91b1-2658d0abcb52","status":400,"durationMs":11,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"ca531bde-a614-4e5c-9d78-bf08a26c5a78","organizationId":"fb5a2f75-7866-4cf0-91b1-2658d0abcb52","status":400,"durationMs":12,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"3a7b2974-7788-438d-a0cb-7bffc3cf9661","organizationId":"fb5a2f75-7866-4cf0-91b1-2658d0abcb52","status":200,"durationMs":18,"event":"api_response"}
+✔ owner HTTP create and update reject enabling, ordinary settings remain editable (65.155521ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Locations and reservations conserve physical stock; concurrent holds, exact reserved sale, replay and SQL corruption checks (636.88693ms)
+{"requestId":"db997df8-4aad-4af4-b3ff-e463948930f5","organizationId":"1d995b2b-7b47-496e-88b4-11448030630a","status":404,"code":"NOT_FOUND","durationMs":5,"event":"api_error"}
+{"requestId":"5f962d9c-b168-45f1-b1f2-e77f74856780","organizationId":"1d995b2b-7b47-496e-88b4-11448030630a","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"b69bb75f-dd1e-4dd5-be33-0efe36fdfc3b","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Expiry uses server time once, ignored expired quota does not oversell; audit failure rolls back and APIs enforce tenant/live role (137.174997ms)
+✔ actual receipt captures cost change and movement in one transaction, replay adds no valuation event (225.407427ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ parallel branches receive unique committed product order, sequence does not use timestamp sorting, rollback adds no event (143.276643ms)
+✔ legacy unjournaled balance is recorded as an unproven boundary, never silently capitalised (70.496921ms)
+✔ actual two receipts, branch sales and linked return replay into separate stock and COGS corrections without writes (521.845395ms)
+✔ native capture alone cannot authorize an invented source or an unimplemented adjustment adapter (77.540617ms)
+✔ organization-wide baseline preserves exact sum beyond one branch decimal capacity without breaking original cost update (29.169673ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8403.89338

@@ -1,0 +1,19 @@
+[WebServer] (node:84959) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:85009) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (1.1s)
+  ✓  2 [chromium] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (1.0s)
+(node:85186) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [firefox] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (1.9s)
+  ✓  4 [firefox] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (1.5s)
+(node:85524) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [webkit] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in uz match reviewed wording, current DB prices/trial/limits and localized metadata (2.1s)
+  ✓  6 [webkit] › tests/e2e/public-claims.spec.ts:21:6 › Public claims in ru match reviewed wording, current DB prices/trial/limits and localized metadata (1.8s)
+
+  6 passed (11.9s)

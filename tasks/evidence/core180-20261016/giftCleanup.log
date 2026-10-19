@@ -1,0 +1,29 @@
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Actual cash certificate issue/replay, original sale allocation and goods cash refund conserve liability and cash once (750.00392ms)
+✔ Gift issuer limits/code collisions/foreign source roll back cash; native journals cannot be rewritten (265.485559ms)
+✔ Original unused-refund terms and current spending suspension apply through the ordinary advance endpoints too (187.114379ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Two independent original operations cannot spend the same gift money twice (352.061542ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Zero-credit-limit customer: gift/cash checkout and duplicate original operation commit payment, stock and liability atomically (642.467953ms)
+✔ Failed checkout keeps draft stock, credit and gift balance unchanged; original retry succeeds after stock recovery (206.719516ms)
+✔ Assigned cashier can use only their scoped sale/customer gift; issuance remains owner-only (231.026048ms)
+✔ Native source/currency proof and late checkout fault keep real cash, stock and liability consistent (199.886241ms)
+{"requestId":"2cfe18b1-9eba-4d6a-96de-82286cc652c1","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","status":400,"code":"VALIDATION_ERROR","durationMs":19,"event":"api_error"}
+{"requestId":"123d27bf-a6e3-4ffc-9258-12895a26dae7","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","operationId":"d15c1dd2-ce19-46ee-ac3c-4138f81ac30a","status":200,"durationMs":37,"event":"api_response"}
+{"requestId":"991fcbc4-c38d-474d-9145-1117d4077086","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"2f71f93e-5568-47f7-9ab1-9afc2062182e","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"eafeb9af-8067-43d1-a005-92c54de8501c","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"421fc524-3345-422a-83e7-f57889b2ca9c","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","operationId":"e9968b26-ca3a-46ee-b97c-146c0d415def","status":200,"durationMs":70,"event":"api_response"}
+{"requestId":"a1858040-e341-4396-baca-6b6fa474c527","organizationId":"eec51bf8-8b6a-4858-bad3-fa3036b754e1","operationId":"e9968b26-ca3a-46ee-b97c-146c0d415def","status":200,"durationMs":14,"event":"api_response"}
+✔ Actual gift HTTP uses strict inputs, safe DTO, current session and original customer-scoped sale (290.268883ms)
+✔ Prepaid gift goods earn configured non-credit points once; an unfunded forged credit-exemption intent cannot commit (242.500545ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3730.250333

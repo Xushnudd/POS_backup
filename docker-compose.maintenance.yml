@@ -1,0 +1,12 @@
+# Optional overlay. Mount the directory so atomic rename is visible to readers.
+services:
+  app:
+    environment:
+      POS_DEPLOYMENT_STATE_FILE: /run/pos-state/deployment.json
+    volumes:
+      - ${POS_STATE_DIRECTORY:?Operator-owned state directory required}:/run/pos-state:ro
+  jobs:
+    environment:
+      POS_DEPLOYMENT_STATE_FILE: /run/pos-state/deployment.json
+    volumes:
+      - ${POS_STATE_DIRECTORY:?Operator-owned state directory required}:/run/pos-state:ro

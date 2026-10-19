@@ -1,0 +1,22 @@
+✔ late receipt cost propagates through later weighted receipts and linked returns without changing input (3.577468ms)
+✔ fractional moving average tracks rounding and exact charge residuals (0.721923ms)
+✔ replay refuses guessed order, duplicate identity, negative history and unrelated or excess returns (0.912508ms)
+✔ correction plan separates remaining stock, two sales, original linked return and rounding journals (1.586126ms)
+✔ fully sold receipt correction goes to COGS and missing or nonreceipt source is refused (0.572186ms)
+✔ replay bounds source decimals and native bigint order without rounding excessive precision (0.901262ms)
+✔ late receipt charge propagates through branch transit and subsequent receipt without rewriting facts (10.235773ms)
+✔ absolute manual cost override retains its original value and exposes displaced charge as variance (0.598809ms)
+✔ linked customer return restores corrected issue cost and cannot return twice or to a fabricated branch (1.042188ms)
+✔ supplier return and receipt reversal leave no imaginary stock; fully removed charge remains separate variance (0.788582ms)
+✔ transit damage conserves owned stock and cannot exceed or restore an unrelated original transfer (1.151438ms)
+✔ physical adjustments expose valuation variance and reject deeper/branch-specific negative stock (0.878783ms)
+✔ sequence/source/precision limits and repeated charges are exact and fail closed (0.767151ms)
+✔ terminal loss/unsellable return totals use original sources without fabricated inventory order (1.208621ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 73.487715

@@ -1,9 +1,14 @@
+import {clientBaseQuantity,clientQuantitySum} from '@/lib/unit-conversion';
+import { clientLine, clientPercentage, fixed, displayed } from '@/lib/money';
 import { useState, useCallback, useMemo } from 'react';
 import { CartItem, Customer, Product } from '@/types';
 
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [cartDiscount, setCartDiscount] = useState<number>(0);
+  const [amountDiscount, setAmountDiscount] = useState<number>(0);
+  const [cartDiscountPercent,setCartDiscountPercent]=useState<number|undefined>();
+  const [discountReason,setDiscountReason]=useState('');
+  const setCartDiscount=useCallback((value:number)=>{setCartDiscountPercent(undefined);setAmountDiscount(value);},[]);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [note, setNote] = useState<string>('');
 
@@ -14,19 +19,21 @@ export function useCart() {
       if (existingIdx > -1) {
         const updated = [...prev];
         const currentItem = updated[existingIdx];
-        const newQty = currentItem.quantity + quantity;
-        const lineTotal = newQty * currentItem.unitPrice - currentItem.discountAmount;
+        const tradeQuantity=currentItem.tradeUnit?clientQuantitySum(currentItem.tradeQuantity??'1',quantity):undefined;
+        const newQty = tradeQuantity?Number(clientBaseQuantity(tradeQuantity,currentItem.conversionRatio??'1',product.unitPrecision??6)):Number(clientQuantitySum(String(currentItem.quantity),quantity));
+        const discountAmount=currentItem.discountPercent===undefined?currentItem.discountAmount:clientPercentage(clientLine(newQty,currentItem.unitPrice),currentItem.discountPercent);
+        const lineTotal = clientLine(newQty, currentItem.unitPrice, discountAmount);
 
         updated[existingIdx] = {
           ...currentItem,
-          quantity: newQty,
+          quantity: newQty,tradeQuantity,discountAmount,
           lineTotal: Math.max(0, lineTotal),
         };
         return updated;
       }
 
       const unitPrice = Number(product.salePrice);
-      const lineTotal = quantity * unitPrice;
+      const lineTotal = clientLine(quantity, unitPrice);
 
       return [
         ...prev,
@@ -50,10 +57,11 @@ export function useCart() {
     setItems((prev) =>
       prev.map((item) => {
         if (item.product.id === productId) {
-          const lineTotal = quantity * item.unitPrice - item.discountAmount;
+          const discountAmount=item.discountPercent===undefined?item.discountAmount:clientPercentage(clientLine(quantity,item.unitPrice),item.discountPercent);
+          const lineTotal = clientLine(quantity, item.unitPrice, discountAmount);
           return {
             ...item,
-            quantity,
+            quantity,discountAmount,
             lineTotal: Math.max(0, lineTotal),
           };
         }
@@ -62,16 +70,27 @@ export function useCart() {
     );
   }, []);
 
+  const selectTradeUnit=useCallback((productId:string,tradeUnit:string)=>{
+    const item=items.find(row=>row.product.id===productId);if(!item)return;const conversion=item.product.unitConversions?.find(row=>row.tradeUnit===tradeUnit&&row.isActive);
+    if(tradeUnit!==item.product.unit&&!conversion)throw new Error('Birlik nisbati mavjud emas');const ratio=conversion?.ratio??'1',quantity=Number(clientBaseQuantity('1',ratio,item.product.unitPrecision??6));const lineTotal=clientLine(quantity,item.unitPrice);
+    setItems(previous=>previous.map(row=>row.product.id===productId?{...row,tradeUnit:conversion?tradeUnit:undefined,conversionRatio:conversion?.ratio,tradeQuantity:conversion?'1':undefined,quantity,discountAmount:0,discountPercent:undefined,lineTotal}:row));
+  },[items]);
+  const updateTradeQuantity=useCallback((productId:string,value:string)=>{
+    const item=items.find(row=>row.product.id===productId);if(!item)return;const conversion=item.product.unitConversions?.find(row=>row.tradeUnit===item.tradeUnit),precision=conversion?.tradePrecision??6;
+    if(fixed(value,6)%BigInt(10)**BigInt(6-precision)!==BigInt(0))throw new Error('Savdo birligi kasr aniqligiga mos emas');const quantity=Number(clientBaseQuantity(value,item.conversionRatio??'1',item.product.unitPrecision??6)),discountAmount=item.discountPercent===undefined?item.discountAmount:clientPercentage(clientLine(quantity,item.unitPrice),item.discountPercent),lineTotal=clientLine(quantity,item.unitPrice,discountAmount);
+    setItems(previous=>previous.map(row=>row.product.id===productId?{...row,tradeQuantity:value,quantity,discountAmount,lineTotal}:row));
+  },[items]);
+
   const updateLineDiscount = useCallback(
-    (productId: string, discountAmount: number) => {
+    (productId: string, discountAmount: number,discountPercent?:number) => {
       setItems((prev) =>
         prev.map((item) => {
           if (item.product.id === productId) {
-            const safeDiscount = Math.max(0, Math.min(discountAmount, item.quantity * item.unitPrice));
-            const lineTotal = item.quantity * item.unitPrice - safeDiscount;
+            const safeDiscount = discountPercent===undefined?Math.max(0, Math.min(discountAmount, clientLine(item.quantity,item.unitPrice))):clientPercentage(clientLine(item.quantity,item.unitPrice),discountPercent);
+            const lineTotal = clientLine(item.quantity, item.unitPrice, safeDiscount);
             return {
               ...item,
-              discountAmount: safeDiscount,
+              discountAmount: safeDiscount,discountPercent,
               lineTotal,
             };
           }
@@ -90,29 +109,36 @@ export function useCart() {
     setItems([]);
     setCartDiscount(0);
     setCustomer(null);
-    setNote('');
-  }, []);
+    setNote('');setCartDiscountPercent(undefined);setDiscountReason('');
+  }, [setCartDiscount]);
 
   const subtotal = useMemo(() => {
-    return items.reduce((sum, item) => sum + item.lineTotal, 0);
+    return displayed(items.reduce((sum, item) => sum + fixed(item.lineTotal), BigInt(0)));
   }, [items]);
 
+  const cartDiscount=cartDiscountPercent===undefined?amountDiscount:clientPercentage(subtotal,cartDiscountPercent);
   const totalAmount = useMemo(() => {
-    return Math.max(0, subtotal - (Number(cartDiscount) || 0));
+    const net=fixed(subtotal)-fixed(Number(cartDiscount)||0);
+    return displayed(net<BigInt(0)?BigInt(0):net);
   }, [subtotal, cartDiscount]);
 
   const itemCount = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
   }, [items]);
 
+  const hydrate = useCallback((snapshot: { items: CartItem[]; cartDiscount: number; customer: Customer | null; note: string;discountReason?:string;cartDiscountPercent?:number }) => {
+    setItems(snapshot.items); setCartDiscount(snapshot.cartDiscount); setCustomer(snapshot.customer); setNote(snapshot.note);setDiscountReason(snapshot.discountReason??'');setCartDiscountPercent(snapshot.cartDiscountPercent);
+  }, [setCartDiscount]);
+
   return {
+    hydrate,
     items,
     addItem,
-    updateQuantity,
+    updateQuantity,selectTradeUnit,updateTradeQuantity,
     updateLineDiscount,
     removeItem,
     clearCart,
-    cartDiscount,
+    cartDiscount,cartDiscountPercent,setCartDiscountPercent,discountReason,setDiscountReason,
     setCartDiscount,
     customer,
     setCustomer,

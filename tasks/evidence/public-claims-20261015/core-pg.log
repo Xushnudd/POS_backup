@@ -1,0 +1,602 @@
+{"requestId":"d1c7e402-4a33-42ad-b22e-a59aaa27e88f","organizationId":"d8a22632-cf2d-4c54-ae70-c8c6ca7a11df","status":200,"durationMs":15,"event":"api_response"}
+✔ New organization receives one immutable Pro trial; private billing does not cross tenants or grant platform access (222.560928ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"4046f4e9-8d7f-4abf-bfff-5568774d73ef","organizationId":"d3489f61-2e79-444b-bfaf-f9e2a7299c2a","status":409,"code":"PLAN_LIMIT_REACHED","durationMs":25,"event":"api_error"}
+{"requestId":"174c994a-a3a5-4fda-8671-bbf688916bf4","organizationId":"d3489f61-2e79-444b-bfaf-f9e2a7299c2a","status":409,"code":"PLAN_LIMIT_REACHED","durationMs":17,"event":"api_error"}
+✔ Approved plan assignment replays once; concurrent raw/API-independent creates cannot bypass quota or erase existing data (231.251399ms)
+✔ Payment proof cannot commit without settlement; late audit failure rolls back paid invoice, period and proof together (156.456665ms)
+{"requestId":"eb5d4d07-1c76-44b8-ae3b-c166ce9aa888","organizationId":"884406ad-cc86-4b27-b7ce-cd56abfd731c","status":200,"durationMs":44,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Expired trial denies new sale/object, preserves reads and restores paid entitlement atomically without POS cash postings (638.704434ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Plan publishing requires platform admin and rolls back immutable version/current pointer/Operation on audit failure (247.000747ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"09185d7c-aa9b-45e4-b8a7-15d8582076fc","organizationId":"bb55c3d7-cd1b-4d65-a0a4-53e93ee476c8","status":200,"durationMs":39,"event":"api_response"}
+✔ Reviewed CSV/Excel import previews without writes, reports bad/duplicate rows, commits once and roundtrips exact owner cost/aliases (1178.299466ms)
+{"requestId":"4ecc2656-8009-44d3-bd1c-ca1192a9d44e","organizationId":"6d5a541f-59b2-4aac-a70c-da3018061a87","status":403,"code":"OWNER_REQUIRED","durationMs":18,"event":"api_error"}
+{"requestId":"8112cc3c-3c91-4a83-8d0a-808832995af6","organizationId":"6d5a541f-59b2-4aac-a70c-da3018061a87","status":403,"code":"FORBIDDEN","durationMs":9,"event":"api_error"}
+✔ Import rejects stale preview, actual admin/cashier/revoked source and late audit failure atomically (657.549234ms)
+✔ Bounded XLSX preview/import handles one thousand rows without truncation or stock/money posting (6126.289734ms)
+{"requestId":"42376112-7782-4bba-ae58-0bb4546bc06e","status":200,"durationMs":323,"event":"api_response"}
+{"requestId":"b9625133-d909-4172-9bca-5e20a695b6a2","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"ac3b08ce-9eac-459b-ba00-5b6ce4be764e","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":400,"durationMs":16,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"227c1ca5-462e-4965-9585-aae6dee01e9f","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":400,"durationMs":17,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"7e789d63-e098-4ee5-a9fa-234c170a50a0","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":400,"durationMs":19,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"3c7a45c7-bcb1-4ab1-86cd-72d768348a26","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":400,"durationMs":20,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"529ee82c-ede4-4eac-bd7b-7e276d702b04","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":200,"durationMs":52,"event":"api_response"}
+{"requestId":"cb3b772c-fa0a-4338-ae9e-652c67bd711f","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":400,"durationMs":17,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"5935b8d7-0c24-4bc7-bf38-7ab7d7631674","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"05a3ea36-31db-4402-baae-271bd39c62e2","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"625f0fd7-e5c2-41f5-bf77-85bac400131f","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"7618afea-6c9d-4217-9909-930413a2b807","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":403,"code":"TENANT_MISMATCH","durationMs":7,"event":"api_error"}
+{"requestId":"cd10b44e-91b0-453d-92be-616f1999ea80","organizationId":"2f5826de-6fd5-463a-a8ba-b4694fee4a5f","status":403,"code":"FORBIDDEN","durationMs":17,"event":"api_error"}
+✔ Category validation/search/sort and full CSV remain tenant/role safe beyond page 200 (903.516989ms)
+{"requestId":"906897d9-4a84-47ac-a975-7f3a0fbd7906","status":200,"durationMs":251,"event":"api_response"}
+{"requestId":"3fe2a31e-a811-4b1d-b46e-66758ef84346","status":200,"durationMs":255,"event":"api_response"}
+{"requestId":"4d92ff88-32a6-4aaa-a9c7-fd5e1a64748a","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"6a686947-aebc-4533-b9bf-b42119a48e71","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":34,"event":"api_response"}
+{"requestId":"976732c5-329c-4f18-80b0-a0206a6bd578","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":43,"event":"api_response"}
+{"requestId":"9b18f58e-330f-47db-92b2-b3febceb3b70","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"7f2f21ed-4923-404e-a4cc-f93f73f50cc2","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"43d7997b-a6bc-4ae7-a668-c404ffeb9c04","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"e5e8c684-7146-40e8-8856-175717e4c8a2","organizationId":"c8c33f96-047f-4659-98b5-250d960e69bd","status":404,"code":"NOT_FOUND","durationMs":13,"event":"api_error"}
+{"requestId":"e26a28f4-8391-47e9-b778-e1d4cdd509ec","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"47066ab4-a5fc-4696-a446-43d202085108","organizationId":"5c97f029-3180-4afe-a0c9-6f15c5ca271b","status":403,"code":"FORBIDDEN","durationMs":40,"event":"api_error"}
+✔ Unit and barcode search/paging expose all records, stable primary order and complete safe exports (954.61946ms)
+{"requestId":"fc0d6b6e-b86e-4813-ac2d-4130a2debbff","status":200,"durationMs":250,"event":"api_response"}
+{"requestId":"a584d141-446f-49e3-932b-893767d14788","status":200,"durationMs":235,"event":"api_response"}
+{"requestId":"667372ed-b6c4-4027-9bfa-03ea3aebb3b3","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"29e26a3f-e1ab-4e07-af8f-fd7ebb1ab941","organizationId":"4639e161-8bfb-43b9-8de8-adc23a337f43","status":404,"code":"NOT_FOUND","durationMs":18,"event":"api_error"}
+{"requestId":"2c450368-74c4-4ccb-9a7d-0f566b7547e7","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":200,"durationMs":58,"event":"api_response"}
+{"requestId":"f5dfc8db-c7d1-4be2-b422-a16491cf92d1","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":200,"durationMs":48,"event":"api_response"}
+{"requestId":"915865b7-d699-4205-9a37-faef2ab5aaf6","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":200,"durationMs":63,"event":"api_response"}
+{"requestId":"cc4a0023-96b6-47f1-8a0f-a307bf45089b","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":200,"durationMs":73,"event":"api_response"}
+{"requestId":"236632c9-183b-4483-b334-5833c5287c73","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":404,"code":"NOT_FOUND","durationMs":23,"event":"api_error"}
+{"requestId":"5645c297-5214-42e9-bc6c-5c9a3393de8c","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":404,"code":"NOT_FOUND","durationMs":23,"event":"api_error"}
+{"requestId":"dcb3314e-3dc4-457b-bd1b-35f0d8d6243e","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":400,"code":"INVALID_TOTAL_FILTER","durationMs":36,"event":"api_error"}
+{"requestId":"cc6c2aed-da6a-42ce-b208-32fc3e2fa17b","organizationId":"90a5db71-b066-4429-9958-0d820cfb649f","status":403,"code":"FORBIDDEN","durationMs":19,"event":"api_error"}
+✔ Supplier history and confirmed purchase totals use scoped event dates and Decimal reversals without counting drafts or other adjustments (1059.707584ms)
+{"requestId":"50426b69-373d-4663-b26e-311a12fe5790","status":200,"durationMs":253,"event":"api_response"}
+{"requestId":"9b794ac7-91d3-4926-870b-7bc8fb2d37d9","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"2405ea72-5ea8-4f28-930d-6a2c1bf753ea","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":200,"durationMs":40,"event":"api_response"}
+{"requestId":"06aeba10-6dae-43c0-be10-166b791718cc","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":200,"durationMs":57,"event":"api_response"}
+{"requestId":"a14feb64-9536-4767-b799-d4931fcbc693","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"77b659df-15fd-487a-a29c-123019412094","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"eb4929e8-4573-4bd7-b477-2188a3165b1a","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":404,"code":"NOT_FOUND","durationMs":5,"event":"api_error"}
+{"requestId":"da46ec28-3901-4bb1-8a9e-b5527e357f89","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":400,"code":"INVALID_DOCUMENT_TYPE","durationMs":12,"event":"api_error"}
+{"requestId":"06313783-8c5a-4268-9802-67ebf35590c4","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":400,"code":"INVALID_DATE","durationMs":17,"event":"api_error"}
+{"requestId":"a022c299-3a33-446b-91e4-d240f608b288","organizationId":"8e5bcda8-b4d0-42e3-9fb6-640057bf364e","status":400,"code":"INVALID_STATUS","durationMs":22,"event":"api_error"}
+✔ Stock document and transfer filtering and CSV are stable, full, signed and branch-scoped (688.13545ms)
+{"requestId":"5d91297a-d7e0-4179-af99-e4b9503431fb","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"8447f70e-8ddf-4bfe-b1a4-ed5a8fdd9db9","organizationId":"45145389-e5dc-48ae-a79b-76ba1e5f71b3","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"b37bc155-a71c-4be6-aab7-ce66277e7270","organizationId":"45145389-e5dc-48ae-a79b-76ba1e5f71b3","status":200,"durationMs":43,"event":"api_response"}
+{"requestId":"dbab9903-39db-409c-bda2-8513b6f34c5f","organizationId":"45145389-e5dc-48ae-a79b-76ba1e5f71b3","status":400,"code":"INVALID_FORMAT","durationMs":34,"event":"api_error"}
+{"requestId":"be10ebe3-ab77-44c2-8af5-5587bb7856c4","organizationId":"45145389-e5dc-48ae-a79b-76ba1e5f71b3","status":400,"code":"INVALID_FILTER","durationMs":21,"event":"api_error"}
+{"requestId":"3428bc89-e3ae-4a0e-99c7-d12a0f88ccf8","organizationId":"45145389-e5dc-48ae-a79b-76ba1e5f71b3","status":429,"code":"RATE_LIMITED","durationMs":10,"event":"api_error"}
+✔ Stock balance CSV matches low-stock scope, preserves quantities/cost and does not truncate to its UI page (542.887103ms)
+{"requestId":"b6126b19-3209-4f95-8daf-ef06ff18ecdb","status":200,"durationMs":233,"event":"api_response"}
+{"requestId":"c1dfbbe8-0f81-4b39-a8d2-6a55296c395e","organizationId":"29e4cd21-efbf-43b3-ad8d-d1545579b0f7","status":413,"code":"EXPORT_TOO_LARGE","durationMs":92,"event":"api_error"}
+{"requestId":"254c0e70-fe93-4bfa-8bb2-526aa7778282","organizationId":"29e4cd21-efbf-43b3-ad8d-d1545579b0f7","status":413,"code":"EXPORT_TOO_LARGE","durationMs":67,"event":"api_error"}
+✔ Document and transfer CSV caps count child lines, not only parent documents; failure returns no partial content (13648.356471ms)
+{"requestId":"f6dff78c-24d6-49da-8538-60d8b35fec2c","status":200,"durationMs":302,"event":"api_response"}
+{"requestId":"fb54f879-46b1-48bf-8a41-19f225e438af","status":200,"durationMs":244,"event":"api_response"}
+{"requestId":"b4ca53a0-fd32-4c72-9533-37c39819348e","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":403,"code":"TENANT_MISMATCH","durationMs":11,"event":"api_error"}
+{"requestId":"d6ac805e-3088-4ac2-a10c-c8704340258b","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"efe2b040-5357-49d1-b75f-4124848068d6","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"7d59328f-f6e9-4b94-b485-176d30ba2c24","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"ef25ea34-187d-4e8c-a828-6dffad3f5608","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"2fc30052-09db-4bc1-a903-31fd3ce51f9f","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":200,"durationMs":33,"event":"api_response"}
+{"requestId":"f01d7a56-9e99-4f6e-813d-1d69aaf851bb","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":400,"durationMs":14,"code":"MISSING_PARAM","event":"api_response"}
+{"requestId":"d80515aa-c108-40ce-a60f-4af73f86e5ff","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"01d066bf-1048-468a-9974-fe3988ea9164","organizationId":"bb157552-9b90-4116-ab61-398b50e54311","status":403,"code":"FORBIDDEN","durationMs":12,"event":"api_error"}
+{"requestId":"50edae28-d130-4083-a4de-8d170a5f13da","status":403,"code":"CSRF_REJECTED","durationMs":1,"event":"api_error"}
+{"requestId":"01630204-4286-4e85-b6cf-78b1973ccee4","status":200,"durationMs":3,"event":"api_response"}
+{"requestId":"d9af5f4c-cc70-4b17-87ce-3eb8625b2777","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+{"requestId":"c369c987-40b9-47c7-a889-3efa2476c45d","status":200,"durationMs":1,"event":"api_response"}
+✔ Tenant API, draft edits, nested transfer, global totals, revoke and constraints (847.06718ms)
+{"requestId":"9faf46bc-9a26-42a5-a339-97df56348e30","status":200,"durationMs":246,"event":"api_response"}
+{"requestId":"4eb0a9d2-87ac-4e54-a528-ad8262fa5d99","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"b2d0c3b8-72e5-4011-91f5-bc5e6ef6cf40","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"3664bcc0-6069-4ba0-9b8b-457b8c6dd196","organizationId":"38c8159e-fe1a-47e2-8e73-b910a907ac68","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"1b117f7f-4e32-4894-b356-4f5ab5122a32","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"41413ad8-b88d-42f3-a60b-99b4c3449cb6","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"22cf83b3-f21d-48b4-8965-a8b53c4f1e80","organizationId":"38c8159e-fe1a-47e2-8e73-b910a907ac68","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"16c368aa-523c-4e9b-8ee2-a31e2fc9e2a8","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"8d81bd3a-5411-496f-b9b1-ad5b609864b0","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"8443a7fb-05c0-4267-bb27-6c2a7b4eba16","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":400,"code":"INVALID_PAGE","durationMs":16,"event":"api_error"}
+{"requestId":"edd2db9b-cfc9-46ca-aa50-d337907f67b5","organizationId":"38c8159e-fe1a-47e2-8e73-b910a907ac68","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"ad651b19-57d8-499a-9252-36753d1616ea","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":403,"code":"OWNER_REQUIRED","durationMs":15,"event":"api_error"}
+{"requestId":"51b8e274-3a78-418c-b707-39a5afd87404","organizationId":"65b18a97-1c7c-486e-a2d3-1d0a5162a873","status":403,"code":"OWNER_REQUIRED","durationMs":14,"event":"api_error"}
+✔ Debt allocation targets paginate positive scoped balances and require owner access (891.9532ms)
+{"requestId":"e8546213-5d19-40cd-ad83-75da58f66195","status":200,"durationMs":245,"event":"api_response"}
+{"requestId":"e2fd95c6-858b-4e76-a1fb-fff95bfff2d6","status":200,"durationMs":238,"event":"api_response"}
+{"requestId":"96e0548d-17b7-45ee-89eb-2fa42394af99","organizationId":"20318983-b80b-4dc4-8f98-147146e731a9","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"8bab2992-803e-4d96-99c5-2f158faa36d7","organizationId":"20318983-b80b-4dc4-8f98-147146e731a9","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"8b144e93-ee25-4dce-a2cb-8422ff87eebc","organizationId":"f11cf607-a480-46dc-b614-e60e80659a7f","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"d63d871d-6ae5-4163-917e-e9765a5749d9","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"82c0e8d6-7c87-483c-a482-81796b2165aa","organizationId":"20318983-b80b-4dc4-8f98-147146e731a9","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"9fe98fc1-09a8-4844-85b0-6b20fbaf22b0","organizationId":"20318983-b80b-4dc4-8f98-147146e731a9","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+✔ Return history is paginated, uses frozen item names and enforces sale scope (696.480287ms)
+{"requestId":"f4fd7367-3aea-42ce-a710-01341f2e5c8e","status":200,"durationMs":238,"event":"api_response"}
+{"requestId":"8eb5dd57-cf71-47d4-81ca-7bef68caf688","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"47a44227-9b25-4cf5-8a8e-bffa1c269fbd","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"3d24a015-2442-4d6c-9dd4-009223a95c54","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"11f6bf5a-8384-478f-b6f2-7780ef490da6","organizationId":"82073360-2fe8-4416-9508-8b5fa28fb62d","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"5de81d57-e6ad-4162-a081-7d5554ae47b8","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_ID","durationMs":11,"event":"api_error"}
+{"requestId":"62f185a7-b1c0-47df-b458-1c7f05ec5b77","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_DATE","durationMs":13,"event":"api_error"}
+{"requestId":"06d61583-572c-43f7-9c5f-261521517e28","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"abd874a0-342e-47ad-9b66-2d35f0028ab9","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_VIEW","durationMs":13,"event":"api_error"}
+{"requestId":"1f4a74cd-606b-418c-8d9b-0ccb64834419","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_ID","durationMs":16,"event":"api_error"}
+{"requestId":"9935f131-913b-473c-8e0e-5c6e3fbc042c","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_PAGINATION","durationMs":12,"event":"api_error"}
+{"requestId":"3d3c50b7-c5f5-4911-82e3-0b4beb7a1241","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"e5e2779a-c68e-40de-82ae-1f1e30830235","organizationId":"82073360-2fe8-4416-9508-8b5fa28fb62d","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"01b80a54-fbef-4e65-9c51-59e2d9be9807","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_ID","durationMs":12,"event":"api_error"}
+{"requestId":"b52105e9-e891-4cc9-a0d0-1c1037bbaa8a","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_ID","durationMs":11,"event":"api_error"}
+{"requestId":"79d51c77-d611-449a-a335-1b2d0990d797","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_ID","durationMs":11,"event":"api_error"}
+{"requestId":"3fc56f72-bc06-48c2-bc3b-b83d3cb1674c","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":400,"code":"INVALID_ID","durationMs":12,"event":"api_error"}
+{"requestId":"8708662f-27ed-4e16-8218-224380a05df6","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"3ea0ab87-0fbe-49cc-b46a-2e38589ec6ce","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"cf3cbd04-7ee0-45c2-b572-29e4ffcdbe1a","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":429,"code":"RATE_LIMITED","durationMs":11,"event":"api_error"}
+{"requestId":"96af7dd1-a81a-4a6e-b421-811ec29f121e","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":403,"code":"FORBIDDEN","durationMs":9,"event":"api_error"}
+{"requestId":"6b69f57a-dca4-4ca2-bc71-f22645dc8552","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":403,"code":"FORBIDDEN","durationMs":10,"event":"api_error"}
+{"requestId":"73f5aabf-c9e0-4211-ac71-8ea8dc86ab3b","organizationId":"2e7eccd1-c780-4df4-9a59-b4a7994d2ab0","status":403,"code":"FORBIDDEN","durationMs":11,"event":"api_error"}
+✔ Owner audit summary filters a timezone snapshot and omits sensitive payloads (901.969869ms)
+{"requestId":"c4bde868-5ed5-46ba-9a45-77ef3440cf2c","status":200,"durationMs":241,"event":"api_response"}
+{"requestId":"ee2289d6-1447-42cd-8d9c-0b4e1cf304e7","status":200,"durationMs":238,"event":"api_response"}
+{"requestId":"e199a7ad-7426-4367-8f33-ae1a00d5fb68","organizationId":"35dd08e0-8bc3-433d-b2e3-14ff524a5c9c","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"58637185-c105-4dc4-a27a-fa1134c16b88","organizationId":"35dd08e0-8bc3-433d-b2e3-14ff524a5c9c","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"98e1d79e-f1f5-4abb-9979-c5d1b030ab03","organizationId":"dc628051-2cce-4e1c-9ca8-e88ca5952cea","status":404,"code":"NOT_FOUND","durationMs":18,"event":"api_error"}
+{"requestId":"ba445b83-a859-47e3-ac5e-2f4b2175d3bb","organizationId":"35dd08e0-8bc3-433d-b2e3-14ff524a5c9c","status":409,"code":"CURRENT_SESSION","durationMs":13,"event":"api_error"}
+{"requestId":"cf55affd-4965-4f16-8356-246869825be7","organizationId":"35dd08e0-8bc3-433d-b2e3-14ff524a5c9c","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"39201cd4-427f-4a6b-adb5-b360599a763c","organizationId":"35dd08e0-8bc3-433d-b2e3-14ff524a5c9c","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"fb3dc43e-c3f4-4204-9096-91de3dbcd7c2","organizationId":"35dd08e0-8bc3-433d-b2e3-14ff524a5c9c","status":200,"durationMs":17,"event":"api_response"}
+✔ Session management exposes only own live sessions and revokes another session exactly once (634.974086ms)
+{"requestId":"b1e63238-1efc-4945-b7a4-ee679e9a92b6","status":200,"durationMs":257,"event":"api_response"}
+{"requestId":"ce95a8e5-789f-4974-9f8f-fa36b67be6dd","organizationId":"d322ffa3-066a-47a3-b43d-77915914551d","status":403,"code":"INVALID_PASSWORD","durationMs":237,"event":"api_error"}
+{"requestId":"18ceb521-0bb7-4ad7-b26b-3e7cb0487115","organizationId":"d322ffa3-066a-47a3-b43d-77915914551d","status":400,"code":"VALIDATION_ERROR","durationMs":13,"event":"api_error"}
+{"requestId":"926a5ba3-44bf-4060-9400-10637f85e3f6","organizationId":"d322ffa3-066a-47a3-b43d-77915914551d","status":200,"durationMs":896,"event":"api_response"}
+{"requestId":"99a17bc7-84d0-4131-b213-6f77f06f50fa","organizationId":"d322ffa3-066a-47a3-b43d-77915914551d","status":401,"code":"SESSION_CHANGED","durationMs":898,"event":"api_error"}
+✔ Password changes reject bad credentials and UTF-8 truncation; competing requests cannot overwrite (1852.469906ms)
+{"requestId":"50e600dd-e8e5-4deb-8ef2-a8ff2f02ff27","status":200,"durationMs":242,"event":"api_response"}
+{"requestId":"18019f01-a818-416c-a681-9da7b7beb4c6","status":200,"durationMs":256,"event":"api_response"}
+{"requestId":"4e28ecad-a9cf-4377-9880-90ee35bf897d","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":175,"event":"api_response"}
+{"requestId":"f1c9a0b4-c988-4c6f-a10a-f02796a01309","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":190,"event":"api_response"}
+{"requestId":"559a8e69-863f-48df-a2c8-2d935902fc86","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":192,"event":"api_response"}
+{"requestId":"65a8c65c-fe8f-49fe-bbd3-d4e5fd1e3cb1","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":201,"event":"api_response"}
+{"requestId":"ea95c2aa-b341-4a96-886d-5c1f6741bb20","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":203,"event":"api_response"}
+{"requestId":"3408a541-34e0-46f2-b042-8dfd33c74ffb","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":204,"event":"api_response"}
+{"requestId":"d6ef38f4-c22a-45b6-874c-b660fb6d70e5","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":207,"event":"api_response"}
+{"requestId":"11fe0c58-6127-44a5-b142-e4050c672318","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":214,"event":"api_response"}
+{"requestId":"ff174ee9-b1d6-4710-9cd0-83853d6ba9bb","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":219,"event":"api_response"}
+{"requestId":"81945e7e-c69c-4f0b-bb00-780c4c46149c","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":429,"code":"RATE_LIMITED","durationMs":227,"event":"api_error"}
+{"requestId":"0709a282-6ef6-405a-abc3-2766089cc523","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":429,"code":"RATE_LIMITED","durationMs":230,"event":"api_error"}
+{"requestId":"5a976f14-fe20-424c-b85a-928c32b92d93","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":233,"event":"api_response"}
+{"requestId":"e1708052-8514-41e8-915d-acfd5bf6a552","organizationId":"6768173b-4654-4512-a76f-6f95e70c6cec","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"c6bbf882-615e-42a5-803f-244dc9bd14e0","organizationId":"d2f05d1e-ec9b-498e-8cf5-a27a7ee93c67","status":200,"durationMs":16,"event":"api_response"}
+✔ Customer exports share an atomic format/customer budget and expose a bounded retry delay (782.669771ms)
+{"requestId":"928bc8b1-e960-457d-aa92-9f50e074ac67","status":200,"durationMs":250,"event":"api_response"}
+{"requestId":"ee41ec68-24bd-40c3-b464-edaca4bf1884","status":200,"durationMs":240,"event":"api_response"}
+{"requestId":"c36f33a8-da5d-4fe7-af4d-a786860ac085","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"68cba5c8-5510-42ac-b90f-25f711929136","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"e65268d6-ab2b-4dfe-a7b2-a8175ad31c81","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":429,"code":"RATE_LIMITED","durationMs":8,"event":"api_error"}
+{"requestId":"f290bf4a-a026-4ae2-9ff6-a69b9f11dca1","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":429,"code":"RATE_LIMITED","durationMs":7,"event":"api_error"}
+{"requestId":"932ec78c-b444-43ac-a63f-53b0cc80e6a5","organizationId":"57c2be46-1cfb-4dd1-b802-96416444b8ce","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"28870d46-8b6e-45e2-949d-8f68280b729b","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":200,"durationMs":43,"event":"api_response"}
+{"requestId":"1ed5018d-168e-46ae-9c7d-cd4d6e404a34","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":429,"code":"RATE_LIMITED","durationMs":9,"event":"api_error"}
+{"requestId":"2f7a5ad1-095e-441c-a96c-77cda15568f5","organizationId":"52ca8e02-f674-4837-82fc-97afc27481e8","status":403,"code":"FORBIDDEN","durationMs":6,"event":"api_error"}
+✔ Report endpoints share actor/tenant throttling and reconciliation has a tighter budget (750.622284ms)
+{"requestId":"1fadf7aa-9b18-4781-a6a2-910b65634cad","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"ddc7d357-5c35-47f0-8322-29a8ab46e756","status":200,"durationMs":243,"event":"api_response"}
+{"requestId":"876e1be0-62bc-4391-89db-26d1f7e5f76b","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"durationMs":14,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"a582d43d-9f72-4586-8b67-6219afceea37","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"durationMs":15,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"1dbc9f86-fe52-4c14-b076-5c213e3c493f","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"durationMs":12,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"0a483625-202b-417c-aaf4-86478746b73e","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"durationMs":17,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"7f3997ff-894f-42b2-a529-9c7af402d83d","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"durationMs":16,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"e8f6319b-a10c-4857-b7e1-5a8b7d44726c","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","operationId":"e1cc03ef-c253-4eed-99ca-99deea1e0e29","status":409,"durationMs":28,"code":"INVALID_DISCOUNT","event":"api_response"}
+{"requestId":"1f328c6a-7b1d-40c5-b824-0a5b90da4782","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"code":"INVALID_ID","durationMs":5,"event":"api_error"}
+{"requestId":"61ce68a4-3629-41ac-8a01-3d8d6cfb8ee4","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":403,"code":"TENANT_MISMATCH","durationMs":7,"event":"api_error"}
+{"requestId":"75bdf1cb-90f5-4995-bb3e-c173c34b9900","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","operationId":"0722c28f-179a-42c5-a21b-83abd1f3cd07","status":200,"durationMs":47,"event":"api_response"}
+{"requestId":"672409b2-afd6-4a07-bcf5-3f51135b0115","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"code":"VALIDATION_ERROR","durationMs":11,"event":"api_error"}
+{"requestId":"7e4805c5-d8ef-4c30-bee9-f5c30cd8806c","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","operationId":"76505d45-ce46-4ef1-a093-1d7b1fde64c5","status":400,"code":"INVALID_PAYMENT","durationMs":17,"event":"api_error"}
+{"requestId":"1b08e644-6246-4c09-82da-0e4e01fbe1f7","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","operationId":"76505d45-ce46-4ef1-a093-1d7b1fde64c5","status":200,"durationMs":67,"event":"api_response"}
+{"requestId":"f25e9f36-7734-49ee-bcac-a4871ae4cd81","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"2d333c27-2926-4daa-92ac-4efca3214112","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","operationId":"76505d45-ce46-4ef1-a093-1d7b1fde64c5","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"1d64d35e-1667-47a4-9a9b-76c4b9b3d5a6","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","operationId":"76505d45-ce46-4ef1-a093-1d7b1fde64c5","status":409,"code":"OPERATION_PAYLOAD_CONFLICT","durationMs":14,"event":"api_error"}
+{"requestId":"3f45b78c-b181-4293-b628-ed80b371efdc","organizationId":"77fda0da-1ecd-4a61-aa04-c022608c9392","status":400,"durationMs":11,"code":"INVALID_STATUS","event":"api_response"}
+✔ Sale HTTP contract rejects bad input, recovers original operation and rejects changed retry (837.579607ms)
+✔ New owner resumes ordered organization/register/import/opening/cashier/actual-sale checkpoints with exact core effects (791.448472ms)
+✔ Onboarding scopes owner/current branch, immutable history and rollback after audit failure (110.701049ms)
+✔ Receipt identity is derived at atomic completion, survives later identity changes, replay and direct-write attacks (261.357524ms)
+✔ Rolled-back checkout does not retain a snapshot, payment or stock mutation (68.057256ms)
+✔ Mixed manual cash/card/debt refunds preview exact channels, require proof and conserve repeated partial/full refunds (443.773453ms)
+{"requestId":"44f782e1-a277-4411-955e-715057987202","organizationId":"c5e9f5a7-61a2-4a49-a4e0-07d378e7a068","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"7f26d60a-6689-45bc-9bca-ece30212323d","organizationId":"c5e9f5a7-61a2-4a49-a4e0-07d378e7a068","status":400,"durationMs":15,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"30cd46b1-aa7d-4ed0-ab97-0b4eaebb585a","organizationId":"c5e9f5a7-61a2-4a49-a4e0-07d378e7a068","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"473307c9-e986-4641-bfb7-86d92a218d0a","organizationId":"d87e7688-8a35-4c78-a252-047dd5d1a51d","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"3be969ac-9d93-48a2-949a-9563660d48bf","organizationId":"c5e9f5a7-61a2-4a49-a4e0-07d378e7a068","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"62601e0b-f899-41be-9830-c9568a3dbc65","organizationId":"c5e9f5a7-61a2-4a49-a4e0-07d378e7a068","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"1660efe3-5124-4dd5-bddc-001c16ae7631","organizationId":"c5e9f5a7-61a2-4a49-a4e0-07d378e7a068","status":200,"durationMs":20,"event":"api_response"}
+✔ Supplier terms and bank requisites validate, survive archive/restore, export safely and remain tenant/role scoped (229.957709ms)
+✔ Provider provenance cannot pass the manual refund boundary even when its journal is recorded (70.722264ms)
+✔ Staff archive preserves financial history, revokes sessions and restores only to blocked state (209.971297ms)
+✔ Staff lifecycle denies foreign tenant, non-owner, last owner and ambiguous archive requests (107.729864ms)
+{"requestId":"05362485-81c2-4378-ad2c-c5ded9bbebd9","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":52,"event":"api_response"}
+{"requestId":"bce623b2-8743-4c2b-bc29-7c2aee627a83","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":400,"code":"INVALID_PAGINATION","durationMs":15,"event":"api_error"}
+{"requestId":"0d19e4b5-f23b-4a88-b9a5-0eca1c6169f5","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":400,"code":"INVALID_PAGINATION","durationMs":16,"event":"api_error"}
+{"requestId":"97d7c811-bfdd-49bf-ad9d-7631d7446cde","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":45,"event":"api_response"}
+{"requestId":"96f7bf84-0ff8-421a-8b6b-98279dedf351","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":47,"event":"api_response"}
+{"requestId":"28cb8615-2612-407a-9d7f-fbf6f9d87ce2","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":45,"event":"api_response"}
+{"requestId":"2278986a-e029-4425-8b09-5edfdc60e44a","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":80,"event":"api_response"}
+{"requestId":"21e7fc8a-91ca-41cf-8aab-297e9b58aaba","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":41,"event":"api_response"}
+{"requestId":"2a7eec76-ec90-4512-b0e9-a39d622669a4","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":48,"event":"api_response"}
+{"requestId":"0279a533-edbd-49d4-8e6e-2fed31dbed89","organizationId":"48663b66-3500-448b-96a8-c2487c77dfd0","status":200,"durationMs":51,"event":"api_response"}
+✔ 1000 receipts: global totals, cash/debt separation, historical COGS and cutoff agree across table/dashboard/CSV (5156.822631ms)
+{"requestId":"f60e69ff-58ab-49f6-8288-ed09f0d5a8ab","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"46c093c9-a482-4f4b-94df-bf226bdd1e23","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":15,"event":"api_error"}
+{"requestId":"61a8fe9a-027b-4208-b971-7d247dc0ac44","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":15,"event":"api_error"}
+{"requestId":"3186f4b2-e396-4786-8735-0b1b5d8c3ee8","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":15,"event":"api_error"}
+{"requestId":"37a4805d-c451-4afe-884a-f63eded8335f","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_DATE","durationMs":17,"event":"api_error"}
+{"requestId":"0ed5ba42-5bda-4148-88e0-4ecaacd13f4c","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"c500bce2-9d00-4f2b-a61e-1e6bf6d2017c","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":15,"event":"api_error"}
+{"requestId":"906c8a29-4e82-4039-8a4c-e67ccfdb027e","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":13,"event":"api_error"}
+{"requestId":"8c6ea207-c329-41e7-aad2-9468195bcb5b","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":13,"event":"api_error"}
+{"requestId":"700db60c-05ba-40ae-ba0f-2a3185326201","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_DATE","durationMs":17,"event":"api_error"}
+{"requestId":"4ac94ac6-f3c7-4313-8b0a-1793b9d78f79","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"8a9a87d5-a0a9-4b41-a6de-6c74ad75397b","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":16,"event":"api_error"}
+{"requestId":"72b7dac2-6a2c-48e4-8da2-6755eb39d446","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":15,"event":"api_error"}
+{"requestId":"ad905c8c-f89b-4f7a-bbcb-4554d2e789fd","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":16,"event":"api_error"}
+{"requestId":"fc14adcc-8f8e-40c7-a88f-b82044f4d6d4","organizationId":"a225d759-4b94-4e59-a81b-547d737c13a2","status":400,"code":"INVALID_DATE","durationMs":15,"event":"api_error"}
+✔ Report day boundaries include Tashkent first/last millisecond and reject malformed/future cutoffs (353.732737ms)
+{"requestId":"4787b16b-8f6d-4230-a626-81091416bac1","organizationId":"0bb404ed-3bfe-462c-bad5-25a23128ce9d","status":403,"code":"TENANT_MISMATCH","durationMs":5,"event":"api_error"}
+{"requestId":"0c9d54d4-eee8-4c09-852d-e93dd2be7070","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"42bdc736-b0cf-4af1-98df-ae19528e405b","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"ca17084f-f74d-4959-9868-eae0cf9c2796","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"ef954af4-41a8-494d-a5f3-43c4ff8cc09a","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"ed6e917a-ad67-48fe-a5fe-0ea3fe36bc1a","organizationId":"0bb404ed-3bfe-462c-bad5-25a23128ce9d","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+{"requestId":"ba052d95-4fbd-4012-888f-9bb092f8afb0","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"569cd8da-593b-481c-a75d-8ac1ed18ff10","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"2c753278-28cc-4bd2-9cd6-6b7a3fa0ee02","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"11b2a41c-77be-4057-ba90-cf2190c903a4","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"45626dbc-23d7-4e21-aa83-baceb7cc45e1","organizationId":"0bb404ed-3bfe-462c-bad5-25a23128ce9d","status":403,"code":"TENANT_MISMATCH","durationMs":8,"event":"api_error"}
+{"requestId":"bccfd3ed-6ba4-447d-b250-f944c5d8a715","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"5a0f73e7-ce8f-4cd2-ab12-3eb786a5e7b5","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"821ddc8f-88b4-4015-b630-ff5d1035f3ef","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"9416bfff-a603-4d8d-9dc2-173d4d7928da","organizationId":"0bb404ed-3bfe-462c-bad5-25a23128ce9d","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+{"requestId":"9c04a5bb-10c0-4531-a868-ceb826da307c","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"5e400fe8-ca68-4b13-8872-46d268b0794e","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"92c238a1-9643-4812-8dce-65e562bea23e","organizationId":"629a50ac-974c-457c-abe3-069177a84246","status":200,"durationMs":18,"event":"api_response"}
+✔ All reports and exports enforce A/B tenants and administrator branch allow/deny (317.140547ms)
+{"requestId":"ff995cce-dabe-4f5d-9719-6539b562c29b","organizationId":"22d4e137-9ba8-4b92-b3ee-8816315b6cd5","status":200,"durationMs":20,"event":"api_response"}
+✔ Cash sources and custody withdrawals are separate and close conserves opening plus net (292.913915ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Closed shift correction is linked, immutable, atomic, exactly once and contributes only to the posting shift (280.903962ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Parallel returns cannot exceed original quantity and manager approval/audit remain frozen (314.200689ms)
+✔ Sellable returns use original cost in weighted average; zero stock resets to original and replay cannot revalue twice (321.095107ms)
+{"requestId":"2f62a608-c12c-4c46-8044-15c0b65cfcb3","organizationId":"a2a997e6-a788-40be-984a-6d7af2766909","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"95d4c2f0-bbdd-4a9e-9cab-b5e085c60f6b","organizationId":"a2a997e6-a788-40be-984a-6d7af2766909","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"9b242523-8e5f-4cdf-8f67-90d805dd4a49","organizationId":"a2a997e6-a788-40be-984a-6d7af2766909","status":404,"code":"NOT_FOUND","durationMs":10,"event":"api_error"}
+{"requestId":"9e18fcea-671c-4353-a852-fab64fbfd2fd","organizationId":"a2a997e6-a788-40be-984a-6d7af2766909","status":404,"code":"NOT_FOUND","durationMs":9,"event":"api_error"}
+{"requestId":"281cd0b7-db18-4964-abbd-34b9eac53fa7","organizationId":"a2a997e6-a788-40be-984a-6d7af2766909","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"ea142705-e464-40b4-b851-ece4ffe61b04","organizationId":"a2a997e6-a788-40be-984a-6d7af2766909","status":403,"code":"MANAGER_REQUIRED","durationMs":13,"event":"api_error"}
+{"requestId":"33da8f2e-a53e-44de-9a94-2025cfbdd7a9","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Cashier shift ownership, nested cost redaction and live membership revocation are enforced by HTTP and cached service contexts (184.925816ms)
+{"requestId":"301f7403-62a1-4930-a097-384c37234c0a","organizationId":"1cd52608-d2a4-44f4-9b57-659f051dce50","status":404,"code":"NOT_FOUND","durationMs":18,"event":"api_error"}
+✔ Correction references cannot cross tenant/branch and cashiers cannot deposit or approve (207.621499ms)
+{"requestId":"f5d39d6e-7f53-426f-84af-85ef678a65a8","organizationId":"ad871e9d-5fa9-4fea-a222-15cb22e30909","status":404,"code":"NOT_FOUND","durationMs":18,"event":"api_error"}
+✔ Every checkout reference rejects foreign tenants atomically, including draft updates and direct payment writes (305.67494ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Tender and change snapshot conserves cash revenue and replay, while invalid tender rolls back (401.196893ms)
+✔ Mixed cash/card and cash/debt keep applied cash, tender, customer and receipt note separate (217.571149ms)
+{"requestId":"dc9a1627-7ada-4422-be15-587b47d20f27","organizationId":"413b59c0-a89a-4094-8339-440b376b5e63","operationId":"5ea889ba-4429-441b-a350-a66491f025fa","status":200,"durationMs":38,"event":"api_response"}
+{"requestId":"ec2dd4f5-898c-4164-b155-bc45646c8532","organizationId":"413b59c0-a89a-4094-8339-440b376b5e63","operationId":"51824438-fec4-4088-9479-296e3eec2d18","status":200,"durationMs":58,"event":"api_response"}
+{"requestId":"67d50810-f46f-4055-8717-4cad49a87fba","organizationId":"413b59c0-a89a-4094-8339-440b376b5e63","operationId":"51824438-fec4-4088-9479-296e3eec2d18","code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"67d50810-f46f-4055-8717-4cad49a87fba","organizationId":"413b59c0-a89a-4094-8339-440b376b5e63","operationId":"51824438-fec4-4088-9479-296e3eec2d18","status":200,"durationMs":91,"event":"api_response"}
+{"requestId":"ed8590e7-15cf-45d4-a011-7bd082e47e25","organizationId":"e656b683-80dc-45b6-8ee9-631b2ff31a80","operationId":"51824438-fec4-4088-9479-296e3eec2d18","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"998654e8-863d-4cc9-87d9-c9079c8dbf93","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Sync response loss and repeated/concurrent foreground sync produce one original posting and isolate actors (261.429661ms)
+{"requestId":"b907dbdf-61f9-44f7-b819-af5f7f830b4c","status":403,"code":"CSRF_REJECTED","durationMs":0,"event":"api_error"}
+{"requestId":"366fafe1-0aa3-4ee1-9d27-36a89368d606","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Cookie session expiry, revoke and cross-origin CSRF reject mutation before any economic effect (93.167327ms)
+✔ Optional sale metadata rejects foreign seller and blank service without creating a draft (105.262544ms)
+{"requestId":"67516566-f4bb-4c33-a897-22f918a69db5","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":400,"durationMs":18,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"4abf0d8f-abed-4c47-914e-78673a2d8cd0","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":400,"durationMs":14,"code":"VALIDATION_ERROR","event":"api_response"}
+{"requestId":"1a16936a-996d-47e4-88b4-9ecc664f9762","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":200,"durationMs":25,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"6ffe28f1-520d-457f-9618-e359a0d94dec","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":200,"durationMs":41,"event":"api_response"}
+{"requestId":"4452b47a-3535-4797-9d3b-e8c365ba989a","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"51239ae7-0810-47e7-a45e-72f4f85adcf8","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"2ff56793-dd2a-4127-a430-687914c3a0d4","organizationId":"aba69f04-4b38-47c9-8dad-cce2a80533da","status":200,"durationMs":157,"event":"api_response"}
+✔ Opening and signed adjustments post once, require reasons, retain approval/source and reverse atomically (609.930188ms)
+{"requestId":"d41035ee-28a1-43a2-ab36-49936c7976cc","organizationId":"dc39912e-d9a9-442e-8497-35eb10204340","operationId":"d5b8b511-3778-4b56-b44b-b63e19d6d621","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"304db34f-d616-4e2a-8a5f-ad6000d74206","organizationId":"dc39912e-d9a9-442e-8497-35eb10204340","operationId":"d5b8b511-3778-4b56-b44b-b63e19d6d621","code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"304db34f-d616-4e2a-8a5f-ad6000d74206","organizationId":"dc39912e-d9a9-442e-8497-35eb10204340","operationId":"d5b8b511-3778-4b56-b44b-b63e19d6d621","status":200,"durationMs":89,"event":"api_response"}
+{"requestId":"debef181-0d51-4783-b926-a23a88b13590","organizationId":"dc39912e-d9a9-442e-8497-35eb10204340","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"2e6bed8e-c8a7-42c6-8619-7817d55b75b8","organizationId":"1243b0d8-9f81-44f2-9948-593b3faa7e88","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"b7df58ea-036a-43fe-8aa7-950fd255fd1f","organizationId":"dc39912e-d9a9-442e-8497-35eb10204340","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"c5e2b896-7804-49ee-a615-a3f251b02bfa","organizationId":"dc39912e-d9a9-442e-8497-35eb10204340","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+✔ Barcode generation is actor-bound idempotent, labels are escaped and tenant-scoped (240.140014ms)
+{"requestId":"dd9c705d-b7b5-42c4-a91d-84fda71bbcda","organizationId":"b588e09a-a7c6-49f7-a3d0-237b2a92f5f2","status":200,"durationMs":24,"event":"api_response"}
+✔ Ownership handover requires recipient acceptance, cancels safely, expires and revokes old sessions atomically (121.74521ms)
+{"requestId":"34162018-ccd2-499e-b5cd-2b5034f6baf3","organizationId":"c3a63712-dc46-4179-a70d-3654642f7f42","status":403,"code":"FORBIDDEN","durationMs":13,"event":"api_error"}
+{"requestId":"171bea69-b9cc-4808-945a-e54c466b57db","organizationId":"c3a63712-dc46-4179-a70d-3654642f7f42","status":403,"code":"FORBIDDEN","durationMs":13,"event":"api_error"}
+{"requestId":"bd62d5de-8439-4716-9807-51e4b92801a0","organizationId":"c3a63712-dc46-4179-a70d-3654642f7f42","status":200,"durationMs":19,"event":"api_response"}
+✔ Parallel owner removal keeps a live owner; inactive and foreign business switches preserve old session (168.402882ms)
+✔ Stock journal rejects mutation, missing source and zero movements while preserving posted balance (69.811591ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Two opening documents cannot race into duplicate initial stock; stale ownership request cannot transfer (151.175174ms)
+{"requestId":"36ea8929-59f5-4086-8a34-22fa3c2cab6e","organizationId":"a67531de-4621-45ea-8df8-d59989689216","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"9c4367eb-a385-41d3-ae51-4392c0fc3da3","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+✔ Cached catalog prices, stock and role never authorize posting; private API results bypass shared caches (273.816251ms)
+{"requestId":"1be72b7b-621b-468e-af2a-5e31f09f3dcb","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"4ddd3691-4acb-451c-a57c-53f76e4dc976","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"edb56965-c7cf-4811-9805-04bcd4d2e990","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"f0d1c2a6-4dd9-4b9f-bf68-53b7dbb2f481","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"ed220941-73a9-4d70-a442-ba70ab6e3a81","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"48076c69-30b0-4114-99d8-a46c0aadd3b4","organizationId":"a61334fc-e2ab-4ab2-9c82-b0b923e963da","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"c70cdfbf-606b-4877-92d1-7ac84d76a961","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"dd40cf1c-e7ae-45a4-ab08-6c608f4f437f","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"bbda69a1-b8a7-4748-aa19-9b6ae1436b54","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"f368cf7d-2681-4efd-af49-db88427795c4","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"172acb2a-83e7-4610-ac05-aa3a4f4d8743","organizationId":"88a07a96-448a-4fe8-b270-c2f0da31662f","status":400,"code":"VALIDATION_ERROR","durationMs":11,"event":"api_error"}
+✔ Purchase price history compares original confirmed snapshots, signed reversals and scoped full exports (536.748971ms)
+{"requestId":"4c3c23ac-710d-4804-8e88-0557f2305a00","organizationId":"4fbf3f02-6a57-4074-add7-b69030a6c221","status":200,"durationMs":19,"event":"api_response"}
+✔ Credit boundary rejects missing/inactive customer and over-limit without posting; 100000 debt adds no cash (244.672582ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Register receipt counter is atomic, actor-idempotent and separate from nullable fiscal reference (112.393114ms)
+{"requestId":"723a7743-37cb-4091-a21f-ec3bf2898354","organizationId":"1b9b6654-63cb-4ad1-b667-f13eb3cc9564","operationId":"2e0dd12c-be3c-4d81-852e-53bafa719164","status":409,"code":"PRICE_CHANGED","durationMs":22,"event":"api_error"}
+{"requestId":"0e7e43cb-fe03-43aa-b0b0-45540930c8ce","organizationId":"1b9b6654-63cb-4ad1-b667-f13eb3cc9564","operationId":"2e0dd12c-be3c-4d81-852e-53bafa719164","status":409,"code":"INSUFFICIENT_STOCK","durationMs":21,"event":"api_error"}
+✔ Checkout conflicts expose scoped old/new price and requested/available stock without any posting (108.111011ms)
+{"requestId":"755aa331-568e-4251-9f66-aaeb9341e408","organizationId":"1d7d94d5-c6c3-4b2a-805c-6048bef39f6b","status":503,"code":"INTEGRATION_UNAVAILABLE","durationMs":7,"event":"api_error"}
+✔ Unconfigured integration boundary returns a distinct sanitized HTTP state without vendor calls (37.443044ms)
+✔ Cashier counted difference needs immutable manager approval and blocks transactions until accepted (123.690841ms)
+{"requestId":"8c5aeb53-c35b-494b-b855-8a4b19401387","organizationId":"229fe566-8f63-4c42-99c4-b029d9974951","operationId":"5c18548a-6e94-488d-bb28-139f8120af55","status":200,"durationMs":19,"event":"api_response"}
+✔ Zero shift difference closes without approval; pending payments and draft policies still block close (109.830628ms)
+✔ Rejected close request resumes work; handover rejects wrong amount, stale or foreign origin (139.825622ms)
+{"requestId":"25d25bd5-95f9-4c06-b4f6-646a63cec74a","organizationId":"d9c9d19d-65d1-4925-870b-18b60bed1b52","status":200,"durationMs":13,"event":"api_response"}
+✔ Opening document FIFO and explicit allocations conserve payment, due buckets and statement exports (106.254363ms)
+✔ Persistent reconciliation detects drift without repair; resolution rechecks source and is audited (163.393366ms)
+✔ Automatic system scan detects sale-payment mismatch and preserves evidence for the responsible owner (62.65769ms)
+{"requestId":"bfef4bc6-45bc-4e5c-98da-72ee3d9c6d37","organizationId":"6865b04d-5e6c-45e1-8025-0bf2c41a3f63","status":200,"durationMs":12,"event":"api_response"}
+{"requestId":"8f4f97c9-0db8-4f85-bebc-f2cd575605cb","organizationId":"6865b04d-5e6c-45e1-8025-0bf2c41a3f63","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"dc7d9c4d-d5b7-4987-abbe-a7288e8a6aec","organizationId":"6865b04d-5e6c-45e1-8025-0bf2c41a3f63","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+✔ Branch min/max recommendations include missing balances, stay exact and deny cross-store settings (118.885087ms)
+{"requestId":"86fdceca-d0fd-420d-82b8-86e8eef10cc1","organizationId":"2c11635b-1eb6-4df9-89e5-1ab2575451c3","operationId":"8646c824-d291-4c5c-af59-22003555644c","status":200,"durationMs":24,"event":"api_response"}
+✔ Sync review keeps immutable source; manager resolution requires terminal proof and cannot repost (156.862683ms)
+{"requestId":"8e5a4a76-b45e-45ec-8a0d-3d95640a195c","organizationId":"1a33fa0b-f917-4e3f-90e3-b55d3035dd48","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"bef6cc27-f3f0-4992-8f6a-1a6e4d97113a","organizationId":"042ec016-c1fc-421a-875c-e07be72cbe96","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"668a8d29-e191-4cb4-9673-224c14fce1b6","organizationId":"1a33fa0b-f917-4e3f-90e3-b55d3035dd48","status":400,"durationMs":11,"code":"INVALID_STATUS","event":"api_response"}
+✔ Server saved draft survives a second device session and completes the same sale exactly once (141.532901ms)
+✔ Audit insert failure rolls back sale, stock and payment; source actor and request correlation stay atomic (86.710909ms)
+{"requestId":"e90fb716-c167-4ac5-bfbb-72f261a129e2","organizationId":"9334c4d2-728f-4aed-a0b0-d41c2a721d20","operationId":"ef109bdb-bfa3-49a1-aaee-ef98ab37eff5","status":200,"durationMs":36,"event":"api_response"}
+{"requestId":"fc227b0e-bf6e-4ec4-94ef-6d9345eeeca3","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"83621133-361b-47c7-8dbd-39f3defd792e","organizationId":"9334c4d2-728f-4aed-a0b0-d41c2a721d20","status":403,"code":"TENANT_MISMATCH","durationMs":6,"event":"api_error"}
+{"requestId":"84293549-6c47-480f-994c-da6caed6a744","status":413,"code":"PAYLOAD_TOO_LARGE","durationMs":0,"event":"api_error"}
+{"requestId":"833b5895-7eb0-4b39-9981-8b81cb70b515","status":403,"code":"CSRF_REJECTED","durationMs":0,"event":"api_error"}
+✔ Standard API envelopes keep decimal strings, request ID, errors, pagination and body limits consistent (101.916069ms)
+{"requestId":"13fdfa9d-a7ea-44c9-a55a-649b6ca31146","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+{"requestId":"b0ba8c80-ac0c-4546-97de-3cdb6026b1af","status":401,"code":"UNAUTHORIZED","durationMs":0,"event":"api_error"}
+✔ Session expiry, revoke and cookie transport enforce the browser boundary without bearer fallback (63.730508ms)
+{"requestId":"4aee33a7-ca8d-4b09-b04e-375b1cd0d9cb","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":200,"durationMs":17,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"4ba07248-27b2-41e7-9e64-addaa3c51801","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":403,"code":"COST_CHANGE_FORBIDDEN","durationMs":14,"event":"api_error"}
+{"requestId":"50b5c2ed-7fad-4834-9f4f-610428aa5ec9","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":403,"code":"COST_CHANGE_FORBIDDEN","durationMs":15,"event":"api_error"}
+{"requestId":"a9f9df1d-9ee2-480d-ad4c-b67b4897c8c4","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":403,"code":"FORBIDDEN","durationMs":14,"event":"api_error"}
+{"requestId":"39c69543-f713-4057-9e01-b74e75821c3b","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":404,"code":"NOT_FOUND","durationMs":10,"event":"api_error"}
+{"requestId":"6bdd915e-8a69-4e14-ba76-3b2615803059","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":400,"code":"VALIDATION_ERROR","durationMs":12,"event":"api_error"}
+{"requestId":"2ba0c9e5-1251-4368-ba32-33f33e762f2b","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":400,"code":"VALIDATION_ERROR","durationMs":77,"event":"api_error"}
+{"requestId":"33472865-c3db-4ac2-b73f-f4d33ab067a0","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":400,"code":"DUPLICATE_ITEM","durationMs":14,"event":"api_error"}
+{"requestId":"93d62aa9-6215-437d-85dc-d3d68625c68f","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":403,"code":"COST_CHANGE_FORBIDDEN","durationMs":17,"event":"api_error"}
+{"requestId":"dacfcce7-c9a7-41c3-bf7f-ecaedeb3b33b","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"bb4d3fc1-6089-461e-8413-058d7b95b47c","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"9ffaced9-58dc-46e3-a3b1-c372c473660d","organizationId":"41278f76-80c9-4fc7-bdd9-1080f0770f90","status":200,"durationMs":20,"event":"api_response"}
+✔ Price batches preview atomically, preserve receipts, replay once and protect cost history/export (513.854365ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"93a52abd-fdac-498a-99b7-e2091ba319a8","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":200,"durationMs":11,"event":"api_response"}
+{"requestId":"64e803be-95c6-4d81-bd04-5a4b0cb6004f","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":403,"code":"FORBIDDEN","durationMs":3,"event":"api_error"}
+{"requestId":"a2ee7fb5-df2b-4a93-b2db-1ce22921931a","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":404,"code":"NOT_FOUND","durationMs":5,"event":"api_error"}
+{"requestId":"7d662e02-ff1a-4f14-a108-f983078ac12f","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":200,"durationMs":10,"event":"api_response"}
+{"requestId":"d3158622-65a8-4cd2-abc9-93579c758a21","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"e76e8206-b4aa-48c4-b056-7be488c526a6","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"4b97f54f-9fc3-4a8f-825c-d3c4c55b72be","organizationId":"afdd2723-53cf-4178-9c52-74d3d6c3a84f","status":200,"durationMs":13,"event":"api_response"}
+✔ Damaged return locations and write-off journals are atomic, frozen, immutable and branch scoped (392.855145ms)
+✔ Late audit failure rolls back a reviewed price batch and the entire damaged-return location/refund (132.626715ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"93dab100-dc6d-4d7a-9cc8-4f5fa92efceb","organizationId":"d94bfec5-4078-4b61-8649-6ded87e63df1","status":200,"durationMs":21,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"969fb587-79bf-4d84-8512-1d19f6436107","organizationId":"d94bfec5-4078-4b61-8649-6ded87e63df1","status":200,"durationMs":17,"event":"api_response"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"6280e239-ad8e-496a-833b-907cf3952aa4","organizationId":"d94bfec5-4078-4b61-8649-6ded87e63df1","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"3b4171a4-67b8-409c-a616-49fb0c33fec7","organizationId":"d94bfec5-4078-4b61-8649-6ded87e63df1","status":403,"code":"OWNER_REQUIRED","durationMs":14,"event":"api_error"}
+✔ Financial accounts transfer atomically without revenue, expense categories/reversals and gross/operating profit reconcile (557.636266ms)
+✔ Financial transfer late audit failure rolls back both accounts, cash and operation key (88.047489ms)
+{"requestId":"7800e589-a151-448d-973a-da7b1c9a8946","organizationId":"5237ec9e-d1a3-4aa8-887c-398885e78d06","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"2a084ed6-8bd4-4d0b-8857-f81998fba2e8","organizationId":"5237ec9e-d1a3-4aa8-887c-398885e78d06","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"5c1f9d64-6006-48e4-9d77-acd25a75acd2","organizationId":"5237ec9e-d1a3-4aa8-887c-398885e78d06","status":200,"durationMs":20,"event":"api_response"}
+✔ Cross-branch transfer details require access to both accounts (141.690072ms)
+{"requestId":"81605545-74ed-405b-bf99-4621c160b403","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":32,"event":"api_response"}
+{"requestId":"a3747af8-667a-4bae-bdca-a0e306fe2c25","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":32,"event":"api_response"}
+{"requestId":"c4798b95-c9da-447a-94be-2f13e45c562e","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":30,"event":"api_response"}
+{"requestId":"30ddff79-a5a1-4966-9424-95c123851672","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"2ffdfd46-5f94-4837-b81d-7e7acc7ecc89","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":30,"event":"api_response"}
+{"requestId":"4ace9cd4-4965-4cd2-928a-e1b993481e6e","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":31,"event":"api_response"}
+{"requestId":"cab0db41-9664-4269-8a19-f5de3ae19612","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"83be8a89-1b4b-4465-a7ea-d374af9ab143","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"70f25401-31f4-46c8-a238-e53a60419077","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"dfed3f47-f2ec-45a6-bf0f-d48fd56936d4","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"d8f28aa1-4a48-44d8-98cc-7b3b4834af3b","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":36,"event":"api_response"}
+{"requestId":"0badf62b-4961-4962-9b85-07c408bc9692","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":403,"code":"FORBIDDEN","durationMs":7,"event":"api_error"}
+{"requestId":"093f1b0f-7351-47b4-b01b-0190cc3343fd","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"c95ba946-89a5-42c0-976f-ab7e3d851d66","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":400,"code":"INVALID_DIMENSION","durationMs":11,"event":"api_error"}
+{"requestId":"3a392314-11fa-414e-bc82-455b22edaee6","organizationId":"fa0b8e0e-5a16-42b3-8272-296ac7e49d8b","status":200,"durationMs":27,"event":"api_response"}
+✔ All five sales breakdown dimensions reconcile original discounts, mixed tender, returns, scope and full CSV (703.325966ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"4d6b9dbf-3506-4624-8515-9730a9c45098","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"4d0604bb-3bd6-4059-b920-6554e96fe233","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"fd315ee8-0509-4dc7-9952-3454ce51c167","organizationId":"ece35423-0b94-432b-a737-7168de99f74e","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"c3eb6e02-adc1-455a-ac80-22c6645f0d99","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":409,"code":"SUPPLIER_BALANCE_NOT_ZERO","durationMs":14,"event":"api_error"}
+{"requestId":"29456fbb-065e-4de9-9a91-0d604257279c","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"627854fc-f104-417e-9e14-121c2548a8e8","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"c1b5c61b-4da1-4478-bfee-c525616a0ecd","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"91cb502c-43c2-42ad-9601-b02b62ac0554","organizationId":"666e0763-8a4e-49d7-8812-a660cef63b92","status":200,"durationMs":17,"event":"api_response"}
+✔ Supplier invoices, advances and partial allocations conserve cash and debt through replay, races and scope guards (603.764227ms)
+{"requestId":"f696aa99-e5f2-4aa6-94d1-e14ec1b7857a","organizationId":"dee4336f-5e7e-4dd3-942f-dfec2e11aa9f","status":200,"durationMs":17,"event":"api_response"}
+✔ Supplier cash payment late audit failure leaves neither advance nor cash debit and retries original key once (154.150775ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"08a6ee5b-015b-45a6-99b2-7435672dcaec","organizationId":"c64e8ce2-19c7-4d8d-a1bb-a05e9f1d66ef","status":200,"durationMs":16,"event":"api_response"}
+✔ Purchase order two partial receipts atomically reconcile original stock, supplier invoice and payment with overreceive and replay guards (299.686336ms)
+✔ Purchase order receipt late failure rolls back stock, weighted cost, invoice, original links and operation before exact retry (131.34103ms)
+{"requestId":"bde673d3-0f3e-417a-9666-a974f617cc5b","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"88b2c801-f78f-4be9-8e70-2d2b21ac982d","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"a4f62310-e133-42b3-83b5-b6166972956c","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"29696cc9-02f8-47f8-a470-5bf42f2e4425","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":21,"event":"api_response"}
+{"requestId":"7b152681-ef99-4b8d-a45f-ed310f176895","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"ebbc555d-f4ea-46dd-bca7-1cfa1f8197ea","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"f62db207-b7f2-422f-a1d4-b267e3559979","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":403,"code":"FORBIDDEN","durationMs":4,"event":"api_error"}
+{"requestId":"cfad9cc2-840e-41ea-be54-03c56905c942","organizationId":"6ff88635-e013-4ee4-93b4-1e3e941171ee","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"838daf48-e6bf-4e16-bfdf-f5c78e6acc9a","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"479357ef-4504-4f9d-9fbb-4a1543cd190e","organizationId":"9d385f31-9951-4337-a2fd-5bd0c911fbf6","status":400,"code":"INVALID_REPORT_CUTOFF","durationMs":10,"event":"api_error"}
+✔ Supplier balance aging report reconciles invoice allocation, purchase report, customer due and frozen shift cash with cutoff and scope (478.771811ms)
+✔ Zero-value purchase receipt conserves original quantity without inventing supplier payable or cash and rejects changed unit (95.994245ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"56677ce0-fda6-40f1-90b2-5640d9c25309","organizationId":"94fbbad3-ea75-45af-bbf5-801e749bf308","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"43c3f28a-f175-4227-baf1-dc33f2583937","organizationId":"94fbbad3-ea75-45af-bbf5-801e749bf308","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"94be83e9-3764-4ae2-a8ed-e563a3a1a272","organizationId":"94fbbad3-ea75-45af-bbf5-801e749bf308","status":200,"durationMs":23,"event":"api_response"}
+✔ Supplier paid returns and price credits conserve original quantity, payable and released advance without inventing cash refund (437.65515ms)
+✔ Supplier credit late audit failure rolls back original credit, freed allocation, stock and cost before one original retry (171.625142ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+✔ Supplier fractional partial returns conserve last cent and parallel commands cannot consume the same original quantity (330.671378ms)
+✔ Supplier price correction after a partial return distributes only the remaining payable across remaining goods (188.363086ms)
+{"requestId":"5e46d4e5-1dae-46ae-98a8-c7d6834567c1","organizationId":"e0f78753-b5ce-422f-8f00-989ba4e89f10","status":200,"durationMs":15,"event":"api_response"}
+✔ Product variants keep barcode, stock, sale and return independent and preserve the original default SKU (193.650764ms)
+{"code":"CONCURRENT_CONFLICT","event":"operation_retry"}
+{"requestId":"a9256df0-c9d7-4ae8-b828-05f60a67e9d6","organizationId":"6c2fb815-a373-44a7-b7c7-736c39cb4d18","status":403,"code":"FORBIDDEN","durationMs":7,"event":"api_error"}
+{"requestId":"ee8d1bfd-7807-4b57-814b-d8d5362b7741","organizationId":"5ad0af45-cff9-4d31-bbd2-7a9d657a7e78","status":404,"code":"NOT_FOUND","durationMs":8,"event":"api_error"}
+{"requestId":"02e3f25e-d140-4f32-beee-e8d8b23698c3","organizationId":"6c2fb815-a373-44a7-b7c7-736c39cb4d18","status":200,"durationMs":18,"event":"api_response"}
+✔ Variant combination uniqueness, tenant scope, cashier rights and immutable family identity are enforced (246.026468ms)
+✔ Variant creation rolls back product, barcode, price history and operation on late audit failure (79.544119ms)
+✔ Internal reconciliation worker explicitly isolates tenant/store scope and never creates a financial posting (123.21956ms)
+{"requestId":"5f2bb688-5cba-442e-a2df-eeefecea9d85","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"bf3a50e8-8b46-4e3c-bdca-7dab0c1b9c60","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"494825ca-3788-4ebc-80bb-68422d3b955d","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"e9d24fa3-04a9-4249-9ff1-f37156f2e3a1","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"b0df945b-c465-41e3-b3b3-d8a0d15638df","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"befd15a7-b1fc-4462-8814-0f7b33dc11f3","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"72df5a92-f8b7-4380-a509-64737643da2e","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"89c3643b-3e26-4914-9d0e-c0c33d09ee86","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"fe118ffa-ef07-4e60-a08a-c1485e5cd134","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":400,"code":"INVALID_PAGINATION","durationMs":15,"event":"api_error"}
+{"requestId":"a81f2f02-3639-425f-864c-e1a414793fb4","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":400,"code":"INVALID_PAGINATION","durationMs":6,"event":"api_error"}
+{"requestId":"32f6e72e-3821-4c63-80eb-9f4161ac4661","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"76dd8423-b79c-429d-b335-2b40be81be0e","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"17183832-26cd-44a1-9cfe-2d6f743efbc5","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"fd740fdd-a44a-4910-ad5d-86a1aa5c22e1","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"336a1ddd-c64e-460a-832a-bd9b0e925a0e","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"3183d269-deb7-4a14-bf12-96cf9ad8d885","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"75d50279-4082-4bdc-b75b-c21472da5403","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"bbb6d97b-2743-4843-977c-918693ae82fe","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"2b199d34-13a6-4240-8b2c-ac8bcf1820eb","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"a9064682-93dc-4375-b8e5-81464ee31cfb","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":404,"code":"NOT_FOUND","durationMs":7,"event":"api_error"}
+{"requestId":"a967a1f9-e11e-49d3-9ad1-cb7f24631658","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"64e0b570-a13a-463b-87e7-072c8b9687a0","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":400,"code":"INVALID_ID","durationMs":6,"event":"api_error"}
+{"requestId":"f2046a08-af17-4a36-a3c8-23e30e7e4584","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":403,"code":"FORBIDDEN","durationMs":5,"event":"api_error"}
+{"requestId":"7f7896ef-6789-4859-a81d-cdc7f10dd3ef","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":200,"durationMs":18,"event":"api_response"}
+{"requestId":"112ae3ef-ec61-4558-8ac8-dc44e5b369ec","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"8789320a-3dd1-4460-b0b0-69e312e75be3","organizationId":"8c94aa5e-1cc4-444e-ba15-32a40c75a517","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"82f26df9-262e-459c-a22d-890b1a039f48","status":401,"code":"UNAUTHORIZED","durationMs":1,"event":"api_error"}
+{"requestId":"caa30e98-7a8a-4464-8220-b6d9aac1e220","status":401,"code":"UNAUTHORIZED","durationMs":2,"event":"api_error"}
+✔ Replenishment and incident pages reject unbounded pagination and keep explicit branch filters scoped (214.519738ms)
+{"requestId":"b99d92ee-1a51-4c75-8438-9dd66fefc1d3","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"878f3219-8548-4f24-a0f4-9b4d5158b975","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"b26ab982-6945-49fc-bc9e-8eb0ec2a817e","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"8b7803f6-427d-48f4-9093-adef6cda84a7","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"e0b92260-d37c-4e18-b0ab-d803dff9f475","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"76ee97ea-bbd1-40c3-8297-ade408ffca56","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":404,"code":"NOT_FOUND","durationMs":6,"event":"api_error"}
+{"requestId":"d99ecdbe-e1a8-49af-8e50-11f6c6613191","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"0e6abe2a-f9eb-4d29-855a-6ed9f310b66f","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":13,"event":"api_error"}
+{"requestId":"8c1f4af4-0b86-4b59-9cd9-2d6e1c6be5ea","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":13,"event":"api_error"}
+{"requestId":"bfba8f0e-980a-466c-ac3e-87ea06d810cc","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"ab689004-f19b-475f-a89e-6254673bcd5f","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"1aed7559-3d7f-43ac-b618-5b25797fe963","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":9,"event":"api_error"}
+{"requestId":"6cb48359-5c74-41b9-abfe-f9863fb648b6","organizationId":"67903158-91d8-49d5-ae83-b302ddd2ad07","status":400,"code":"INVALID_FILTER","durationMs":11,"event":"api_error"}
+✔ Inactive stock report uses positive branch stock and completed-sale activity, keeps draft/other-branch activity separate and exports all filtered rows (381.818896ms)
+{"requestId":"00838900-7f2c-4bfe-adc5-c65cbdaae058","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":39,"event":"api_response"}
+{"requestId":"5c892f17-83fa-4c9d-be6c-259a2006398c","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":38,"event":"api_response"}
+{"requestId":"15733c39-aec5-4821-ac49-28db435ddfba","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":38,"event":"api_response"}
+{"requestId":"b220272f-ccfa-4e18-858a-f802a1a5a862","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":38,"event":"api_response"}
+{"requestId":"47c382c6-788a-49e0-aec4-66928c97bfb1","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"dfca1c3c-d972-408a-a44f-444ba784e217","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"3af13956-1fb8-48f1-9c0d-7d9c626ff3d6","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"ef84423d-6270-4a02-9cc0-a4e1e5f9b7d1","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":17,"event":"api_response"}
+{"requestId":"109c8ce7-9ac2-4a4d-95c5-077bb84ac56d","organizationId":"67108b8d-d75e-4c55-9197-d02dd29b575a","status":200,"durationMs":19,"event":"api_response"}
+✔ Release ledger acceptance: purchase, split cash/credit sale, partial return, debt collection and closed shift reconcile with no unexplained difference (554.108498ms)
+{"requestId":"05990ee5-04fa-48f6-87a0-437da80ac8cc","organizationId":"c8dce10d-7d89-4212-beb4-12f224ab8d67","status":200,"durationMs":13,"event":"api_response"}
+{"requestId":"ac0c88c8-b00d-4aba-9ecf-59eed99014f7","organizationId":"c8dce10d-7d89-4212-beb4-12f224ab8d67","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"67623dc9-4356-476f-bd00-4bf5af5696fa","organizationId":"c8dce10d-7d89-4212-beb4-12f224ab8d67","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"b50bbcbd-22ff-4595-bbbe-3728d7341f43","organizationId":"c8dce10d-7d89-4212-beb4-12f224ab8d67","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"95dde748-8e57-42f1-b3b3-defd87876f9a","organizationId":"c8dce10d-7d89-4212-beb4-12f224ab8d67","status":200,"durationMs":16,"event":"api_response"}
+{"requestId":"33c237ee-6fc6-420f-8709-5ca33115ff3b","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+{"requestId":"9a7c5ecb-70d4-4481-a968-aafa53d0d08a","organizationId":"c8dce10d-7d89-4212-beb4-12f224ab8d67","status":400,"code":"INVALID_FILTER","durationMs":12,"event":"api_error"}
+{"requestId":"7a454184-dc84-469f-b26a-46dfbc7c38c5","status":400,"code":"INVALID_PAGINATION","durationMs":0,"event":"api_error"}
+✔ Original disposition journal global pages and filtered export retain frozen values and never admit an explicit unassigned branch (1396.844732ms)
+{"requestId":"4b9e583a-fb65-4896-8c8c-55aef4f63538","organizationId":"6f17b090-4bc0-420a-8de4-0d0b9512bd7d","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"830c0e75-8c4c-4a94-81e3-f256eca3082b","organizationId":"6f17b090-4bc0-420a-8de4-0d0b9512bd7d","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"be8c6f0e-3a24-48d1-9bdd-fee9f7079ec2","organizationId":"6f17b090-4bc0-420a-8de4-0d0b9512bd7d","status":200,"durationMs":15,"event":"api_response"}
+{"requestId":"c47fabb4-5231-4a7a-88b1-b2c8ede7a5cf","organizationId":"6f17b090-4bc0-420a-8de4-0d0b9512bd7d","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"3deb86fb-e21d-40f5-8983-c625545aa718","organizationId":"6f17b090-4bc0-420a-8de4-0d0b9512bd7d","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"bb2af7aa-e1bd-4a43-a6cc-557cfd76a452","organizationId":"6f17b090-4bc0-420a-8de4-0d0b9512bd7d","status":400,"code":"INVALID_FILTER","durationMs":12,"event":"api_error"}
+✔ Replenishment search/global suggested quantity sorting covers every product and retains default minimum-only advice (247.435972ms)
+{"requestId":"a00ac144-6bb4-4829-bb7a-94e463d75a03","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"bbf370ab-c857-402d-8e15-39fb62aa23be","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"d1803213-f6d6-47f4-a018-21007df9690a","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"77002946-4884-4689-b0ea-8c0579023523","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"bd579ec0-b3d7-49b7-81f9-72936aacdd83","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"aec1152d-8520-4172-8f6e-3e9e9191fa45","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":29,"event":"api_response"}
+{"requestId":"3ff5e746-d004-4377-b9a2-045b203fe69b","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":55,"event":"api_response"}
+{"requestId":"d4c40499-6aa8-46fc-9e1b-81f04d18b38a","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":33,"event":"api_response"}
+{"requestId":"8e8cbd7d-93a9-4701-a5f8-3eb043959f78","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"0a569b82-29d8-46df-af9d-541313e015db","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":32,"event":"api_response"}
+{"requestId":"de9e8697-8914-4b1e-98e1-21f66e8260fd","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"ff8fa3e6-be38-4ce0-808d-bfe91df29db1","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":46,"event":"api_response"}
+{"requestId":"9b6002a0-df8f-4b9d-9678-1faf3d83eed6","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":37,"event":"api_response"}
+{"requestId":"9923f208-114c-47a5-9434-c8cee8e97a9b","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":400,"code":"INVALID_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"5117d6e0-1521-4b7d-8b12-9224c728c14c","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":25,"event":"api_response"}
+{"requestId":"3352ed3f-4da5-4ca9-95e8-42d2893b1010","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":400,"code":"INVALID_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"ea28b220-8be9-41ee-bc02-43f09528d87a","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"92b70a88-0b72-4f9f-b2d8-634fbcf28a72","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":400,"code":"INVALID_FILTER","durationMs":10,"event":"api_error"}
+{"requestId":"a49d73ec-7529-4f82-a904-4118ec8f4c0f","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":19,"event":"api_response"}
+{"requestId":"f337db5d-8744-486e-aa41-1bfa38849309","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"8b54a028-af83-48e0-a69e-e8b6df6a37ee","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"7e03fd80-26b8-4636-9da9-8e6fa17ba950","organizationId":"3bcf2b50-bb7a-4915-8023-f4cfcd54c087","status":200,"durationMs":32,"event":"api_response"}
+✔ Financial report filtered search/global sorts/counts/export retain one cutoff and exact source totals across large datasets (4128.023768ms)
+{"requestId":"15e82b79-4e98-4dac-a71a-443d571d802f","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":28,"event":"api_response"}
+{"requestId":"1b389eaa-fa70-49b3-a264-e49533e83d7a","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":24,"event":"api_response"}
+{"requestId":"bae293d8-a7d5-4d96-96a0-7ea9fd1e43e9","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":27,"event":"api_response"}
+{"requestId":"89d63ce8-46c3-4218-a8d0-05e40b938752","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"32fc9a55-47e9-4912-bff0-b4cd82f4db71","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":22,"event":"api_response"}
+{"requestId":"8241823c-e1db-4128-bce1-70997d52efc6","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":20,"event":"api_response"}
+{"requestId":"c3b62cf6-347d-442a-a109-c9f6a311c815","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"42d55848-b784-464b-a560-ef62abfe65bb","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":23,"event":"api_response"}
+{"requestId":"977b96e7-a26d-42dd-9dd1-09a4672d08d2","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":400,"code":"INVALID_FILTER","durationMs":14,"event":"api_error"}
+{"requestId":"67fe3c46-f871-4ecf-88d4-a5d029ffdf43","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":42,"event":"api_response"}
+{"requestId":"d0c95f45-28de-4fa7-8f9e-04624f2176a8","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":35,"event":"api_response"}
+{"requestId":"b367e036-91c3-47bf-bfbc-204572def2d9","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":400,"code":"INVALID_FILTER","durationMs":16,"event":"api_error"}
+{"requestId":"b628c489-c544-4bb4-ba73-ea30d5b91d58","organizationId":"72f25f7e-1b7f-4fe7-a1e8-8bfb21b006e4","status":200,"durationMs":53,"event":"api_response"}
+✔ Main sale/product report row search and amount sorts cover all sources while period summary and complete filtered exports stay explicit (4254.194618ms)
+{"requestId":"8ea28e9e-bf05-45ad-adde-4678437739cb","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":200,"durationMs":14,"event":"api_response"}
+{"requestId":"59091e2c-de26-46dd-8c6f-b5dc8b125ced","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":200,"durationMs":26,"event":"api_response"}
+{"requestId":"4420390e-2533-42df-80d1-71170df87189","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":200,"durationMs":41,"event":"api_response"}
+{"requestId":"d55851cc-ed18-4a36-835a-7c1e0a9bd3f2","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":200,"durationMs":60,"event":"api_response"}
+{"requestId":"a9a9b568-5b82-4e8f-a1b3-9df373de2b4b","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":200,"durationMs":39,"event":"api_response"}
+{"requestId":"c20fb388-9a1e-4f5e-bdde-8fda4e252be5","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":400,"code":"INVALID_FILTER","durationMs":32,"event":"api_error"}
+{"requestId":"123deb99-6f67-4b7d-881b-2124347d0a82","organizationId":"a103fe74-e959-485a-9753-aa036f69cf8f","status":403,"code":"COST_CHANGE_FORBIDDEN","durationMs":12,"event":"api_error"}
+✔ Price history global read filters and CSV retain all original bulk postings without exposing owner costs to administrators (606.151098ms)
+ℹ tests 100
+ℹ suites 0
+ℹ pass 100
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 99815.246756

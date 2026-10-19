@@ -1,0 +1,147 @@
+[WebServer] (node:665818) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:665861) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/support-policy-state.spec.ts:11:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (29.4s)
+  ✘   2 [chromium] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (865ms)
+(node:667253) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   3 [chromium] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (2.3s)
+  ✓   4 [chromium] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.2s)
+(node:667509) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [firefox] › tests/e2e/support-policy-state.spec.ts:11:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (24.6s)
+  ✘   6 [firefox] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (1.1s)
+(node:668925) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [firefox] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (3.1s)
+  ✓   8 [firefox] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (1.4s)
+(node:669781) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [webkit] › tests/e2e/support-policy-state.spec.ts:11:5 › raw support hours and separate ticket draft survive a newer policy version and failed read (22.8s)
+  ✘  10 [webkit] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment (1.7s)
+(node:670913) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [webkit] › tests/e2e/support-tickets.spec.ts:8:5 › Ticket lost ACK recovers once, real internal reply tracks separately and unconfigured recovery never verifies (3.1s)
+  ✓  12 [webkit] › tests/e2e/ticket-editor-state.spec.ts:8:5 › ticket reply draft stays mounted through read failure and original reply recovery clears only acknowledged draft (2.0s)
+
+
+  1) [chromium] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment 
+
+    PrismaClientUnknownRequestError: 
+    Invalid `db.organization.deleteMany()` invocation in
+    /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:112
+
+      6 if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw Error('Isolated DB required')
+      7 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+      8 const headers={Origin:'https://localhost:3100'}
+    → 9 test.afterAll(async()=>{await db.organization.deleteMany(
+    Error occurred during query execution:
+    ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "P0001", message: "Support policy versions immutable", severity: "ERROR", detail: None, column: None, hint: None }), transient: false })
+
+       7 | const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+       8 | const headers={Origin:'https://localhost:3100'}
+    >  9 | test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.supportPolicyVersion.deleteMany({where:{createdBy:{in:users}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect()})
+         |                                                                                                                ^
+      10 | async function admin(page:Page){expect((await page.request.post('/api/auth/register',{headers,data:{fullName:'Support policy operator',phone:'support-policy-'+randomUUID(),password:'test-only-password',organizationName:'Policy draft state'}})).ok()).toBe(true);const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);await db.platformOperator.create({data:{userId:me.user.id,role:'platform_admin'}});return me}
+      11 | test('raw support hours and separate ticket draft survive a newer policy version and failed read',async({page})=>{
+      12 |  const me=await admin(page),critical=await enrollCritical(page,'test-only-password'),initial=(await(await page.request.get('/api/support/policy')).json()).data
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:112
+        at $n.handleRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:7505)
+        at $n.handleAndLogRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6623)
+        at $n.request (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6307)
+        at l (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:9633)
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:82
+
+    Error Context: test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [firefox] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment 
+
+    PrismaClientUnknownRequestError: 
+    Invalid `db.organization.deleteMany()` invocation in
+    /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:112
+
+      6 if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw Error('Isolated DB required')
+      7 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+      8 const headers={Origin:'https://localhost:3100'}
+    → 9 test.afterAll(async()=>{await db.organization.deleteMany(
+    Error occurred during query execution:
+    ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "P0001", message: "Support policy versions immutable", severity: "ERROR", detail: None, column: None, hint: None }), transient: false })
+
+       7 | const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+       8 | const headers={Origin:'https://localhost:3100'}
+    >  9 | test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.supportPolicyVersion.deleteMany({where:{createdBy:{in:users}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect()})
+         |                                                                                                                ^
+      10 | async function admin(page:Page){expect((await page.request.post('/api/auth/register',{headers,data:{fullName:'Support policy operator',phone:'support-policy-'+randomUUID(),password:'test-only-password',organizationName:'Policy draft state'}})).ok()).toBe(true);const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);await db.platformOperator.create({data:{userId:me.user.id,role:'platform_admin'}});return me}
+      11 | test('raw support hours and separate ticket draft survive a newer policy version and failed read',async({page})=>{
+      12 |  const me=await admin(page),critical=await enrollCritical(page,'test-only-password'),initial=(await(await page.request.get('/api/support/policy')).json()).data
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:112
+        at $n.handleRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:7505)
+        at $n.handleAndLogRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6623)
+        at $n.request (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6307)
+        at l (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:9633)
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:82
+
+    Error Context: test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-firefox/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-firefox/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-firefox/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment 
+
+    PrismaClientUnknownRequestError: 
+    Invalid `db.organization.deleteMany()` invocation in
+    /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:112
+
+      6 if(connection.hostname!=='127.0.0.1'||connection.port!=='55439'||connection.pathname!=='/pos_test')throw Error('Isolated DB required')
+      7 const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+      8 const headers={Origin:'https://localhost:3100'}
+    → 9 test.afterAll(async()=>{await db.organization.deleteMany(
+    Error occurred during query execution:
+    ConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: "P0001", message: "Support policy versions immutable", severity: "ERROR", detail: None, column: None, hint: None }), transient: false })
+
+       7 | const db=new PrismaClient(),orgs:string[]=[],users:string[]=[]
+       8 | const headers={Origin:'https://localhost:3100'}
+    >  9 | test.afterAll(async()=>{await db.organization.deleteMany({where:{id:{in:orgs}}});await db.supportPolicyVersion.deleteMany({where:{createdBy:{in:users}}});await db.user.deleteMany({where:{id:{in:users}}});await db.$disconnect()})
+         |                                                                                                                ^
+      10 | async function admin(page:Page){expect((await page.request.post('/api/auth/register',{headers,data:{fullName:'Support policy operator',phone:'support-policy-'+randomUUID(),password:'test-only-password',organizationName:'Policy draft state'}})).ok()).toBe(true);const me=(await(await page.request.get('/api/auth/me')).json()).data;orgs.push(me.organization.id);users.push(me.user.id);await db.platformOperator.create({data:{userId:me.user.id,role:'platform_admin'}});return me}
+      11 | test('raw support hours and separate ticket draft survive a newer policy version and failed read',async({page})=>{
+      12 |  const me=await admin(page),critical=await enrollCritical(page,'test-only-password'),initial=(await(await page.request.get('/api/support/policy')).json()).data
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:112
+        at $n.handleRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:7505)
+        at $n.handleAndLogRequestError (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6623)
+        at $n.request (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:121:6307)
+        at l (/home/fedora/Developments/POS_backup/node_modules/@prisma/client/runtime/library.js:130:9633)
+        at /home/fedora/Developments/POS_backup/tests/e2e/support-policy-state.spec.ts:9:82
+
+    Error Context: test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/support-policy-state-faile-bef5b-g-stale-or-empty-assignment-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment 
+    [firefox] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment 
+    [webkit] › tests/e2e/support-policy-state.spec.ts:25:5 › failed operator refresh retains assignment draft and prevents submitting stale or empty assignment 
+  9 passed (1.6m)

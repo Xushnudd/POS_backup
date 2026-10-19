@@ -1,4 +1,7 @@
 'use client';
+import {errorMessage as displayErrorMessage} from '@/i18n/errors';
+
+import {useTranslation} from '@/context/LocaleContext';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -22,8 +25,12 @@ export default function CameraBarcodeScanner({
   onDetected,
   disabled = false,
   className = '',
-  ariaLabel = 'Kamera orqali barkodni skanerlash',
+  ariaLabel,
 }: CameraBarcodeScannerProps) {
+ const {message:uiMessage}=useTranslation();
+
+ const {t:tr}=useTranslation();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
   const detectedRef = useRef(false);
@@ -74,7 +81,7 @@ export default function CameraBarcodeScanner({
       );
       controlsRef.current = controls;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '';
+      const message = displayErrorMessage(error,'');
       setErrorMessage(
         message || 'Kameraga ulanib bo‘lmadi. Ruxsat berilganini va HTTPS ishlatilayotganini tekshiring.'
       );
@@ -95,7 +102,7 @@ export default function CameraBarcodeScanner({
     <>
       <button
         type="button"
-        aria-label={ariaLabel}
+        aria-label={ariaLabel??tr('Kamera orqali barkodni skanerlash')}
         title={ariaLabel}
         disabled={disabled}
         onClick={() => setIsOpen(true)}
@@ -104,33 +111,30 @@ export default function CameraBarcodeScanner({
         <FontAwesomeIcon icon={faCamera} />
       </button>
 
-      <Modal isOpen={isOpen} onClose={closeScanner} title="Barkodni skanerlash" size="md">
+      <Modal isOpen={isOpen} onClose={closeScanner} title={tr("Barkodni skanerlash")} size="md">
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-xl bg-black aspect-video">
             <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
             {isStarting && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-sm text-white">
                 <FontAwesomeIcon icon={faCircleNotch} className="mr-2 animate-spin" />
-                Kamera ulanmoqda...
-              </div>
+                {tr("Kamera ulanmoqda...")}</div>
             )}
             <div className="pointer-events-none absolute inset-x-8 top-1/2 h-20 -translate-y-1/2 rounded-lg border-2 border-emerald-400" />
           </div>
 
           {errorMessage ? (
             <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-              {errorMessage}
+              {uiMessage(errorMessage)}
             </p>
           ) : (
-            <p className="text-center text-xs text-gray-500">
-              Barkodni ramka ichiga joylashtiring. Kod topilishi bilan skaner avtomatik yopiladi.
-            </p>
+            <p className="text-center text-xs text-gray-600">
+              {tr("Barkodni ramka ichiga joylashtiring. Kod topilishi bilan skaner avtomatik yopiladi.")}</p>
           )}
 
           <div className="flex justify-end">
             <Button type="button" variant="outline" onClick={closeScanner}>
-              Bekor qilish
-            </Button>
+              {tr("Bekor qilish")}</Button>
           </div>
         </div>
       </Modal>

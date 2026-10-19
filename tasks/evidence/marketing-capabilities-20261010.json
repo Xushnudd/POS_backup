@@ -1,0 +1,40 @@
+{
+  "scope": "current core, not vendor/hardware or real pilot acceptance",
+  "features": {
+    "cash_sale_returns_credit_statement": [
+      "POS-02.03",
+      "RET-01.05",
+      "CRM-01.03",
+      "CRM-01.04"
+    ],
+    "catalog_purchases_movements_transfers_count": [
+      "CAT-01.01",
+      "PUR-01.01",
+      "INV-01.01",
+      "INV-01.02",
+      "PUR-01.02",
+      "INV-01.03"
+    ],
+    "shifts_reports_csv": [
+      "FIN-01.02",
+      "REP-01.01",
+      "REP-01.06"
+    ]
+  },
+  "prices": "BillingPlan.currentVersion database query; no dictionary price cards",
+  "conditions": [
+    "manual card/bank records",
+    "non-fiscal browser receipt",
+    "no vendor Click/fiscal/E-POS/hardware bindings",
+    "no full offline payment guarantee",
+    "browser engines, not specific real device models"
+  ],
+  "removed_unproven_claims": [
+    "100+ stores",
+    "unlimited registers",
+    "personal manager",
+    "zero/permanent free plan",
+    "old 25000/50000 dictionary prices",
+    "demo video CTA"
+  ]
+}

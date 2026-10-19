@@ -1,0 +1,30 @@
+[
+  {
+    "test": "test-results/core-Production-HTTPS-dura-ce8f8-en-report-pagination-export-chromium",
+    "error": "\n\n```\nTest timeout of 60000ms exceeded.\n```\n\n```\nError: locator.click: Test timeout of 60000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: 'Keyingi sahifa', exact: true })\n\n```\n\n"
+  },
+  {
+    "test": "test-results/core-Business-switching-ke-bc154-label-HTML-downloads-safely-chromium",
+    "error": "\n\n```\nError: expect(locator).toBeVisible() failed\n\nLocator: getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true }) with timeout 10000ms\n  - waiting for getByRole('dialog', { name: 'Muhim amalni tasdiqlash', exact: true })\n\n```\n\n```yaml\n- link \"Asosiy mazmunga o\u2018tish\":\n  - /url: \"#main-content\"\n- complementary:\n  - link \"S Shuni POS Switch A\":\n    - /url: /dashboard\n    - text: S\n    - heading \"Shuni POS\" [level=1]\n    - paragraph: Switch A\n  - navigation:\n    - link \"Yordam murojaatlari\":\n      - /url: /tickets\n    - link \"Tarif va obuna\":\n      - /url: /billing\n    - link \"POS Kassa\":\n      - /url: /pos\n    - link \"Savdolar\":\n      - /url: /sales\n    - link \"Smenalar\":\n      - /url: /shifts\n    - link \"Server qoralamalari\":\n      - /url: /drafts\n    - link \"Navbat va konfliktlar\":\n      - /url: /sync-review\n    - link \"Yordam\":\n      - /url: /help\n    - link \"Kassir mashqi\":\n      - /url: /training\n    - link \"Faol sessiyalar\":\n      - /url: /security\n  - text: v1.0.0 (MVP)\n  - status \"Server aloqasi\": Online\n- banner:\n  - region \"Egalik so\u2018rovlari\":\n    - text: Egalikni topshirish so\u2018rovi (18.10.2026 14:22)\n    - button \"Qabul qilish\"\n    - button \"Bekor qilish\"\n  - text: Asosiy do'kon Kassa 1\n  - link \"Smena ochilmagan\":\n    - /url: /shifts\n  - text: Til\n  - combobox \"Til\":\n    - option \"O\u2018zbekcha\" [selected]: UZ\n    - option \"\u0420\u0443\u0441\u0441\u043a\u0438\u0439\": RU\n  - 'link \"Xavfsizlik bildirishnomalari: 0 ta o\u2018qilmagan\"':\n    - /url: /security\n    - text: Xavfsizlik\n  - text: Recipient owner Kassir\n  - button \"Tizimdan chiqish\"\n- main:\n  - status:\n    - text: Sinov davri faol.\n    - link \"Tarif va obuna\":\n      - /url: /billing\n  - complementary \"Muhim holatlar\":\n    - 'link \"Server qoralamalari: 0\"':\n      - /url: /drafts\n    - 'link \"Ochiq smenalar: 0 \u00b7 tasdiq kutmoqda: 0\"':\n      - /url: /shifts\n    - 'link \"Sync konfliktlari: 0\"':\n      - /url: /sync-review\n    - text: Fiskal integratsiya ulanmagan\n  - status:\n    - text: Server bilan aloqa bor\n    - button \"Aloqani tekshirish\"\n  - paragraph: \"F2: "
+  },
+  {
+    "test": "test-results/core-Owner-sees-durable-in-04f02-help-without-hidden-repairs-chromium",
+    "error": "\n\n```\nError: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('row')\nExpected substring: \"8 dona\"\nError: strict mode violation: getByRole('row') resolved to 2 elements:\n    1) <tr>\u2026</tr> aka getByRole('row', { name: 'Filial / mahsulot Qoldiq /' })\n    2) <tr class=\"border-b\">\u2026</tr> aka getByRole('row', { name: 'Asosiy do\\'kon \u00b7 Alert item 2' })\n\nCall log:\n  - Expect \"toContainText\" getByRole('row') with timeout 10000ms\n  - waiting for getByRole('row')\n    2 \u00d7 locator resolved to <tr>\u2026</tr>\n      - unexpected value \"Filial / mahsulotQoldiq / minimumMaksimum / tavsiya\"\n\n```\n\n"
+  },
+  {
+    "test": "test-results/core-Dashboard-boundary-re-21bf6-tion-or-exposing-input-data-chromium",
+    "error": "\n\n```\nPrismaClientKnownRequestError: \nInvalid `db.organization.deleteMany()` invocation in\n/home/fedora/Developments/POS_backup/tests/e2e/core.spec.ts:43:24\n\n  40 test.afterAll(async()=>{\n  41  const accounts=await db.user.findMany({where:{phone:{in:phones}},include:{organizationUsers:true}})\n  42  users.push(...accounts.map(user=>user.id));orgs.push(...accounts.flatMap(user=>user.organizationUsers.map(member=>member.organizationId)))\n\u2192 43  await db.organization.deleteMany(\nForeign key constraint violated: `CustomerAdvanceRefund_documentId_fkey (index)`\n```\n\n"
+  },
+  {
+    "test": "test-results/custom-roles-Owner-explici-d0c62-idation-follow-policy-edits-chromium",
+    "error": "\n\n```\nError: expect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n```\n\n"
+  },
+  {
+    "test": "test-results/pages-smoke-Every-dashboar-19feb-t-a-server-render-exception-chromium",
+    "error": "\n\n```\nTest timeout of 180000ms exceeded.\n```\n\n```\nError: page.waitForLoadState: Test timeout of 180000ms exceeded.\n```\n\n"
+  },
+  {
+    "test": "test-results/threshold-recovery-stock-t-75f79-cate-audit-or-stock-posting-chromium",
+    "error": "\n\n```\nError: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('row')\nExpected substring: \"8.000001 kg\"\nError: strict mode violation: getByRole('row') resolved to 2 elements:\n    1) <tr>\u2026</tr> aka getByRole('row', { name: 'Filial / mahsulot Qoldiq /' })\n    2) <tr class=\"border-b\">\u2026</tr> aka getByRole('row', { name: 'Asosiy do\\'kon \u00b7 Threshold' })\n\nCall log:\n  - Expect \"toContainText\" getByRole('row') with timeout 10000ms\n  - waiting for getByRole('row')\n\n```\n\n"
+  }
+]

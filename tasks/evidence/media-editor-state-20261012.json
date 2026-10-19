@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "originalDone": 164,
+  "target": 170,
+  "delta": 0,
+  "checks": {
+    "browser": {
+      "passed": 6,
+      "failed": 0,
+      "seconds": 18.8,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "unit": {
+      "passed": 100,
+      "failed": 0
+    },
+    "build": "pass",
+    "typecheck": "pass",
+    "lint": "pass"
+  },
+  "behavior": [
+    "Metadata raw draft guarded; synchronous duplicate-submit prevention; inputs frozen until actual ACK",
+    "Failed metadata read preserves new draft and last loaded data; retry restores availability",
+    "File DELETE uses original durable key and strictly scoped allowlist; lost ACK replay creates one deletion audit",
+    "Independent metadata draft survives image upload/delete ACK; deleted image bytes unavailable"
+  ],
+  "limits": [
+    "Original parent remains open; no new original done",
+    "Legacy product PUT is not falsely claimed as server-idempotent or durable; uncertain result requires read verification",
+    "No vendor or external deployment changes"
+  ],
+  "logs": {
+    "browser": "tasks/evidence/logs/media-editor-state-20261012-browser.log",
+    "build": "tasks/evidence/logs/media-editor-state-20261012-build.log",
+    "typecheck": "tasks/evidence/logs/media-editor-state-20261012-typecheck.log",
+    "lint": "tasks/evidence/logs/media-editor-state-20261012-lint.log",
+    "unit": "tasks/evidence/logs/media-editor-state-20261012-unit.log"
+  },
+  "sha256": {
+    "src/app/(dashboard)/products/[id]/media/page.tsx": "737dd19c102b29239f76ded6f7199527bad0443784b109105ddf1011b379e150",
+    "src/components/forms/DurableMutation.tsx": "b74c4de41baba8cbde6499b8ecabca954d6bd1096ae14d4876757acbe99548ad",
+    "src/lib/durable-request.ts": "965ecc6dae1edc8a3b6ae1ffc61b1ccf3f1de03158e018a3e48a50d0142497ff",
+    "tests/durable-request.unit.test.ts": "7fe6641ab17228caad0cbfdd9bcbd88349761db08c2735ad518f334bfb86ee42",
+    "tests/e2e/media-editor-state.spec.ts": "e45fabb92114e35b9dbc41a3089099cc2a02075c3f26c863e8fa85d5f8cca6ce"
+  }
+}

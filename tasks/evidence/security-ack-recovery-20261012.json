@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-12",
+  "task": "UX-01.05",
+  "status": "in_progress",
+  "original_done": 164,
+  "original_total": 259,
+  "target": 170,
+  "original_delta": 0,
+  "head": "18fd83eba30be24af77f72e270d61a35eed08aec",
+  "checks": {
+    "browser": {
+      "passed": 12,
+      "failed": 0,
+      "duration": "32.9s",
+      "browsers": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "cases": [
+        "Actual password change MFA, same-tick double click, failed profile read after write ACK",
+        "Actual all-session logout double click and failed profile read",
+        "Existing password MFA/new-password-only admission",
+        "Existing shared security draft and frozen pending enrollment navigation"
+      ]
+    },
+    "build": "Webpack PASS",
+    "typecheck": "PASS",
+    "changed_lint": "PASS"
+  },
+  "invariants": [
+    "Account credential flight and revoke flight prevent overlapping irreversible actions.",
+    "A confirmed password/logout result survives failed profile read and returns to login.",
+    "Password reset/change requires actual server ACK and enrolled critical proof; no fake success.",
+    "Passwords remain memory-only, absent from localStorage and audit payloads.",
+    "Old password rejected, new password accepted, previous sessions revoked."
+  ],
+  "source_sha256": {
+    "src/app/(dashboard)/security/page.tsx": "661570a8347ba44cd42d180325dc53d5df92714c5a123091c516697b90f2acb1",
+    "tests/e2e/security-ack-state.spec.ts": "aa05a2b68efe2d08d984047f16980f0cab27004a038d322433ac360f34e1c7c9",
+    "tests/e2e/totp.spec.ts": "957041e2104d152c1af4f7cec8f0df9df5577dc3aa8c86d7908cf537e1589865",
+    "tests/e2e/critical-fixture.ts": "aa9c68581d9fad6d083a19c908e30872a84767061ccf5aafa0ee46309c8d51b9"
+  },
+  "logs": [
+    "tasks/evidence/logs/security-ack-20261012-pos-170-security-ack-e2e.log",
+    "tasks/evidence/logs/security-ack-20261012-pos-170-security-ack-build.log",
+    "tasks/evidence/logs/security-ack-20261012-pos-170-security-ack-type.log",
+    "tasks/evidence/logs/security-ack-20261012-pos-170-security-ack-lint.log"
+  ],
+  "limits": [
+    "Browser test covers password/logout flights; separate session revoke was type/lint/build reviewed and protected with same synchronous admission.",
+    "Original UX-01.05 remains open.",
+    "No real provider, external delivery or production deployment."
+  ]
+}

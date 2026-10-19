@@ -1,0 +1,22 @@
+✔ distinct synthetic environments pass without claiming network verification (1.628279ms)
+✔ same database with a different user and query still rejected (0.87494ms)
+✔ URL-encoded database name cannot disguise the same target (0.395623ms)
+✔ password, active key and old overlap cannot cross environment boundaries (0.510306ms)
+✔ overlap configuration follows runtime limit and does not normalize malformed input (0.312999ms)
+✔ release MFA, loopback and immutable image are required (0.338564ms)
+✔ CLI accepts own 0600 files, refuses public file/symlink and never logs secret input (90.869201ms)
+✔ image audit rejects baked runtime credentials and root identities without returning credential values (0.674433ms)
+✔ image audit recognizes excluded credential stores inside nested layers but allows public system certificates (0.477408ms)
+✔ image audit refuses mutable references before invoking Docker (1.102249ms)
+✔ reviewed public test vectors do not permit unknown keys or extra copies of the same key in another file (0.289507ms)
+✔ release startup requires a digest reference, production and a non-root identity (0.661503ms)
+✔ mutable-image startup never invokes the child and rejects without echoing input (29.116905ms)
+✔ release entrypoint preserves the child exit code and forwards shutdown (100.994951ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 248.752341

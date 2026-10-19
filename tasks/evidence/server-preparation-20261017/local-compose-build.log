@@ -1,0 +1,106 @@
+ Image pos-preparation:20261017 Building 
+ Image pos-preparation:20261017 Building 
+ Image pos-preparation:20261017 Building 
+ Image pos-preparation:20261017 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.33kB done
+#1 DONE 0.0s
+
+#2 [app internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.74kB done
+#2 DONE 0.0s
+
+#3 [app internal] load metadata for docker.io/library/node:24-slim
+#3 DONE 0.7s
+
+#4 [app internal] load .dockerignore
+#4 transferring context: 316B done
+#4 DONE 0.0s
+
+#5 [jobs deps 1/7] FROM docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5
+#5 resolve docker.io/library/node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 0.0s done
+#5 DONE 0.0s
+
+#6 [app internal] load build context
+#6 transferring context: 193.17kB 0.0s done
+#6 DONE 0.1s
+
+#7 [reconciliation deps 4/7] COPY package.json package-lock.json* ./
+#7 CACHED
+
+#8 [reconciliation local-development 1/2] COPY . .
+#8 CACHED
+
+#9 [reconciliation deps 2/7] RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [reconciliation deps 6/7] RUN npm ci --engine-strict
+#10 CACHED
+
+#11 [reconciliation deps 3/7] WORKDIR /app
+#11 CACHED
+
+#12 [reconciliation deps 7/7] RUN npx prisma generate
+#12 CACHED
+
+#13 [reconciliation deps 5/7] COPY prisma ./prisma/
+#13 CACHED
+
+#14 [jobs local-development 2/2] RUN node scripts/build-offline.cjs     && node node_modules/typescript/bin/tsc -p tsconfig.worker.json     && mkdir -p /app/.next     && touch /app/next-env.d.ts     && groupadd --system --gid 1001 nodejs     && useradd --system --create-home --uid 1001 --gid nodejs nextjs     && chown 1001:1001 /app /app/.next /app/next-env.d.ts /app/tsconfig.json
+#14 CACHED
+
+#15 [app] exporting to image
+#15 exporting layers done
+#15 exporting manifest sha256:a08c717e2ecc1174fb2255f7bf98501307cabf4521a0353ac89c7075fd87ef56 0.0s done
+#15 exporting config sha256:6b2e2de373af3e558f61bfec0bfd57741d807b04db3d9a11207531b34a320cfe 0.1s done
+#15 exporting attestation manifest sha256:e49bdea22e65513ff15b52e3ad9ead54892acc559a29c93e14236cf6c28bbb0c 0.1s done
+#15 exporting manifest list sha256:2d3b7931904957542c8a012c2e6a88abef0e39b84e1054dfccca12e5773af99a 0.0s done
+#15 naming to docker.io/library/pos-preparation:20261017 0.0s done
+#15 unpacking to docker.io/library/pos-preparation:20261017 0.0s done
+#15 DONE 0.3s
+
+#16 [jobs] exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:4d5361999c29587dd32879733d20392b0b1530ec065da03f224d95e13387750c 0.0s done
+#16 exporting config sha256:b7fd1706caf3db512865a6eedfe108bd821c6429990f0f5fd6a3fccce1e8b93c 0.1s done
+#16 exporting attestation manifest sha256:a9ef1febe1aafdea1e48b60c481a053b93f82d4e9c3c5b0bdc2c7c41a46b0565 0.1s done
+#16 exporting manifest list sha256:56f523f7cc8fa92d2b596dfec446f72cb59cf9f5086e29e4490e4fb5fb203a06 0.1s done
+#16 naming to docker.io/library/pos-preparation:20261017 0.0s done
+#16 unpacking to docker.io/library/pos-preparation:20261017 0.0s done
+#16 DONE 0.4s
+
+#17 [reconciliation] exporting to image
+#17 exporting layers done
+#17 exporting manifest sha256:355b1c2425f995edfa039addec9e9e0f403d1af9e3c5f07b08e9438cf64fc9cf 0.0s done
+#17 exporting config sha256:2854b4651d8195a3c8828e3e9400aa6dfc58344631060b3fb09aaff73605db43 0.1s done
+#17 exporting attestation manifest sha256:6114d850f36e9c8191be8b64a026de7c715cd3242f1f34515efaed0ea51e55df 0.1s done
+#17 exporting manifest list sha256:76c70a674b5aedc3e628626b6fce5aac48af357aa64326b737b4949112f3d114 0.0s done
+#17 naming to docker.io/library/pos-preparation:20261017 0.0s done
+#17 unpacking to docker.io/library/pos-preparation:20261017 0.0s done
+#17 DONE 0.3s
+
+#18 [migrate] exporting to image
+#18 exporting layers done
+#18 exporting manifest sha256:37b4e02a593de764964afe86ec44543866bb0bd76f92bfef7ceeba80ecce937f 0.0s done
+#18 exporting config sha256:96596ba9c31b8dad5f40a9cec962b42398577c3d942b17644c82583d0a1a49ae 0.1s done
+#18 exporting attestation manifest sha256:c1ada8b57d43a9bd91bd5e59a4d86d19691881bf3d01bb02789377255ebe0a85 0.1s done
+#18 exporting manifest list sha256:4e3e2c74659fb18bf031c132b583a9ffc02627830e468a9af9809e087454fa3c 0.1s done
+#18 naming to docker.io/library/pos-preparation:20261017 0.0s done
+#18 unpacking to docker.io/library/pos-preparation:20261017 0.0s done
+#18 DONE 0.3s
+
+#19 [app] resolving provenance for metadata file
+#19 DONE 0.1s
+
+#20 [migrate] resolving provenance for metadata file
+#20 DONE 0.1s
+
+#21 [reconciliation] resolving provenance for metadata file
+#21 DONE 0.1s
+
+#22 [jobs] resolving provenance for metadata file
+#22 DONE 0.0s
+ Image pos-preparation:20261017 Built 
+ Image pos-preparation:20261017 Built 
+ Image pos-preparation:20261017 Built 
+ Image pos-preparation:20261017 Built 

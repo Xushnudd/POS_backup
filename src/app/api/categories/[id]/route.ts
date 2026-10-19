@@ -1,21 +1,27 @@
+import {assertLiveContext} from '@/server/operations'
+import {validateCategoryParent} from '@/server/catalog/category-tree'
+import {Prisma} from '@prisma/client'
+import { AccessError } from '@/server/auth/policy'
+import { scopedPrisma } from '@/server/auth/scoped-prisma'
+import { withApi } from '@/server/api'
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth'
+import { verifyToken, getRequestToken } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateCategorySchema = z.object({
-  name: z.string().min(2).optional(),
-  sortOrder: z.number().optional(),
+  name: z.string().trim().min(2).max(200).optional(),
+  parentId: z.string().uuid().nullable().optional(),
+  sortOrder: z.number().int().min(-2147483648).max(2147483647).optional(),
   isActive: z.boolean().optional(),
 })
 
-export async function PUT(
+async function handlePUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -23,20 +29,28 @@ export async function PUT(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     const body = await request.json()
     const validatedData = updateCategorySchema.parse(body)
 
-    const category = await prisma.category.update({
+    const category = await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      if(validatedData.parentId!==undefined)await validateCategoryParent(tx,payload.organizationId,validatedData.parentId,id)
+      const result = await tx.category.update({
       where: { id },
       data: validatedData,
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"update"}})
+      await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
+      return result
     })
 
     return NextResponse.json({
@@ -46,28 +60,26 @@ export async function PUT(
     })
 
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
+    if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Ma\'lumotlar noto\'g\'ri', details: error.issues } },
         { status: 400 }
       )
     }
 
-    console.error('Update category error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    throw error
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params
-    const token = extractTokenFromHeader(request.headers.get('authorization'))
+    const token = getRequestToken(request)
     if (!token) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Avtorizatsiya talab qilinadi' } },
@@ -75,18 +87,25 @@ export async function DELETE(
       )
     }
 
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (!payload) {
       return NextResponse.json(
         { success: false, error: { code: 'INVALID_TOKEN', message: 'Noto\'g\'ri token' } },
         { status: 401 }
       )
     }
+    const db = scopedPrisma(payload)
 
     // Soft delete
-    await prisma.category.update({
+    await db.$transaction(async tx => {
+      await assertLiveContext(tx,payload)
+      const result = await tx.category.update({
       where: { id },
       data: { isActive: false },
+    })
+      await tx.auditLog.create({data:{organizationId:payload.organizationId,actorId:payload.userId,entityType:"Category",entityId:result.id,action:"update"}})
+      await tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`
+      return result
     })
 
     return NextResponse.json({
@@ -95,10 +114,11 @@ export async function DELETE(
     })
 
   } catch (error) {
-    console.error('Delete category error:', error)
-    return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Server xatosi' } },
-      { status: 500 }
-    )
+    if (error instanceof Prisma.PrismaClientUnknownRequestError) throw error
+    if (error instanceof AccessError || error instanceof Prisma.PrismaClientKnownRequestError) throw error
+    throw error
   }
 }
+export const PUT = withApi(handlePUT)
+
+export const DELETE = withApi(handleDELETE)

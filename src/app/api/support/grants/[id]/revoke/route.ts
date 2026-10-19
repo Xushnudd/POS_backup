@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {withApi} from '@/server/api';import {getRequestToken,verifyToken} from '@/lib/auth';import {AccessError} from '@/server/auth/policy';import {revokeGrant,revokeSchema} from '@/server/support/service';
+export const POST=withApi(async(request,{params}:{params:Promise<{id:string}>})=>{const ctx=await verifyToken(getRequestToken(request)??'');if(!ctx)throw new AccessError(401,'UNAUTHORIZED');return NextResponse.json({success:true,data:await revokeGrant(ctx,(await params).id,revokeSchema.parse(await request.json()))})});
